@@ -18,6 +18,8 @@ refresh_db()
 	if [ "$1" != "" ]
 	then
 		/usr/bin/mysql -u $1 -p < /opt/opencelium.backend/database/oc_data.sql;
+		rm -rf /var/lib/neo4j/data/*
+		/etc/init.d/neo4j restart
 	else
 	    echo "please enter username as a second";
 	fi
