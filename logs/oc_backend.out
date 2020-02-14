@@ -1,0 +1,82 @@
+2020-02-14 17:31:48.361  INFO 63812 --- [           main] c.becon.opencelium.backend.Application   : Starting Application on oc-demo with PID 63812 (/opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar started by root in /opt/src/backend)
+2020-02-14 17:31:48.373  INFO 63812 --- [           main] c.becon.opencelium.backend.Application   : No active profile set, falling back to default profiles: default
+2020-02-14 17:31:49.761  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-02-14 17:31:49.762  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2020-02-14 17:31:49.858  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 86ms. Found 7 repository interfaces.
+2020-02-14 17:31:49.860  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-02-14 17:31:49.860  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2020-02-14 17:31:49.973  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 109ms. Found 14 repository interfaces.
+2020-02-14 17:31:49.974  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-02-14 17:31:49.974  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2020-02-14 17:31:49.990  INFO 63812 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 16ms. Found 1 repository interfaces.
+2020-02-14 17:31:51.066  INFO 63812 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.ws.config.annotation.DelegatingWsConfiguration' of type [org.springframework.ws.config.annotation.DelegatingWsConfiguration$$EnhancerBySpringCGLIB$$8e2f99c] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-02-14 17:31:51.112  INFO 63812 --- [           main] .w.s.a.s.AnnotationActionEndpointMapping : Supporting [WS-Addressing August 2004, WS-Addressing 1.0]
+2020-02-14 17:31:51.344  INFO 63812 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$644b349d] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-02-14 17:31:51.492  INFO 63812 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.hateoas.config.HateoasConfiguration' of type [org.springframework.hateoas.config.HateoasConfiguration$$EnhancerBySpringCGLIB$$e3cb81cf] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-02-14 17:31:51.879  INFO 63812 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9090 (http)
+2020-02-14 17:31:51.939  INFO 63812 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-02-14 17:31:51.951  INFO 63812 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.22]
+2020-02-14 17:31:52.060  INFO 63812 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-02-14 17:31:52.061  INFO 63812 --- [           main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 3593 ms
+2020-02-14 17:31:52.612  INFO 63812 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2020-02-14 17:31:52.798  INFO 63812 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2020-02-14 17:31:52.864  INFO 63812 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2020-02-14 17:31:52.982  INFO 63812 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate Core {5.3.10.Final}
+2020-02-14 17:31:52.984  INFO 63812 --- [           main] org.hibernate.cfg.Environment            : HHH000206: hibernate.properties not found
+2020-02-14 17:31:53.232  INFO 63812 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.0.4.Final}
+2020-02-14 17:31:53.676  INFO 63812 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.MySQL5Dialect
+2020-02-14 17:31:55.066  INFO 63812 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2020-02-14 17:31:56.094  INFO 63812 --- [           main] o.elasticsearch.plugins.PluginsService   : no modules loaded
+2020-02-14 17:31:56.096  INFO 63812 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.index.reindex.ReindexPlugin]
+2020-02-14 17:31:56.096  INFO 63812 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.join.ParentJoinPlugin]
+2020-02-14 17:31:56.096  INFO 63812 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.percolator.PercolatorPlugin]
+2020-02-14 17:31:56.096  INFO 63812 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.script.mustache.MustachePlugin]
+2020-02-14 17:31:56.096  INFO 63812 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.transport.Netty4Plugin]
+2020-02-14 17:31:58.398  INFO 63812 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-02-14 17:31:58.399  INFO 63812 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Building annotation class map
+2020-02-14 17:31:58.399  INFO 63812 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 46 classes
+2020-02-14 17:31:58.412  INFO 63812 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-02-14 17:31:59.003  INFO 63812 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter authorizationFilter was not registered (disabled)
+2020-02-14 17:31:59.328  INFO 63812 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.mysql.service.EnhancementServiceImp so treating as simple type for SD Commons
+2020-02-14 17:31:59.390  INFO 63812 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.execution.ExecutionContainer so treating as simple type for SD Commons
+2020-02-14 17:31:59.409  INFO 63812 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.utility.ActionUtility so treating as simple type for SD Commons
+2020-02-14 17:31:59.422  INFO 63812 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.invoker.service.InvokerServiceImp so treating as simple type for SD Commons
+2020-02-14 17:31:59.449  INFO 63812 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-02-14 17:31:59.847  INFO 63812 --- [           main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2020-02-14 17:31:59.863  INFO 63812 --- [           main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2020-02-14 17:31:59.864  INFO 63812 --- [           main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v.2.3.1 created.
+2020-02-14 17:31:59.866  INFO 63812 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Using db table-based data access locking (synchronization).
+2020-02-14 17:31:59.868  INFO 63812 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : JobStoreCMT initialized.
+2020-02-14 17:31:59.869  INFO 63812 --- [           main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'quartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 5 threads.
+  Using job-store 'org.springframework.scheduling.quartz.LocalDataSourceJobStore' - which supports persistence. and is not clustered.
+
+2020-02-14 17:31:59.870  INFO 63812 --- [           main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'quartzScheduler' initialized from an externally provided properties instance.
+2020-02-14 17:31:59.870  INFO 63812 --- [           main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.3.1
+2020-02-14 17:31:59.870  INFO 63812 --- [           main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@3f0d6038
+2020-02-14 17:32:00.480  INFO 63812 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-02-14 17:32:00.543  WARN 63812 --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2020-02-14 17:32:00.549  WARN 63812 --- [           main] ebConfiguration$Neo4jWebMvcConfiguration : spring.data.neo4j.open-in-view is enabled by default.Therefore, database queries may be performed during view rendering. Explicitly configure spring.data.neo4j.open-in-view to disable this warning
+2020-02-14 17:32:01.169  INFO 63812 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: Ant [pattern='/api/storage/**'], []
+2020-02-14 17:32:01.169  INFO 63812 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: Ant [pattern='/api/webhook/execute/**'], []
+2020-02-14 17:32:01.200  INFO 63812 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@1806bc4c, org.springframework.security.web.context.SecurityContextPersistenceFilter@6415f61e, org.springframework.security.web.header.HeaderWriterFilter@19a31b9d, org.springframework.web.filter.CorsFilter@462e1e64, org.springframework.security.web.authentication.logout.LogoutFilter@4d68b571, com.becon.opencelium.backend.security.AuthenticationFilter@3d36dff4, com.becon.opencelium.backend.security.AuthorizationFilter@7351a16e, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5a0bef24, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@696b4a95, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@69afa141, org.springframework.security.web.session.SessionManagementFilter@6d60899e, org.springframework.security.web.access.ExceptionTranslationFilter@11eed657, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@2121d1f9]
+2020-02-14 17:32:01.303  INFO 63812 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2020-02-14 17:32:01.508  INFO 63812 --- [           main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2020-02-14 17:32:01.548  INFO 63812 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Freed 0 triggers from 'acquired' / 'blocked' state.
+2020-02-14 17:32:01.551  INFO 63812 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Recovering 0 jobs that were in-progress at the time of the last shut-down.
+2020-02-14 17:32:01.552  INFO 63812 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Recovery complete.
+2020-02-14 17:32:01.555  INFO 63812 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Removed 0 'complete' triggers.
+2020-02-14 17:32:01.556  INFO 63812 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Removed 0 stale fired job entries.
+2020-02-14 17:32:01.560  INFO 63812 --- [           main] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED started.
+2020-02-14 17:32:01.611  INFO 63812 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9090 (http) with context path ''
+2020-02-14 17:32:01.615  INFO 63812 --- [           main] c.becon.opencelium.backend.Application   : Started Application in 14.262 seconds (JVM running for 14.849)
+2020-02-14 17:32:01.954  INFO 63812 --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2020-02-14 17:32:07.716  INFO 63812 --- [nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2020-02-14 17:32:07.716  INFO 63812 --- [nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2020-02-14 17:32:07.726  INFO 63812 --- [nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 10 ms
