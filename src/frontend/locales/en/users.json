@@ -6,7 +6,6 @@
     "FORM": {
       "PAGE_1": "Credentials",
       "EMAIL": "Email",
-      "EMAIL_EXIST": "The user with such email already exist",
       "PASSWORD": "Password",
       "REPEAT_PASSWORD": "Repeat password",
       "HINT_1": "Provide credential information",
@@ -28,12 +27,17 @@
       "HINT_3": "Assign user group"
     },
     "VALIDATION_MESSAGES": {
-      "EMAIL_IS_REQUIRED": "Email is a required field",
-      "PASSWORD_IS_REQUIRED": "Password is a required field",
+      "EMAIL_REQUIRED": "Email is a required field",
+      "EMAIL_EXIST": "The user with such email already exist",
+      "PASSWORD_REQUIRED": "Password is a required field",
+      "REPEAT_PASSWORD_REQUIRED": "Repeat password is a required field",
       "WRONG_EMAIL": "Please, provide the right email address",
       "WRONG_REPEAT_PASSWORD": "Please, repeat your password",
       "WRONG_LENGTH_PASSWORD": "Password should have from 8 to 16 characters",
-      "WRONG_LENGTH_PASSWORD_SHORT": "Password is too short"
+      "WRONG_LENGTH_PASSWORD_SHORT": "Password is too short",
+      "NAME_REQUIRED": "Name is a required field",
+      "SURNAME_REQUIRED": "Surname is a required field",
+      "USERGROUP_REQUIRED": "User Group is a required field"
     }
   },
   "UPDATE": {
@@ -65,9 +69,17 @@
       "HINT_3": "Assign user group"
     },
     "VALIDATION_MESSAGES": {
+      "EMAIL_REQUIRED": "Email is a required field",
+      "EMAIL_EXIST": "The user with such email already exist",
+      "PASSWORD_REQUIRED": "Password is a required field",
+      "REPEAT_PASSWORD_REQUIRED": "Repeat password is a required field",
       "WRONG_EMAIL": "Please, provide the right email address",
       "WRONG_REPEAT_PASSWORD": "Please, repeat your password",
-      "WRONG_LENGTH_PASSWORD": "Password should have from 8 to 16 characters"
+      "WRONG_LENGTH_PASSWORD": "Password should have from 8 to 16 characters",
+      "WRONG_LENGTH_PASSWORD_SHORT": "Password is too short",
+      "NAME_REQUIRED": "Name is a required field",
+      "SURNAME_REQUIRED": "Surname is a required field",
+      "USERGROUP_REQUIRED": "User Group is a required field"
     }
   },
   "LIST": {

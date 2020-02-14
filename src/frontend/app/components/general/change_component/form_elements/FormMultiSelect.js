@@ -89,6 +89,7 @@ class FormMultiSelect extends Component{
             <div className={`${theme.withIcon} ${theme.input} ${tourStep ? tourStep : ''}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <OCSelect
+                    id={`input_${name}`}
                     name={name}
                     value={value}
                     onChange={::this.handleChange}

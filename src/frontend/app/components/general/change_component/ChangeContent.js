@@ -19,7 +19,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import Form from "./Form";
 import Hint from "./Hint";
 import Navigation from "./Navigation";
-import {getInputsState, isNumber} from "../../../utils/app";
+import {getInputsState, isNumber, setFocusById} from "../../../utils/app";
 import ValidationMessage from "./ValidationMessage";
 import {
     addChangeContentActionNavigation, addFocusDocumentNavigation,
@@ -181,6 +181,7 @@ class ChangeContent extends Component{
                                     let isValidated = false;
                                     let focusedInput = {name: newInputs.name, label: newInputs.label};
                                     let validationMessage = request.notSuccessMessage;
+                                    setFocusById(`input_${newInputs.name}`);
                                     this.setState({
                                         page: isValidated ? page + 1 : page,
                                         isValidated,
@@ -206,71 +207,44 @@ class ChangeContent extends Component{
         this.setState({focusedInput});
     }
 
+    getInputName(name){
+        const {entity} = this.state;
+        let result = '';
+        if(entity instanceof CConnection) {
+            switch(name){
+                case 'connection_title':
+                    result = entity.title;
+                    break;
+                case 'connectors':
+                    result = entity;
+                    break;
+                case 'mode':
+                    result = entity;
+                    break;
+            }
+
+        } else{
+            result = entity[name];
+        }
+        return result;
+    }
+
     /**
      * to check and to validate Input Fields
      */
     checkFields(startIndex = 0){
         const {contents} = this.props;
         const {page, entity} = this.state;
-        if(entity instanceof CConnection) {
-            if(page === 0){
-                if(entity.title === ''){
-                    this.setState({isValidated: true, validationMessage: '', hasRequired: true, focusedInput: {name: 'title', label: 'Title'}});
-                    return false;
-                }
-                if(entity.fromConnector.id === 0){
-                    this.setState({isValidated: true, validationMessage: '', hasRequired: true, focusedInput: {name: 'from_connector', label: 'From Connector'}});
-                    return false;
-                }
-                if(entity.toConnector.id === 0){
-                    this.setState({isValidated: true, validationMessage: '', hasRequired: true, focusedInput: {name: 'to_connector', label: 'To Connector'}});
-                    return false;
-                }
-            }
-            if(page === 1 && entity.template.mode === TEMPLATE_MODE && entity.template.templateId === -1){
-                this.setState({isValidated: entity.allTemplates.length !== 0, validationMessage: entity.allTemplates.length !== 0 ? '' : 'Please, choose the expert mode', hasRequired: entity.allTemplates.length !== 0, focusedInput: {name: 'template', label: 'Template'}});
-                return false;
-            }
-            return true;
-        }
-        if(entity instanceof CInvoker) {
-            if(page === 0){
-                if(entity.name === ''){
-                    this.setState({isValidated: true, validationMessage: '', hasRequired: true, focusedInput: {name: 'name', label: 'Name'}});
-                    return false;
-                }
-            }
-            if(page === 1){
-                if(entity.auth === ''){
-                    this.setState({isValidated: true, validationMessage: '', hasRequired: true, focusedInput: {name: 'auth', label: 'Authentication'}});
-                    return false;
-                }
-            }
-            if(page === 2){
-                if(entity.connection.name === ''){
-                    this.setState({isValidated: true, validationMessage: '', hasRequired: true, focusedInput: {name: 'name', label: 'Name'}});
-                    return false;
-                }
-                if(entity.connection.request.method === ''){
-                    this.setState({isValidated: true, validationMessage: '', hasRequired: true, focusedInput: {name: 'method', label: 'Method'}});
-                    return false;
-                }
-            }
-            return true;
-        }
         let inputs = contents[page].inputs;
         let hasRequired = false;
         let focusedInput = {name: '', label: ''};
         let validationMessage = '';
         let isValidated = true;
         for(let i = startIndex; i < inputs.length; i++){
-            if(inputs[i].hasOwnProperty('required')){
-                if(inputs[i].required) {
-                    let tmpValue = entity[inputs[i].name];
+            /*if(inputs[i].hasOwnProperty('required') && !(entity instanceof CConnection) && !(entity instanceof CInvoker)) {
+                if (inputs[i].required) {
+                    let tmpValue = this.getInputName(inputs[i].name);
                     if (tmpValue === ''
-                        || (inputs[i].type === 'select+description' || inputs[i].type === 'select') && tmpValue === 0
-                        || (inputs[i].type === 'connection_mode' && tmpValue && tmpValue.hasOwnProperty('mode') && tmpValue.mode === '')
-                        || (inputs[i].type === 'connectors' || inputs[i].type === 'connectors_readonly') && (tmpValue.fromConnector === 0 || tmpValue.toConnector === 0)
                         || Array.isArray(tmpValue) && tmpValue.length === 0
                         || isEmptyObject(tmpValue)) {
                         hasRequired = true;
@@ -279,7 +253,7 @@ class ChangeContent extends Component{
                         break;
                     }
                 }
-            }
+            }*/
             if(inputs[i].hasOwnProperty('check')){
                 if(typeof inputs[i].check === 'function') {
                     let checkResult = inputs[i].check(entity);
@@ -302,6 +276,20 @@ class ChangeContent extends Component{
     }
 
     /**
+     * to focus on the first input when switch the page
+     */
+    setFocusOnInput(inputs){
+        let name = inputs[0].name;
+        if(inputs[0].hasOwnProperty('visible')){
+            let elem = inputs.find(i => i.visible === true);
+            if(elem){
+                name = elem.name;
+            }
+        }
+        setFocusById(`input_${name}`);
+    }
+
+    /**
      * to open next page
      * startFieldIndex - start to check fields from concrete index
      */
@@ -319,6 +307,7 @@ class ChangeContent extends Component{
                     if(onPageSwitch){
                         onPageSwitch(page + 2);
                     }
+                    ::this.setFocusOnInput(content.inputs);
                 });
             }
         }
@@ -342,10 +331,10 @@ class ChangeContent extends Component{
                 validationMessage: '',
                 page: page - 1
             }, () => {
-
                 if(onPageSwitch){
                     onPageSwitch(page);
                 }
+                ::this.setFocusOnInput(content.inputs);
             });
         }
     }
@@ -367,10 +356,10 @@ class ChangeContent extends Component{
                 validationMessage: '',
                 page,
             }, () => {
-
                 if(onPageSwitch){
                     onPageSwitch(page + 1);
                 }
+                ::this.setFocusOnInput(content.inputs);
             });
         }
     }
@@ -391,6 +380,17 @@ class ChangeContent extends Component{
     }
 
     /**
+     * to clear a validation message
+     */
+    clearValidationMessage(){
+        if(this.state.name !== '' && this.state.label !== '') {
+            this.setState({
+                focusedInput: {name: '', label: ''},
+            });
+        }
+    }
+
+    /**
      * to do action of the entity (add or update)
      */
     doAction(){
@@ -407,7 +407,7 @@ class ChangeContent extends Component{
         if(hasRequired && focusedInput.label){
             return <ValidationMessage message={`${focusedInput.label} is a required field`} authUser={authUser}/>;
         }
-        if(!isValidated){
+        if(!isValidated && focusedInput.label){
             return <ValidationMessage message={validationMessage} authUser={authUser}/>;
         }
         return null;
@@ -427,12 +427,13 @@ class ChangeContent extends Component{
                 <Breadcrumbs items={breadcrumbsItems} page={page} exactPage={::this.exactPage} authUser={authUser}/>
                 {
                     noHint
-                        ?
+                    ?
                         null
-                        :
+                    :
                         <Hint hint={contents[page].hint} authUser={authUser}/>
                 }
                 <Form
+                    clearValidationMessage={::this.clearValidationMessage}
                     inputs={contents[page].inputs}
                     entity={this.state.entity}
                     updateEntity={::this.updateEntity}

@@ -17,6 +17,7 @@ import React, {Component} from 'react';
 import styles from '../../../../../../themes/default/general/change_component.scss';
 import theme from "react-toolbox/lib/input/theme.css";
 import FontIcon from "../../../../basic_components/FontIcon";
+import {onEnter} from "../../../../../../utils/app";
 
 
 const types = [
@@ -74,9 +75,12 @@ class Method extends Component{
                         types.map((type, key) => {
                             return (
                                 <span
+                                    id={`method_${type.value}`}
+                                    tabIndex={2 + key}
                                     key={key}
                                     className={`${value === type.value ? `${styles.invoker_selected_method} ${styles[`invoker_method_${type.value}`]}` : styles.invoker_request_item_method}`}
                                     onClick={(e) => ::this.chooseMethod(e, type.value)}
+                                    onKeyDown={(e) => onEnter(e, (e) => ::this.chooseMethod(e, type.value))}
                                 >
                                     {type.label}
                                 </span>

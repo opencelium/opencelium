@@ -385,7 +385,6 @@ CREATE TABLE `activity` (
 
 LOCK TABLES `activity` WRITE;
 /*!40000 ALTER TABLE `activity` DISABLE KEYS */;
-INSERT INTO `activity` VALUES (11,'4f3f7b60-3a27-4e8c-ad41-69e3f94494e1','2020-01-22 09:55:36','0'),(12,'1f41f89d-ed7b-4213-9ae5-fafb5cdd4901','2019-09-18 06:06:04','0'),(18,'f763c284-565d-4e17-9fef-cffb16e6fc87','2019-10-13 21:49:42','0');
 /*!40000 ALTER TABLE `activity` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -432,7 +431,7 @@ CREATE TABLE `connection` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=235 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -459,7 +458,7 @@ CREATE TABLE `connector` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `title_UNIQUE` (`title`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -468,7 +467,6 @@ CREATE TABLE `connector` (
 
 LOCK TABLES `connector` WRITE;
 /*!40000 ALTER TABLE `connector` DISABLE KEYS */;
-INSERT INTO `connector` VALUES (23,'icinga2','icinga2','Icinga2 descr'),(24,'zabbix','zabbix','zabbix description'),(27,'i-doit','i-doit','i-doit description'),(28,'otrs','otrs','ootrs');
 /*!40000 ALTER TABLE `connector` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -504,7 +502,7 @@ CREATE TABLE `detail` (
 
 LOCK TABLES `detail` WRITE;
 /*!40000 ALTER TABLE `detail` DISABLE KEYS */;
-INSERT INTO `detail` VALUES (11,'John','Doe',NULL,'Manager','Org','+99830 302 03 23','17f8bcfc-7bcd-4a45-9999-65d1cfa40d97.png','2019-09-06 11:07:25','2019-12-09 11:44:58',0,NULL),(12,'Tod','Philips',NULL,'producer','warner brothers','83883820','17f8bcfc-7bcd-4a45-9999-65d1cfa40d97.png','2019-09-18 06:05:14','2019-09-18 06:05:14',0,''),(18,'Tod','Philips',NULL,'producer','warner brothers','83883820','17f8bcfc-7bcd-4a45-9999-65d1cfa40d97.png','2019-10-13 21:49:31','2019-10-13 21:49:31',0,'');
+INSERT INTO `detail` VALUES (1,'Admin','Admin',NULL,'IT Administrator','Org','12343435','17f8bcfc-7bcd-4a45-9999-65d1cfa40d97.png','2019-09-06 11:07:25','2019-12-09 11:44:58',0,NULL);
 /*!40000 ALTER TABLE `detail` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -528,7 +526,7 @@ CREATE TABLE `enhancement` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_enhancement_connection1_idx` (`connection_id`),
   CONSTRAINT `fk_enhancement_connection1` FOREIGN KEY (`connection_id`) REFERENCES `connection` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=359 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -558,7 +556,7 @@ CREATE TABLE `execution` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_execution_scheduler1_idx` (`scheduler_id`),
   CONSTRAINT `fk_execution_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=310 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -592,7 +590,7 @@ CREATE TABLE `last_execution` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_last_execution_scheduler1_idx` (`scheduler_id`),
   CONSTRAINT `fk_last_execution_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -647,7 +645,7 @@ CREATE TABLE `request_data` (
   PRIMARY KEY (`id`,`connector_id`),
   KEY `fk_data_connector1_idx` (`connector_id`),
   CONSTRAINT `fk_data_connector1` FOREIGN KEY (`connector_id`) REFERENCES `connector` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -656,7 +654,6 @@ CREATE TABLE `request_data` (
 
 LOCK TABLES `request_data` WRITE;
 /*!40000 ALTER TABLE `request_data` DISABLE KEYS */;
-INSERT INTO `request_data` VALUES (7,23,'url','https://oc-icinga.westeurope.cloudapp.azure.com:5665/v1','public'),(8,23,'username','root','public'),(9,23,'password','41abb84ee1467aa3','protected'),(10,24,'url','http://oc-zabbix.westeurope.cloudapp.azure.com/zabbix/api_jsonrpc.php','public'),(11,24,'user','Admin','public'),(12,24,'password','zabbix','protected'),(15,27,'url','http://oc-idoit.westeurope.cloudapp.azure.com/src/jsonrpc.php','public'),(16,27,'apikey','AWK123!','public'),(17,28,'url','http://oc-otrs.westeurope.cloudapp.azure.com/otrs/nph-genericinterface.pl/Webservice','public'),(18,28,'UserLogin','root@localhost','public'),(19,28,'Password','init','protected'),(20,28,'WebService','OC-Connector','public');
 /*!40000 ALTER TABLE `request_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -674,7 +671,7 @@ CREATE TABLE `role` (
   `icon` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -735,7 +732,7 @@ CREATE TABLE `scheduler` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_scheduler_connection1_idx` (`connection_id`),
   CONSTRAINT `fk_scheduler_connection1` FOREIGN KEY (`connection_id`) REFERENCES `connection` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -764,7 +761,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `unique_id_UNIQUE` (`email`),
   KEY `fk_user_role1_idx` (`role_id`),
   CONSTRAINT `fk_user_role1` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -773,7 +770,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (11,'admin@gmail.com','$2a$10$WOmLccLsWfqOJJpiGsyKcuSWKv91VyKvuSrARWvkLY.xAZXLaLZ36',1),(12,'user@gmail.com','$2a$10$ED41wMqHbuA.8p2Z0hu.geiGhhKMKBBw7TwoQ2vcvGmjuxdn/H12i',2),(18,'test@gmail.com','$2a$10$EHmlza8yzQ3N7yEQhJsdBeKzxUkTl9mGYBi.PYx/9raD4tjCRhV2G',2);
+INSERT INTO `user` VALUES (1,'admin@opencelium.io','$2a$10$WOmLccLsWfqOJJpiGsyKcuSWKv91VyKvuSrARWvkLY.xAZXLaLZ36',1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -794,7 +791,7 @@ CREATE TABLE `webhook` (
   UNIQUE KEY `uuid_UNIQUE` (`uuid`),
   KEY `fk_webhook_scheduler1_idx` (`scheduler_id`),
   CONSTRAINT `fk_webhook_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

@@ -190,6 +190,7 @@ class FormPermissionTable extends Component{
                                     <TableCell key={key} className={styles.header_cell}>
                                         <span>{t(`PERMISSIONS.${permission}`)}</span>
                                         <Checkbox
+                                            id={key === 0 ? `input_${name}` : ''}
                                             checked={permissionCheckValues[key]}
                                             onChange={(e) => ::this.checkAllByPermission(e, permission)}
                                             theme={{field: styles.checkbox_field}}

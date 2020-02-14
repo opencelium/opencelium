@@ -31,6 +31,7 @@ import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "../../../../utils/
 import ChangeContent from "../../../general/change_component/ChangeContent";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
 import CConnection from "../../../../classes/components/content/connection/CConnection";
+import {setFocusById} from "../../../../utils/app";
 
 
 const connectionPrefixURL = '/connections';
@@ -74,6 +75,10 @@ class ConnectionUpdate extends Component{
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
         };
+    }
+
+    componentDidMount(){
+        setFocusById('input_connection_title');
     }
 
     /**
@@ -153,35 +158,37 @@ class ConnectionUpdate extends Component{
     }
 
     /**
-     * to validate title on uniqueness
+     * to validate title
      */
     validateTitle(connection){
-        this.startCheckingTitle = true;
-        //this.props.checkConnectionTitle(connection.getObject());
-        //return {value: false, message: ''};
+        const {t} = this.props;
+        if(connection.title === ''){
+            setFocusById('input_connection_title');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TITLE_REQUIRED')};
+        } else {
+            if(this.props.connection.title !== connection.title) {
+                this.startCheckingTitle = true;
+                this.props.checkConnectionTitle(connection.getObject());
+                return {value: false, message: ''};
+            }
+        }
         return {value: true, message: ''};
     }
 
     /**
-     * to validate template
+     * to validate connector
      */
-    validateTemplate(entity){
+    validateConnectors(connection){
         const {t} = this.props;
-        let {mode} = entity;
-        let templateWasChecked = false;
-        let message = t('UPDATE.VALIDATION_MESSAGES.TEMPLATE_NOT_SELECT');
-        if(mode && mode.hasOwnProperty('mode') && mode.hasOwnProperty('isTemplate') && mode.hasOwnProperty('template')){
-            if(mode.isTemplate){
-                if(mode.template !== null){
-                    templateWasChecked = true;
-                    message = '';
-                }
-            } else{
-                templateWasChecked = true;
-                message = '';
-            }
+        if(connection.fromConnector.id === 0){
+            setFocusById('from_connector');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED')};
         }
-        return {value: templateWasChecked, message};
+        if(connection.toConnector.id === 0){
+            setFocusById('to_connector');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED')};
+        }
+        return {value: true, message: ''};
     }
 
     /**
@@ -228,6 +235,7 @@ class ConnectionUpdate extends Component{
                     source: connectorMenuItems,
                     callback: ::this.setMethods,
                     connectors: connectors,
+                    check: (e, entity) => ::this.validateConnectors(e, entity),
                 },
             ],
             hint: {text: t('UPDATE.FORM.HINT_1'), openTour: ::this.openTour},

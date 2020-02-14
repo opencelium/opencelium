@@ -28,6 +28,7 @@ import {UserPermissions} from "../../../../utils/constants/permissions";
 import {INPUTS} from "../../../../utils/constants/inputs";
 import {USER_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
+import {setFocusById} from "../../../../utils/app";
 
 
 const prefixUrl = '/users';
@@ -86,6 +87,10 @@ class UserUpdate extends Component{
             currentTour: 'page_1',
             isTourOpen: false,
         };
+    }
+
+    componentDidMount(){
+        setFocusById('input_email');
     }
 
     /**
@@ -176,17 +181,26 @@ class UserUpdate extends Component{
      */
     validateEmail(entity){
         const {t, user} = this.props;
-        let isEmailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        let isEmail = isEmailRegExp.test(entity.email);
         let message = '';
-        if(!isEmail){
-            message = t('UPDATE.VALIDATION_MESSAGES.WRONG_EMAIL');
-        } else{
-            if(user.email !== entity.email) {
-                this.startCheckingEmail = true;
-                this.checkUserEmail(entity);
-                return {value: false, message: ''};
+        let isEmail = true;
+        if(entity.email === ''){
+            message = t('UPDATE.VALIDATION_MESSAGES.EMAIL_REQUIRED');
+            isEmail = false;
+        } else {
+            let isEmailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            isEmail = isEmailRegExp.test(entity.email);
+            if (!isEmail) {
+                message = t('UPDATE.VALIDATION_MESSAGES.WRONG_EMAIL');
+            } else {
+                if(entity.email !== user.email) {
+                    this.startCheckingEmail = true;
+                    this.checkUserEmail(entity);
+                    return {value: false, message: ''};
+                }
             }
+        }
+        if(!isEmail){
+            setFocusById('input_email');
         }
         return {value: isEmail, message};
     }
@@ -198,11 +212,17 @@ class UserUpdate extends Component{
         const {t} = this.props;
         let hasCorrectLength = true;
         let message = '';
-        if(entity.password !== '') {
+        if(entity.password === '') {
+            hasCorrectLength = false;
+            message = t('UPDATE.VALIDATION_MESSAGES.PASSWORD_REQUIRED');
+        } else {
             if (entity.password.length < 8 || entity.password.length > 16) {
                 hasCorrectLength = false;
                 message = t('UPDATE.VALIDATION_MESSAGES.WRONG_LENGTH_PASSWORD');
             }
+        }
+        if(!hasCorrectLength){
+            setFocusById('input_password');
         }
         return {value: hasCorrectLength, message};
     }
@@ -214,10 +234,54 @@ class UserUpdate extends Component{
         const {t} = this.props;
         let isEqual = entity.password === entity.repeatPassword;
         let message = '';
+        if(entity.repeatPassword === '') {
+            isEqual = false;
+            message = t('UPDATE.VALIDATION_MESSAGES.REPEAT_PASSWORD_REQUIRED');
+        } else {
+            if (!isEqual) {
+                message = t('UPDATE.VALIDATION_MESSAGES.WRONG_REPEAT_PASSWORD');
+            }
+        }
         if(!isEqual){
-            message = t('UPDATE.VALIDATION_MESSAGES.WRONG_REPEAT_PASSWORD');
+            setFocusById('input_repeatPassword');
         }
         return {value: isEqual, message};
+    }
+
+    /**
+     * to validate name if empty
+     */
+    validateName(entity){
+        const {t} = this.props;
+        if(entity.name === ''){
+            setFocusById('input_name');
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.NAME_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate surname if empty
+     */
+    validateSurname(entity){
+        const {t} = this.props;
+        if(entity.surname === ''){
+            setFocusById('input_surname');
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.SURNAME_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate UserGroup if was selected
+     */
+    validateUsergroup(entity){
+        const {t} = this.props;
+        if(entity.userGroup === 0){
+            setFocusById('input_userGroup');
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.USERGROUP_REQUIRED')};
+        }
+        return {value: true, message: ''};
     }
 
     render(){
@@ -267,7 +331,8 @@ class UserUpdate extends Component{
                         tourStep: USER_TOURS.page_2[0].selector,
                         label: t('UPDATE.FORM.NAME'),
                         maxLength: 128,
-                        required: true
+                        required: true,
+                        check: (e, entity) => ::this.validateName(e, entity)
                     },
                     {
                         ...INPUTS.SURNAME,
@@ -275,6 +340,7 @@ class UserUpdate extends Component{
                         label: t('UPDATE.FORM.SURNAME'),
                         maxLength: 128,
                         required: true,
+                        check: (e, entity) => ::this.validateSurname(e, entity)
                     },
                     {...INPUTS.PHONE_NUMBER, label: t('UPDATE.FORM.PHONE_NUMBER')},
                     {...INPUTS.ORGANIZATION, label: t('UPDATE.FORM.ORGANISATION')},
@@ -292,7 +358,8 @@ class UserUpdate extends Component{
                         source: userGroups,
                         required: true,
                         defaultValue: 0,
-                        description: {name: 'description', label: t('UPDATE.FORM.DESCRIPTION'), values: descriptions}
+                        description: {name: 'description', label: t('UPDATE.FORM.DESCRIPTION'), values: descriptions},
+                        check: (e, entity) => ::this.validateUsergroup(e, entity)
                     }
                 ],
                 hint: {text: t('UPDATE.FORM.HINT_3'), openTour: ::this.openTour},

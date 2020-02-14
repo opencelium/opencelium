@@ -22,7 +22,7 @@ import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 import Pagination from 'react-bootstrap/Pagination';
 
 import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "../../../../utils/app";
+import {getThemeClass, sortByNameFunction} from "../../../../utils/app";
 import {deleteSchedules} from '../../../../actions/schedules/delete';
 import {startSchedules, enableSchedules, disableSchedules} from '../../../../actions/schedules/update';
 import {checkApp, checkAppCanceled} from "../../../../actions/apps/fetch";
@@ -198,9 +198,19 @@ class ScheduleList extends Component{
         return false;
     }
 
+    /**
+     * to sort all schedules by title
+     */
+    sortAllCurrentSchedules(){
+        let {schedules} = this.props;
+        return schedules.sort(sortByNameFunction);
+    }
+
+    /**
+     * to filter all schedules by search title
+     */
     filterAllCurrentSchedules({filterTitle}){
-        const {schedules} = this.props;
-        return schedules.filter(s => {
+        return this.sortAllCurrentSchedules().filter(s => {
             let noFilterTitle = true;
             if(filterTitle !== ''){
                 noFilterTitle = s.title.toLowerCase().indexOf(filterTitle.toLowerCase()) !== -1 || s.connection.title.toLowerCase().indexOf(filterTitle.toLowerCase()) !== -1;
@@ -216,6 +226,9 @@ class ScheduleList extends Component{
         });
     }
 
+    /**
+     * to open a page
+     */
     openPage(e, pageNumber){
         this.setState({
             currentPage: pageNumber,

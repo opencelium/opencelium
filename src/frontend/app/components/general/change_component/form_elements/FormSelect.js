@@ -96,7 +96,7 @@ class FormSelect extends Component{
 
     render(){
         const {icon, source, name, placeholder, selectClassName, tourStep, tourStepHint} = this.props.data;
-        const {handleChange, hasHintTour} = this.props;
+        const {id, handleChange, hasHintTour} = this.props;
         let value = this.getValue();
         let iconStyle = theme.icon;
         let selectStyle = styles.multiselect;
@@ -115,6 +115,7 @@ class FormSelect extends Component{
             <div className={`${theme.withIcon} ${theme.input} ${className}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <Select
+                    id={id}
                     name={name}
                     value={value}
                     onChange={handleChange ? handleChange : ::this.handleChange}
@@ -153,6 +154,7 @@ FormSelect.defaultProps = {
     onBlur: null,
     hasHintTour: false,
     handleChange: null,
+    id: 'input_'
 };
 
 

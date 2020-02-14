@@ -34,7 +34,7 @@ class ValidationMessage extends Component{
         let defaultClassNames = ['validation_message', 'message'];
         defaultClassNames = getThemeClass({classNames: defaultClassNames, authUser, styles});
         let validationMessageClassName = `${styles[defaultClassNames.validation_message]}`;
-        let messageClassName = `${defaultClassNames.message}`;
+        let messageClassName = `${styles[defaultClassNames.message]}`;
         if(classNames){
             if(classNames.hasOwnProperty('validationMessage')){
                 validationMessageClassName += ` ${classNames.validationMessage}`;

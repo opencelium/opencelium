@@ -29,24 +29,27 @@ class FormName extends Component{
     constructor(props){
         super(props);
         this.state = {
-            name: props.entity.name,
+            nameValue: props.entity.name,
         };
     }
 
     onBlur(){
-        const {name} = this.state;
+        const {nameValue} = this.state;
         let {entity, updateEntity} = this.props;
-        entity.name = name;
+        entity.name = nameValue;
         updateEntity(entity);
     }
 
-    handleInput(name){
-        this.setState({name});
+    handleInput(nameValue){
+        if(typeof this.props.clearValidationMessage === 'function'){
+            this.props.clearValidationMessage();
+        }
+        this.setState({nameValue});
     }
 
     render(){
-        const {name} = this.state;
-        const {label, icon, maxLength, readOnly, required} = this.props.data;
+        const {nameValue} = this.state;
+        const {name, label, icon, maxLength, readOnly, required} = this.props.data;
         let {tourStep} = this.props.data;
         let isReadonly = false;
         let inputStyle = styles.form_input;
@@ -58,6 +61,7 @@ class FormName extends Component{
         }
         return (
             <Input
+                id={`input_${name}`}
                 onChange={::this.handleInput}
                 onBlur={::this.onBlur}
                 name={'form_connector_name'}
@@ -65,7 +69,7 @@ class FormName extends Component{
                 type={'text'}
                 icon={icon}
                 maxLength={maxLength}
-                value={name}
+                value={nameValue}
                 readOnly={isReadonly}
                 className={inputStyle}
                 required={required}

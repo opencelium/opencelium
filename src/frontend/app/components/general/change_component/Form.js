@@ -53,7 +53,7 @@ class Form extends Component{
      * to map Field Inputs correspondingly
      */
     mapInputs(data, key){
-        const {entity, updateEntity} = this.props;
+        const {entity, updateEntity, clearValidationMessage} = this.props;
         switch(data.type){
             case 'select+description':
                 return <FormSelectDescription
@@ -115,6 +115,7 @@ class Form extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
+                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'connectors':
                 return <FormConnectors
@@ -129,6 +130,7 @@ class Form extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
+                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'methods':
                 return <FormMethods
@@ -143,6 +145,7 @@ class Form extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
+                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'invoker_description':
                 return <FormInvokerDescription
@@ -234,6 +237,7 @@ Form.propTypes = {
     updateEntity: PropTypes.func.isRequired,
     focusedInput: PropTypes.string,
     authUser: PropTypes.object.isRequired,
+    clearValidationMessage: PropTypes.func.isRequired,
 };
 
 Form.defaultProps = {

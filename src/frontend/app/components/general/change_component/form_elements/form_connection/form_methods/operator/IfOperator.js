@@ -203,11 +203,11 @@ class IfOperator extends Component{
      */
     updateRelationalOperator(relationalOperator){
         const {operator, updateEntity} = this.props;
-        operator.setRightStatementColor('');
         operator.setRelationalOperator(relationalOperator.value);
         this.setState({
             rightField: '',
             rightProperty: '',
+            responseTypeRight: RESPONSE_SUCCESS,
         });
         updateEntity();
     }

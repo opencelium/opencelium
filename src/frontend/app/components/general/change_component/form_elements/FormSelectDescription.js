@@ -43,7 +43,7 @@ class FormSelectDescription extends Component{
         let descriptionValue = description.values[value];
         return (
             <div>
-                <FormSelect {...this.props}/>
+                <FormSelect {...this.props} id={`input_${name}`}/>
                 <Input
                     name={description.name}
                     type={'text'}

@@ -25,6 +25,10 @@
       "HINT_1": "Provide general information",
       "HINT_2": "Provide credentials and test"
     },
+    "VALIDATION_MESSAGES": {
+      "TITLE_REQUIRED": "The title is a required field",
+      "INVOKER_REQUIRED": "The invoker is a required field"
+    },
     "LIST_BUTTON": "Connectors",
     "ADD_BUTTON": "Add",
     "TEST_BUTTON": "Test",

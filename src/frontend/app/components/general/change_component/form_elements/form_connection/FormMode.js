@@ -185,7 +185,7 @@ class FormMode extends Component{
      */
     handleChangeMode(){
         const {mode, showConfirm} = this.state;
-        let {entity, updateEntity, data} = this.props;
+        let {entity, updateEntity, data, clearValidationMessage} = this.props;
         const {readOnly} = data;
         if(readOnly){
             return;
@@ -196,6 +196,10 @@ class FormMode extends Component{
             this.setState({showConfirm: !showConfirm}, () => updateEntity(entity));
         } else{
             updateEntity(entity);
+        }
+
+        if(typeof clearValidationMessage === 'function'){
+            clearValidationMessage();
         }
     };
 
@@ -309,6 +313,7 @@ class FormMode extends Component{
             return (
                 <div className={`second-tour-step ${styles.template_select}`}>
                     <Select
+                        id={'templates'}
                         name={'connection_mode'}
                         value={template}
                         onChange={::this.handleChangeTemplate}

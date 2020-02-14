@@ -30,6 +30,7 @@ import {INPUTS} from "../../../../utils/constants/inputs";
 import {automaticallyShowTour, CONNECTOR_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
+import {setFocusById} from "../../../../utils/app";
 
 
 const connectorPrefixURL = '/connectors';
@@ -101,6 +102,7 @@ class ConnectorAdd extends Component{
                 authenticationFields
             });
         }
+        setFocusById('input_title');
     }
 
     UNSAFE_componentWillReceiveProps(nextProps){
@@ -266,14 +268,25 @@ class ConnectorAdd extends Component{
      */
     validateTitle(entity){
         const {t} = this.props;
-        let isExist = false;
-        let message = '';
-        if(isExist){
-            message = t('ADD.VALIDATION_MESSAGES.WRONG_TITLE');
+        if(entity.title === ''){
+            setFocusById('input_title');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TITLE_REQUIRED')};
         } else{
-            this.props.checkConnectorTitle(entity);
+            //this.props.checkConnectorTitle(entity);
         }
-        return {value: isExist, message};
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate title
+     */
+    validateInvoker(entity){
+        const {t} = this.props;
+        if(entity.invoker === 0){
+            setFocusById('input_invoker');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.INVOKER_REQUIRED')};
+        }
+        return {value: true, message: ''};
     }
 
     /**
@@ -323,6 +336,7 @@ class ConnectorAdd extends Component{
                     tourStep: CONNECTOR_TOURS.page_1[0].selector,
                     label: t('ADD.FORM.TITLE'),
                     required: true,
+                    check: (e, entity) => ::this.validateTitle(e, entity),
                 },
                 {
                     ...INPUTS.DESCRIPTION,
@@ -338,6 +352,7 @@ class ConnectorAdd extends Component{
                     defaultValue: 0,
                     description: {name: 'description', label: t('ADD.FORM.INVOKER_DESCRIPTION'), values: descriptions},
                     callback: ::this.chooseInvoker,
+                    check: (e, entity) => ::this.validateInvoker(e, entity),
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},

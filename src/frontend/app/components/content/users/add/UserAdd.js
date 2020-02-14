@@ -28,6 +28,7 @@ import {INPUTS} from "../../../../utils/constants/inputs";
 import {automaticallyShowTour, USER_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
+import {setFocusById} from "../../../../utils/app";
 
 const userPrefixURL = '/users';
 
@@ -82,6 +83,10 @@ class UserAdd extends Component{
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
         };
+    }
+
+    componentDidMount(){
+        setFocusById('input_email');
     }
 
     /**
@@ -147,15 +152,24 @@ class UserAdd extends Component{
      */
     validateEmail(entity){
         const {t} = this.props;
-        let isEmailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        let isEmail = isEmailRegExp.test(entity.email);
         let message = '';
+        let isEmail = true;
+        if(entity.email === ''){
+            message = t('ADD.VALIDATION_MESSAGES.EMAIL_REQUIRED');
+            isEmail = false;
+        } else {
+            let isEmailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            isEmail = isEmailRegExp.test(entity.email);
+            if (!isEmail) {
+                message = t('ADD.VALIDATION_MESSAGES.WRONG_EMAIL');
+            } else {
+                this.startCheckingEmail = true;
+                this.checkUserEmail(entity);
+                return {value: false, message: ''};
+            }
+        }
         if(!isEmail){
-            message = t('ADD.VALIDATION_MESSAGES.WRONG_EMAIL');
-        } else{
-            this.startCheckingEmail = true;
-            this.checkUserEmail(entity);
-            return {value: false, message: ''};
+            setFocusById('input_email');
         }
         return {value: isEmail, message};
     }
@@ -167,9 +181,17 @@ class UserAdd extends Component{
         const {t} = this.props;
         let hasCorrectLength = true;
         let message = '';
-        if(entity.password.length < 8 || entity.password.length > 16){
+        if(entity.password === '') {
             hasCorrectLength = false;
-            message = t('ADD.VALIDATION_MESSAGES.WRONG_LENGTH_PASSWORD');
+            message = t('ADD.VALIDATION_MESSAGES.PASSWORD_REQUIRED');
+        } else {
+            if (entity.password.length < 8 || entity.password.length > 16) {
+                hasCorrectLength = false;
+                message = t('ADD.VALIDATION_MESSAGES.WRONG_LENGTH_PASSWORD');
+            }
+        }
+        if(!hasCorrectLength){
+            setFocusById('input_password');
         }
         return {value: hasCorrectLength, message};
     }
@@ -181,10 +203,54 @@ class UserAdd extends Component{
         const {t} = this.props;
         let isEqual = entity.password === entity.repeatPassword;
         let message = '';
+        if(entity.repeatPassword === '') {
+            isEqual = false;
+            message = t('ADD.VALIDATION_MESSAGES.REPEAT_PASSWORD_REQUIRED');
+        } else {
+            if (!isEqual) {
+                message = t('ADD.VALIDATION_MESSAGES.WRONG_REPEAT_PASSWORD');
+            }
+        }
         if(!isEqual){
-            message = t('ADD.VALIDATION_MESSAGES.WRONG_REPEAT_PASSWORD');
+            setFocusById('input_repeatPassword');
         }
         return {value: isEqual, message};
+    }
+
+    /**
+     * to validate name if empty
+     */
+    validateName(entity){
+        const {t} = this.props;
+        if(entity.name === ''){
+            setFocusById('input_name');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.NAME_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate surname if empty
+     */
+    validateSurname(entity){
+        const {t} = this.props;
+        if(entity.surname === ''){
+            setFocusById('input_surname');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.SURNAME_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate UserGroup if was selected
+     */
+    validateUsergroup(entity){
+        const {t} = this.props;
+        if(entity.userGroup === 0){
+            setFocusById('input_userGroup');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.USERGROUP_REQUIRED')};
+        }
+        return {value: true, message: ''};
     }
 
     render(){
@@ -210,7 +276,7 @@ class UserAdd extends Component{
                             inProcess: checkingUserEmail,
                             status: this.startCheckingEmail && !checkingUserEmail,
                             result: checkEmailResult,
-                            notSuccessMessage: t('ADD.FORM.EMAIL_EXIST'),
+                            notSuccessMessage: t('ADD.VALIDATION_MESSAGES.EMAIL_EXIST'),
                         }},
                     {...INPUTS.PASSWORD,
                         label: t('ADD.FORM.PASSWORD'),
@@ -237,14 +303,16 @@ class UserAdd extends Component{
                         tourStep: USER_TOURS.page_2[0].selector,
                         maxLength: 128,
                         required: true,
-                        defaultValue: ''
+                        defaultValue: '',
+                        check: (e, entity) => ::this.validateName(e, entity)
                     },
                     {...INPUTS.SURNAME,
                         label: t('ADD.FORM.SURNAME'),
                         tourStep: USER_TOURS.page_2[1].selector,
                         maxLength: 128,
                         required: true,
-                        defaultValue: ''
+                        defaultValue: '',
+                        check: (e, entity) => ::this.validateSurname(e, entity)
                     },
                     {...INPUTS.PHONE_NUMBER, label: t('ADD.FORM.PHONE_NUMBER'), defaultValue: ''},
                     {...INPUTS.ORGANIZATION, label: t('ADD.FORM.ORGANISATION'), defaultValue: ''},
@@ -261,7 +329,8 @@ class UserAdd extends Component{
                         source: userGroups,
                         required: true,
                         defaultValue: 0,
-                        description: {name: 'description', label: t('ADD.FORM.DESCRIPTION'), values: descriptions}
+                        description: {name: 'description', label: t('ADD.FORM.DESCRIPTION'), values: descriptions},
+                        check: (e, entity) => ::this.validateUsergroup(e, entity)
                     }
                 ],
                 hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},

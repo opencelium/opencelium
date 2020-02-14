@@ -32,6 +32,7 @@ import {isString} from './../../../../utils/app';
 import {CONNECTOR_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
+import {setFocusById} from "../../../../utils/app";
 
 const connectorPrefixURL = '/connectors';
 
@@ -109,6 +110,7 @@ class ConnectorUpdate extends Component{
                 authenticationFields
             });
         }
+        setFocusById('input_title');
     }
 
     UNSAFE_componentWillReceiveProps(nextProps){
@@ -289,6 +291,31 @@ class ConnectorUpdate extends Component{
     }
 
     /**
+     * (not used) to validate title on exist
+     */
+    validateTitle(entity){
+        const {t} = this.props;
+        if(entity.title === ''){
+            setFocusById('input_title');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TITLE_REQUIRED')};
+        } else{
+            //this.props.checkConnectorTitle(entity);
+        }
+        return {value: true, message: ''};
+    }
+    /**
+     * to validate title
+     */
+    validateInvoker(entity){
+        const {t} = this.props;
+        if(entity.invoker === 0){
+            setFocusById('input_invoker');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.INVOKER_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
      * to filter steps tour
      */
     filterSteps(inputs){
@@ -331,7 +358,12 @@ class ConnectorUpdate extends Component{
         let authenticationInputs = this.generateAuthenticationInputs();
         let contents = [{
             inputs: [
-                {...INPUTS.TITLE, tourStep: CONNECTOR_TOURS.page_1[0].selector, label: t('UPDATE.FORM.TITLE'), maxLength: 32},
+                {...INPUTS.TITLE,
+                    tourStep: CONNECTOR_TOURS.page_1[0].selector,
+                    label: t('UPDATE.FORM.TITLE'),
+                    maxLength: 32,
+                    check: (e, entity) => ::this.validateTitle(e, entity),
+                },
                 {...INPUTS.DESCRIPTION, tourStep: CONNECTOR_TOURS.page_1[1].selector, label: t('UPDATE.FORM.DESCRIPTION')},
                 {...INPUTS.INVOKER,
                     tourStep: CONNECTOR_TOURS.page_1[2].selector,
@@ -339,6 +371,7 @@ class ConnectorUpdate extends Component{
                     required: true,
                     source: invokers,
                     callback: ::this.chooseInvoker,
+                    check: (e, entity) => ::this.validateInvoker(e, entity),
                     description: {name: 'description', label: t('UPDATE.FORM.INVOKER_DESCRIPTION'), values: descriptions},
                 },
             ],

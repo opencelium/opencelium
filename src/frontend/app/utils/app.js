@@ -38,6 +38,43 @@ export function sortByIndexFunction(a, b){
 }
 
 /**
+ * callback to search by name
+ */
+export function searchByNameFunction(element, searchValue){
+    let elementValue = element.hasOwnProperty('name') ? element.name.toUpperCase() : element.hasOwnProperty('title') ? element.title.toUpperCase() : '';
+    if(elementValue === ''){
+        if(element.hasOwnProperty('userDetail') && element.userDetail && element.userDetail.hasOwnProperty('name')){
+            elementValue = element.userDetail.name.toUpperCase();
+        } else if(element instanceof CUserGroup) {
+            elementValue = element.role.toUpperCase();
+        } else{
+            return true;
+        }
+    }
+    return elementValue.indexOf(searchValue.toUpperCase()) !== -1;
+}
+
+/**
+ * callback to sort by name
+ */
+export function sortByNameFunction(a, b){
+    let propertyA = a.hasOwnProperty('name') ? a.name.toUpperCase() : a.hasOwnProperty('title') ? a.title.toUpperCase() : '';
+    let propertyB = b.hasOwnProperty('name') ? b.name.toUpperCase() : b.hasOwnProperty('title') ? b.title.toUpperCase() : '';
+    if(propertyA === '' && propertyB === ''){
+        if(a.hasOwnProperty('userDetail') && a.userDetail && a.userDetail.hasOwnProperty('name')){
+            propertyA = a.userDetail.name.toUpperCase();
+            propertyB = b.userDetail.name.toUpperCase();
+        } else if(a instanceof CUserGroup) {
+            propertyA = a.role.toUpperCase();
+            propertyB = b.role.toUpperCase();
+        } else{
+            return 1;
+        }
+    }
+    if(propertyA < propertyB){return -1;} if(propertyA > propertyB){return 1;} return 0;
+}
+
+/**
  * on enter event
  */
 export function onEnter(e, callback){
@@ -119,15 +156,20 @@ export function shuffle(array) {
  * focus input by id
  */
 export function setFocusById(id){
-    let nameElement = document.getElementById(id);
+    let element = document.getElementById(id);
     const inputs = ['input', 'select', 'button', 'textarea'];
-    if (nameElement) {
-        if(inputs.indexOf(nameElement.tagName.toLowerCase()) === -1){
-            nameElement = nameElement.querySelector('input');
+    if (element) {
+        let inputElement = null;
+        if(inputs.indexOf(element.tagName.toLowerCase()) === -1){
+            inputElement = element.querySelector('input');
         }
-        if(nameElement) {
+        if(inputElement) {
             setTimeout(() => {
-                nameElement.focus()
+                inputElement.focus();
+            }, 100);
+        } else{
+            setTimeout(() => {
+                element.focus();
             }, 100);
         }
     }

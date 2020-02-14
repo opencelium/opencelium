@@ -79,7 +79,7 @@ const fetchUsersEpic = (action$, store) => {
     return action$.ofType(UsersAction.FETCH_USERS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let storedUsers = store.getState().get('users').get('users');
+            /*let storedUsers = store.getState().get('users').get('users');
             if(storedUsers.hasOwnProperty('size')){
                 if(storedUsers.size > 0){
                     return Rx.Observable.of(fetchUsersInStore(storedUsers));
@@ -88,7 +88,7 @@ const fetchUsersEpic = (action$, store) => {
                 if (storedUsers.length > 0) {
                     return Rx.Observable.of(fetchUsersInStore(storedUsers));
                 }
-            }
+            }*/
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
                 success: fetchUsersFulfilled,

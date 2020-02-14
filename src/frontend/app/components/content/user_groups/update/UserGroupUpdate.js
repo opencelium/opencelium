@@ -28,6 +28,7 @@ import {UserGroupPermissions} from "../../../../utils/constants/permissions";
 import {INPUTS} from "../../../../utils/constants/inputs";
 import {USERGROUP_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
+import {isEmptyObject, setFocusById} from "../../../../utils/app";
 
 const userGroupPrefixURL = '/usergroups';
 
@@ -74,6 +75,10 @@ class UserGroupUpdate extends Component{
             currentTour: 'page_1',
             isTourOpen: false,
         };
+    }
+
+    componentDidMount(){
+        setFocusById('input_role');
     }
 
     /**
@@ -140,6 +145,30 @@ class UserGroupUpdate extends Component{
     }
 
     /**
+     * to validate role name if empty
+     */
+    validateRole(entity){
+        const {t} = this.props;
+        if(entity.role === ''){
+            setFocusById('input_role');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.ROLE_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate components if not selected
+     */
+    validateComponents(entity){
+        const {t} = this.props;
+        if(entity.components.length === 0){
+            setFocusById('input_components');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.COMPONENTS_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
      * to validate permissions on empty fields
      */
     validatePermissions(entity){
@@ -150,8 +179,9 @@ class UserGroupUpdate extends Component{
         let message = '';
         for(let i = 0; i < components.length; i++){
             if(!permissions.hasOwnProperty(components[i].label) || permissions[components[i].label].length === 0){
+                setFocusById('input_permissions');
                 hasNotEmptyFields = false;
-                message = t('UPDATE.VALIDATION_MESSAGES.PERMISSIONS_IS_REQUIRED');
+                message = t('UPDATE.VALIDATION_MESSAGES.PERMISSIONS_REQUIRED');
             }
         }
         return {value: hasNotEmptyFields, message};
@@ -170,19 +200,37 @@ class UserGroupUpdate extends Component{
         changeContentTranslations.updateButton = t('UPDATE.UPDATE_BUTTON');
         let contents = [{
             inputs: [
-                {...INPUTS.ROLE, tourStep: USERGROUP_TOURS.page_1[0].selector, label: t('UPDATE.FORM.ROLE'), required: true},
+                {...INPUTS.ROLE,
+                    tourStep: USERGROUP_TOURS.page_1[0].selector,
+                    label: t('UPDATE.FORM.ROLE'),
+                    required: true,
+                    check: (e, entity) => ::this.validateRole(e, entity),
+                },
                 {...INPUTS.DESCRIPTION, tourStep: USERGROUP_TOURS.page_1[1].selector, label: t('UPDATE.FORM.DESCRIPTION')},
                 {...INPUTS.ICON, tourStep: USERGROUP_TOURS.page_1[2].selector, label: t('UPDATE.FORM.USER_GROUP_PICTURE'), browseTitle: t('UPDATE.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
             ],
             hint: {text: t('UPDATE.FORM.HINT_1'), openTour: ::this.openTour},
         },{
             inputs:[
-                {...INPUTS.COMPONENTS, tourStep: USERGROUP_TOURS.page_2[0].selector, label: t('UPDATE.FORM.COMPONENTS'), placeholder: t('UPDATE.FORM.COMPONENTS_PLACEHOLDER'), source: components, required: true},
+                {...INPUTS.COMPONENTS,
+                    tourStep: USERGROUP_TOURS.page_2[0].selector,
+                    label: t('UPDATE.FORM.COMPONENTS'),
+                    placeholder: t('UPDATE.FORM.COMPONENTS_PLACEHOLDER'),
+                    source: components,
+                    required: true,
+                    check: (e, entity) => ::this.validateComponents(e, entity),
+                },
             ],
             hint: {text: t('UPDATE.FORM.HINT_2'), openTour: ::this.openTour},
         },{
             inputs:[
-                {...INPUTS.PERMISSIONS, tourStep: USERGROUP_TOURS.page_3[0].selector, label: t('UPDATE.FORM.PERMISSIONS'), dataSource: 'components', required: true, check: (e, entity) => ::this.validatePermissions(e, entity)},
+                {...INPUTS.PERMISSIONS,
+                    tourStep: USERGROUP_TOURS.page_3[0].selector,
+                    label: t('UPDATE.FORM.PERMISSIONS'),
+                    dataSource: 'components',
+                    required: true,
+                    check: (e, entity) => ::this.validatePermissions(e, entity)
+                },
             ],
             hint: {text: t('UPDATE.FORM.HINT_3'), openTour: ::this.openTour},
         },

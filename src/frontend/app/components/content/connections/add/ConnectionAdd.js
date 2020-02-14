@@ -26,13 +26,14 @@ import {fetchConnectors} from '../../../../actions/connectors/fetch';
 import Loading from "../../../general/app/Loading";
 import {ConnectionPermissions} from "../../../../utils/constants/permissions";
 import {permission} from "../../../../decorators/permission";
-import {injectFieldBindingIntoConnection} from "../../../../utils/app";
+import {injectFieldBindingIntoConnection, setFocusById} from "../../../../utils/app";
 import {INPUTS} from "../../../../utils/constants/inputs";
 import OCTour from "../../../general/basic_components/OCTour";
 import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "../../../../utils/constants/tours";
 import CConnection from "../../../../classes/components/content/connection/CConnection";
 import ChangeContent from "../../../general/change_component/ChangeContent";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
+import {TEMPLATE_MODE} from "../../../../classes/components/content/connection/CTemplate";
 
 
 const connectionPrefixURL = '/connections';
@@ -75,6 +76,10 @@ class ConnectionAdd extends Component{
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
         };
+    }
+
+    componentDidMount(){
+        setFocusById('input_connection_title');
     }
 
     /**
@@ -154,35 +159,50 @@ class ConnectionAdd extends Component{
     }
 
     /**
-     * to validate title on uniqueness
+     * to validate title
      */
     validateTitle(connection){
-        this.startCheckingTitle = true;
-        //this.props.checkConnectionTitle(connection.getObject());
-        //return {value: false, message: ''};
+        const {t} = this.props;
+        if(connection.title === ''){
+            setFocusById('input_connection_title');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TITLE_REQUIRED')};
+        } else {
+            this.startCheckingTitle = true;
+            this.props.checkConnectionTitle(connection.getObject());
+            return {value: false, message: ''};
+        }
+    }
+
+    /**
+     * to validate connector
+     */
+    validateConnectors(connection){
+        const {t} = this.props;
+        if(connection.fromConnector.id === 0){
+            setFocusById('from_connector');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED')};
+        }
+        if(connection.toConnector.id === 0){
+            setFocusById('to_connector');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED')};
+        }
         return {value: true, message: ''};
     }
 
     /**
-     * to validate template
+     * to validate mode
      */
-    validateTemplate(entity){
+    validateMode(entity){
         const {t} = this.props;
-        let {mode} = entity;
-        let templateWasChecked = false;
-        let message = t('ADD.VALIDATION_MESSAGES.TEMPLATE_NOT_SELECT');
-        if(mode && mode.hasOwnProperty('mode') && mode.hasOwnProperty('isTemplate') && mode.hasOwnProperty('template')){
-            if(mode.isTemplate){
-                if(mode.template !== null){
-                    templateWasChecked = true;
-                    message = '';
-                }
+        if (entity.template && entity.template.mode === TEMPLATE_MODE && entity.template.templateId === -1) {
+            if(entity.allTemplates.length === 0){
+                return {value: false, message: t('ADD.VALIDATION_MESSAGES.NO_TEMPLATES')};
             } else{
-                templateWasChecked = true;
-                message = '';
+                setFocusById('templates');
+                return {value: false, message: t('ADD.VALIDATION_MESSAGES.TEMPLATE_REQUIRED')};
             }
         }
-        return {value: templateWasChecked, message};
+        return {value: true, message: ''};
     }
 
     /**
@@ -230,6 +250,7 @@ class ConnectionAdd extends Component{
                     source: connectorMenuItems,
                     callback: ::this.setMethods,
                     connectors: connectors,
+                    check: (e, entity) => ::this.validateConnectors(e, entity),
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
@@ -250,7 +271,7 @@ class ConnectionAdd extends Component{
                     required: true,
                     readOnly: false,
                     connectors: connectors,
-                    check: (e, entity) => ::this.validateTemplate(e, entity),
+                    check: (e, entity) => ::this.validateMode(e, entity),
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},

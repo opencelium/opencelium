@@ -30,7 +30,7 @@ class Name extends Component{
         super(props);
 
         this.state = {
-            name: props.operation.name,
+            nameValue: props.operation.name,
         };
     }
 
@@ -38,26 +38,26 @@ class Name extends Component{
         let {name} = this.props.operation;
         if(name === ''){
             this.setState({
-                name,
+                nameValue: name,
             });
         }
     }
 
-    onChange(name){
-        this.setState({name});
+    onChange(nameValue){
+        this.setState({nameValue});
     }
 
     onBlur(){
         const {operation, updateEntity} = this.props;
-        const {name} = this.state;
-        operation.name = name;
+        const {nameValue} = this.state;
+        operation.name = nameValue;
         updateEntity();
     }
 
     render(){
-        const {name} = this.state;
+        const {nameValue} = this.state;
         const {ids, data, tourStep} = this.props;
-        const {maxLength, readonly, required} = data;
+        const {name, maxLength, readonly, required} = data;
         let isReadonly = false;
         let inputStyle = '';
         if(tourStep){
@@ -71,12 +71,12 @@ class Name extends Component{
                 onChange={::this.onChange}
                 onBlur={::this.onBlur}
                 name={'Name'}
-                id={ids && ids.hasOwnProperty('name') ? ids.name : ''}
+                id={ids && ids.hasOwnProperty('name') ? ids.name : `input_${name}`}
                 label={'Name'}
                 type={'text'}
                 icon={'perm_identity'}
                 maxLength={255}
-                value={name}
+                value={nameValue}
                 readOnly={isReadonly}
                 className={inputStyle}
                 required={required}

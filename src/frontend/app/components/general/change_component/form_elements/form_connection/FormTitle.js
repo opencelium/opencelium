@@ -42,12 +42,15 @@ class FormTitle extends Component{
     }
 
     handleInput(title){
+        if(typeof this.props.clearValidationMessage === 'function'){
+            this.props.clearValidationMessage();
+        }
         this.setState({title});
     }
 
     render(){
         const {title} = this.state;
-        const {label, icon, maxLength, readOnly, required} = this.props.data;
+        const {name, label, icon, maxLength, readOnly, required} = this.props.data;
         let {tourStep} = this.props.data;
         let isReadonly = false;
         let inputStyle = styles.form_input;
@@ -62,6 +65,7 @@ class FormTitle extends Component{
                 onChange={::this.handleInput}
                 onBlur={::this.onBlur}
                 name={'form_connection_title'}
+                id={'input_'+name}
                 label={label}
                 type={'text'}
                 icon={icon}

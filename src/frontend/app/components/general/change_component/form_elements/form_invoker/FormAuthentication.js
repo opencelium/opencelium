@@ -55,7 +55,7 @@ class FormAuthentication extends Component{
         const {name} = data;
         let value = entity[name];
         if(value) {
-            let icon = document.getElementById('firstRadio').parentElement.parentElement.parentElement.querySelector('[data-react-toolbox="font-icon"]');
+            let icon = document.getElementById(`input_${name}`).parentElement.parentElement.parentElement.querySelector('[data-react-toolbox="font-icon"]');
             icon.style.color = '#3f51b5';
         }
     }
@@ -92,6 +92,7 @@ class FormAuthentication extends Component{
     }
 
     renderAuthTypes(){
+        const {name} = this.props.data;
         return types.map((type, key) => {
             if(!type.hasOwnProperty('visible')){
                 return (
@@ -100,7 +101,7 @@ class FormAuthentication extends Component{
                         label={type.label}
                         value={type.value}
                         onFocus={::this.onFocusValue}
-                        id={key === 0 ? 'firstRadio' : ''}
+                        id={key === 0 ? `input_${name}` : ''}
                         theme={{field: styles.form_invoker_auth_radio_field, text: styles.form_invoker_auth_radio_text}}
                     />
                 );
@@ -112,7 +113,7 @@ class FormAuthentication extends Component{
                             label={type.label}
                             value={type.value}
                             onFocus={::this.onFocusValue}
-                            id={key === 0 ? 'firstRadio' : ''}
+                            id={key === 0 ? `input_${name}` : ''}
                             theme={{field: styles.form_invoker_auth_radio_field, text: styles.form_invoker_auth_radio_text}}
                         />
                     );

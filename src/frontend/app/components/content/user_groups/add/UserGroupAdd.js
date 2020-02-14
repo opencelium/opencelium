@@ -30,6 +30,7 @@ import OCTour from "../../../general/basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
+import {setFocusById, isEmptyObject} from "../../../../utils/app";
 
 const userGroupPrefixURL = '/usergroups';
 
@@ -80,6 +81,9 @@ class UserGroupAdd extends Component{
         };
     }
 
+    componentDidMount(){
+        setFocusById('input_role');
+    }
 
     /**
      * to set appropriate Tour
@@ -127,6 +131,49 @@ class UserGroupAdd extends Component{
         });
     }
 
+    /**
+     * to validate role name if empty
+     */
+    validateRole(entity){
+        const {t} = this.props;
+        if(entity.role === ''){
+            setFocusById('input_role');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.ROLE_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate components if not selected
+     */
+    validateComponents(entity){
+        const {t} = this.props;
+        if(entity.components.length === 0){
+            setFocusById('input_components');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.COMPONENTS_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate permissions on empty fields
+     */
+    validatePermissions(entity){
+        const {t} = this.props;
+        let components = entity['components'];
+        let permissions = entity['permissions'];
+        let hasNotEmptyFields = true;
+        let message = '';
+        for(let i = 0; i < components.length; i++){
+            if(!permissions.hasOwnProperty(components[i].label) || permissions[components[i].label].length === 0){
+                setFocusById('input_permissions');
+                hasNotEmptyFields = false;
+                message = t('UPDATE.VALIDATION_MESSAGES.PERMISSIONS_REQUIRED');
+            }
+        }
+        return {value: hasNotEmptyFields, message};
+    }
+
     render(){
         const {t, authUser, addingUserGroup, doAction} = this.props;
         let mappedComponents = this.mapComponents();
@@ -139,19 +186,40 @@ class UserGroupAdd extends Component{
         let breadcrumbsItems = [t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_2'), t('ADD.FORM.PAGE_3')];
         let contents = [{
             inputs: [
-                {...INPUTS.ROLE, label: t('ADD.FORM.ROLE'), tourStep: USERGROUP_TOURS.page_1[0].selector, defaultValue: '', required: true},
+                {...INPUTS.ROLE,
+                    label: t('ADD.FORM.ROLE'),
+                    tourStep: USERGROUP_TOURS.page_1[0].selector,
+                    defaultValue: '',
+                    required: true,
+                    check: (e, entity) => ::this.validateRole(e, entity),
+                },
                 {...INPUTS.DESCRIPTION, label: t('ADD.FORM.DESCRIPTION'), tourStep: USERGROUP_TOURS.page_1[1].selector, defaultValue: ''},
                 {...INPUTS.ICON, label: t('ADD.FORM.USER_GROUP_PICTURE'), tourStep: USERGROUP_TOURS.page_1[2].selector, browseTitle: t('ADD.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
         },{
             inputs:[
-                {...INPUTS.COMPONENTS, label: t('ADD.FORM.COMPONENTS'), tourStep: USERGROUP_TOURS.page_2[0].selector, placeholder: t('ADD.FORM.COMPONENTS_PLACEHOLDER'), source: mappedComponents, defaultValue: [], required: true},
+                {...INPUTS.COMPONENTS,
+                    label: t('ADD.FORM.COMPONENTS'),
+                    tourStep: USERGROUP_TOURS.page_2[0].selector,
+                    placeholder: t('ADD.FORM.COMPONENTS_PLACEHOLDER'),
+                    source: mappedComponents,
+                    defaultValue: [],
+                    required: true,
+                    check: (e, entity) => ::this.validateComponents(e, entity),
+                },
             ],
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
         },{
             inputs:[
-                {...INPUTS.PERMISSIONS, label: t('ADD.FORM.PERMISSIONS'), tourStep: USERGROUP_TOURS.page_3[0].selector, dataSource: 'components', defaultValue: {}, required: true},
+                {...INPUTS.PERMISSIONS,
+                    label: t('ADD.FORM.PERMISSIONS'),
+                    tourStep: USERGROUP_TOURS.page_3[0].selector,
+                    dataSource: 'components',
+                    defaultValue: {},
+                    required: true,
+                    check: (e, entity) => ::this.validatePermissions(e, entity),
+                },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
         },

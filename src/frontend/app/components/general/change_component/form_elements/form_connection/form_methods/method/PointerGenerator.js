@@ -187,7 +187,7 @@ class PointerGenerator extends Component{
                                 top: 'auto',
                                 marginTop: '-16px',
                                 marginBottom: '8px',
-                                width: '150px',
+                                width: '200px',
                                 zIndex: '1',
                             };
                             if(isDisabled || source.length === 0){

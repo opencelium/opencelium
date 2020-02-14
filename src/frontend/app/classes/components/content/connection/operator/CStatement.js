@@ -35,7 +35,7 @@ export default class CStatement{
         this._rightPropertyValue = rightPropertyValue;
     }
 
-    static createStatement(statement){
+    static createStatement(statement = null){
         let color = statement && statement.hasOwnProperty('color') && statement.color ? statement.color : '';
         let field = statement && statement.hasOwnProperty('field') && statement.field ? statement.field : '';
         let rightPropertyValue = statement && statement.hasOwnProperty('rightPropertyValue') && statement.rightPropertyValue ? statement.rightPropertyValue : '';
@@ -79,6 +79,8 @@ export default class CStatement{
 
     set color(color){
         this._color = this.checkColor(color) ? color : DEFAULT_COLOR;
+        this._field = '';
+        this._responseType = RESPONSE_SUCCESS;
     }
 
     get responseType(){
@@ -88,6 +90,7 @@ export default class CStatement{
     set responseType(responseType){
         if(this.checkResponseType(responseType)) {
             this._responseType = responseType;
+            this._field = '';
         }
     }
 

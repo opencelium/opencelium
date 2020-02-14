@@ -43,16 +43,6 @@ class Endpoint extends Component{
         }
     }
 
-    componentDidUpdate(prevProps){
-        const {focused} = prevProps.data;
-        if(focused || this.props.data.focused){
-            let elem = document.getElementById('input_invoker_connection_path');
-            if(elem) {
-                elem.focus();
-            }
-        }
-    }
-
     onChange(endpoint){
         this.setState({endpoint});
     }

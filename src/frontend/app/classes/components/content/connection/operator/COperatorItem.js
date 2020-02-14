@@ -15,6 +15,7 @@
 
 
 import CCondition from "./CCondition";
+import CStatement from "./CStatement";
 
 export const IF_OPERATOR = 'if';
 export const LOOP_OPERATOR = 'loop';
@@ -67,10 +68,12 @@ export default class COperatorItem{
 
     setLeftStatementColor(color){
         this._condition.leftStatement.color = color;
+        this._condition.rightStatement.rightPropertyValue = '';
     }
 
     setLeftStatementField(field){
         this._condition.leftStatement.field = field;
+        this._condition.rightStatement.rightPropertyValue = '';
     }
 
     setLeftStatementParent(parent){
@@ -79,10 +82,12 @@ export default class COperatorItem{
 
     setLeftStatementResponseType(type){
         this._condition.leftStatement.responseType = type;
+        this._condition.rightStatement.rightPropertyValue = '';
     }
 
     setRelationalOperator(relationalOperator){
         this._condition.relationalOperator = relationalOperator;
+        this._condition.rightStatement = CStatement.createStatement();
     }
 
     getRelationalOperator(){

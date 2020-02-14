@@ -29,6 +29,7 @@ import OCTour from "../../../general/basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
 import CInvoker from "../../../../classes/components/content/invoker/CInvoker";
+import {setFocusById} from "../../../../utils/app";
 
 const invokerPrefixURL = '/invokers';
 
@@ -67,6 +68,10 @@ class InvokerAdd extends Component{
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
         };
+    }
+
+    componentDidMount(){
+        setFocusById('input_name');
     }
 
     /**
@@ -112,6 +117,50 @@ class InvokerAdd extends Component{
         this.props.router.push(`${invokerPrefixURL}`);
     }
 
+    /**
+     * to validate title
+     */
+    validateName(invoker){
+        const {t} = this.props;
+        if(invoker.name === ''){
+            setFocusById('input_name');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TITLE_REQUIRED')};
+        }/* else {
+            this.startCheckingTitle = true;
+            this.props.checkConnectionTitle(connection.getObject());
+            return {value: false, message: ''};
+        }*/
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate auth
+     */
+    validateAuth(invoker){
+        const {t} = this.props;
+        if(invoker.auth === ''){
+            setFocusById('input_auth');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.AUTH_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate connection
+     */
+    validateConnection(invoker){
+        const {t} = this.props;
+        if(invoker.connection.name === ''){
+            setFocusById('input_connection');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.CONNECTION_NAME_REQUIRED')};
+        }
+        if(invoker.connection.request.method === ''){
+            setFocusById('method_post');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.CONNECTION_METHOD_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
     render(){
         const {t, authUser, addingInvoker, doAction} = this.props;
         let {invoker} = this.state;
@@ -129,6 +178,7 @@ class InvokerAdd extends Component{
                     tourStep: INVOKER_TOURS.page_1[0].selector,
                     label: t('ADD.FORM.NAME'),
                     required: true,
+                    check: (e, entity) => ::this.validateName(e, entity),
                     maxLength: 255,
                 },
                 {
@@ -157,6 +207,7 @@ class InvokerAdd extends Component{
                     tourStep: INVOKER_TOURS.page_2[0].selector,
                     label: t('ADD.FORM.AUTHENTICATION'),
                     required: true,
+                    check: (e, entity) => ::this.validateAuth(e, entity),
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
@@ -167,6 +218,7 @@ class InvokerAdd extends Component{
                     tourSteps: INVOKER_TOURS.page_3,
                     label: t('ADD.FORM.CONNECTION'),
                     required: true,
+                    check: (e, entity) => ::this.validateConnection(e, entity),
                     defaultValue: {name: '', path: '', method: 'post', request: {header: [], body: {}}, response: {success: {header: [], body: {}}, fail: {header: [], body: {}}}}
                 },
             ],

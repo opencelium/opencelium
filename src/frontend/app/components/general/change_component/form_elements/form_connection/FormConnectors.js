@@ -111,6 +111,7 @@ class FormConnectors extends Component{
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{placeholders[0]}</div>
                     <Select
+                        id={'from_connector'}
                         value={fromConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'fromConnector')}
                         options={source}
@@ -126,6 +127,7 @@ class FormConnectors extends Component{
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{placeholders[1]}</div>
                     <Select
+                        id={'to_connector'}
                         value={toConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'toConnector')}
                         options={source}

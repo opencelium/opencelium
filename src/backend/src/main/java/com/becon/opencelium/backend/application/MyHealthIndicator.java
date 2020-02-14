@@ -14,20 +14,17 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.exception;
+package com.becon.opencelium.backend.application;
 
-import com.becon.opencelium.backend.constant.ExceptionConstant;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
 
-public class ConnectionNotFoundException extends RuntimeException{
+@Component
+public class MyHealthIndicator implements HealthIndicator {
 
-    private final Long id;
-
-    public ConnectionNotFoundException(final Long id) {
-        super(ExceptionConstant.CONNECTOR_NOT_FOUND);
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
+    @Override
+    public Health health() {
+        return Health.up().build();
     }
 }

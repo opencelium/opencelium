@@ -29,8 +29,9 @@ import {
     removeSelectCardKeyNavigation, removeGraphCardKeyNavigation, addEnterKeyNavigation, removeEnterKeyNavigation,
     removeUpdateCardKeyNavigation, removeViewCardKeyNavigation, switchUserListKeyNavigation,
 } from "../../../utils/key_navigation";
-import {getThemeClass, isString} from "../../../utils/app";
+import {getThemeClass, isString, searchByNameFunction, sortByNameFunction} from "../../../utils/app";
 import styles from '../../../themes/default/general/list_of_components.scss';
+import Input from "../basic_components/inputs/Input";
 
 
 /**
@@ -45,6 +46,7 @@ class List extends Component{
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
+            searchValue: '',
         };
     }
 
@@ -99,6 +101,10 @@ class List extends Component{
             removeAddEntityKeyNavigation(this);
         }
         switchUserListKeyNavigation(false);
+    }
+
+    changeSearchValue(searchValue){
+        this.setState({searchValue});
     }
 
     /**
@@ -165,6 +171,30 @@ class List extends Component{
     }
 
     /**
+     * to sort entities by name/title
+     */
+    searchEntities(){
+        const {searchValue} = this.state;
+        const {entities} = this.props;
+        let result = entities;
+        if(result.length > 1){
+            result = result.filter((value) => searchByNameFunction(value, searchValue));
+        }
+        return result;
+    }
+
+    /**
+     * to sort entities by name/title
+     */
+    sortEntities(){
+        let result = this.searchEntities();
+        if(result.length > 1){
+            result = result.sort(sortByNameFunction);
+        }
+        return result;
+    }
+
+    /**
      * to filter entities depending of the page
      */
     filterEntities(){
@@ -176,7 +206,7 @@ class List extends Component{
         if(typeof pageNumber === 'undefined'){
             pageNumber = 1;
         }
-        return entities.filter((entity, key) => {
+        return this.sortEntities().filter((entity, key) => {
             if(key >= (pageNumber - 1)*ENTITIES_PRO_PAGE && key <= pageNumber*ENTITIES_PRO_PAGE - 1) {
                 return entity;
             }
@@ -185,21 +215,23 @@ class List extends Component{
 
     render(){
         const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles} = this.props;
-        const {selectedCard, keyNavigateType, isPressedAddEntity} = this.state;
+        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue} = this.state;
         let {page, translations} = this.props;
         let classNames = ['empty_list'];
+        let filteredEntities = this.filterEntities();
         classNames = getThemeClass({classNames, authUser, styles});
-        page.entitiesLength = entities.length;
+        page.entitiesLength = this.searchEntities().length;
         return(
             <Row id={'app_list'}>
                 <Col xl={8} lg={10} md={12} sm={12} offset={{ xl: 2, lg: 1 }} >
-                    <Container style={containerStyles}>
+                    <Container style={containerStyles} style={{marginBottom: '70px'}}>
                         <ListHeader header={translations.header} authUser={authUser}/>
+                        <div><Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'}/></div>
                         <Row>
                             {
-                                this.filterEntities().length > 0
+                                filteredEntities.length > 0
                                     ?
-                                        this.filterEntities().map((entity, key) => {
+                                        filteredEntities.map((entity, key) => {
                                             let mappedEntity = mapEntity.map(entity);
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';

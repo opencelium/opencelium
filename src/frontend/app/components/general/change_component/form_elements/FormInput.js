@@ -30,16 +30,6 @@ class FormInput extends Component{
         super(props);
     }
 
-    componentDidUpdate(prevProps){
-        const {focused, name} = prevProps.data;
-        if(focused || this.props.data.focused){
-            let elem = document.getElementById('input_' + name);
-            if(elem) {
-                elem.focus();
-            }
-        }
-    }
-
     handleInput(value){
         const {name} = this.props.data;
         const {entity, updateEntity} = this.props;
