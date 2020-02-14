@@ -44,13 +44,14 @@ spring:
     job-store-type: jdbc
 
 management:
+  health:
+    status:
+      http-mapping:
+        DOWN: 200
+        UP: 200
   endpoint:
     health:
-      show-details: always
-      status:
-        http-mapping:
-          fatal: 200
-
+      show-details: alwaysx
 
 #timezone: Europe/Berlin
 
