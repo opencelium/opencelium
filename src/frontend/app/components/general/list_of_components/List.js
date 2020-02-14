@@ -214,7 +214,7 @@ class List extends Component{
     }
 
     render(){
-        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles} = this.props;
+        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField} = this.props;
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue} = this.state;
         let {page, translations} = this.props;
         let classNames = ['empty_list'];
@@ -226,7 +226,7 @@ class List extends Component{
                 <Col xl={8} lg={10} md={12} sm={12} offset={{ xl: 2, lg: 1 }} >
                     <Container style={containerStyles} style={{marginBottom: '70px'}}>
                         <ListHeader header={translations.header} authUser={authUser}/>
-                        <div><Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'}/></div>
+                        {entities.length > 0 && !noSearchField ? <div><Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'}/></div> : null}
                         <Row>
                             {
                                 filteredEntities.length > 0
@@ -313,12 +313,14 @@ List.propTypes = {
     permissions: PropTypes.object.isRequired,
     load: PropTypes.object,
     containerStyles: PropTypes.object,
+    noSearchField: PropTypes.bool,
 };
 
 List.defaultProps = {
     exceptionEntities: {label: '', exceptions: []},
     load: null,
     containerStyles: {},
+    noSearchField: false,
 };
 
 export default List;
