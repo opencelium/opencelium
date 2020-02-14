@@ -86,6 +86,7 @@ class AdminCardsList extends Component{
             authUser={authUser}
             load={{loadLink: loadAdminCardsLink, loadingLink: loadingAdminCardsLink, callback: ::this.redirect}}
             containerStyles={{marginBottom: '70px'}}
+            noSearchField={true}
         />;
     }
 }
