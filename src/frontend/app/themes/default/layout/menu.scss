@@ -1,0 +1,46 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../constants';
+
+.menu{
+  font-family: $FONT_FAMILY;
+  width: 200px;
+  height: 100%;
+  background: #fafafa;
+  position: fixed;
+  -webkit-box-shadow: 2px 0 3px -1px rgba(0,0,0,0.2);
+  -moz-box-shadow: 2px 0 3px -1px rgba(0,0,0,0.2);
+  box-shadow: 2px 0 3px -1px rgba(0,0,0,0.2);
+}
+
+.navigation_link{
+  font-family: $FONT_FAMILY;
+  padding-top: 30%;
+}
+
+.link{
+  font-family: $FONT_FAMILY;
+  color: white;
+  background: #cc5656;
+  width: 90%;
+  padding: 5px;
+  margin-top: 8% !important;
+}
+
+.selected_link{
+  @extend .link;
+  background: #692828;
+}

@@ -1,0 +1,363 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../../constants';
+
+.last_success_cell{
+  transition: all 1s;
+}
+
+.title_cell{
+  transition: all 1s;
+}
+
+.emphasize_cell{
+  background-color: #7aced2;
+}
+
+.navigation_button_title{
+  text-align: center;
+  margin-top: 15px;
+  margin-left: 5px;
+  font-size: $FONT_SIZE_MEDIUM;
+  font-weight: bold;
+  cursor: pointer;
+}
+.navigation_button_title:hover{
+  text-decoration: underline;
+}
+
+.input_file_label{
+  width: 70% !important;
+  float: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.schedule_list_actions{
+  text-align: center;
+}
+
+.schedule_list_action{
+  color: #2e75b6;
+  cursor: pointer;
+  transition: color;
+  transition-duration: 0.3s;
+  :hover{
+    color: #3f51b5;
+  }
+}
+
+.time_line_item{
+  background-color: #c3f5c3 !important;
+}
+
+.schedule_list{
+  overflow: hidden;
+  margin-top: 20px;
+}
+.schedule_list_empty{
+  margin-top: 20px;
+  font-family: $FONT_FAMILY;
+}
+
+.schedule_list_status_cell_loading{
+  font-family: $FONT_FAMILY;
+  margin: 0 !important;
+  min-height: 0 !important;
+  >div {
+    height: 20px;
+    width: 20px;
+  }
+}
+
+.schedule_list_status{
+  transition: all 0.5s;
+}
+
+.schedule_list_status_green{
+  background: #c3f5c3;
+  text-align: center;
+}
+
+.schedule_list_status_created{
+  background: #cccccc;
+  text-align: center;
+}
+
+.schedule_list_status_disable{
+  background: #cccccc;
+  text-align: center;
+}
+
+.schedule_list_status_red{
+  background: #f5c3c3;
+  text-align: center;
+}
+
+.trigger_schedule_start_off{
+  color: gray;
+  cursor: default !important;
+}
+.trigger_schedule_start_off:hover{
+  text-decoration: none !important;
+}
+
+
+.multiselect_label{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  border: none;
+}
+
+
+.multiselect>div{
+  font-family: $FONT_FAMILY;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2121211f;
+}
+.multiselect>div>div{
+  padding-left: 0;
+}
+
+.big_calendar {
+  font-family: $FONT_FAMILY;
+  button{
+    font-family: $FONT_FAMILY;
+  }
+}
+
+.schedule_title{
+  font-size: $INPUT_TEXT_SIZE;
+  height: 38px;
+}
+
+.select_connection{
+  font-size: $INPUT_TEXT_SIZE;
+}
+
+.schedule_cron_exp{
+  font-size: $INPUT_TEXT_SIZE;
+  height: 38px;
+}
+
+.date_time_picker{
+  font-size: $INPUT_TEXT_SIZE;
+  height: 38px;
+}
+
+.select_iteration{
+  font-size: $INPUT_TEXT_SIZE;
+}
+
+
+.schedule_list_switch_status_field{
+  display: inline !important;
+}
+.schedule_list_switch_status_thumb{
+  background: #2e75b6 !important;
+}
+.schedule_list_switch_status_thumb:hover{
+  background: #3f51b5 !important;
+}
+.schedule_list_switch_status_on{
+  background: #2e75b68f !important;
+}
+.schedule_list_switch_status_on:hover{
+  background: #3f51b580 !important;
+  span{
+    background: #3f51b5 !important;
+  }
+}
+.bulk_actions{
+  margin-top: 20px;
+  .action_item{
+    margin-right: 15px;
+  }
+}
+
+.checkbox{
+  margin-top: 10px;
+}
+
+.date_cell_cron{
+  font-weight: bold;
+}
+
+.progress_bar_element{
+  height: 15px;
+  margin-bottom: 10px;
+}
+
+.progress_bar_iterator{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  float: left;
+  width: 3%;
+}
+
+.progress_bar_section{
+  float: left;
+  width: 97%;
+}
+
+.progress_bar_from{
+  line-height: 17px;
+  position: absolute;
+  z-index: 1;
+  color: #000000;
+  padding-left: 10px;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  span{
+    padding: 5px 5px 5px 5px;
+    background: #fea532;
+    border-radius: 5px 5px 5px 5px;
+  }
+}
+
+.progress_bar_title{
+  line-height: 17px;
+  position: absolute;
+  z-index: 1;
+  color: #ffffff;
+  text-align: center;
+  width: 100%;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+}
+
+.progress_bar{
+  top: -8px;
+  height: 33px;
+  margin-bottom: 10px;
+  border-radius: .25rem;
+  float: left;
+}
+
+.progress_bar_to{
+  line-height: 17px;
+  position: absolute;
+  z-index: 1;
+  color: #000000;
+  padding-right: 25px;
+  right: 0;
+  text-align: right;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  span{
+    padding: 5px 5px 5px 5px;
+    background: #fea532;
+    border-radius: 5px 5px 5px 5px;
+  }
+}
+
+.progress_bar_value{
+  background-color: #2e75b6;
+}
+
+.progress_bar_buffer{
+  background-color: #e9ecef;
+  background-image: none;
+}
+
+.current_schedules{
+  margin-top: 30px;
+}
+
+.schedule_add_loading{
+  font-family: $FONT_FAMILY;
+  line-height: 0;
+  padding-top: 30px;
+  margin: 0;
+  min-height: 0 !important;
+  >div {
+    height: 20px;
+    width: 20px;
+  }
+}
+
+.current_schedule_header{
+  margin-bottom: 30px;
+}
+
+/*webhook*/
+.webhook_tools{
+  font-family: $FONT_FAMILY;
+  cursor: pointer;
+  color: #2e75b6;
+}
+.webhook_loading{
+  min-height: 0 !important;
+  display: inline-block;
+  margin-top: 0 !important;
+}
+
+.webhook_loading>div{
+  width: 24px;
+  height: 20px;
+  display: inline-flex;
+}
+
+.webhook{
+  color: #2e75b6;
+  position: absolute;
+  top: 8px;
+  right: 0px;
+  :hover{
+    color: #3f51b5;
+  }
+}
+
+.webhook_url{
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.add_button{
+  width: 100%;
+  padding: 8px 12px;
+}
+
+.schedule_delete_loading{
+  min-height: 0 !important;
+  display: inline-block;
+  margin-top: 0 !important;
+}
+.schedule_delete_loading>div{
+  width: 24px;
+  height: 20px;
+  display: inline-flex;
+}
+.schedule_start_loading{
+  min-height: 0 !important;
+  display: inline-block;
+  margin-top: 0 !important;
+}
+.schedule_start_loading>div{
+  width: 24px;
+  height: 20px;
+  display: inline-flex;
+}
+
+.schedule_list_title{
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 60px;
+}

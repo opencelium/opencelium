@@ -1,0 +1,73 @@
+/*
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import React, {Component} from 'react';
+import { withRouter } from 'react-router';
+import Pagination from 'react-bootstrap/Pagination';
+
+
+import {addPrevPageKeyNavigation, removePrevPageKeyNavigation} from '../../../../utils/key_navigation';
+
+import styles from '../../../../themes/default/general/pagination.scss';
+import FontIcon from "../FontIcon";
+
+
+/**
+ * Component for Previous Page
+ */
+class PrevPage extends Component{
+
+    constructor(props){
+        super(props);
+
+        this.openPrevPage = this.openPrevPage.bind(this);
+    }
+
+    componentDidMount(){
+        addPrevPageKeyNavigation(this);
+    }
+
+    componentWillUnmount(){
+        removePrevPageKeyNavigation(this);
+    }
+
+    /**
+     * to open previous page
+     */
+    openPrevPage(){
+        const {link, router} = this.props;
+        if(link !== '' && link !== -1) {
+            router.push(link);
+        }
+    }
+
+    render(){
+        const {link, isFirst} = this.props;
+        let className = styles.prev_page;
+        if(link === -1){
+            className += ' ' + styles.disable_arrow;
+        }
+        return(
+            <Pagination.Prev onClick={this.openPrevPage} disabled={isFirst}/>
+        );
+        return (
+            <span className={className} onClick={this.openPrevPage}>
+                <FontIcon value={'arrow_left'}/>
+            </span>
+        );
+    }
+}
+
+export default withRouter(PrevPage);

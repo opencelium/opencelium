@@ -1,0 +1,79 @@
+<!--
+  ~ Copyright (C) <2019>  <becon GmbH>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, version 3 of the License.
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
+  -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Open Source API-HUB. Connecting data center applications to automate your processes.">
+    <title>OpenCelium</title>
+    <link rel="shortcut icon" type="image/png" href="img/logo.png"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/css/swiper.min.css">
+    <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+            crossorigin="anonymous"
+    />
+  </head>
+  <body>
+	<div id="app"></div>
+    <div id="notification"></div>
+    <script>
+        var shortcutIcon = document.createElement("link");
+        shortcutIcon.rel = "shortcut icon";
+        shortcutIcon.type = 'image/png';
+        shortcutIcon.href = './img/logo.png';
+        document.getElementsByTagName("head")[0].appendChild(shortcutIcon);
+    </script>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>
+      var hrefs = [
+          "./styles/app.css",
+          "node_modules/storm-react-diagrams/dist/style.min.css",
+          "./styles/react-select.css",
+          "./styles/material_icons.css"
+      ];
+      var srcs = [
+          'bundle.js',
+          'jira_integration.js'
+      ];
+      var host = '/';
+      for(var i = 0; i < srcs.length; i++) {
+          var script = document.createElement('script');
+          script.type='text/javascript';
+          script.src = host + srcs[i];
+          document.getElementsByTagName("head")[0].appendChild(script);
+      }
+      for(var i = 0; i < hrefs.length; i++) {
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = host + hrefs[i];
+          document.getElementsByTagName("head")[0].appendChild(link);
+      }
+
+      var socketLink = document.createElement("link");
+      socketLink.rel = "preconnect";
+      socketLink.href = window.location.protocol + '//' + window.location.hostname + ':8082';
+      document.getElementsByTagName("head")[0].appendChild(socketLink);
+
+      var apiLink = document.createElement("link");
+      apiLink.rel = "preconnect";
+      apiLink.href = window.location.protocol + '//' + window.location.hostname + ':9090';
+      document.getElementsByTagName("head")[0].appendChild(apiLink);
+    </script>
+  </body>
+</html>

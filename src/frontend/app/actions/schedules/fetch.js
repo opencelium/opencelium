@@ -1,0 +1,288 @@
+/*
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import Rx from 'rxjs/Rx';
+
+import { SchedulesAction } from '../../utils/actions';
+
+
+/**
+ * trigger/run/execute schedule successfully
+ * @returns {{type: string, payload: {}}}
+ */
+const triggerScheduleSuccessfully = () => {
+    return {
+        type: SchedulesAction.TRIGGER_SCHEDULESUCCESS,
+        payload: {},
+    };
+};
+
+/**
+ * trigger/run/execute schedule successfully fulfilled
+ * @returns {promise}
+ */
+const triggerScheduleSuccessfullyFulfilled = () => {
+    return Rx.Observable.of({
+        type: SchedulesAction.TRIGGER_SCHEDULESUCCESS_FULFILLED,
+        payload: {},
+    });
+};
+
+/**
+ * trigger/run/execute schedule
+ * @param schedule
+ * @returns {{type: string, payload: {}}}
+ */
+const triggerSchedule = (schedule) => {
+    return {
+        type: SchedulesAction.TRIGGER_SCHEDULE,
+        payload: schedule,
+    };
+};
+/**
+ * trigger/run/execute schedule fulfilled
+ * @param schedule
+ * @returns {{type: string, payload: {}}}
+ */
+const triggerScheduleFulfilled = (schedule) => {
+    return {
+        type: SchedulesAction.TRIGGER_SCHEDULE_FULFILLED,
+        payload: schedule,
+    };
+};
+
+/**
+ * trigger/run/execute schedule rejected
+ * @param error
+ * @returns {promise}
+ */
+const triggerScheduleRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.TRIGGER_SCHEDULE_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * trigger/run/execute schedule canceled
+ * @param message
+ * @returns {promise}
+ */
+const triggerScheduleCanceled = (message) => {
+    return {
+        type: SchedulesAction.TRIGGER_SCHEDULE_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch schedule fulfilled
+ * @param schedule
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchScheduleFulfilled = (schedule) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULE_FULFILLED,
+        payload: schedule,
+    };
+};
+
+/**
+ * fetch schedule rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchScheduleRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_SCHEDULE_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch schedule canceled
+ * @param message
+ * @returns {promise}
+ */
+const fetchScheduleCanceled = (message) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULE_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch schedules
+ * @returns {{type: string}}
+ */
+const fetchSchedules = () => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULES
+    };
+};
+
+/**
+ * fetch schedules fulfilled
+ * @param schedules
+ * @returns {{type: string, payload: []}}
+ */
+const fetchSchedulesFulfilled = (schedules) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULES_FULFILLED,
+        payload: schedules
+    };
+};
+
+/**
+ * fetch schedules rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchSchedulesRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_SCHEDULES_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch schedules canceled
+ * @param message
+ * @returns {{type: string, payload: []}}
+ */
+const fetchSchedulesCanceled = (message) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULES_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch current schedules
+ * @returns {{type: string}}
+ */
+const fetchCurrentSchedules = () => {
+    return {
+        type: SchedulesAction.FETCH_CURRENTSCHEDULES
+    };
+};
+
+/**
+ * fetch current schedules fulfilled
+ * @param schedules
+ * @returns {{type: string, payload: []}}
+ */
+const fetchCurrentSchedulesFulfilled = (schedules) => {
+    return{
+        type: SchedulesAction.FETCH_CURRENTSCHEDULES_FULFILLED,
+        payload: schedules
+    };
+};
+
+/**
+ * fetch current schedules rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchCurrentSchedulesRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_CURRENTSCHEDULES_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch current schedules canceled
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const cancelFetchCurrentSchedules = (message) => {
+    return {
+        type: SchedulesAction.FETCH_CURRENTSCHEDULES_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch schedules by ids
+ * @returns {{type: string}}
+ */
+const fetchSchedulesByIds = (ids) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULESBYIDS,
+        payload: ids,
+    };
+};
+
+/**
+ * fetch schedules by ids fulfilled
+ * @param schedules
+ * @returns {{type: string, payload: []}}
+ */
+const fetchSchedulesByIdsFulfilled = (schedules) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULESBYIDS_FULFILLED,
+        payload: schedules
+    };
+};
+
+/**
+ * fetch schedules by ids rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchSchedulesByIdsRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_SCHEDULESBYIDS_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch schedules by ids canceled
+ * @param message
+ * @returns {{type: string, payload: []}}
+ */
+const fetchSchedulesByIdsCanceled = (message) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULESBYIDS_CANCELED,
+        payload: message
+    };
+};
+
+
+export {
+    fetchSchedules,
+    fetchSchedulesFulfilled,
+    fetchSchedulesRejected,
+    fetchSchedulesCanceled,
+    fetchScheduleFulfilled,
+    fetchScheduleRejected,
+    fetchScheduleCanceled,
+    triggerSchedule,
+    triggerScheduleFulfilled,
+    triggerScheduleRejected,
+    triggerScheduleCanceled,
+    triggerScheduleSuccessfully,
+    triggerScheduleSuccessfullyFulfilled,
+    fetchCurrentSchedules,
+    fetchCurrentSchedulesFulfilled,
+    fetchCurrentSchedulesRejected,
+    cancelFetchCurrentSchedules,
+    fetchSchedulesByIds,
+    fetchSchedulesByIdsFulfilled,
+    fetchSchedulesByIdsRejected,
+    fetchSchedulesByIdsCanceled,
+};

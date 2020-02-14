@@ -1,0 +1,13 @@
+{
+  "HEADER": "My Profile",
+  "UPDATE_BUTTON": "Update",
+  "THEME": {
+    "DEFAULT": "Default",
+    "OTHER": "Green Day"
+  },
+  "APP_TOUR": {
+    "TITLE": "Auto appearance",
+    "ENABLE": "Enable",
+    "DISABLE": "Disable"
+  }
+}

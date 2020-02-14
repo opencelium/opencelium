@@ -1,0 +1,104 @@
+dependencies
+chokidar				-			to work with watch events inside the file system(fs.watch,...). For plugins.
+crypto-js				-			library of crypto standards (SHA256, base64, AES)
+fine-uploader			-			file uploader library
+fine-uploader-wrappers	-			additional features for fine-uploader (as a requirement)
+!fn 					-			functions for easy map of array's ellements
+i18next					-			library for multilanguage
+i18next-browser-languagedetector -	plugin for i18next to detect user language via cookie, localStorage, ...
+i18next-xhr-backend		-			plugin for loading translation via xhr
+immutable				-			to use immutable Maps and Lists features (increasing performance)
+lodash					-			library delivering modularity, performance, extras (_.zip(['a', 'b'], [1, 2], [true, false]); // => [['a', 1, true], ['b', 2, false]])
+nuka-carousel			-			react slider
+post-css				-			library for refactoring css
+prop-types				-			for checking the type of props in react
+react 					-			react library
+react-bootstrap			-			
+react-dom 				-			
+?react-dropzone 			-			
+?react-fine-uploader 	-			
+react-grid-system 		-			
+react-i18next			-			
+?react-mdl-stepper		-			
+react-redux 			-			
+react-router 			-			
+react-router-redux 		-			router for react with redux (3)
+?react-tap-event-plugin	-			
+react-toolbox 			-			Google's Material Design specification
+?readline 				-			
+redux 					-			library Redux
+redux-immutable 		-			combineReducers that works with Immutable.js state.
+redux-notify 			-			Redux middleware to notify when an action from the list is dispatched.
+redux-observable 		-			epics
+redux-responsive 		-			A redux reducer for managing the responsive state of your application.
+rx 						-			
+rxjs 					-			
+socket.io 				-			
+socket.io-client 		-			
+
+?babel-jest
+react-css-modules
+?react-hot-loader
+
+
+devDependencies
+autoprefixer			-			powerfull prefix fixer (webkit, moz, o)
+?babel-cli
+?babel-core
+
+babel-loader
+babel-plugin-react-transform
+babel-plugin-transform-class-properties
+babel-plugin-transform-decorators-legacy
+babel-plugin-transform-es3-member-expression-literals
+babel-plugin-transform-es3-property-literals
+babel-plugin-transform-node-env-inline
+?babel-preset-es2015
+babel-preset-latest
+babel-preset-react
+babel-preset-stage-0
+babel-register
+browser-sync
+browser-sync-webpack-plugin
+cross-env
+css-loader
+css-modules-require-hook
+enzyme
+?eslint
+?eslint-plugin-babel
+?eslint-plugin-react
+expect
+?file-loader
+identity-obj-proxy
+image-webpack-loader
+jest
+jest-css-modules
+node-sass
+?postcss-each
+?postcss-import
+?postcss-loader
+?postcss-mixins
+?postcss-nested
+?postcss-reporter
+
+?react-style-proptype
+redux-devtools
+redux-devtools-chart-monitor
+redux-devtools-dock-monitor
+redux-devtools-log-monitor
+redux-logger
+redux-mock-store
+redux-slider-monitor
+sass-loader
+style-loader
+webpack
+webpack-dev-middleware
+webpack-dev-server
+
+
+babel-eslint
+webpack-stream
+webpack-hot-middleware
+resolve-url-loader
+
+

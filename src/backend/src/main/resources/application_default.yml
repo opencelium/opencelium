@@ -1,0 +1,67 @@
+spring:
+  main:
+    banner-mode: "off"
+
+  data:
+    rest:
+      basePath: /api
+    neo4j:
+      url: bolt://localhost:7687
+      username: neo4j
+      password: secret
+
+  jpa:
+    properties:
+      hibernate:
+        id:
+          new_generator_mappings: false
+
+    hebirnate:
+      dll-auto: update
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/opencelium?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Berlin
+    username: root
+    password: root
+
+  servlet:
+    multipart:
+      max-file-size: 10240KB
+      max-request-size: 10240KB
+
+  http:
+    multipart:
+      enabled: false
+
+  quartz:
+    properties:
+      org:
+        quartz:
+          threadPool:
+            threadCount: 5
+          jobStore:
+            tablePrefix: QRTZ_
+    job-store-type: jdbc
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      status:
+        http-mapping:
+          fatal: 200
+
+
+#timezone: Europe/Berlin
+
+#elasticsearch:
+#  clustername: open_celium
+#  host: localhost
+#  port: 9300
+
+#  ldap:
+#    embedded:
+#      base-dn: dc=springframework,dc=org
+#      ldif: classpath:test-server.ldif
+#      port: 8389
+#      url: ldap://localhost:8389/

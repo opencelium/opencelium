@@ -1,0 +1,32 @@
+@import '../../constants';
+
+.input_file_label{
+  font-family: $FONT_FAMILY;
+  width: 69% !important;
+  float: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.input_file_browse{
+  font-family: $FONT_FAMILY;
+  width: 31%;
+  border-bottom: none;
+  padding: 1px 0 0 0 !important;
+  min-width: auto;
+}
+
+.export{
+  cursor: pointer;
+  float: right;
+}
+.export_loading{
+  margin: 0 7px 0 0;
+  float: right;
+  min-height: 0;
+  >div{
+    width: 20px;
+    height: 20px;
+  }
+}

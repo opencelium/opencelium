@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>new invoker</name>
+    <description>my description</description>
+    <hint>valuable hint</hint>
+    <icon/>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="apikey" type="string" visibility="public"/>
+    </requiredData>
+    <authType>apikey</authType>
+    <operations>
+        <operation name="connection" type="test">
+            <request>
+                <method>post</method>
+                <endpoint>path/endpoint</endpoint>
+                <body>
+                    <field name="request" type="object"/>
+                </body>
+                <header>
+                    <item name="Accept" type="string">accept header</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body>
+                        <field name="success" type="object"/>
+                    </body>
+                    <header>
+                        <item name="Accept-Charset" type="string">charset header</item>
+                    </header>
+                </success>
+                <fail status="400">
+                    <body>
+                        <field name="fail" type="object"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="operation 1" type="">
+            <request>
+                <method>get</method>
+                <endpoint>path1</endpoint>
+                <body>
+                    <field name="operation_request" type="object"/>
+                </body>
+                <header>
+                    <item name="Authorization" type="string">auth</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body>
+                        <field name="operation_success" type="object"/>
+                    </body>
+                    <header>
+                        <item name="Date" type="string">date</item>
+                    </header>
+                </success>
+                <fail status="406">
+                    <body>
+                        <field name="operation_fail" type="object"/>
+                    </body>
+                    <header>
+                        <item name="Host" type="string">host</item>
+                    </header>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

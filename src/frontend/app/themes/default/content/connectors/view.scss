@@ -1,0 +1,78 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../../constants';
+
+.general{
+  margin-bottom: 20px;
+  font-family: $FONT_FAMILY;
+  .header{
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: $FONT_SIZE_MEDIUM;
+    margin-bottom: 15px;
+  }
+
+  .title{
+    font-size: $FONT_SIZE_MEDIUM;
+    margin-bottom: 5px;
+    margin-left: 15px;
+    margin-top: 15px;
+  }
+
+  .description{
+    margin-left: 15px;
+  }
+}
+
+.invoker{
+  font-family: $FONT_FAMILY;
+  margin-bottom: 20px;
+  .header{
+    font-weight: bold;
+    font-size: $FONT_SIZE_MEDIUM;
+    margin-bottom: 15px;
+  }
+
+  .name{
+    font-size: $FONT_SIZE_MEDIUM;
+    margin-bottom: 5px;
+  }
+
+  .description{
+  }
+}
+
+.operations{
+  margin-bottom: 20px;
+  font-family: $FONT_FAMILY;
+  .content{
+    margin-left: 15px;
+    .operation_header{
+      font-weight: bold;
+    }
+  }
+}
+
+.hint{
+  margin-bottom: 20px;
+  font-family: $FONT_FAMILY;
+  .content{
+    margin-left: 15px;
+    .hint_header{
+      font-weight: bold;
+    }
+  }
+}

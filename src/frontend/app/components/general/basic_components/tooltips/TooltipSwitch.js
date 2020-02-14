@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+import Switch from 'react-toolbox/lib/switch';
+
+import theme from "react-toolbox/lib/tooltip/theme.css";
+import {getThemeClass} from "../../../../utils/app";
+import styles from '../../../../themes/default/general/basic_components.scss';
+
+
+/**
+ * Tooltip Component for Switch
+ */
+class TooltipSwitch extends Component{
+
+    constructor(props){
+        super(props);
+        this.state = {
+            isActive: false,
+        };
+    }
+
+    activate(){
+        this.setState({
+            isActive: true,
+        });
+    }
+
+    deactivate(){
+        this.setState({
+            isActive: false,
+        });
+    }
+
+    render(){
+        const {authUser, tooltip, ...props} = this.props;
+        let classNames = [
+            'tooltip_switch',
+            'tooltip',
+        ];
+        classNames = getThemeClass({classNames, authUser, styles});
+        return (
+            <span className={styles[classNames.tooltip_switch]} onMouseOver={::this.activate} onMouseLeave={::this.deactivate}>
+                <span className={`${theme.tooltip} ${theme.tooltipTop} ${ this.state.isActive ? theme.tooltipActive : ''} ${styles[classNames.tooltip]}`}>
+                    <span className={`${theme.tooltipInner}`}>{tooltip}</span>
+                </span>
+                <Switch {...props}/>
+            </span>
+        );
+    }
+}
+
+TooltipSwitch.propTypes = {
+    authUser: PropTypes.object.isRequired,
+    checked: PropTypes.bool.isRequired,
+    onChange: PropTypes.func.isRequired,
+    tooltip: PropTypes.string.isRequired,
+};
+
+export default TooltipSwitch;

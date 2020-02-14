@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+body{
+  margin: 0;
+  display: block;
+}
+
+.key_navigation_title{
+  margin-left: 0 !important;
+}
+
+.key_navigation_letter{
+  color: #ffffff;
+  margin-left: 0 !important;
+  text-decoration: underline;
+}
+
+#app{
+  opacity: 0;
+  -webkit-transition: all .5s ease-in-out;
+  -moz-transition: all .5s ease-in-out;
+  -o-transition: all .5s ease-in-out;
+  transition: all .5s ease-in-out;
+}
+
+#app_content{
+  opacity: 0;
+  -webkit-transition: all .3s ease-in-out;
+  -moz-transition: all .3s ease-in-out;
+  -o-transition: all .3s ease-in-out;
+  transition: all .3s ease-in-out;
+}
+
+#app_list{
+  opacity: 0;
+  -webkit-transition: all .3s ease-in-out;
+  -moz-transition: all .3s ease-in-out;
+  -o-transition: all .3s ease-in-out;
+  transition: all .3s ease-in-out;
+}
+@media screen and (min-width: 650px) {
+  #notification{
+    position: fixed;
+    top: 70px;
+    right: 70px;
+    height: 1px;
+    width: 200px;
+  }
+}
+@media screen and (max-width: 649px) {
+  #notification{
+    position: fixed;
+    top: 50px;
+    right: 120px;
+    height: 1px;
+    width: 70px;
+  }
+}
+
+.hide{
+  display: none;
+}
+
+.show{
+  display: block;
+}
+
+.rbc-calendar{
+  min-height: 500px !important;
+}
+
+.key_modal_request{
+  z-index: 1;
+}
+
+textarea{
+  resize: none;
+  height: 100% !important;
+}

@@ -1,0 +1,132 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../../other/layout/_header.scss';
+@import '../constants';
+
+
+.appBar{
+  background: #2e75b6 !important;
+}
+.header{
+  background: #2e75b6 !important;
+  li{
+    list-style: none;
+  }
+}
+
+.menu_icon{
+  color: #ffd807 !important;
+}
+
+.link{
+  font-family: $FONT_FAMILY;
+  color: white !important;
+  text-decoration: none;
+}
+
+.link:hover{
+  text-decoration: underline;
+  text-decoration-color: #ffd807;
+}
+
+.admin_header, .user_header{
+  flex-grow: 1;
+}
+
+.loading_header :first-child{
+  margin-left: 60px;
+}
+
+.loading{
+  height: 15px;
+  background: gray;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  float: left;
+}
+
+.loading_icon{
+  height: 15px;
+  background: gray;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  float: left;
+  width: 20px;
+  border-radius: 4px;
+  margin-right: 5px;
+}
+
+.loading_title{
+  @extend .loading;
+  font-family: $FONT_FAMILY;
+  width: 80px;
+  border-radius: 5px;
+  margin-right: 55px;
+}
+
+@media(max-width: 867px){
+  .navigation :first-child{
+    margin-left: 5px;
+    span{
+      font-size:$FONT_SIZE_SMALL;
+    }
+  }
+}
+@media(min-width: 868px) and (max-width: 1000px){
+  .navigation :first-child{
+    margin-left: 5px;
+  }
+}
+@media(min-width: 1001px) and (max-width: 1100px){
+  .navigation :first-child{
+    margin-left: 10px;
+  }
+}
+@media(min-width: 1101px) and (max-width: 1150px){
+  .navigation :first-child{
+    margin-left: 15px;
+  }
+}
+@media (min-width: 1151px) and (max-width: 1250px){
+  .navigation :first-child{
+    margin-left: 20px;
+  }
+}
+@media(min-width: 1251px){
+  .navigation :first-child{
+    margin-left: 30px;
+  }
+}
+.right_navigation{
+  min-width: 126px;
+}
+.right_navigation :first-child{
+  margin-left: 10px;
+}
+.link_icon{
+  color: #ffffff;
+  margin-right: 3px;
+  font-size: 30px;
+}
+
+.link_title > abbr{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_MEDIUM;
+}
+
+.left_icon{
+  margin-top: -5px;
+}

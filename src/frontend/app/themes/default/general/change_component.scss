@@ -1,0 +1,636 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../constants';
+
+.form{
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.breadcrumbs{
+  font-size: $FONT_SIZE_TINY;
+  ul{
+    padding-left: 0;
+  }
+  li{
+    display: inline;
+  }
+}
+
+.breadcrumbs_item_text{
+  font-family: $FONT_FAMILY;
+  vertical-align: super;
+}
+
+.breadcrumbs_item_text_active{
+  font-family: $FONT_FAMILY;
+  vertical-align: super;
+  cursor: pointer;
+}
+
+.breadcrumbs_item_text_active:hover{
+  text-decoration: underline;
+}
+
+.hint{
+  font-family: $FONT_FAMILY;
+  position: absolute;
+  left: 50%;
+  .text{
+    font-size: $FONT_SIZE_SMALL;
+    text-align: center;
+    position: relative;
+    left: -50%;
+    font-style: italic;
+    white-space: nowrap;
+  }
+}
+
+.validation_message{
+  font-family: $FONT_FAMILY;
+  position: absolute;
+  bottom: 30px;
+  width: 100%;
+  text-align: center;
+  padding: 0 30px 0 0;
+  .message{
+    color: #d42222;
+    position: relative;
+  }
+}
+
+.navigation {
+  font-family: $FONT_FAMILY;
+  height: 26px;
+  position: absolute;
+  bottom: 30px;
+  margin-left: -15px;
+  width: 100%;
+}
+
+.navigation_buttons{
+  position: relative;
+}
+
+.navigation_icon:hover{
+  border-bottom: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 15px;
+}
+
+.navigation_icon:active{
+  position:relative;
+  top:1px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.8);
+  border-radius: 15px;
+}
+
+.navigation_next_icon{
+  @extend .navigation_icon;
+  float: right;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+
+.navigation_prev_icon{
+  @extend .navigation_icon;
+  float: left;
+  cursor: pointer;
+  margin-left: 15px;
+}
+
+.navigation_action_icon{
+  margin-right: 15px;
+  float: right;
+  cursor: pointer;
+}
+
+.navigation_icon_text{
+  font-family: $FONT_FAMILY;
+  font-weight: bold;
+  font-size: 20px;
+  vertical-align: super;
+}
+.navigation_icon_text:hover{
+  font-family: $FONT_FAMILY;
+  text-decoration: underline;
+}
+
+.navigation_action_in_progress{
+  width: 24px;
+  height: 24px;
+}
+
+.navigation_loading{
+  text-align: right;
+  margin-top: 0;
+  margin-right: 15px;
+}
+
+.navigation_loading>div{
+  width: 25px;
+  height: 25px;
+}
+
+.form_select_description_textarea{
+  textarea{
+    height: auto !important;
+    font-family: $FONT_FAMILY;
+    resize: none;
+  }
+}
+.form_input_textarea{
+  textarea{
+    height: auto !important;
+    font-family: $FONT_FAMILY;
+    resize: none;
+  }
+}
+.form_input_label{
+  font-family: $FONT_FAMILY;
+}
+
+.input_file_label{
+  font-family: $FONT_FAMILY;
+  width: 69% !important;
+  float: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.input_file_browse{
+  font-family: $FONT_FAMILY;
+  width: 31%;
+  border-bottom: none;
+  padding: 1px 0 0 0 !important;
+  min-width: auto;
+}
+
+.user_group_row_table{
+  padding: 0 15px;
+}
+
+.user_group_col_table{
+  padding: 0 !important;
+  overflow-x: auto !important;
+}
+
+.user_group_table{
+  font-family: $FONT_FAMILY;
+  .header_cell{
+    text-align: center;
+  }
+  .row_cell{
+    text-align: center;
+  }
+  .checkbox_field{
+    margin-left: 5px;
+    display: inline;
+  }
+  .checkbox_field_value{
+    margin-bottom: unset;
+  }
+}
+
+.user_group_description{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL
+}
+
+.multiselect_label{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  border: none !important;
+}
+
+.multiselect_focused{
+  color: rgb(63, 81, 181) !important;
+}
+.multiselect_focused>div{
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgb(63, 81, 181);
+  box-shadow: none;
+  box-sizing: content-box;
+}
+
+.multiselect>div{
+  font-family: $FONT_FAMILY;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2121211f;
+  box-sizing: content-box;
+}
+
+.permission_table{
+  font-family: $FONT_FAMILY;
+  overflow-x: auto;
+}
+.form_select_dropdown{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+}
+
+.form_select_dropdown>div{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+}
+
+.form_select_connector{
+  font-family: $FONT_FAMILY;
+  overflow: inherit !important;
+}
+
+.form_select_method{
+  overflow: inherit !important;
+}
+
+.input_secret{
+  font-family: $FONT_FAMILY;
+  position: relative;
+  input[type="checkbox"] {
+    height: 12px;
+    width: 12px;
+    position: absolute;
+    right: 0;
+    top: 30px;
+    margin: 0;
+  }
+}
+.input_method_title{
+  font-family: $FONT_FAMILY;
+  border: none;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-size: $FONT_SIZE_TINY;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.input_method_add{
+  text-align: center;
+}
+.input_connector_placeholder{
+  font-family: $FONT_FAMILY;
+  color: #21212142;
+  border: none;
+  float: left;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-size: $FONT_SIZE_TINY;
+  margin-bottom: 10px;
+}
+.input_direction_label{
+  font-family: $FONT_FAMILY;
+  border: none;
+  float: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: center;
+}
+
+.input_direction_arrows{
+  text-align: center;
+}
+
+
+.input_direction_arrow{
+  cursor: pointer;
+  font-size: 40px;
+}
+.input_direction_arrow:hover{
+  color: #3f51b5;
+}
+
+.input_direction_arrow_selected{
+  cursor: pointer;
+  font-size: 40px;
+  color: #ffd807;
+}
+
+.input_direction_arrow_readonly{
+  font-size: 40px;
+  color: #000000;
+}
+
+.mapping_methods{
+  font-family: $FONT_FAMILY;
+  text-align: center;
+  font-size: $FONT_SIZE_MEDIUM;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+.template_dialog{
+  min-height: 240px;
+  max-height: 240px;
+}
+
+.template_dialog_title {
+  font-family: $FONT_FAMILY;
+  text-align: center;
+}
+
+.invoker_chip{
+  max-width: 88% !important;
+  float: left;
+  border-right: 5px solid #eeeeee;
+}
+
+.invoker_chip_close{
+  max-width: 5%;
+  float: left;
+}
+
+.invoker_attribute_generator{
+  float: left;
+  line-height:30px;
+  min-width: 5%;
+  text-align: center;
+}
+.invoker_attribute_generator>div{
+  padding: 3px 5px;
+}
+
+.invoker_attr{
+  font-family: $FONT_FAMILY;
+  padding: 4px;
+  margin: 0 3px;
+  transition: all 0.5s;
+}
+
+.invoker_attr:hover{
+  background: #ffffff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.invoker_attr_key{
+  font-family: $FONT_FAMILY;
+  color: #de5e14;
+}
+
+.invoker_attr_value{
+  font-family: $FONT_FAMILY;
+  color: #3300ff;
+  font-weight:bold;
+}
+
+.invoker_item_text{
+  font-size: 20px;
+  float: left;
+  line-height: 20px;
+  padding: 5px;
+  transition: all 0.5s;
+}
+
+.invoker_item_text:hover{
+  background: #e1f6ff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+@keyframes APopupInputAppear {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.popup_input{
+  z-index: 1;
+  position: absolute;
+  width: 120px;
+  height: 50px;
+  background: white;
+  left: -20px;
+  top: 0;
+  animation: APopupInputAppear .25s;
+}
+
+.input_input_element{
+  font-family: $FONT_FAMILY;
+  height: 38px;
+}
+
+.highlighted_input_input_element{
+  @extend .input_input_element;
+  background-color: white !important;
+  box-shadow: rgba(0, 0, 0, 0.14) 0 0 0 0, rgb(153, 189, 234) 0 3px 15px 5px, rgba(0, 0, 0, 0.12) 0 1px 5px 0;
+}
+
+.invoker_item_prop{
+  float: left;
+  width: 39%;
+}
+.invoker_item_prop>div{
+  padding: 0;
+}
+
+.invoker_item_val{
+  float: right;
+  width: 48%;
+}
+
+.invoker_item_prop_add{
+  float: left;
+  width: 39%;
+}
+.invoker_item_prop_add>div{
+  padding: 0;
+}
+
+.invoker_item_val_add{
+  float: right;
+  width: 43%;
+}
+
+.invoker_item_add_button{
+  float: right;
+  line-height:80px;
+  width: 5%;
+}
+
+.invoker_item_delete_button{
+  cursor: pointer;
+  position: absolute;
+  float: right;
+  right: 0;
+  top: 10px;
+}
+
+
+
+.invoker_authentication_item_key{
+  float: left;
+  width: 30%;
+  margin-right: 1%;
+}
+
+.invoker_authentication_item_name{
+  float: left;
+  width: 30%;
+  margin-right: 1%;
+}
+.invoker_authentication_item_type{
+  float: right;
+  width: 30%;
+}
+
+.invoker_authentication_item_key_add{
+  float: left;
+  width: 30%;
+  margin-right: 1%;
+}
+
+.invoker_authentication_item_name_add{
+  float: left;
+  width: 30%;
+  margin-right: 1%;
+}
+.invoker_authentication_item_type_add{
+  float: right;
+  width: 25%;
+}
+
+.invoker_authentication_item_add_button{
+  float: right;
+  line-height:80px;
+  width: 5%;
+}
+
+.input_authentication_label{
+  font-family: $FONT_FAMILY;
+  width: 70% !important;
+  float: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.input_import_json_button{
+  position: absolute;
+  cursor: pointer;
+  left: 230px;
+}
+
+.input_textarea_import_json{
+  textarea{
+    height: auto !important;
+    font-family: $FONT_FAMILY;
+    resize: none;
+  }
+}
+
+.invoker_request_item_method{
+  background: #eeeeee;
+  padding: 5px 20px;
+  border-radius: 3px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.invoker_request_item_method:hover{
+  background: #bcbcbc;
+}
+
+.invoker_selected_method{
+  padding: 5px 20px;
+  border-radius: 3px;
+  margin-right: 10px;
+  color: #fff;
+  cursor: default;
+}
+
+.invoker_item_method{
+  float: left;
+  padding: 1px;
+  width: 50px;
+  text-align: center;
+  border-radius: 3px;
+  color: #fff;
+  font-family: $FONT_FAMILY;
+}
+
+.invoker_method_post{
+  background-color: #10a54a;
+}
+
+.invoker_method_get{
+  background-color: #0f6ab4;
+}
+
+.invoker_method_put{
+  background-color: #c5862b;
+}
+
+.invoker_method_delete{
+  background-color: #a41e22;
+}
+
+.invoker_item_name{
+  margin-left: 20px;
+  font-family: $FONT_FAMILY;
+}
+
+.no_card_header_tabs nav{
+  margin: 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.form_input{
+  padding: 20px 0 !important;
+}
+
+.form_invoker_auth_radio_field{
+  width: 20px;
+}
+
+.form_invoker_auth_radio_text{
+  cursor: pointer;
+}
+
+.form_user_title{
+  .label{
+    border: none;
+    padding-bottom: 0;
+  }
+  .radio_group{
+    height: 25px;
+  }
+  .first_radio_button{
+    margin-right: 20px;
+  }
+  .radio_button{
+    float: left;
+    margin-bottom: 10px !important;
+  }
+}
+
+.radiogroup_label{
+  font-family: $FONT_FAMILY;
+  padding: 15px 0 0 0;
+  border: none !important;
+}
+
+.invoker_method_label{
+  font-family: $FONT_FAMILY;
+  padding: 15px 0 0 0;
+  border: none !important;
+}

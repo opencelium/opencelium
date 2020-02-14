@@ -1,0 +1,31 @@
+/*
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This file is licensed under the terms of the EARLY ADOPTER PROGRAM (EAP) agreement.
+ * The license agreement was sent with the confirmation of the participation of the EAP.
+ */
+
+.wy-side-nav-search {
+	background-color: #fcfcfc !important;
+	border-right: 1px solid #e1e4e5;
+}
+
+.wy-side-nav-search > a, .wy-side-nav-search .wy-dropdown > a {
+	color: black !important;
+}
+
+.wy-side-nav-search > div.version {
+	color: black !important;
+}
+
+.ethical-sidebar{
+	display: none !important;
+}
+
+.ethical-footer{
+	display: none !important;
+}
+
+.underline {
+    text-decoration: underline;
+}

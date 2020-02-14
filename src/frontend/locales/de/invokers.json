@@ -1,0 +1,64 @@
+{
+  "LIST":{
+    "ADD_BUTTON": "Add Invoker",
+    "EMPTY_LIST": "The list of Invokers is empty",
+    "HEADER": "Invokers",
+    "HEADER_ADMIN_CARDS": "Admin Cards"
+  },
+  "ADD":{
+    "FORM":{
+      "NAME": "Name",
+      "DESCRIPTION": "Description",
+      "HINT": "Hint",
+      "ICON": "Icon",
+      "ICON_PLACEHOLDER": "Please select an icon...",
+      "PAGE_1": "General Data",
+      "AUTHENTICATION": "Authentication",
+      "PAGE_2": "Authentication",
+      "CONNECTION": "Connection",
+      "PAGE_3": "Connection",
+      "OPERATIONS": "Operations",
+      "PAGE_4": "Operations",
+      "HINT_1": "Provide general information",
+      "HINT_2": "Choose Authentication",
+      "HINT_3": "Provide connection items",
+      "HINT_4": "Provide request and response operations"
+    },
+    "LIST_BUTTON": "Invokers",
+    "ADD_BUTTON": "Add",
+    "TEST_BUTTON": "Test",
+    "HEADER": "Add Invoker"
+  },
+  "UPDATE":{
+    "FORM":{
+      "NAME": "Name",
+      "DESCRIPTION": "Description",
+      "HINT": "Hint",
+      "ICON": "Icon",
+      "ICON_PLACEHOLDER": "Please select an icon...",
+      "PAGE_1": "General Data",
+      "AUTHENTICATION": "Authentication",
+      "PAGE_2": "Authentication",
+      "CONNECTION": "Connection",
+      "PAGE_3": "Connection",
+      "OPERATIONS": "Operations",
+      "PAGE_4": "Operations",
+      "HINT_1": "Provide general information",
+      "HINT_2": "Add properties for Authentication",
+      "HINT_3": "Provide connection items",
+      "HINT_4": "Provide request and response operations"
+    },
+    "LIST_BUTTON": "Invokers",
+    "UPDATE_BUTTON": "Update",
+    "TEST_BUTTON": "Test",
+    "HEADER": "Update Invoker"
+  },
+  "VIEW": {
+    "HEADER": "View Invoker",
+    "LIST_BUTTON": "Invokers",
+    "GENERAL_TITLE": "General",
+    "INVOKER_TITLE": "Invoker",
+    "OPERATIONS_TITLE": "Operations",
+    "HINT_TITLE": "Hint"
+  }
+}

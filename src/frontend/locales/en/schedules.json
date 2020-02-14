@@ -1,0 +1,39 @@
+{
+  "HEADER": "Scheduler",
+  "LIST":{
+    "EMPTY_LIST": "The list of Schedulers is empty",
+    "EMPTY_CURRENT_LIST": "The list of current jobs is empty",
+    "TOOLTIP_START_ICON": "Start",
+    "TOOLTIP_ENABLE_SWITCH_TRUE": "Enable",
+    "TOOLTIP_ENABLE_SWITCH_FALSE": "Disable",
+    "TOOLTIP_UPDATE_ICON": "Update",
+    "TOOLTIP_DELETE_ICON": "Delete",
+    "STATUS_ON": "On",
+    "STATUS_OFF": "Off",
+    "TITLE": "Title",
+    "CONNECTION": "Connection",
+    "CRON": "Cron",
+    "LAST_SUCCESS": "Last Success",
+    "LAST_FAILURE": "Last Failure",
+    "LAST_DURATION": "Last Duration",
+    "LAST_DURATION_SEC": "sec",
+    "STATUS": "Status",
+    "ACTION": "Action",
+    "WEBHOOK": "WEBHOOK",
+    "WEBHOOK_TOOLTIP": "Copy to Clipboard",
+    "WEBHOOK_TOOLS_TOOLTIP_CREATE": "Create Webhook",
+    "WEBHOOK_TOOLS_TOOLTIP_DELETE": "Delete Webhook"
+  },
+  "UPDATE":{
+    "UPDATE_BUTTON": "update"
+  },
+  "ADD":{
+    "TITLE_PLACEHOLDER": "Title",
+    "FILTER_PLACEHOLDER": "Filter by title",
+    "CONNECTION_PLACEHOLDER": "Connection",
+    "CRONEXP_PLACEHOLDER": "Cron Expression",
+    "ADD_BUTTON_TITLE": "Add Job",
+    "ADD_BUTTON_TITLE_SHORT": "Add",
+    "COLOR_TITLE": "Color"
+  }
+}

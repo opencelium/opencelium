@@ -1,0 +1,103 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../../constants';
+
+.title {
+  margin-bottom: 20px;
+  font-family: $FONT_FAMILY;
+  .header {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+  .content{
+    margin-left: 15px;
+  }
+}
+.connectors {
+  margin-bottom: 20px;
+  font-family: $FONT_FAMILY;
+  .header {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+  .content{
+    font-family: $FONT_FAMILY;
+    margin-left: 15px;
+    .connector_item_title{
+      font-weight: bold;
+    }
+    .connector_item{
+      float: left;
+      width: 40%;
+      cursor: pointer;
+      font-size: $FONT_SIZE_TINY;
+      div{
+        text-align: right;
+      }
+      img{
+        width: 70px;
+        height: 70px;
+      }
+    }
+    .connector_item:hover{
+      text-decoration: underline;
+    }
+    .left_connector{
+      div{
+        text-align: right;
+      }
+    }
+    .right_connector{
+      div{
+        text-align: left;
+      }
+    }
+    .direction{
+      margin-top: 25px;
+      text-align: center;
+      float: left;
+      width: 20%;
+    }
+  }
+}
+.mapping {
+  margin-bottom: 20px;
+  font-family: $FONT_FAMILY;
+  .header {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+  .content{
+    margin-left: 15px;
+  }
+}
+.map_methods{
+  .header{
+    font-family: $FONT_FAMILY;
+    font-weight: bold;
+    text-align: center;
+  }
+}
+.map_fields{
+  .header{
+    font-family: $FONT_FAMILY;
+    font-weight:bold;
+    text-align: center;
+  }
+}

@@ -1,0 +1,87 @@
+/*
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import React, { Component }  from 'react';
+import PropTypes from 'prop-types';
+
+import styles from '../../../themes/default/general/app.scss';
+import CancelLoadingButton from "../basic_components/CancelLoadingButton";
+import {consoleError, getThemeClass} from "../../../utils/app";
+import {LoadingComponentError} from "../../../utils/constants/errors";
+import ProgressBar from "../basic_components/ProgressBar";
+import ComponentError from "./ComponentError";
+import {ERROR_TYPE} from "../../../utils/constants/app";
+
+
+/**
+ * Loading Component
+ */
+class Loading extends Component{
+
+    constructor(props){
+        super(props);
+        this.cancelLoading = this.cancelLoading.bind(this);
+    }
+
+    /**
+     * to cancel loading
+     */
+    cancelLoading(){
+        const {cancelCallback} = this.props;
+        cancelCallback();
+    }
+
+    renderCancelButton(){
+        return null;
+       /* if(cancelCallback){
+            return <CancelLoadingButton cancel={this.cancelLoading}/>;
+        } else{
+            return null;
+        }*/
+    }
+
+    render(){
+        const {className, authUser, error} = this.props;
+        if (error) {
+            consoleError(error);
+            return (
+                <ComponentError entity={{type: ERROR_TYPE.FRONTEND, message: LoadingComponentError}} manualVisible={true}/>
+            );
+        }
+        let classNames = ['loading'];
+        let loadingClassName = styles.loading;
+        if(authUser) {
+            classNames = getThemeClass({classNames, authUser, styles});
+            loadingClassName = styles[classNames.loading];
+        }
+        return (
+            <div className={`${loadingClassName} ${className}`}>
+                <ProgressBar type='circular' mode='indeterminate'/>
+                {this.renderCancelButton()}
+            </div>
+        );
+    }
+}
+
+Loading.propTypes = {
+    authUser: PropTypes.object,
+};
+Loading.defaultProps = {
+    authUser: null,
+    className: '',
+    cancelCallback: null
+};
+
+export default Loading;

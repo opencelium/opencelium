@@ -1,0 +1,797 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../constants';
+
+.item{
+  display: block !important;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  margin-top: 15px;
+  width: auto !important;
+  overflow: initial !important;
+  .remove{
+    color: #000000;
+    font-size: $FONT_SIZE_MEDIUM;
+    right: 0;
+    position: absolute;
+    cursor: pointer;
+    top: 2px;
+  }
+}
+
+.item:hover{
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  box-shadow: 0 4px 2px rgba(0,0,0,0.12), 0 3px 10px rgba(0,0,0,0.24);
+}
+
+.item_delete_button{
+  cursor: pointer;
+  position: absolute;
+  float: right;
+  right: 0;
+  top: 17px;
+}
+
+.item_title_arrow{
+  margin-top: 4px;
+  width: 15%;
+  float: left;
+}
+
+.item_title{
+  vertical-align: super;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_MEDIUM !important;
+  width: 85%;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item_title:hover{
+  text-shadow: 1px 0 12px #fffcfc;
+}
+
+.item_card_title{
+  padding: 14px 0 14px 16px !important;
+}
+.item_card_title>div{
+  width: 100%;
+}
+
+.item_card_text{
+  max-height: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #c6c6d90d;
+}
+
+.item_card_text::-webkit-scrollbar {
+  width: 10px;
+}
+
+.item_card_text::-webkit-scrollbar-thumb {
+  border: 1px solid #b78b73
+}
+
+.item_card_text_show{
+  @extend .item_card_text;
+  transition: all 2s ease;
+  max-height: 1000px;
+}
+.item_card_text_hide{
+ @extend .item_card_text;
+ transition: all 2s ease;
+ max-height: 0;
+}
+
+.selected_item{
+  border-radius: 15px;
+  border: 1px solid #040404;
+  transition: all 0.5s cubic-bezier(.25,.8,.25,1);
+}
+
+.last_item{
+  background-color: #C9C9C9;
+}
+
+.operator{
+  margin-top: 15px;
+  font-family: $FONT_FAMILY;
+  position: relative;
+  .remove{
+    color: #000000;
+    font-size: $FONT_SIZE_MEDIUM;
+    right: 0;
+    position: absolute;
+    cursor: pointer;
+    top: 2px;
+  }
+}
+
+.method_item_menu{
+  z-index: 1000;
+  border: 1px solid black;
+  position: fixed;
+  margin-left: 135px;
+  height: 100px;
+  width: 100px;
+  margin-top: -3px;
+  border-top-right-radius: 15px;
+  background-color: #f0efef;
+  .close{
+    position: absolute;
+    top: 0;
+    right: 5px;
+    cursor: pointer;
+    color: red;
+  }
+}
+
+.form_select_dropdown{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  width: 120px;
+  float: left;
+}
+
+.dropdown_selected_item{
+  font-size: $FONT_SIZE_SMALL !important;
+}
+.dropdown_input_input{
+  font-family: $FONT_FAMILY;
+  padding-top: 5px;
+}
+
+.input_method_add{
+  cursor: pointer;
+  text-align: center;
+  float: left;
+  line-height: 50px;
+}
+
+
+.input_method_add_icon{
+  font-size: $FONT_SIZE_MEDIUM;
+}
+
+.items_menu{
+  text-align: center;
+  height: 30px;
+}
+
+.item_menu{
+  font-family: $FONT_FAMILY;
+  transition: width 0.4s;
+  border: 2px solid #c2c5bf;
+  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+  width: 30px;
+  display: inline-block;
+  height: 30px;
+  line-height: 26px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.item_menu:hover{
+  cursor: pointer;
+  transition: width 0.4s;
+  width: 63px;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.item_menu_method{
+  @extend .item_menu;
+  margin-left: 0;
+  background-color: #F5F5F5;
+}
+
+.item_menu_method:hover::after{
+  font-family: $FONT_FAMILY;
+  content: 'ethod';
+}
+
+.item_menu_param{
+  @extend .item_menu;
+  background-color: #DAE8FC;
+}
+
+.item_menu_param:hover::after{
+  font-family: $FONT_FAMILY;
+  content: 'arameter';
+}
+
+.item_menu_operator{
+  @extend .item_menu;
+  background-color: #D5E8D4;
+}
+
+.item_menu_operator:hover::after{
+  font-family: $FONT_FAMILY;
+  content: 'perator';
+}
+
+.item_menu_selected{
+  border-color: #666666;
+  text-decoration: underline;
+}
+
+
+.method_param{
+  font-family: $FONT_FAMILY;
+  .name{
+    line-height: 20px;
+    font-size: $FONT_SIZE_TINY;
+    float: left;
+    width: 50%;
+    text-align: right;
+    padding-right: 6px;
+  }
+  .input{
+    padding-bottom: 0;
+  }
+  .input_pointer{
+    padding-bottom: 0;
+    width: 5%;
+    display: inline-block;
+  }
+  .input_pointer_input{
+    line-height: 21px;
+  }
+}
+
+.methods_method_item{
+  font-family: $FONT_FAMILY;
+  cursor: pointer;
+  width: 20px;
+  display: inline-block;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.dropdown_menu_menu{
+  font-family: $FONT_FAMILY;
+  margin: auto;
+  width: 75%;
+  height: 94px;
+}
+
+.mapping_area{
+  margin-top: 30px;
+}
+.mapping_area_line{
+}
+.mapping_area_title{
+  font-family: $FONT_FAMILY;
+  text-align: center;
+  font-size: $FONT_SIZE_MEDIUM;
+  margin-top: 25px;
+}
+
+.operator_icon{
+  cursor: pointer;
+}
+
+.input_pointer_param_loop{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  width: 100%;
+  float: left;
+  transition: all 0.3s ease 0s;
+  input{
+    font-size: $FONT_SIZE_TINY;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.operator_left_field{
+  width: 100% !important;
+}
+
+.operator_right_field{
+  width: 100% !important;
+}
+
+.input_pointer_param_if{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  width: 100%;
+  float: left;
+  transition: all 0.3s ease 0s;
+  input{
+    font-size: $FONT_SIZE_TINY;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.input_pointer_compare_statement{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  input{
+    font-size: $FONT_SIZE_TINY;
+  }
+}
+
+.input_element_pointer_param{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+  line-height: 21px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.input_element_pointer_compare_statement_visible{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  line-height: 21px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.input_element_pointer_compare_statement_not_visible{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  line-height: 21px;
+}
+
+.multiselect_label{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  border: none;
+}
+
+.multiselect_focused{
+  color: rgb(63, 81, 181);
+}
+.multiselect_focused>div{
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgb(63, 81, 181);
+  box-shadow: none;
+}
+
+.multiselect>div{
+  font-family: $FONT_FAMILY;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2121211f;
+  box-shadow: none;
+  background-color: initial;
+}
+
+.method_radio_area{
+  font-family: $FONT_FAMILY;
+  float:left;
+  margin-top: 40px;
+  font-size: 6px;
+  margin-left: 5px;
+
+}
+
+.enhancement_dialog{
+  min-height: 720px;
+  max-height: 720px;
+}
+
+.enhancement_dialog_title {
+  font-family: $FONT_FAMILY;
+  text-align: center;
+}
+
+.operator_response_radio_area_loop{
+  font-family: $FONT_FAMILY;
+  float:left;
+  width: 20%;
+}
+.operator_response_radio_area_if{
+  font-family: $FONT_FAMILY;
+  float:left;
+  width: 20%;
+}
+
+.operator_radio_field_disabled{
+  font-family: $FONT_FAMILY;
+  text-align: left !important;
+  margin-bottom: -2px !important;
+  padding-right: 3px;
+  padding-left: 3px;
+}
+.operator_radio_field{
+  font-family: $FONT_FAMILY;
+  text-align: left !important;
+  margin-bottom: -2px !important;
+  padding-right: 3px;
+  padding-left: 3px;
+}
+
+.operator_radio_field_fail{
+  border-bottom: 1px solid rgba(33, 33, 33, 0.12);
+}
+
+.operator_radio_radio{
+  font-family: $FONT_FAMILY;
+  width: 12px !important;
+  height: 12px !important;
+  border: 1px solid rgb(0, 0, 0);
+}
+
+.operator_radio_radio_checked{
+  width: 12px !important;
+  height: 12px !important;
+  border: 1px solid rgb(63, 81, 181);
+}
+
+.operator_radio_text{
+  font-family: $FONT_FAMILY;
+  padding-left: 3px !important;
+  line-height: 12px !important;
+}
+
+.method_response_radio_area{
+  font-family: $FONT_FAMILY;
+  float:left;
+  font-size: 6px;
+  margin-left: 8px;
+}
+
+.method_radio_field_disabled{
+  font-family: $FONT_FAMILY;
+  text-align: left !important;
+  margin-bottom: 1px !important;
+  margin-right: 3px;
+}
+.method_radio_field{
+  font-family: $FONT_FAMILY;
+  text-align: left !important;
+  margin-bottom: 1px !important;
+  margin-right: 3px;
+}
+
+.method_radio_radio{
+  font-family: $FONT_FAMILY;
+  width: 12px !important;
+  height: 12px !important;
+  border: 1px solid rgb(0, 0, 0);
+}
+
+.method_radio_radio_checked{
+  width: 12px !important;
+  height: 12px !important;
+  border: 1px solid rgb(63, 81, 181);
+}
+
+.method_radio_text{
+  font-family: $FONT_FAMILY;
+  padding-left: 3px !important;
+  line-height: 12px !important;
+}
+
+.input_pointer_focused{
+  background-color: #3f51b5;
+  bottom: 0;
+  content: '';
+  height: 2px;
+  position: absolute;
+  transition-duration: 0.2s;
+  transition-property: width, background-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0;
+}
+
+.import_json_button{
+  font-family: $FONT_FAMILY;
+  background-color: #e6e5cb;
+  float: right;
+  width: 20%;
+  font-size: $FONT_SIZE_TINY;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.import_json_button:hover{
+  background-color: #fffee1;
+  border: 1px solid black;
+}
+
+.textarea_import_json{
+  textarea{
+    height: auto !important;
+    font-family: $FONT_FAMILY;
+    resize: none;
+  }
+}
+
+.create_param {
+  margin: auto;
+  width: 80%;
+  text-align: center;
+  .or {
+    font-family: $FONT_FAMILY;
+    margin-bottom: 20px;
+  }
+  .add_icon{
+    cursor: pointer;
+  }
+}
+
+
+@media screen and (min-width: 992px) {
+  .template_button{
+    width: 100px;
+    padding: 15px 10px;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+  .expert_button{
+    width: 100px;
+    margin-right: 110px;
+    padding: 15px 10px;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+
+  .connection_mode_loading{
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    min-height: 78px !important;
+  }
+
+  .connection_mode_loading>div{
+    width: 38px;
+    height: 38px;
+  }
+}
+@media screen and (max-width: 991px) {
+  .template_button{
+    width: 80px;
+    padding: 15px 6px;
+    font-size: $FONT_SIZE_SMALL;
+  }
+  .expert_button{
+    width: 80px;
+    margin-right: 10px;
+    padding: 15px 16px;
+    font-size: $FONT_SIZE_SMALL;
+  }
+
+  .connection_mode_loading{
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    min-height: 78px !important;
+  }
+
+  .connection_mode_loading>div{
+    width: 38px;
+    height: 38px;
+  }
+}
+
+.no_templates{
+  text-align: center;
+  margin-top: 20px;
+}
+
+.template_select{
+  margin: 30px 0;
+  position: relative;
+}
+.template_select{
+  margin: 30px 0;
+  position: relative;
+}
+
+.method_affix{
+  float: left;
+  width: 10%;
+  padding-top: 10px;
+  height: 41px;
+  border-bottom: 1px solid rgba(33, 33, 33, 0.12);
+}
+
+.param_generator{
+  position: absolute;
+  margin-top: -26px;
+  right: -20px;
+  cursor: pointer;
+}
+
+.param_generator_param{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  width: 100%;
+  float: left;
+  transition: all 0.3s ease 0s;
+  input{
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.param_generator_json{
+  z-index: 1;
+  position: absolute;
+  cursor: pointer;
+  left: 0;
+}
+
+.param_generator_form_parent{
+  position: absolute;
+  width: 232px;
+  background: #fff;
+  z-index: 100;
+  border: 1px solid #b7dedc;
+  padding: 5px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  box-shadow: rgba(0, 0, 0, 0.14) 0 0 0 0, rgb(105, 68, 47) 0 2px 11px 2px, rgba(0, 0, 0, 0.12) 0 1px 5px 0;
+}
+
+.param_generator_form{
+  @extend .param_generator_form_parent;
+  top: -15px;
+  left: 21px;
+}
+
+.param_generator_form_json{
+  @extend .param_generator_form_parent;
+  left: 2px;
+  width: 212px;
+}
+
+.param_generator_form_add{
+  width: 20px;
+  line-height: 40px;
+  text-align: center;
+  float: left;
+}
+
+.body_label{
+  font-size: $FONT_SIZE_TINY;
+  position: initial;
+  font-family: $FONT_FAMILY;
+}
+.template_description{
+  textarea{
+    height: auto !important;
+    font-family: $FONT_FAMILY;
+    resize: none;
+  }
+}
+
+@keyframes APopupInputAppear {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.menu_edit{
+  left: 0;
+  animation: APopupInputAppear .25s;
+  transition: all 0.3s ease 0s;
+  position: absolute;
+  width: 300px;
+  float: right;
+  background: white;
+  box-shadow: rgba(0, 0, 0, 0.14) 0 0 0 0, rgb(159, 159, 159) 0 1px 7px 1px, rgba(0, 0, 0, 0.22) 0 1px 1px 0;
+  border-radius: 3px;
+  padding: 8px;
+  top: 0;
+}
+.if_placeholder{
+  width: 88%;
+  float: left;
+  padding: 6px 5px;
+  margin-left: 4px;
+}
+.if_placeholder:hover{
+  box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
+}
+.if_placeholder_title{
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 26px;
+  padding: 2px 5px;
+  float: left;
+}
+.if_placeholder_relational_operator{
+  text-align: center;
+  cursor: pointer;
+  min-width: 14%;
+  float: left;
+  height: 26px;
+  padding: 2px 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.if_placeholder_right_property{
+  cursor: pointer;
+  float: left;
+  height: 26px;
+  padding: 2px 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.if_placeholder_right_field{
+  cursor: pointer;
+  float: left;
+  height: 26px;
+  padding: 2px 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.operator_close_menu_edit{
+  position: absolute;
+  cursor: pointer;
+  top: 3px;
+  right: 3px;
+  color: black;
+  font-size: $FONT_SIZE_SMALL;
+}
+
+.loop_placeholder{
+  width: 88%;
+  float: left;
+  padding: 6px 5px;
+  margin-left: 4px;
+}
+.loop_placeholder_title{
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  height: 26px;
+  padding: 2px 5px;
+  float: left;
+}
+.loop_placeholder_title:hover{
+  box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
+}
+
+.if_right_statement{
+  float: left;
+}
+.if_relational_operator_separator{
+  align-self: stretch;
+  background-color: hsl(0,0%,80%);
+  margin-bottom: 8px;
+  margin-top: 8px;
+  width: 1px;
+  box-sizing: border-box;
+}
+
+.property_input_right_equal{
+  overflow: hidden;
+  float: left;
+  text-align: center;
+  line-height: 37px;
+  border-bottom: 1px solid rgba(33, 33, 33, 0.12);
+  font-size: $FONT_SIZE_SMALL;
+  font-family: $FONT_FAMILY;
+}

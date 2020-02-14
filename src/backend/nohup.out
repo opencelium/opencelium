@@ -1,0 +1,179 @@
+2020-01-16 15:00:38.425  INFO 66142 --- [           main] c.becon.opencelium.backend.Application   : Starting Application on oc-demo with PID 66142 (/opt/opencelium.backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar started by root in /opt/opencelium.backend)
+2020-01-16 15:00:38.429  INFO 66142 --- [           main] c.becon.opencelium.backend.Application   : No active profile set, falling back to default profiles: default
+2020-01-16 15:00:39.763  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-01-16 15:00:39.763  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2020-01-16 15:00:39.897  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 117ms. Found 7 repository interfaces.
+2020-01-16 15:00:39.899  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-01-16 15:00:39.899  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2020-01-16 15:00:40.021  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 111ms. Found 15 repository interfaces.
+2020-01-16 15:00:40.022  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-01-16 15:00:40.022  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2020-01-16 15:00:40.039  INFO 66142 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 16ms. Found 1 repository interfaces.
+2020-01-16 15:00:40.977  INFO 66142 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.ws.config.annotation.DelegatingWsConfiguration' of type [org.springframework.ws.config.annotation.DelegatingWsConfiguration$$EnhancerBySpringCGLIB$$ee1911ca] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-01-16 15:00:41.025  INFO 66142 --- [           main] .w.s.a.s.AnnotationActionEndpointMapping : Supporting [WS-Addressing August 2004, WS-Addressing 1.0]
+2020-01-16 15:00:41.128  INFO 66142 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$49814ccb] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-01-16 15:00:41.448  INFO 66142 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.hateoas.config.HateoasConfiguration' of type [org.springframework.hateoas.config.HateoasConfiguration$$EnhancerBySpringCGLIB$$c90199fd] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-01-16 15:00:41.809  INFO 66142 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9090 (http)
+2020-01-16 15:00:41.852  INFO 66142 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2020-01-16 15:00:41.852  INFO 66142 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.22]
+2020-01-16 15:00:41.969  INFO 66142 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2020-01-16 15:00:41.969  INFO 66142 --- [           main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 3463 ms
+2020-01-16 15:00:42.296  INFO 66142 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2020-01-16 15:00:42.462  INFO 66142 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2020-01-16 15:00:42.519  INFO 66142 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2020-01-16 15:00:42.631  INFO 66142 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate Core {5.3.10.Final}
+2020-01-16 15:00:42.633  INFO 66142 --- [           main] org.hibernate.cfg.Environment            : HHH000206: hibernate.properties not found
+2020-01-16 15:00:42.875  INFO 66142 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.0.4.Final}
+2020-01-16 15:00:43.187  INFO 66142 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.MySQL5Dialect
+2020-01-16 15:00:44.525  INFO 66142 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2020-01-16 15:00:45.358  INFO 66142 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter authorizationFilter was not registered (disabled)
+2020-01-16 15:00:46.456  INFO 66142 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Starting Post-processing phase
+2020-01-16 15:00:46.456  INFO 66142 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Building annotation class map
+2020-01-16 15:00:46.457  INFO 66142 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Building interface class map for 43 classes
+2020-01-16 15:00:46.476  INFO 66142 --- [           main] org.neo4j.ogm.metadata.DomainInfo        : Post-processing complete
+2020-01-16 15:00:46.530  INFO 66142 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.mysql.service.EnhancementServiceImp so treating as simple type for SD Commons
+2020-01-16 15:00:46.579  INFO 66142 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.execution.ExecutionContainer so treating as simple type for SD Commons
+2020-01-16 15:00:46.604  INFO 66142 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.utility.ActionUtility so treating as simple type for SD Commons
+2020-01-16 15:00:46.643  INFO 66142 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : No class information found in OGM meta-data for class com.becon.opencelium.backend.invoker.service.InvokerServiceImp so treating as simple type for SD Commons
+2020-01-16 15:00:46.693  INFO 66142 --- [           main] o.s.d.neo4j.mapping.Neo4jMappingContext  : Neo4jMappingContext initialisation completed
+2020-01-16 15:00:47.371  INFO 66142 --- [           main] org.quartz.impl.StdSchedulerFactory      : Using default implementation for ThreadExecutor
+2020-01-16 15:00:47.394  INFO 66142 --- [           main] org.quartz.core.SchedulerSignalerImpl    : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2020-01-16 15:00:47.394  INFO 66142 --- [           main] org.quartz.core.QuartzScheduler          : Quartz Scheduler v.2.3.1 created.
+2020-01-16 15:00:47.396  INFO 66142 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Using db table-based data access locking (synchronization).
+2020-01-16 15:00:47.403  INFO 66142 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : JobStoreCMT initialized.
+2020-01-16 15:00:47.404  INFO 66142 --- [           main] org.quartz.core.QuartzScheduler          : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'quartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 5 threads.
+  Using job-store 'org.springframework.scheduling.quartz.LocalDataSourceJobStore' - which supports persistence. and is not clustered.
+
+2020-01-16 15:00:47.404  INFO 66142 --- [           main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler 'quartzScheduler' initialized from an externally provided properties instance.
+2020-01-16 15:00:47.405  INFO 66142 --- [           main] org.quartz.impl.StdSchedulerFactory      : Quartz scheduler version: 2.3.1
+2020-01-16 15:00:47.405  INFO 66142 --- [           main] org.quartz.core.QuartzScheduler          : JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@e4d2696
+2020-01-16 15:00:47.883  INFO 66142 --- [           main] o.elasticsearch.plugins.PluginsService   : no modules loaded
+2020-01-16 15:00:47.884  INFO 66142 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.index.reindex.ReindexPlugin]
+2020-01-16 15:00:47.884  INFO 66142 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.join.ParentJoinPlugin]
+2020-01-16 15:00:47.884  INFO 66142 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.percolator.PercolatorPlugin]
+2020-01-16 15:00:47.884  INFO 66142 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.script.mustache.MustachePlugin]
+2020-01-16 15:00:47.884  INFO 66142 --- [           main] o.elasticsearch.plugins.PluginsService   : loaded plugin [org.elasticsearch.transport.Netty4Plugin]
+2020-01-16 15:00:49.617 ERROR 66142 --- [           main] .d.e.r.s.AbstractElasticsearchRepository : failed to load elasticsearch nodes : org.elasticsearch.client.transport.NoNodeAvailableException: None of the configured nodes are available: [{#transport#-1}{y8hpMbrgRuC3qyumstzXmA}{localhost}{127.0.0.1:0}]
+2020-01-16 15:00:49.830  INFO 66142 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-01-16 15:00:49.887  WARN 66142 --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2020-01-16 15:00:49.892  WARN 66142 --- [           main] ebConfiguration$Neo4jWebMvcConfiguration : spring.data.neo4j.open-in-view is enabled by default.Therefore, database queries may be performed during view rendering. Explicitly configure spring.data.neo4j.open-in-view to disable this warning
+2020-01-16 15:00:50.574  INFO 66142 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: Ant [pattern='/api/storage/**'], []
+2020-01-16 15:00:50.574  INFO 66142 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: Ant [pattern='/api/webhook/execute/**'], []
+2020-01-16 15:00:50.602  INFO 66142 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4b97c4ad, org.springframework.security.web.context.SecurityContextPersistenceFilter@bc042d5, org.springframework.security.web.header.HeaderWriterFilter@6b1dc20f, org.springframework.web.filter.CorsFilter@7640a5b1, org.springframework.security.web.authentication.logout.LogoutFilter@68ab0936, com.becon.opencelium.backend.security.AuthenticationFilter@6d64b553, com.becon.opencelium.backend.security.AuthorizationFilter@3bc735b3, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@37df14d1, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3dfa819, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@642f9a77, org.springframework.security.web.session.SessionManagementFilter@6540cf1d, org.springframework.security.web.access.ExceptionTranslationFilter@36c2b646, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@4c1bdcc2]
+2020-01-16 15:00:50.780  INFO 66142 --- [           main] o.s.s.quartz.SchedulerFactoryBean        : Starting Quartz Scheduler now
+2020-01-16 15:00:50.818  INFO 66142 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Freed 0 triggers from 'acquired' / 'blocked' state.
+2020-01-16 15:00:50.823  INFO 66142 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Recovering 0 jobs that were in-progress at the time of the last shut-down.
+2020-01-16 15:00:50.823  INFO 66142 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Recovery complete.
+2020-01-16 15:00:50.824  INFO 66142 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Removed 0 'complete' triggers.
+2020-01-16 15:00:50.824  INFO 66142 --- [           main] o.s.s.quartz.LocalDataSourceJobStore     : Removed 0 stale fired job entries.
+2020-01-16 15:00:50.825  INFO 66142 --- [           main] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED started.
+2020-01-16 15:00:50.871  INFO 66142 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9090 (http) with context path ''
+2020-01-16 15:00:50.877  INFO 66142 --- [           main] c.becon.opencelium.backend.Application   : Started Application in 13.397 seconds (JVM running for 14.049)
+2020-01-16 15:00:50.930  INFO 66142 --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2020-01-16 15:00:54.603  INFO 66142 --- [nio-9090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2020-01-16 15:00:54.603  INFO 66142 --- [nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2020-01-16 15:00:54.614  INFO 66142 --- [nio-9090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 11 ms
+2020-01-16 15:00:55.591  INFO 66142 --- [nio-9090-exec-3] Driver                                   : Direct driver instance 692058705 created for server address localhost:7687
+2020-01-16 15:01:34.098  INFO 66142 --- [eduler_Worker-1] c.b.o.backend.quartz.JobExecutor         : Executing Job with key connection.238-83
+2020-01-16 15:01:34.099  INFO 66142 --- [eduler_Worker-1] c.b.o.backend.quartz.JobExecutor         : Firing  Trigger with key 238.83-now
+==================================================================
+============================================================
+Function: cmdb.objects.read
+Method: POST
+URL: http://oc-idoit.westeurope.cloudapp.azure.com/src/jsonrpc.php
+NoNodeAvailableException[None of the configured nodes are available: [{#transport#-1}{y8hpMbrgRuC3qyumstzXmA}{localhost}{127.0.0.1:0}]]
+	at org.elasticsearch.client.transport.TransportClientNodesService.ensureNodesAreAvailable(TransportClientNodesService.java:349)
+	at org.elasticsearch.client.transport.TransportClientNodesService.execute(TransportClientNodesService.java:247)
+	at org.elasticsearch.client.transport.TransportProxyClient.execute(TransportProxyClient.java:60)
+	at org.elasticsearch.client.transport.TransportClient.doExecute(TransportClient.java:381)
+	at org.elasticsearch.client.support.AbstractClient.execute(AbstractClient.java:407)
+	at org.elasticsearch.client.support.AbstractClient.execute(AbstractClient.java:396)
+	at org.elasticsearch.action.ActionRequestBuilder.execute(ActionRequestBuilder.java:46)
+	at org.springframework.data.elasticsearch.core.ElasticsearchTemplate.index(ElasticsearchTemplate.java:577)
+	at org.springframework.data.elasticsearch.repository.support.AbstractElasticsearchRepository.save(AbstractElasticsearchRepository.java:156)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.springframework.data.repository.core.support.RepositoryComposition$RepositoryFragments.invoke(RepositoryComposition.java:359)
+	at org.springframework.data.repository.core.support.RepositoryComposition.invoke(RepositoryComposition.java:200)
+	at org.springframework.data.repository.core.support.RepositoryFactorySupport$ImplementationMethodExecutionInterceptor.invoke(RepositoryFactorySupport.java:644)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.data.repository.core.support.RepositoryFactorySupport$QueryExecutorMethodInterceptor.doInvoke(RepositoryFactorySupport.java:608)
+	at org.springframework.data.repository.core.support.RepositoryFactorySupport$QueryExecutorMethodInterceptor.lambda$invoke$3(RepositoryFactorySupport.java:595)
+	at org.springframework.data.repository.core.support.RepositoryFactorySupport$QueryExecutorMethodInterceptor.invoke(RepositoryFactorySupport.java:595)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.data.projection.DefaultMethodInvokingMethodInterceptor.invoke(DefaultMethodInvokingMethodInterceptor.java:59)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:93)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.data.repository.core.support.SurroundingTransactionDetectorMethodInterceptor.invoke(SurroundingTransactionDetectorMethodInterceptor.java:61)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:212)
+	at com.sun.proxy.$Proxy163.save(Unknown Source)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:343)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:198)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:139)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:212)
+	at com.sun.proxy.$Proxy163.save(Unknown Source)
+	at com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp.save(LogMessageServiceImp.java:35)
+	at com.becon.opencelium.backend.execution.ConnectorExecutor.sendRequest(ConnectorExecutor.java:163)
+	at com.becon.opencelium.backend.execution.ConnectorExecutor.executeMethod(ConnectorExecutor.java:99)
+	at com.becon.opencelium.backend.execution.ConnectorExecutor.start(ConnectorExecutor.java:80)
+	at com.becon.opencelium.backend.execution.ConnectionExecutor.start(ConnectionExecutor.java:66)
+	at com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(JobExecutor.java:102)
+	at org.springframework.scheduling.quartz.QuartzJobBean.execute(QuartzJobBean.java:75)
+	at org.quartz.core.JobRunShell.run(JobRunShell.java:202)
+	at org.quartz.simpl.SimpleThreadPool$WorkerThread.run(SimpleThreadPool.java:573)
+java.lang.NullPointerException
+	at com.becon.opencelium.backend.execution.ConnectorExecutor.executeLoopOperator(ConnectorExecutor.java:420)
+	at com.becon.opencelium.backend.execution.ConnectorExecutor.executeOperator(ConnectorExecutor.java:393)
+	at com.becon.opencelium.backend.execution.ConnectorExecutor.executeMethod(ConnectorExecutor.java:138)
+	at com.becon.opencelium.backend.execution.ConnectorExecutor.start(ConnectorExecutor.java:80)
+	at com.becon.opencelium.backend.execution.ConnectionExecutor.start(ConnectionExecutor.java:66)
+	at com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(JobExecutor.java:102)
+	at org.springframework.scheduling.quartz.QuartzJobBean.execute(QuartzJobBean.java:75)
+	at org.quartz.core.JobRunShell.run(JobRunShell.java:202)
+	at org.quartz.simpl.SimpleThreadPool$WorkerThread.run(SimpleThreadPool.java:573)
+2020-01-16 15:01:34.329 ERROR 66142 --- [eduler_Worker-1] org.quartz.core.JobRunShell              : Job connection.238-83 threw an unhandled Exception: 
+
+java.lang.RuntimeException: EXECUTION_FAILED
+	at com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(JobExecutor.java:120) ~[classes!/:na]
+	at org.springframework.scheduling.quartz.QuartzJobBean.execute(QuartzJobBean.java:75) ~[spring-context-support-5.1.9.RELEASE.jar!/:5.1.9.RELEASE]
+	at org.quartz.core.JobRunShell.run(JobRunShell.java:202) ~[quartz-2.3.1.jar!/:na]
+	at org.quartz.simpl.SimpleThreadPool$WorkerThread.run(SimpleThreadPool.java:573) [quartz-2.3.1.jar!/:na]
+
+2020-01-16 15:01:34.329 ERROR 66142 --- [eduler_Worker-1] org.quartz.core.ErrorLogger              : Job (connection.238-83 threw an exception.
+
+org.quartz.SchedulerException: Job threw an unhandled exception.
+	at org.quartz.core.JobRunShell.run(JobRunShell.java:213) ~[quartz-2.3.1.jar!/:na]
+	at org.quartz.simpl.SimpleThreadPool$WorkerThread.run(SimpleThreadPool.java:573) [quartz-2.3.1.jar!/:na]
+Caused by: java.lang.RuntimeException: EXECUTION_FAILED
+	at com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(JobExecutor.java:120) ~[classes!/:na]
+	at org.springframework.scheduling.quartz.QuartzJobBean.execute(QuartzJobBean.java:75) ~[spring-context-support-5.1.9.RELEASE.jar!/:5.1.9.RELEASE]
+	at org.quartz.core.JobRunShell.run(JobRunShell.java:202) ~[quartz-2.3.1.jar!/:na]
+	... 1 common frames omitted
+
+2020-01-16 15:02:20.922  INFO 66142 --- [       Thread-4] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2020-01-16 15:02:20.932  INFO 66142 --- [       Thread-4] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2020-01-16 15:02:20.955  INFO 66142 --- [       Thread-4] o.s.s.quartz.SchedulerFactoryBean        : Shutting down Quartz Scheduler
+2020-01-16 15:02:20.955  INFO 66142 --- [       Thread-4] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED shutting down.
+2020-01-16 15:02:20.955  INFO 66142 --- [       Thread-4] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2020-01-16 15:02:20.963  INFO 66142 --- [       Thread-4] org.quartz.core.QuartzScheduler          : Scheduler quartzScheduler_$_NON_CLUSTERED shutdown complete.
+2020-01-16 15:02:20.969  INFO 66142 --- [       Thread-4] o.n.ogm.drivers.bolt.driver.BoltDriver   : Shutting down Bolt driver org.neo4j.driver.internal.InternalDriver@293ffa51 
+2020-01-16 15:02:23.188  INFO 66142 --- [       Thread-4] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2020-01-16 15:02:23.189  INFO 66142 --- [       Thread-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2020-01-16 15:02:23.202  INFO 66142 --- [       Thread-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

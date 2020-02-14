@@ -1,0 +1,8 @@
+{
+  "LIST":{
+    "IMPORT_BUTTON": "Import template",
+    "EMPTY_LIST": "The list of Templates is empty",
+    "HEADER": "Templates",
+    "HEADER_ADMIN_CARDS": "Templates"
+  }
+}

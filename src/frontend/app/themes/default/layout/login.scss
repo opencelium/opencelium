@@ -1,0 +1,79 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../constants';
+
+.key_navigation_letter{
+  font-family: $FONT_FAMILY;
+  color: #000000;
+  text-decoration: underline;
+}
+
+.login_page{
+  font-family: $FONT_FAMILY;
+  width: 300px;
+  height: 290px;
+  margin: 30px auto;
+  border: 1px solid #f7f7f7;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+
+  .caption{
+    font-family: $FONT_FAMILY;
+    font-size: $FONT_SIZE_MEDIUM;
+    padding: 10px;
+    text-align: center;
+  }
+
+
+
+  .button_connect{
+    font-family: $FONT_FAMILY;
+    margin: 35px 15px 0 0;
+    float: right;
+    border: 1px solid #dbdbdb;
+  }
+
+}
+
+.input {
+  font-family: $FONT_FAMILY;
+  background: #2e75b6;
+  input {
+    border-bottom-color: #ffd807 !important;
+    color: white;
+    width: 96%;
+    margin: 0 2% 0 2%;
+  }
+}
+.bar::before,.bar::after{
+  font-family: $FONT_FAMILY;
+  background-color: white !important;
+  height: 1px !important;
+}
+
+.login_page:hover {
+  font-family: $FONT_FAMILY;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.validation_message{
+  bottom: -24px !important;
+  padding: 0 !important;
+  .message{
+    color: #d42222;
+    position: relative;
+  }
+}

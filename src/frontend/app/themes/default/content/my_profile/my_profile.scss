@@ -1,0 +1,239 @@
+/*!
+ * Copyright (C) <2019>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../../constants';
+
+.user_details_app_tour_title{
+  float: left;
+  line-height: 23px;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.user_details_app_tour_header{
+  font-family: $FONT_FAMILY;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.user_details_app_tour{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+  width: 160px;
+}
+
+.user_details_themes_title{
+  font-family: $FONT_FAMILY;
+  margin-top: 20px;
+  margin-bottom: 10px;
+ }
+
+.user_details_themes{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+  width: 100px;
+}
+
+.user_details_textareas{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.user_details_textareas_xs{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+  margin-top: 15px;
+}
+
+.user_details_textarea{
+  font-family: $FONT_FAMILY;
+  line-height: 20px;
+}
+
+.user_details_label{
+  font-family: $FONT_FAMILY;
+  float: left;
+}
+
+.user_details_value{
+  font-family: $FONT_FAMILY;
+  text-align: right;
+}
+
+.user_details_avatar_area{
+  float: right;
+  padding: 0 15px;
+}
+
+@media(min-width: 576px) {
+  .user_details_avatar_size {
+    z-index: 100;
+    float: right;
+    font-size: 144px;
+  }
+}
+
+@media(max-width: 575px){
+  .user_details_avatar_size{
+    z-index: 100;
+    font-size: 144px;
+  }
+}
+.user_details_avatar{
+  width: 100%;
+  img {
+    z-index: 100;
+    float: right;
+    width: 144px;
+    height: 144px;
+    border-left: 1px solid #999999;
+    border-bottom: 1px solid #999999;
+  }
+}
+
+.user_details_avatar_xs{
+  width: 100%;
+  text-align: center;
+  img {
+    width: 144px;
+    height: 144px;
+  }
+}
+
+.user_details_email_parent{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  width: 100%;
+  a{
+    cursor: pointer;
+    text-decoration: none;
+    color: #000000;
+  }
+  a:hover{
+    text-decoration: underline;
+  }
+}
+
+.user_details_email{
+  @extend .user_details_email_parent;
+  float: right;
+  text-align: right;
+}
+
+.user_details_email_xs{
+  @extend .user_details_email_parent;
+  text-align: center;
+}
+
+.user_details_last_login{
+  width: 100%;
+  text-align: right;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.user_details_last_login_xs{
+  width: 100%;
+  text-align: center;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.user_details_actions{
+  position: absolute;
+  right: 165px;
+  top: 30px;
+}
+
+.user_details_actions_xs{
+  text-align: center;
+  float:left;
+  width: 100%;
+}
+
+.user_details_action{
+  display: block;
+  cursor: pointer;
+  position: fixed;
+  margin-left: -18px;
+  z-index: 10;
+}
+.user_details_action:nth-child(2){
+  margin-top: 30px;
+}
+.user_details_action:nth-child(3){
+  margin-top: 60px;
+}
+.user_details_action:hover{
+  margin-left: -108px;
+}
+
+.user_details_action_xs{
+  display: inline-block;
+  cursor: pointer;
+}
+
+.user_group{
+  margin-top: 15px;
+}
+
+.user_group_title_xs{
+  font-family: $FONT_FAMILY;
+  text-align: center;
+  font-size: $FONT_SIZE_MEDIUM;
+  text-transform: capitalize;
+}
+
+.user_group_title{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_MEDIUM;
+  text-transform: capitalize;
+}
+
+
+.user_group_icon_size{
+  font-size: 70px;
+}
+
+.user_group_icon{
+  text-align: center;
+  img{
+    width: 70px;
+    height: 70px;
+  }
+}
+
+
+.user_group_row_table{
+  padding: 0 15px;
+}
+
+.user_group_col_table{
+  padding: 0 !important;
+  overflow-x: auto !important;
+}
+
+.user_group_table{
+  .header_cell{
+    text-align: center;
+  }
+  .row_cell{
+    text-align: center;
+  }
+}
+
+.user_group_description{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+}

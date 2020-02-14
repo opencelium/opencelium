@@ -1,0 +1,156 @@
+<invoker type="RESTful">
+    <name>icinga2</name>
+    <description>icinga2 Description</description>
+    <hint>icinga2 hint text</hint>
+    <icon>icinga2.jpg</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="checkConnection" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="createHost" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/objects/hosts</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+<!--                    <item name="X-HTTP-Method-Override" type="string">PUT</item>-->
+                </header>
+                <body>
+                    <field name="templates" type="array">generic-host</field>
+                    <field name="attrs" type="object">
+                        <field name="address" type="string"/>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="results" type="array">
+                            <field name="code" type="string"/>
+                            <field name="status" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="modifyHost" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/objects/hosts</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <!--                    <item name="X-HTTP-Method-Override" type="string">PUT</item>-->
+                </header>
+                <body>
+                    <field name="templates" type="array">generic-host</field>
+                    <field name="attrs" type="object">
+                        <field name="address" type="string"/>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="results" type="array">
+                            <field name="code" type="string"/>
+                            <field name="status" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteHost" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/objects/hosts</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body>
+                        <field name="results" type="array">
+                            <field name="code" type="string"/>
+                            <field name="status" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getHosts" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/objects/hosts</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body>
+                        <field name="results" type="array">
+                            <field name="attrs" type="object">
+                                <field name="address" type="string"/>
+                                <field name="active" type="string"/>
+                            </field>
+                            <field name="name" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

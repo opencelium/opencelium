@@ -1,0 +1,67 @@
+{
+  "LIST":{
+    "ADD_BUTTON": "Add Connector",
+    "EMPTY_LIST": "The list of Connectors is empty",
+    "HEADER": "Connectors"
+  },
+  "ADD":{
+    "FORM":{
+      "TITLE": "Title",
+      "DESCRIPTION": "Description",
+      "INVOKER": "Invoker",
+      "INVOKER_PLACEHOLDER": "Choose invoker...",
+      "INVOKER_DESCRIPTION": "Description",
+      "INVOKER_DESCRIPTION_DEFAULT": "Here you will see the description of the connector",
+      "PAGE_1": "General Data",
+      "URL": "URL",
+      "APIKEY": "API-Key",
+      "LOGIN": "Login",
+      "USER": "User",
+      "USERLOGIN": "Login",
+      "USERNAME": "Username",
+      "PASSWORD": "Password",
+      "WEBSERVICE": "Webservice",
+      "PAGE_2": "Credentials",
+      "HINT_1": "Provide general information",
+      "HINT_2": "Provide credentials and test"
+    },
+    "LIST_BUTTON": "Connectors",
+    "ADD_BUTTON": "Add",
+    "TEST_BUTTON": "Test",
+    "HEADER": "Add Connector"
+  },
+  "UPDATE":{
+    "FORM":{
+      "TITLE": "Title",
+      "DESCRIPTION": "Description",
+      "INVOKER": "Invoker",
+      "INVOKER_PLACEHOLDER": "Choose invoker...",
+      "INVOKER_DESCRIPTION": "Description",
+      "INVOKER_DESCRIPTION_DEFAULT": "Here you will see the description of the connector",
+      "PAGE_1": "General Data",
+      "URL": "URL",
+      "APIKEY": "API-Key",
+      "LOGIN": "Login",
+      "USER": "User",
+      "USERLOGIN": "Login",
+      "USERNAME": "Username",
+      "PASSWORD": "Password",
+      "WEBSERVICE": "Webservice",
+      "PAGE_2": "Credentials",
+      "HINT_1": "Provide general information",
+      "HINT_2": "Provide credentials and test"
+    },
+    "LIST_BUTTON": "Connectors",
+    "UPDATE_BUTTON": "Update",
+    "TEST_BUTTON": "Test",
+    "HEADER": "Update Connector"
+  },
+  "VIEW": {
+    "HEADER": "View Connector",
+    "LIST_BUTTON": "Connectors",
+    "GENERAL_TITLE": "General",
+    "INVOKER_TITLE": "Invoker",
+    "OPERATIONS_TITLE": "Operations",
+    "HINT_TITLE": "Hint"
+  }
+}
