@@ -1,0 +1,30 @@
+.wy-side-nav-search {
+	background-color: #fcfcfc !important;
+	border-right: 1px solid #e1e4e5;
+}
+
+.wy-side-nav-search > a, .wy-side-nav-search .wy-dropdown > a {
+	color: black !important;
+}
+
+.wy-side-nav-search > div.version {
+	color: black !important;
+}
+
+.ethical-sidebar{
+	display: none !important;
+}
+
+.ethical-footer{
+	display: none !important;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.align-middle{
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
