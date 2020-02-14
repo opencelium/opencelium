@@ -503,7 +503,7 @@ CREATE TABLE `detail` (
 
 LOCK TABLES `detail` WRITE;
 /*!40000 ALTER TABLE `detail` DISABLE KEYS */;
-INSERT INTO `detail` VALUES (1,'Admin','Admin',NULL,'IT Administrator','Org','12343435','17f8bcfc-7bcd-4a45-9999-65d1cfa40d97.png','2019-09-06 11:07:25','2019-12-09 11:44:58',0,NULL);
+INSERT INTO `detail` VALUES (1,'Admin','Admin',NULL,'IT Administrator','Org','12343435','17f8bcfc-7bcd-4a45-9999-65d1cfa40d97.png','2019-09-06 11:07:25','2019-12-09 11:44:58',1,NULL);
 /*!40000 ALTER TABLE `detail` ENABLE KEYS */;
 UNLOCK TABLES;
 
