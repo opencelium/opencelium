@@ -51,14 +51,12 @@ management:
         UP: 200
   endpoint:
     health:
-      show-details: alwaysx
+      show-details: always
 
-#timezone: Europe/Berlin
-
-#elasticsearch:
-#  clustername: open_celium
-#  host: localhost
-#  port: 9300
+elasticsearch:
+  clustername: open_celium
+  host: localhost
+  port: 9300
 
 #  ldap:
 #    embedded:

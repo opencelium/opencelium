@@ -17,7 +17,7 @@ refresh_db()
 {
 	if [ "$1" != "" ]
 	then
-		/usr/bin/mysql -u $1 -p < /opt/opencelium.backend/database/oc_data.sql;
+		/usr/bin/mysql -u $1 -p < /opt/src/backend/database/oc_data.sql;
 		rm -rf /var/lib/neo4j/data/*
 		/etc/init.d/neo4j restart
 	else
@@ -25,8 +25,8 @@ refresh_db()
 	fi
 }
 
-build_gradle(){
-	cd /opt/opencelium.backend/ && gradle build > /opt/logs/oc_backend.out &
+rebuild_backend(){
+	cd /opt/src/backend/ && gradle build > /opt/logs/oc_backend.out &
 }
 
 stop_backend()
@@ -35,11 +35,12 @@ stop_backend()
 }
 
 start_backend(){
-	cd /opt/opencelium.backend/ && nohup java -Dserver.port=9090 -jar /opt/opencelium.backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
+	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
 }
 
 restart_backend(){
 	stop_backend
+	sleep 10
 	start_backend
 }
 
@@ -49,7 +50,7 @@ stop_frontend()
 }
 
 start_frontend(){
-        cd /opt/opencelium.frontend/ && nohup yarn --cwd /opt/opencelium.frontend --cache-folder /opt/opencelium.frontend start_dev > /opt/logs/oc_frontend.out &
+        cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_dev > /opt/logs/oc_frontend.out &
 }
 
 restart_frontend(){
@@ -63,5 +64,5 @@ if [ "$1" != "" ]
 then
 	$1 $2
 else
-    echo "please use one of the following commands: refresh_db build_gradle stop_backend start_backend restart_backend stop_frontend start_frontend restart_frontend"
+    echo "please use one of the following commands: refresh_db rebuild_backend stop_backend start_backend restart_backend stop_frontend start_frontend restart_frontend"
 fi

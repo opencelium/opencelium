@@ -5,7 +5,7 @@ Login
 After launching the application you will see the login page. As a default admin user it has next credential data:
 
 
-- **login:** admin@gmail.com
+- **login:** admin@opencelium.io
 - **password:** 1234
 
 Login into the system! You will see the menu on top: Dashboard, Users, Groups, Connectors, Connections, Schedulers. 

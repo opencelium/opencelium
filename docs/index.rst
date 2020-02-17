@@ -27,6 +27,18 @@ This documentation is organized into a couple of sections:
    usage/schedules
    usage/apps
 
+.. toctree::
+   :caption: REST API Reference
+   :maxdepth: 2
+
+   api/authentication
+   api/user_management
+   api/user_group
+   api/component
+   api/permission
+   api/connector
+   api/connection
+   api/schedule
 
 ##################
 License
