@@ -31,6 +31,7 @@ import {updateUserFulfilled, updateUserRejected,updateUserDetailFulfilled, updat
 } from '../actions/users/update';
 import {deleteUserFulfilled, deleteUserRejected} from '../actions/users/delete';
 import {doRequest} from "../utils/auth";
+import {isString} from "../utils/app";
 
 
 /**
@@ -153,14 +154,13 @@ const updateUserEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            //#OC-194
             let profilePicture = action.payload.userDetail.profilePicture;
             let data = {...action.payload};
             let successResponse = updateUserFulfilled;
-            if(data.userDetail.profilePicture !== null){
+            if(data.userDetail.profilePicture !== null && !isString(data.userDetail.profilePicture)){
                 successResponse = updateProfilePicture;
+                delete data.userDetail.profilePicture;
             }
-            delete data.userDetail.profilePicture;
             return doRequest({url, method: 'put', data: {...data}},{
                 success: successResponse,
                 reject: updateUserRejected,},
