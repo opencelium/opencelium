@@ -56,7 +56,7 @@ class FormInputFile extends Component{
         if(this.state.browseTitle !== ''){
             browseTitle = this.state.browseTitle;
         } else{
-            if(entity[name]) {
+            if(entity[name] && entity[name].hasOwnProperty('name')) {
                 browseTitle = entity[name].name;
             }
         }

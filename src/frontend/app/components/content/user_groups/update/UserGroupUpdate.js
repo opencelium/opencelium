@@ -134,7 +134,7 @@ class UserGroupUpdate extends Component{
         result.id = userGroup.id;
         result.role = userGroup.role;
         result.description = userGroup.description;
-        result.icon = '';
+        result.icon = userGroup.icon;
         result.permissions = {};
         result.components = [];
         userGroup.components.map(component => {

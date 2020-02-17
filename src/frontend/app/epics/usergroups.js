@@ -28,6 +28,7 @@ import {
 } from '../actions/usergroups/update';
 import {deleteUserGroupFulfilled, deleteUserGroupRejected} from '../actions/usergroups/delete';
 import {doRequest} from "../utils/auth";
+import {isString} from "../utils/app";
 
 
 /**
@@ -78,11 +79,13 @@ const addUserGroupEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
+            let data = {...action.payload};
             let successResponse = addUserGroupFulfilled;
-            if(typeof action.payload.icon !== 'string' && action.payload.icon !== ''){
+            if(data.icon !== null){
                 successResponse = addGroupIcon;
             }
-            return doRequest({url, method: 'post', data: action.payload},{
+            delete data.icon;
+            return doRequest({url, method: 'post', data},{
                 success: successResponse,
                 reject: addUserGroupRejected,},
                 res => {let result = res.response; result.icon = action.payload.icon; return result;}
@@ -99,7 +102,7 @@ const addGroupIconEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `storage/groupIcon`;
             let data = new FormData();
-            data.append('userGroupId', action.payload.id);
+            data.append('userGroupId', action.payload.groupId);
             data.append('file', action.payload.icon);
             return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
                     success: addGroupIconFulfilled,
@@ -116,12 +119,14 @@ const updateUserGroupEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.UPDATE_USERGROUP)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.id}/component`;
+            let data = {...action.payload};
+            let url = `${urlPrefix}/${data.id}/component`;
             let successResponse = updateUserGroupFulfilled;
-            if(typeof action.payload.icon !== 'string' && action.payload.icon !== ''){
+            if(data.icon !== null && !isString(data.icon)){
                 successResponse = updateGroupIcon;
+                delete data.icon;
             }
-            return doRequest({url, method: 'put', data: action.payload},{
+            return doRequest({url, method: 'put', data},{
                     success: successResponse,
                     reject: updateUserGroupRejected,},
                 res => {let result = res.response; result.icon = action.payload.icon; return result;}
@@ -138,7 +143,7 @@ const updateGroupIconEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `storage/groupIcon`;
             let data = new FormData();
-            data.append('userGroupId', action.payload.id);
+            data.append('userGroupId', action.payload.groupId);
             data.append('file', action.payload.icon);
             return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
                     success: updateGroupIconFulfilled,
