@@ -166,7 +166,7 @@ class UserUpdate extends Component{
         result.organisation = user.userDetail.organisation;
         result.department = user.userDetail.department;
         result.userTitle = user.userDetail.userTitle;
-        result.profilePicture = '';
+        result.profilePicture = user.userDetail.profilePicture;
         result.userGroup = user.userGroups.groupId;
         result.description = user.userGroups.description;
         return result;
