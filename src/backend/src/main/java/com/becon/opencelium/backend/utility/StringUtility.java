@@ -37,6 +37,9 @@ public class StringUtility {
     }
 
     public static String findImageFromUrl(String path){
+        if (path == null || path.isEmpty()){
+            return null;
+        }
         List<String> parts =  Arrays.asList(path.split("/"));
 
         return parts.stream()

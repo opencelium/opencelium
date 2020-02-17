@@ -107,7 +107,7 @@ public class FileController {
         //Generate new file name
         String newFilename = UUID.randomUUID().toString() + "." + extension;
 
-        // If user group has an old image, delete the picture from image
+        // If user group has an old image, delete the picture from files
         if (userRole.getIcon() != null){
             storageService.delete(userRole.getIcon());
         }
