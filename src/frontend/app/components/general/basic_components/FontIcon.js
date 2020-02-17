@@ -34,8 +34,4 @@ class FontIcon extends Component{
     }
 }
 
-FontIcon.propTypes = {
-    value: PropTypes.string.isRequired,
-};
-
 export default FontIcon;

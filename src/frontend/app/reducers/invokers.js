@@ -17,6 +17,7 @@ import {List, fromJS} from 'immutable';
 
 import {InvokersAction} from '../utils/actions';
 import {API_REQUEST_STATE} from "../utils/constants/app";
+import {isArray} from "../utils/app";
 
 
 const initialState = fromJS({
@@ -42,7 +43,12 @@ const reducer = (state = initialState, action) => {
         case InvokersAction.FETCH_INVOKERS:
             return state.set('fetchingInvokers', API_REQUEST_STATE.START).set('error', null);
         case InvokersAction.FETCH_INVOKERS_FULFILLED:
-            return state.set('fetchingInvokers', API_REQUEST_STATE.FINISH).set('invokers', List(action.payload));
+            if(isArray(action.payload)){
+                invokers = List(action.payload);
+            } else{
+                invokers = List([]);
+            }
+            return state.set('fetchingInvokers', API_REQUEST_STATE.FINISH).set('invokers', invokers);
         case InvokersAction.FETCH_INVOKERS_REJECTED:
             return state.set('fetchingInvokers', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case InvokersAction.ADD_INVOKER:

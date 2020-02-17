@@ -16,7 +16,7 @@
 const fs = require("fs");
 const fileNames = ['rc-datetime-picker/dist/picker.css', 'rc-datetime-picker/src/less/picker.less','rc-datetime-picker/dist/rc-datetime-picker.js',
     'rc-datetime-picker/dist/rc-datetime-picker.cjs.js', 'react-toolbox/lib/dropdown/Dropdown.js','react-toolbox/lib/link/Link.js', 'storm-react-diagrams/dist/main.js',
-    'storm-react-diagrams/dist/main.js.map', 'storm-react-diagrams/dist/style.min.css', 'react-json-view/dist/main.js'];
+    'storm-react-diagrams/dist/main.js.map', 'storm-react-diagrams/dist/style.min.css', 'react-json-view/dist/main.js', 'react-loadable/lib/index.js'];
 
 
 /**

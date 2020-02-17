@@ -412,7 +412,7 @@ export const LIST_TOURS = {
             content: 'Press U to update the card',
         },{
             selector: '.tour-step-delete-add',
-            content: 'Click on the button or press Alt + a to add a new element',
+            content: 'Click on the button or press Alt + to add a new element',
         },
     ],
     card_1 : [
@@ -433,7 +433,7 @@ export const LIST_TOURS = {
             content: 'Press D to delete the card',
         },{
             selector: '.tour-step-delete-add',
-            content: 'Click on the button or press Alt + a to add a new element',
+            content: 'Click on the button or press Alt + to add a new element',
         },
     ],
     card_2: [
@@ -454,7 +454,7 @@ export const LIST_TOURS = {
             content: 'Press D to delete the card',
         },{
             selector: '.tour-step-delete-add',
-            content: 'Click on the button or press Alt + a to add a new element',
+            content: 'Click on the button or press Alt + to add a new element',
         },
     ]
 };

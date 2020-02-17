@@ -38,7 +38,6 @@ class TooltipFontIcon extends Component{
 }
 
 TooltipFontIcon.propTypes = {
-    value: PropTypes.string.isRequired,
     tooltip: PropTypes.string.isRequired,
 };
 
