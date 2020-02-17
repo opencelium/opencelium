@@ -39,6 +39,8 @@ module.exports = merge(common, {
         new webpack.EvalSourceMapDevToolPlugin(),
         new BrowserSyncPlugin({
             host: 'localhost',
+            ghostMode: false,
+            codeSync: false,
             port: 8888,
             proxy: {
                 target: 'http://localhost:8081/',
