@@ -94,9 +94,6 @@ public class UserServiceImpl implements UserService{
         User user = new User();
         User userDb = userRepository.findById(userRequestResource.getUserId()).orElse(null);
         UserRole userRole = userRoleRepository.findById(userRequestResource.getUserGroup()).orElse(null);
-        UserDetail userDetail = detailService.toEntity(userRequestResource.getUserDetail());
-        Activity activity  = activityService.findById(userRequestResource.getUserId()).orElse(null);
-
         if ((userDb == null) && (userRequestResource.getPassword() == null || userRequestResource.getPassword().isEmpty())){
             throw new RuntimeException("PASSWORD_IS_NULL");
         }
@@ -108,6 +105,14 @@ public class UserServiceImpl implements UserService{
         if (userDb != null && (userRequestResource.getPassword() == null || userRequestResource.getPassword().isEmpty())){
             user.setPassword(userDb.getPassword());
         }
+
+        if (userDb != null){
+            userRequestResource.getUserDetail().setProfilePicture(userDb.getUserDetail().getProfilePicture());
+        }
+
+        UserDetail userDetail = detailService.toEntity(userRequestResource.getUserDetail());
+        Activity activity  = activityService.findById(userRequestResource.getUserId()).orElse(null);
+
         user.setId(userRequestResource.getUserId());
         user.setUserRole(userRole);
         user.setActivity(activity);

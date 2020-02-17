@@ -50,6 +50,9 @@ public class InvokerConfiguration {
         List<Document> invokers = getAllInvokers();
         Map<String, Invoker> container = new HashMap<>();
         invokers.forEach(document -> {
+            if (document == null){
+                return;
+            }
             InvokerParserImp parser = new InvokerParserImp(document);
             File f = new File(document.getDocumentURI());
             String invoker = FilenameUtils.removeExtension(f.getName());
@@ -73,6 +76,10 @@ public class InvokerConfiguration {
             return allInvokers.map(p -> new File(filePath.toString() + "/" + p.getFileName()))
                     .map(file -> {
                         try {
+                            System.out.println(FilenameUtils.getExtension(file.getName()));
+                            if(!FilenameUtils.getExtension(file.getName()).equals("xml")){
+                                return null;
+                            }
                             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                             return dBuilder.parse(file);
                         }

@@ -85,9 +85,7 @@ public class UserDetail {
         this.organisation = userDetailResource.getOrganisation();
         this.department = userDetailResource.getDepartment();
         this.title = userDetailResource.getUserTitle();
-        if (userDetailResource.getProfilePicture() != null){
-            this.profilePicture = StringUtility.findImageFromUrl(userDetailResource.getProfilePicture());
-        }
+        this.profilePicture = StringUtility.findImageFromUrl(userDetailResource.getProfilePicture());
         this.tutorial = userDetailResource.isAppTour();
         this.theme = userDetailResource.getTheme();
     }

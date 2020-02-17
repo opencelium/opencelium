@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,9 @@ public class UserController {
 
     @Autowired
     private ActivityServiceImpl activityService;
+
+    @Autowired
+    private StorageService storageService;
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable("id") int id) throws IOException {
@@ -127,10 +131,10 @@ public class UserController {
                 .findById(id)
                 .map(
                         p -> {
-//                            // if user has an image delete the image from storage
-//                            if (p.getUserDetail().getProfilePicture() != null){
-//                                storageService.delete(p.getUserDetail().getProfilePicture());
-//                            }
+                            // if user has an image delete the image from storage
+                            if (p.getUserDetail().getProfilePicture() != null){
+                                storageService.delete(p.getUserDetail().getProfilePicture());
+                            }
 
                             userService.deleteById(id);
                             return ResponseEntity.noContent().build();
