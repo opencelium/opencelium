@@ -20,7 +20,7 @@ const path = require('path');
 const integrateLibs = require('./plugins/LibsIntegration');
 integrateLibs();
 
-const getScopedName = require('./plugins/getScopedName');
+//const getScopedName = require('./plugins/getScopedName');
 
 module.exports = {
     resolve: {
@@ -41,10 +41,10 @@ module.exports = {
                 test: [/\.scss$/, /\.css$/],
                 use: [
                     {
-                        loader: 'style-loader'  // creates style nodes from JS strings
+                        loader: 'style-loader'
                     },
                     {
-                        loader: "css-loader",   // translates CSS into CommonJS
+                        loader: "css-loader",
                         options: {
                             modules: true,
                             sourceMap: false,
@@ -58,10 +58,10 @@ module.exports = {
                         }
                     },
                     {
-                        loader: "postcss-loader"    // loader for webpack to process CSS with PostCSS
+                        loader: "postcss-loader"
                     },
                     {
-                        loader: "sass-loader",  // compiles Sass to CSS, using Node Sass by default
+                        loader: "sass-loader",
                         options: {
                             includePaths: ["node_modules"]
                         }
