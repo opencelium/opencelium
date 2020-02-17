@@ -97,7 +97,7 @@ const importTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.IMPORT_TEMPLATE)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/upload`;
+            let url = `storage/${urlPrefix}`;
             let data = new FormData();
             data.append('file', action.payload.template);
             return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
