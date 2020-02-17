@@ -25,6 +25,10 @@ import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.storage.UserStorageService;
+import com.becon.opencelium.backend.template.entity.Template;
+import com.becon.opencelium.backend.template.service.TemplateService;
+import com.becon.opencelium.backend.template.service.TemplateServiceImp;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -48,6 +52,9 @@ public class FileController {
 
     @Autowired
     private UserRoleServiceImpl userRoleService;
+
+    @Autowired
+    private TemplateServiceImp templateService;
 
     private final UserStorageService storageService;
 
@@ -122,6 +129,34 @@ public class FileController {
         storageService.store(file, newFilename);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/template")
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
+        // Get extension
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (!checkJsonExtension(extension)){
+            throw new StorageException("File should be JSON");
+        }
+
+        try {
+            //Generate new file name
+            String newFilename = UUID.randomUUID().toString() + "." + extension;
+            // Save file in storage
+            ObjectMapper objectMapper = new ObjectMapper();
+            Template template = objectMapper.readValue(file.getBytes(), Template.class);
+            templateService.save(template);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    private boolean checkJsonExtension(String extension){
+        if (!(extension.equals("json") || extension.equals("JSON"))){
+            return false;
+        }
+        return true;
     }
 
     @GetMapping("/files/{filename:.+}")

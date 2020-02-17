@@ -130,26 +130,7 @@ public class TemplateController {
         }
     }
 
-    @PostMapping(value = "/upload")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
-        // Get extension
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (checkJsonExtension(extension)){
-            throw new StorageException("File should be JSON");
-        }
 
-        try {
-            //Generate new file name
-            String newFilename = UUID.randomUUID().toString() + "." + extension;
-            // Save file in storage
-            ObjectMapper objectMapper = new ObjectMapper();
-            Template template = objectMapper.readValue(file.getBytes(), Template.class);
-            templateService.save(template);
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
-        return ResponseEntity.ok().build();
-    }
 
     @GetMapping("/file/{filename:.+}")
     @ResponseBody
@@ -185,12 +166,5 @@ public class TemplateController {
     public ResponseEntity<?> delete(@PathVariable String id){
         templateService.deleteById(id);
         return ResponseEntity.ok().build();
-    }
-
-    private boolean checkJsonExtension(String extension){
-        if (!(extension.equals("json") || extension.equals("JSON"))){
-            return false;
-        }
-        return true;
     }
 }
