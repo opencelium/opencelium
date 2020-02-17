@@ -80,7 +80,7 @@ const updateAuthUserLanguageEpic = (action$, store) => {
                     }
                 }),
                 reject: (ajax) => {
-                    return loginUserRejected({'message': ajax.response.hasOwnProperty('error') && ajax.response.error === 'Bad credentials' ? 'WRONG_CREDENTIALS' : 'SERVER_NOT_FOUND'});
+                    return loginUserRejected({'message': ajax.response && ajax.response.hasOwnProperty('error') && ajax.response.error === 'Bad credentials' ? 'WRONG_CREDENTIALS' : 'SERVER_NOT_FOUND'});
                 },
                 cancel: action$.ofType(AuthAction.LOG_IN_CANCELED)},
                 res => {
