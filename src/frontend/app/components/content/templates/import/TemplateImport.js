@@ -64,6 +64,7 @@ class TemplateImport extends Component{
 
     import(){
         this.props.importTemplate({template: this.state.templateFile});
+        this.toggleImport();
     }
 
     render(){
