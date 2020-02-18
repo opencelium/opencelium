@@ -41,7 +41,7 @@ export function sortByIndexFunction(a, b){
  * callback to search by name
  */
 export function searchByNameFunction(element, searchValue){
-    let elementValue = element.hasOwnProperty('name') ? element.name.toUpperCase() : element.hasOwnProperty('title') ? element.title.toUpperCase() : '';
+    let elementValue = element && element.hasOwnProperty('name') ? element.name.toUpperCase() : element && element.hasOwnProperty('title') ? element.title.toUpperCase() : '';
     if(elementValue === ''){
         if(element.hasOwnProperty('userDetail') && element.userDetail && element.userDetail.hasOwnProperty('name')){
             elementValue = element.userDetail.name.toUpperCase();
@@ -58,8 +58,8 @@ export function searchByNameFunction(element, searchValue){
  * callback to sort by name
  */
 export function sortByNameFunction(a, b){
-    let propertyA = a.hasOwnProperty('name') ? a.name.toUpperCase() : a.hasOwnProperty('title') ? a.title.toUpperCase() : '';
-    let propertyB = b.hasOwnProperty('name') ? b.name.toUpperCase() : b.hasOwnProperty('title') ? b.title.toUpperCase() : '';
+    let propertyA = a && a.hasOwnProperty('name') ? a.name.toUpperCase() : a.hasOwnProperty('title') ? a.title.toUpperCase() : '';
+    let propertyB = b && b.hasOwnProperty('name') ? b.name.toUpperCase() : b.hasOwnProperty('title') ? b.title.toUpperCase() : '';
     if(propertyA === '' && propertyB === ''){
         if(a.hasOwnProperty('userDetail') && a.userDetail && a.userDetail.hasOwnProperty('name')){
             propertyA = a.userDetail.name.toUpperCase();

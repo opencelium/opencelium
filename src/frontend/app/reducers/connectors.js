@@ -15,15 +15,19 @@
 
 import {List, fromJS} from 'immutable';
 
-import {ConnectorsAction} from '../utils/actions';
+import {ConnectorsAction, UserGroupsAction} from '../utils/actions';
 import { addConnectorSubscriber, updateConnectorSubscriber, deleteConnectorSubscriber } from '../utils/socket/connectors';
 import {API_REQUEST_STATE} from "../utils/constants/app";
+import {updateObj} from "../utils/app";
+import {updateUserGroupSubscriber} from "../utils/socket/userGroups";
 
 
 const initialState = fromJS({
     fetchingConnector: API_REQUEST_STATE.INITIAL,
     addingConnector: API_REQUEST_STATE.INITIAL,
+    addingConnectorIcon: API_REQUEST_STATE.INITIAL,
     updatingConnector: API_REQUEST_STATE.INITIAL,
+    updatingConnectorIcon: API_REQUEST_STATE.INITIAL,
     fetchingConnectors: API_REQUEST_STATE.INITIAL,
     deletingConnector: API_REQUEST_STATE.INITIAL,
     testingConnector: API_REQUEST_STATE.INITIAL,
@@ -69,6 +73,12 @@ const reducer = (state = initialState, action) => {
             return state.set('addingConnector', API_REQUEST_STATE.FINISH).set('connectors', connectors.set(connectors.size, action.payload));
         case ConnectorsAction.ADD_CONNECTOR_REJECTED:
             return state.set('addingConnector', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case ConnectorsAction.ADD_CONNECTORICON:
+            return state.set('addingConnectorIcon', API_REQUEST_STATE.START).set('error', null);
+        case ConnectorsAction.ADD_CONNECTORICON_FULFILLED:
+            return state.set('addingConnectorIcon', API_REQUEST_STATE.FINISH).set('addingConnector', API_REQUEST_STATE.FINISH).set('connectors', connectors.set(connectors.size, action.payload));
+        case ConnectorsAction.ADD_CONNECTORICON_REJECTED:
+            return state.set('addingConnectorIcon', API_REQUEST_STATE.ERROR).set('addingConnector', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case ConnectorsAction.UPDATE_CONNECTOR:
             return state.set('updatingConnector', API_REQUEST_STATE.START).set('error', null);
         case ConnectorsAction.UPDATE_CONNECTOR_FULFILLED:
@@ -83,6 +93,20 @@ const reducer = (state = initialState, action) => {
             return state.set('updatingConnector', API_REQUEST_STATE.FINISH);
         case ConnectorsAction.UPDATE_CONNECTOR_REJECTED:
             return state.set('updatingConnector', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case ConnectorsAction.UPDATE_CONNECTORICON:
+            return state.set('updatingConnectorIcon', API_REQUEST_STATE.START).set('error', null);
+        case ConnectorsAction.UPDATE_CONNECTORICON_FULFILLED:
+            updateConnectorSubscriber(action.payload);
+            index = connectors.findIndex(function (connector) {
+                return connector.id === action.payload.id;
+            });
+            if(index >= 0) {
+                connector = action.payload;
+                return state.set('updatingConnector', API_REQUEST_STATE.FINISH).set('connectors', connectors.set(index, connector));
+            }
+            return state.set('updatingConnector', API_REQUEST_STATE.FINISH);
+        case ConnectorsAction.UPDATE_CONNECTORICON_REJECTED:
+            return state.set('updatingConnector', API_REQUEST_STATE.ERROR).set('updatingConnectorIcon', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case ConnectorsAction.DELETE_CONNECTOR:
             return state.set('deletingConnector', API_REQUEST_STATE.START).set('error', null);
         case ConnectorsAction.DELETE_CONNECTOR_FULFILLED:

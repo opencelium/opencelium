@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { ConnectorsAction } from '../../utils/actions';
+import {ConnectorsAction} from '../../utils/actions';
 
 
 /**
@@ -55,9 +55,49 @@ const updateConnectorRejected = (error) => {
 };
 
 
+/**
+ * update icon of the connector
+ * @param connector
+ * @returns {{type: string, payload: {}}}
+ */
+const updateConnectorIcon = (connector) => {
+    return {
+        type: ConnectorsAction.UPDATE_CONNECTORICON,
+        payload: connector,
+    };
+};
+
+/**
+ * update icon of the connector fulfilled
+ * @param connector
+ * @returns {{type: string, payload: {}}}
+ */
+const updateConnectorIconFulfilled = (connector) => {
+    return {
+        type: ConnectorsAction.UPDATE_CONNECTORICON_FULFILLED,
+        payload: connector,
+    };
+};
+
+/**
+ * update icon of the connector rejected
+ * @param error
+ * @returns {promise}
+ */
+const updateConnectorIconRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectorsAction.UPDATE_CONNECTORICON_REJECTED,
+        payload: error
+    });
+};
+
+
 
 export{
     updateConnector,
     updateConnectorFulfilled,
     updateConnectorRejected,
+    updateConnectorIcon,
+    updateConnectorIconFulfilled,
+    updateConnectorIconRejected,
 };

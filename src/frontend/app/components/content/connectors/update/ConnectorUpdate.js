@@ -29,7 +29,7 @@ import {SingleComponent} from "../../../../decorators/SingleComponent";
 import { AuthenticationTypes, DefaultAuthenticationType } from '../AuthenticationTypes';
 import {INPUTS} from "../../../../utils/constants/inputs";
 import {isString} from './../../../../utils/app';
-import {CONNECTOR_TOURS} from "../../../../utils/constants/tours";
+import {CONNECTOR_TOURS, USERGROUP_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
 import {setFocusById} from "../../../../utils/app";
@@ -55,9 +55,10 @@ function mapStateToProps(state){
 
 function mapConnector(connector){
     let data = {};
-    const {id, title, description, invoker, authenticationFields} = connector;
+    const {id, title, icon, description, invoker, authenticationFields} = connector;
     data['id'] = id;
     data['title'] = title;
+    data['icon'] = icon;
     data['description'] = description;
     data['invoker'] = {name: invoker.hasOwnProperty('value') ? invoker.value : invoker};
     data['requestData'] = {};
@@ -151,6 +152,7 @@ class ConnectorUpdate extends Component{
         let data = {};
         data['id'] = parseInt(this.props.params.id);
         data['title'] = connector.title;
+        data['icon'] = connector.icon;
         data['description'] = connector.description;
         data['invoker'] = {name: connector.invoker.hasOwnProperty('value') ? connector.invoker.value : connector.invoker};
         data['requestData'] = {};
@@ -373,6 +375,11 @@ class ConnectorUpdate extends Component{
                     callback: ::this.chooseInvoker,
                     check: (e, entity) => ::this.validateInvoker(e, entity),
                     description: {name: 'description', label: t('UPDATE.FORM.INVOKER_DESCRIPTION'), values: descriptions},
+                },
+                {
+                    ...INPUTS.ICON,
+                    label: t('UPDATE.FORM.ICON'),
+                    browseTitle: t('UPDATE.FORM.ICON_PLACEHOLDER'),
                 },
             ],
             hint: {text: t('UPDATE.FORM.HINT_1'), openTour: ::this.openTour},

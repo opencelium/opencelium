@@ -20,9 +20,12 @@ import {
 } from '../actions/connectors/fetch';
 import {
     addConnectorFulfilled ,addConnectorRejected,
+    addConnectorIconFulfilled, addConnectorIconRejected,
 } from '../actions/connectors/add';
 import {testConnectorFulfilled, testConnectorRejected} from '../actions/connectors/test';
-import {updateConnectorFulfilled, updateConnectorRejected,
+import {
+    updateConnectorFulfilled, updateConnectorRejected,
+    updateConnectorIconFulfilled, updateConnectorIconRejected,
 } from '../actions/connectors/update';
 import {deleteConnectorFulfilled, deleteConnectorRejected} from '../actions/connectors/delete';
 import {doRequest} from "../utils/auth";
@@ -98,6 +101,24 @@ const addConnectorEpic = (action$, store) => {
             );
         });
 };
+/**
+ * add connector icon to the corresponded connector
+ */
+const addConnectorIconEpic = (action$, store) => {
+    return action$.ofType(ConnectorsAction.ADD_CONNECTORICON)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `storage/groupIcon`;
+            let data = new FormData();
+            data.append('connectorId', action.payload.connectorId);
+            data.append('file', action.payload.icon);
+            return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
+                    success: addConnectorIconFulfilled,
+                    reject: addConnectorIconRejected,},
+                res => {return action.payload;}
+            );
+        });
+};
 
 
 /**
@@ -111,6 +132,25 @@ const updateConnectorEpic = (action$, store) => {
             return doRequest({url, method: 'put', data: action.payload},{
                     success: updateConnectorFulfilled,
                     reject: updateConnectorRejected,},
+            );
+        });
+};
+
+/**
+ * update one connector icon
+ */
+const updateConnectorIconEpic = (action$, store) => {
+    return action$.ofType(ConnectorsAction.UPDATE_CONNECTORICON)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `storage/groupIcon`;
+            let data = new FormData();
+            data.append('connectorId', action.payload.connectorId);
+            data.append('file', action.payload.icon);
+            return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
+                    success: updateConnectorIconFulfilled,
+                    reject: updateConnectorIconRejected,},
+                res => {return action.payload;}
             );
         });
 };
@@ -136,7 +176,9 @@ export {
     fetchConnectorEpic,
     fetchConnectorsEpic,
     addConnectorEpic,
+    addConnectorIconEpic,
     updateConnectorEpic,
+    updateConnectorIconEpic,
     deleteConnectorEpic,
     testConnectorEpic,
 };

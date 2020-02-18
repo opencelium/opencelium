@@ -52,9 +52,10 @@ function mapStateToProps(state){
 
 function mapConnector(connector){
     let data = {};
-    const {title, description, invoker, authenticationFields} = connector;
+    const {title, description, icon, invoker, authenticationFields} = connector;
     data['title'] = title;
     data['description'] = description;
+    data['icon'] = icon;
     data['invoker'] = {name: invoker.hasOwnProperty('value') ? invoker.value : invoker};
     data['requestData'] = {};
     for(let field in authenticationFields){
@@ -353,6 +354,11 @@ class ConnectorAdd extends Component{
                     description: {name: 'description', label: t('ADD.FORM.INVOKER_DESCRIPTION'), values: descriptions},
                     callback: ::this.chooseInvoker,
                     check: (e, entity) => ::this.validateInvoker(e, entity),
+                },
+                {
+                    ...INPUTS.ICON,
+                    label: t('ADD.FORM.ICON'),
+                    browseTitle: t('ADD.FORM.ICON_PLACEHOLDER')
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
