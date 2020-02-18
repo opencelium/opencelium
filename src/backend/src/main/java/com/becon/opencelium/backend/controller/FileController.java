@@ -24,6 +24,7 @@ import com.becon.opencelium.backend.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateService;
@@ -146,10 +147,12 @@ public class FileController {
             ObjectMapper objectMapper = new ObjectMapper();
             Template template = objectMapper.readValue(file.getBytes(), Template.class);
             templateService.save(template);
+            final org.springframework.hateoas.Resource<TemplateResource> resource
+                    = new org.springframework.hateoas.Resource<>(templateService.toResource(template));
+            return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             throw new RuntimeException(e);
         }
-        return ResponseEntity.ok().build();
     }
 
     private boolean checkJsonExtension(String extension){

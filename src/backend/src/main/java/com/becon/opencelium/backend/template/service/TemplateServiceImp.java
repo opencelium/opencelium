@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -84,6 +85,9 @@ public class TemplateServiceImp implements TemplateService {
     public List<Template> findByFromInvokerAndToInvoker(String fromInvoker, String toInvoker) {
         List<Template> result = new ArrayList<>();
         getAll().forEach(t -> {
+            if (t == null){
+                return;
+            }
             if (t.getConnection().getFromConnector().getInvoker().getName().equals(fromInvoker) &&
                     t.getConnection().getToConnector().getInvoker().getName().equals(toInvoker)){
                 result.add(t);
@@ -131,6 +135,9 @@ public class TemplateServiceImp implements TemplateService {
             ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)
                     .map(path -> {
+                        if(!FilenameUtils.getExtension(path.toString()).equals("json")){
+                            return null;
+                        }
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));

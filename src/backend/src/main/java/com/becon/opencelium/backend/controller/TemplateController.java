@@ -105,6 +105,9 @@ public class TemplateController {
 
         List<TemplateResource> templateResources = new ArrayList<>();
         templates.forEach(t -> {
+            if (t == null){
+                return;
+            }
             TemplateResource templateResource = templateService.toResource(t);
             templateResources.add(templateResource);
         });
