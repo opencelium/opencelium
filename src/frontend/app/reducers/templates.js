@@ -73,7 +73,10 @@ const reducer = (state = initialState, action) => {
         case TemplatesAction.IMPORT_TEMPLATE:
             return state.set('importingTemplate', API_REQUEST_STATE.START).set('error', null);
         case TemplatesAction.IMPORT_TEMPLATE_FULFILLED:
-            return state.set('importingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.set(templates.size, action.payload));
+            if(action.payload) {
+                return state.set('importingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.set(templates.size, action.payload));
+            }
+            return state.set('importingTemplate', API_REQUEST_STATE.FINISH);
         case TemplatesAction.IMPORT_TEMPLATE_REJECTED:
             return state.set('importingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case TemplatesAction.EXPORT_TEMPLATE:
