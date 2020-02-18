@@ -76,7 +76,6 @@ public class InvokerConfiguration {
             return allInvokers.map(p -> new File(filePath.toString() + "/" + p.getFileName()))
                     .map(file -> {
                         try {
-                            System.out.println(FilenameUtils.getExtension(file.getName()));
                             if(!FilenameUtils.getExtension(file.getName()).equals("xml")){
                                 return null;
                             }
