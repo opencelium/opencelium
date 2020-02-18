@@ -75,7 +75,7 @@ public class TemplateServiceImp implements TemplateService {
             String json = objectMapper.writeValueAsString(template);
             FileWriter jsonTemplate = new FileWriter(PathConstant.TEMPLATE + filename);
             jsonTemplate.write(json);
-            jsonTemplate.flush();
+            jsonTemplate.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
