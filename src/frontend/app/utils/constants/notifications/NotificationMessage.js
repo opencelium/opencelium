@@ -36,18 +36,13 @@ class NotificationMessage extends Component{
             notificationMessage = NotificationMessageHandlers[status][message](params);
         } else{
             if(params && params.hasOwnProperty('message') && params.message !== 'No message available'){
-                if(params.message === params.message.toUpperCase()) {
+                if(i18n.exists(`notifications:${status}.${message}.${params.message}`)) {
                     notificationMessage = t(status + '.' + message + '.' + params.message);
                     if (notificationMessage === `${status}.${message}.${params.message}`) {
                         notificationMessage = t(`${status}.${message}.__DEFAULT__`);
                     }
                 } else{
-
-                    if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
-                        notificationMessage = t(`${status}.${message}.__DEFAULT__`);
-                    } else {
-                        notificationMessage = t(status + '.' + message);
-                    }
+                    notificationMessage = params.message;
                 }
             } else {
                 if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {

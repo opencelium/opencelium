@@ -29,13 +29,15 @@ class CardIcon extends Component{
         super(props);
 
         this.state = {
-            isCorrectIcon: false,
+            isCorrectIcon: true,
         };
+        this.notMounted = true;
     }
 
     componentDidMount(){
         const {icon} = this.props;
         checkImage(icon, () => this.setState({isCorrectIcon: true}), () => this.setState({isCorrectIcon: false}));
+        this.notMounted = false;
     }
 
     renderIcon(){
@@ -51,12 +53,15 @@ class CardIcon extends Component{
     }
 
     render(){
+        if(this.notMounted){
+            return null;
+        }
         const {isCorrectIcon} = this.state;
-        const {authUser} = this.props;
+        const {authUser, style} = this.props;
         let classNames = ['card_avatar', 'card_avatar_default'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <div className={isCorrectIcon ? styles[classNames.card_avatar] : styles[classNames.card_avatar_default]}>
+            <div className={isCorrectIcon ? styles[classNames.card_avatar] : styles[classNames.card_avatar_default]} style={style}>
                 {this.renderIcon()}
             </div>
         );
@@ -66,6 +71,7 @@ class CardIcon extends Component{
 CardIcon.defaultProps = {
     authUser: PropTypes.object.isRequired,
     icon: '',
+    style: {},
 };
 
 export default CardIcon;

@@ -69,45 +69,6 @@ const fetchAppsCanceled = (message) => {
 };
 
 /**
- * load apps' link if exist
- * @returns {{type: string}}
- */
-const loadAppsLink = (app, settings = {}) => {
-    return {
-        type: AppsAction.LOAD_APPSLINK,
-        payload: app,
-        settings,
-    };
-};
-
-/**
- * load apps' link if exist fulfilled
- * @param app
- * @param settings = {background: bool}
- *      background - if true -> does not show a notification; else -> show a notification
- * @returns {{type: string, payload: []}}
- */
-const loadAppsLinkFulfilled = (app, settings = {}) => {
-    return {
-        type: AppsAction.LOAD_APPSLINK_FULFILLED,
-        payload: app,
-        settings
-    };
-};
-
-/**
- * load apps' link if exist rejected
- * @param error
- * @returns {promise}
- */
-const loadAppsLinkRejected = (error) => {
-    return Rx.Observable.of({
-        type: AppsAction.LOAD_APPSLINK_REJECTED,
-        payload: error
-    });
-};
-
-/**
  * check app
  * @param app
  * @returns {{type: string}}
@@ -137,10 +98,10 @@ const checkAppFulfilled = (result) => {
  * @returns {promise}
  */
 const checkAppRejected = (error) => {
-    return Rx.Observable.of({
+    return {
         type: AppsAction.CHECK_APP_REJECTED,
         payload: error
-    });
+    };
 };
 
 /**
@@ -160,9 +121,6 @@ export {
     fetchAppsFulfilled,
     fetchAppsRejected,
     fetchAppsCanceled,
-    loadAppsLink,
-    loadAppsLinkFulfilled,
-    loadAppsLinkRejected,
     checkApp,
     checkAppFulfilled,
     checkAppRejected,

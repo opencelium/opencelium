@@ -17,11 +17,11 @@ import {List, fromJS} from 'immutable';
 
 import {AppsAction} from '../utils/actions';
 import {API_REQUEST_STATE} from "../utils/constants/app";
+import {APP_STATUS_UP} from "../utils/constants/url";
 
 
 const initialState = fromJS({
     fetchingApps: API_REQUEST_STATE.INITIAL,
-    loadingAppsLink: API_REQUEST_STATE.INITIAL,
     checkingApp: API_REQUEST_STATE.INITIAL,
     checkingAppResult: null,
     app: null,
@@ -45,16 +45,10 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingApps', API_REQUEST_STATE.FINISH).set('apps', List(action.payload));
         case AppsAction.FETCH_APPS_REJECTED:
             return state.set('fetchingApps', API_REQUEST_STATE.PAUSE).set('error', action.payload);
-        case AppsAction.LOAD_APPSLINK:
-            return state.set('loadingAppsLink', API_REQUEST_STATE.START);
-        case AppsAction.LOAD_APPSLINK_FULFILLED:
-            window.open(action.payload.url, '_blank').focus();
-            return state.set('loadingAppsLink', API_REQUEST_STATE.FINISH);
-        case AppsAction.LOAD_APPSLINK_REJECTED:
-            return state.set('loadingAppsLink', API_REQUEST_STATE.ERROR);
         case AppsAction.CHECK_APP:
             return state.set('checkingApp', API_REQUEST_STATE.START).set('error', null).set('checkingAppResult', null);
         case AppsAction.CHECK_APP_FULFILLED:
+            window.open(action.payload.link, '_blank').focus();
             return state.set('checkingApp', API_REQUEST_STATE.FINISH).set('checkingAppResult', action.payload);
         case AppsAction.CHECK_APP_REJECTED:
             return state.set('checkingApp', API_REQUEST_STATE.PAUSE).set('error', action.payload);

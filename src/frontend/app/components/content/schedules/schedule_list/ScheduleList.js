@@ -142,7 +142,7 @@ class ScheduleList extends Component{
      * to check status of Elastic Search
      */
     checkElasticSearch(){
-        this.props.checkApp({name: 'elasticsearch'});
+        this.props.checkApp({value: 'elasticsearch'});
     }
 
     /**

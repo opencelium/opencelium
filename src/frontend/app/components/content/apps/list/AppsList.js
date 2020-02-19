@@ -16,7 +16,7 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchApps, fetchAppsCanceled, loadAppsLink} from '../../../../actions/apps/fetch';
+import {fetchApps, fetchAppsCanceled, checkApp} from '../../../../actions/apps/fetch';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "../../../../decorators/ListComponent";
@@ -24,7 +24,7 @@ import {AppPermissions} from "../../../../utils/constants/permissions";
 import {permission} from "../../../../decorators/permission";
 import {APP_TOURS} from "../../../../utils/constants/tours";
 import {tour} from "../../../../decorators/tour";
-import {APP_STATUS_DOWN} from "../../../../utils/constants/url";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "../../../../utils/constants/url";
 
 
 const prefixUrl = '/apps';
@@ -35,7 +35,7 @@ function mapStateToProps(state){
     return {
         authUser: auth.get('authUser'),
         fetchingApps: apps.get('fetchingApps'),
-        loadingAppsLink: apps.get('loadingAppsLink'),
+        checkingApp: apps.get('checkingApp'),
         apps: apps.get('apps').toJS(),
         isCanceled: apps.get('isCanceled'),
         isRejected: apps.get('isRejected'),
@@ -45,7 +45,7 @@ function mapStateToProps(state){
 /**
  * List of the Applications
  */
-@connect(mapStateToProps, {fetchApps, fetchAppsCanceled, loadAppsLink})
+@connect(mapStateToProps, {fetchApps, fetchAppsCanceled, checkApp})
 @permission(AppPermissions.READ, true)
 @withTranslation('apps')
 @ListComponent('apps')
@@ -57,7 +57,7 @@ class AppsList extends Component{
     }
 
     render(){
-        const {authUser, t, apps, params, setTotalPages, openTour, loadAppsLink, loadingAppsLink} = this.props;
+        const {authUser, t, apps, params, setTotalPages, openTour, checkApp, checkingApp} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -65,10 +65,23 @@ class AppsList extends Component{
         let mapEntity = {};
         mapEntity.map = (app) => {
             let result = {};
+            let subtitle = '';
+            if(app.status) {
+                switch (app.status) {
+                    case APP_STATUS_UP:
+                        subtitle = t('LIST.APP_UP');
+                        break;
+                    case APP_STATUS_DOWN:
+                        subtitle = t('LIST.APP_DOWN');
+                        break;
+                }
+            }
             result.id = app.id;
             result.title = app.name;
-            result.subtitle = app.status ? app.status : APP_STATUS_DOWN;
+            result.subtitle = subtitle;
             result.avatar = app.icon;
+            result.value = app.value;
+            result.link = app.link;
             return result;
         };
         mapEntity.getOnCardClickLink = (app) => {return `${app.link}`;};
@@ -80,7 +93,7 @@ class AppsList extends Component{
             setTotalPages={setTotalPages}
             permissions={AppPermissions}
             authUser={authUser}
-            load={{loadLink: loadAppsLink, loadingLink: loadingAppsLink}}
+            load={{loadLink: checkApp, loadingLink: checkingApp}}
             containerStyles={{marginBottom: '70px'}}
         />;
     }

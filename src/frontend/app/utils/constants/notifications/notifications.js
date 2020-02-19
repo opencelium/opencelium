@@ -71,7 +71,7 @@ export const EntitiesWithNotification = [
     {name: WebHooksAction.ADD_WEBHOOK, types: ['FULFILLED', 'REJECTED',]},
     {name: WebHooksAction.DELETE_WEBHOOK, types: ['FULFILLED', 'REJECTED',]},
     {name: WebHooksAction.COPYTOCLIPBOARD_WEBHOOK, types: ['FULFILLED']},
-    {name: AppsAction.LOAD_APPSLINK, types: ['REJECTED']},
+    {name: AppsAction.CHECK_APP, types: ['REJECTED']},
     {name: AdminCardsAction.LOAD_ADMINCARD, types: ['REJECTED']},
     {name: InvokersAction.ADD_INVOKER, types: ['FULFILLED', 'REJECTED']},
 ];
