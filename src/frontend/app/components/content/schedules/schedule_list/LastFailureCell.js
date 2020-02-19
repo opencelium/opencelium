@@ -52,7 +52,6 @@ class LastFailureCell extends Component{
 
     renderData(){
         let {schedule, hasElasticSearch} = this.props;
-        hasElasticSearch = true;
         let time = schedule.getFailEndTime();
         let taId = schedule.getFailTaId();
         let executionId = schedule.getFailExecutionId();

@@ -13,10 +13,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Rx from 'rxjs/Rx';
 import {AppsAction} from '../utils/actions';
 import {
     fetchAppsFulfilled, fetchAppsRejected,
-    loadAppsLinkFulfilled, loadAppsLinkRejected,
     checkAppFulfilled, checkAppRejected,
 } from '../actions/apps/fetch';
 import {doRequest} from "../utils/auth";
@@ -59,28 +59,20 @@ const fetchAppsEpic = (action$, store) => {
         });
 };
 
-const loadAppsLinkEpic = (action$, store) => {
-    return action$.ofType(AppsAction.LOAD_APPSLINK)
-        .debounceTime(500)
-        .mergeMap((action) => {
-            let url = action.payload.link;
-            return doRequest({fullUrl: true, url},{
-                success: loadAppsLinkFulfilled,
-                reject: loadAppsLinkRejected,},
-                res => {return {url};}
-            );
-        });
-};
-
 const checkAppEpic = (action$, store) => {
     return action$.ofType(AppsAction.CHECK_APP)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.name}`;
+            let url = `${urlPrefix}/${action.payload.value}`;
             return doRequest({url, isApi: false, hasAuthHeader: true},{
-                success: checkAppFulfilled,
-                reject: checkAppRejected,
-            });
+                success: ((data) => {
+                    if(data && data.status === APP_STATUS_DOWN){
+                        return checkAppRejected({'message': data.details.error})
+                    }
+                    return checkAppFulfilled({...data, link: action.payload.link});
+                }),
+                reject: (ajax) => Rx.Observable.of(checkAppRejected(ajax))},
+            );
         });
 };
 
@@ -88,6 +80,5 @@ const checkAppEpic = (action$, store) => {
 
 export {
     fetchAppsEpic,
-    loadAppsLinkEpic,
     checkAppEpic,
 };
