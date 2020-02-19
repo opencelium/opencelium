@@ -23,6 +23,7 @@ public class Template {
     private String templateId;
     private String name;
     private String description;
+    private String license;
     private ConnectionResource connection;
 
     public String getTemplateId() {
@@ -47,6 +48,14 @@ public class Template {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getLicense() {
+        return license;
+    }
+
+    public void setLicense(String license) {
+        this.license = license;
     }
 
     public ConnectionResource getConnection() {
