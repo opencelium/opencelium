@@ -38,6 +38,13 @@ public class InvokerContainer {
     }
 
     public Invoker getByName(String name){
+        if (!invokers.containsKey(name)){
+            for (Invoker invoker : invokers.values()){
+                if (invoker.getName().equals(name)){
+                    return invoker;
+                }
+            }
+        }
         return invokers.get(name);
     }
 
