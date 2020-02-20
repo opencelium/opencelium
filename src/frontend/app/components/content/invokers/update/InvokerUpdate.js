@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2019>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
 import ChangeContent from "../../../general/change_component/ChangeContent";
 
+import {fetchInvoker} from '../../../../actions/invokers/fetch';
 import {updateInvoker} from '../../../../actions/invokers/update';
-import {fetchInvokers} from '../../../../actions/invokers/fetch';
 import {InvokerPermissions} from "../../../../utils/constants/permissions";
 import {permission} from "../../../../decorators/permission";
 import {INPUTS} from "../../../../utils/constants/inputs";
@@ -29,6 +29,7 @@ import OCTour from "../../../general/basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
 import CInvoker from "../../../../classes/components/content/invoker/CInvoker";
+import {setFocusById} from "../../../../utils/app";
 
 const invokerPrefixURL = '/invokers';
 
@@ -38,11 +39,11 @@ function mapStateToProps(state){
     return{
         authUser: auth.get('authUser'),
         invoker: invokers.get('invoker'),
+        fetchingInvoker: invokers.get('fetchingInvoker'),
         updatingInvoker: invokers.get('updatingInvoker'),
         error: invokers.get('error'),
     };
 }
-
 
 
 function mapInvoker(connector){
@@ -52,7 +53,7 @@ function mapInvoker(connector){
 /**
  * Component to Update Invoker
  */
-@connect(mapStateToProps, {updateInvoker, fetchInvokers})
+@connect(mapStateToProps, {updateInvoker, fetchInvoker})
 @permission(InvokerPermissions.CREATE, true)
 @withTranslation(['invokers', 'app'])
 @SingleComponent('invoker', 'updating', [], mapInvoker)
@@ -67,6 +68,10 @@ class InvokerUpdate extends Component{
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
         };
+    }
+
+    componentDidMount(){
+        setFocusById('input_name');
     }
 
     /**
@@ -112,8 +117,52 @@ class InvokerUpdate extends Component{
         this.props.router.push(`${invokerPrefixURL}`);
     }
 
+    /**
+     * to validate title
+     */
+    validateName(invoker){
+        const {t} = this.props;
+        if(invoker.name === ''){
+            setFocusById('input_name');
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.TITLE_REQUIRED')};
+        }/* else {
+            this.startCheckingTitle = true;
+            this.props.checkConnectionTitle(connection.getObject());
+            return {value: false, message: ''};
+        }*/
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate auth
+     */
+    validateAuth(invoker){
+        const {t} = this.props;
+        if(invoker.auth === ''){
+            setFocusById('input_auth');
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.AUTH_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate connection
+     */
+    validateConnection(invoker){
+        const {t} = this.props;
+        if(invoker.connection.name === ''){
+            setFocusById('input_connection');
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.CONNECTION_NAME_REQUIRED')};
+        }
+        if(invoker.connection.request.method === ''){
+            setFocusById('method_post');
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.CONNECTION_METHOD_REQUIRED')};
+        }
+        return {value: true, message: ''};
+    }
+
     render(){
-        const {t, authUser, updatingInvoker, doAction, invoker} = this.props;
+        const {t, authUser, invoker, updatingInvoker, doAction} = this.props;
         let contentTranslations = {};
         contentTranslations.header = t('UPDATE.HEADER');
         contentTranslations.list_button = t('UPDATE.LIST_BUTTON');
@@ -128,6 +177,7 @@ class InvokerUpdate extends Component{
                     tourStep: INVOKER_TOURS.page_1[0].selector,
                     label: t('UPDATE.FORM.NAME'),
                     required: true,
+                    check: (e, entity) => ::this.validateName(e, entity),
                     maxLength: 255,
                 },
                 {
@@ -156,6 +206,7 @@ class InvokerUpdate extends Component{
                     tourStep: INVOKER_TOURS.page_2[0].selector,
                     label: t('UPDATE.FORM.AUTHENTICATION'),
                     required: true,
+                    check: (e, entity) => ::this.validateAuth(e, entity),
                 },
             ],
             hint: {text: t('UPDATE.FORM.HINT_2'), openTour: ::this.openTour},
@@ -166,6 +217,7 @@ class InvokerUpdate extends Component{
                     tourSteps: INVOKER_TOURS.page_3,
                     label: t('UPDATE.FORM.CONNECTION'),
                     required: true,
+                    check: (e, entity) => ::this.validateConnection(e, entity),
                     defaultValue: {name: '', path: '', method: 'post', request: {header: [], body: {}}, response: {success: {header: [], body: {}}, fail: {header: [], body: {}}}}
                 },
             ],

@@ -91,9 +91,9 @@ class InvokersList extends Component{
             return result;
         };
         //mapEntity.getViewLink = (invoker) => {return `${prefixUrl}/${invoker.name}/view`;};
-        //mapEntity.getUpdateLink = (invoker) => {return `${prefixUrl}/${invoker.name}/update`;};
+        mapEntity.getUpdateLink = (invoker) => {return `${prefixUrl}/${invoker.name}/update`;};
         mapEntity.getAddLink = `${prefixUrl}/add`;
-        //#OC-149 mapEntity.onDelete = deleteInvoker;
+        mapEntity.onDelete = deleteInvoker;
         return <List
             entities={invokers}
             translations={translations}

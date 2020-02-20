@@ -22,9 +22,11 @@ import {isArray} from "../utils/app";
 
 const initialState = fromJS({
     fetchingInvokers: API_REQUEST_STATE.INITIAL,
+    fetchingInvoker: API_REQUEST_STATE.INITIAL,
     addingInvoker: API_REQUEST_STATE.INITIAL,
     updatingInvoker: API_REQUEST_STATE.INITIAL,
     deletingInvoker: API_REQUEST_STATE.INITIAL,
+    invoker: null,
     invokers: List([]),
     error: null,
     message: {},
@@ -51,6 +53,12 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingInvokers', API_REQUEST_STATE.FINISH).set('invokers', invokers);
         case InvokersAction.FETCH_INVOKERS_REJECTED:
             return state.set('fetchingInvokers', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case InvokersAction.FETCH_INVOKER:
+            return state.set('fetchingInvoker', API_REQUEST_STATE.START).set('error', null);
+        case InvokersAction.FETCH_INVOKER_FULFILLED:
+            return state.set('fetchingInvoker', API_REQUEST_STATE.FINISH).set('invoker', action.payload);
+        case InvokersAction.FETCH_INVOKER_REJECTED:
+            return state.set('fetchingInvoker', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case InvokersAction.ADD_INVOKER:
             return state.set('addingInvoker', API_REQUEST_STATE.START).set('error', null);
         case InvokersAction.ADD_INVOKER_FULFILLED:

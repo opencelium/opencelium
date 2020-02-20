@@ -38,7 +38,6 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
             constructor(props){
                 super(props);
 
-                this.hasWrongURL = false;
                 this.state = {
                     entity: null,
                     isCommandTriggered: false,
@@ -47,6 +46,7 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
                     hasStartedFetchingEntity: false,
                     hasStartedTriggeringCommand: false,
                     hasStartedFetchingResources: false,
+                    hasWrongURL: false,
                 };
             }
 
@@ -90,8 +90,8 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
             }
 
             componentDidUpdate(){
-                const {entity, resources, fetchingResource, hasStartedFetchingEntity} = this.state;
-                if(entity === null && command !== 'adding' && !hasStartedFetchingEntity) {
+                const {entity, resources, fetchingResource, hasStartedFetchingEntity, hasWrongURL} = this.state;
+                if(entity === null && command !== 'adding' && !hasStartedFetchingEntity && !hasWrongURL) {
                     this.fetch();
                 }
                 if(additionalResources.length > 0) {
@@ -109,18 +109,18 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
                     let id = -1;
                     if (this.props.params) {
                         if (this.props.params.hasOwnProperty('id')) {
-                            id = parseInt(this.props.params.id);
+                            id = singleEntityName !== 'invoker' ? parseInt(this.props.params.id) : this.props.params.id;
                         } else {
                             if (this.props.hasOwnProperty('authUser')) {
-                                id = parseInt(this.props.authUser.userId);
+                                id = singleEntityName !== 'invoker' ? parseInt(this.props.authUser.userId) : this.props.authUser.userId;
                             }
                         }
                     }
-                    if (typeof id === 'number' && id > 0) {
+                    if (typeof id === 'number' && id > 0 || singleEntityName === 'invoker') {
                         this.setState({hasStartedFetchingEntity: true});
                         this.props[`fetch${capitalize(singleEntityName)}`]({id});
                     } else {
-                        this.hasWrongURL = true;
+                        this.setState({hasWrongURL: true});
                     }
                 }
             }
@@ -146,10 +146,10 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
              *      PageNotFound if the requested page does not exist
              */
             checkEntity(){
-                const {entity, isCommandTriggered, resources} = this.state;
+                const {entity, isCommandTriggered, resources, hasWrongURL} = this.state;
                 const {error, t, authUser} = this.props;
                 const cancelFetching = this.props[`fetch${capitalize(singleEntityName)}Canceled`];
-                if(this.hasWrongURL){
+                if(hasWrongURL){
                     return <PageNotFound/>;
                 }
                 if(this.props[`fetching${capitalize(singleEntityName)}`] === API_REQUEST_STATE.ERROR){
