@@ -23,7 +23,7 @@ import {invokerUrl, appUrl} from "../utils/constants/url";
 
 
 const adminCards = [
-    //{id: 1, name: 'App', link: '/apps'},
+    {id: 1, name: 'App', link: '/apps'},
     {id: 2, name: 'Invokers', link: '/invokers'},
     {id: 3, name: 'Templates', link: '/templates'},
 ];

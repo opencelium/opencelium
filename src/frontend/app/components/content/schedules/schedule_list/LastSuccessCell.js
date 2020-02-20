@@ -52,7 +52,6 @@ class LastSuccessCell extends Component{
 
     renderData(){
         let {schedule, hasElasticSearch} = this.props;
-        hasElasticSearch = true;
         let time = schedule.getSuccessEndTime();
         let taId = schedule.getSuccessTaId();
         let executionId = schedule.getSuccessExecutionId();

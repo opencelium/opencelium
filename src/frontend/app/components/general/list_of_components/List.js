@@ -176,10 +176,7 @@ class List extends Component{
     searchEntities(){
         const {searchValue} = this.state;
         const {entities} = this.props;
-        let result = entities;
-        if(result.length > 1){
-            result = result.filter((value) => searchByNameFunction(value, searchValue));
-        }
+        let result = entities.filter((value) => searchByNameFunction(value, searchValue));
         return result;
     }
 

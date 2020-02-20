@@ -58,7 +58,7 @@ import {
     addWebHookEpic, updateWebHookEpic, deleteWebHookEpic,
 } from '../epics/webhooks';
 import {
-    fetchAppsEpic, loadAppsLinkEpic, checkAppEpic
+    fetchAppsEpic, checkAppEpic
 } from "../epics/apps";
 import {
     fetchAdminCardsEpic, loadAdminCardsLinkEpic,
@@ -136,7 +136,6 @@ export default combineEpics(
     updateWebHookEpic,
     deleteWebHookEpic,
     checkUserEmailEpic,
-    loadAppsLinkEpic,
     toggleAppTourEpic,
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,

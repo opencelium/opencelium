@@ -27,6 +27,7 @@ import Loading from "../app/Loading";
 import CardIcon from "../../icons/CardIcon";
 
 import styles from '../../../themes/default/general/list_of_components.scss';
+import {API_REQUEST_STATE} from "../../../utils/constants/app";
 
 
 /**
@@ -41,13 +42,14 @@ class ListCard extends Component{
             showConfirm: false,
             hasSelectedCardEffect: false,
             clickOnCard: false,
+            avatarScale: 1,
         };
     }
 
     static getDerivedStateFromProps(props, state){
         if(state.clickOnCard){
             if(props.load && props.load.hasOwnProperty('loadingLink')) {
-                if (!props.load.loadingLink) {
+                if (props.load.loadingLink !== API_REQUEST_STATE.START) {
                     if(props.load) {
                         if(props.load.hasOwnProperty('callback')) {
                             props.load.callback({link: props.onCardClickLink});
@@ -55,6 +57,7 @@ class ListCard extends Component{
                     }
                     return {
                         clickOnCard: false,
+                        avatarScale: 1,
                     };
                 }
             }
@@ -173,6 +176,25 @@ class ListCard extends Component{
     }
 
     /**
+     * to open link clicking on Card in a new tab for Apps
+     */
+    onCardClick(){
+        const {entity, onCardClickLink, load} = this.props;
+        if(onCardClickLink && onCardClickLink !== '') {
+            let that = this;
+            this.setState({avatarScale: 0});
+            setTimeout(() => {
+                if (load && load.hasOwnProperty('loadLink')) {
+                    load.loadLink(entity);
+                }
+                that.setState({clickOnCard: true}, () => {
+                    that.props.keyNavigate('');
+                });
+            }, 100);
+        }
+    }
+
+    /**
      * to check if Card does not have any action
      */
     hasNotActions(){
@@ -196,16 +218,16 @@ class ListCard extends Component{
     }
 
     renderAvatar(){
-        const {clickOnCard} = this.state;
+        const {clickOnCard, avatarScale} = this.state;
         const {entity, authUser, load} = this.props;
         let classNames = ['loading'];
         classNames = getThemeClass({classNames, authUser, styles});
-        if(clickOnCard && load && load.hasOwnProperty('loadingLink') && load.loadingLink){
+        if(clickOnCard && load && load.hasOwnProperty('loadingLink') && load.loadingLink === API_REQUEST_STATE.START){
             return <Loading authUser={authUser} className={styles[classNames.loading]}/>;
         }
         if(typeof entity.avatar === 'string') {
             return(
-                <CardIcon atuhUser={authUser} icon={entity.avatar}/>
+                <CardIcon authUser={authUser} icon={entity.avatar} style={{transform: `scale(${avatarScale})`}}/>
             );
         }
         if(React.isValidElement(entity.avatar)){
@@ -279,21 +301,6 @@ class ListCard extends Component{
                     <CardButton className={`${currentCardStyle}`} text={exceptionLabel} permission={permissions.READ}/>
                 </div>
             );
-        }
-    }
-
-    /**
-     * to open link clicking on Card in a new tab for Apps
-     */
-    onCardClick(){
-        const {onCardClickLink, load} = this.props;
-        if(onCardClickLink && onCardClickLink !== '') {
-            if(load && load.hasOwnProperty('loadLink')) {
-                load.loadLink({link: onCardClickLink});
-            }
-            this.setState({clickOnCard: true}, () => {
-                this.props.keyNavigate('');
-            });
         }
     }
 
