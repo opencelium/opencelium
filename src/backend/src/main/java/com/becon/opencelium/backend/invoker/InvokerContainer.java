@@ -55,4 +55,8 @@ public class InvokerContainer {
     public void update(Map<String, Invoker> invokers){
         this.invokers = invokers;
     }
+
+    public void remove(String name){
+        invokers.remove(name);
+    }
 }

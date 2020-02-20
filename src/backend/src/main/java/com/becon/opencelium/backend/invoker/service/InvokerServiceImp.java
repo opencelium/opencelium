@@ -16,24 +16,36 @@
 
 package com.becon.opencelium.backend.invoker.service;
 
+import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.nio.file.Files.exists;
 
 @Service
 public class InvokerServiceImp implements InvokerService{
 
     @Autowired
     private InvokerContainer invokerContainer;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public Invoker toEntity(InvokerResource resource) {
@@ -66,6 +78,31 @@ public class InvokerServiceImp implements InvokerService{
     @Override
     public List<Invoker> findAll() {
         return new ArrayList<>(invokerContainer.getInvokers().values());
+    }
+
+    @Override
+    public void delete(String name) {
+        invokerContainer.remove(name);
+        if(name.equals("")){
+            throw new RuntimeException("INVOKER_NOT_FOUND");
+        }
+        String location = "src/backend/src/main/resources/invoker/";
+        Path rootLocation = Paths.get(location);
+        try {
+
+            Path file = rootLocation.resolve(name);
+            if(exists(file)){
+                Files.delete(file);
+            }
+        }
+        catch (IOException e){
+            throw new StorageException("Failed to delete stored file", e);
+        }
+    }
+
+    private boolean exists(Path file) {
+        File tempFile = new File(file.toString());
+        return tempFile.exists();
     }
 
     //TODO: need to add path of field
