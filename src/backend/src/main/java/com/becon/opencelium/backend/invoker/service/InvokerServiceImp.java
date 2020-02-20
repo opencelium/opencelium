@@ -90,7 +90,7 @@ public class InvokerServiceImp implements InvokerService{
         Path rootLocation = Paths.get(location);
         try {
 
-            Path file = rootLocation.resolve(name);
+            Path file = rootLocation.resolve(name + ".xml");
             if(exists(file)){
                 Files.delete(file);
             }
