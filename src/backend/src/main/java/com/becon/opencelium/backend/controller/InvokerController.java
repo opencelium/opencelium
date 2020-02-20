@@ -75,6 +75,12 @@ public class InvokerController {
     @Autowired
     private InvokerContainer invokerContainer;
 
+    @GetMapping("/{name}")
+    public ResponseEntity<?> get(@PathVariable String name) throws Exception {
+        InvokerResource invokerResources = invokerService.toResource(invokerService.findByName(name));
+        return ResponseEntity.ok(invokerResources);
+    }
+
     @GetMapping("/all")
     public ResponseEntity<?> getAll() throws Exception {
 
@@ -161,6 +167,12 @@ public class InvokerController {
         InvokerResource invokerResource = invokerService.toResource(invoker);
         final Resource<InvokerResource> resource = new Resource<>(invokerResource);
         return ResponseEntity.ok().body(resource);
+    }
+
+    @DeleteMapping("/{name}")
+    public ResponseEntity<?> delete(@PathVariable String name){
+        invokerService.delete(name);
+        return ResponseEntity.ok().build();
     }
 
     private static Document convertStringToXMLDocument(String xmlString)

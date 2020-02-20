@@ -39,6 +39,8 @@ public interface InvokerService {
 
     List<Invoker> findAll();
 
+    void delete(String name);
+
     String findFieldType(String name, String methodName, String exchangeType, String result, String fieldName);
 
     String findFieldByPath(String invoker, String method, String path);

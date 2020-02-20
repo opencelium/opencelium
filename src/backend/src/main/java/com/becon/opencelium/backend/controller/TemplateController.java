@@ -133,8 +133,6 @@ public class TemplateController {
         }
     }
 
-
-
     @GetMapping("/file/{filename:.+}")
     @ResponseBody
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String filename) {
