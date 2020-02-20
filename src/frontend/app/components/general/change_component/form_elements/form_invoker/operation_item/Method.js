@@ -21,10 +21,10 @@ import {onEnter} from "../../../../../../utils/app";
 
 
 const types = [
-    {value: 'post', label: 'POST'},
-    {value: 'get', label: 'GET'},
-    {value: 'put', label: 'PUT'},
-    {value: 'delete', label: 'DELETE'},
+    {value: 'POST', label: 'POST'},
+    {value: 'GET', label: 'GET'},
+    {value: 'PUT', label: 'PUT'},
+    {value: 'DELETE', label: 'DELETE'},
 ];
 
 /**
@@ -78,7 +78,7 @@ class Method extends Component{
                                     id={`method_${type.value}`}
                                     tabIndex={2 + key}
                                     key={key}
-                                    className={`${value === type.value ? `${styles.invoker_selected_method} ${styles[`invoker_method_${type.value}`]}` : styles.invoker_request_item_method}`}
+                                    className={`${value === type.value ? `${styles.invoker_selected_method} ${styles[`invoker_method_${type.value.toLowerCase()}`]}` : styles.invoker_request_item_method}`}
                                     onClick={(e) => ::this.chooseMethod(e, type.value)}
                                     onKeyDown={(e) => onEnter(e, (e) => ::this.chooseMethod(e, type.value))}
                                 >

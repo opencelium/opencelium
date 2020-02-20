@@ -41,7 +41,8 @@
     "ADD_WEBHOOK": "The webhook was successfully created",
     "DELETE_WEBHOOK": "The webhook was successfully removed",
     "COPYTOCLIPBOARD_WEBHOOK": "The webhook was successfully copied",
-    "ADD_INVOKER": "The invoker was successfully added"
+    "ADD_INVOKER": "The invoker was successfully added",
+    "DELETE_INVOKER": "The invoker was successfully deleted"
   },
   "ERROR": {
     "ADD_USER": {
@@ -133,7 +134,8 @@
     },
     "LOAD_APPSLINK": "The link to this application does not work, please check your installations",
     "LOAD_ADMINCARD": "The link to this card does not work, please check your permissions",
-    "ADD_INVOKER": "The invoker was not added"
+    "ADD_INVOKER": "The invoker was not added",
+    "DELETE_INVOKER": "The invoker was not deleted"
   },
   "WARNING": {
     "ADD_USER": "The user was added, but ...",

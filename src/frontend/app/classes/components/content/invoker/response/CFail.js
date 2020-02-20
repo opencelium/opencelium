@@ -18,7 +18,7 @@ import {isArray, isString, isEmptyObject} from "../../../../../utils/app";
 import {FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT, FIELD_TYPE_STRING} from "../../connection/method/CMethodItem";
 import {
     convertFieldNameForBackend,
-    getFieldsForSelectSearch
+    getFieldsForSelectSearch, parseHeader
 } from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
 
 /**
@@ -29,7 +29,7 @@ export default class CFail{
     constructor(status = '', body = {}, header = []){
         this._status = status;
         this._body = body === null ? {} : body;
-        this._header = header;
+        this._header = parseHeader(header);
     }
 
     static createFail(fail){

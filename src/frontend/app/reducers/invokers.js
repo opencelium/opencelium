@@ -82,7 +82,7 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingInvoker', API_REQUEST_STATE.START).set('error', null);
         case InvokersAction.DELETE_INVOKER_FULFILLED:
             index = invokers.findIndex(function (invoker) {
-                return invoker.id === action.payload.id;
+                return invoker.name === action.payload.id;
             });
             if(index >= 0) {
                 return state.set('deletingInvoker', API_REQUEST_STATE.FINISH).set('invokers', invokers.delete(index));

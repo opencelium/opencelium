@@ -13,7 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {isEmptyObject, isString} from "../../../../../utils/app";
+import {isEmptyObject, isString, isArray, isObject} from "../../../../../utils/app";
+import {parseHeader} from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
 /**
  * (not used)
  */
@@ -27,7 +28,7 @@ export default class CRequest{
         this._body = body === null ? {} : body;
         this._invokerBody = body === null ? {} : body;
         this._method = method;
-        this._header = header;
+        this._header = parseHeader(header);
     }
 
     static createRequest(request){
