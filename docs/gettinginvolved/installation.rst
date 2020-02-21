@@ -181,53 +181,47 @@ Debian/Ubuntu
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone https://$user@bitbucket.org/becon_gmbh/opencelium.frontend.git // please replace $user with your username
+	root@shell> git clone https://bitbucket.org/becon_gmbh/opencelium.git
 
 2. Run frontend with yarn
 
 .. code-block:: sh
 
-	root@shell> cd opencelium.frontend
+	root@shell> cd src/frontend
 	root@shell> yarn
 	root@shell> echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
 	root@shell> yarn start_dev // use "nohup" to run process in the background
 
 
-4. Get backend repository
+3. Create application.yml file for backend
 
 .. code-block:: sh
 
-	root@shell> cd /opt
-	root@shell> git clone https://$user@bitbucket.org/becon_gmbh/opencelium.backend.git // please replace $user with your username
-
-5. Create application.yml file
-
-.. code-block:: sh
-
-	root@shell> cp opencelium.backend/src/main/resources/application_default.yml opencelium.backend/src/main/resources/application.yml
+	root@shell> cd /opt/src/backend
+	root@shell> cp src/main/resources/application_default.yml src/main/resources/application.yml
 	root@shell> make changes inside of application.yml. change neo4j and mysql database password
 
-6. Install database 
+4. Install database 
 
 .. code-block:: sh
 
-	root@shell> cd /opt/opencelium.backend/database
+	root@shell> cd /opt/src/backend/database
 	root@shell> mysql -u root -p -e "source oc_data.sql"
 
-7. Build backend project
+5. Build backend project
 
 .. code-block:: sh
 
-	root@shell> cd /opt/opencelium.backend/
+	root@shell> cd /opt/src/backend/
 	root@shell> gradle build
 
-8. Start backend
+6. Start backend
 
 .. code-block:: sh
 
 	root@shell> java -Dserver.port=9090 -jar /opt/opencelium.backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar // use "nohup" to run process in the background
 
-9. Welcome to OC
+7. Welcome to OC
 
 .. code-block:: sh
 	
