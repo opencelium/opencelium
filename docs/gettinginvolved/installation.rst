@@ -154,8 +154,8 @@ Debian/Ubuntu
 	 root@shell> add-apt-repository "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
 	 root@shell> apt-get update
 	 root@shell> apt-get install elasticsearch
-	 root@shell> sed -i '/\#cluster.name: my-application/c\\cluster.name: opencelium' /etc/elasticsearch/elasticsearch.yml
-	 root@shell> sed -i '/\#network.host: 192.168.0.1/c\\#network.host: 0.0.0.0' /etc/elasticsearch/elasticsearch.yml
+	 root@shell> sed -i '/\#cluster.name: my-application/c\cluster.name: opencelium' /etc/elasticsearch/elasticsearch.yml
+	 root@shell> sed -i '/\#network.host: 192.168.0.1/c\network.host: 0.0.0.0' /etc/elasticsearch/elasticsearch.yml
 	 root@shell> /bin/systemctl enable elasticsearch.service
 	 root@shell> systemctl start elasticsearch.service
 
