@@ -590,4 +590,4 @@ Ansible
 
 .. code-block:: sh
 
-	root@shell> ansible-playbook --connection=local -e 'host_key_checking=False' -e "git_user=XXX" -e "git_password=xxxxxxx" playbooks/install_oc.yml
+	root@shell> ansible-playbook --connection=local -e 'host_key_checking=False' playbooks/install_oc.yml
