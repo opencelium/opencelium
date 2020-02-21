@@ -169,8 +169,8 @@ Debian/Ubuntu
 	:linenos:
 
 	 root@shell> apt-get install kibana
-	 root@shell> sed -i '/\#server.host: "localhost"/c\\server.host: "0.0.0.0"' /etc/kibana/kibana.yml
-	 root@shell> sed -i '/\#elasticsearch.hosts: ["http://localhost:9200"]/c\\elasticsearch.hosts: ["http://localhost:9200"]' /etc/kibana/kibana.yml
+	 root@shell> sed -i '/\#server.host: "localhost"/c\server.host: "0.0.0.0"' /etc/kibana/kibana.yml
+	 root@shell> sed -i '/\#elasticsearch.hosts: ["http://localhost:9200"]/c\elasticsearch.hosts: ["http://localhost:9200"]' /etc/kibana/kibana.yml
 	 root@shell> service kibana start
 
 
