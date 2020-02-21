@@ -141,7 +141,7 @@ Debian/Ubuntu
 	root@shell> apt-get install netdata -y
 
 	root@shell> sed -i '/\tbind socket to IP = 127.0.0.1/c\\tbind socket to IP = 0.0.0.0' /etc/netdata/netdata.conf
-	root@shell> wget https://bitbucket.org/becon_gmbh/opencelium.frontend.docs/raw/4169a8422cf65de88b4ffb1ed0f21766affca862/docs/files/oc-mode.html -O /usr/share/netdata/web/oc-mode.html
+	root@shell> wget https://bitbucket.org/becon_gmbh/opencelium/raw/cf5b43c102cca25d0a7abe778f1de0fe0c4e40c7/docs/netdata/oc-mode.html
 	root@shell> chown netdata:netdata /usr/share/netdata/web/oc-mode.html (if debian)
 	root@shell> systemctl restart netdata
 
