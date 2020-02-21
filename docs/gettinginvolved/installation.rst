@@ -575,7 +575,7 @@ Ansible
 	:linenos:
 
 	root@shell> cd /etc/ansible
-	root@shell> git clone https://$user@bitbucket.org/becon_gmbh/opencelium.setup.ansible.git // please replace $user with your username
+	root@shell> git clone https://bitbucket.org/becon_gmbh/opencelium.setup.ansible.git
 	root@shell> mv opencelium.setup.ansible/* ./
 	root@shell> mv opencelium.setup.ansible/.* ./
 	root@shell> rmdir opencelium.setup.ansible
