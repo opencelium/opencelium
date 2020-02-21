@@ -16,6 +16,7 @@
 import {InvokersAction} from '../utils/actions';
 import {
     fetchInvokersFulfilled,fetchInvokersRejected,
+    fetchInvokerFulfilled, fetchInvokerRejected,
 } from '../actions/invokers/fetch';
 import {
     addInvokerFulfilled, addInvokerRejected,
@@ -54,8 +55,24 @@ const fetchInvokersEpic = (action$, store) => {
             });
         });
 };
+
 /**
- * add one connector
+ * fetch one connector
+ */
+const fetchInvokerEpic = (action$, store) => {
+    return action$.ofType(InvokersAction.FETCH_INVOKER)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.id}`;
+            return doRequest({url},{
+                success: fetchInvokerFulfilled,
+                reject: fetchInvokerRejected,
+            });
+        });
+};
+
+/**
+ * add one invoker
  */
 const addInvokerEpic = (action$, store) => {
     return action$.ofType(InvokersAction.ADD_INVOKER)
@@ -69,14 +86,14 @@ const addInvokerEpic = (action$, store) => {
         });
 };
 /**
- * add one connector
+ * update one invoker
  */
 const updateInvokerEpic = (action$, store) => {
     return action$.ofType(InvokersAction.UPDATE_INVOKER)
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return doRequest({url, method: 'put', data: action.payload},{
+            return doRequest({url, method: 'post', data: action.payload},{
                 success: updateInvokerFulfilled,
                 reject: updateInvokerRejected,},
             );
@@ -104,6 +121,7 @@ const deleteInvokerEpic = (action$, store) => {
 
 export {
     fetchInvokersEpic,
+    fetchInvokerEpic,
     addInvokerEpic,
     updateInvokerEpic,
     deleteInvokerEpic,

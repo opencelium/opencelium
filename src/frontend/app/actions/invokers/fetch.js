@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { InvokersAction } from '../../utils/actions';
+import {InvokersAction} from '../../utils/actions';
 
 
 /**
@@ -64,10 +64,49 @@ const fetchInvokersCanceled = (message) => {
     };
 };
 
+/**
+ * fetch invoker
+ * @param invoker
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchInvoker = (invoker) => {
+    return {
+        type: InvokersAction.FETCH_INVOKER,
+        payload: invoker,
+    };
+};
+
+/**
+ * fetch invoker fulfilled
+ * @param invoker
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchInvokerFulfilled = (invoker) => {
+    return {
+        type: InvokersAction.FETCH_INVOKER_FULFILLED,
+        payload: invoker,
+    };
+};
+
+/**
+ * fetch invoker rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchInvokerRejected = (error) => {
+    return Rx.Observable.of({
+        type: InvokersAction.FETCH_INVOKER_REJECTED,
+        payload: error
+    });
+};
+
 
 export {
     fetchInvokers,
     fetchInvokersFulfilled,
     fetchInvokersRejected,
     fetchInvokersCanceled,
+    fetchInvoker,
+    fetchInvokerFulfilled,
+    fetchInvokerRejected,
 };

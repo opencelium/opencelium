@@ -37,7 +37,8 @@ import {
     updateConnectorEpic, updateConnectorIconEpic, deleteConnectorEpic, testConnectorEpic,
 } from '../epics/connectors';
 import {
-    fetchInvokersEpic, addInvokerEpic, updateInvokerEpic, deleteInvokerEpic,
+    fetchInvokersEpic, fetchInvokerEpic, addInvokerEpic,
+    updateInvokerEpic, deleteInvokerEpic,
 } from '../epics/invokers';
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
@@ -101,6 +102,7 @@ export default combineEpics(
     updateConnectorIconEpic,
     deleteConnectorEpic,
     fetchInvokersEpic,
+    fetchInvokerEpic,
     addInvokerEpic,
     updateInvokerEpic,
     deleteInvokerEpic,

@@ -56,7 +56,7 @@ class Name extends Component{
 
     render(){
         const {nameValue} = this.state;
-        const {ids, data, tourStep} = this.props;
+        const {ids, data, tourStep, index} = this.props;
         const {name, maxLength, readonly, required} = data;
         let isReadonly = false;
         let inputStyle = '';
@@ -71,7 +71,7 @@ class Name extends Component{
                 onChange={::this.onChange}
                 onBlur={::this.onBlur}
                 name={'Name'}
-                id={ids && ids.hasOwnProperty('name') ? ids.name : `input_${name}`}
+                id={ids && ids.hasOwnProperty('name') ? ids.name : `input_${name}_${index}`}
                 label={'Name'}
                 type={'text'}
                 icon={'perm_identity'}

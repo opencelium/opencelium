@@ -55,10 +55,6 @@ class FormIcon extends Component{
         let {tourStep, browseTitle} = data;
         if(this.state.browseTitle !== ''){
             browseTitle = this.state.browseTitle;
-        } else{
-            if(entity[name]) {
-                browseTitle = entity[name].name;
-            }
         }
         return (
             <div className={`${theme.withIcon} ${theme.input} ${tourStep ? tourStep : ''}`}>

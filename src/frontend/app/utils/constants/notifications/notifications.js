@@ -74,6 +74,7 @@ export const EntitiesWithNotification = [
     {name: AppsAction.CHECK_APP, types: ['REJECTED']},
     {name: AdminCardsAction.LOAD_ADMINCARD, types: ['REJECTED']},
     {name: InvokersAction.ADD_INVOKER, types: ['FULFILLED', 'REJECTED']},
+    {name: InvokersAction.DELETE_INVOKER, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**

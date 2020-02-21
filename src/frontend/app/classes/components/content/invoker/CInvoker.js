@@ -38,7 +38,7 @@ export default class CInvoker{
         let hint = invoker && invoker.hasOwnProperty('hint') ? invoker.hint : '';
         let icon = invoker && invoker.hasOwnProperty('icon') ? invoker.icon : '';
         let data = invoker && invoker.hasOwnProperty('data') ? invoker.data : '';
-        let auth = invoker && invoker.hasOwnProperty('auth') ? invoker.auth : '';
+        let auth = invoker && invoker.hasOwnProperty('authType') ? invoker.authType : '';
         let operations = invoker && invoker.hasOwnProperty('operations') ? invoker.operations : [];
         return new CInvoker(name, description, hint, icon, data, auth, operations);
     }

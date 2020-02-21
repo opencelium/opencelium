@@ -80,13 +80,14 @@ class Operations extends Component{
             return (
                 <Card key={key}>
                     <Accordion.Toggle as={Card.Header} eventKey={key}>
-                        <div className={`${styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method}`]}`}>{operation.request.method}</div>
+                        <div className={`${styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
                         <span className={`${styles.invoker_item_name}`}>{operation.name}</span>
                     </Accordion.Toggle>
                     <Accordion.Collapse eventKey={key}>
                         <Card.Body className={styles.no_card_header_tabs}>
                             <OperationItem
                                 {...props}
+                                index={key}
                                 invoker={entity}
                                 operation={operation}
                                 updateEntity={::this.updateEntity}

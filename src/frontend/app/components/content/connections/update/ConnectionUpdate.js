@@ -17,6 +17,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
+import ChangeContent from "../../../general/change_component/ChangeContent";
 
 import {checkConnectionTitle} from '../../../../actions/connections/fetch';
 import {fetchConnection} from "../../../../actions/connections/fetch";
@@ -28,7 +29,6 @@ import {permission} from "../../../../decorators/permission";
 import {INPUTS} from "../../../../utils/constants/inputs";
 import OCTour from "../../../general/basic_components/OCTour";
 import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "../../../../utils/constants/tours";
-import ChangeContent from "../../../general/change_component/ChangeContent";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
 import CConnection from "../../../../classes/components/content/connection/CConnection";
 import {setFocusById} from "../../../../utils/app";
@@ -59,7 +59,7 @@ function mapConnection(connection){
 }
 
 /**
- * Component to Add Connection
+ * Component to Update Connection
  */
 @connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle})
 @permission(ConnectionPermissions.CREATE, true)
@@ -112,7 +112,7 @@ class ConnectionUpdate extends Component{
     }
 
     /**
-     * to redirect app after adding Connection
+     * to redirect app after updating Connection
      */
     redirect(){
         this.props.router.push(`${connectionPrefixURL}`);
@@ -164,7 +164,7 @@ class ConnectionUpdate extends Component{
         const {t} = this.props;
         if(connection.title === ''){
             setFocusById('input_connection_title');
-            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TITLE_REQUIRED')};
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.TITLE_REQUIRED')};
         } else {
             if(this.props.connection.title !== connection.title) {
                 this.startCheckingTitle = true;
@@ -182,11 +182,11 @@ class ConnectionUpdate extends Component{
         const {t} = this.props;
         if(connection.fromConnector.id === 0){
             setFocusById('from_connector');
-            return {value: false, message: t('ADD.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED')};
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED')};
         }
         if(connection.toConnector.id === 0){
             setFocusById('to_connector');
-            return {value: false, message: t('ADD.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED')};
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED')};
         }
         return {value: true, message: ''};
     }
@@ -252,7 +252,7 @@ class ConnectionUpdate extends Component{
                     ...INPUTS.METHODS,
                     tourSteps: CONNECTION_UPDATE_TOURS.page_2,
                     label: t('UPDATE.FORM.METHODS'),
-                    templateLabels: {addTemplate: t('UPDATE.FORM.ADD_TEMPLATE'), addTemplateTitle: t('UPDATE.FORM.ADD_TEMPLATE_TITLE')},
+                    templateLabels: {addTemplate: t('UPDATE.FORM.UPDATE_TEMPLATE'), addTemplateTitle: t('UPDATE.FORM.UPDATE_TEMPLATE_TITLE')},
                     actions: {addTemplate: ::this.addTemplate},
                     source: Object.freeze(connectors),
                     readOnly: false,

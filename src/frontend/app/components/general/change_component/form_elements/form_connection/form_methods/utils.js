@@ -15,7 +15,7 @@
 
 
 
-import {isArray, isString} from "../../../../../../utils/app";
+import {isArray, isObject, isString} from "../../../../../../utils/app";
 
 /**
  * constants from backend
@@ -144,4 +144,18 @@ export function getFieldsForSelectSearch(invokerBody, searchField){
         }
     }
     return result;
+}
+
+export function parseHeader(header){
+    if(isArray(header)){
+        return header;
+    }
+    let newHeader = [];
+    if(isObject(header)){
+        for(let param in header){
+            newHeader.push({name: param, value: header[param]});
+        }
+        return newHeader;
+    }
+    return [];
 }

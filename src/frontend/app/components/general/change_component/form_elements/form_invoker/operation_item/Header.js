@@ -136,7 +136,11 @@ class Header extends Component{
     }
 
     findValueInHeaderSource(value){
-        return HTTPRequestHeaders.find(h => h.value === value);
+        let elem = HTTPRequestHeaders.find(h => h.value === value);
+        if(elem) {
+            return elem;
+        }
+        return null;
     }
 
     renderInputs(){
@@ -152,68 +156,78 @@ class Header extends Component{
         let items = entity.header;
         return items.map((item, key) => {
             let itemValue = this.findValueInHeaderSource(item.name);
-            let itemSource = [itemValue].concat(this.commonSource);
-            return (
-                <div
-                    style={{position: 'relative'}}
-                    key={key}
-                    onMouseEnter={(e) => ::this.showDeleteButton(e, key)}
-                    onMouseLeave={::this.hideDeleteButton}>
-                    <FormSelect
-                        data={{icon: 'bookmark', selectClassName: styles.invoker_item_prop, source: itemSource, name: `select_header_${item.name}`, placeholder: propertyLabel, label: propertyLabel, visible: true}}
-                        value={itemValue}
-                        handleChange={(e) => ::this.handleChange(e, item.name, 'name')}
-                        entity={{}}
-                        onFocus={::this.onFocusValue}
-                        onBlur={::this.onBlurValue}
-                    />
-                    <Input
-                        onChange={(e) => ::this.handleChange(e, item.name, 'value')}
-                        name={`input_header_${item.name}`}
-                        label={valueLabel}
-                        type={'text'}
-                        maxLength={255}
-                        value={item.value}
-                        readOnly={isReadonly}
-                        className={styles.invoker_item_val}
-                        theme={{label: styles.form_input_label}}
-                        onFocus={::this.onFocusValue}
-                        onBlur={::this.onBlurValue}
-                    />
-                    {
-                        !isReadonly && hasDeleteButton && currentKey === key
-                            ?
-                            <div>
-                                <TooltipFontIcon
-                                    className={styles.invoker_item_delete_button}
-                                    value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
-                                    onMouseOver={::this.isOnDeleteButtonOver}
-                                    onMouseLeave={::this.isNotOnDeleteButtonOver}
-                                    onClick={(e) => ::this.deleteItem(e, itemValue)}
-                                    tooltip={'Delete Header'}
-                                />
-                            </div>
-                            :
-                            null
-                    }
-                </div>
-            );
+            if(itemValue) {
+                let itemSource = [itemValue].concat(this.commonSource);
+                return (
+                    <div
+                        style={{position: 'relative'}}
+                        key={key}
+                        onMouseEnter={(e) => ::this.showDeleteButton(e, key)}
+                        onMouseLeave={::this.hideDeleteButton}>
+                        <FormSelect
+                            data={{
+                                icon: 'bookmark',
+                                selectClassName: styles.invoker_item_prop,
+                                source: itemSource,
+                                name: `select_header_${item.name}`,
+                                placeholder: propertyLabel,
+                                label: propertyLabel,
+                                visible: true
+                            }}
+                            value={itemValue}
+                            handleChange={(e) => ::this.handleChange(e, item.name, 'name')}
+                            entity={{}}
+                            onFocus={::this.onFocusValue}
+                            onBlur={::this.onBlurValue}
+                        />
+                        <Input
+                            onChange={(e) => ::this.handleChange(e, item.name, 'value')}
+                            name={`input_header_${item.name}`}
+                            label={valueLabel}
+                            type={'text'}
+                            maxLength={255}
+                            value={item.value}
+                            readOnly={isReadonly}
+                            className={styles.invoker_item_val}
+                            theme={{label: styles.form_input_label}}
+                            onFocus={::this.onFocusValue}
+                            onBlur={::this.onBlurValue}
+                        />
+                        {
+                            !isReadonly && hasDeleteButton && currentKey === key
+                                ?
+                                <div>
+                                    <TooltipFontIcon
+                                        className={styles.invoker_item_delete_button}
+                                        value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
+                                        onMouseOver={::this.isOnDeleteButtonOver}
+                                        onMouseLeave={::this.isNotOnDeleteButtonOver}
+                                        onClick={(e) => ::this.deleteItem(e, itemValue)}
+                                        tooltip={'Delete Header'}
+                                    />
+                                </div>
+                                :
+                                null
+                        }
+                    </div>
+                );
+            }
         });
     }
 
     addItem(){
         const {header_prop, header_val} = this.state;
-        const {entity, updateEntity} = this.props;
+        const {entity, updateEntity, index, headerType} = this.props;
         let header = entity.header;
         if(header_prop.value === 0){
-            let elem = document.getElementById('header_prop');
+            let elem = document.getElementById(`header_prop_${headerType}_${index}`);
             if(elem) {
                 elem.click();
             }
             return;
         }
         if(header_val === ''){
-            let elem = document.getElementById('header_val');
+            let elem = document.getElementById(`header_val_${headerType}_${index}`);
             if(elem) {
                 elem.focus();
             }
@@ -241,7 +255,7 @@ class Header extends Component{
     }
 
     renderAddItem(){
-        const {tourStep} = this.props;
+        const {tourStep, index, headerType} = this.props;
         if(this.commonSource.length === 0)
             return null;
         return (
@@ -249,7 +263,7 @@ class Header extends Component{
                 <FormSelect
                     data={{tourStepHint: tourStep ? tourStep : '', icon: 'label_outline', selectClassName: `${styles.invoker_item_prop_add}`, source: this.commonSource, name: 'header_prop', placeholder: 'Key', label: 'Key', required: false, visible: true}}
                     value={this.state.header_prop}
-                    id={'header_prop'}
+                    id={`header_prop_${headerType}_${index}`}
                     handleChange={::this.changeHeaderProp}
                     entity={{}}
                     hasHintTour={true}
@@ -262,7 +276,7 @@ class Header extends Component{
                 <Input
                     onChange={::this.changeHeaderVal}
                     name={'header_val'}
-                    id={'header_val'}
+                    id={`header_val_${headerType}_${index}`}
                     label={'Value'}
                     type={'text'}
                     maxLength={255}
