@@ -156,6 +156,7 @@ Debian/Ubuntu
 	 root@shell> apt-get install elasticsearch
 	 root@shell> sed -i '/\#cluster.name: my-application/c\cluster.name: opencelium' /etc/elasticsearch/elasticsearch.yml
 	 root@shell> sed -i '/\#network.host: 192.168.0.1/c\network.host: 0.0.0.0' /etc/elasticsearch/elasticsearch.yml
+	 root@shell> echo "cluster.initial_master_nodes: node-1" >> /etc/elasticsearch/elasticsearch.yml 
 	 root@shell> /bin/systemctl enable elasticsearch.service
 	 root@shell> systemctl start elasticsearch.service
 
