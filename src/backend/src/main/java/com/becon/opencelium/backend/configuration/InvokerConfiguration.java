@@ -47,6 +47,11 @@ public class InvokerConfiguration {
 
     @Bean
     public Map<String, Invoker> containerBean(){
+        if (Files.notExists(filePath)){
+            File directory = new File(PathConstant.INVOKER);
+            directory.mkdir();
+            System.out.println("Directory has been created: " + PathConstant.INVOKER);
+        }
         List<Document> invokers = getAllInvokers();
         Map<String, Invoker> container = new HashMap<>();
         invokers.forEach(document -> {

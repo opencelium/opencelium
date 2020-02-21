@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.configuration;
 
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -28,6 +29,10 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Configuration
@@ -44,6 +49,12 @@ public class StorageConfiguration {
 
     @EventListener(ApplicationReadyEvent.class)
     public void createStorageAfterStartup() {
+        Path filePath = Paths.get(PathConstant.TEMPLATE);
+        if (Files.notExists(filePath)){
+            File directory = new File(PathConstant.TEMPLATE);
+            directory.mkdir();
+            System.out.println("Directory has been created: " + PathConstant.TEMPLATE);
+        }
         List<Connector> connectors = connectorService.findAll();
         connectors.forEach(c -> {
             List<RequestData> requestData = c.getRequestData();
