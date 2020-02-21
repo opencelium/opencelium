@@ -3,7 +3,7 @@ Installation
 ##################
 
 .. note::
-	Before starting the OC you need to download software that are in the requirements. How to install the corresponded program you can find on the official websites, that are provided in the parenthesis.
+	Please check the software requirements, before installing OC. 
 
 
 Windows
