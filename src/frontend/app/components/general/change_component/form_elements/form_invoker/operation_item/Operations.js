@@ -87,6 +87,7 @@ class Operations extends Component{
                         <Card.Body className={styles.no_card_header_tabs}>
                             <OperationItem
                                 {...props}
+                                index={key}
                                 invoker={entity}
                                 operation={operation}
                                 updateEntity={::this.updateEntity}

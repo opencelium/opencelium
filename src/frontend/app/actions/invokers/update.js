@@ -25,7 +25,7 @@ import { InvokersAction } from '../../utils/actions';
  */
 const updateInvoker = (invoker) => {
     return {
-        type: InvokersAction.UDPATE_INVOKER,
+        type: InvokersAction.UPDATE_INVOKER,
         payload: invoker,
     };
 };
@@ -37,7 +37,7 @@ const updateInvoker = (invoker) => {
  */
 const updateInvokerFulfilled = (invoker) => {
     return {
-        type: InvokersAction.UDPATE_INVOKER_FULFILLED,
+        type: InvokersAction.UPDATE_INVOKER_FULFILLED,
         payload: invoker,
     };
 };
@@ -49,7 +49,7 @@ const updateInvokerFulfilled = (invoker) => {
  */
 const updateInvokerRejected = (error) => {
     return Rx.Observable.of({
-        type: InvokersAction.UDPATE_INVOKER_REJECTED,
+        type: InvokersAction.UPDATE_INVOKER_REJECTED,
         payload: error
     });
 };

@@ -57,7 +57,7 @@ class Endpoint extends Component{
     render(){
         const {readonly} = this.props.data;
         const {endpoint} = this.state;
-        let {tourStep} = this.props;
+        let {tourStep, index} = this.props;
         let isReadonly = false;
         let inputStyle = '';
         if(tourStep){
@@ -71,7 +71,7 @@ class Endpoint extends Component{
                 onChange={::this.onChange}
                 onBlur={::this.onBlur}
                 name={'Path'}
-                id={'input_invoker_connection_path'}
+                id={`input_invoker_connection_path_${index}`}
                 label={'Path'}
                 type={'text'}
                 icon={'perm_identity'}

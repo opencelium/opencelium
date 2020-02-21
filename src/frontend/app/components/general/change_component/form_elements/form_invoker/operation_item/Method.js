@@ -69,7 +69,7 @@ class Method extends Component{
         }
         return (
             <div className={`${theme.withIcon} ${theme.input} ${inputStyle}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={{padding: '8px 0 0 0'}}/>
                 <div>
                     {
                         types.map((type, key) => {

@@ -20,7 +20,7 @@ import Input from '../../../../basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from '../../../../../../themes/default/general/change_component.scss';
-import {isString, isJsonString} from "../../../../../../utils/app";
+import {isString, isJsonString, setFocusById} from "../../../../../../utils/app";
 import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
 import FontIcon from "../../../../basic_components/FontIcon";
 import Dialog from "../../../../basic_components/Dialog";
@@ -38,6 +38,12 @@ class Body extends Component{
             importJson: '',
             focused: false,
         };
+    }
+
+    componentDidUpdate(){
+        if(this.state.showImportJson){
+            setTimeout(() => setFocusById('dialog_import_json'), 301);
+        }
     }
 
     onSelectValue(e){
@@ -89,6 +95,7 @@ class Body extends Component{
                 title={'Type Json'}
             >
                 <Input
+                    id={'dialog_import_json'}
                     className={styles.input_textarea_import_json}
                     name={'json'}
                     type={'text'}

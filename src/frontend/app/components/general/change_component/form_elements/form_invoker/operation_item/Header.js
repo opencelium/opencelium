@@ -217,17 +217,17 @@ class Header extends Component{
 
     addItem(){
         const {header_prop, header_val} = this.state;
-        const {entity, updateEntity} = this.props;
+        const {entity, updateEntity, index, headerType} = this.props;
         let header = entity.header;
         if(header_prop.value === 0){
-            let elem = document.getElementById('header_prop');
+            let elem = document.getElementById(`header_prop_${headerType}_${index}`);
             if(elem) {
                 elem.click();
             }
             return;
         }
         if(header_val === ''){
-            let elem = document.getElementById('header_val');
+            let elem = document.getElementById(`header_val_${headerType}_${index}`);
             if(elem) {
                 elem.focus();
             }
@@ -255,7 +255,7 @@ class Header extends Component{
     }
 
     renderAddItem(){
-        const {tourStep} = this.props;
+        const {tourStep, index, headerType} = this.props;
         if(this.commonSource.length === 0)
             return null;
         return (
@@ -263,7 +263,7 @@ class Header extends Component{
                 <FormSelect
                     data={{tourStepHint: tourStep ? tourStep : '', icon: 'label_outline', selectClassName: `${styles.invoker_item_prop_add}`, source: this.commonSource, name: 'header_prop', placeholder: 'Key', label: 'Key', required: false, visible: true}}
                     value={this.state.header_prop}
-                    id={'header_prop'}
+                    id={`header_prop_${headerType}_${index}`}
                     handleChange={::this.changeHeaderProp}
                     entity={{}}
                     hasHintTour={true}
@@ -276,7 +276,7 @@ class Header extends Component{
                 <Input
                     onChange={::this.changeHeaderVal}
                     name={'header_val'}
-                    id={'header_val'}
+                    id={`header_val_${headerType}_${index}`}
                     label={'Value'}
                     type={'text'}
                     maxLength={255}

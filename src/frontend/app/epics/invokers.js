@@ -93,7 +93,7 @@ const updateInvokerEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return doRequest({url, method: 'put', data: action.payload},{
+            return doRequest({url, method: 'post', data: action.payload},{
                 success: updateInvokerFulfilled,
                 reject: updateInvokerRejected,},
             );
