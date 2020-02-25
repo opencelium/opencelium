@@ -155,7 +155,7 @@
     "webpack-stream": "5.2.1"
   },
   "scripts": {
-    "start": "node server.production.js --env.production",
+    "start": "node server.development.js --env.development",
     "start_dev": "node server.development.js --env.development",
     "start_mock": "node json-server.js",
     "watch:test": "node_modules/.bin/jest --watch --no-watchman",
