@@ -341,14 +341,7 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 	:linenos:
 
 	 root@shell> rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
-	 root@shell> echo "[elasticsearch-7.x]
-name=Elasticsearch repository for 7.x packages
-baseurl=https://artifacts.elastic.co/packages/oss-7.x/yum
-gpgcheck=1
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-enabled=1
-autorefresh=1
-type=rpm-md" >> /etc/zypp/repos.d/elasticsearch.repo 
+	 root@shell> echo -e "[elasticsearch-7.x]\nname=Elasticsearch repository for 7.x packages\nbaseurl=https://artifacts.elastic.co/packages/oss-7.x/yum\ngpgcheck=1\ngpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch\nenabled=1\nautorefresh=1\ntype=rpm-md" >> /etc/zypp/repos.d/elasticsearch.repo 
 	 root@shell> zypper install elasticsearch-oss
 	 root@shell> sed -i '/\#cluster.name: my-application/c\cluster.name: opencelium' /etc/elasticsearch/elasticsearch.yml
 	 root@shell> sed -i '/\#network.host: 192.168.0.1/c\network.host: 0.0.0.0' /etc/elasticsearch/elasticsearch.yml
@@ -363,14 +356,7 @@ type=rpm-md" >> /etc/zypp/repos.d/elasticsearch.repo
 .. code-block:: sh
 	:linenos:
 
-	 root@shell> echo "[kibana-7.x]
-name=Kibana repository for 7.x packages
-baseurl=https://artifacts.elastic.co/packages/7.x/yum
-gpgcheck=1
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-enabled=1
-autorefresh=1
-type=rpm-md" >> /etc/zypp/repos.d/kibana.repo
+	 root@shell> echo -e "[kibana-7.x]\nname=Kibana repository for 7.x packages\nbaseurl=https://artifacts.elastic.co/packages/7.x/yum\ngpgcheck=1\ngpgkey=https://artifacts.elastic.co/\nGPG-KEY-elasticsearch\nenabled=1\nautorefresh=1\ntype=rpm-md" >> /etc/zypp/repos.d/kibana.repo
 	 root@shell> zypper install kibana
 	 root@shell> sed -i '/\#server.host: "localhost"/c\server.host: "0.0.0.0"' /etc/kibana/kibana.yml
 	 root@shell> sed -i '/\#elasticsearch.hosts: ["http://localhost:9200"]/c\elasticsearch.hosts: ["http://localhost:9200"]' /etc/kibana/kibana.yml
