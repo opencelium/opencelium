@@ -65,6 +65,20 @@
     "GENERAL_TITLE": "General",
     "INVOKER_TITLE": "Invoker",
     "OPERATIONS_TITLE": "Operations",
-    "HINT_TITLE": "Hint"
+    "HINT_TITLE": "Hint",
+    "FORM":{
+      "NAME": "Name",
+      "DESCRIPTION": "Description",
+      "HINT": "Hint",
+      "ICON": "Icon",
+      "ICON_PLACEHOLDER": "Please select an icon...",
+      "PAGE_1": "General Data",
+      "AUTHENTICATION": "Authentication",
+      "PAGE_2": "Operations",
+      "CONNECTION": "Connection",
+      "OPERATIONS": "Operations",
+      "HINT_1": "General Information",
+      "HINT_4": "Operations"
+    }
   }
 }

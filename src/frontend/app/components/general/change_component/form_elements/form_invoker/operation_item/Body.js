@@ -120,7 +120,7 @@ class Body extends Component{
     }
 
     render(){
-        const {icon, readonly} = this.props.data;
+        const {icon, readOnly} = this.props.data;
         let {tourStep, entity} = this.props;
         let value = entity.body;
         if(value === ''){
@@ -134,12 +134,12 @@ class Body extends Component{
                     collapsed={false}
                     src={value}
                     onSelect={::this.onSelectValue}
-                    onEdit={readonly ? false : ::this.handleInput}
-                    onDelete={readonly ? false : ::this.handleInput}
-                    onAdd={readonly ? false : ::this.handleInput}
+                    onEdit={readOnly ? false : ::this.handleInput}
+                    onDelete={readOnly ? false : ::this.handleInput}
+                    onAdd={readOnly ? false : ::this.handleInput}
                     style={{padding: '0', width: '80%', display: 'inline-block'}}
                 />
-                {!readonly
+                {!readOnly
                     ?
                         <TooltipFontIcon
                             className={`${styles.input_import_json_button} ${tourStep ? tourStep : ''}`}
@@ -150,7 +150,7 @@ class Body extends Component{
                     :
                         null
                 }
-                {!readonly ? this.renderDialogImportJson() : null}
+                {!readOnly ? this.renderDialogImportJson() : null}
 
                 <FontIcon value={icon} className={theme.icon}/>
                 <span className={theme.bar}/>

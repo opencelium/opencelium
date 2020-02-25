@@ -50,12 +50,14 @@ class Endpoint extends Component{
     onBlur(){
         const {operation, updateEntity} = this.props;
         const {endpoint} = this.state;
-        operation.request.query = endpoint;
-        updateEntity();
+        if(operation.request.query !== endpoint) {
+            operation.request.query = endpoint;
+            updateEntity();
+        }
     }
 
     render(){
-        const {readonly} = this.props.data;
+        const {readOnly} = this.props.data;
         const {endpoint} = this.state;
         let {tourStep, index} = this.props;
         let isReadonly = false;
@@ -63,7 +65,7 @@ class Endpoint extends Component{
         if(tourStep){
             inputStyle = tourStep;
         }
-        if(readonly){
+        if(readOnly){
             isReadonly = true;
         }
         return (

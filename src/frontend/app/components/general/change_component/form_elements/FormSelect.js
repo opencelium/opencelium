@@ -96,7 +96,7 @@ class FormSelect extends Component{
 
     render(){
         const {icon, source, name, placeholder, selectClassName, tourStep, tourStepHint} = this.props.data;
-        const {id, handleChange, hasHintTour} = this.props;
+        const {id, handleChange, hasHintTour, isDisabled} = this.props;
         let value = this.getValue();
         let iconStyle = theme.icon;
         let selectStyle = styles.multiselect;
@@ -127,6 +127,7 @@ class FormSelect extends Component{
                     className={selectStyle}
                     maxMenuHeight={200}
                     minMenuHeight={50}
+                    isDisabled={isDisabled}
                 />
                 {
                     value && value.hasOwnProperty('hint')

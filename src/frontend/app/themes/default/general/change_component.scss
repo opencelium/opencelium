@@ -539,6 +539,13 @@
   }
 }
 
+.invoker_operation_header{
+  cursor: pointer;
+}
+.invoker_operation_header:hover{
+  background: #fffdfd;
+}
+
 .invoker_request_item_method{
   background: #eeeeee;
   padding: 5px 20px;
@@ -546,10 +553,10 @@
   margin-right: 10px;
   cursor: pointer;
 }
-.invoker_request_item_method:hover{
+.invoker_request_item_method_not_readonly:hover{
   background: #bcbcbc;
 }
-.invoker_request_item_method:focus{
+.invoker_request_item_method_not_readonly:focus{
   background: #bcbcbc;
 }
 
@@ -585,6 +592,11 @@
 
 .invoker_method_delete{
   background-color: #a41e22;
+}
+
+.invoker_item_method_test{
+  float: right;
+  color: #5a5757;
 }
 
 .invoker_item_name{

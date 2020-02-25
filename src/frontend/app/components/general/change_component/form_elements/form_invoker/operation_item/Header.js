@@ -24,6 +24,7 @@ import {isString} from "../../../../../../utils/app";
 import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
 import FontIcon from "../../../../basic_components/FontIcon";
 import {HTTPRequestHeaders} from "../../../../../../utils/constants/HTTPRequestHeaders";
+import HeaderValue from "./HeaderValue";
 
 
 /**
@@ -120,7 +121,6 @@ class Header extends Component{
             header_prop: {value: 0, label: 'Choose Key ...', hint: 'Choose key to read a hint'},
             header_val: '',
         });
-
     }
 
     onFocusValue(e){
@@ -146,11 +146,11 @@ class Header extends Component{
     renderInputs(){
         const {onDeleteButtonOver, hasDeleteButton, currentKey} = this.state;
         const {entity, data} = this.props;
-        const {readonly, required} = data;
+        const {readOnly, required} = data;
         let propertyLabel = 'Key';
         let valueLabel = 'Value';
         let isReadonly = false;
-        if(readonly){
+        if(readOnly){
             isReadonly = true;
         }
         let items = entity.header;
@@ -179,7 +179,16 @@ class Header extends Component{
                             entity={{}}
                             onFocus={::this.onFocusValue}
                             onBlur={::this.onBlurValue}
+                            isDisabled={isReadonly}
                         />
+
+                        <HeaderValue
+                            item={item}
+                            readOnly={readOnly}
+                            onFocus={::this.onFocusValue}
+                            onBlur={::this.onBlurValue}
+                            onChange={::this.handleChange}
+                        />{/*
                         <Input
                             onChange={(e) => ::this.handleChange(e, item.name, 'value')}
                             name={`input_header_${item.name}`}
@@ -192,7 +201,7 @@ class Header extends Component{
                             theme={{label: styles.form_input_label}}
                             onFocus={::this.onFocusValue}
                             onBlur={::this.onBlurValue}
-                        />
+                        />*/}
                         {
                             !isReadonly && hasDeleteButton && currentKey === key
                                 ?
@@ -300,12 +309,13 @@ class Header extends Component{
     }
 
     render(){
+        const {readOnly} = this.props.data;
         return(
             <div className={`${theme.withIcon} ${theme.input}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <div style={{display: 'grid'}}>
                     {this.renderInputs()}
-                    {this.renderAddItem()}
+                    {readOnly ? null : this.renderAddItem()}
                 </div>
                 <FontIcon value={'public'} className={theme.icon}/>
                 <span className={theme.bar}/>

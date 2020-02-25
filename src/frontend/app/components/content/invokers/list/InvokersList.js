@@ -90,7 +90,7 @@ class InvokersList extends Component{
             result.avatar = invoker.icon;
             return result;
         };
-        //mapEntity.getViewLink = (invoker) => {return `${prefixUrl}/${invoker.name}/view`;};
+        mapEntity.getViewLink = (invoker) => {return `${prefixUrl}/${invoker.name}/view`;};
         mapEntity.getUpdateLink = (invoker) => {return `${prefixUrl}/${invoker.name}/update`;};
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteInvoker;

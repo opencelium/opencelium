@@ -61,7 +61,8 @@ class Method extends Component{
     }
 
     render(){
-        const {operation, tourStep} = this.props;
+        const {operation, tourStep, data} = this.props;
+        let {readOnly} = data;
         let value = operation.request.method;
         let inputStyle = '';
         if(tourStep){
@@ -78,9 +79,9 @@ class Method extends Component{
                                     id={`method_${type.value}`}
                                     tabIndex={2 + key}
                                     key={key}
-                                    className={`${value === type.value ? `${styles.invoker_selected_method} ${styles[`invoker_method_${type.value.toLowerCase()}`]}` : styles.invoker_request_item_method}`}
-                                    onClick={(e) => ::this.chooseMethod(e, type.value)}
-                                    onKeyDown={(e) => onEnter(e, (e) => ::this.chooseMethod(e, type.value))}
+                                    className={`${value === type.value ? `${styles.invoker_selected_method} ${styles[`invoker_method_${type.value.toLowerCase()}`]}` : `${styles.invoker_request_item_method} ${readOnly ? '' : styles.invoker_request_item_method_not_readonly}`}`}
+                                    onClick={readOnly ? null : (e) => ::this.chooseMethod(e, type.value)}
+                                    onKeyDown={readOnly ? null : (e) => onEnter(e, (e) => ::this.chooseMethod(e, type.value))}
                                 >
                                     {type.label}
                                 </span>
