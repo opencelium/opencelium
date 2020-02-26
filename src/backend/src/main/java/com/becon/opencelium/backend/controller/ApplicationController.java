@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.controller;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,11 @@ public class ApplicationController {
         HikariPool hikariPool = (HikariPool) new DirectFieldAccessor(dataSource).getPropertyValue("pool");
         System.out.println(hikariPool.toString());
         return null;
+    }
+
+    @GetMapping("/oc/test")
+    public ResponseEntity<?> ocTest(){
+        return ResponseEntity.ok().build();
     }
 
     public String get(){

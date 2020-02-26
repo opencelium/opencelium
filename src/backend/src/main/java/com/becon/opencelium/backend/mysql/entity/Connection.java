@@ -16,11 +16,19 @@
 
 package com.becon.opencelium.backend.mysql.entity;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "connection")
+@EntityListeners(AuditingEntityListener.class)
 public class Connection   {
 
     @Id
@@ -38,6 +46,24 @@ public class Connection   {
 
     @Column(name = "to_connector")
     private int toConnector;
+
+    @CreatedBy
+    @Column(name = "created_by")
+    private Integer createdBy;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on", updatable = false)
+    private Date createdOn;
+
+    @LastModifiedBy
+    @Column(name = "modified_by")
+    private Integer modifiedBy;
+
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "modified_on")
+    private Date modifiedOn;
 
     @OneToMany(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Enhancement> enhancements;
@@ -86,6 +112,38 @@ public class Connection   {
 
     public void setToConnector(int toConnector) {
         this.toConnector = toConnector;
+    }
+
+    public Integer getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
+    }
+
+    public Integer getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(Integer modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Date getModifiedOn() {
+        return modifiedOn;
+    }
+
+    public void setModifiedOn(Date modifiedOn) {
+        this.modifiedOn = modifiedOn;
     }
 
     public List<Enhancement> getEnhancements() {
