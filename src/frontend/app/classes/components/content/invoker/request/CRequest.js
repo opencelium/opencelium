@@ -31,7 +31,7 @@ export default class CRequest{
         this._header = parseHeader(header);
     }
 
-    static createRequest(request){
+    static createRequest(request = null){
         let query = request && request.hasOwnProperty('endpoint') ? request.endpoint : '';
         let affix = '';
         let body = request && request.hasOwnProperty('body') ? request.body : {};

@@ -32,7 +32,7 @@ export default class CFail{
         this._header = parseHeader(header);
     }
 
-    static createFail(fail){
+    static createFail(fail = null){
         let status = fail && fail.hasOwnProperty('status') ? fail.status : '';
         let body = fail && fail.hasOwnProperty('body') ? fail.body : {};
         let header = fail && fail.hasOwnProperty('header') ? fail.header : [];

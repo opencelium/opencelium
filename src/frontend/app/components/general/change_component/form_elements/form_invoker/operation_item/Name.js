@@ -50,20 +50,22 @@ class Name extends Component{
     onBlur(){
         const {operation, updateEntity} = this.props;
         const {nameValue} = this.state;
-        operation.name = nameValue;
-        updateEntity();
+        if(operation.name !== nameValue) {
+            operation.name = nameValue;
+            updateEntity();
+        }
     }
 
     render(){
         const {nameValue} = this.state;
         const {ids, data, tourStep, index} = this.props;
-        const {name, maxLength, readonly, required} = data;
+        const {name, maxLength, readOnly, required} = data;
         let isReadonly = false;
         let inputStyle = '';
         if(tourStep){
             inputStyle = tourStep;
         }
-        if(readonly){
+        if(readOnly){
             isReadonly = true;
         }
         return (

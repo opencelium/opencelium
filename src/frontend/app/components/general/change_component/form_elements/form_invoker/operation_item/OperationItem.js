@@ -26,6 +26,10 @@ import Tab from 'react-bootstrap/Tab';
 import CInvoker from "../../../../../../classes/components/content/invoker/CInvoker";
 import COperation from "../../../../../../classes/components/content/invoker/COperation";
 import Status from "./Status";
+import CRequest from "../../../../../../classes/components/content/invoker/request/CRequest";
+import CSuccess from "../../../../../../classes/components/content/invoker/response/CSuccess";
+import CResponse from "../../../../../../classes/components/content/invoker/response/CResponse";
+import CFail from "../../../../../../classes/components/content/invoker/response/CFail";
 
 class OperationItem extends Component{
 
@@ -51,7 +55,7 @@ class OperationItem extends Component{
     }
 
     render(){
-        const {operation, className, data, hasTour} = this.props;
+        const {isVisible, operation, className, data, hasTour} = this.props;
         const {tourSteps} = data;
         let tourClassNames = [];
         if(hasTour && tourSteps && tourSteps.length > 0){
@@ -64,22 +68,27 @@ class OperationItem extends Component{
                 <Name {...this.props} tourStep={tourClassNames[0] ? tourClassNames[0] : ''}/>
                 <Endpoint {...this.props} tourStep={tourClassNames[1] ? tourClassNames[1] : ''}/>
                 <Method {...this.props} tourStep={tourClassNames[2] ? tourClassNames[2] : ''}/>
-                <Tabs activeKey={this.state.tabKey} onSelect={::this.handleTabChange} className={tourClassNames[3] ? tourClassNames[3] : ''}>
-                    <Tab title='Request' eventKey={'request'}>
-                        <Header {...this.props} entity={operation.request} headerType={'request'} tourStep={tourClassNames[4] ? tourClassNames[4] : ''}/>
-                        <Body {...this.props} entity={operation.request} bodyType={'request'} tourStep={tourClassNames[5] ? tourClassNames[5] : ''}/>
-                    </Tab>
-                    <Tab title='Response(success)' eventKey={'response_success'}>
-                        <Status {...this.props} entity={operation.response.success} headerType={'response_success'}/>
-                        <Header {...this.props} entity={operation.response.success} headerType={'response_success'}/>
-                        <Body {...this.props} entity={operation.response.success} headerType={'response_success'}/>
-                    </Tab>
-                    <Tab title='Response(fail)' eventKey={'response_fail'}>
-                        <Status {...this.props} entity={operation.response.fail} headerType={'response_fail'}/>
-                        <Header {...this.props} entity={operation.response.fail} headerType={'response_fail'}/>
-                        <Body {...this.props} entity={operation.response.fail} bodyType={'response_fail'}/>
-                    </Tab>
-                </Tabs>
+                {
+                    isVisible
+                    ?
+                        <Tabs activeKey={this.state.tabKey} onSelect={::this.handleTabChange} className={tourClassNames[3] ? tourClassNames[3] : ''}>
+                            <Tab title='Request' eventKey={'request'}>
+                                <Body {...this.props} entity={operation.request} bodyType={'request'} tourStep={tourClassNames[5] ? tourClassNames[5] : ''}/>
+                            </Tab>
+                            <Tab title='Response(success)' eventKey={'response_success'}>
+                                <Status {...this.props} entity={operation.response.success} headerType={'response_success'}/>
+                                <Header {...this.props} entity={operation.response.success} headerType={'response_success'}/>
+                                <Body {...this.props} entity={operation.response.success} headerType={'response_success'}/>
+                            </Tab>
+                            <Tab title='Response(fail)' eventKey={'response_fail'}>
+                                <Status {...this.props} entity={operation.response.fail} headerType={'response_fail'}/>
+                                <Header {...this.props} entity={operation.response.fail} headerType={'response_fail'}/>
+                                <Body {...this.props} entity={operation.response.fail} bodyType={'response_fail'}/>
+                            </Tab>
+                        </Tabs>
+                    :
+                    null
+                }
             </div>
         );
     }
@@ -89,6 +98,7 @@ OperationItem.propTypes = {
     index: PropTypes.number,
     invoker: PropTypes.instanceOf(CInvoker).isRequired,
     operation: PropTypes.instanceOf(COperation).isRequired,
+    isVisible: PropTypes.bool,
 };
 
 OperationItem.defaultProps = {
@@ -96,6 +106,7 @@ OperationItem.defaultProps = {
     className: '',
     hasTour: false,
     justAdded: false,
+    isVisible: true,
 };
 
 export default OperationItem;

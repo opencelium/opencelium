@@ -32,7 +32,7 @@ export default class CSuccess{
         this._header = parseHeader(header);
     }
 
-    static createSuccess(success){
+    static createSuccess(success = null){
         let status = success && success.hasOwnProperty('status') ? success.status : '';
         let body = success && success.hasOwnProperty('body') ? success.body : {};
         let header = success && success.hasOwnProperty('header') ? success.header : [];

@@ -84,6 +84,8 @@ class Navigation extends Component{
                 case 'update':
                     icon = 'autorenew';
                     break;
+                case 'view':
+                    icon = '';
             }
             let onClickAction = null;
             if(test.isTested === -1 || test.isTested === 0){
@@ -92,6 +94,9 @@ class Navigation extends Component{
                 onClickAction = ::this.test;
             } else {
                 onClickAction = action;
+            }
+            if(icon === ''){
+                return null;
             }
             return (
                 <Button

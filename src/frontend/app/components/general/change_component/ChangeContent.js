@@ -279,6 +279,9 @@ class ChangeContent extends Component{
      * to focus on the first input when switch the page
      */
     setFocusOnInput(inputs){
+        if(inputs[0].readOnly === true){
+            return;
+        }
         let name = inputs[0].name;
         if(inputs[0].hasOwnProperty('visible')){
             let elem = inputs.find(i => i.visible === true);
@@ -369,7 +372,6 @@ class ChangeContent extends Component{
      */
     updateEntity(entity){
         const {initiateTestStatus} = this.props;
-
         if(initiateTestStatus !== null){
             initiateTestStatus();
         }

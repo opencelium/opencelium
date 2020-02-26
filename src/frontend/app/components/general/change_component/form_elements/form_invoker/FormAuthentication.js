@@ -22,6 +22,7 @@ import theme from "react-toolbox/lib/input/theme.css";
 import styles from '../../../../../themes/default/general/change_component.scss';
 import {FormElement} from "../../../../../decorators/FormElement";
 import FontIcon from "../../../basic_components/FontIcon";
+import Input from "../../../basic_components/inputs/Input";
 
 const types = [
     {value: 'apikey',                label: 'API Key (i-doit)'},
@@ -52,9 +53,9 @@ class FormAuthentication extends Component{
 
     componentDidMount(){
         const {entity, data} = this.props;
-        const {name} = data;
+        const {name, readOnly} = data;
         let value = entity[name];
-        if(value) {
+        if(value && !readOnly) {
             let icon = document.getElementById(`input_${name}`).parentElement.parentElement.parentElement.querySelector('[data-react-toolbox="font-icon"]');
             icon.style.color = '#3f51b5';
         }
@@ -123,10 +124,15 @@ class FormAuthentication extends Component{
     }
 
     render(){
-        const {name, icon} = this.props.data;
+        const {name, icon, readOnly} = this.props.data;
         const {entity} = this.props;
-        let {tourStep} = this.props.data;
+        let {tourStep, label} = this.props.data;
         let value = entity[name];
+        if(readOnly) {
+            return (
+                <Input readOnly={readOnly} value={types.find(t => t.value === value).label} label={label} icon={icon}/>
+            );
+        }
         return(
             <div className={`${theme.withIcon} ${theme.input} ${tourStep ? tourStep : ''}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.radiogroup_label}`}/>

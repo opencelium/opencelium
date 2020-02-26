@@ -46,7 +46,7 @@ class Status extends Component{
     }
 
     render(){
-        const {readonly} = this.props.data;
+        const {readOnly} = this.props.data;
         const {status} = this.state;
         let {tourStep} = this.props;
         let isReadonly = false;
@@ -54,7 +54,7 @@ class Status extends Component{
         if(tourStep){
             inputStyle = tourStep;
         }
-        if(readonly){
+        if(readOnly){
             isReadonly = true;
         }
         return (
