@@ -23,18 +23,19 @@ class AccordionItem extends Component{
 
     render(){
         const {isVisible} = this.state;
-        const {index, entity, operation, readOnly, ...props} = this.props;
+        const {index, forConnection, entity, operation, readOnly, ...props} = this.props;
         return(
             <React.Fragment>
-                <Accordion.Toggle as={Card.Header} eventKey={index} className={styles.invoker_operation_header} onClick={::this.toggleIsVisible}>
-                    <div className={`${styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
-                    <span className={`${styles.invoker_item_name}`}>{operation.name}</span>
-                    {readOnly && operation.type === METHOD_TYPE_TEST ? <div className={styles.invoker_item_method_test}>Connection Test</div> : null}
+                <Accordion.Toggle as={Card.Header} eventKey={index} className={forConnection ? styles.invoker_operation_header_for_connection : styles.invoker_operation_header} onClick={::this.toggleIsVisible}>
+                    <div className={`${forConnection ? styles.invoker_item_method_for_connection : styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
+                    <span className={`${forConnection ? styles.invoker_item_name_for_connection : styles.invoker_item_name}`}>{operation.name}</span>
+                    {readOnly && operation.type === METHOD_TYPE_TEST && !forConnection ? <div className={styles.invoker_item_method_test}>Connection Test</div> : null}
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey={index} >
-                    <Card.Body className={styles.no_card_header_tabs}>
+                    <Card.Body className={forConnection ? styles.no_card_header_tabs_for_connection : styles.no_card_header_tabs}>
                         <OperationItem
                             {...props}
+                            forConnection={forConnection}
                             isVisible={isVisible}
                             index={index}
                             invoker={entity}
@@ -47,5 +48,9 @@ class AccordionItem extends Component{
         );
     }
 }
+
+AccordionItem.defaultProps = {
+    forConnection: false,
+};
 
 export default AccordionItem;

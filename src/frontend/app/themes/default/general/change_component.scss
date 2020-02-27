@@ -162,6 +162,36 @@
 .form_input_label{
   font-family: $FONT_FAMILY;
 }
+.form_input_label_for_connection{
+  font-family: $FONT_FAMILY;
+  top: 0 !important;
+}
+.form_input_status_label{
+  font-family: $FONT_FAMILY;
+}
+.form_input_status_label_for_connection{
+  font-family: $FONT_FAMILY;
+  top: 15px !important;
+}
+
+.form_input_input_for_connection{
+  padding: 5px 0 10px 0 !important;
+}
+.form_input_input_header_for_connection{
+  padding: 5px 0 0 0 !important;
+}
+.form_input_element_for_connection{
+  padding: 10px 0 0 0 !important;
+  font-size: 14px !important;
+}
+.form_input_status_element_for_connection{
+  padding: 25px 0 0 0 !important;
+  font-size: 14px !important;
+}
+.form_input_header_element_for_connection{
+  padding: 0 !important;
+  font-size: 14px !important;
+}
 
 .input_file_label{
   font-family: $FONT_FAMILY;
@@ -442,6 +472,13 @@
 .invoker_item_prop>div{
   padding: 0;
 }
+.invoker_item_prop_for_connection{
+  float: left;
+  width: 48%;
+}
+.invoker_item_prop_for_connection>div{
+  padding: 0;
+}
 
 .invoker_item_val{
   float: right;
@@ -541,8 +578,23 @@
 
 .invoker_operation_header{
   cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .invoker_operation_header:hover{
+  background: #fffdfd;
+}
+
+.invoker_operation_header_for_connection{
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 14px;
+  padding: 5px 10px;
+}
+.invoker_operation_header_for_connection:hover{
   background: #fffdfd;
 }
 
@@ -578,6 +630,17 @@
   font-family: $FONT_FAMILY;
 }
 
+.invoker_item_method_for_connection{
+  font-size: $FONT_SIZE_TINY;
+  float: left;
+  padding: 1px;
+  width: 40px;
+  text-align: center;
+  border-radius: 3px;
+  color: #fff;
+  font-family: $FONT_FAMILY;
+}
+
 .invoker_method_post{
   background-color: #10a54a;
 }
@@ -602,6 +665,19 @@
 .invoker_item_name{
   margin-left: 20px;
   font-family: $FONT_FAMILY;
+}
+.invoker_item_name_for_connection{
+  margin-left: 5px;
+  font-family: $FONT_FAMILY;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.no_card_header_tabs_for_connection{
+  margin: 0;
+  border-bottom: 1px solid #dee2e6;
+  padding: 10px;
 }
 
 .no_card_header_tabs nav{
@@ -648,4 +724,68 @@
   font-family: $FONT_FAMILY;
   padding: 15px 0 0 0;
   border: none !important;
+}
+
+.form_connector_invoker{
+  position: fixed;
+  width: 250px;
+  top: 300px;
+  z-index: 1;
+  max-height: 300px;
+  overflow: auto;
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+}
+
+.form_connector_from_invoker{
+  @extend .form_connector_invoker;
+  left: 0;
+}
+.form_connector_from_invoker_appear{
+  animation-name: $ANIMATION_FADE_IN_LEFT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+.form_connector_from_invoker_disappear{
+  animation-name: $ANIMATION_FADE_OUT_LEFT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+.form_connector_to_invoker{
+  @extend .form_connector_invoker;
+  right: 0;
+}
+.form_connector_to_invoker_appear{
+  animation-name: $ANIMATION_FADE_IN_RIGHT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+.form_connector_to_invoker_disappear{
+  animation-name: $ANIMATION_FADE_OUT_RIGHT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+.form_connector_arrow{
+  position: fixed;
+  top: 275px;
+  cursor: pointer;
+}
+
+.form_connector_arrow_from{
+  @extend .form_connector_arrow;
+  left: 0;
+}
+
+.form_connector_arrow_to{
+  @extend .form_connector_arrow;
+  right: 0;
+}
+
+.operation_item_tabs{
+  a{
+    padding: 5px 10px;
+    font-size: $FONT_SIZE_14;
+  }
 }

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import Input from '../../../../basic_components/inputs/Input';
+import Input from '../../../../../basic_components/inputs/Input';
 
-import styles from '../../../../../../themes/default/general/change_component.scss';
+import styles from '../../../../../../../themes/default/general/change_component.scss';
 
 
 class HeaderValue extends Component{
@@ -26,7 +26,7 @@ class HeaderValue extends Component{
 
     render(){
         const {headerKey} = this.state;
-        const {item, readOnly, onFocus} = this.props;
+        const {item, readOnly, onFocus, forConnection} = this.props;
         return(
             <Input
                 name={`input_header_${item.name}`}
@@ -34,12 +34,16 @@ class HeaderValue extends Component{
                 onChange={::this.onChange}
                 onFocus={onFocus}
                 onBlur={(e) => ::this.onBlur(e, item.name, 'value')}
-                label={'Value'}
+                label={forConnection ? '' : 'Value'}
                 type={'text'}
-                maxLength={255}
+                maxLength={forConnection ? 0 : 255}
                 readOnly={readOnly}
                 className={styles.invoker_item_val}
-                theme={{label: styles.form_input_label}}
+                theme={{
+                    label: forConnection ? styles.form_input_label_for_connection : styles.form_input_label,
+                    input: forConnection ? styles.form_input_input_header_for_connection : '',
+                    inputElement: forConnection ? styles.form_input_header_element_for_connection : '',
+                }}
             />
         );
     }

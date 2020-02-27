@@ -788,6 +788,10 @@ class IfOperator extends Component{
             operatorStyle.borderRadius = '3px';
             classNames += ` ${styles.selected_item}`;
         }
+        if(operator.error.hasError){
+            operatorStyle.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
+            operatorStyle.border = 'border: 1px solid #d14b4b';
+        }
         let menuEditStyles = {width: '300px'};
         if(isOperatorHasThreeParams){
             menuEditStyles.width = '320px';

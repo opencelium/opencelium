@@ -36,8 +36,10 @@ class Operations extends Component{
     }
 
     updateEntity(){
-        const {entity, updateEntity} = this.props;
-        updateEntity(entity);
+        const {entity, updateEntity, readOnly, forConnection} = this.props;
+        if(!readOnly && !forConnection) {
+            updateEntity(entity);
+        }
     }
 
     updateAddOperation(){

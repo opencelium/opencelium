@@ -116,18 +116,18 @@ class Body extends Component{
         if(focused){
             labelStyle += ' ' + styles.multiselect_focused;
         }
-        return <label className={labelStyle}>{label}</label>;
+        return <label className={labelStyle} style={{top: '15px'}}>{label}</label>;
     }
 
     render(){
         const {icon, readOnly} = this.props.data;
-        let {tourStep, entity} = this.props;
+        let {tourStep, entity, forConnection} = this.props;
         let value = entity.body;
         if(value === ''){
             value = {};
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input}`}>
+            <div className={`${forConnection ? '' : theme.withIcon} ${theme.input}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <ReactJson
                     name={'body'}

@@ -24,9 +24,9 @@ import {FormElement} from "../../../../../decorators/FormElement";
 import {Row, Col} from "react-grid-system";
 import {ArrowRight} from '../../../basic_components/Arrows';
 
-import {isArray} from '../../../../../utils/app';
 import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../classes/components/content/connection/CConnectorItem";
-import FormMethods from "./form_methods/FormMethods";
+import FormOperations from "../form_invoker/FormOperations";
+import TooltipFontIcon from "../../../basic_components/tooltips/TooltipFontIcon";
 
 
 /**
@@ -39,7 +39,39 @@ class FormConnectors extends Component{
         super(props);
         this.state = {
             focused: false,
+            isFromInvokerOpened: false,
+            isToInvokerOpened: false,
+            fromWillDisappear: false,
+            toWillDisappear: false,
         };
+    }
+
+    toggleFromInvoker(){
+        if(!this.state.isFromInvokerOpened === false){
+            this.setState({fromWillDisappear: true});
+            setTimeout(() => this.setState({
+                isFromInvokerOpened: false,
+                fromWillDisappear: false
+            }), 500);
+        } else{
+            this.setState({
+                isFromInvokerOpened: true,
+            });
+        }
+    }
+
+    toggleToInvoker(){
+        if(!this.state.isToInvokerOpened === false){
+            this.setState({toWillDisappear: true});
+            setTimeout(() => this.setState({
+                isToInvokerOpened: false,
+                toWillDisappear: false
+            }), 500);
+        } else{
+            this.setState({
+                isToInvokerOpened: true,
+            });
+        }
     }
 
     /**
@@ -68,7 +100,36 @@ class FormConnectors extends Component{
         updateEntity(entity);
     }
 
+    renderFromInvoker(){
+        const {isFromInvokerOpened, fromWillDisappear} = this.state;
+        if(!isFromInvokerOpened){
+            return null;
+        }
+        const {entity} = this.props;
+        let invoker = entity.fromConnector.invoker;
+        return(
+            <div className={`${styles.form_connector_from_invoker} ${fromWillDisappear ? styles.form_connector_from_invoker_disappear : styles.form_connector_from_invoker_appear}`}>
+                <FormOperations entity={invoker} data={{readOnly: true, visible: true}} forConnection={true}/>
+            </div>
+        );
+    }
+
+    renderToInvoker(){
+        const {isToInvokerOpened, toWillDisappear} = this.state;
+        if(!isToInvokerOpened){
+            return null;
+        }
+        const {entity} = this.props;
+        let invoker = entity.toConnector.invoker;
+        return(
+            <div className={`${styles.form_connector_to_invoker} ${toWillDisappear ? styles.form_connector_to_invoker_disappear : styles.form_connector_to_invoker_appear}`}>
+                <FormOperations entity={invoker} data={{readOnly: true, visible: true}} forConnection={true}/>
+            </div>
+        );
+    }
+
     renderReadonlyConnectors(){
+        const {isFromInvokerOpened, isToInvokerOpened} = this.state;
         const {source, placeholders} = this.props.data;
         const {entity} = this.props;
         let fromConnectorValue = entity.fromConnector.title;
@@ -83,6 +144,8 @@ class FormConnectors extends Component{
                         readOnly
                         required
                     />
+                    <TooltipFontIcon tooltipPosition={'right'} tooltip={`${fromConnectorValue} Invoker`} className={styles.form_connector_arrow_from} value={isFromInvokerOpened ? 'arrow_left' : 'arrow_right'} onClick={::this.toggleFromInvoker}/>
+                    {::this.renderFromInvoker()}
                 </Col>
                 <Col md={2} style={{textAlign: 'center'}}>
                     <ArrowRight className={styles.input_direction_arrow_readonly}/>
@@ -95,6 +158,8 @@ class FormConnectors extends Component{
                         readOnly
                         required
                     />
+                    <TooltipFontIcon tooltipPosition={'left'} tooltip={`${toConnectorValue} Invoker`} className={styles.form_connector_arrow_to} value={isToInvokerOpened ? 'arrow_right' : 'arrow_left'} onClick={::this.toggleToInvoker}/>
+                    {::this.renderToInvoker()}
                 </Col>
             </Row>
         );

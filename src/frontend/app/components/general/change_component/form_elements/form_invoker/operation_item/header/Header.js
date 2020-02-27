@@ -15,16 +15,17 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../../../basic_components/inputs/Input';
+import Input from '../../../../../basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import FormSelect from "../../FormSelect";
-import {isString} from "../../../../../../utils/app";
-import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
-import FontIcon from "../../../../basic_components/FontIcon";
-import {HTTPRequestHeaders} from "../../../../../../utils/constants/HTTPRequestHeaders";
+import styles from '../../../../../../../themes/default/general/change_component.scss';
+import FormSelect from "../../../FormSelect";
+import {isString} from "../../../../../../../utils/app";
+import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "../../../../../basic_components/FontIcon";
+import {HTTPRequestHeaders} from "../../../../../../../utils/constants/HTTPRequestHeaders";
 import HeaderValue from "./HeaderValue";
+import HeaderKey from "./HeaderKey";
 
 
 /**
@@ -145,10 +146,8 @@ class Header extends Component{
 
     renderInputs(){
         const {onDeleteButtonOver, hasDeleteButton, currentKey} = this.state;
-        const {entity, data} = this.props;
-        const {readOnly, required} = data;
-        let propertyLabel = 'Key';
-        let valueLabel = 'Value';
+        const {entity, data, forConnection} = this.props;
+        const {readOnly} = data;
         let isReadonly = false;
         if(readOnly){
             isReadonly = true;
@@ -164,44 +163,24 @@ class Header extends Component{
                         key={key}
                         onMouseEnter={(e) => ::this.showDeleteButton(e, key)}
                         onMouseLeave={::this.hideDeleteButton}>
-                        <FormSelect
-                            data={{
-                                icon: 'bookmark',
-                                selectClassName: styles.invoker_item_prop,
-                                source: itemSource,
-                                name: `select_header_${item.name}`,
-                                placeholder: propertyLabel,
-                                label: propertyLabel,
-                                visible: true
-                            }}
-                            value={itemValue}
-                            handleChange={(e) => ::this.handleChange(e, item.name, 'name')}
-                            entity={{}}
-                            onFocus={::this.onFocusValue}
-                            onBlur={::this.onBlurValue}
-                            isDisabled={isReadonly}
+                        <HeaderKey
+                            forConnection={forConnection}
+                            isReadonly={isReadonly}
+                            itemSource={itemSource}
+                            item={item}
+                            itemValue={itemValue}
+                            handleChange={::this.handleChange}
+                            onFocusValue={::this.onFocusValue}
+                            onBlurValue={::this.onBlurValue}
                         />
-
                         <HeaderValue
                             item={item}
                             readOnly={readOnly}
                             onFocus={::this.onFocusValue}
                             onBlur={::this.onBlurValue}
                             onChange={::this.handleChange}
-                        />{/*
-                        <Input
-                            onChange={(e) => ::this.handleChange(e, item.name, 'value')}
-                            name={`input_header_${item.name}`}
-                            label={valueLabel}
-                            type={'text'}
-                            maxLength={255}
-                            value={item.value}
-                            readOnly={isReadonly}
-                            className={styles.invoker_item_val}
-                            theme={{label: styles.form_input_label}}
-                            onFocus={::this.onFocusValue}
-                            onBlur={::this.onBlurValue}
-                        />*/}
+                            forConnection={forConnection}
+                        />
                         {
                             !isReadonly && hasDeleteButton && currentKey === key
                                 ?
@@ -264,13 +243,13 @@ class Header extends Component{
     }
 
     renderAddItem(){
-        const {tourStep, index, headerType} = this.props;
+        const {tourStep, index, headerType, forConnection} = this.props;
         if(this.commonSource.length === 0)
             return null;
         return (
             <div>
                 <FormSelect
-                    data={{tourStepHint: tourStep ? tourStep : '', icon: 'label_outline', selectClassName: `${styles.invoker_item_prop_add}`, source: this.commonSource, name: 'header_prop', placeholder: 'Key', label: 'Key', required: false, visible: true}}
+                    data={{tourStepHint: tourStep ? tourStep : '', icon: forConnection ? '' : 'label_outline', selectClassName: `${styles.invoker_item_prop_add}`, source: this.commonSource, name: 'header_prop', placeholder: 'Key', label: 'Key', required: false, visible: true}}
                     value={this.state.header_prop}
                     id={`header_prop_${headerType}_${index}`}
                     handleChange={::this.changeHeaderProp}
@@ -309,15 +288,16 @@ class Header extends Component{
     }
 
     render(){
-        const {readOnly} = this.props.data;
+        const {data, forConnection} = this.props;
+        const {readOnly} = data;
         return(
-            <div className={`${theme.withIcon} ${theme.input}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <div className={`${forConnection ? '' : theme.withIcon} ${theme.input}`} style={forConnection ? {paddingBottom: 0} : null}>
+                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={forConnection ? {padding: 0} : null}/>
                 <div style={{display: 'grid'}}>
                     {this.renderInputs()}
-                    {readOnly ? null : this.renderAddItem()}
+                    {readOnly || forConnection ? null : this.renderAddItem()}
                 </div>
-                <FontIcon value={'public'} className={theme.icon}/>
+                {forConnection ? null : <FontIcon value={'public'} className={theme.icon}/>}
                 <span className={theme.bar}/>
                 {this.renderLabel()}
             </div>
@@ -328,6 +308,10 @@ class Header extends Component{
 Header.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
+};
+
+Header.defaultProps = {
+    forConnection: false,
 };
 
 
