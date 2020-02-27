@@ -17,8 +17,10 @@
 package com.becon.opencelium.backend.mysql.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "webhook")
@@ -34,6 +36,14 @@ public class Webhook {
 
     @Column(name = "token")
     private String token;
+
+    @Column(name = "created_by")
+    private Integer createdBy;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_on", updatable = false)
+    private Date createdOn;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST) // need to delete
@@ -70,6 +80,22 @@ public class Webhook {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public Integer getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(Date createdOn) {
+        this.createdOn = createdOn;
     }
 
     public Scheduler getScheduler() {

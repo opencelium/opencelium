@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.neo4j.service;
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
@@ -25,7 +26,9 @@ import com.becon.opencelium.backend.neo4j.entity.FieldNode;
 import com.becon.opencelium.backend.neo4j.repository.ConnectionNodeRepository;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
