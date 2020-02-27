@@ -37,7 +37,8 @@
       "FROM_CONNECTOR_REQUIRED": "From Connector is a required field",
       "TO_CONNECTOR_REQUIRED": "To Connector is a required field",
       "TEMPLATE_REQUIRED": "Template is a required field",
-      "NO_TEMPLATES": "Please, choose the expert mode"
+      "NO_TEMPLATES": "Please, choose the expert mode",
+      "FORM_METHODS": "Wrong data"
     },
     "CONFIRMATION": {
       "TITLE": "OC.Confirmation",
@@ -90,7 +91,12 @@
     "UPDATE_BUTTON": "Update",
     "HEADER": "Update Connection",
     "VALIDATION_MESSAGES": {
-      "TEMPLATE_NOT_SELECT": "Template is a required field"
+      "TITLE_REQUIRED": "Title is a required field",
+      "FROM_CONNECTOR_REQUIRED": "From Connector is a required field",
+      "TO_CONNECTOR_REQUIRED": "To Connector is a required field",
+      "TEMPLATE_REQUIRED": "Template is a required field",
+      "NO_TEMPLATES": "Please, choose the expert mode",
+      "FORM_METHODS": "Wrong data"
     },
     "CONFIRMATION": {
       "TITLE": "OC.Confirmation",

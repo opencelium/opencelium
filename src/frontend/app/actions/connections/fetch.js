@@ -19,6 +19,42 @@ import { ConnectionsAction } from '../../utils/actions';
 
 
 /**
+ * validate form methods
+ * @param connection
+ * @returns {{type: string, payload: {}}}
+ */
+const validateConnectionFormMethods = (connection) => {
+    return {
+        type: ConnectionsAction.VALIDATE_FORMMETHODS,
+        payload: connection,
+    };
+};
+
+/**
+ * validate form methods fulfilled
+ * @param connection
+ * @returns {{type: string, payload: {}}}
+ */
+const validateConnectionFormMethodsFulfilled = (connection) => {
+    return {
+        type: ConnectionsAction.VALIDATE_FORMMETHODS_FULFILLED,
+        payload: connection,
+    };
+};
+
+/**
+ * validate form methods rejected
+ * @param error
+ * @returns {promise}
+ */
+const validateConnectionFormMethodsRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectionsAction.VALIDATE_FORMMETHODS_REJECTED,
+        payload: error
+    });
+};
+
+/**
  * check uniqueness of the title
  * @param connection
  * @returns {{type: string, payload: {}}}
@@ -168,4 +204,7 @@ export {
     checkConnectionTitle,
     checkConnectionTitleRejected,
     checkConnectionTitleFulfilled,
+    validateConnectionFormMethods,
+    validateConnectionFormMethodsFulfilled,
+    validateConnectionFormMethodsRejected,
 };

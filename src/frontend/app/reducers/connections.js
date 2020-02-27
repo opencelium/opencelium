@@ -28,8 +28,10 @@ const initialState = fromJS({
     deletingConnection: API_REQUEST_STATE.INITIAL,
     testingConnection: API_REQUEST_STATE.INITIAL,
     checkingConnectionTitle: false,
-    connection: null,
     checkTitleResult: null,
+    validatingFormMethods: false,
+    validateFormMethodsResult: null,
+    connection: null,
     testResult: {},
     connections: List(),
     error: null,
@@ -47,6 +49,12 @@ let index = 0;
 const reducer = (state = initialState, action) => {
     connections = state.get('connections');
     switch (action.type) {
+        case ConnectionsAction.VALIDATE_FORMMETHODS:
+            return state.set('validatingFormMethods', true).set('validateFormMethodsResult', null).set('error', null);
+        case ConnectionsAction.VALIDATE_FORMMETHODS_FULFILLED:
+            return state.set('validatingFormMethods', false).set('validateFormMethodsResult', action.payload);
+        case ConnectionsAction.VALIDATE_FORMMETHODS_REJECTED:
+            return state.set('validatingFormMethods', false).set('error', null).set('validateFormMethodsResult', action.payload);
         case ConnectionsAction.CHECK_CONNECTIONTITLE:
             return state.set('checkingConnectionTitle', true).set('checkTitleResult', null).set('error', null);
         case ConnectionsAction.CHECK_CONNECTIONTITLE_FULFILLED:

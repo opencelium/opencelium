@@ -19,14 +19,13 @@ import {withTranslation} from 'react-i18next';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import Content from "../../../general/content/Content";
 
-import {checkConnectionTitle} from '../../../../actions/connections/fetch';
+import {checkConnectionTitle, validateConnectionFormMethods} from '../../../../actions/connections/fetch';
 import {addConnection} from '../../../../actions/connections/add';
 import {addTemplate} from "../../../../actions/templates/add";
 import {fetchConnectors} from '../../../../actions/connectors/fetch';
-import Loading from "../../../general/app/Loading";
 import {ConnectionPermissions} from "../../../../utils/constants/permissions";
 import {permission} from "../../../../decorators/permission";
-import {injectFieldBindingIntoConnection, setFocusById} from "../../../../utils/app";
+import {setFocusById} from "../../../../utils/app";
 import {INPUTS} from "../../../../utils/constants/inputs";
 import OCTour from "../../../general/basic_components/OCTour";
 import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "../../../../utils/constants/tours";
@@ -51,6 +50,8 @@ function mapStateToProps(state){
         fetchingConnectors: connectors.get('fetchingConnectors'),
         checkingConnectionTitle: connections.get('checkingConnectionTitle'),
         checkTitleResult: connections.get('checkTitleResult'),
+        validatingFormMethods: connections.get('validatingFormMethods'),
+        validateFormMethodsResult: connections.get('validateFormMethodsResult'),
     };
 }
 
@@ -61,7 +62,7 @@ function mapConnection(connection){
 /**
  * Component to Add Connection
  */
-@connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle})
+@connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle, validateConnectionFormMethods})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app'])
 @SingleComponent('connection', 'adding', ['connectors'], mapConnection)
@@ -71,6 +72,7 @@ class ConnectionAdd extends Component{
         super(props);
         const {authUser} = this.props;
         this.startCheckingTitle = false;
+        this.startValidatingFormMethods = false;
         this.state = {
             connection: CConnection.createConnection(null),
             currentTour: 'page_1',
@@ -88,6 +90,7 @@ class ConnectionAdd extends Component{
     setCurrentTour(pageNumber){
         const {authUser} = this.props;
         this.startCheckingTitle = false;
+        this.startValidatingFormMethods = false;
         this.setState({
             currentTour: `page_${pageNumber}`,
             isTourOpen: automaticallyShowTour(authUser),
@@ -206,6 +209,15 @@ class ConnectionAdd extends Component{
     }
 
     /**
+     * to validate form methods
+     */
+    validateFormMethods(){
+        this.startValidatingFormMethods = true;
+        this.props.validateConnectionFormMethods(entity);
+        return {value: false, message: ''};
+    }
+
+    /**
      * to add template
      */
     addTemplate(template){
@@ -215,7 +227,10 @@ class ConnectionAdd extends Component{
 
 
     render(){
-        const {t, connectors, authUser, checkingConnectionTitle, checkTitleResult, addingConnection, doAction} = this.props;
+        const {
+            t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
+            addingConnection, doAction, validatingFormMethods, validateFormMethodsResult,
+        } = this.props;
         let {connection} = this.state;
         let connectorMenuItems = this.getConnectorMenuItems();
         let contentTranslations = {};
@@ -292,6 +307,13 @@ class ConnectionAdd extends Component{
                     actions: {addTemplate: ::this.addTemplate},
                     source: Object.freeze(connectors),
                     readOnly: false,
+                    check: (e, entity) => ::this.validateFormMethods(e, entity),
+                    request: {
+                        inProcess: validatingFormMethods,
+                        status: this.startValidatingFormMethods && !validatingFormMethods,
+                        result: validateFormMethodsResult,
+                        notSuccessMessage: t('ADD.VALIDATION_MESSAGES.FORM_METHODS'),
+                    }
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},

@@ -25,21 +25,33 @@ export const LOOP_OPERATOR = 'loop';
  */
 export default class COperatorItem{
 
-    constructor(index = '', type = '', condition = null){
+    constructor(index = '', type = '', condition = null, error = null){
         this._index = index;
         this._type = this.checkType(type) ? type : '';
         this._condition = CCondition.createCondition(condition);
+        this._error = this.checkError(error);
     }
 
     static createOperatorItem(operatorItem){
         let index = operatorItem && operatorItem.hasOwnProperty('index') ? operatorItem.index : '';
         let type = operatorItem && operatorItem.hasOwnProperty('type') ? operatorItem.type : '';
         let condition = operatorItem && operatorItem.hasOwnProperty('condition') ? operatorItem.condition : null;
-        return new COperatorItem(index, type, condition);
+        let error = operatorItem && operatorItem.hasOwnProperty('error') ? operatorItem.error : null;
+        return new COperatorItem(index, type, condition, error);
     }
 
     checkType(type){
         return type === IF_OPERATOR || type === LOOP_OPERATOR;
+    }
+
+    checkError(error){
+        if(error && error.hasOwnProperty('hasError') && error.hasOwnProperty('location')){
+            return error;
+        }
+        return {
+            hasError: false,
+            location: '',
+        };
     }
 
     get index(){
@@ -112,6 +124,14 @@ export default class COperatorItem{
 
     setRightStatementResponseType(type){
         this._condition.rightStatement.responseType = type;
+    }
+
+    get error(){
+        return this._error;
+    }
+
+    set error(error){
+        this._error = this.checkError(error);
     }
 
     getObject(){

@@ -18,6 +18,7 @@ import {
     fetchConnectionFulfilled, fetchConnectionRejected,
     fetchConnectionsFulfilled, fetchConnectionsRejected,
     checkConnectionTitleFulfilled, checkConnectionTitleRejected,
+    validateConnectionFormMethodsFulfilled, validateConnectionFormMethodsRejected,
 } from '../actions/connections/fetch';
 import {
     addConnectionFulfilled ,addConnectionRejected,
@@ -32,6 +33,25 @@ import {doRequest} from "../utils/auth";
  * main url for connections
  */
 const urlPrefix = 'connection';
+
+/**
+ * validate connection's form methods
+ *
+ * @param action$ - catch the state of the app
+ * @param store - from redux
+ * returns promise depending on the result of request
+ */
+const validateConnectionFormMethodsEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.VALIDATE_FORMMETHODS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/check/${action.payload.title}`;
+            return doRequest({url},{
+                success: validateConnectionFormMethodsFulfilled,
+                reject: validateConnectionFormMethodsRejected,
+            });
+        });
+};
 
 /**
  * check connection's title on existing
@@ -143,4 +163,5 @@ export {
     updateConnectionEpic,
     deleteConnectionEpic,
     checkConnectionTitleEpic,
+    validateConnectionFormMethodsEpic,
 };

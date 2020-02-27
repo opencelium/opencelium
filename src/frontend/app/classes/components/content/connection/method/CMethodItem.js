@@ -26,13 +26,14 @@ export const FIELD_TYPE_OBJECT = 'object';
  */
 export default class CMethodItem{
 
-    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null){
+    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null){
         this._index = index;
         this._invoker = this.convertInvoker(invoker);
         this._name = name;
         this._color = color;
         this._request = this.convertRequest(request);
         this._response = this.convertResponse(response);
+        this._error = this.checkError(error);
     }
 
     static createMethodItem(methodItem){
@@ -42,14 +43,24 @@ export default class CMethodItem{
         let request = methodItem ? methodItem.request : null;
         let response = methodItem ? methodItem.response : null;
         let invoker = methodItem && methodItem.hasOwnProperty('invoker') ? methodItem.invoker : null;
-        return new CMethodItem(index, name, color, request, response, invoker);
+        let error = methodItem && methodItem.hasOwnProperty('error') ? methodItem.error : null;
+        return new CMethodItem(index, name, color, request, response, invoker, error);
+    }
+
+    checkError(error){
+        if(error && error.hasOwnProperty('hasError') && error.hasOwnProperty('location')){
+            return error;
+        }
+        return {
+            hasError: false,
+            location: '',
+        };
     }
 
     convertRequest(request){
         if(!(request instanceof CRequest)) {
             let operation = this._invoker && this._invoker.operations ? this._invoker.operations.find(o => o.name === this._name) : null;
             return CRequest.createRequest({...request, operation});
-            //return CRequest.createRequest({...request});
         }
         return request;
     }
@@ -140,6 +151,14 @@ export default class CMethodItem{
 
     setResponseSuccessStatus(body){
         this._response._success._body = body;
+    }
+
+    get error(){
+        return this._error;
+    }
+
+    set error(error){
+        this._error = this.checkError(error);
     }
 
     getObject(){
