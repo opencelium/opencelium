@@ -200,8 +200,10 @@ class ConnectionUpdate extends Component{
      */
     validateFormMethods(){
         this.startValidatingFormMethods = true;
-        this.props.validateConnectionFormMethods(entity);
-        return {value: false, message: ''};
+        //#OC-212
+        //this.props.validateConnectionFormMethods(entity);
+        //return {value: false, message: ''};
+        return {value: true, message: ''};
     }
 
     /**

@@ -29,6 +29,7 @@ import {Row, Col} from "react-grid-system";
 import styles from '../../../../../../../../themes/default/general/enhancement.scss';
 import Input from '../../../../../../basic_components/inputs/Input';
 import CEnhancement from "../../../../../../../../classes/components/content/connection/field_binding/CEnhancement";
+import {setFocusById} from "../../../../../../../../utils/app";
 
 
 /**
@@ -45,7 +46,7 @@ class Enhancement extends Component{
         let onlyExpert = convertSimpleCode(simpleCode) !== expertCode && expertCode !== '';
         this.state = {
             onlyExpert,
-            mode: onlyExpert ? 'expert' : 'simple',
+            mode: 'expert',
             constants: [
                 {name: 'constant1', value: 'editing'},
                 {name: 'constant2', value: 3.14},
@@ -62,6 +63,10 @@ class Enhancement extends Component{
             name: enhancement ? enhancement.name : '',
             description: enhancement ? enhancement.description : '',
         };
+    }
+
+    componentDidMount(){
+        setFocusById('enhancement_name');
     }
 
     /**
@@ -424,16 +429,17 @@ class Enhancement extends Component{
         const {name, description} = this.state;
         let {readOnly} = this.props;
         return (
-            <div>
+            <div>{/*
                 <Row>
                     <Col md={12}>
                         {this.renderMode()}
                     </Col>
-                </Row>
+                </Row>*/}
                 <Row>
                     <Col md={12}>
                         <Input
                             onChange={::this.updateName}
+                            id={'enhancement_name'}
                             name={'Name'}
                             label={'Name'}
                             type={'text'}
@@ -449,6 +455,7 @@ class Enhancement extends Component{
                     <Col md={12}>
                         <Input
                             onChange={::this.updateDescription}
+                            id={'enhancement_description'}
                             name={'Description'}
                             label={'Description'}
                             type={'text'}
