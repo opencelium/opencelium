@@ -91,6 +91,7 @@ public class ConnectionController {
                     final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
                     return ResponseEntity.ok().body(resource);
                 }
+
                 List<EnhancementNode> enhancementNodes =  connectionNodeService
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
                 enhancementNodeService.saveAll(enhancementNodes);

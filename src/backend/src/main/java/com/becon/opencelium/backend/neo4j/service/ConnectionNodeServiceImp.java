@@ -78,17 +78,18 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
             enhancement.setConnection(connection);
             enhancementService.save(enhancement);
             enhancements.add(enhancement);
-            EnhancementNode enhancementNode = new EnhancementNode();
-            enhancementNode.setEnhanceId(enhancement.getId());
-            enhancementNode.setName(enhancement.getName());
+
             List<FieldNode> toFields = e.getTo().stream()
                     .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
 
             List<FieldNode> fromFields = e.getFrom().stream()
                     .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
+
+            EnhancementNode enhancementNode = new EnhancementNode();
+            enhancementNode.setEnhanceId(enhancement.getId());
+            enhancementNode.setName(enhancement.getName());
             enhancementNode.setIncomeField(fromFields);
             enhancementNode.setOutgoingField(toFields);
-
             enhancementNodes.add(enhancementNode);
         });
         connection.setEnhancements(enhancements);
