@@ -32,7 +32,8 @@ import Loading from "../components/general/app/Loading";
  */
 export default function (store){
     return next => action => {
-        let data = {type: '', message: ''};
+        let systemTitle = action.payload && action.payload.hasOwnProperty('systemTitle') ? action.payload.systemTitle : 'OC';
+        let data = {type: '', message: '', systemTitle};
         const dividedState = divideState(action.type);
         if(hasNotification(dividedState) && isNotBackground(action)) {
             data.message = dividedState.prefix;
@@ -73,7 +74,7 @@ export default function (store){
             }, 5500);
             ReactDOM.render(
                 <Suspense fallback={(<Loading/>)}>
-                    <Notification type={data.type} message={data.message} id={idName} params={action.payload}/>
+                    <Notification data={data} id={idName} params={action.payload}/>
                 </Suspense>, domElem);
         }
         next(action);

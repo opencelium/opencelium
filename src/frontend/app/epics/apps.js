@@ -67,7 +67,7 @@ const checkAppEpic = (action$, store) => {
             return doRequest({url, isApi: false, hasAuthHeader: true},{
                 success: ((data) => {
                     if(data && data.status === APP_STATUS_DOWN){
-                        return checkAppRejected({'message': data.details.error})
+                        return checkAppRejected({message: data.details.error, systemTitle: action.payload.value})
                     }
                     return checkAppFulfilled({...data, link: action.payload.link});
                 }),

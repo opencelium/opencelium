@@ -27,6 +27,7 @@ const initialState = fromJS({
     fetchingConnections: API_REQUEST_STATE.INITIAL,
     deletingConnection: API_REQUEST_STATE.INITIAL,
     testingConnection: API_REQUEST_STATE.INITIAL,
+    checkingNeo4j: false,
     checkingConnectionTitle: false,
     checkTitleResult: null,
     validatingFormMethods: false,
@@ -49,6 +50,12 @@ let index = 0;
 const reducer = (state = initialState, action) => {
     connections = state.get('connections');
     switch (action.type) {
+        case ConnectionsAction.CHECK_NEO4J:
+            return state.set('checkingNeo4j', true).set('error', null);
+        case ConnectionsAction.CHECK_NEO4J_FULFILLED:
+            return state.set('checkingNeo4j', false);
+        case ConnectionsAction.CHECK_NEO4J_REJECTED:
+            return state.set('checkingNeo4j', false).set('error', action.payload);
         case ConnectionsAction.VALIDATE_FORMMETHODS:
             return state.set('validatingFormMethods', true).set('validateFormMethodsResult', null).set('error', null);
         case ConnectionsAction.VALIDATE_FORMMETHODS_FULFILLED:

@@ -92,6 +92,9 @@
       "SCHEDULER_NOT_DELETED": "The connection has Schedules. It cannot be removed.",
       "__DEFAULT__": "The connection was not removed"
     },
+    "CHECK_NEO4J": {
+      "DOWN": "Neo4j is down"
+    },
     "TRIGGER_SCHEDULE": {
       "__DEFAULT__": "The job was not triggered"
     },
@@ -168,6 +171,8 @@
   },
   "SYSTEMS": {
     "OC": "OC",
+    "NEO4J": "Neo4j",
+    "ELASTICSEARCH": "Elasticsearch",
     "IDOIT": "i-doit",
     "OTRS": "OTRS",
     "SENSU": "Sensu"

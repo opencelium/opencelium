@@ -211,6 +211,7 @@ class MethodRequest extends Component{
                             connection={connection}
                             connector={connector}
                             updateBody={::this.updateBody}
+                            updateEntity={updateEntity}
                             setCurrentItem={::this.setCurrentItem}
                         />
                     </div>

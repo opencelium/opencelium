@@ -53,6 +53,7 @@ export const EntitiesWithNotification = [
     {name: ConnectionsAction.FETCH_CONNECTIONS, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectionsAction.UPDATE_CONNECTION, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectionsAction.DELETE_CONNECTION, types: ['FULFILLED', 'REJECTED', 'STORE']},
+    {name: ConnectionsAction.CHECK_NEO4J, types: ['REJECTED']},
     {name: SchedulesAction.TRIGGER_SCHEDULE, types: ['FULFILLED', 'REJECTED']},
     {name: SchedulesAction.TRIGGER_SCHEDULESUCCESS, types: ['FULFILLED']},
     {name: SchedulesAction.ADD_SCHEDULE, types: ['FULFILLED', 'REJECTED',]},

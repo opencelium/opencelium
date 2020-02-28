@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ReactJson from 'react-json-view';
-import {isJsonString, isString} from "../../../../../../../utils/app";
+import {isArray, isJsonString, isString, setFocusById} from "../../../../../../../utils/app";
 import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
 import ParamGenerator from "./ParamGenerator";
 import Input from "../../../../../basic_components/inputs/Input";
@@ -12,6 +12,9 @@ import styles from '../../../../../../../themes/default/general/form_methods.scs
 import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
 import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
 import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
+import Enhancement from "../mapping/enhancement/Enhancement";
+import {FIELD_TYPE_REQUEST} from "../utils";
+import CBindingItem from "../../../../../../../classes/components/content/connection/field_binding/CBindingItem";
 
 class Body extends Component{
 
@@ -23,7 +26,15 @@ class Body extends Component{
             showImportJson: false,
             isBodyEditOpened: false,
             importJsonBody: {},
+            showEnhancement: false,
+            currentEnhancement: null,
         };
+    }
+
+    toggleEnhancement(){
+        this.setState({
+            showEnhancement: !this.state.showEnhancement,
+        })
     }
 
     openBodyEdit(){
@@ -62,6 +73,88 @@ class Body extends Component{
         } else{
             alert('Not JSON format');
         }
+    }
+
+    getCurrentBindingItem(){
+        const {connection, method} = this.props
+        return connection.fieldBinding.find(item => item.to.findIndex(elem => elem.color === method.color) !== -1);
+    }
+
+    /*
+    * to open an enhancement when click on pointer
+     */
+    openEnhancement(){
+        let bindingItem = this.getCurrentBindingItem();
+        if(bindingItem){
+            bindingItem = bindingItem.to[0];
+            this.props.connection.setCurrentFieldBindingTo(bindingItem);
+        }
+        this.setState({
+            currentEnhancement: this.props.connection.getEnhancementByTo(),
+            showEnhancement: !this.state.showEnhancement,
+        });
+    }
+
+    setCurrentEnhancement(currentEnhancement){
+        this.setState({
+            currentEnhancement,
+        })
+    }
+
+    /**
+     * to validate fields for enhancement
+     */
+    validateFieldsForEnhancement(){
+        let {currentEnhancement} = this.state;
+        if(currentEnhancement.name === ''){
+            setFocusById('enhancement_name');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * to update enhancement in entity
+     */
+    updateEnhancement(){
+        const {currentEnhancement} = this.state;
+        const {connection, updateEntity} = this.props;
+        connection.updateEnhancement(currentEnhancement);
+        if(this.validateFieldsForEnhancement()) {
+            updateEntity();
+            this.toggleEnhancement();
+        }
+    }
+
+    renderEnhancement(){
+        const {showEnhancement, currentEnhancement} = this.state;
+        const {readOnly, connection, method} = this.props;
+        let bindingItem = connection.fieldBinding.find(item => item.to.findIndex(elem => elem.color === method.color) !== -1);
+        if(!bindingItem){
+            return null;
+        }
+        bindingItem = bindingItem.getObject();
+        bindingItem.enhancement = null;
+        return (
+            <Dialog
+                actions={[{label: 'Ok', onClick: ::this.updateEnhancement}, {label: 'Cancel', onClick: ::this.toggleEnhancement}]}
+                active={showEnhancement}
+                onEscKeyDown={::this.toggleEnhancement}
+                onOverlayClick={::this.toggleEnhancement}
+                title={'Enhancement'}
+                className={styles.enhancement_dialog}
+                theme={{title: styles.enhancement_dialog_title}}
+            >
+                <div>
+                    <Enhancement
+                        binding={bindingItem}
+                        setEnhancement={::this.setCurrentEnhancement}
+                        readOnly={readOnly}
+                        enhancement={currentEnhancement}
+                    />
+                </div>
+            </Dialog>
+        );
     }
 
     renderDialogImportJson(){
@@ -120,6 +213,7 @@ class Body extends Component{
                 {::this.renderCloseMenuEditButton()}
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <div style={{display: 'none'}} id={`${id}_reference_component`}/>
+                {this.renderEnhancement()}
                 <ReactJson
                     name={false}
                     collapsed={false}
@@ -143,6 +237,7 @@ class Body extends Component{
                         id: `${id}_reference_component`,
                         self: this.paramGenerator,
                     }}
+                    onReferenceClick={::this.openEnhancement}
                 />
                 {
                     !readOnly

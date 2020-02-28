@@ -191,6 +191,9 @@ export const InvokersAction = {
  * connections' actions for redux state
  */
 export const ConnectionsAction = {
+    CHECK_NEO4J:                        'CHECK_NEO4J',
+    CHECK_NEO4J_FULFILLED:              'CHECK_NEO4J_FULFILLED',
+    CHECK_NEO4J_REJECTED:               'CHECK_NEO4J_REJECTED',
     FETCH_CONNECTION:                   'FETCH_CONNECTION',
     FETCH_CONNECTION_FULFILLED:         'FETCH_CONNECTION_FULFILLED',
     FETCH_CONNECTION_REJECTED:          'FETCH_CONNECTION_REJECTED',
