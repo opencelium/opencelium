@@ -19,6 +19,9 @@ package com.becon.opencelium.backend.mysql.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -26,6 +29,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "scheduler")
+@EntityListeners(AuditingEntityListener.class)
 public class Scheduler {
 
     @Id
@@ -41,6 +45,7 @@ public class Scheduler {
     @Column(name = "cron_exp")
     private String cronExp;
 
+    @CreatedBy
     @Column(name = "created_by")
     private Integer createdBy;
 
@@ -49,6 +54,7 @@ public class Scheduler {
     @Column(name = "created_on", updatable = false)
     private Date createdOn;
 
+    @LastModifiedBy
     @Column(name = "modified_by")
     private Integer modifiedBy;
 

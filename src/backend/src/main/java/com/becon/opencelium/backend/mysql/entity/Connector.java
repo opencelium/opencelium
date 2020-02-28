@@ -18,6 +18,9 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "connector")
+@EntityListeners(AuditingEntityListener.class)
 public class Connector {
 
     @Id
@@ -41,6 +45,7 @@ public class Connector {
     @Column(name = "description")
     private String description;
 
+    @CreatedBy
     @Column(name = "created_by")
     private Integer createdBy;
 
@@ -49,6 +54,7 @@ public class Connector {
     @Column(name = "created_on", updatable = false)
     private Date createdOn;
 
+    @LastModifiedBy
     @Column(name = "modified_by")
     private Integer modifiedBy;
 

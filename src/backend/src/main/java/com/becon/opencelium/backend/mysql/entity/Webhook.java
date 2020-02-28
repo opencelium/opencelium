@@ -18,12 +18,15 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(name = "webhook")
+@EntityListeners(AuditingEntityListener.class)
 public class Webhook {
 
     @Id
@@ -37,6 +40,7 @@ public class Webhook {
     @Column(name = "token")
     private String token;
 
+    @CreatedBy
     @Column(name = "created_by")
     private Integer createdBy;
 
