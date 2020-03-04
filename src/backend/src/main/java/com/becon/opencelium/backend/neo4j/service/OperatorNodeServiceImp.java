@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.neo4j.entity.ConnectorNode;
 import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
 import com.becon.opencelium.backend.neo4j.repository.OperatorNodeRepository;
 import com.becon.opencelium.backend.resource.connection.ConditionResource;
@@ -36,9 +37,10 @@ public class OperatorNodeServiceImp implements OperatorNodeService {
     @Autowired
     private ActionUtility actionUtility;
 
-    public OperatorNode toEntity(List<MethodResource> methodResources, List<OperatorResource> operatorResources, String invokerName){
+    public OperatorNode toEntity(List<MethodResource> methodResources, List<OperatorResource> operatorResources,
+                                 ConnectorNode connectorNode, String connectionName){
 
-        return actionUtility.buildOperatorEntity(methodResources, operatorResources, invokerName);
+        return actionUtility.buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName);
     }
 
     public static OperatorResource toResource(OperatorNode entity){

@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.entity.User;
@@ -23,14 +24,18 @@ import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
+import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.neo4j.repository.ConnectionNodeRepository;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import com.becon.opencelium.backend.security.UserPrincipals;
+import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +54,16 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
     private FieldNodeServiceImp fieldNodeService;
 
     @Autowired
+    private MethodNodeServiceImp methodNodeServiceImp;
+
+    @Autowired
     private ConnectorNodeServiceImp connectorNodeServiceImp;
+
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
+
+    @Autowired
+    private ValidationContext validationContext;
 
     @Override
     public void save(ConnectionNode connectionNode) {
@@ -85,6 +99,19 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
             List<FieldNode> fromFields = e.getFrom().stream()
                     .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
 
+            MethodNode methodNode = methodNodeServiceImp.getByFieldNodeId(fromFields.get(0).getId())
+                    .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND_FOR_FIELD"));
+            ErrorMessageData messageData = validationContext.get(connection.getName());
+            if (messageData == null){
+                messageData = new ErrorMessageData();
+                validationContext.put(connection.getName(), messageData);
+            }
+
+            messageData.setConnectorId(connection.getFromConnector());
+            messageData.setIndex(methodNode.getIndex());
+            messageData.setLocation("enhancement");
+
+
             EnhancementNode enhancementNode = new EnhancementNode();
             enhancementNode.setEnhanceId(enhancement.getId());
             enhancementNode.setName(enhancement.getName());
@@ -101,8 +128,8 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
         connectionNode.setId(resource.getNodeId());
         connectionNode.setConnectionId(resource.getConnectionId());
         connectionNode.setName(resource.getTitle());
-        connectionNode.setFromConnector(connectorNodeServiceImp.toEntity(resource.getFromConnector()));
-        connectionNode.setToConnector(connectorNodeServiceImp.toEntity(resource.getToConnector()));
+        connectionNode.setFromConnector(connectorNodeServiceImp.toEntity(resource.getFromConnector(), resource.getTitle()));
+        connectionNode.setToConnector(connectorNodeServiceImp.toEntity(resource.getToConnector(), resource.getTitle()));
         return connectionNode;
     }
 

@@ -32,6 +32,8 @@ public interface ConnectionService {
 
     List<Connection> findAll();
 
+    boolean existsByName(String name);
+
     void execute(Long connectionId, int schedulerId);
 
     Connection toEntity(ConnectionResource resource);

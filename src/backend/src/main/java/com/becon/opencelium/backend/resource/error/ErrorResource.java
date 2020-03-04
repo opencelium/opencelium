@@ -14,7 +14,7 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.resource;
+package com.becon.opencelium.backend.resource.error;
 
 import org.springframework.http.HttpStatus;
 

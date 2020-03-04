@@ -80,6 +80,11 @@ public class ConnectionServiceImp implements ConnectionService{
     }
 
     @Override
+    public boolean existsByName(String name) {
+        return connectionRepository.existsByName(name);
+    }
+
+    @Override
     public void execute(Long connectionId, int schedulerId) {
         Connection connection = findById(connectionId)
                 .orElseThrow(() -> new RuntimeException("Connection - " + connectionId + " not found."));

@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.neo4j.entity.ConnectorNode;
 import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.neo4j.repository.MethodNodeRepository;
 import com.becon.opencelium.backend.resource.connection.MethodResource;
@@ -37,8 +38,9 @@ public class MethodNodeServiceImp implements MethodNodeService {
     private ActionUtility actionUtility;
 
 
-    public MethodNode toEntity(List<MethodResource> functionResources, List<OperatorResource> operatorResources, String invokerName) {
-        return actionUtility.buildMethodEntity(functionResources, operatorResources, invokerName);
+    public MethodNode toEntity(List<MethodResource> functionResources, List<OperatorResource> operatorResources,
+                               ConnectorNode connectorNode, String connectionName) {
+        return actionUtility.buildMethodEntity(functionResources, operatorResources, connectorNode, connectionName);
     }
 
     public static MethodResource toResource(MethodNode methodNode){

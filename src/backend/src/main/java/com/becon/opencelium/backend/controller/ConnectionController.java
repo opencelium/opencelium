@@ -26,6 +26,10 @@ import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
+import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
+import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
@@ -56,6 +60,8 @@ public class ConnectionController {
     @Autowired
     private LinkRelationServiceImp linkRelationService;
 
+    @Autowired
+    private ValidationContext validationContext;
 
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
@@ -76,9 +82,11 @@ public class ConnectionController {
     @PostMapping
     public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
         Connection connection = connectionService.toEntity(connectionResource);
+        if (connectionService.existsByName(connection.getName())){
+            throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
+        }
         Long connectionId = 0L;
         try {
-
             connectionService.save(connection);
             connectionId = connection.getId();
 
@@ -104,12 +112,41 @@ public class ConnectionController {
             }
 
             final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
+            validationContext.remove(connection.getName());
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
-            e.printStackTrace();
             connectionService.deleteById(connectionId);
             connectionNodeService.deleteById(connectionId);
-            throw new RuntimeException(e.getMessage());
+
+            ErrorMessageDataResource errorMessageDataResource =
+                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
+            ValidationResource validationResource =
+                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
+            validationContext.remove(connection.getName());
+
+            return ResponseEntity.badRequest().body(validationResource);
+        }
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<?> validate(@RequestBody ConnectionResource connectionResource) throws Exception{
+        Connection connection = connectionService.toEntity(connectionResource);
+        if (connectionService.existsByName(connection.getName())){
+            throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
+        }
+        Long connectionId = 0L;
+        try {
+            connectionNodeService.toEntity(connectionResource);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e){
+            ErrorMessageDataResource errorMessageDataResource =
+                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
+            ValidationResource validationResource =
+                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
+            validationContext.remove(connection.getName());
+
+            return ResponseEntity.badRequest().body(validationResource);
         }
     }
 

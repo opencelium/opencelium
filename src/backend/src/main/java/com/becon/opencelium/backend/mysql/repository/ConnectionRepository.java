@@ -22,4 +22,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
+    boolean existsByName(String name);
 }
