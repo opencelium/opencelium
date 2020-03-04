@@ -18,7 +18,7 @@ import Rx from 'rxjs/Rx';
 import {UsersAction} from '../utils/actions';
 import {
     fetchUserFulfilled, fetchUserRejected,
-    fetchUsersFulfilled, fetchUsersRejected, fetchUsersInStore,
+    fetchUsersFulfilled, fetchUsersRejected,
     checkUserEmailFulfilled, checkUserEmailRejected,
 } from '../actions/users/fetch';
 import {
@@ -26,8 +26,7 @@ import {
     addProfilePictureFulfilled, addProfilePictureRejected,
 } from '../actions/users/add';
 import {updateUserFulfilled, updateUserRejected,updateUserDetailFulfilled, updateUserDetailRejected,
-    updateProfilePicture, updateProfilePictureFulfilled, updateProfilePictureRejected, updateDashboardSettingsFulfilled,
-    updateDashboardSettingsRejected,
+    updateProfilePicture, updateProfilePictureFulfilled, updateProfilePictureRejected,
 } from '../actions/users/update';
 import {deleteUserFulfilled, deleteUserRejected} from '../actions/users/delete';
 import {doRequest} from "../utils/auth";

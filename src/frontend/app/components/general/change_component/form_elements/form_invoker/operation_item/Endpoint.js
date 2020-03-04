@@ -59,7 +59,7 @@ class Endpoint extends Component{
     render(){
         const {readOnly} = this.props.data;
         const {endpoint} = this.state;
-        let {tourStep, index} = this.props;
+        let {tourStep, index, forConnection} = this.props;
         let isReadonly = false;
         let inputStyle = '';
         if(tourStep){
@@ -73,16 +73,20 @@ class Endpoint extends Component{
                 onChange={::this.onChange}
                 onBlur={::this.onBlur}
                 name={'Path'}
-                id={`input_invoker_connection_path_${index}`}
+                id={`input_invoker_connection_path_${index ? index : ''}`}
                 label={'Path'}
                 type={'text'}
-                icon={'perm_identity'}
-                maxLength={2048}
+                icon={forConnection ? '' : 'perm_identity'}
+                maxLength={forConnection ? 0 : 2048}
                 value={endpoint}
                 readOnly={isReadonly}
                 className={inputStyle}
                 required={false}
-                theme={{label: styles.form_input_label}}
+                theme={{
+                    label: forConnection ? styles.form_input_label_for_connection : styles.form_input_label,
+                    input: forConnection ? styles.form_input_input_for_connection : '',
+                    inputElement: forConnection ? styles.form_input_element_for_connection : '',
+                }}
             />
         );
     }
@@ -91,6 +95,10 @@ class Endpoint extends Component{
 Endpoint.propTypes = {
     operation: PropTypes.instanceOf(COperation).isRequired,
     data: PropTypes.object.isRequired,
+};
+
+Endpoint.defaultProps = {
+    forConnection : false,
 };
 
 

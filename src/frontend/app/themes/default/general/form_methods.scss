@@ -795,3 +795,39 @@
   font-size: $FONT_SIZE_SMALL;
   font-family: $FONT_FAMILY;
 }
+
+.method_body{
+  animation: APopupInputAppear .25s;
+  transition: all 0.3s ease 0s;
+  border-radius: 3px;
+  padding: 8px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+  z-index: 1;
+  width: 326px;
+  background: white;
+  position: absolute;
+  max-height: 500px;
+  overflow: hidden auto;
+  left: -20px;
+}
+
+.method_body_placeholder{
+  padding: 6px 5px;
+  cursor: pointer;
+}
+.method_body_placeholder:hover{
+  padding: 6px 5px;
+  box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
+}
+
+.method_has_error{
+  border: 1px solid #d14b4b;
+  box-shadow: rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px;
+}
+
+.method_query_has_error{
+  color: #d14b4b;
+}
+.method_body_has_error{
+  color: #d14b4b;
+}

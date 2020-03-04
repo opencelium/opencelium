@@ -19,17 +19,15 @@ import PropTypes from 'prop-types';
 import Name from "./Name";
 import Endpoint from "./Endpoint";
 import Method from "./Method";
-import Header from "./Header";
+import Header from "./header/Header";
 import Body from "./Body";
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
 import CInvoker from "../../../../../../classes/components/content/invoker/CInvoker";
 import COperation from "../../../../../../classes/components/content/invoker/COperation";
 import Status from "./Status";
-import CRequest from "../../../../../../classes/components/content/invoker/request/CRequest";
-import CSuccess from "../../../../../../classes/components/content/invoker/response/CSuccess";
-import CResponse from "../../../../../../classes/components/content/invoker/response/CResponse";
-import CFail from "../../../../../../classes/components/content/invoker/response/CFail";
+
+import styles from '../../../../../../themes/default/general/change_component.scss';
 
 class OperationItem extends Component{
 
@@ -55,7 +53,7 @@ class OperationItem extends Component{
     }
 
     render(){
-        const {isVisible, operation, className, data, hasTour} = this.props;
+        const {isVisible, operation, className, data, hasTour, forConnection} = this.props;
         const {tourSteps} = data;
         let tourClassNames = [];
         if(hasTour && tourSteps && tourSteps.length > 0){
@@ -63,24 +61,26 @@ class OperationItem extends Component{
                 tourClassNames.push(tourSteps[i].selector.substr(1));
             }
         }
+        let tabsClassname = tourClassNames[3] ? tourClassNames[3] : '';
+        tabsClassname += ` ${styles.operation_item_tabs}`;
         return (
             <div className={className}>
                 <Name {...this.props} tourStep={tourClassNames[0] ? tourClassNames[0] : ''}/>
                 <Endpoint {...this.props} tourStep={tourClassNames[1] ? tourClassNames[1] : ''}/>
-                <Method {...this.props} tourStep={tourClassNames[2] ? tourClassNames[2] : ''}/>
+                {forConnection ? null : <Method {...this.props} tourStep={tourClassNames[2] ? tourClassNames[2] : ''}/>}
                 {
                     isVisible
                     ?
-                        <Tabs activeKey={this.state.tabKey} onSelect={::this.handleTabChange} className={tourClassNames[3] ? tourClassNames[3] : ''}>
+                        <Tabs activeKey={this.state.tabKey} onSelect={::this.handleTabChange} className={tabsClassname}>
                             <Tab title='Request' eventKey={'request'}>
                                 <Body {...this.props} entity={operation.request} bodyType={'request'} tourStep={tourClassNames[5] ? tourClassNames[5] : ''}/>
                             </Tab>
-                            <Tab title='Response(success)' eventKey={'response_success'}>
+                            <Tab title={forConnection ? 'Success' : 'Response(success)'} eventKey={'response_success'}>
                                 <Status {...this.props} entity={operation.response.success} headerType={'response_success'}/>
                                 <Header {...this.props} entity={operation.response.success} headerType={'response_success'}/>
                                 <Body {...this.props} entity={operation.response.success} headerType={'response_success'}/>
                             </Tab>
-                            <Tab title='Response(fail)' eventKey={'response_fail'}>
+                            <Tab title={forConnection ? 'Fail' : 'Response(fail)'} eventKey={'response_fail'}>
                                 <Status {...this.props} entity={operation.response.fail} headerType={'response_fail'}/>
                                 <Header {...this.props} entity={operation.response.fail} headerType={'response_fail'}/>
                                 <Body {...this.props} entity={operation.response.fail} bodyType={'response_fail'}/>
@@ -107,6 +107,7 @@ OperationItem.defaultProps = {
     hasTour: false,
     justAdded: false,
     isVisible: true,
+    forConnection: false,
 };
 
 export default OperationItem;

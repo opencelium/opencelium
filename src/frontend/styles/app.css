@@ -90,3 +90,7 @@ textarea{
   resize: none;
   height: 100% !important;
 }
+
+#atlwdg-trigger{
+  top: 20% !important;
+}

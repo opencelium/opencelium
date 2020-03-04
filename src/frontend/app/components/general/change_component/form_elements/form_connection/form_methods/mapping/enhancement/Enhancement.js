@@ -29,6 +29,7 @@ import {Row, Col} from "react-grid-system";
 import styles from '../../../../../../../../themes/default/general/enhancement.scss';
 import Input from '../../../../../../basic_components/inputs/Input';
 import CEnhancement from "../../../../../../../../classes/components/content/connection/field_binding/CEnhancement";
+import {setFocusById} from "../../../../../../../../utils/app";
 
 
 /**
@@ -38,14 +39,13 @@ class Enhancement extends Component{
 
     constructor(props){
         super(props);
-        let {enhancement, convertSimpleCode} = props;
-        let simpleCode = this.getEnhancementSimpleCode(props);
+        let {enhancement} = props;
         let expertVar = this.getVariablesForExpertMode(true);
         let expertCode = enhancement ? enhancement.expertCode : '';
-        let onlyExpert = convertSimpleCode(simpleCode) !== expertCode && expertCode !== '';
+        let onlyExpert = true;
         this.state = {
             onlyExpert,
-            mode: onlyExpert ? 'expert' : 'simple',
+            mode: 'expert',
             constants: [
                 {name: 'constant1', value: 'editing'},
                 {name: 'constant2', value: 3.14},
@@ -58,23 +58,13 @@ class Enhancement extends Component{
             ],
             expertVar,
             expertCode,
-            simpleCode,
             name: enhancement ? enhancement.name : '',
             description: enhancement ? enhancement.description : '',
         };
     }
 
-    /**
-     * to get simple code
-     */
-    getEnhancementSimpleCode(props){
-        let resultVariable = this.getResultVariable(props);
-        const {enhancement} = props;
-        let result = enhancement ? enhancement.simpleCode : null;
-        if(!result || !result.hasOwnProperty('pointer') || !result.hasOwnProperty('code') || result.code === null){
-            result = {pointer: resultVariable.name !== '' ? 1 : 0, code: [resultVariable]};
-        }
-        return result;
+    componentDidMount(){
+        setFocusById('enhancement_name');
     }
 
     /**
@@ -119,124 +109,11 @@ class Enhancement extends Component{
      * to update expert code
      */
     updateExpertCode(code){
-        let {onlyExpert, simpleCode} = this.state;
-        const {setEnhancement, convertSimpleCode} = this.props;
+        const {setEnhancement} = this.props;
         let {enhancement} = this.props;
-        let tmpSimpleCode = convertSimpleCode(simpleCode);
-        if(simpleCode.code.length === 1){
-            tmpSimpleCode = this.getVariablesForExpertMode() + tmpSimpleCode;
-        }
-        if(code !== tmpSimpleCode) {
-            if (!onlyExpert) {
-                onlyExpert = true;
-            }
-        } else{
-            onlyExpert = false;
-        }
         enhancement.expertCode = code;
         setEnhancement(enhancement);
-        this.setState({expertCode: code, onlyExpert});
-    }
-
-    /**
-     * to update pointer for simple code
-     */
-    updateSimpleCodePointer(pointer){
-        if(pointer >= 0) {
-            let {simpleCode} = this.state;
-            simpleCode.pointer = pointer + 1;
-            this.setState({simpleCode});
-        }
-    }
-
-    /**
-     * to change mode of enhancement
-     */
-    onChangeMode(e){
-        this.setState({
-            mode: e.target.value,
-        });
-    }
-
-    /**
-     * to add variable in code
-     */
-    addVariableInCode(variable){
-        let {simpleCode} = this.state;
-        const {setEnhancement, convertSimpleCode} = this.props;
-        let {enhancement} = this.props;
-        let {pointer, code} = simpleCode;
-        if(pointer >= 0) {
-            code.splice(pointer, 0, {...variable, type: 'variable'});
-        }
-        simpleCode.pointer = simpleCode.pointer + 1;
-        simpleCode.code = code;
-        enhancement.simpleCode = simpleCode;
-        let expertCode = convertSimpleCode(simpleCode);
-        enhancement.expertCode = expertCode;
-        setEnhancement(enhancement);
-        this.setState({simpleCode, expertCode});
-    }
-
-    /**
-     * to add constant in code
-     */
-    addConstantInCode(constant){
-        let {simpleCode} = this.state;
-        const {setEnhancement, convertSimpleCode} = this.props;
-        let {enhancement} = this.props;
-        let {pointer, code} = simpleCode;
-        if(pointer >= 0) {
-            code.splice(pointer, 0, {...constant, type: 'constant'});
-        }
-        simpleCode.pointer = simpleCode.pointer + 1;
-        simpleCode.code = code;
-        enhancement.simpleCode = simpleCode;
-        let expertCode = convertSimpleCode(simpleCode);
-        enhancement.expertCode = expertCode;
-        setEnhancement(enhancement);
-        this.setState({simpleCode, expertCode});
-    }
-
-    /**
-     * to add operator in code
-     */
-    addOperatorInCode(operator){
-        let {simpleCode} = this.state;
-        const {setEnhancement, convertSimpleCode} = this.props;
-        let {enhancement} = this.props;
-        let {pointer, code} = simpleCode;
-        if(pointer >= 0) {
-            code.splice(pointer, 0, {...operator, type: 'operator'});
-        }
-        simpleCode.pointer = simpleCode.pointer + 1;
-        simpleCode.code = code;
-        enhancement.simpleCode = simpleCode;
-        let expertCode = convertSimpleCode(simpleCode);
-        enhancement.expertCode = expertCode;
-        setEnhancement(enhancement);
-        this.setState({simpleCode, expertCode});
-    }
-
-    /**
-     * to remove code piece from simple code
-     */
-    removeCodePiece(index){
-        let {simpleCode} = this.state;
-        const {setEnhancement, convertSimpleCode} = this.props;
-        let {enhancement} = this.props;
-        let {code} = simpleCode;
-
-        if(index >= 0) {
-            code.splice(index, 1);
-            simpleCode.pointer = index;
-        }
-        simpleCode.code = code;
-        enhancement.simpleCode = simpleCode;
-        let expertCode = convertSimpleCode(simpleCode);
-        enhancement.expertCode = expertCode;
-        setEnhancement(enhancement);
-        this.setState({simpleCode, expertCode});
+        this.setState({expertCode: code});
     }
 
     /**
@@ -257,6 +134,17 @@ class Enhancement extends Component{
                     variables.push({name: fromFieldName, value: null, type: fromFieldType, color: fromFieldColor});
                 }
             }
+        } else{
+            if(binding && binding.from) {
+                for (let i = 0; i < binding.from.length; i++) {
+                    fromFieldName = binding.from[i].field;
+                    fromFieldType = binding.from[i].type;
+                    fromFieldColor = binding.from[i].color;
+                    if (fromFieldName !== '') {
+                        variables.push({name: fromFieldName, value: null, type: fromFieldType, color: fromFieldColor});
+                    }
+                }
+            }
         }
         return variables;
     }
@@ -274,6 +162,15 @@ class Enhancement extends Component{
             let toFieldColor = binding[0].to.color;
             if (toFieldName !== '') {
                 result = {name: toFieldName, value: null, type: toFieldType, color: toFieldColor};
+            }
+        } else{
+            if(binding && binding.to){
+                let toFieldName = binding.to[0].field;
+                let toFieldType = binding.to[0].type;
+                let toFieldColor = binding.to[0].color;
+                if (toFieldName !== '') {
+                    result = {name: toFieldName, value: null, type: toFieldType, color: toFieldColor};
+                }
             }
         }
         if(variables.findIndex(v => v.name === result.name) !== -1){
@@ -306,58 +203,12 @@ class Enhancement extends Component{
     }
 
     renderEnhancement(){
-        const {mode, constants, operators, onlyExpert, expertVar} = this.state;
+        const {mode, expertVar} = this.state;
         let {readOnly} = this.props;
-        let {simpleCode, expertCode} = this.state;
-        let variables = this.getVariables(this.props);
+        let {expertCode} = this.state;
         switch(mode) {
             case 'simple':
-                if(onlyExpert){
-                    readOnly = true;
-                }
-                return (
-                    <div>
-                        <Row>
-                            <Col md={6}>
-                                <Variables
-                                    variables={variables}
-                                    addVariableInCode={::this.addVariableInCode}
-                                    readOnly={readOnly}
-                                />
-                            </Col>
-                            <Col md={6}>
-                                <Constants
-                                    addConstant={::this.addConstant}
-                                    removeConstant={::this.removeConstant}
-                                    constants={constants}
-                                    variables={variables}
-                                    addConstantInCode={::this.addConstantInCode}
-                                    readOnly={readOnly}
-                                />
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={12}>
-                                <Operators
-                                    operators={operators}
-                                    addOperatorInCode={::this.addOperatorInCode}
-                                    readOnly={readOnly}
-                                />
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={12}>
-                                <Editor
-                                    updateCodePointer={::this.updateSimpleCodePointer}
-                                    code={simpleCode}
-                                    resultVariable={::this.getResultVariable(this.props)}
-                                    removeCodePiece={::this.removeCodePiece}
-                                    readOnly={readOnly}
-                                />
-                            </Col>
-                        </Row>
-                    </div>
-                );
+                break;
             case 'expert':
                 return(
                     <div>
@@ -409,17 +260,6 @@ class Enhancement extends Component{
         return null;
     }
 
-    renderMode(){
-        const {mode, onlyExpert} = this.state;
-        return(
-            <div className={styles.mode}>
-                <span>simple <input disabled={onlyExpert} type={'radio'} name={'mode'} value={'simple'} checked={mode === 'simple'} onChange={::this.onChangeMode}/></span>
-                <span>expert <input type={'radio'} name={'mode'} value={'expert'} checked={mode === 'expert'} onChange={::this.onChangeMode}/></span>
-            </div>
-        );
-    }
-
-
     render(){
         const {name, description} = this.state;
         let {readOnly} = this.props;
@@ -427,13 +267,9 @@ class Enhancement extends Component{
             <div>
                 <Row>
                     <Col md={12}>
-                        {this.renderMode()}
-                    </Col>
-                </Row>
-                <Row>
-                    <Col md={12}>
                         <Input
                             onChange={::this.updateName}
+                            id={'enhancement_name'}
                             name={'Name'}
                             label={'Name'}
                             type={'text'}
@@ -449,6 +285,7 @@ class Enhancement extends Component{
                     <Col md={12}>
                         <Input
                             onChange={::this.updateDescription}
+                            id={'enhancement_description'}
                             name={'Description'}
                             label={'Description'}
                             type={'text'}
@@ -467,11 +304,12 @@ class Enhancement extends Component{
 }
 
 Enhancement.propTypes = {
-    binding: PropTypes.array.isRequired,
     setEnhancement: PropTypes.func.isRequired,
     readOnly: PropTypes.bool,
-    convertSimpleCode: PropTypes.func.isRequired,
     enhancement: PropTypes.instanceOf(CEnhancement),
+};
+
+Enhancement.defaultProps = {
 };
 
 export default Enhancement;

@@ -43,6 +43,7 @@ import {
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
     updateConnectionEpic, deleteConnectionEpic, checkConnectionTitleEpic,
+    validateConnectionFormMethodsEpic, checkNeo4jEpic, checkNeo4jFulfilledEpic,
 } from '../epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
@@ -110,6 +111,9 @@ export default combineEpics(
     fetchConnectionEpic,
     fetchConnectionsEpic,
     checkConnectionTitleEpic,
+    validateConnectionFormMethodsEpic,
+    checkNeo4jEpic,
+    checkNeo4jFulfilledEpic,
     addConnectionEpic,
     updateConnectionEpic,
     deleteConnectionEpic,

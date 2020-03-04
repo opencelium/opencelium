@@ -15,7 +15,6 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import styles from '../../../../../../../themes/default/general/form_methods.scss';
 
 import chroma from 'chroma-js';
@@ -62,6 +61,10 @@ class MethodItem extends Component{
             methodTitleStyles.borderBottomStyle = 'none';
             methodStyles.boxShadow = `0 0 0 0 rgba(0, 0, 0, .14), 0px 1px 7px 1px  ${chroma(`${method.color}c2`).darken(3)}, 0 1px 1px 0 rgba(0, 0, 0, .22)`;
             methodStyles.borderRadius = '3px';
+        }
+        if(method.error.hasError){
+            methodStyles.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
+            methodStyles.border = 'border: 1px solid #d14b4b';
         }
         let indexSplitter = method.index.split('_');
         let marginLeftTimes = indexSplitter.length;

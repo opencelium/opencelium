@@ -88,81 +88,6 @@ class ChangeContent extends Component{
         removeChangeContentActionNavigation(this);
         removeFocusDocumentNavigation(this);
     }
-/*
-    static getDerivedStateFromProps(props, state){
-        const {page, contentsLength} = state;
-        let newContentsLength = props.contents.length;
-        if(page < (contentsLength - 1)) {
-            let contents = props.contents[page];
-            for(let i = 0; i < contents.inputs.length; i++) {
-                let newInputs = contents.inputs[i];
-                if (newInputs.hasOwnProperty('request')) {
-                    let request = newInputs.request;
-                    if (request) {
-                        if (request.inProcess) {
-                            return {
-                                makingRequest: true,
-                                contentsLength: newContentsLength,
-                            };
-                        } else {
-                            if (request && request.status === true) {
-                                if (request.result.message === "EXISTS") {
-                                    let isValidated = false;
-                                    let focusedInput = {name: newInputs.name, label: newInputs.label};
-                                    let validationMessage = request.notSuccessMessage;
-                                    return{
-                                        page: isValidated ? page + 1 : page,
-                                        isValidated,
-                                        validationMessage,
-                                        focusedInput,
-                                        makingRequest: false,
-                                        contentsLength: newContentsLength,
-                                    };
-                                } else {
-                                    return {
-                                        makingRequest: false,
-                                        contentsLength: newContentsLength,
-                                    };
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-        if(contentsLength !== newContentsLength) {
-            return {
-                contentsLength: newContentsLength,
-            };
-        }
-        return null;
-    }
-
-    componentDidUpdate(){
-        const {page, contentsLength} = this.state;
-        if(page < (contentsLength - 1)) {
-            let contents = this.props.contents[page];
-            for(let i = 0; i < contents.inputs.length; i++) {
-                let newInputs = contents.inputs[i];
-                if (newInputs.hasOwnProperty('request')) {
-                    let request = newInputs.request;
-                    if (request) {
-                        if (!request.inProcess) {
-                            if (request && request.status === true) {
-                                if (request.result.message !== "EXISTS") {
-                                    this.nextPage(i + 1);
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-    }*/
-
 
     UNSAFE_componentWillReceiveProps (nextProps){
         const {page, contentsLength} = this.state;
@@ -241,19 +166,6 @@ class ChangeContent extends Component{
         let validationMessage = '';
         let isValidated = true;
         for(let i = startIndex; i < inputs.length; i++){
-            /*if(inputs[i].hasOwnProperty('required') && !(entity instanceof CConnection) && !(entity instanceof CInvoker)) {
-                if (inputs[i].required) {
-                    let tmpValue = this.getInputName(inputs[i].name);
-                    if (tmpValue === ''
-                        || Array.isArray(tmpValue) && tmpValue.length === 0
-                        || isEmptyObject(tmpValue)) {
-                        hasRequired = true;
-                        focusedInput.name = inputs[i].name;
-                        focusedInput.label = inputs[i].label;
-                        break;
-                    }
-                }
-            }*/
             if(inputs[i].hasOwnProperty('check')){
                 if(typeof inputs[i].check === 'function') {
                     let checkResult = inputs[i].check(entity);

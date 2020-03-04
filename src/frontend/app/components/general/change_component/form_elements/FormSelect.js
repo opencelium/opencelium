@@ -112,7 +112,7 @@ class FormSelect extends Component{
             className += ' ' + tourStep;
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${className}`}>
+            <div className={`${icon !== '' ? theme.withIcon : ''} ${theme.input} ${className}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <Select
                     id={id}

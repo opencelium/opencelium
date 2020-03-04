@@ -52,7 +52,8 @@ class Notification extends Component{
      * to select data to notify
      */
     selectData(){
-        const {type, message, params, t} = this.props;
+        const {data, params, t} = this.props;
+        const {type, message, systemTitle} = data;
         let result = {};
         switch(type){
             case NotificationType.SUCCESS:
@@ -72,7 +73,7 @@ class Notification extends Component{
                 result.icon =  <FontIcon value='note'  style={{color: 'gray'}}/>;
                 break;
         }
-        result.systemTitle = t("SYSTEMS.OC");
+        result.systemTitle = t(`SYSTEMS.${systemTitle.toUpperCase()}`);
         result.header = t("HEADERS" + '.' + type);
         result.message = <NotificationMessage status={type} message={message} params={params}/>;
         return result;

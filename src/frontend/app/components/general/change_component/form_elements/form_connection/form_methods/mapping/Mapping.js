@@ -25,7 +25,7 @@ import {
 } from "storm-react-diagrams";
 
 import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {isNumber, isArray} from "../../../../../../../utils/app";
+import {isArray, setFocusById} from "../../../../../../../utils/app";
 import Enhancement from "./enhancement/Enhancement";
 import {
     FIELD_TYPE_REQUEST, FIELD_TYPE_RESPONSE,
@@ -161,51 +161,6 @@ class Mapping extends Component{
     }
 
     /**
-     * convert simple code to expert code
-     */
-    convertSimpleCode(currentCode){
-        let code = '';
-        if(currentCode && currentCode.hasOwnProperty('code') && currentCode.code.length > 0) {
-            for (let i = 1; i < currentCode.code.length; i++) {
-                let name = currentCode.code[i].name;
-                let value = currentCode.code[i].value;
-                switch (currentCode.code[i].type) {
-                    case 'variable':
-                        code += `var ${name};
-`;
-                        break;
-                    case 'constant':
-                        code += isNumber(value) ? `var ${name} = ${value};` : `var ${name} = "${value}";`;
-                        code += `
-`;
-                        break;
-                }
-            }
-            code += `
-var ${currentCode.code[0].name} =`;
-            for (let i = 1; i < currentCode.code.length; i++) {
-                let name = currentCode.code[i].name;
-                let value = currentCode.code[i].value;
-                switch (currentCode.code[i].type) {
-                    case 'variable':
-                        code += ` ${name}`;
-                        break;
-                    case 'constant':
-                        code += ` ${name}`;
-                        break;
-                    case 'operator':
-                        code += ` ${value}`;
-                        break;
-                }
-                if(i === currentCode.code.length - 1){
-                    code += ';';
-                }
-            }
-        }
-        return code;
-    }
-
-    /**
      * to update enhancement in entity
      */
     updateEnhancement(){
@@ -214,8 +169,8 @@ var ${currentCode.code[0].name} =`;
         connection.updateEnhancement(currentEnhancement);
         if(this.validateFieldsForEnhancement()) {
             updateEntity();
+            this.toggleEnhancement();
         }
-        this.toggleEnhancement();
     }
 
     /**
@@ -223,7 +178,11 @@ var ${currentCode.code[0].name} =`;
      */
     validateFieldsForEnhancement(){
         let {currentEnhancement} = this.state;
-        return currentEnhancement.name !== '';
+        if(currentEnhancement.name === ''){
+            setFocusById('enhancement_name');
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -289,7 +248,6 @@ var ${currentCode.code[0].name} =`;
         return nodes;
     }
 
-
     renderEnhancement(){
         const {currentBindingItem, showEnhancement, currentEnhancement} = this.state;
         const {readOnly, getEnhancement} = this.props;
@@ -309,7 +267,6 @@ var ${currentCode.code[0].name} =`;
                         binding={currentBindingItem}
                         setEnhancement={::this.setCurrentEnhancement}
                         readOnly={readOnly}
-                        convertSimpleCode={::this.convertSimpleCode}
                         enhancement={enhancement}
                     />
                 </div>
@@ -318,7 +275,7 @@ var ${currentCode.code[0].name} =`;
     }
 
     render(){
-        const {connection, readOnly, tourClassNames, updateEntity} = this.props;
+        const {connection, tourClassNames} = this.props;
         let fromConnectorNodes = this.getNodes('fromConnector');
         let toConnectorNodes = this.getNodes('toConnector');
         let toBindings = connection.fieldBinding.filter(f => f.to.length !== 0);

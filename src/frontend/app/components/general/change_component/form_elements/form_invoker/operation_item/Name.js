@@ -58,7 +58,7 @@ class Name extends Component{
 
     render(){
         const {nameValue} = this.state;
-        const {ids, data, tourStep, index} = this.props;
+        const {ids, data, tourStep, index, forConnection} = this.props;
         const {name, maxLength, readOnly, required} = data;
         let isReadonly = false;
         let inputStyle = '';
@@ -73,16 +73,20 @@ class Name extends Component{
                 onChange={::this.onChange}
                 onBlur={::this.onBlur}
                 name={'Name'}
-                id={ids && ids.hasOwnProperty('name') ? ids.name : `input_${name}_${index}`}
+                id={ids && ids.hasOwnProperty('name') ? ids.name : `input_${name ? name : ''}_${index}`}
                 label={'Name'}
                 type={'text'}
-                icon={'perm_identity'}
-                maxLength={255}
+                icon={forConnection ? '' : 'perm_identity'}
+                maxLength={forConnection ? 0 : 255}
                 value={nameValue}
                 readOnly={isReadonly}
                 className={inputStyle}
                 required={required}
-                theme={{label: styles.form_input_label}}
+                theme={{
+                    label: forConnection ? styles.form_input_label_for_connection : styles.form_input_label,
+                    input: forConnection ? styles.form_input_input_for_connection : '',
+                    inputElement: forConnection ? styles.form_input_element_for_connection : '',
+                }}
             />
         );
     }
@@ -91,6 +95,10 @@ class Name extends Component{
 Name.propTypes = {
     operation: PropTypes.instanceOf(COperation).isRequired,
     data: PropTypes.object.isRequired,
+};
+
+Name.defaultProps = {
+    forConnection: false,
 };
 
 

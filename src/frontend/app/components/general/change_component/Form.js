@@ -25,7 +25,7 @@ import FormPermissionTable from "./form_elements/FormPermissionTable";
 
 import styles from '../../../themes/default/general/change_component.scss';
 import FormSecretInput from "./form_elements/FormSecretInput";
-import FormConnectors from "./form_elements/form_connection/FormConnectors";
+import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
 import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
 import {getThemeClass} from "../../../utils/app";
 import FormMode from "./form_elements/form_connection/FormMode";
