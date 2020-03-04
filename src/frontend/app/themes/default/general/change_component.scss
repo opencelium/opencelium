@@ -767,19 +767,71 @@
   animation-fill-mode: both;
 }
 
-.form_connector_arrow{
+.form_connector_invoker_button{
+  text-align: center;
+  width: 100px;
+  color: black;
+  display: inline-block;
+  vertical-align: middle;
   position: fixed;
-  top: 275px;
+  top: 270px;
   cursor: pointer;
+  background: #e1e1e1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  transition: color 0.3s, transform 0.3s;
+  border: 1px solid #9b9bac;
+}
+.form_connector_invoker_button:hover{
+  color: white;
+}
+.form_connector_invoker_button:before{
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #2e75b6;
+  transform: scaleY(0);
+  transform-origin: 50%;
+  transition: transform 0.3s;
+  transition-timing-function: ease-out;
+  border: 1px solid #2e75b6;
+}
+.form_connector_invoker_button:hover:before{
+  transform: scaleY(1);
 }
 
-.form_connector_arrow_from{
-  @extend .form_connector_arrow;
+.form_connector_invoker_button_from{
+  @extend .form_connector_invoker_button;
+  transform-origin: center left;
+  transform: rotate(90deg);
+  left: 15px;
+}
+
+.form_connector_invoker_button_to{
+  @extend .form_connector_invoker_button;
+  transform-origin: center right;
+  transform: rotate(270deg);
+  right: 15px;
+}
+
+.form_connector_invoker_opened{
+  background: #2e75b6;
+  color: white;
+}
+.form_connector_invoker_opened_from{
+  @extend .form_connector_invoker_opened;
+  transform: rotate(0deg);
   left: 0;
 }
-
-.form_connector_arrow_to{
-  @extend .form_connector_arrow;
+.form_connector_invoker_opened_to{
+  @extend .form_connector_invoker_opened;
+  transform: rotate(360deg);
   right: 0;
 }
 

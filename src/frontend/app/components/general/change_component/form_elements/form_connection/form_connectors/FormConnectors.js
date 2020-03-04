@@ -16,17 +16,17 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import Input from '../../../basic_components/inputs/Input';
+import Input from '../../../../basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../decorators/FormElement";
+import styles from '../../../../../../themes/default/general/change_component.scss';
+import {FormElement} from "../../../../../../decorators/FormElement";
 import {Row, Col} from "react-grid-system";
-import {ArrowRight} from '../../../basic_components/Arrows';
+import {ArrowRight} from '../../../../basic_components/Arrows';
 
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../classes/components/content/connection/CConnectorItem";
-import FormOperations from "../form_invoker/FormOperations";
-import TooltipFontIcon from "../../../basic_components/tooltips/TooltipFontIcon";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../classes/components/content/connection/CConnectorItem";
+import FormOperations from "../../form_invoker/FormOperations";
+import InvokerButton from "./InvokerButton";
 
 
 /**
@@ -130,7 +130,7 @@ class FormConnectors extends Component{
 
     renderReadonlyConnectors(){
         const {isFromInvokerOpened, isToInvokerOpened} = this.state;
-        const {source, placeholders} = this.props.data;
+        const {placeholders} = this.props.data;
         const {entity} = this.props;
         let fromConnectorValue = entity.fromConnector.title;
         let toConnectorValue = entity.toConnector.title;
@@ -144,7 +144,7 @@ class FormConnectors extends Component{
                         readOnly
                         required
                     />
-                    <TooltipFontIcon tooltipPosition={'right'} tooltip={`${fromConnectorValue} Invoker`} className={styles.form_connector_arrow_from} value={isFromInvokerOpened ? 'arrow_left' : 'arrow_right'} onClick={::this.toggleFromInvoker}/>
+                    <InvokerButton onClick={::this.toggleFromInvoker} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>
                     {::this.renderFromInvoker()}
                 </Col>
                 <Col md={2} style={{textAlign: 'center'}}>
@@ -158,7 +158,7 @@ class FormConnectors extends Component{
                         readOnly
                         required
                     />
-                    <TooltipFontIcon tooltipPosition={'left'} tooltip={`${toConnectorValue} Invoker`} className={styles.form_connector_arrow_to} value={isToInvokerOpened ? 'arrow_right' : 'arrow_left'} onClick={::this.toggleToInvoker}/>
+                    <InvokerButton onClick={::this.toggleToInvoker} tooltip={toConnectorValue} position={'right'} isOpened={isToInvokerOpened}/>
                     {::this.renderToInvoker()}
                 </Col>
             </Row>

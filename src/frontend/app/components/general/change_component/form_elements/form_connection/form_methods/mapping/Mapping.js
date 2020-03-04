@@ -25,7 +25,7 @@ import {
 } from "storm-react-diagrams";
 
 import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {isNumber, isArray, setFocusById} from "../../../../../../../utils/app";
+import {isArray, setFocusById} from "../../../../../../../utils/app";
 import Enhancement from "./enhancement/Enhancement";
 import {
     FIELD_TYPE_REQUEST, FIELD_TYPE_RESPONSE,
@@ -275,7 +275,7 @@ class Mapping extends Component{
     }
 
     render(){
-        const {connection, readOnly, tourClassNames, updateEntity} = this.props;
+        const {connection, tourClassNames} = this.props;
         let fromConnectorNodes = this.getNodes('fromConnector');
         let toConnectorNodes = this.getNodes('toConnector');
         let toBindings = connection.fieldBinding.filter(f => f.to.length !== 0);

@@ -46,15 +46,24 @@ class TooltipText extends Component{
     }
 
     render(){
-        const {authUser, tooltip, text, className} = this.props;
+        const {authUser, tooltip, text, className, onClick, tooltipPosition} = this.props;
         let classNames = [
             'tooltip_switch',
             'tooltip',
         ];
+        let tooltipPositionClassname = theme.tooltipTop;
+        switch (tooltipPosition){
+            case 'right':
+                tooltipPositionClassname = theme.tooltipRight;
+                break;
+            case 'left':
+                tooltipPositionClassname = theme. tooltipRight;
+                break;
+        }
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <span className={`${styles[classNames.tooltip_switch]} ${className}`} onMouseOver={::this.activate} onMouseLeave={::this.deactivate}>
-                <span className={`${theme.tooltip} ${theme.tooltipTop} ${ this.state.isActive ? theme.tooltipActive : ''} ${styles[classNames.tooltip]}`}>
+            <span className={`${styles[classNames.tooltip_switch]} ${className}`} onMouseOver={::this.activate} onMouseLeave={::this.deactivate} onClick={onClick}>
+                <span className={`${theme.tooltip} ${tooltipPositionClassname} ${ this.state.isActive ? `${theme.tooltipActive}` : ''} ${styles[classNames.tooltip]}`}>
                     <span className={`${theme.tooltipInner}`}>{tooltip}</span>
                 </span>
                 <span>{text}</span>
@@ -64,7 +73,6 @@ class TooltipText extends Component{
 }
 
 TooltipText.propTypes = {
-    authUser: PropTypes.object.isRequired,
     tooltip: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
     className: PropTypes.string,
