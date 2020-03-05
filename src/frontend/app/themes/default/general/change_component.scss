@@ -818,6 +818,9 @@
   transform-origin: center right;
   transform: rotate(270deg);
   right: 15px;
+  div{
+    transform: rotate(180deg);
+  }
 }
 
 .form_connector_invoker_opened{
@@ -833,6 +836,9 @@
   @extend .form_connector_invoker_opened;
   transform: rotate(360deg);
   right: 0;
+  div{
+    transform: rotate(0deg);
+  }
 }
 
 .operation_item_tabs{

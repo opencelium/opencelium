@@ -48,8 +48,8 @@ const validateConnectionFormMethodsEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.VALIDATE_FORMMETHODS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/check/${action.payload.title}`;
-            return doRequest({url},{
+            let url = `${urlPrefix}/validate`;
+            return doRequest({url, method: 'post', data: action.payload},{
                 success: validateConnectionFormMethodsFulfilled,
                 reject: validateConnectionFormMethodsRejected,
             });

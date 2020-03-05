@@ -264,7 +264,7 @@ class Enhancement extends Component{
         const {name, description} = this.state;
         let {readOnly} = this.props;
         return (
-            <div>
+            <div>{/*
                 <Row>
                     <Col md={12}>
                         <Input
@@ -280,7 +280,7 @@ class Enhancement extends Component{
                             readOnly={readOnly}
                         />
                     </Col>
-                </Row>
+                </Row>*/}
                 <Row>
                     <Col md={12}>
                         <Input
@@ -292,7 +292,7 @@ class Enhancement extends Component{
                             icon={'perm_identity'}
                             value={description}
                             multiline={true}
-                            rows={4}
+                            rows={6}
                             readOnly={readOnly}
                         />
                     </Col>
