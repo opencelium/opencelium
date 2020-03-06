@@ -102,28 +102,14 @@ class Body extends Component{
     }
 
     /**
-     * to validate fields for enhancement
-     */
-    validateFieldsForEnhancement(){
-        let {currentEnhancement} = this.state;
-        if(currentEnhancement.name === ''){
-            setFocusById('enhancement_name');
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * to update enhancement in entity
      */
     updateEnhancement(){
         const {currentEnhancement} = this.state;
         const {connection, updateEntity} = this.props;
         connection.updateEnhancement(currentEnhancement);
-        if(this.validateFieldsForEnhancement()) {
-            updateEntity();
-            this.toggleEnhancement();
-        }
+        updateEntity();
+        this.toggleEnhancement();
     }
 
     renderEnhancement(){

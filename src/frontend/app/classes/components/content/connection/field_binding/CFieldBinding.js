@@ -22,7 +22,7 @@ import CBindingItem from "./CBindingItem";
  */
 export default class CFieldBinding{
 
-    constructor(from = [], to = [], enhancement = null){
+    constructor(from = [], to = [], enhancement = {}){
         this._from = CFieldBinding.convertBindingItems(from);
         this._to = CFieldBinding.convertBindingItems(to);
         this._enhancement = this.convertEnhancement(enhancement);
@@ -31,16 +31,16 @@ export default class CFieldBinding{
     static createFieldBinding(fieldBinding){
         let from = fieldBinding && fieldBinding.hasOwnProperty('from') ? fieldBinding.from : [];
         let to = fieldBinding && fieldBinding.hasOwnProperty('to') ? fieldBinding.to : [];
-        let enhancement = fieldBinding && fieldBinding.hasOwnProperty('enhancement') ? fieldBinding.enhancement : null;
+        let enhancement = fieldBinding && fieldBinding.hasOwnProperty('enhancement') ? fieldBinding.enhancement : {};
         return new CFieldBinding(from, to, enhancement);
     }
 
 
     convertEnhancement(enhancement){
         if(!(enhancement instanceof CEnhancement)) {
-            return CEnhancement.createEnhancement(enhancement);
+            return CEnhancement.createEnhancement({...enhancement, fieldBinding: this});
         }
-        return enhancement;
+        return CEnhancement.createEnhancement({...enhancement.getObject(), fieldBinding: this});
     }
 
     static convertBindingItem(item){
@@ -67,30 +67,13 @@ export default class CFieldBinding{
         return bindingItem1.field === bindingItem2.field && bindingItem1.color === bindingItem2.color && bindingItem1.type === bindingItem2.type;
     }
 
-    getVariables(){
-        let variables = [];
-        let fromFieldName = '';
-        let fromFieldType = '';
-        let fromFieldColor = '';
-        if(binding.length > 0) {
-            for (let i = 0; i < binding.length; i++) {
-                fromFieldName = binding[i].from.field;
-                fromFieldType = binding[i].from.type;
-                fromFieldColor = binding[i].from.color;
-                if (fromFieldName !== '') {
-                    variables.push({name: fromFieldName, value: null, type: fromFieldType, color: fromFieldColor});
-                }
-            }
-        }
-        return variables;
-    }
-
     get from(){
         return this._from;
     }
 
     set from(from){
         this._from = CFieldBinding.convertBindingItems(from);
+        this._enhancement.updateExpertVar();
     }
 
     get to(){
@@ -99,6 +82,7 @@ export default class CFieldBinding{
 
     set to(to){
         this._to = CFieldBinding.convertBindingItems(to);
+        this._enhancement.updateExpertVar();
     }
 
     get enhancement(){

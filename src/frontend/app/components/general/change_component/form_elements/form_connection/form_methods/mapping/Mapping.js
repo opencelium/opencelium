@@ -167,22 +167,8 @@ class Mapping extends Component{
         const {currentEnhancement} = this.state;
         const {connection, updateEntity} = this.props;
         connection.updateEnhancement(currentEnhancement);
-        if(this.validateFieldsForEnhancement()) {
-            updateEntity();
-            this.toggleEnhancement();
-        }
-    }
-
-    /**
-     * to validate fields for enhancement
-     */
-    validateFieldsForEnhancement(){
-        let {currentEnhancement} = this.state;
-        if(currentEnhancement.name === ''){
-            setFocusById('enhancement_name');
-            return false;
-        }
-        return true;
+        updateEntity();
+        this.toggleEnhancement();
     }
 
     /**
