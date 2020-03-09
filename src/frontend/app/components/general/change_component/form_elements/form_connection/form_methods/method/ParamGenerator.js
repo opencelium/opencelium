@@ -146,7 +146,7 @@ class ParamGenerator extends Component {
 
     renderMethodSelect(){
         const {color} = this.state;
-        const {connection, readOnly} = this.props;
+        const {connection, readOnly, isVisible} = this.props;
         let method = connection.toConnector.getMethodByColor(color);
         let connector = connection.toConnector;
         if(!method){
@@ -154,7 +154,7 @@ class ParamGenerator extends Component {
             connector = connection.fromConnector;
         }
         let value = method ? method.getValueForSelectInput(connector) : null;
-        let selectThemeInputStyle = {width: '70px', float: 'left'};
+        let selectThemeInputStyle = {width: isVisible ? '25%' : '70px', float: 'left'};
         let source = this.getOptionsForMethods();
         selectThemeInputStyle.padding = 0;
         return (
@@ -246,10 +246,10 @@ class ParamGenerator extends Component {
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method} = this.props;
+        let {method, isVisible} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
-        let divStyles = {float: 'left', width: '130px'};
+        let divStyles = {float: 'left', width: isVisible ? '75%' : '130px'};
         inputTheme.input = styles.param_generator_param;
         return (
             <div style={divStyles}>
@@ -317,7 +317,7 @@ class ParamGenerator extends Component {
                         <div key={2} className={isVisible ? styles.param_generator_form_json : styles.param_generator_form}>
                             {this.renderMethodSelect()}
                             {this.renderParamInput()}
-                            {!isVisible ? <div className={styles.param_generator_form_add} onClick={::this.addParam}>+</div> : null}
+                            {!isVisible ? <TooltipFontIcon tooltip={'Add'} value={'add'} className={styles.param_generator_form_add} onClick={::this.addParam}/> : null}
                         </div>
                         :
                         null

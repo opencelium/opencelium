@@ -19,7 +19,7 @@ import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
 import ChangeContent from "../../../general/change_component/ChangeContent";
 
-import {checkConnectionTitle, validateConnectionFormMethods} from '../../../../actions/connections/fetch';
+import {checkConnectionTitle} from '../../../../actions/connections/fetch';
 import {fetchConnection} from "../../../../actions/connections/fetch";
 import {updateConnection} from "../../../../actions/connections/update";
 import {addTemplate} from "../../../../actions/templates/add";
@@ -63,7 +63,7 @@ function mapConnection(connection){
 /**
  * Component to Update Connection
  */
-@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, validateConnectionFormMethods})
+@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app'])
 @SingleComponent('connection', 'updating', ['connectors'], mapConnection)
@@ -73,7 +73,6 @@ class ConnectionUpdate extends Component{
         super(props);
         const {authUser} = this.props;
         this.startCheckingTitle = false;
-        this.startValidatingFormMethods = false;
         this.state = {
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
@@ -196,17 +195,6 @@ class ConnectionUpdate extends Component{
     }
 
     /**
-     * to validate form methods
-     */
-    validateFormMethods(){
-        this.startValidatingFormMethods = true;
-        //#OC-212
-        //this.props.validateConnectionFormMethods(entity);
-        //return {value: false, message: ''};
-        return {value: true, message: ''};
-    }
-
-    /**
      * to add template
      */
     addTemplate(template){
@@ -217,7 +205,7 @@ class ConnectionUpdate extends Component{
     render(){
         const {
             t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
-            updatingConnection, doAction, validatingFormMethods, validateFormMethodsResult,
+            updatingConnection, doAction,
         } = this.props;
         let {connection} = this.props;
         let connectorMenuItems = this.getConnectorMenuItems();
@@ -274,13 +262,6 @@ class ConnectionUpdate extends Component{
                     actions: {addTemplate: ::this.addTemplate},
                     source: Object.freeze(connectors),
                     readOnly: false,
-                    check: (e, entity) => ::this.validateFormMethods(e, entity),
-                    request: {
-                        inProcess: validatingFormMethods,
-                        status: this.startValidatingFormMethods && !validatingFormMethods,
-                        result: validateFormMethodsResult,
-                        notSuccessMessage: t('UPDATE.VALIDATION_MESSAGES.FORM_METHODS'),
-                    }
                 },
             ],
             hint: {text: t('UPDATE.FORM.HINT_2'), openTour: ::this.openTour},
