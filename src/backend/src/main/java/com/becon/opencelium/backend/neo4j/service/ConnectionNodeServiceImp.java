@@ -54,16 +54,10 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
     private FieldNodeServiceImp fieldNodeService;
 
     @Autowired
-    private MethodNodeServiceImp methodNodeServiceImp;
-
-    @Autowired
     private ConnectorNodeServiceImp connectorNodeServiceImp;
 
     @Autowired
     private InvokerServiceImp invokerServiceImp;
-
-    @Autowired
-    private ValidationContext validationContext;
 
     @Override
     public void save(ConnectionNode connectionNode) {
@@ -88,29 +82,17 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
             if (e.getEnhancement() == null){
                 return;
             }
+
             Enhancement enhancement = enhancementService.toEntity(e.getEnhancement());
             enhancement.setConnection(connection);
             enhancementService.save(enhancement);
             enhancements.add(enhancement);
 
-            List<FieldNode> toFields = e.getTo().stream()
-                    .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
-
             List<FieldNode> fromFields = e.getFrom().stream()
-                    .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
+                    .map(f -> fieldNodeService.findFieldByResource(f, connection)).collect(Collectors.toList());
 
-            MethodNode methodNode = methodNodeServiceImp.getByFieldNodeId(fromFields.get(0).getId())
-                    .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND_FOR_FIELD"));
-            ErrorMessageData messageData = validationContext.get(connection.getName());
-            if (messageData == null){
-                messageData = new ErrorMessageData();
-                validationContext.put(connection.getName(), messageData);
-            }
-
-            messageData.setConnectorId(connection.getFromConnector());
-            messageData.setIndex(methodNode.getIndex());
-            messageData.setLocation("enhancement");
-
+            List<FieldNode> toFields = e.getTo().stream()
+                    .map(f -> fieldNodeService.findFieldByResource(f, connection)).collect(Collectors.toList());
 
             EnhancementNode enhancementNode = new EnhancementNode();
             enhancementNode.setEnhanceId(enhancement.getId());

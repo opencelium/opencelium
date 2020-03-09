@@ -60,10 +60,10 @@ public class LinkRelationServiceImp implements LinkRelationService {
             }
 
             List<FieldNode> toFields = l.getTo().stream()
-                    .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
+                    .map(f -> fieldNodeService.findFieldByResource(f, connection)).collect(Collectors.toList());
 
             List<FieldNode> fromFields = l.getFrom().stream()
-                    .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
+                    .map(f -> fieldNodeService.findFieldByResource(f, connection)).collect(Collectors.toList());
 
             linkRelation.setFieldNodeEnd(toFields.get(0));
             linkRelation.setFieldNodeStart(fromFields.get(0));

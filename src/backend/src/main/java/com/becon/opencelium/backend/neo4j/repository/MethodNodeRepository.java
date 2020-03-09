@@ -37,4 +37,7 @@ public interface MethodNodeRepository extends Neo4jRepository<MethodNode, Long> 
 
     @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector|:from_connector]->(:Connector{connectorId:{1}})-[*]->(m:Method) RETURN m")
     List<MethodNode> findMethodsByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
+
+    @Query("match (c:Connection{connectionId:{0}})-[*]->(m:Method{color:{1}}) return m")
+    Optional<MethodNode> findByConnectionIdAndColor(Long connectionId, String color);
 }

@@ -18,10 +18,13 @@ package com.becon.opencelium.backend.neo4j.service;
 
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.neo4j.entity.*;
 import com.becon.opencelium.backend.neo4j.repository.FieldNodeRepository;
 import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldResource;
 import com.becon.opencelium.backend.utility.StringUtility;
+import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -52,8 +55,27 @@ public class FieldNodeServiceImp implements FieldNodeService {
     @Autowired
     private InvokerServiceImp invokerService;
 
+    @Autowired
+    private MethodNodeServiceImp methodNodeServiceImp;
+
+    @Autowired
+    private ValidationContext validationContext;
+
     @Override
-    public FieldNode findFieldByResource(LinkedFieldResource fieldResource, Long connectionId) {
+    public FieldNode findFieldByResource(LinkedFieldResource fieldResource, Connection connection) {
+        Long connectionId = connection.getId();
+
+        MethodNode methodNode = methodNodeServiceImp.findByConnectionIdAndColor(connectionId, fieldResource.getColor())
+                .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND_FOR_FIELD"));
+        ErrorMessageData messageData = validationContext.get(connection.getName());
+        if (messageData == null){
+            messageData = new ErrorMessageData();
+            validationContext.put(connection.getName(), messageData);
+        }
+        messageData.setConnectorId(connection.getFromConnector());
+        messageData.setIndex(methodNode.getIndex());
+        messageData.setLocation("body");
+
         FieldNode currentField = new FieldNode();
         String color = fieldResource.getColor();
         String type = fieldResource.getType();
