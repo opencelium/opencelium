@@ -57,6 +57,14 @@ public class ValidationResource {
         this.message = message;
     }
 
+    public ErrorMessageDataResource getData() {
+        return data;
+    }
+
+    public void setData(ErrorMessageDataResource data) {
+        this.data = data;
+    }
+
     public String getPath() {
         return path;
     }
