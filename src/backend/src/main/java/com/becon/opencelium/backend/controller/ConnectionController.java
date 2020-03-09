@@ -180,7 +180,7 @@ public class ConnectionController {
 
     @GetMapping("/check/{name}")
     public ResponseEntity<?> existsByName(@PathVariable("name") String name) throws IOException {
-        if (name.equals("")){
+        if (connectionService.existsByName(name)){
             throw new ResponseStatusException(
                     HttpStatus.OK, "EXISTS");
         } else {
