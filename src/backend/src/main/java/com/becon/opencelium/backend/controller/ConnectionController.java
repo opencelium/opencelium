@@ -115,6 +115,7 @@ public class ConnectionController {
             validationContext.remove(connection.getName());
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
+            enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.deleteById(connectionId);
             connectionNodeService.deleteById(connectionId);
 

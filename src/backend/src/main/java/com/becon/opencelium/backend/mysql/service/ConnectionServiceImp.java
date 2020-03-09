@@ -70,6 +70,11 @@ public class ConnectionServiceImp implements ConnectionService{
     }
 
     @Override
+    public void delete(Connection connection) {
+        connectionRepository.delete(connection);
+    }
+
+    @Override
     public Optional<Connection> findById(Long id) {
         return connectionRepository.findById(id);
     }
