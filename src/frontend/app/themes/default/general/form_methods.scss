@@ -744,6 +744,14 @@
   white-space: nowrap;
 }
 .operator_close_menu_edit{
+  position: absolute;
+  cursor: pointer;
+  top: 3px;
+  right: 0;
+  color: black;
+  font-size: $FONT_SIZE_SMALL;
+}
+.body_close_menu_edit{
   position: sticky;
   cursor: pointer;
   top: 3px;

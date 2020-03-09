@@ -23,6 +23,7 @@ addMenuMyProfileKeyNavigation, removeMenuMyProfileKeyNavigation,
 } from "../../../utils/key_navigation";
 import {permission} from "../../../decorators/permission";
 import {MyProfilePermissions} from "../../../utils/constants/permissions";
+import styles from '../../../themes/default/layout/header.scss';
 
 
 function mapStateToProps(state){
@@ -60,6 +61,7 @@ class MyProfileMenuItem extends Component{
                 icon='face'
                 style={{paddingRight: '30px', height: '40px', paddingTop: '8px'}}
                 className={'tour-step-myprofile'}
+                itemClassName={styles.my_profile_header}
             />
         );
     }

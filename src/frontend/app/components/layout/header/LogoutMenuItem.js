@@ -24,6 +24,7 @@ import {logoutUserFulfilled} from '../../../actions/auth';
 import {
     addLogoutKeyNavigation, removeLogoutKeyNavigation,
 } from '../../../utils/key_navigation';
+import styles from '../../../themes/default/layout/header.scss';
 
 
 
@@ -89,7 +90,8 @@ class LogoutMenuItem extends Component{
                 tooltip={'Logout'}
                 icon='exit_to_app'
                 style={{paddingRight: '30px', height: '40px', paddingTop: '8px'}}
-                className={'tour-step-logout'}
+                className={`tour-step-logout`}
+                itemClassName={styles.logout_header}
                 key={1}
             />,
             <Confirmation

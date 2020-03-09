@@ -35,7 +35,7 @@ export default function (data){
     }
     let onClick = !data.hasOwnProperty('to') || data.to === '' ? data.onClick : null;
     return(
-        <NavItem>
+        <NavItem className={data.itemClassName ? data.itemClassName : ''}>
             <NavLink
                 tag={Link}
                 to={data.to}

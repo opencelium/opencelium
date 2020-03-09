@@ -180,7 +180,7 @@ class Body extends Component{
     renderCloseMenuEditButton(){
         return (
             <TooltipFontIcon
-                className={styles.operator_close_menu_edit}
+                className={styles.body_close_menu_edit}
                 value={'check_circle_outline'}
                 tooltip={'Apply'}
                 onClick={::this.closeBodyEdit}
