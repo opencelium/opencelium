@@ -14,7 +14,10 @@
  */
 
 import {isEmptyObject, isString, isArray, isObject} from "../../../../../utils/app";
-import {parseHeader} from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
+import {
+    convertHeaderFormatToObject,
+    parseHeader
+} from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
 /**
  * (not used)
  */
@@ -148,7 +151,7 @@ export default class CRequest{
             method: this._method,
         };
         if(this._header && this._header.length > 0){
-            obj.header = this._header;
+            obj.header = convertHeaderFormatToObject(this._header);
         }
         return obj;
     }

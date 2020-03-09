@@ -159,3 +159,13 @@ export function parseHeader(header){
     }
     return [];
 }
+
+export function convertHeaderFormatToObject(header){
+    let result = {};
+    if(isArray(header)){
+        for(let i = 0; i < header.length; i++){
+            result[header[i].name] = header[i].value;
+        }
+    }
+    return result;
+}
