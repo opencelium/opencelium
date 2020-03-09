@@ -48,7 +48,7 @@ public class Connection   {
     private int toConnector;
 
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_by", updatable = false)
     private Integer createdBy;
 
     @CreationTimestamp
