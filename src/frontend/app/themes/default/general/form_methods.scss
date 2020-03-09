@@ -744,6 +744,14 @@
   white-space: nowrap;
 }
 .operator_close_menu_edit{
+  position: absolute;
+  cursor: pointer;
+  top: 3px;
+  right: 0;
+  color: black;
+  font-size: $FONT_SIZE_SMALL;
+}
+.body_close_menu_edit{
   position: sticky;
   cursor: pointer;
   top: 3px;
@@ -800,7 +808,7 @@
   border-radius: 3px;
   padding: 8px;
   box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
-  z-index: 1;
+  z-index: 5;
   width: 326px;
   background: white;
   position: absolute;

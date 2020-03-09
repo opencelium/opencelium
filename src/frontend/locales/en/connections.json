@@ -84,8 +84,8 @@
       "EXPERT_MODE": "Expert",
       "TEMPLATE_MODE": "Template",
       "HINT_2": "Update methods",
-      "ADD_TEMPLATE": "Add Template",
-      "ADD_TEMPLATE_TITLE": "Add Template"
+      "UPDATE_TEMPLATE": "Add Template",
+      "UPDATE_TEMPLATE_TITLE": "Add Template"
     },
     "LIST_BUTTON": "Connections",
     "UPDATE_BUTTON": "Update",

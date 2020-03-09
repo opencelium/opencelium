@@ -207,6 +207,7 @@ class MethodRequest extends Component{
                         <label className={`${theme.label} ${styles.body_label}`}>{'Body'}</label>
                         <Body
                             id={id}
+                            readOnly={readOnly}
                             method={method}
                             connection={connection}
                             connector={connector}

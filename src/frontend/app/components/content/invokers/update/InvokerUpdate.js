@@ -236,30 +236,30 @@ class InvokerUpdate extends Component{
         ];
         return (
             <Content
-                translations={contentTranslations}
-                getListLink={getListLink}
-                permissions={InvokerPermissions}
-                authUser={authUser}
+        translations={contentTranslations}
+        getListLink={getListLink}
+        permissions={InvokerPermissions}
+        authUser={authUser}
             >
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
-                    contents={contents}
-                    translations={changeContentTranslations}
-                    action={doAction}
-                    entity={CInvoker.createInvoker(invoker)}
-                    isActionInProcess={updatingInvoker}
-                    authUser={authUser}
-                    onPageSwitch={::this.setCurrentTour}
-                    type={'update'}
-                />
-                <OCTour
-                    steps={INVOKER_TOURS[this.state.currentTour]}
-                    isOpen={this.state.isTourOpen}
-                    onRequestClose={::this.closeTour}
-                    updateDelay={1000}
-                />
-            </Content>
-        );
+            <ChangeContent
+        breadcrumbsItems={breadcrumbsItems}
+        contents={contents}
+        translations={changeContentTranslations}
+        action={doAction}
+        entity={CInvoker.createInvoker(invoker)}
+        isActionInProcess={updatingInvoker}
+        authUser={authUser}
+        onPageSwitch={::this.setCurrentTour}
+        type={'update'}
+        />
+        <OCTour
+        steps={INVOKER_TOURS[this.state.currentTour]}
+        isOpen={this.state.isTourOpen}
+        onRequestClose={::this.closeTour}
+        updateDelay={1000}
+        />
+        </Content>
+    );
     }
 }
 
