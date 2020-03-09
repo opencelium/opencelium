@@ -44,15 +44,32 @@ class MethodItem extends Component{
         };
     }
 
+    componentDidUpdate(prevProps){
+        const curMethod = this.props.method;
+        if(curMethod.error.hasError && !this.state.showParams){
+            this.setState({
+                showParams: true,
+            });
+        }
+    }
+
+    updateEntity(){
+        const {method, updateEntity} = this.props;
+        method.deleteError();
+        updateEntity();
+    }
+
     /**
      * to show/hide params
      */
     toggleShowParams(){
+        const {method} = this.props;
+        method.deleteError();
         this.setState({showParams: !this.state.showParams});
     }
 
     render(){
-        const {connection, connector, method, updateEntity, readOnly} = this.props;
+        const {connection, connector, method, readOnly} = this.props;
         const {showParams} = this.state;
         let methodStyles = {position: 'relative', transition: 'all 0.3s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
         let methodTitleStyles = {backgroundColor: method.color};
@@ -81,7 +98,7 @@ class MethodItem extends Component{
                         connection={connection}
                         connector={connector}
                         method={method}
-                        updateEntity={updateEntity}
+                        updateEntity={::this.updateEntity}
                         toggleShowParams={::this.toggleShowParams}
                         showParams={showParams}
                         readOnly={readOnly}
@@ -95,7 +112,7 @@ class MethodItem extends Component{
                                 connection={connection}
                                 connector={connector}
                                 method={method}
-                                updateEntity={updateEntity}
+                                updateEntity={::this.updateEntity}
                             />
                         :
                             null

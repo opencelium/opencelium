@@ -154,26 +154,23 @@ export default class CConnection{
     }
 
     setError(error){
-        if(error && error.hasOwnProperty('data') && error.data.hasOwnProperty('invokerName') && error.data.hasOwnProperty('index')){
-            let item = this.getItemByInvokerNameAndIndex(error.data.invokerName, error.data.index);
+        if(error && error.hasOwnProperty('data') && error.data.hasOwnProperty('connectorId') && error.data.hasOwnProperty('index')){
+            let item = this.getItemByConnectorIdAndIndex(error.data.connectorId, error.data.index);
             if(item){
                 item.error = {hasError: true, location: error.data.location, message: error.message};
             }
         }
     }
 
-    getItemByInvokerNameAndIndex(invokerName, index){
+    getItemByConnectorIdAndIndex(connectorId, index){
         let item = null;
         if(this._fromConnector && this._toConnector) {
-            let invoker = this._fromConnector.invoker;
             let connector = null;
-            if(invoker && invoker.name === invokerName){
+            if(this._fromConnector.id === connectorId){
                 connector = this._fromConnector;
-            } else {
-                invoker = this._toConnector.invoker;
-                if(invoker && invoker.name === invokerName){
-                    connector = this._toConnector;
-                }
+            }
+            if(this._toConnector.id === connectorId){
+                connector = this._toConnector;
             }
             if (connector) {
                 item = connector.getMethodByIndex(index);

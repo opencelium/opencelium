@@ -219,9 +219,10 @@ class ConnectionAdd extends Component{
     render(){
         const {
             t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
-            addingConnection, doAction,
+            addingConnection, doAction, error,
         } = this.props;
         let {connection} = this.state;
+        connection.setError(error);
         let connectorMenuItems = this.getConnectorMenuItems();
         let contentTranslations = {};
         contentTranslations.header = t('ADD.HEADER');

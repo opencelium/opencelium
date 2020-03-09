@@ -91,7 +91,7 @@ const reducer = (state = initialState, action) => {
             addConnectionSubscriber(action.payload);
             return state.set('addingConnection', API_REQUEST_STATE.FINISH).set('connections', connections.set(connections.size, action.payload));
         case ConnectionsAction.ADD_CONNECTION_REJECTED:
-            return state.set('addingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('addingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
         case ConnectionsAction.UPDATE_CONNECTION:
             return state.set('updatingConnection', API_REQUEST_STATE.START).set('error', null);
         case ConnectionsAction.UPDATE_CONNECTION_FULFILLED:

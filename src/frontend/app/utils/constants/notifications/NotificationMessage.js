@@ -35,14 +35,18 @@ class NotificationMessage extends Component{
         if(NotificationMessageHandlers[status] && NotificationMessageHandlers[status][message]){
             notificationMessage = NotificationMessageHandlers[status][message](params);
         } else{
-            if(params && params.hasOwnProperty('message') && params.message !== 'No message available'){
-                if(i18n.exists(`notifications:${status}.${message}.${params.message}`)) {
-                    notificationMessage = t(status + '.' + message + '.' + params.message);
-                    if (notificationMessage === `${status}.${message}.${params.message}`) {
+            let comingMessage = params && params.hasOwnProperty('response') && params.response.hasOwnProperty('message') ? params.response.message : '';
+            if(comingMessage === ''){
+                comingMessage = params &&  params.hasOwnProperty('message') && params.message !== 'No message available' ? params.message : '';
+            }
+            if(comingMessage){
+                if(i18n.exists(`notifications:${status}.${message}.${comingMessage}`)) {
+                    notificationMessage = t(status + '.' + message + '.' + comingMessage);
+                    if (notificationMessage === `${status}.${message}.${comingMessage}`) {
                         notificationMessage = t(`${status}.${message}.__DEFAULT__`);
                     }
                 } else{
-                    notificationMessage = params.message;
+                    notificationMessage = comingMessage;
                 }
             } else {
                 if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
