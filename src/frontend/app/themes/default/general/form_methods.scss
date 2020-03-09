@@ -387,8 +387,6 @@
 }
 
 .enhancement_dialog{
-  min-height: 720px;
-  max-height: 720px;
 }
 
 .enhancement_dialog_title {
@@ -746,10 +744,10 @@
   white-space: nowrap;
 }
 .operator_close_menu_edit{
-  position: absolute;
+  position: sticky;
   cursor: pointer;
   top: 3px;
-  right: 3px;
+  left: 100%;
   color: black;
   font-size: $FONT_SIZE_SMALL;
 }

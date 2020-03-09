@@ -211,12 +211,11 @@ class ConnectionAdd extends Component{
     /**
      * to validate form methods
      */
-    validateFormMethods(){
+    validateFormMethods(entity){
         this.startValidatingFormMethods = true;
-        //#OC-212
-        //this.props.validateConnectionFormMethods(entity);
-        //return {value: false, message: ''};
-        return {value: true, message: ''};
+
+        this.props.validateConnectionFormMethods(entity.getObject());
+        return {value: false, message: ''};
     }
 
     /**

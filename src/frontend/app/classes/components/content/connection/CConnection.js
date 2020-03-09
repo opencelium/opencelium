@@ -98,13 +98,6 @@ export default class CConnection{
         return template;
     }
 
-    convertEnhancement(enhancement){
-        if(!(enhancement instanceof CEnhancement) || enhancement === null) {
-            return CEnhancement.createEnhancement(enhancement);
-        }
-        return enhancement;
-    }
-
     isEmpty(){
         return this._fromConnector.methods.length === 0 && this._fromConnector.operators.length === 0 && this._toConnector.methods.length === 0 && this._toConnector.operators.length === 0;
     }
@@ -378,12 +371,6 @@ export default class CConnection{
                 for(let i = 0; i < fields.length; i++) {
                     if(this.checkFieldFormat(fields[i])) {
                         counter++;
-                        /*for (let j = 0; j < this._fieldBinding.length; j++) {
-                            if (this._fieldBinding[j].from.findIndex(f => f.color === fields[i].color && f.field === fields[i].field) !== -1) {
-                                counter++;
-                                break;
-                            }
-                        }*/
                     } else{
                         result = false;
                         break;
@@ -447,12 +434,10 @@ export default class CConnection{
     }
 
     updateFieldBinding(connectorType, bindingItem){
-        let newFieldBinding = new CFieldBinding();
+        let newFieldBinding = null;
         switch(connectorType){
             case CONNECTOR_FROM:
-                newFieldBinding.from.push(this.convertBindingItem(bindingItem));
-                newFieldBinding.enhancement = null;
-                newFieldBinding.to = [];
+                newFieldBinding = CFieldBinding.createFieldBinding({from: [this.convertBindingItem(bindingItem)]});
                 this._fieldBinding.push(newFieldBinding);
                 break;
             case CONNECTOR_TO:
@@ -484,9 +469,7 @@ export default class CConnection{
                             }
                         }
                     }
-                    newFieldBinding.from = bindingItem.from;
-                    newFieldBinding.enhancement = null;
-                    newFieldBinding.to = bindingItem.to;
+                    newFieldBinding = CFieldBinding.createFieldBinding({from: bindingItem.from, to: bindingItem.to});
                     this._fieldBinding.push(newFieldBinding);
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].from.length === 1 && this._fieldBinding[i].to.length === 0){
@@ -514,9 +497,6 @@ export default class CConnection{
                     return enhancement = this._fieldBinding[i].enhancement;
                 }
             }
-        }
-        if(enhancement === null){
-            enhancement = CEnhancement.createEnhancement();
         }
         return enhancement;
     }
