@@ -54,6 +54,7 @@ export default class CMethodItem{
         return {
             hasError: false,
             location: '',
+            message: '',
         };
     }
 

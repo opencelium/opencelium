@@ -207,7 +207,9 @@ class ConnectionUpdate extends Component{
             t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
             updatingConnection, doAction,
         } = this.props;
-        let {connection} = this.props;
+        let {connection, error} = this.props;
+        connection.error = error;
+        let connectionClass = CConnection.createConnection(connection);
         let connectorMenuItems = this.getConnectorMenuItems();
         let contentTranslations = {};
         contentTranslations.header = t('UPDATE.HEADER');
@@ -274,7 +276,7 @@ class ConnectionUpdate extends Component{
                     contents={contents}
                     translations={changeContentTranslations}
                     action={doAction}
-                    entity={CConnection.createConnection(connection)}
+                    entity={connectionClass}
                     type={'update'}
                     isActionInProcess={updatingConnection}
                     authUser={authUser}

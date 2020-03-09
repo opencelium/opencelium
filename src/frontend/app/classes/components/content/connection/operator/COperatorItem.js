@@ -51,6 +51,7 @@ export default class COperatorItem{
         return {
             hasError: false,
             location: '',
+            message: '',
         };
     }
 
