@@ -47,6 +47,14 @@ export default class CMethodItem{
         return new CMethodItem(index, name, color, request, response, invoker, error);
     }
 
+    deleteError(){
+        this._error = {
+            hasError: false,
+            location: '',
+            message: '',
+        };
+    }
+
     checkError(error){
         if(error && error.hasOwnProperty('hasError') && error.hasOwnProperty('location')){
             return error;
@@ -54,6 +62,7 @@ export default class CMethodItem{
         return {
             hasError: false,
             location: '',
+            message: '',
         };
     }
 

@@ -90,10 +90,9 @@ class ChangeContent extends Component{
     }
 
     UNSAFE_componentWillReceiveProps (nextProps){
-        const {action} = this.props;
-        const {entity, page, contentsLength} = this.state;
-        let contents = nextProps.contents[this.state.page];
-        if(!this.doExit) {
+        const {page, contentsLength} = this.state;
+        if(this.state.page < (contentsLength - 1)) {
+            let contents = nextProps.contents[this.state.page];
             for (let i = 0; i < contents.inputs.length; i++) {
                 let newInputs = contents.inputs[i];
                 if (newInputs.hasOwnProperty('request')) {
@@ -116,16 +115,9 @@ class ChangeContent extends Component{
                                         makingRequest: false,
                                     });
                                 } else {
-                                    if (page === (contentsLength - 1)) {
-                                        this.doExit = true;
-                                        this.setState({
-                                            makingRequest: false,
-                                        }, action(entity));
-                                    } else {
-                                        this.setState({
-                                            makingRequest: false,
-                                        }, this.nextPage(i + 1));
-                                    }
+                                    this.setState({
+                                        makingRequest: false,
+                                    }, this.nextPage(i + 1));
                                 }
                                 break;
                             }

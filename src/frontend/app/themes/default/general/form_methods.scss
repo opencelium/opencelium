@@ -597,6 +597,7 @@
 }
 
 .method_affix{
+  cursor: default;
   float: left;
   width: 10%;
   padding-top: 10px;
@@ -651,8 +652,8 @@
 
 .param_generator_form_json{
   @extend .param_generator_form_parent;
-  left: 2px;
-  width: 212px;
+  left: 10px;
+  width: 290px;
 }
 
 .param_generator_form_add{

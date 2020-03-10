@@ -31,7 +31,7 @@ const ALL_COLORS = ['#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7', '#9EC798', '#BFC
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -56,6 +56,7 @@ export default class CConnection{
             this.removeRestColor(this._toConnector.methods[i].color);
         }
         this._currentFieldBindingTo = -1;
+        this.setError(error);
     }
 
     static createConnection(connection){
@@ -66,7 +67,8 @@ export default class CConnection{
         let toConnector = connection && connection.hasOwnProperty('toConnector') ? connection.toConnector : null;
         let fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
         let template = connection && connection.hasOwnProperty('template') ? connection.template : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template);
+        let error = connection && connection.hasOwnProperty('error') ? connection.error : null;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error);
     }
 
     convertBindingItem(bindingItem){
@@ -149,6 +151,35 @@ export default class CConnection{
                 this._colors.splice(index, 1);
             }
         }
+    }
+
+    setError(error){
+        if(error && error.hasOwnProperty('data') && error.data.hasOwnProperty('connectorId') && error.data.hasOwnProperty('index')){
+            let item = this.getItemByConnectorIdAndIndex(error.data.connectorId, error.data.index);
+            if(item){
+                item.error = {hasError: true, location: error.data.location, message: error.message};
+            }
+        }
+    }
+
+    getItemByConnectorIdAndIndex(connectorId, index){
+        let item = null;
+        if(this._fromConnector && this._toConnector) {
+            let connector = null;
+            if(this._fromConnector.id === connectorId){
+                connector = this._fromConnector;
+            }
+            if(this._toConnector.id === connectorId){
+                connector = this._toConnector;
+            }
+            if (connector) {
+                item = connector.getMethodByIndex(index);
+                if (!item) {
+                    item = connector.getOperatorByIndex(index);
+                }
+            }
+        }
+        return item;
     }
 
     get id(){

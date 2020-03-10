@@ -19,7 +19,7 @@ import {withTranslation} from 'react-i18next';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import Content from "../../../general/content/Content";
 
-import {checkConnectionTitle, validateConnectionFormMethods} from '../../../../actions/connections/fetch';
+import {checkConnectionTitle} from '../../../../actions/connections/fetch';
 import {addConnection} from '../../../../actions/connections/add';
 import {addTemplate} from "../../../../actions/templates/add";
 import {fetchConnectors} from '../../../../actions/connectors/fetch';
@@ -62,7 +62,7 @@ function mapConnection(connection){
 /**
  * Component to Add Connection
  */
-@connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle, validateConnectionFormMethods})
+@connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app'])
 @SingleComponent('connection', 'adding', ['connectors'], mapConnection)
@@ -72,7 +72,6 @@ class ConnectionAdd extends Component{
         super(props);
         const {authUser} = this.props;
         this.startCheckingTitle = false;
-        this.startValidatingFormMethods = false;
         this.state = {
             connection: CConnection.createConnection(null),
             currentTour: 'page_1',
@@ -209,16 +208,6 @@ class ConnectionAdd extends Component{
     }
 
     /**
-     * to validate form methods
-     */
-    validateFormMethods(entity){
-        this.startValidatingFormMethods = true;
-
-        this.props.validateConnectionFormMethods(entity.getObject());
-        return {value: false, message: ''};
-    }
-
-    /**
      * to add template
      */
     addTemplate(template){
@@ -230,9 +219,10 @@ class ConnectionAdd extends Component{
     render(){
         const {
             t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
-            addingConnection, doAction, validatingFormMethods, validateFormMethodsResult,
+            addingConnection, doAction, error,
         } = this.props;
         let {connection} = this.state;
+        connection.setError(error);
         let connectorMenuItems = this.getConnectorMenuItems();
         let contentTranslations = {};
         contentTranslations.header = t('ADD.HEADER');
@@ -308,13 +298,6 @@ class ConnectionAdd extends Component{
                     actions: {addTemplate: ::this.addTemplate},
                     source: Object.freeze(connectors),
                     readOnly: false,
-                    check: (e, entity) => ::this.validateFormMethods(e, entity),
-                    request: {
-                        inProcess: validatingFormMethods,
-                        status: this.startValidatingFormMethods && !validatingFormMethods,
-                        result: validateFormMethodsResult,
-                        notSuccessMessage: t('ADD.VALIDATION_MESSAGES.FORM_METHODS'),
-                    }
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
