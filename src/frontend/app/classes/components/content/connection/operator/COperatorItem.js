@@ -40,6 +40,14 @@ export default class COperatorItem{
         return new COperatorItem(index, type, condition, error);
     }
 
+    deleteError(){
+        this._error = {
+            hasError: false,
+            location: '',
+            message: '',
+        };
+    }
+
     checkType(type){
         return type === IF_OPERATOR || type === LOOP_OPERATOR;
     }

@@ -46,7 +46,15 @@ class NotificationMessage extends Component{
                         notificationMessage = t(`${status}.${message}.__DEFAULT__`);
                     }
                 } else{
-                    notificationMessage = comingMessage;
+                    let colorRegExp = /^(.*)#[0-9a-f]{6}(.*)/gi;
+                    let checkColorRegExp = colorRegExp.exec(comingMessage);
+                    if(checkColorRegExp && checkColorRegExp.length > 2){
+                        let color = comingMessage.substring(checkColorRegExp[1].length, checkColorRegExp[1].length + 7);
+                        let colorStyles = {height: '17px', width: '40px', display: 'inline-block', margin: '0 5px'};
+                        notificationMessage = <span>{checkColorRegExp[1]}<span style={{...colorStyles, background: color}}/>{checkColorRegExp[2]}</span>;
+                    } else{
+                        notificationMessage = comingMessage;
+                    }
                 }
             } else {
                 if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
