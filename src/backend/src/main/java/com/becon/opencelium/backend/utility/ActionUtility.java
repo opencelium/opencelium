@@ -47,6 +47,7 @@ public class ActionUtility {
     @Autowired
     private ValidationContext validationContext;
 
+    private String methodIndex;
     private String methodName; // need for determine type of field
     private String result; // need for determine type of field
     private String exchangeType; // need for determine type of field
@@ -83,6 +84,7 @@ public class ActionUtility {
         messageData.setIndex(methodResource.getIndex());
         messageData.setLocation("method");
 
+        this.methodIndex = methodResource.getIndex();
         this.methodName = methodResource.getName();
         this.connectorNode = connectorNode;
         this.connectionName = connectionName;
@@ -142,6 +144,14 @@ public class ActionUtility {
 
     private List<FieldNode> buildFields(Map<String, Object> bodyResource){
         List<FieldNode> fieldNodeList = new ArrayList<>();
+        ErrorMessageData messageData = validationContext.get(connectionName);
+        if (messageData == null){
+            messageData = new ErrorMessageData();
+            validationContext.put(connectionName, messageData);
+        }
+        messageData.setConnectorId(connectorNode.getConnectorId());
+        messageData.setIndex(methodIndex);
+        messageData.setLocation("body");
 
         bodyResource.forEach((k,v) -> {
             FieldNode fieldNode = new FieldNode();
@@ -151,7 +161,13 @@ public class ActionUtility {
                 v = "";
             }
 
-                String type = invokerServiceImp.findFieldType(connectorNode.getName(), methodName, exchangeType, result, k);
+            if (v instanceof String && fieldNodeService.hasReference(v.toString())){
+                if (!fieldNodeService.existsInInvokerMethod(connectorNode.getName(), methodName, v.toString())){
+                    throw new RuntimeException("FIELD_NOT_FOUND_IN_REF_METHOD");
+                }
+            }
+
+            String type = invokerServiceImp.findFieldType(connectorNode.getName(), methodName, exchangeType, result, k);
             // for situation = "ConfigItem": "#FFCFB5.(response).success.result[];#C77E7E.(response).success.result[]"
             if ((type.equals("object") || type.equals("array")) && ( v instanceof String )){
                 fieldNode.setType("array");

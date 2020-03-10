@@ -22,13 +22,18 @@ import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface EnhancementNodeRepository  extends Neo4jRepository<EnhancementNode, Long> {
+public interface EnhancementNodeRepository extends Neo4jRepository<EnhancementNode, Long> {
 
     Optional<EnhancementNode> findOptionalByEnhanceId(Integer enhanceId);
 
     @Query("match (enh:Enhancement)-[:linked]->(f:Field) where ID(f) = {0} return enh")
     Optional<EnhancementNode> findByFieldId(Long fieldId);
+
+    @Query("match (enh:Enhancement)-[:linked]->(f:Field) where ID(f) = {0} return enh")
+    LinkedList<EnhancementNode> findAllByConnectionId(Long connectionId);
 }
