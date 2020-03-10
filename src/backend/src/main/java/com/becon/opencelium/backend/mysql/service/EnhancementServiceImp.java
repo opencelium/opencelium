@@ -54,8 +54,8 @@ public class EnhancementServiceImp implements EnhancementService{
     }
 
     @Override
-    public List<EnhancementNode> findAllByConnectionId(Long connectionId) {
-        return null;
+    public List<Enhancement> findAllByConnectionId(Long connectionId) {
+        return enhancementRepository.findAllByConnectionId(connectionId);
     }
 
     @Override

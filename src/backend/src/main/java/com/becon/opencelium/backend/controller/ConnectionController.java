@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
+import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
@@ -157,20 +158,36 @@ public class ConnectionController {
                                     @RequestBody ConnectionResource connectionResource) throws Exception{
         connectionResource.setConnectionId(connectionId);
         Connection connection = connectionService.toEntity(connectionResource);
-        enhancementService.deleteAllByConnectionId(connectionId);
-        connectionService.save(connection);
+        Connection connectionClone = connectionService.findById(connectionId)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        ConnectionNode connectionNodeClone = connectionNodeService.findByConnectionId(connectionId)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        try {
+            enhancementService.deleteAllByConnectionId(connectionId);
+            connectionService.save(connection);
 
-        ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
-        connectionNodeService.deleteById(connectionId);
-        connectionNodeService.save(connectionNode);
+            ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
+            connectionNodeService.deleteById(connectionId);
+            connectionNodeService.save(connectionNode);
 
-        if (connectionResource.getFieldBinding() != null || !connectionResource.getFieldBinding().isEmpty()){
-            List<EnhancementNode> enhancementNodes =  connectionNodeService
-                    .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
-            enhancementNodeService.saveAll(enhancementNodes);
+            if (connectionResource.getFieldBinding() != null || !connectionResource.getFieldBinding().isEmpty()){
+                List<EnhancementNode> enhancementNodes = connectionNodeService
+                        .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
+                enhancementNodeService.saveAll(enhancementNodes);
+            }
+            final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
+            return ResponseEntity.ok().body(resource);
+        } catch (Exception e){
+            connectionService.save(connectionClone);
+            connectionNodeService.save(connectionNodeClone);
+            ErrorMessageDataResource errorMessageDataResource =
+                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
+            ValidationResource validationResource =
+                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
+            validationContext.remove(connection.getName());
+
+            return ResponseEntity.badRequest().body(validationResource);
         }
-        final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
-        return ResponseEntity.ok().body(resource);
     }
 
     @DeleteMapping("{id}")

@@ -37,7 +37,7 @@ public interface FieldNodeService {
     List<FieldNode> findIncoming(Long outgoingId);
     String getFieldValue(FieldNode fieldNode);
     boolean hasReference(String fieldValue);
-
+    boolean existsInInvokerMethod(String invoker, String method, String path);
     Map<String, Object> deleteEmptyFields(Map<String, Object> body);
     boolean valueIsJSON(String value);
 }

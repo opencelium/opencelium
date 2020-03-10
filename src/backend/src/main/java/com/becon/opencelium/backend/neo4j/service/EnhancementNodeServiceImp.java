@@ -50,4 +50,9 @@ public class EnhancementNodeServiceImp implements EnhancementNodeService {
     public Optional<EnhancementNode> findByFieldId(Long fieldId) {
         return enhancementNodeRepository.findByFieldId(fieldId);
     }
+
+    @Override
+    public List<EnhancementNode> findAllByConnectionId(Long connectionId) {
+        return enhancementNodeRepository.findAllByConnectionId(connectionId);
+    }
 }

@@ -22,9 +22,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedList;
+
 @Repository
 public interface EnhancementRepository extends JpaRepository<Enhancement, Integer> {
 
     @Transactional
     void removeByConnectionId(Long connectionId);
+
+    LinkedList<Enhancement> findAllByConnectionId(Long connectionId);
 }
