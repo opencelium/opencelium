@@ -30,6 +30,23 @@ export const DEBUGGER_ERRORS = true;
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied'];
 
 
+export function parseConnectionPointer(connectionPointer){
+    let result = {
+        color: '',
+        field: '',
+        type: '',
+    };
+    if(isString(connectionPointer)){
+        let parsedConnectionPointer = connectionPointer.split('.');
+        if(parsedConnectionPointer.length > 2){
+            result.color = parsedConnectionPointer[0];
+            result.type = parsedConnectionPointer[1].substring(1, parsedConnectionPointer[1].length - 1);
+            result.field = subArrayToString(parsedConnectionPointer, '.', 2, parsedConnectionPointer.length);
+        }
+    }
+    return result;
+}
+
 /**
  * callback to sort by index
  */

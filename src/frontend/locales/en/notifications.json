@@ -84,6 +84,7 @@
     },
     "ADD_CONNECTION": {
       "CONNECTION_EXISTS": "This connection with this name already exists",
+      "FIELD_NOT_FOUND_IN_REF_METHOD": "There is an error with {{methodPath}} in ",
       "__DEFAULT__": "The connection was not added"
     },
     "FETCH_CONNECTIONS": "Connections were not fetched",

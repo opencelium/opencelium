@@ -28,11 +28,12 @@ import {permission} from "../../../../decorators/permission";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
 import { AuthenticationTypes, DefaultAuthenticationType } from '../AuthenticationTypes';
 import {INPUTS} from "../../../../utils/constants/inputs";
-import {isString} from './../../../../utils/app';
+import {capitalize, isString} from './../../../../utils/app';
 import {CONNECTOR_TOURS, USERGROUP_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
 import {setFocusById} from "../../../../utils/app";
+import i18n from "../../../../utils/i18n";
 
 const connectorPrefixURL = '/connectors';
 
@@ -58,7 +59,7 @@ function mapConnector(connector){
     const {id, title, icon, description, invoker, authenticationFields} = connector;
     data['id'] = id;
     data['title'] = title;
-    data['icon'] = icon;
+    data['icon'] = icon === '' ? null : icon;
     data['description'] = description;
     data['invoker'] = {name: invoker.hasOwnProperty('value') ? invoker.value : invoker};
     data['requestData'] = {};
@@ -283,7 +284,7 @@ class ConnectorUpdate extends Component{
                 if(tourIndex !== -1) {
                     field.tourStep = CONNECTOR_TOURS.page_2[tourIndex].selector;
                 }
-                field.label = t('UPDATE.FORM.'+fieldName.toUpperCase());
+                field.label = i18n.exists(`UPDATE.FORM.${fieldName.toUpperCase()}`) ? t(`UPDATE.FORM.${fieldName.toUpperCase()}`) : capitalize(fieldName);
                 field.visible = authenticationFields[invokerName + '__' + fieldName];
                 field.required = authenticationFields[invokerName + '__' + fieldName];
                 result.push(field);

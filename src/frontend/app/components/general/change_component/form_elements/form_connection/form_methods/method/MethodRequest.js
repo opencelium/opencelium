@@ -192,6 +192,12 @@ class MethodRequest extends Component{
 
     render(){
         const {id, readOnly, method, connector, connection, updateEntity} = this.props;
+        let bodyHasError = false;
+        if(method.error.hasError){
+            if(method.error.location === 'body'){
+                bodyHasError = true;
+            }
+        }
         return (
             <div id={id} className={styles.item_card_text}>
                 <CardText>
@@ -204,7 +210,7 @@ class MethodRequest extends Component{
                             setCurrentItem={::this.setCurrentItem}
                             updateEntity={updateEntity}
                         />
-                        <label className={`${theme.label} ${styles.body_label}`}>{'Body'}</label>
+                        <label className={`${theme.label} ${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</label>
                         <Body
                             id={id}
                             readOnly={readOnly}

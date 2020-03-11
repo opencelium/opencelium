@@ -18,6 +18,7 @@ import {withTranslation} from "react-i18next";
 import i18n from '../../i18n';
 
 import {NotificationMessageHandlers} from './notifications';
+import {parseConnectionPointer} from "../../app";
 
 
 /**
@@ -27,6 +28,20 @@ import {NotificationMessageHandlers} from './notifications';
 class NotificationMessage extends Component{
     constructor(props){
         super(props);
+    }
+
+    setColoredSpan(comingMessage){
+        let result = '';
+        let colorRegExp = /^(.*)#[0-9a-f]{6}(.*)/gi;
+        let checkColorRegExp = colorRegExp.exec(comingMessage);
+        if(checkColorRegExp && checkColorRegExp.length > 2){
+            let color = comingMessage.substring(checkColorRegExp[1].length, checkColorRegExp[1].length + 7);
+            let colorStyles = {height: '17px', width: '40px', display: 'inline-block', margin: '0 5px'};
+            result = <span>{checkColorRegExp[1]}<span style={{...colorStyles, background: color}}/>{checkColorRegExp[2]}</span>;
+        } else{
+            result = comingMessage;
+        }
+        return result;
     }
 
     render() {
@@ -41,12 +56,22 @@ class NotificationMessage extends Component{
             }
             if(comingMessage){
                 if(i18n.exists(`notifications:${status}.${message}.${comingMessage}`)) {
-                    notificationMessage = t(status + '.' + message + '.' + comingMessage);
-                    if (notificationMessage === `${status}.${message}.${comingMessage}`) {
-                        notificationMessage = t(`${status}.${message}.__DEFAULT__`);
+                    if(params.hasOwnProperty('response') && params.response.hasOwnProperty('data') && params.response.data.hasOwnProperty('connectionPointer')){
+                        let connectionPointer = parseConnectionPointer(params.response.data.connectionPointer);
+                        if(connectionPointer.field !== '' && connectionPointer.color !== '') {
+                            notificationMessage = t(status + '.' + message + '.' + comingMessage, {methodPath: connectionPointer.field});
+                            notificationMessage = this.setColoredSpan(`${notificationMessage} ${connectionPointer.color}`);
+                        } else{
+                            notificationMessage = t(status + '.' + message + '.' + comingMessage);
+                        }
+                    } else {
+                        notificationMessage = t(status + '.' + message + '.' + comingMessage);
+                        if (notificationMessage === `${status}.${message}.${comingMessage}`) {
+                            notificationMessage = t(`${status}.${message}.__DEFAULT__`);
+                        }
                     }
                 } else{
-                    notificationMessage = comingMessage;
+                    notificationMessage = this.setColoredSpan(comingMessage);
                 }
             } else {
                 if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
