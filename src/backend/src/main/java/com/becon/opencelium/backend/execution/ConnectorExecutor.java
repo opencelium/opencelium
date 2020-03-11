@@ -42,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -217,10 +218,12 @@ public class ConnectorExecutor {
 
         // TODO: added application/x-www-form-urlencoded support: need to refactor.
         Object data;
-        HashMap<String, Object> formData = new HashMap<>();
-        if (header.containsKey("Content-Type") && header.get("Content-Type").equals("application/x-www-form-urlencoded")){
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+        String contentType = header.get("Content-Type").get(0);
+        if (header.containsKey("Content-Type") && contentType.equals("application/x-www-form-urlencoded")){
             try {
-                formData = new ObjectMapper().readValue(body, HashMap.class);
+                HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);
+                mapData.forEach(formData::add);
                 data = formData;
             } catch (Exception e){
                 throw new RuntimeException(e);
