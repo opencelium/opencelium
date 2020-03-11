@@ -24,6 +24,8 @@ const Login = {key: 'userlogin', type: 'text', maxLength: 256, icon: 'perm_ident
 
 const Username = {key: 'username', type: 'text', maxLength: 256, icon: 'perm_identity', defaultValue: 'username',};
 
+const Secret = {key: '_secret',type: 'secret', maxLength: 256, icon: 'vpn_key', defaultValue: '1234',};
+
 const Password = {key: 'password',type: 'secret', maxLength: 256, icon: 'local_parking', defaultValue: '1234',};
 
 const Token = {key: 'token', type: 'secret', icon: 'vpn_key', defaultValue: '1234',};
@@ -39,6 +41,7 @@ export const AuthenticationTypes = {
     userlogin: Login,
     username: Username,
     password: Password,
+    _secret: Secret,
     token: Token,
     webservice: Webservice,
 };

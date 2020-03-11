@@ -15,6 +15,7 @@ import CConnection from "../../../../../../../classes/components/content/connect
 import Enhancement from "../mapping/enhancement/Enhancement";
 import {FIELD_TYPE_REQUEST} from "../utils";
 import CBindingItem from "../../../../../../../classes/components/content/connection/field_binding/CBindingItem";
+import TooltipText from "../../../../../basic_components/tooltips/TooltipText";
 
 class Body extends Component{
 
@@ -34,7 +35,7 @@ class Body extends Component{
     toggleEnhancement(){
         this.setState({
             showEnhancement: !this.state.showEnhancement,
-        })
+        });
     }
 
     openBodyEdit(){
@@ -169,10 +170,19 @@ class Body extends Component{
     }
 
     renderPlaceholder(){
+        const {method} = this.props;
+        let hasError = false;
+        if(method.error.hasError){
+            if(method.error.location === 'body'){
+                hasError = true;
+            }
+        }
         return(
             <React.Fragment>
                 <br/>
-                <span className={styles.method_body_placeholder} onClick={::this.openBodyEdit}>{`{ ... }`}</span>
+                <span className={styles.method_body_placeholder}
+                      style={hasError ? {color: 'red'} : {}}
+                      onClick={::this.openBodyEdit}>{`{ ... }`}</span>
             </React.Fragment>
         );
     }
