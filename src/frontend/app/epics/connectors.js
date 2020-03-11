@@ -99,7 +99,9 @@ const addConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = addConnectorFulfilled;
-            /*if(data.icon !== null){
+            /*
+            TODO: #214
+            if(data.icon !== null){
                 successResponse = addConnectorIcon;
             }
             delete data.icon;*/
@@ -144,7 +146,9 @@ const updateConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = updateConnectorFulfilled;
-            /*if(data.icon !== null){
+            /*
+            TODO: #214
+            if(data.icon !== null){
                 successResponse = updateConnectorIcon;
             }
             delete data.icon;*/
