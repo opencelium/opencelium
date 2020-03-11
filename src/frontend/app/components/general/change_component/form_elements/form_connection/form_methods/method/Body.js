@@ -10,7 +10,7 @@ import Dialog from "../../../../../basic_components/Dialog";
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from '../../../../../../../themes/default/general/form_methods.scss';
 import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
+import CConnectorItem, {CONNECTOR_FROM} from "../../../../../../../classes/components/content/connection/CConnectorItem";
 import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
 import Enhancement from "../mapping/enhancement/Enhancement";
 import {FIELD_TYPE_REQUEST} from "../utils";
@@ -85,6 +85,10 @@ class Body extends Component{
     * to open an enhancement when click on pointer
      */
     openEnhancement(){
+        const {connector} = this.props;
+        if(connector.getConnectorType() === CONNECTOR_FROM){
+            return;
+        }
         let bindingItem = this.getCurrentBindingItem();
         if(bindingItem){
             bindingItem = bindingItem.to[0];
@@ -99,7 +103,7 @@ class Body extends Component{
     setCurrentEnhancement(currentEnhancement){
         this.setState({
             currentEnhancement,
-        })
+        });
     }
 
     /**
