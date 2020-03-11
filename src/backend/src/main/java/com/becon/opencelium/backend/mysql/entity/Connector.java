@@ -46,7 +46,7 @@ public class Connector {
     private String description;
 
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_by", updatable = false)
     private Integer createdBy;
 
     @CreationTimestamp

@@ -41,7 +41,7 @@ public class Webhook {
     private String token;
 
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_by", updatable = false)
     private Integer createdBy;
 
     @CreationTimestamp
