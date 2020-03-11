@@ -39,7 +39,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -196,6 +198,7 @@ public class ConnectorExecutor {
         }
 
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
+
         System.out.println("Body: " + body);
         System.out.println("============================================================");
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
@@ -212,9 +215,24 @@ public class ConnectorExecutor {
             System.err.println(e.getMessage());
         }
 
-        HttpEntity<String> httpEntity = new HttpEntity <String> (body, header);
+        // TODO: added application/x-www-form-urlencoded support: need to refactor.
+        Object data;
+        HashMap<String, Object> formData = new HashMap<>();
+        if (header.containsKey("Content-Type") && header.get("Content-Type").equals("application/x-www-form-urlencoded")){
+            try {
+                formData = new ObjectMapper().readValue(body, HashMap.class);
+                data = formData;
+            } catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        } else {
+            data = body;
+        }
+
+        // TODO: Changed string to object in httpEntity;
+        HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
         if (body.equals("null")){
-            httpEntity = new HttpEntity <String> (header);
+            httpEntity = new HttpEntity <Object> (header);
         }
 
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
