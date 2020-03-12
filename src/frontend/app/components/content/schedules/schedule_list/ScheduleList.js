@@ -354,8 +354,8 @@ class ScheduleList extends Component{
                                 <TitleCell schedule={schedule}/>
                                 <TableCell className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></TableCell>
                                 <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
-                                <LastSuccessCell schedule={schedule} hasElasticSearch={`${checkingAppResult}` === APP_STATUS_UP}/>
-                                <LastFailureCell schedule={schedule} hasElasticSearch={`${checkingAppResult}` === APP_STATUS_UP}/>
+                                <LastSuccessCell schedule={schedule} hasElasticSearch={`${checkingAppResult.status}` === APP_STATUS_UP}/>
+                                <LastFailureCell schedule={schedule} hasElasticSearch={`${checkingAppResult.status}` === APP_STATUS_UP}/>
                                 <LastDurationCell schedule={schedule} t={t}/>
                                 <StatusCell schedule={schedule}/>
                                 <TableCell style={{padding: '5px'}}>
