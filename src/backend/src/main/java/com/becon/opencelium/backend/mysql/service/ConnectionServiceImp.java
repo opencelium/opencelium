@@ -101,6 +101,11 @@ public class ConnectionServiceImp implements ConnectionService{
     }
 
     @Override
+    public List<Connection> findAllByConnectorId(int connectorId) {
+        return connectionRepository.findAllByConnectorId(connectorId);
+    }
+
+    @Override
     public Connection toEntity(ConnectionResource resource) {
         Connection connection = new Connection();
 

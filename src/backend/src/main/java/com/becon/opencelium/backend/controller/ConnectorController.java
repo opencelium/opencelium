@@ -23,9 +23,13 @@ import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.factory.AuthenticationFactory;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.becon.opencelium.backend.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +53,12 @@ public class ConnectorController {
 
     @Autowired
     private InvokerServiceImp invokerService;
+
+    @Autowired
+    private ConnectionServiceImp connectionService;
+
+    @Autowired
+    private ConnectionNodeServiceImp connectionNodeService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -100,6 +111,11 @@ public class ConnectorController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable int id){
+        List<Connection> connections = connectionService.findAllByConnectorId(id);
+        connections.forEach(c -> {
+            connectionService.deleteById(c.getId());
+            connectionNodeService.deleteById(c.getId());
+        });
         connectorService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

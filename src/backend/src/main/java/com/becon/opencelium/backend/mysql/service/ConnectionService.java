@@ -38,6 +38,8 @@ public interface ConnectionService {
 
     void execute(Long connectionId, int schedulerId);
 
+    List<Connection> findAllByConnectorId(int connectorId);
+
     Connection toEntity(ConnectionResource resource);
 
     ConnectionResource toNodeResource(Connection connection);
