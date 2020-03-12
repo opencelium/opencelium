@@ -38,14 +38,16 @@ class Notification extends Component{
 
     componentDidMount(){
         let that = this;
-        const {id} = that.props;
-        setTimeout(function(){
-            let element = document.getElementById(id);
-            if(element){
-                element.classList.remove(styles['notification_show']);
-                element.classList.add(styles['notification_hide']);
-            }
-        }, 3500);
+        const {id, timeOfBeing} = that.props;
+        if(timeOfBeing !== 'infinite') {
+            setTimeout(function () {
+                let element = document.getElementById(id);
+                if (element) {
+                    element.classList.remove(styles['notification_show']);
+                    element.classList.add(styles['notification_hide']);
+                }
+            }, timeOfBeing);
+        }
     }
 
     /**
@@ -93,5 +95,9 @@ class Notification extends Component{
         );
     }
 }
+
+Notification.defaultProps = {
+    timeOfBeing: 3500,
+};
 
 export default Notification;

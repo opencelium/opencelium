@@ -73,9 +73,8 @@ export function checkConnection(){
                 render() {
                     const {authUser, logining, logouting, checkingOCConnection} = this.props;
                     let isCheckingConnection = this.startCheckingConnection && checkingOCConnection !== API_REQUEST_STATE.FINISH;
-                    if (logining || logouting || isCheckingConnection) {
-                        return <Loading authUser={authUser}/>;
-                    }
+                    if (logining || logouting || isCheckingConnection)
+                        return <div style={{padding: '0 15px', maxWidth: '1140px', marginLeft: 'auto', marginRight: 'auto'}}><Loading authUser={authUser}/></div>;
                     return <Component {...this.props}/>;
                 }
             }

@@ -22,9 +22,10 @@ import {removeAllLS, setLS} from '../utils/LocalStorage';
 /**
  * check connection with oc
  */
-const checkOCConnection = () => {
+const checkOCConnection = (settings = {}) => {
     return {
         type: AuthAction.CHECK_OCCONNECTION,
+        settings,
     };
 };
 

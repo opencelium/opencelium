@@ -31,6 +31,7 @@ const initialState = fromJS({
     updatingTheme: false,
     updatingAuthUserLanguage: false,
     checkingOCConnection: API_REQUEST_STATE.INITIAL,
+    checkOCConnectionResult: null,
     error: null,
     message: {},
 });
@@ -92,11 +93,11 @@ const reducer = (state = initialState, action) => {
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
             return state.set('togglingAppTour', false).set('error', fromJS(action.payload));
         case AuthAction.CHECK_OCCONNECTION:
-            return state.set('checkingOCConnection', API_REQUEST_STATE.START).set('error', null);
+            return state.set('checkingOCConnection', API_REQUEST_STATE.START).set('error', null).set('checkOCConnectionResult', null);
         case AuthAction.CHECK_OCCONNECTION_FULFILLED:
             return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH);
         case AuthAction.CHECK_OCCONNECTION_REJECTED:
-            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH).set('error', fromJS(action.payload));
+            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH).set('error', fromJS(action.payload)).set('checkOCConnectionResult', fromJS(action.payload));
         default:
             return state;
     }
