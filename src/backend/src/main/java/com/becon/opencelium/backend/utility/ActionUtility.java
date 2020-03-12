@@ -19,7 +19,6 @@ package com.becon.opencelium.backend.utility;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.*;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
-import com.becon.opencelium.backend.operator.Operator;
 import com.becon.opencelium.backend.resource.connection.ConditionResource;
 import com.becon.opencelium.backend.resource.connection.MethodResource;
 import com.becon.opencelium.backend.resource.connection.OperatorResource;
