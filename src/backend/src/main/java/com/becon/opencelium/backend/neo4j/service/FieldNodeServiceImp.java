@@ -79,7 +79,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         messageData.setIndex(methodNode.getIndex());
         messageData.setLocation("body");
 
-        FieldNode currentField = new FieldNode();
+        FieldNode currentField;
         String color = fieldResource.getColor();
         String type = fieldResource.getType();
         String field = fieldResource.getField();
