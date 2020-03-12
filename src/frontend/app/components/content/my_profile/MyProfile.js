@@ -30,6 +30,7 @@ import AppTour from "./AppTour";
 import Loading from "../../general/app/Loading";
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "../../../utils/constants/app";
+import checkConnection from "../../../decorators/checkConnection";
 
 
 function mapStateToProps(state){

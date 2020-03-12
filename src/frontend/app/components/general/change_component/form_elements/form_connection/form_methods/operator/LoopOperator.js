@@ -290,12 +290,12 @@ class LoopOperator extends Component{
     }
 
     render(){
-        const {connector, tooltip, operator, depth, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
+        const {connector, tooltip, operator, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
         let classNames = styles.operator_icon;
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : null;
         let operatorStyle = {
             height: '50px',
-            marginLeft: `${depth * 20}px`,
+            marginLeft: `${operator.getDepth() * 20}px`,
             padding: '5px',
             transition: 'all 0.3s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',

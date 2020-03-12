@@ -14,42 +14,31 @@
  */
 
 import React, {Component, Suspense} from 'react';
-import {connect} from 'react-redux';
 import {Container} from 'react-grid-system';
 
 import Loading from '../../general/app/Loading';
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "../../../utils/constants/app";
+import {checkConnection} from "../../../decorators/checkConnection";
 
-
-function mapStateToProps(state){
-    const auth = state.get('auth');
-    return{
-        authUser: auth.get('authUser'),
-        logining: auth.get('logining'),
-        logouting: auth.get('logouting'),
-    };
-}
 
 /**
  * Layout for Connections
  */
-@connect(mapStateToProps, {})
+@checkConnection()
 class ConnectionLayout extends Component{
 
     constructor(props){
         super(props);
     }
 
-
     render(){
-        const {logining, logouting, children, authUser} = this.props;
-        const content = logining || logouting ? <Loading authUser={authUser}/> : children;
+        const {children, authUser} = this.props;
         return (
             <Container>
                 <Suspense fallback={(<Loading authUser={authUser}/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {content}
+                        {children}
                     </ComponentError>
                 </Suspense>
             </Container>

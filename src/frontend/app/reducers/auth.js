@@ -17,6 +17,7 @@ import {fromJS} from 'immutable';
 
 import {AuthAction} from '../utils/actions';
 import {updateDashboardSettingsSubscriber} from "../utils/socket/users";
+import {API_REQUEST_STATE} from "../utils/constants/app";
 
 
 const initialState = fromJS({
@@ -29,6 +30,7 @@ const initialState = fromJS({
     togglingAppTour: false,
     updatingTheme: false,
     updatingAuthUserLanguage: false,
+    checkingOCConnection: API_REQUEST_STATE.INITIAL,
     error: null,
     message: {},
 });
@@ -89,6 +91,12 @@ const reducer = (state = initialState, action) => {
             return state.set('togglingAppTour', false).set('authUser', authUser);
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
             return state.set('togglingAppTour', false).set('error', fromJS(action.payload));
+        case AuthAction.CHECK_OCCONNECTION:
+            return state.set('checkingOCConnection', API_REQUEST_STATE.START).set('error', null);
+        case AuthAction.CHECK_OCCONNECTION_FULFILLED:
+            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH);
+        case AuthAction.CHECK_OCCONNECTION_REJECTED:
+            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH).set('error', fromJS(action.payload));
         default:
             return state;
     }

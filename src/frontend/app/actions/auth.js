@@ -20,7 +20,38 @@ import {removeAllLS, setLS} from '../utils/LocalStorage';
 
 
 /**
- * update theme
+ * check connection with oc
+ */
+const checkOCConnection = () => {
+    return {
+        type: AuthAction.CHECK_OCCONNECTION,
+    };
+};
+
+/**
+ * check connection with oc fulfilled
+ * @returns {{type: string, payload: {}, data: {}}}
+ */
+const checkOCConnectionFulfilled = () => {
+    return {
+        type: AuthAction.CHECK_OCCONNECTION_FULFILLED,
+    };
+};
+
+/**
+ * check connection with oc rejected
+ * @param error
+ * @returns {promise}
+ */
+const checkOCConnectionRejected = (error) => {
+    return Rx.Observable.of({
+        type: AuthAction.CHECK_OCCONNECTION_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * toggle application tour
  * @param user
  */
 const toggleAppTour = (user) => {
@@ -31,8 +62,8 @@ const toggleAppTour = (user) => {
 };
 
 /**
- * update theme fulfilled
- * @param user
+ * toggle application tour fulfilled
+ * @param userDetail
  * @returns {{type: string, payload: {}, data: {}}}
  */
 const toggleAppTourFulfilled = (userDetail) => {
@@ -44,7 +75,7 @@ const toggleAppTourFulfilled = (userDetail) => {
 };
 
 /**
- * update theme rejected
+ * toggle application tour rejected
  * @param error
  * @returns {promise}
  */
@@ -54,6 +85,7 @@ const toggleAppTourRejected = (error) => {
         payload: error
     });
 };
+
 /**
  * update language of the auth user
  * @param language
@@ -226,7 +258,7 @@ const updateDashboardSettingsRejected = (error) => {
 
 /**
  * update theme
- * @param user
+ * @param data
  * @returns {{type: string, payload: {}}}
  */
 const updateTheme = (data) => {
@@ -279,4 +311,7 @@ export {
     toggleAppTour,
     toggleAppTourFulfilled,
     toggleAppTourRejected,
+    checkOCConnection,
+    checkOCConnectionFulfilled,
+    checkOCConnectionRejected,
 };

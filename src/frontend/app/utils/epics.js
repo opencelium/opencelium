@@ -27,7 +27,7 @@ import {
 } from '../epics/usergroups';
 import {
     loginUserEpic, logoutUserEpic, updateAuthUserLanguageEpic, updateDashboardSettingsEpic,
-    updateThemeEpic, toggleAppTourEpic,
+    updateThemeEpic, toggleAppTourEpic, checkOCConnectionEpic,
 } from '../epics/auth';
 import {
     fetchComponentsEpic,
@@ -143,6 +143,7 @@ export default combineEpics(
     deleteWebHookEpic,
     checkUserEmailEpic,
     toggleAppTourEpic,
+    checkOCConnectionEpic,
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,

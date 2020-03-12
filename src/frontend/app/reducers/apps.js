@@ -18,6 +18,7 @@ import {List, fromJS} from 'immutable';
 import {AppsAction} from '../utils/actions';
 import {API_REQUEST_STATE} from "../utils/constants/app";
 import {APP_STATUS_UP} from "../utils/constants/url";
+import {isString} from "../utils/app";
 
 
 const initialState = fromJS({
@@ -48,7 +49,9 @@ const reducer = (state = initialState, action) => {
         case AppsAction.CHECK_APP:
             return state.set('checkingApp', API_REQUEST_STATE.START).set('error', null).set('checkingAppResult', null);
         case AppsAction.CHECK_APP_FULFILLED:
-            window.open(action.payload.link, '_blank').focus();
+            if(action.payload && isString(action.payload.link)) {
+                window.open(action.payload.link, '_blank').focus();
+            }
             return state.set('checkingApp', API_REQUEST_STATE.FINISH).set('checkingAppResult', action.payload);
         case AppsAction.CHECK_APP_REJECTED:
             return state.set('checkingApp', API_REQUEST_STATE.PAUSE).set('error', action.payload);

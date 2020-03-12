@@ -111,16 +111,6 @@ class OperatorItem extends Component{
         updateEntity();
     }
 
-    getDepth(){
-        const {operator} = this.props;
-        let indexSplitted = operator.index.split('_');
-        let depth = indexSplitted.length;
-        if(depth >= 1) {
-            depth--;
-        }
-        return depth;
-    }
-
     updateEntity(){
         const {operator, updateEntity} = this.props;
         operator.deleteError();
@@ -139,7 +129,6 @@ class OperatorItem extends Component{
                     connector={connector}
                     operator={operator}
                     updateEntity={::this.updateEntity}
-                    depth={::this.getDepth()}
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
@@ -152,7 +141,6 @@ class OperatorItem extends Component{
                     connector={connector}
                     operator={operator}
                     updateEntity={::this.updateEntity}
-                    depth={::this.getDepth()}
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}

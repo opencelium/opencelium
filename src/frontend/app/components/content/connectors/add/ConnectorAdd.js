@@ -342,12 +342,11 @@ class ConnectorAdd extends Component{
                 },
                 {
                     ...INPUTS.DESCRIPTION,
-                    tourStep: CONNECTOR_TOURS.page_1[1].selector,
                     label: t('ADD.FORM.DESCRIPTION'),
                 },
                 {
                     ...INPUTS.INVOKER,
-                    tourStep: CONNECTOR_TOURS.page_1[2].selector,
+                    tourStep: CONNECTOR_TOURS.page_1[1].selector,
                     label: t('ADD.FORM.INVOKER'),
                     required: true,
                     source: invokers,

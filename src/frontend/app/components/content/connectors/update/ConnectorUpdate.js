@@ -367,9 +367,11 @@ class ConnectorUpdate extends Component{
                     maxLength: 32,
                     check: (e, entity) => ::this.validateTitle(e, entity),
                 },
-                {...INPUTS.DESCRIPTION, tourStep: CONNECTOR_TOURS.page_1[1].selector, label: t('UPDATE.FORM.DESCRIPTION')},
+                {...INPUTS.DESCRIPTION,
+                    label: t('UPDATE.FORM.DESCRIPTION')
+                },
                 {...INPUTS.INVOKER,
-                    tourStep: CONNECTOR_TOURS.page_1[2].selector,
+                    tourStep: CONNECTOR_TOURS.page_1[1].selector,
                     label: t('UPDATE.FORM.INVOKER'),
                     required: true,
                     source: invokers,

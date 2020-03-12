@@ -44,7 +44,7 @@ export const OC_TOURS = [
         selector: '.tour-step-schedule',
         content: 'Gives you opportunity to schedule your connections',},
     {
-        selector: '.tour-step-admin_cards',
+        selector: '.tour-step-app',
         content: 'Here you find more opportunities, like apps and invokers',},
     {
         selector: '.tour-step-logout',
@@ -60,14 +60,6 @@ export const USERGROUP_TOURS = {
                 <SwitchOffTour>
                     Provide unique name
                 </SwitchOffTour>,},
-        {
-            selector: '.tour-page-1-step-2',
-            content: 'Provide description (optional)',
-        },
-        {
-            selector: '.tour-page-1-step-3',
-            content: 'Choose icon (optional)',
-        },
     ],
     page_2: [
         {
@@ -103,7 +95,7 @@ export const USER_TOURS = {
         },
         {
             selector: '.tour-page-1-step-3',
-            content: 'Repeat password ',
+            content: 'Repeat password',
         },
     ],
     page_2: [
@@ -202,10 +194,6 @@ export const CONNECTOR_TOURS = {
                 <SwitchOffTour>
                     Provide name for the connector.
                 </SwitchOffTour>,
-        },
-        {
-            selector: '.tour-page-1-step-2',
-            content: 'Provide description for the connector, if you need',
         },
         {
             selector: '.tour-page-1-step-3',
@@ -399,62 +387,62 @@ export const ADMINCARD_TOURS = [
 export const LIST_TOURS = {
     card_1_user : [
         {
+            selector: '.tour-step-search-1',
+            content: <SwitchOffTour>Type here to use a quick search</SwitchOffTour>,
+        },{
             selector: '.tour-step-card-1',
-            content:
-                <SwitchOffTour>
-                    Press key 1 to select a card
-                </SwitchOffTour>,
+            content: <span>Press key <b>1</b> to select a card</span>,
         },{
             selector: '.tour-step-view-1',
-            content: 'After you can press V to view the card',
+            content: <span>After you can press <b>V</b> to view the card</span>,
         },{
             selector: '.tour-step-update-1',
-            content: 'Press U to update the card',
+            content: <span>Press <b>U</b> to update the card</span>,
         },{
             selector: '.tour-step-delete-add',
-            content: 'Click on the button or press Alt + to add a new element',
+            content: <span>Click on the button or press <b>Alt +</b> to add a new element</span>,
         },
     ],
     card_1 : [
         {
+            selector: '.tour-step-search-1',
+            content: <SwitchOffTour>Type here to use a quick search</SwitchOffTour>,
+        },{
             selector: '.tour-step-card-1',
-            content:
-                <SwitchOffTour>
-                    Press key 1 to select a card
-                </SwitchOffTour>,
+            content: <span>Press key <b>1</b> to select a card</span>,
         },{
             selector: '.tour-step-view-1',
-            content: 'After you can press V to view the card',
+            content: <span>After you can press <b>V</b> to view the card</span>,
         },{
             selector: '.tour-step-update-1',
-            content: 'Press U to update the card',
+            content: <span>Press <b>U</b> to update the card</span>,
         },{
             selector: '.tour-step-delete-1',
-            content: 'Press D to delete the card',
+            content: <span>Press <b>D</b> to delete the card</span>,
         },{
             selector: '.tour-step-delete-add',
-            content: 'Click on the button or press Alt + to add a new element',
+            content: <span>Click on the button or press <b>Alt +</b> to add a new element</span>,
         },
     ],
     card_2: [
         {
+            selector: '.tour-step-search-1',
+            content: <SwitchOffTour>Type here to use a quick search</SwitchOffTour>,
+        },{
             selector: '.tour-step-card-2',
-            content:
-                <SwitchOffTour>
-                    Press key 2 to select a card
-                </SwitchOffTour>,
+            content: <span>Press key <b>2</b> to select a card</span>,
         },{
             selector: '.tour-step-view-2',
-            content: 'After you can press V to view the card',
+            content: <span>After you can press <b>V</b> to view the card</span>,
         },{
             selector: '.tour-step-update-2',
-            content: 'Press U to update the card',
+            content: <span>Press <b>U</b> to update the card</span>,
         },{
             selector: '.tour-step-delete-2',
-            content: 'Press D to delete the card',
+            content: <span>Press <b>D</b> to delete the card</span>,
         },{
             selector: '.tour-step-delete-add',
-            content: 'Click on the button or press Alt + to add a new element',
+            content: <span>Click on the button or press <b>Alt +</b> to add a new element</span>,
         },
     ]
 };

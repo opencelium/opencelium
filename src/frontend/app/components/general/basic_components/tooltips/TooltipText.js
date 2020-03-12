@@ -46,7 +46,7 @@ class TooltipText extends Component{
     }
 
     render(){
-        const {authUser, tooltip, text, className, onClick, tooltipPosition} = this.props;
+        const {authUser, tooltip, text, className, onClick, tooltipPosition, style} = this.props;
         let classNames = [
             'tooltip_switch',
             'tooltip',
@@ -62,7 +62,7 @@ class TooltipText extends Component{
         }
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <span className={`${styles[classNames.tooltip_switch]} ${className}`} onMouseOver={::this.activate} onMouseLeave={::this.deactivate} onClick={onClick}>
+            <span className={`${styles[classNames.tooltip_switch]} ${className}`} onMouseOver={::this.activate} onMouseLeave={::this.deactivate} onClick={onClick} style={style}>
                 <span className={`${theme.tooltip} ${tooltipPositionClassname} ${ this.state.isActive ? `${theme.tooltipActive}` : ''} ${styles[classNames.tooltip]}`}>
                     <span className={`${theme.tooltipInner}`}>{tooltip}</span>
                 </span>
@@ -79,6 +79,7 @@ TooltipText.propTypes = {
 };
 TooltipText.defaultProps = {
     className: '',
+    style: {},
 };
 
 export default TooltipText;

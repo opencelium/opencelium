@@ -265,7 +265,7 @@ class IfOperator extends Component{
         if(leftColor !== ''){
             return(
                 <div className={styles.if_placeholder} onClick={toggleIsVisibleMenuEdit}>
-                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor, maxWidth: hasValue ? '43%' : '70%'}} title={title}>{title}</div>
+                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor, maxWidth: hasValue ? '43%' : '80%'}} title={title}>{title}</div>
                     {
                         relationalOperator !== ''
                         ?
@@ -772,13 +772,13 @@ class IfOperator extends Component{
     }
 
     render(){
-        const {connector, operator, tooltip, depth, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
+        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
         let classNames = styles.operator_icon;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : null;
         let operatorStyle = {
             height: '50px',
-            marginLeft: `${depth * 20}px`,
+            marginLeft: `${operator.getDepth() * 20}px`,
             padding: '5px',
             transition: 'all 0.3s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',

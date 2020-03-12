@@ -63,6 +63,15 @@ export default class COperatorItem{
         };
     }
 
+    getDepth(){
+        let indexSplitted = this._index.split('_');
+        let depth = indexSplitted.length;
+        if(depth >= 1) {
+            depth--;
+        }
+        return depth;
+    }
+
     get index(){
         return this._index;
     }

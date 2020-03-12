@@ -193,8 +193,8 @@ class UserGroupAdd extends Component{
                     required: true,
                     check: (e, entity) => ::this.validateRole(e, entity),
                 },
-                {...INPUTS.DESCRIPTION, label: t('ADD.FORM.DESCRIPTION'), tourStep: USERGROUP_TOURS.page_1[1].selector, defaultValue: ''},
-                {...INPUTS.ICON, label: t('ADD.FORM.USER_GROUP_PICTURE'), tourStep: USERGROUP_TOURS.page_1[2].selector, browseTitle: t('ADD.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
+                {...INPUTS.DESCRIPTION, label: t('ADD.FORM.DESCRIPTION'), defaultValue: ''},
+                {...INPUTS.ICON, label: t('ADD.FORM.USER_GROUP_PICTURE'), browseTitle: t('ADD.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
         },{
