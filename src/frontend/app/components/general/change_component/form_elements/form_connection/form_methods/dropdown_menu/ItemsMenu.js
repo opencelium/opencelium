@@ -57,11 +57,11 @@ class ItemsMenu extends Component{
         let depth = 0;
         let currentItem = connector.getCurrentItem();
         if(currentItem){
-            depth = connector.getCurrentItem().index.split('_').length;
+            depth = connector.getCurrentItem().getDepth();
         }
         classNames.operator = styles.item_menu_operator;
         classNames[itemType] += ` ${styles.item_menu_selected}`;
-        if(depth < CONNECTOR_DEPTH_LIMIT) {
+        if(depth <= CONNECTOR_DEPTH_LIMIT) {
             if (connector.getConnectorType() === CONNECTOR_TO || connector.methods.length > 0) {
                 return (
                     <span onClick={() => ::this.selectItem('operator')} className={classNames.operator}>

@@ -27,7 +27,7 @@ export const CONNECTOR_TO = 'toConnector';
 export const METHOD_ITEM = 'method';
 export const OPERATOR_ITEM = 'operator';
 
-export const CONNECTOR_DEPTH_LIMIT = 4;
+export const CONNECTOR_DEPTH_LIMIT = 7;
 
 /**
  * Connector class for manipulating data in the Connector Component

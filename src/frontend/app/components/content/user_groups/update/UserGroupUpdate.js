@@ -206,8 +206,8 @@ class UserGroupUpdate extends Component{
                     required: true,
                     check: (e, entity) => ::this.validateRole(e, entity),
                 },
-                {...INPUTS.DESCRIPTION, tourStep: USERGROUP_TOURS.page_1[1].selector, label: t('UPDATE.FORM.DESCRIPTION')},
-                {...INPUTS.ICON, tourStep: USERGROUP_TOURS.page_1[2].selector, label: t('UPDATE.FORM.USER_GROUP_PICTURE'), browseTitle: t('UPDATE.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
+                {...INPUTS.DESCRIPTION, label: t('UPDATE.FORM.DESCRIPTION')},
+                {...INPUTS.ICON, label: t('UPDATE.FORM.USER_GROUP_PICTURE'), browseTitle: t('UPDATE.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
             ],
             hint: {text: t('UPDATE.FORM.HINT_1'), openTour: ::this.openTour},
         },{

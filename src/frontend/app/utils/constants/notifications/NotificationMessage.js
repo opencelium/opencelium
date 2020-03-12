@@ -77,7 +77,11 @@ class NotificationMessage extends Component{
                 if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
                     notificationMessage = t(`${status}.${message}.__DEFAULT__`);
                 } else{
-                    notificationMessage = t(`${status}.${message}`);
+                    if(i18n.exists(`notifications:${status}.${message}`)){
+                        notificationMessage = t(`${status}.${message}`);
+                    } else{
+                        notificationMessage = message;
+                    }
                 }
             }
         }

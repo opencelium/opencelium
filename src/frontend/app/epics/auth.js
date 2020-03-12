@@ -21,6 +21,7 @@ import {
     updateAuthUserLanguageFulfilled, updateAuthUserLanguageRejected,
     updateDashboardSettingsFulfilled,
     updateThemeFulfilled, toggleAppTourFulfilled, toggleAppTourRejected, updateThemeRejected,
+    checkOCConnectionFulfilled, checkOCConnectionRejected,
 } from '../actions/auth';
 
 import {doRequest} from '../utils/auth';
@@ -66,7 +67,7 @@ const updateAuthUserLanguageEpic = (action$, store) => {
                     }
                     if(token !== null) {
                         const decodedData = jwt.decode(token.slice(7));
-                        const expTime = decodedData.exp;
+                        const expTime = decodedData.exp - decodedData.iat;
                         setLS("token", token);
                         setLS("exp_time", expTime);
                         setLS("last_login", Date.now());
@@ -150,6 +151,21 @@ const toggleAppTourEpic = (action$, store) => {
         });
 };
 
+/**
+ * check OC connection
+ */
+const checkOCConnectionEpic = (action$, store) => {
+    return action$.ofType(AuthAction.CHECK_OCCONNECTION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = 'application/oc/test';
+            return doRequest({url, method: 'get'}, {
+                    success: checkOCConnectionFulfilled,
+                    reject: checkOCConnectionRejected
+            });
+        });
+};
+
 
 export {
     updateAuthUserLanguageEpic,
@@ -158,4 +174,5 @@ export {
     updateDashboardSettingsEpic,
     updateThemeEpic,
     toggleAppTourEpic,
+    checkOCConnectionEpic,
 };

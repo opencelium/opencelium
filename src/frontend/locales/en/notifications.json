@@ -139,7 +139,8 @@
     "LOAD_APPSLINK": "The link to this application does not work, please check your installations",
     "LOAD_ADMINCARD": "The link to this card does not work, please check your permissions",
     "ADD_INVOKER": "The invoker was not added",
-    "DELETE_INVOKER": "The invoker was not deleted"
+    "DELETE_INVOKER": "The invoker was not deleted",
+    "CHECK_OCCONNECTION": "Your sessions is expired"
   },
   "WARNING": {
     "ADD_USER": "The user was added, but ...",

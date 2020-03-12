@@ -54,7 +54,7 @@ class AdminCardsMenuItem extends Component{
             <ListItemLink
                 label={{text: 'Admin', index: 0}}
                 to='/admin_cards'
-                navigationTitleClass={'tour-step-admin_cards'}
+                navigationTitleClass={'tour-step-app'}
             />
         );
     }

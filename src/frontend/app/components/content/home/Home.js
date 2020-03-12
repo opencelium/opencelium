@@ -14,28 +14,19 @@
  */
 
 import React, { Component, Suspense }  from 'react';
-import {connect} from 'react-redux';
 import {Container} from 'react-grid-system';
 
 import Loading from '../../general/app/Loading';
 import Greeting from "../home/Greeting";
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "../../../utils/constants/app";
+import {checkConnection} from "../../../decorators/checkConnection";
 
-
-function mapStateToProps(state){
-    const auth = state.get('auth');
-    return{
-        authUser: auth.get('authUser'),
-        logining: auth.get('logining'),
-        logouting: auth.get('logouting')
-    };
-}
 
 /**
  * Home Component to load Greeting
  */
-@connect(mapStateToProps, {})
+@checkConnection()
 class Home extends Component{
 
     constructor(props){
@@ -43,13 +34,12 @@ class Home extends Component{
     }
     
     render(){
-        const {logining, logouting, authUser} = this.props;
-        const content = logining || logouting ? <Loading authUser={authUser}/> : <Greeting/>;
+        const {authUser} = this.props;
         return (
             <Container>
                 <Suspense fallback={(<Loading authUser={authUser}/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {content}
+                        <Greeting/>
                     </ComponentError>
                 </Suspense>
             </Container>

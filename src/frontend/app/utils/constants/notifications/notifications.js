@@ -41,6 +41,7 @@ export const EntitiesWithNotification = [
     {name: UserGroupsAction.UPDATE_GROUPICON, types: ['FULFILLED']},
     {name: UserGroupsAction.DELETE_USERGROUP, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: AuthAction.LOG_IN, types: ['REJECTED']},
+    {name: AuthAction.CHECK_OCCONNECTION, types: ['REJECTED']},
     {name: AuthAction.SESSION_EXPIRED, types: ['CANCELED']},
     {name: AuthAction.UPDATE_AUTH_USER_LANGUAGE, types: ['FULFILLED', 'REJECTED']},
     {name: AppAction.DO_REQUEST, types: ['REJECTED']},

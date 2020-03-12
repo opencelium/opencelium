@@ -23,6 +23,7 @@ import {LoadingComponentError} from "../../../utils/constants/errors";
 import ProgressBar from "../basic_components/ProgressBar";
 import ComponentError from "./ComponentError";
 import {ERROR_TYPE} from "../../../utils/constants/app";
+import {Spinner} from "reactstrap";
 
 
 /**
@@ -68,7 +69,8 @@ class Loading extends Component{
         }
         return (
             <div className={`${loadingClassName} ${className}`}>
-                <ProgressBar type='circular' mode='indeterminate'/>
+
+                {/*<ProgressBar type='circular' mode='indeterminate'/>*/}
                 {this.renderCancelButton()}
             </div>
         );

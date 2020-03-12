@@ -66,6 +66,15 @@ export default class CMethodItem{
         };
     }
 
+    getDepth(){
+        let indexSplitted = this._index.split('_');
+        let depth = indexSplitted.length;
+        if(depth >= 1) {
+            depth--;
+        }
+        return depth;
+    }
+
     convertRequest(request){
         if(!(request instanceof CRequest)) {
             let operation = this._invoker && this._invoker.operations ? this._invoker.operations.find(o => o.name === this._name) : null;
