@@ -33,7 +33,7 @@ public interface FieldNodeRepository extends Neo4jRepository<FieldNode, Long> {
 
     @Query("match (conn:Connection{connectionId:{0}})-[*]->(f:Method{color:{1}})-[:has_response]->" +
             "(:Response)-[:has_success|has_fail]->(:Result{name:{2}})-[has_body]->" +
-            "(:Body)-[:has_field]->(fi:Field{name:{3}}) return fi;")
+            "(:Body)-[:has_field*1..9]->(fi:Field{name:{3}}) return fi;")
     FieldNode findFirstFieldInResponse(Long connectionId, String function, String result, String field);
 
     @Query("match (conn:Connection{connectionId:{0}})-[*]->(f:Method{color:{1}})-[:has_request]->" +
