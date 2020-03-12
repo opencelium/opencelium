@@ -339,7 +339,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         Object value = new Object();
         String[] valueParts;
         if (pathValue.contains(".")){
-            valueParts = ConditionUtility.getRefValue(pathValue).split("\\.");
+            valueParts = pathValue.split("\\.");
         } else {
             valueParts = new String[1];
             valueParts[0] = pathValue;

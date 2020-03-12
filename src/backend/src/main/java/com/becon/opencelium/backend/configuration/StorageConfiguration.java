@@ -61,7 +61,10 @@ public class StorageConfiguration {
             List<RequiredData> requiredData = invokerContainer.getByName(c.getInvoker()).getRequiredData();
 
             requestData.forEach(request -> {
-                RequiredData required = requiredData.stream().filter(rq -> rq.getName().equals(request.getField())).findFirst().get();
+                RequiredData required = requiredData.stream().filter(rq -> rq.getName().equals(request.getField())).findFirst().orElse(null);
+                if (required == null){
+                    return;
+                }
                 request.setVisibility(required.getVisibility());
             });
         });

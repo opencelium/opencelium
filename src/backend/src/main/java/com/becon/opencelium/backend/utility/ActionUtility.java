@@ -19,7 +19,6 @@ package com.becon.opencelium.backend.utility;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.*;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
-import com.becon.opencelium.backend.operator.Operator;
 import com.becon.opencelium.backend.resource.connection.ConditionResource;
 import com.becon.opencelium.backend.resource.connection.MethodResource;
 import com.becon.opencelium.backend.resource.connection.OperatorResource;
@@ -161,11 +160,12 @@ public class ActionUtility {
                 v = "";
             }
 
-            if (v instanceof String && fieldNodeService.hasReference(v.toString())){
-                if (!fieldNodeService.existsInInvokerMethod(connectorNode.getName(), methodName, v.toString())){
-                    throw new RuntimeException("FIELD_NOT_FOUND_IN_REF_METHOD");
-                }
-            }
+            // TODO: bug when determining invoker file in ref.
+//            if (v instanceof String && fieldNodeService.hasReference(v.toString())){
+//                if (!fieldNodeService.existsInInvokerMethod(connectorNode.getName(), methodName, v.toString())){
+//                    throw new RuntimeException("FIELD_NOT_FOUND_IN_REF_METHOD");
+//                }
+//            }
 
             String type = invokerServiceImp.findFieldType(connectorNode.getName(), methodName, exchangeType, result, k);
             // for situation = "ConfigItem": "#FFCFB5.(response).success.result[];#C77E7E.(response).success.result[]"

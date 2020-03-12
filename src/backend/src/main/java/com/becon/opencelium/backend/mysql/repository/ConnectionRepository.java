@@ -18,9 +18,16 @@ package com.becon.opencelium.backend.mysql.repository;
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.LinkedList;
+import java.util.List;
 
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     boolean existsByName(String name);
+
+    @Query(value = "select * from connection where from_connector = ?1 or to_connector = ?1", nativeQuery = true)
+    LinkedList<Connection> findAllByConnectorId(int connectorId);
 }
