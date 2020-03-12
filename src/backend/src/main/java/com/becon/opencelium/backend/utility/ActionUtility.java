@@ -161,11 +161,12 @@ public class ActionUtility {
                 v = "";
             }
 
-            if (v instanceof String && fieldNodeService.hasReference(v.toString())){
-                if (!fieldNodeService.existsInInvokerMethod(connectorNode.getName(), methodName, v.toString())){
-                    throw new RuntimeException("FIELD_NOT_FOUND_IN_REF_METHOD");
-                }
-            }
+            // TODO: bug when determining invoker file in ref.
+//            if (v instanceof String && fieldNodeService.hasReference(v.toString())){
+//                if (!fieldNodeService.existsInInvokerMethod(connectorNode.getName(), methodName, v.toString())){
+//                    throw new RuntimeException("FIELD_NOT_FOUND_IN_REF_METHOD");
+//                }
+//            }
 
             String type = invokerServiceImp.findFieldType(connectorNode.getName(), methodName, exchangeType, result, k);
             // for situation = "ConfigItem": "#FFCFB5.(response).success.result[];#C77E7E.(response).success.result[]"
