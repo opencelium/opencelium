@@ -39,7 +39,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -196,6 +199,7 @@ public class ConnectorExecutor {
         }
 
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
+
         System.out.println("Body: " + body);
         System.out.println("============================================================");
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
@@ -212,9 +216,26 @@ public class ConnectorExecutor {
             System.err.println(e.getMessage());
         }
 
-        HttpEntity<String> httpEntity = new HttpEntity <String> (body, header);
+        // TODO: added application/x-www-form-urlencoded support: need to refactor.
+        Object data;
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+        String contentType = header.get("Content-Type") != null ? header.get("Content-Type").get(0) : null;
+        if (contentType != null && header.containsKey("Content-Type") && contentType.equals("application/x-www-form-urlencoded")){
+            try {
+                HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);
+                mapData.forEach(formData::add);
+                data = formData;
+            } catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        } else {
+            data = body;
+        }
+
+        // TODO: Changed string to object in httpEntity;
+        HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
         if (body.equals("null")){
-            httpEntity = new HttpEntity <String> (header);
+            httpEntity = new HttpEntity <Object> (header);
         }
 
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
@@ -321,11 +342,19 @@ public class ConnectorExecutor {
         header.forEach((k,v) -> {
             String requiredField;
             if (v.contains("{") && v.contains("}")){
-                requiredField = v.replace("{","").replace("}","");
-                String value = executionContainer.getRequestData().stream()
-                        .filter(r -> r.getField().equals(requiredField))
-                        .map(RequestData::getValue).findFirst().get();
-                headerItem.put(k, value);
+                String curlyValue = "";
+                for (RequestData data : executionContainer.getRequestData()) {
+                    String field = "{" + data.getField() + "}";// TODO: should be regular expression
+                    curlyValue = v;
+                    if (v.contains(field)){
+                        curlyValue = curlyValue.replace(field,data.getValue());
+                    }
+                }
+                requiredField = curlyValue;
+//                String value = executionContainer.getRequestData().stream()
+//                        .filter(r -> r.getField().equals(requiredField))
+//                        .map(RequestData::getValue).findFirst().get();
+                headerItem.put(k, requiredField);
                 return;
             }
             headerItem.put(k, v);

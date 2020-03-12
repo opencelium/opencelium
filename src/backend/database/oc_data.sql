@@ -649,7 +649,7 @@ CREATE TABLE `request_data` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `connector_id` int(11) NOT NULL,
   `field` varchar(45) DEFAULT NULL,
-  `value` varchar(255) DEFAULT NULL,
+  `value` varchar(2048) DEFAULT NULL,
   `visibility` varchar(15) DEFAULT NULL,
   PRIMARY KEY (`id`,`connector_id`),
   KEY `fk_data_connector1_idx` (`connector_id`),

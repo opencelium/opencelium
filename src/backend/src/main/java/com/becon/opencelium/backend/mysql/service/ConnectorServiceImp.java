@@ -127,7 +127,8 @@ public class ConnectorServiceImp implements ConnectorService{
             String visibility = requiredData.stream()
                     .filter(d -> d.getName().equals(data.getField()))
                     .map(RequiredData::getVisibility)
-                    .findFirst().orElseThrow(() -> new RuntimeException("Visibility not found while converting to entity"));
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Visibility not found while converting to entity for field:" + data.getField()));
             
             data.setVisibility(visibility);
         });
