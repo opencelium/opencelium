@@ -44,7 +44,7 @@ import LastFailureCell from "./LastFailureCell";
 import LastDurationCell from "./LastDurationCell";
 import Checkbox from "../../../general/basic_components/inputs/Checkbox";
 import Input from "../../../general/basic_components/inputs/Input";
-import {APP_STATUS_UP} from "../../../../utils/constants/url";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "../../../../utils/constants/url";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
 
 export const EMPHASIZE_DURATION_ANIMATION = 900;
@@ -354,8 +354,8 @@ class ScheduleList extends Component{
                                 <TitleCell schedule={schedule}/>
                                 <TableCell className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></TableCell>
                                 <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
-                                <LastSuccessCell schedule={schedule} hasElasticSearch={`${checkingAppResult.status}` === APP_STATUS_UP}/>
-                                <LastFailureCell schedule={schedule} hasElasticSearch={`${checkingAppResult.status}` === APP_STATUS_UP}/>
+                                <LastSuccessCell schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
+                                <LastFailureCell schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
                                 <LastDurationCell schedule={schedule} t={t}/>
                                 <StatusCell schedule={schedule}/>
                                 <TableCell style={{padding: '5px'}}>
