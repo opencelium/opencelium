@@ -163,6 +163,7 @@ public class ConnectionController {
         ConnectionNode connectionNodeClone = connectionNodeService.findByConnectionId(connectionId)
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
         try {
+//            List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
             enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.save(connection);
 

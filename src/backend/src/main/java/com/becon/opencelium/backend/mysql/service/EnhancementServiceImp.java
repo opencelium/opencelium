@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.resource.connection.binding.FieldBindingReso
 import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +61,7 @@ public class EnhancementServiceImp implements EnhancementService{
 
     @Override
     public void deleteAllByConnectionId(Long connectionId) {
-        enhancementRepository.removeByConnectionId(connectionId);
+        enhancementRepository.deleteByConnectionId(connectionId);
     }
 
     @Override
@@ -74,6 +75,12 @@ public class EnhancementServiceImp implements EnhancementService{
     @Override
     public Optional<Enhancement> findById(Integer enhId) {
         return enhancementRepository.findById(enhId);
+    }
+
+    @Override
+    public void deleteAll(List<Enhancement> enhancements) {
+
+        enhancements.forEach(e -> enhancementRepository.deleteById(e.getId()));
     }
 
     @Override
