@@ -69,7 +69,7 @@ class Loading extends Component{
         }
         return (
             <div className={`${loadingClassName} ${className}`}>
-
+                <Spinner type="grow" color="primary" />
                 {/*<ProgressBar type='circular' mode='indeterminate'/>*/}
                 {this.renderCancelButton()}
             </div>

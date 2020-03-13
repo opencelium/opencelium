@@ -45,9 +45,9 @@ export default function (store){
                     data.type = NotificationType.ERROR;
                     if (action.payload
                         && (action.payload.status === 403 || TOKEN_EXPIRED_MESSAGES.indexOf(action.payload.message) !== -1)
-                        && data.message !== AuthAction.CHECK_OCCONNECTION
+                        /*&& data.message !== AuthAction.CHECK_OCCONNECTION*/
                     ){
-                        window.open('/login', '_blank').focus();
+                        //window.open('/login', '_blank').focus();
                         store.dispatch(sessionExpired({}));
                         history.push('/login');
                         next({type: AuthAction.INITIAL_STATE, payload: {}});

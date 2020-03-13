@@ -60,7 +60,7 @@ class Layout extends Component{
     componentDidMount(){
         const {addUserInStore, checkOCConnection} = this.props;
         addUserListener(addUserInStore);
-        setInterval(::this.checkOCConnection, 10000);
+        //setInterval(::this.checkOCConnection, 10000);
     }
 
     checkOCConnection(){
@@ -71,7 +71,7 @@ class Layout extends Component{
         }
     }
 
-    componentDidUpdate(){
+/*    componentDidUpdate(){
         const {showLoginAgain} = this.state;
         const {checkOCConnectionResult, isAuth} = this.props;
         if(checkOCConnectionResult !== null && !showLoginAgain && isAuth){
@@ -84,7 +84,7 @@ class Layout extends Component{
                 showLoginAgain: false,
             });
         }
-    }
+    }*/
 
     toggleMenu(){
         this.setState({isMenuVisible: !this.state.isMenuVisible});
@@ -95,6 +95,7 @@ class Layout extends Component{
     }
 
     renderLoginAgain(){
+        return null;
         const {showLoginAgain} = this.state;
         if(showLoginAgain) {
             const {t} = this.props;
