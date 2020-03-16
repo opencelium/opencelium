@@ -29,7 +29,8 @@ import LayoutError from "./LayoutError";
 import styles from '../../themes/default/layout/layout.scss';
 import Notification from "../general/app/Notification";
 import {NotificationType} from "../../utils/constants/notifications/notifications";
-import {checkOCConnection} from "../../actions/auth";
+import {checkOCConnection, logoutUserFulfilled} from "../../actions/auth";
+import {API_REQUEST_STATE} from "../../utils/constants/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -38,6 +39,7 @@ function mapStateToProps(state){
         isAuth: auth.get('isAuth'),
         currentLanguage: auth.get('authUser') ? auth.get('authUser').current_language : defaultLanguage.code,
         checkOCConnectionResult: auth.get('checkOCConnectionResult'),
+        checkingOCConnection: auth.get('checkingOCConnection'),
     };
 }
 
@@ -45,12 +47,11 @@ function mapStateToProps(state){
  * Layout of the app(OC)
  */
 @withTranslation('notifications')
-@connect(mapStateToProps, {changeLanguage, addUserInStore, checkOCConnection})
+@connect(mapStateToProps, {changeLanguage, addUserInStore, checkOCConnection, logoutUserFulfilled})
 class Layout extends Component{
 
     constructor(props){
         super(props);
-
         this.state = {
             isMenuVisible: false,
             authUser: props.authUser,
@@ -61,29 +62,34 @@ class Layout extends Component{
     componentDidMount(){
         const {addUserInStore} = this.props;
         addUserListener(addUserInStore);
-        setInterval(::this.checkOCConnection, 10000);
-    }
-
-    checkOCConnection(){
-        const {showLoginAgain} = this.state;
-        const {isAuth, checkOCConnection} = this.props;
-        if(isAuth && !showLoginAgain) {
-            checkOCConnection({background: true});
-        }
+        setInterval(::this.checkOCConnection, 3000);
     }
 
     componentDidUpdate(){
         const {showLoginAgain} = this.state;
-        const {checkOCConnectionResult, isAuth} = this.props;
-        if(checkOCConnectionResult !== null && !showLoginAgain && isAuth){
-            this.setState({
-                showLoginAgain: true,
-            });
+        const {checkOCConnectionResult, authUser, logoutUserFulfilled, checkingOCConnection} = this.props;
+        if(checkingOCConnection === API_REQUEST_STATE.FINISH) {
+            if (checkOCConnectionResult !== null && !showLoginAgain) {
+                logoutUserFulfilled({
+                    ...authUser,
+                    isNotAuthButStayInSystem: true
+                });
+                this.setState({
+                    showLoginAgain: true,
+                });
+            }
+            if (checkOCConnectionResult === null && showLoginAgain) {
+                this.setState({
+                    showLoginAgain: false,
+                });
+            }
         }
-        if(checkOCConnectionResult === null && showLoginAgain && isAuth){
-            this.setState({
-                showLoginAgain: false,
-            });
+    }
+
+    checkOCConnection(){
+        const {isAuth, checkOCConnection} = this.props;
+        if(isAuth) {
+            checkOCConnection({background: true});
         }
     }
 

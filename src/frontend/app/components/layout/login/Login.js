@@ -37,8 +37,8 @@ class Login extends Component{
     constructor(props){
         super(props);
         this.state = {
-            email: '',
-            password: '',
+            email: 'admin@opencelium.io',
+            password: '1234',
             validationMessage: '',
         };
     }
@@ -89,7 +89,7 @@ class Login extends Component{
         const {email} = this.state;
         const {t} = this.props;
         if(email === ''){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.EMAIL_IS_REQUIRED')});
+            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.EMAIL_REQUIRED')});
             setFocusById('login_email');
             return false;
         }
@@ -103,11 +103,17 @@ class Login extends Component{
         return true;
     }
 
+    pressEnterEmail(){
+        if(this.validate()) {
+            this.login();
+        }
+    }
+
     validatePassword(){
         const {password} = this.state;
         const {t} = this.props;
         if(password === ''){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.PASSWORD_IS_REQUIRED')});
+            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.PASSWORD_REQUIRED')});
             setFocusById('login_password');
             return false;
         }
@@ -143,7 +149,7 @@ class Login extends Component{
                     value={this.state.email}
                     theme={styles}
                     onChange={::this.emailChange}
-                    onKeyPress={(e) => onEnter(e, () => setFocusById('login_password'))}
+                    onKeyPress={(e) => onEnter(e, ::this.pressEnterEmail)}
                     id={'login_email'}
                 />
                 <Input

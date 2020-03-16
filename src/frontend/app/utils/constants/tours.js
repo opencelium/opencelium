@@ -449,7 +449,7 @@ export const LIST_TOURS = {
 
 
 export function automaticallyShowTour(authUser){
-    if(authUser && authUser.userDetail.hasOwnProperty('appTour')){
+    if(authUser && authUser.hasOwnProperty('userDetail') && authUser.userDetail && authUser.userDetail.hasOwnProperty('appTour')){
         return authUser.userDetail.appTour;
     }
     return true;

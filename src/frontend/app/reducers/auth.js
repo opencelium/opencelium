@@ -42,6 +42,7 @@ let authUser = null;
  * redux reducer for auth user
  */
 const reducer = (state = initialState, action) => {
+    let isNotAuthButStayInSystem = false;
     switch (action.type) {
         case AuthAction.INITIAL_STATE:
             return state;
@@ -56,7 +57,10 @@ const reducer = (state = initialState, action) => {
         case AuthAction.LOG_OUT:
             return state.set('logouting', true).set('error', null);
         case AuthAction.LOG_OUT_FULFILLED:
-            return state.set('logouting', false).set('authUser', action.payload).set('isAuth', false);
+            if(action.payload && action.payload.hasOwnProperty('isNotAuthButStayInSystem')){
+                isNotAuthButStayInSystem = action.payload.isNotAuthButStayInSystem;
+            }
+            return state.set('logouting', false).set('authUser', action.payload).set('isAuth', isNotAuthButStayInSystem);
         case AuthAction.LOG_OUT_REJECTED:
             return state.set('logouting', false).set('error', action.payload).set('isAuth', true);
         case AuthAction.LOG_OUT_CANCELED:
