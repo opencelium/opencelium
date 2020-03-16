@@ -139,6 +139,7 @@ class Login extends Component{
                 <div className={styles.caption}>{t("LOGIN.HEADER")}</div>
                 <Input
                     type={'email'}
+                    placeholder={t('LOGIN.EMAIL_PLACEHOLDER')}
                     value={this.state.email}
                     theme={styles}
                     onChange={::this.emailChange}
@@ -147,6 +148,7 @@ class Login extends Component{
                 />
                 <Input
                     type={'password'}
+                    placeholder={t('LOGIN.PASSWORD_PLACEHOLDER')}
                     value={this.state.password}
                     theme={styles}
                     onChange={::this.passwordChange}

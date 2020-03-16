@@ -20,6 +20,7 @@ import Header from "./header/Header";
 import Footer from "./footer/Footer";
 import {changeLanguage} from "../../actions/app";
 import {defaultLanguage} from "../../utils/constants/languages";
+import store from '../../utils/store';
 import {addUserInStore} from '../../actions/users/add';
 
 import { addUserListener,
@@ -58,20 +59,20 @@ class Layout extends Component{
     }
 
     componentDidMount(){
-        const {addUserInStore, checkOCConnection} = this.props;
+        const {addUserInStore} = this.props;
         addUserListener(addUserInStore);
-        //setInterval(::this.checkOCConnection, 10000);
+        setInterval(::this.checkOCConnection, 10000);
     }
 
     checkOCConnection(){
         const {showLoginAgain} = this.state;
         const {isAuth, checkOCConnection} = this.props;
-        if(isAuth) {
+        if(isAuth && !showLoginAgain) {
             checkOCConnection({background: true});
         }
     }
 
-/*    componentDidUpdate(){
+    componentDidUpdate(){
         const {showLoginAgain} = this.state;
         const {checkOCConnectionResult, isAuth} = this.props;
         if(checkOCConnectionResult !== null && !showLoginAgain && isAuth){
@@ -84,7 +85,7 @@ class Layout extends Component{
                 showLoginAgain: false,
             });
         }
-    }*/
+    }
 
     toggleMenu(){
         this.setState({isMenuVisible: !this.state.isMenuVisible});
@@ -95,9 +96,9 @@ class Layout extends Component{
     }
 
     renderLoginAgain(){
-        return null;
         const {showLoginAgain} = this.state;
-        if(showLoginAgain) {
+        const {location} = this.props;
+        if(showLoginAgain && location.pathname !== '/login') {
             const {t} = this.props;
             const message = <span>Your session is expired, please <a target={'_blank'}
                                                                      href={'/login'}>login</a> again</span>;
