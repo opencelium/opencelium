@@ -47,6 +47,13 @@ export default function (store){
                         next(action);
                         return;
                     }
+                    if (action.payload
+                        && (action.payload.status === 403 || TOKEN_EXPIRED_MESSAGES.indexOf(action.payload.message) !== -1)
+                    ) {
+                        store.dispatch(sessionExpired({}));
+                        history.push('/login');
+                        next({type: AuthAction.INITIAL_STATE, payload: {}});
+                    }
                     break;
                 case 'CANCELED':
                     data.type = NotificationType.WARNING;
