@@ -64,13 +64,13 @@ const checkNeo4jEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = 'actuator/health/neo4j';
-            let {settings} = action;
+            let {callbackData} = action;
             return doRequest({url, isApi: false, hasAuthHeader: true},{
                 success: ((data) => {
                     if(data && data.status === APP_STATUS_DOWN){
-                        return checkNeo4jRejected({'message': "DOWN", systemTitle: 'NEO4J', neo4j: data, settings})
+                        return checkNeo4jRejected({'message': "DOWN", systemTitle: 'NEO4J', neo4j: data, callbackData});
                     }
-                    return checkNeo4jFulfilled({neo4j: data, settings});
+                    return checkNeo4jFulfilled({neo4j: data, callbackData});
                 }),
                 reject: (ajax) => Rx.Observable.of(checkNeo4jRejected(ajax))},
             );
@@ -84,13 +84,14 @@ const checkNeo4jFulfilledEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.CHECK_NEO4J_FULFILLED, ConnectionsAction.CHECK_NEO4J_REJECTED)
         .debounceTime(500)
         .mergeMap((action) => {
-            let {settings, neo4j} = action.payload;
-            if(settings && settings.hasOwnProperty('callback')){
-                let params = settings.hasOwnProperty('params') ? settings.params : null;
+            let {callbackData, neo4j} = action.payload;
+            if(callbackData && callbackData.hasOwnProperty('callback')){
+                let params = callbackData.hasOwnProperty('params') ? callbackData.params : null;
+                let settings = callbackData.hasOwnProperty('settings') ? callbackData.settings : {};
                 if(params) {
-                    return Rx.Observable.of(settings.callback(params, {neo4j}));
+                    return Rx.Observable.of(callbackData.callback(params, {...settings, neo4j}));
                 } else{
-                    return Rx.Observable.of(settings.callback({neo4j}));
+                    return Rx.Observable.of(callbackData.callback({...settings, neo4j}));
                 }
             }
             return checkNeo4jRejected(action.payload);
@@ -122,7 +123,7 @@ const fetchConnectionEpic = (action$, store) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             let neo4j = action.settings ? action.settings.neo4j : null;
             if(!neo4j){
-                return checkNeo4j({callback: fetchConnection, params: action.payload});
+                return checkNeo4j({callback: fetchConnection, params: action.payload, settings: action.settings});
             } else{
                 if(neo4j.status === APP_STATUS_DOWN){
                     return fetchConnectionRejected(action.settings);
@@ -145,7 +146,7 @@ const fetchConnectionsEpic = (action$, store) => {
             let url = `${urlPrefix}/all`;
             let neo4j = action.settings ? action.settings.neo4j : null;
             if(!neo4j){
-                return checkNeo4j({callback: fetchConnections});
+                return checkNeo4j({callback: fetchConnections, settings: action.settings});
             } else{
                 if(neo4j.status === APP_STATUS_DOWN){
                     return fetchConnectionsRejected(action.settings);

@@ -23,10 +23,10 @@ import { ConnectionsAction } from '../../utils/actions';
  * check neo4j
  * @returns {{type: string}}
  */
-const checkNeo4j = (settings = null) => {
+const checkNeo4j = (callbackData = null) => {
     return Rx.Observable.of({
         type: ConnectionsAction.CHECK_NEO4J,
-        settings,
+        callbackData,
     });
 };
 

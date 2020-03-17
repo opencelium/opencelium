@@ -128,7 +128,7 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
             fetchResource(){
                 const {resources, fetchingResource} = this.state;
                 if(resources.length < additionalResources.length) {
-                    this.props[`fetch${capitalize(additionalResources[resources.length])}`]({onBackground: true});
+                    this.props[`fetch${capitalize(additionalResources[resources.length])}`]({background: true});
                     if(!fetchingResource) {
                         this.setState({fetchingResource: true, hasStartedFetchingResources: true});
                     } else{

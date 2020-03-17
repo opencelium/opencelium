@@ -91,8 +91,8 @@ export default function (store){
  */
 function isNotBackground(action){
     if(action.hasOwnProperty('settings')){
-        if(action.settings.hasOwnProperty('onBackground')){
-            return !action.settings.onBackground;
+        if(action.settings.hasOwnProperty('background')){
+            return !action.settings.background;
         }
     }
     return true;
