@@ -31,6 +31,7 @@ import Notification from "../general/app/Notification";
 import {NotificationType} from "../../utils/constants/notifications/notifications";
 import {checkOCConnection, logoutUserFulfilled} from "../../actions/auth";
 import {API_REQUEST_STATE} from "../../utils/constants/app";
+import {removeAllLS} from "../../utils/LocalStorage";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -56,6 +57,7 @@ class Layout extends Component{
             isMenuVisible: false,
             authUser: props.authUser,
             showLoginAgain: false,
+            isNotAuthButStayInSystem: false,
         };
     }
 
@@ -66,29 +68,22 @@ class Layout extends Component{
     }
 
     componentDidUpdate(){
-        const {showLoginAgain} = this.state;
-        const {checkOCConnectionResult, authUser, logoutUserFulfilled, checkingOCConnection} = this.props;
+        const {isNotAuthButStayInSystem} = this.state;
+        const {checkOCConnectionResult, checkingOCConnection} = this.props;
         if(checkingOCConnection === API_REQUEST_STATE.FINISH) {
-            if (checkOCConnectionResult !== null && !showLoginAgain) {
-                logoutUserFulfilled({
-                    ...authUser,
-                    isNotAuthButStayInSystem: true
-                });
-                this.setState({
-                    showLoginAgain: true,
-                });
+            if (checkOCConnectionResult !== null && !isNotAuthButStayInSystem) {
+                removeAllLS();
+                this.setState({isNotAuthButStayInSystem: true});
             }
-            if (checkOCConnectionResult === null && showLoginAgain) {
-                this.setState({
-                    showLoginAgain: false,
-                });
+            if (checkOCConnectionResult === null && isNotAuthButStayInSystem) {
+                this.setState({isNotAuthButStayInSystem: false});
             }
         }
     }
 
     checkOCConnection(){
-        const {isAuth, checkOCConnection} = this.props;
-        if(isAuth) {
+        const {checkOCConnection} = this.props;
+        if(location.pathname !== '/login') {
             checkOCConnection({background: true});
         }
     }
@@ -102,9 +97,8 @@ class Layout extends Component{
     }
 
     renderLoginAgain(){
-        const {showLoginAgain} = this.state;
         const {location} = this.props;
-        if(showLoginAgain && location.pathname !== '/login') {
+        if(this.state.isNotAuthButStayInSystem && location.pathname !== '/login') {
             const {t} = this.props;
             const message = <span>Your session is expired, please <a target={'_blank'}
                                                                      href={'/login'}>login</a> again</span>;

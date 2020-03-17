@@ -42,14 +42,13 @@ let authUser = null;
  * redux reducer for auth user
  */
 const reducer = (state = initialState, action) => {
-    let isNotAuthButStayInSystem = false;
     switch (action.type) {
         case AuthAction.INITIAL_STATE:
             return state;
         case AuthAction.LOG_IN:
             return state.set('logining', true).set('error', null);
         case AuthAction.LOG_IN_FULFILLED:
-            return state.set('logining', false).set('authUser', action.payload).set('isAuth', true);
+            return state.set('logining', false).set('authUser', action.payload).set('isAuth', true).set('checkOCConnectionResult', null);
         case AuthAction.LOG_IN_REJECTED:
             return state.set('logining', false).set('error', action.payload).set('isAuth', false);
         case AuthAction.LOG_IN_CANCELED:
@@ -57,10 +56,7 @@ const reducer = (state = initialState, action) => {
         case AuthAction.LOG_OUT:
             return state.set('logouting', true).set('error', null);
         case AuthAction.LOG_OUT_FULFILLED:
-            if(action.payload && action.payload.hasOwnProperty('isNotAuthButStayInSystem')){
-                isNotAuthButStayInSystem = action.payload.isNotAuthButStayInSystem;
-            }
-            return state.set('logouting', false).set('authUser', action.payload).set('isAuth', isNotAuthButStayInSystem);
+            return state.set('logouting', false).set('authUser', action.payload).set('isAuth', false);
         case AuthAction.LOG_OUT_REJECTED:
             return state.set('logouting', false).set('error', action.payload).set('isAuth', true);
         case AuthAction.LOG_OUT_CANCELED:
