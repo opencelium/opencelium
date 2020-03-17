@@ -153,10 +153,10 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
                     return <PageNotFound/>;
                 }
                 if(this.props[`fetching${capitalize(singleEntityName)}`] === API_REQUEST_STATE.ERROR){
-                    return <RejectedRequest entityName={singleEntityName}/>;
+                    return <RejectedRequest entityName={singleEntityName} error={error}/>;
                 }
                 if(resources.length < additionalResources.length && this.props[`fetching${capitalize(additionalResources[resources.length])}`] === API_REQUEST_STATE.ERROR){
-                    return <RejectedRequest entityName={additionalResources[resources.length]}/>;
+                    return <RejectedRequest entityName={additionalResources[resources.length]} error={error}/>;
                 }
                 if(entity === null && command !== 'adding' || resources.length !== additionalResources.length) {
                     return <Loading cancelCallback={cancelFetching} authUser={authUser}/>;

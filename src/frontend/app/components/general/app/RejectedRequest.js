@@ -16,9 +16,11 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {withTranslation} from "react-i18next";
+import {history} from "../../App";
 
 import {ERROR_TYPE} from "../../../utils/constants/app";
 import ComponentError from "./ComponentError";
+import {TOKEN_EXPIRED_MESSAGES} from "../../../utils/app";
 
 
 /**
@@ -29,6 +31,15 @@ class RejectedRequest extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount(){
+        const {error} = this.props;
+        if(error && error.hasOwnProperty('response') && error.response && error.response.hasOwnProperty('message')){
+            if(TOKEN_EXPIRED_MESSAGES.indexOf(error.response.message) !== -1){
+                history.push('/login');
+            }
+        }
     }
 
     render(){

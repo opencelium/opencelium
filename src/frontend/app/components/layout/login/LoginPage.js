@@ -13,9 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'react-hot-loader';
 import React, {Component, Suspense} from 'react';
-import { hot } from 'react-hot-loader/root';
 import {connect} from 'react-redux';
 import {updateMenu} from "../../../actions/app";
 import {AdminMenus, UserMenus} from "../../../utils/constants/menus";
@@ -77,4 +75,4 @@ class LoginPage extends Component{
         );
     }
 }
-export default hot(LoginPage);
+export default LoginPage;

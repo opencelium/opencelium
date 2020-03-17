@@ -27,7 +27,7 @@ export const DEBUGGER_ERRORS = true;
 /**
  * messages from backend if token was expired
  */
-export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied'];
+export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
 export function parseConnectionPointer(connectionPointer){
