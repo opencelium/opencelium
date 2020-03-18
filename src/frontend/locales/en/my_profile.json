@@ -1,4 +1,7 @@
 {
+  "MENU": {
+    "TITLE": "My Profile"
+  },
   "HEADER": "My Profile",
   "UPDATE_BUTTON": "Update",
   "THEME": {

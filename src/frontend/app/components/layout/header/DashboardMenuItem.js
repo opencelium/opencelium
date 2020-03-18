@@ -16,8 +16,9 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import {withTranslation} from "react-i18next";
 
+import ListItemLink from "../../general/basic_components/ListItemLink";
 import {
 addMenuDashboardKeyNavigation, removeMenuDashboardKeyNavigation,
 } from "../../../utils/key_navigation";
@@ -30,9 +31,10 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for Dashboard
+ * Menu Dashboard
  */
 @connect(mapStateToProps, {})
+@withTranslation('layout')
 class DashboardMenuItem extends Component{
 
     constructor(props){
@@ -48,9 +50,10 @@ class DashboardMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
-                label={{text: 'Dashboard', index: 0}}
+                label={{text: t('HEADER.DASHBOARD.TITLE'), index: 0}}
                 to='/'
                 navigationTitleClass={'tour-step-dashboard'}
             />

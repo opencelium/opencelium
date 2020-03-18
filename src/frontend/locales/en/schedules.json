@@ -1,4 +1,7 @@
 {
+  "MENU": {
+    "TITLE": "Scheduler"
+  },
   "HEADER": "Scheduler",
   "LIST":{
     "EMPTY_LIST": "The list of Schedulers is empty",

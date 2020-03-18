@@ -15,15 +15,11 @@
 
 import React, {Component, Suspense} from 'react';
 import {connect} from 'react-redux';
-import {updateMenu} from "../../../actions/app";
-import {AdminMenus, UserMenus} from "../../../utils/constants/menus";
-import {Roles} from '../../../utils/constants/app';
-import Loading from '../../general/app/Loading';
 
-import {setLS} from "../../../utils/LocalStorage";
+import Loading from '../../general/app/Loading';
+import Login from "./Login";
 
 import styles from '../../../themes/default/layout/login.scss';
-import Login from "./Login";
 
 
 function mapStateToProps(state){
@@ -36,9 +32,9 @@ function mapStateToProps(state){
 }
 
 /**
- * Component of Login page
+ * App Login Page
  */
-@connect(mapStateToProps, {updateMenu})
+@connect(mapStateToProps, {})
 class LoginPage extends Component{
 
     constructor(props){
@@ -46,29 +42,20 @@ class LoginPage extends Component{
     }
 
     componentDidUpdate(){
-        if(this.props.isAuth){
-            switch(this.props.authUser.role){
-                case Roles.USER:
-                    setLS("currentMenu", UserMenus['HOME']);
-                    this.props.updateMenu(UserMenus.HOME);
-                    break;
-                case Roles.ADMIN:
-                    setLS("currentMenu", AdminMenus['HOME']);
-                    this.props.updateMenu(AdminMenus.HOME);
-                    break;
-            }
-            this.props.router.push('/');
+        const {isAuth, router} = this.props;
+        if(isAuth){
+            router.push('/');
         }
     }
 
     render(){
-        const {authUser, logining} = this.props;
+        const {logining} = this.props;
         if(logining){
-            return <Loading authUser={authUser}/>;
+            return <Loading/>;
         }
         return (
             <div className={styles.login_page}>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
+                <Suspense fallback={(<Loading/>)}>
                     <Login/>
                 </Suspense>
             </div>

@@ -15,21 +15,21 @@
 
 import React, { Component, Suspense }  from 'react';
 import {connect} from 'react-redux';
+import {withTranslation} from "react-i18next";
+
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
-
 import LoadingHeader from './LoadingHeader';
 import LogoutMenuItem from './LogoutMenuItem';
 import {Roles} from '../../../utils/constants/app';
-import DashboardMenuItem from './DashboardMenuItem';
 import UsersMenuItem from "./UsersMenuItem";
 import UserGroupsMenuItem from "./UserGroupsMenuItem";
 import ConnectorsMenuItem from "./ConnectorsMenuItem";
 import ConnectionsMenuItem from "./ConnectionsMenuItem";
 import MyProfileMenuItem from "./MyProfileMenuItem";
 import SchedulesMenuItem from "./SchedulesMenuItem";
-import AdminCardsMenuItem from "./AdminCardsMenuItem";
 
+import AdminCardsMenuItem from "./AdminCardsMenuItem";
 import TooltipFontIcon from "../../general/basic_components/tooltips/TooltipFontIcon";
 import {getThemeClass} from "../../../utils/app";
 import styles from '../../../themes/default/layout/header.scss';
@@ -51,6 +51,7 @@ function mapStateToProps(state){
  * Header Component
  */
 @connect(mapStateToProps, {})
+@withTranslation('layout')
 class Header extends Component{
 
     constructor(props){
@@ -72,6 +73,11 @@ class Header extends Component{
         }
     }
 
+    /**
+     * to toggle menu
+     *
+     * @param expanded - expand and undo
+     */
     onToggleHeader(expanded){
         this.setState({
             expanded,
@@ -80,7 +86,7 @@ class Header extends Component{
 
     render(){
         const {expanded} = this.state;
-        const {authUser} = this.props;
+        const {authUser, t} = this.props;
         let classNames = ['header'];
         if(authUser) {
             classNames = getThemeClass({classNames, authUser, styles});
@@ -97,7 +103,6 @@ class Header extends Component{
                 <Suspense fallback={(<LoadingHeader/>)}>
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="mr-auto">
-                            {/*<DashboardMenuItem/>*/}
                             <UsersMenuItem/>
                             <UserGroupsMenuItem/>
                             <ConnectorsMenuItem/>
@@ -112,7 +117,7 @@ class Header extends Component{
                     </Nav>
                 </Suspense>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" style={{borderColor: 'white'}}>
-                    <TooltipFontIcon value={'menu'} tooltip={'Menu'} style={{color: 'white'}} tooltipPosition={'bottom'}/>
+                    <TooltipFontIcon value={'menu'} tooltip={t('HEADER.HEADER.MENU')} style={{color: 'white'}} tooltipPosition={'bottom'}/>
                 </Navbar.Toggle>
             </Navbar>
         );

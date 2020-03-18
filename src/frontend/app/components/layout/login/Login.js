@@ -30,8 +30,11 @@ import {
 import ValidationMessage from "../../general/change_component/ValidationMessage";
 
 
+/**
+ * App Login Form
+ */
 @connect(null, {loginUser})
-@withTranslation(['auth', 'users'])
+@withTranslation(['layout', 'users'])
 class Login extends Component{
 
     constructor(props){
@@ -56,17 +59,27 @@ class Login extends Component{
     }
 
     /**
-     * on change email
+     * to change email
+     *
+     * @param value - email value
      */
-    emailChange(value){
-        this.setState({email: value, validationMessage: '',});
+    changeEmail(value){
+        this.setState({
+            email: value,
+            validationMessage: '',
+        });
     }
 
     /**
-     * on change password
+     * to change password
+     *
+     * @param value - password value
      */
-    passwordChange(value){
-        this.setState({password: value, validationMessage: '',});
+    changePassword(value){
+        this.setState({
+            password: value,
+            validationMessage: '',
+        });
     }
 
     /**
@@ -78,6 +91,9 @@ class Login extends Component{
         }
     }
 
+    /**
+     * to validate Login component
+     */
     validate(){
         if(this.validateEmail()) {
             return this.validatePassword();
@@ -85,6 +101,9 @@ class Login extends Component{
         return false;
     }
 
+    /**
+     * to validate email input
+     */
     validateEmail(){
         const {email} = this.state;
         const {t} = this.props;
@@ -103,12 +122,18 @@ class Login extends Component{
         return true;
     }
 
+    /**
+     * to press Enter key in email input
+     */
     pressEnterEmail(){
         if(this.validate()) {
             this.login();
         }
     }
 
+    /**
+     * to validate password input
+     */
     validatePassword(){
         const {password} = this.state;
         const {t} = this.props;
@@ -141,14 +166,14 @@ class Login extends Component{
     render(){
         const {t} = this.props;
         return (
-            <div style={{position: 'relative'}}>
+            <div className={styles.login}>
                 <div className={styles.caption}>{t("LOGIN.HEADER")}</div>
                 <Input
                     type={'email'}
                     placeholder={t('LOGIN.EMAIL_PLACEHOLDER')}
                     value={this.state.email}
                     theme={styles}
-                    onChange={::this.emailChange}
+                    onChange={::this.changeEmail}
                     onKeyPress={(e) => onEnter(e, ::this.pressEnterEmail)}
                     id={'login_email'}
                 />
@@ -157,12 +182,18 @@ class Login extends Component{
                     placeholder={t('LOGIN.PASSWORD_PLACEHOLDER')}
                     value={this.state.password}
                     theme={styles}
-                    onChange={::this.passwordChange}
+                    onChange={::this.changePassword}
                     onKeyPress={(e) => onEnter(e, ::this.login)}
                     id={'login_password'}
                 />
                 {this.renderValidation()}
-                <Button className={styles.button_connect} onClick={::this.login} autoFocus>{generateLabel(t("LOGIN.BUTTON_CONNECT"), 0, {keyNavigationLetter: styles.key_navigation_letter})}</Button>
+                <Button
+                    className={styles.button_connect}
+                    onClick={::this.login}
+                    autoFocus
+                >
+                    {generateLabel(t("LOGIN.BUTTON_CONNECT"), 0, {keyNavigationLetter: styles.key_navigation_letter})}
+                </Button>
             </div>
         );
     }

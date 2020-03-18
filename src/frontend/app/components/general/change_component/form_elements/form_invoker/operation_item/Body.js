@@ -137,7 +137,7 @@ class Body extends Component{
                     onEdit={readOnly ? false : ::this.handleInput}
                     onDelete={readOnly ? false : ::this.handleInput}
                     onAdd={readOnly ? false : ::this.handleInput}
-                    style={{padding: '0', width: '80%', display: 'inline-block'}}
+                    style={{padding: '10px 0 0 0', width: '80%', display: 'inline-block'}}
                 />
                 {!readOnly
                     ?

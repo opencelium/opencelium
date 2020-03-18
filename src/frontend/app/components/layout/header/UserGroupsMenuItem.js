@@ -16,6 +16,7 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
+import {withTranslation} from "react-i18next";
 
 import ListItemLink from "../../general/basic_components/ListItemLink";
 import {addMenuUserGroupsKeyNavigation, removeMenuUserGroupsKeyNavigation} from "../../../utils/key_navigation";
@@ -31,10 +32,11 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for UserGroups
+ * Menu UserGroups
  */
 @connect(mapStateToProps, {})
 @permission(UserGroupPermissions.READ)
+@withTranslation('layout')
 class UserGroupsMenuItem extends Component{
 
     constructor(props){
@@ -50,9 +52,10 @@ class UserGroupsMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
-                label={{text: 'Groups', index: 0}}
+                label={{text: t('HEADER.USER_GROUPS.TITLE'), index: 0}}
                 to='/usergroups'
                 navigationTitleClass={'tour-step-usergroup'}
             />

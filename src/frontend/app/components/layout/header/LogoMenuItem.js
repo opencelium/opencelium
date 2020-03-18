@@ -16,12 +16,12 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import {withTranslation} from "react-i18next";
 
+import ListItemLink from "../../general/basic_components/ListItemLink";
 import {
     addMenuDashboardKeyNavigation, removeMenuDashboardKeyNavigation,
 } from "../../../utils/key_navigation";
-
 
 
 function mapStateToProps(state){
@@ -32,9 +32,10 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for MyProfile
+ * Menu Logo Icon
  */
 @connect(mapStateToProps, {})
+@withTranslation('layout')
 class LogoMenuItem extends Component{
 
     constructor(props){
@@ -50,12 +51,13 @@ class LogoMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
                 label={{text: '', index: 0}}
                 to='/'
-                tooltip={'Home'}
-                icon={<img src={'../../../img/logo.png'} width={'44px'} style={{cursor: 'pointer'}}/>}
+                tooltip={t('HEADER.LOGO.LOGO_TOOLTIP')}
+                icon={<img src={'../../../img/logo.png'} width={'44px'} style={{cursor: 'pointer'}} alt={t('HEADER.LOGO.LOGO_TOOLTIP')}/>}
                 style={{padding: '0', height: '40px'}}
                 className={'tour-step-dashboard'}
             />
