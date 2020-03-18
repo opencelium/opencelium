@@ -62,7 +62,12 @@ public class InvokerRequestBuilder{
 
         Object data;
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
-        String contentType = header.get("Content-Type").get(0);
+
+        String contentType = "";
+        if (header.containsKey("Content-Type")){
+            contentType = header.get("Content-Type").get(0);
+        }
+
         if (header.containsKey("Content-Type") && contentType.equals("application/x-www-form-urlencoded")){
             try {
                 HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);

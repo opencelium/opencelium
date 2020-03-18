@@ -220,7 +220,9 @@ public class ConnectorExecutor {
         Object data;
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
         String contentType = header.get("Content-Type") != null ? header.get("Content-Type").get(0) : null;
-        if (contentType != null && header.containsKey("Content-Type") && contentType.equals("application/x-www-form-urlencoded")){
+        if (contentType != null && header.containsKey("Content-Type")
+                    && contentType.equals("application/x-www-form-urlencoded")
+                    && !invoker.getName().equals("CheckMK")){
             try {
                 HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);
                 mapData.forEach(formData::add);
@@ -230,6 +232,12 @@ public class ConnectorExecutor {
             }
         } else {
             data = body;
+        }
+
+        // TODO: works only for CheckMk. Should be deleted in future.
+        if (invoker.getName().equals("CheckMK")){
+            formData.add("request", body);
+            data = formData;
         }
 
         // TODO: Changed string to object in httpEntity;
