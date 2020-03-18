@@ -65,7 +65,7 @@ class ScheduleAdd extends Component{
     }
 
     componentDidMount (){
-        this.props.fetchConnections({onBackground: true});
+        this.props.fetchConnections({background: true});
         window.addEventListener('resize', this.resize, false);
     }
 

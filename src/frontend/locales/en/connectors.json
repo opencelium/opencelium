@@ -1,4 +1,7 @@
 {
+  "MENU": {
+    "TITLE": "Connectors"
+  },
   "LIST":{
     "ADD_BUTTON": "Add Connector",
     "EMPTY_LIST": "The list of Connectors is empty",

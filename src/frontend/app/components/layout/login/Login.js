@@ -30,15 +30,18 @@ import {
 import ValidationMessage from "../../general/change_component/ValidationMessage";
 
 
+/**
+ * App Login Form
+ */
 @connect(null, {loginUser})
-@withTranslation(['auth', 'users'])
+@withTranslation(['layout', 'users'])
 class Login extends Component{
 
     constructor(props){
         super(props);
         this.state = {
-            email: '',
-            password: '',
+            email: 'admin@opencelium.io',
+            password: '1234',
             validationMessage: '',
         };
     }
@@ -56,17 +59,27 @@ class Login extends Component{
     }
 
     /**
-     * on change email
+     * to change email
+     *
+     * @param value - email value
      */
-    emailChange(value){
-        this.setState({email: value, validationMessage: '',});
+    changeEmail(value){
+        this.setState({
+            email: value,
+            validationMessage: '',
+        });
     }
 
     /**
-     * on change password
+     * to change password
+     *
+     * @param value - password value
      */
-    passwordChange(value){
-        this.setState({password: value, validationMessage: '',});
+    changePassword(value){
+        this.setState({
+            password: value,
+            validationMessage: '',
+        });
     }
 
     /**
@@ -78,6 +91,9 @@ class Login extends Component{
         }
     }
 
+    /**
+     * to validate Login component
+     */
     validate(){
         if(this.validateEmail()) {
             return this.validatePassword();
@@ -85,11 +101,14 @@ class Login extends Component{
         return false;
     }
 
+    /**
+     * to validate email input
+     */
     validateEmail(){
         const {email} = this.state;
         const {t} = this.props;
         if(email === ''){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.EMAIL_IS_REQUIRED')});
+            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.EMAIL_REQUIRED')});
             setFocusById('login_email');
             return false;
         }
@@ -103,11 +122,23 @@ class Login extends Component{
         return true;
     }
 
+    /**
+     * to press Enter key in email input
+     */
+    pressEnterEmail(){
+        if(this.validate()) {
+            this.login();
+        }
+    }
+
+    /**
+     * to validate password input
+     */
     validatePassword(){
         const {password} = this.state;
         const {t} = this.props;
         if(password === ''){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.PASSWORD_IS_REQUIRED')});
+            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.PASSWORD_REQUIRED')});
             setFocusById('login_password');
             return false;
         }
@@ -135,26 +166,34 @@ class Login extends Component{
     render(){
         const {t} = this.props;
         return (
-            <div style={{position: 'relative'}}>
+            <div className={styles.login}>
                 <div className={styles.caption}>{t("LOGIN.HEADER")}</div>
                 <Input
                     type={'email'}
+                    placeholder={t('LOGIN.EMAIL_PLACEHOLDER')}
                     value={this.state.email}
                     theme={styles}
-                    onChange={::this.emailChange}
-                    onKeyPress={(e) => onEnter(e, () => setFocusById('login_password'))}
+                    onChange={::this.changeEmail}
+                    onKeyPress={(e) => onEnter(e, ::this.pressEnterEmail)}
                     id={'login_email'}
                 />
                 <Input
                     type={'password'}
+                    placeholder={t('LOGIN.PASSWORD_PLACEHOLDER')}
                     value={this.state.password}
                     theme={styles}
-                    onChange={::this.passwordChange}
+                    onChange={::this.changePassword}
                     onKeyPress={(e) => onEnter(e, ::this.login)}
                     id={'login_password'}
                 />
                 {this.renderValidation()}
-                <Button className={styles.button_connect} onClick={::this.login} autoFocus>{generateLabel(t("LOGIN.BUTTON_CONNECT"), 0, {keyNavigationLetter: styles.key_navigation_letter})}</Button>
+                <Button
+                    className={styles.button_connect}
+                    onClick={::this.login}
+                    autoFocus
+                >
+                    {generateLabel(t("LOGIN.BUTTON_CONNECT"), 0, {keyNavigationLetter: styles.key_navigation_letter})}
+                </Button>
             </div>
         );
     }

@@ -15,9 +15,11 @@
 
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
+import {withTranslation} from "react-i18next";
 
-import styles from '../../../themes/default/layout/footer.scss';
 import {getThemeClass} from "../../../utils/app";
+import styles from '../../../themes/default/layout/footer.scss';
+
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -26,11 +28,11 @@ function mapStateToProps(state){
     };
 }
 
-
 /**
- * Footer Component of app
+ * App Footer
  */
 @connect(mapStateToProps, {})
+@withTranslation('layout')
 class Footer extends Component{
 
     constructor(props){
@@ -38,16 +40,16 @@ class Footer extends Component{
     }
 
     render(){
-        const {authUser} = this.props;
+        const {authUser, t} = this.props;
         let classNames = ['footer', 'open_celium', 'logo_icon_bottom_right'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <footer className={styles[classNames.footer]}>
                 <div className={styles[classNames.logo_icon_bottom_right]}/>
-                <div className={styles[classNames.open_celium]}>OpenCelium</div>
+                <div className={styles[classNames.open_celium]}>{t('FOOTER.OPENCELIUM')}</div>
             </footer>
         );
     }
-};
+}
 
 export default Footer;

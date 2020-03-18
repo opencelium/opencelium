@@ -1,4 +1,7 @@
 {
+  "MENU": {
+    "TITLE": "Users"
+  },
   "ADD": {
     "HEADER": "Add User",
     "LIST_BUTTON": "Users",

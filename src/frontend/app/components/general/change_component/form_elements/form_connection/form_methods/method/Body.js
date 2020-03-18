@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ReactJson from 'react-json-view';
-import {isArray, isJsonString, isString, setFocusById} from "../../../../../../../utils/app";
+import {isArray, isJsonString, isString, setFocusById, subArrayToString} from "../../../../../../../utils/app";
 import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
 import ParamGenerator from "./ParamGenerator";
 import Input from "../../../../../basic_components/inputs/Input";
@@ -76,20 +76,25 @@ class Body extends Component{
         }
     }
 
-    getCurrentBindingItem(){
-        const {connection, method} = this.props
-        return connection.fieldBinding.find(item => item.to.findIndex(elem => elem.color === method.color) !== -1);
+    getCurrentBindingItem(fieldName){
+        const {connection, method} = this.props;
+        return connection.fieldBinding.find(item => item.to.findIndex(elem => elem.color === method.color && elem.field === fieldName) !== -1);
     }
 
     /*
     * to open an enhancement when click on pointer
      */
-    openEnhancement(){
+    openEnhancement(e, value){
         const {connector} = this.props;
         if(connector.getConnectorType() === CONNECTOR_FROM){
             return;
         }
-        let bindingItem = this.getCurrentBindingItem();
+        let fieldName = '';
+        if(value.namespace.length > 1){
+            fieldName = `${subArrayToString(value.namespace, '.', 1, value.namespace.length)}.`;
+        }
+        fieldName += value.variable.name;
+        let bindingItem = this.getCurrentBindingItem(fieldName);
         if(bindingItem){
             bindingItem = bindingItem.to[0];
             this.props.connection.setCurrentFieldBindingTo(bindingItem);

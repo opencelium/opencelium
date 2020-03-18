@@ -140,7 +140,7 @@
     "LOAD_ADMINCARD": "The link to this card does not work, please check your permissions",
     "ADD_INVOKER": "The invoker was not added",
     "DELETE_INVOKER": "The invoker was not deleted",
-    "CHECK_OCCONNECTION": "Your sessions is expired"
+    "CHECK_OCCONNECTION": "Your session is expired"
   },
   "WARNING": {
     "ADD_USER": "The user was added, but ...",
@@ -152,7 +152,7 @@
     "FETCH_USERGROUPS": "Fetching was canceled.",
     "UPDATE_USERGROUP": "Updating was canceled.",
     "DELETE_USERGROUP": "Deleting was canceled.",
-    "SESSION_EXPIRED": "Your sessions is expired."
+    "SESSION_EXPIRED": "Your session is expired."
   },
   "NOTE": {
     "ADD_USER": "You have a new user.",

@@ -27,7 +27,7 @@ export const DEBUGGER_ERRORS = true;
 /**
  * messages from backend if token was expired
  */
-export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied'];
+export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
 export function parseConnectionPointer(connectionPointer){
@@ -322,6 +322,7 @@ export function getInputsState(inputs){
 }
 
 /**
+ * @param cronExp - cron expression
  * convert cron expression value in ScheduleList component
  */
 export function convertCronExpForSchedulerlist(cronExp){
@@ -329,6 +330,9 @@ export function convertCronExpForSchedulerlist(cronExp){
 }
 
 /**
+ * @param t - time
+ * @param mode - 'short' or 'full' format of time
+ *
  * convert time value in ScheduleList component
  */
 export function convertTimeForSchedulerList(t, mode = 'short'){
@@ -352,7 +356,12 @@ export function convertTimeForSchedulerList(t, mode = 'short'){
 }
 
 /**
- * get classnames from the theme
+ * get classnames from the themes folder
+ * if theme does not exist, then get default one
+ *
+ * @param authUser - current authorized user
+ * @param classNames - a classname or an array of classnames
+ * @param styles - an imported default css/scss file *
  */
 export function getThemeClass({classNames, authUser, styles}){
     if(authUser && authUser.userDetail && authUser.userDetail.hasOwnProperty('theme') && authUser.userDetail.theme && styles) {
@@ -390,10 +399,12 @@ export function getThemeClass({classNames, authUser, styles}){
 
 /**
  * copy text to a clipboard
+ *
+ * @param text - text that is going to be copied
  */
-export function copyStringToClipboard(str) {
+export function copyStringToClipboard(text) {
     let el = document.createElement('textarea');
-    el.value = str;
+    el.value = text;
     el.setAttribute('readonly', '');
     el.style.opacity = '0';
     document.body.appendChild(el);

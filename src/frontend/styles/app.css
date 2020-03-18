@@ -58,6 +58,7 @@ body{
     right: 70px;
     height: 1px;
     width: 200px;
+    z-index: 1;
   }
 }
 @media screen and (max-width: 649px) {
@@ -67,6 +68,7 @@ body{
     right: 120px;
     height: 1px;
     width: 70px;
+    z-index: 1;
   }
 }
 

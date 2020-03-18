@@ -43,15 +43,16 @@ export default function (store){
                     break;
                 case 'REJECTED':
                     data.type = NotificationType.ERROR;
+                    if(data.message === AuthAction.CHECK_OCCONNECTION){
+                        next(action);
+                        return;
+                    }
                     if (action.payload
                         && (action.payload.status === 403 || TOKEN_EXPIRED_MESSAGES.indexOf(action.payload.message) !== -1)
-                        /*&& data.message !== AuthAction.CHECK_OCCONNECTION*/
-                    ){
-                        //window.open('/login', '_blank').focus();
+                    ) {
                         store.dispatch(sessionExpired({}));
                         history.push('/login');
                         next({type: AuthAction.INITIAL_STATE, payload: {}});
-                        return;
                     }
                     break;
                 case 'CANCELED':
@@ -90,8 +91,8 @@ export default function (store){
  */
 function isNotBackground(action){
     if(action.hasOwnProperty('settings')){
-        if(action.settings.hasOwnProperty('onBackground')){
-            return !action.settings.onBackground;
+        if(action.settings.hasOwnProperty('background')){
+            return !action.settings.background;
         }
     }
     return true;

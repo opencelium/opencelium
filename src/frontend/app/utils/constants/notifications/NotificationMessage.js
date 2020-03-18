@@ -50,7 +50,7 @@ class NotificationMessage extends Component{
         if(NotificationMessageHandlers[status] && NotificationMessageHandlers[status][message]){
             notificationMessage = NotificationMessageHandlers[status][message](params);
         } else{
-            let comingMessage = params && params.hasOwnProperty('response') && params.response.hasOwnProperty('message') ? params.response.message : '';
+            let comingMessage = params && params.hasOwnProperty('response') && params.response && params.response.hasOwnProperty('message') ? params.response.message : '';
             if(comingMessage === ''){
                 comingMessage = params &&  params.hasOwnProperty('message') && params.message !== 'No message available' ? params.message : '';
             }

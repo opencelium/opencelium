@@ -27,7 +27,6 @@ import {
 import styles from '../../../themes/default/layout/header.scss';
 
 
-
 function mapStateToProps(state){
     const auth = state.get('auth');
     return {
@@ -37,10 +36,10 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for Logout
+ * Menu Logout Icon
  */
 @connect(mapStateToProps, {logoutUserFulfilled})
-@withTranslation(['auth', 'my_profile'])
+@withTranslation('layout')
 class LogoutMenuItem extends Component{
 
     constructor(props){
@@ -59,14 +58,14 @@ class LogoutMenuItem extends Component{
     }
 
     /**
-     * to set showConfirm state
+     * to toggle confirmation dialog
      */
     toggleConfirm(){
         this.setState({showConfirm: !this.state.showConfirm});
     }
 
     /**
-     * to show confirm before logout
+     * to show confirmation dialog before logout
      */
     wantLogout(){
         this.toggleConfirm();
@@ -87,7 +86,7 @@ class LogoutMenuItem extends Component{
             <ListItemLink
                 label={{text: '', index: 4}}
                 onClick={::this.wantLogout}
-                tooltip={'Logout'}
+                tooltip={t('HEADER.LOGOUT.TITLE')}
                 icon='exit_to_app'
                 style={{paddingRight: '30px', height: '40px', paddingTop: '8px'}}
                 className={`tour-step-logout`}
@@ -98,8 +97,8 @@ class LogoutMenuItem extends Component{
                 okClick={::this.doLogout}
                 cancelClick={::this.toggleConfirm}
                 active={this.state.showConfirm}
-                title={t('auth:LOGOUT.CONFIRMATION_TITLE')}
-                message={t('auth:LOGOUT.CONFIRMATION_MESSAGE')}
+                title={t('HEADER.LOGOUT.CONFIRMATION_TITLE')}
+                message={t('HEADER.LOGOUT.CONFIRMATION_MESSAGE')}
                 key={2}
             />
         ];

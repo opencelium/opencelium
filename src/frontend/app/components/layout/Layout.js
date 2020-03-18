@@ -20,6 +20,7 @@ import Header from "./header/Header";
 import Footer from "./footer/Footer";
 import {changeLanguage} from "../../actions/app";
 import {defaultLanguage} from "../../utils/constants/languages";
+import store from '../../utils/store';
 import {addUserInStore} from '../../actions/users/add';
 
 import { addUserListener,
@@ -28,7 +29,9 @@ import LayoutError from "./LayoutError";
 import styles from '../../themes/default/layout/layout.scss';
 import Notification from "../general/app/Notification";
 import {NotificationType} from "../../utils/constants/notifications/notifications";
-import {checkOCConnection} from "../../actions/auth";
+import {checkOCConnection, logoutUserFulfilled} from "../../actions/auth";
+import {API_REQUEST_STATE} from "../../utils/constants/app";
+import {removeAllLS} from "../../utils/LocalStorage";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -37,6 +40,7 @@ function mapStateToProps(state){
         isAuth: auth.get('isAuth'),
         currentLanguage: auth.get('authUser') ? auth.get('authUser').current_language : defaultLanguage.code,
         checkOCConnectionResult: auth.get('checkOCConnectionResult'),
+        checkingOCConnection: auth.get('checkingOCConnection'),
     };
 }
 
@@ -44,47 +48,45 @@ function mapStateToProps(state){
  * Layout of the app(OC)
  */
 @withTranslation('notifications')
-@connect(mapStateToProps, {changeLanguage, addUserInStore, checkOCConnection})
+@connect(mapStateToProps, {changeLanguage, addUserInStore, checkOCConnection, logoutUserFulfilled})
 class Layout extends Component{
 
     constructor(props){
         super(props);
-
         this.state = {
             isMenuVisible: false,
             authUser: props.authUser,
             showLoginAgain: false,
+            isNotAuthButStayInSystem: false,
         };
     }
 
     componentDidMount(){
-        const {addUserInStore, checkOCConnection} = this.props;
+        const {addUserInStore} = this.props;
         addUserListener(addUserInStore);
-        //setInterval(::this.checkOCConnection, 10000);
+        setInterval(::this.checkOCConnection, 10000);
+    }
+
+    componentDidUpdate(){
+        const {isNotAuthButStayInSystem} = this.state;
+        const {checkOCConnectionResult, checkingOCConnection} = this.props;
+        if(checkingOCConnection === API_REQUEST_STATE.FINISH) {
+            if (checkOCConnectionResult !== null && !isNotAuthButStayInSystem) {
+                removeAllLS();
+                this.setState({isNotAuthButStayInSystem: true});
+            }
+            if (checkOCConnectionResult === null && isNotAuthButStayInSystem) {
+                this.setState({isNotAuthButStayInSystem: false});
+            }
+        }
     }
 
     checkOCConnection(){
-        const {showLoginAgain} = this.state;
-        const {isAuth, checkOCConnection} = this.props;
-        if(isAuth) {
+        const {checkOCConnection} = this.props;
+        if(location.pathname !== '/login') {
             checkOCConnection({background: true});
         }
     }
-
-/*    componentDidUpdate(){
-        const {showLoginAgain} = this.state;
-        const {checkOCConnectionResult, isAuth} = this.props;
-        if(checkOCConnectionResult !== null && !showLoginAgain && isAuth){
-            this.setState({
-                showLoginAgain: true,
-            });
-        }
-        if(checkOCConnectionResult === null && showLoginAgain && isAuth){
-            this.setState({
-                showLoginAgain: false,
-            });
-        }
-    }*/
 
     toggleMenu(){
         this.setState({isMenuVisible: !this.state.isMenuVisible});
@@ -95,9 +97,8 @@ class Layout extends Component{
     }
 
     renderLoginAgain(){
-        return null;
-        const {showLoginAgain} = this.state;
-        if(showLoginAgain) {
+        const {location} = this.props;
+        if(this.state.isNotAuthButStayInSystem && location.pathname !== '/login') {
             const {t} = this.props;
             const message = <span>Your session is expired, please <a target={'_blank'}
                                                                      href={'/login'}>login</a> again</span>;

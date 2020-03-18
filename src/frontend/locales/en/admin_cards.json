@@ -1,4 +1,7 @@
 {
+  "MENU": {
+    "TITLE": "Admin"
+  },
   "LIST":{
     "ADD_BUTTON": "Add Admin Card",
     "EMPTY_LIST": "The list of Admin Cards is empty",
