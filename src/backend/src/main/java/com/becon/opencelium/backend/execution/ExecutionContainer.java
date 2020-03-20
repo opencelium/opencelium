@@ -223,15 +223,19 @@ public class ExecutionContainer {
     // ==================================== private zone ====================================================== //
 
     private List<?> convertToArray(String stringifiedArray){
-        List<String> array = new ArrayList<>();
-
-        String withoutBrackets = stringifiedArray.replaceAll("[\\[\\](){}]", ""); // Remove all the brackets
-        for (String word : withoutBrackets.split(",")) {
-            String element = word.replaceAll("\"", "");
-            array.add(element);
+        try {
+//            List<String> array = new ArrayList<>();
+            ObjectMapper mapper = new ObjectMapper();
+            List jsonString = (List) mapper.readValue(stringifiedArray, Object.class);
+//            String withoutBrackets = stringifiedArray.replaceAll("[\\[\\](){}]", ""); // Remove all the brackets
+//            for (String word : withoutBrackets.split(",")) {
+//                String element = word.replaceAll("\"", "");
+//                array.add(element);
+//            }
+            return jsonString;
+        } catch (Exception e){
+            throw new RuntimeException(e);
         }
-
-        return array;
     }
 
     private Map<String, String> parseExpertVars(String vars){
