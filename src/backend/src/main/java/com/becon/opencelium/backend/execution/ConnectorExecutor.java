@@ -324,6 +324,7 @@ public class ConnectorExecutor {
             endpoint = endpoint.replace(part, value);
          }
 
+        endpoint = endpoint.replace(" ", "%20"); // In OpenMS url could name with whitespace
         return endpoint;
     }
 
@@ -365,7 +366,6 @@ public class ConnectorExecutor {
                 headerItem.put(k, requiredField);
                 return;
             }
-            v = v.replace(" ", "%20"); // In OpenMS url could name with whitespace
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
