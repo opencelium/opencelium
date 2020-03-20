@@ -101,7 +101,7 @@ class TemplatesList extends Component{
             let toInvokerName = template.connection.toConnector.invoker.name;
             let avatarElement = null;
             if(exportedTemplate.templateId === template.templateId && exportingTemplate === API_REQUEST_STATE.START){
-                avatarElement = <Loading className={styles.export_loading}/>;
+                avatarElement = <Loading authUser={authUser} className={styles.export_loading}/>;
             } else{
                 avatarElement = <TooltipFontIcon className={styles.export} value={'get_app'} tooltip={'Download'} onClick={(e) => ::this.exportTemplate(e, template)}/>;
             }

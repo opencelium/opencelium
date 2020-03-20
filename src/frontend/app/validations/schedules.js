@@ -14,7 +14,8 @@
  */
 
 /**
- * validation of the adding schedule
+ * @param schedule - schedule
+ * to validate before add schedule
  */
 export function validateAddSchedule(schedule){
     let result = {success: true, message: ''};

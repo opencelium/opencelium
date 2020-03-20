@@ -19,7 +19,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import Form from "./Form";
 import Hint from "./Hint";
 import Navigation from "./Navigation";
-import {getInputsState, isNumber, setFocusById} from "../../../utils/app";
+import {isNumber, setFocusById} from "../../../utils/app";
 import ValidationMessage from "./ValidationMessage";
 import {
     addChangeContentActionNavigation, addFocusDocumentNavigation,
@@ -30,10 +30,7 @@ import {
 } from "../../../utils/key_navigation";
 
 import {isEmptyObject} from '../../../utils/app';
-import CConnection from "../../../classes/components/content/connection/CConnection";
 import {API_REQUEST_STATE} from "../../../utils/constants/app";
-import {TEMPLATE_MODE} from "../../../classes/components/content/connection/CTemplate";
-import CInvoker from "../../../classes/components/content/invoker/CInvoker";
 
 
 /**
@@ -50,7 +47,7 @@ class ChangeContent extends Component{
             onlyInputs = onlyInputs.concat(inputs[i]);
         }
         if(isEmptyObject(props.entity)){
-            entity = getInputsState(onlyInputs);
+            entity = this.getInputsState(onlyInputs);
         } else{
             entity = props.entity;
         }
@@ -128,30 +125,21 @@ class ChangeContent extends Component{
         }
     }
 
-    setFocusInput(focusedInput){
-        this.setState({focusedInput});
+    /**
+     * to get values from inputs
+     *
+     * @param inputs - inputs from props.contents
+     */
+    getInputsState(inputs){
+        let obj = {};
+        if(Array.isArray(inputs)) {
+            inputs.forEach(input => input.hasOwnProperty('defaultValue') ? obj[input.name] = input.defaultValue : obj[input.name] = '');
+        }
+        return obj;
     }
 
-    getInputName(name){
-        const {entity} = this.state;
-        let result = '';
-        if(entity instanceof CConnection) {
-            switch(name){
-                case 'connection_title':
-                    result = entity.title;
-                    break;
-                case 'connectors':
-                    result = entity;
-                    break;
-                case 'mode':
-                    result = entity;
-                    break;
-            }
-
-        } else{
-            result = entity[name];
-        }
-        return result;
+    setFocusInput(focusedInput){
+        this.setState({focusedInput});
     }
 
     /**

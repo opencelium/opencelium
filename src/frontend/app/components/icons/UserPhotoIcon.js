@@ -40,7 +40,7 @@ class UserPhotoIcon extends Component{
         const {isCorrectPhoto} = this.state;
         const {photo, className} = this.props;
         if(isCorrectPhoto){
-            return <img src={photo} />;
+            return <img src={photo} alt={'icon'}/>;
         } else{
             return <FontIcon value={'monochrome_photos'} className={className}/>;
         }
