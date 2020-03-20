@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+   ~// Copyright (C) <2020> <becon GmbH>
+   ~//
+   ~// This file is licensed under the OpenCelium license agreement.
+   ~//
+   ~// If you purchased an OpenCelium subscription you can use this file
+   ~// under the terms of the OpenCelium license agreement.
+   ~// License agreement and license key will be shipped with the order
+   ~// confirmation.
+-->
+<invoker type="RESTful">
+    <name>openNMS</name>
+    <description>Open Network Monitoring System</description>
+    <hint>Open Network Monitoring System</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="checkConnection" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/rest/alarms</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="createRequisition" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/rest/requisitions</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body>
+                    <field name="foreign-source" type="string"/>
+                    <field name="node" type="array"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getNodes" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/rest/nodes?limit=0</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body>
+                        <field name="count" type="number"/>
+                        <field name="offset" type="number"/>
+                        <field name="totalCount" type="number"/>
+                        <field name="node" type="array">
+                            <field name="id" type="string"/>
+                            <field name="foreignId" type="string"/>
+                            <field name="label" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getRequisitionsByName" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/rest/requisitions</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body>
+                        <field name="date-stamp" type="number"/>
+                        <field name="foreign-source" type="string"/>
+                        <field name="last-import" type="number"/>
+                        <field name="node" type="array">
+                            <field name="node-label" type="string"/>
+                            <field name="foreign-id" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="rescanExisting" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/rest/requisitions</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body>
+                    <field name="rescanExisting" type="boolean"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteSelNodes" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/admin/deleteSelNodes</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
+                </header>
+                <body>
+                    <field name="nodeCheck" type="number"/>
+                    <field name="nodeData" type="number"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteNode" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/rest/nodes</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteRequisition" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/rest/requisitions</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteRequisitionDeployed" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/rest/requisitions/deployed</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteForeignSources" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/rest/foreignSources</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteForeignSourcesDeployed" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/rest/foreignSources/deployed</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="createNode" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/rest/requisitions</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body>
+                    <field name="foreign-id" type="string"/>
+                    <field name="node-label" type="string"/>
+                    <field name="interface" type="array">
+                        <field name="ip-addr" type="string"/>
+                        <field name="snmp-primary" type="string"/>
+                        <field name="status" type="string"/>
+                        <field name="meta-data" type="array"/>
+                        <field name="monitored-service" type="array"/>
+                    </field>
+                    <field name="parent-foreign-id" type="object"/>
+                    <field name="parent-node-label" type="object"/>
+                    <field name="asset" type="array"/>
+                    <field name="meta-data" type="array"/>
+                    <field name="category" type="array">
+                        <field name="name" type="string"/>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>
