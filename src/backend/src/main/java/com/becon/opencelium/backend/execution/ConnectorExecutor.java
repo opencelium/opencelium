@@ -365,6 +365,7 @@ public class ConnectorExecutor {
                 headerItem.put(k, requiredField);
                 return;
             }
+            v = v.replace(" ", "%20"); // In OpenMS url could name with whitespace
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
@@ -408,7 +409,13 @@ public class ConnectorExecutor {
             }
 
             if (f.getChild() != null){
-                item.put(f.getName(), replaceValues(f.getChild()));
+                Object value = new Object();
+                if (f.getType().equals("array")){
+                    value = Collections.singletonList(replaceValues(f.getChild()));
+                } else {
+                    value = replaceValues(f.getChild());
+                }
+                item.put(f.getName(), value);
                 return;
             }
 
