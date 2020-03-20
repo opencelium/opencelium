@@ -46,7 +46,7 @@ class CardIcon extends Component{
         let classNames = ['avatar', 'avatar_default'];
         classNames = getThemeClass({classNames, authUser, styles});
         if(isCorrectIcon){
-            return <img src={icon} className={styles[classNames.avatar]}/>;
+            return <img src={icon} className={styles[classNames.avatar]} alt={'icon'}/>;
         } else{
             return <FontIcon value={'monochrome_photos'} className={styles[classNames.avatar_default]}/>;
         }

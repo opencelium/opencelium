@@ -14,8 +14,6 @@
  */
 
 import React, { Component }  from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
 
 import styles from '../../../themes/default/general/app.scss';
 import CancelLoadingButton from "../basic_components/CancelLoadingButton";
@@ -26,17 +24,10 @@ import {ERROR_TYPE} from "../../../utils/constants/app";
 import {Spinner} from "reactstrap";
 
 
-function mapStateToProps(state){
-    const auth = state.get('auth');
-    return{
-        authUser: auth.get('authUser'),
-    };
-}
 
 /**
  * Loading Component
  */
-@connect(mapStateToProps, {})
 class Loading extends Component{
 
     constructor(props){

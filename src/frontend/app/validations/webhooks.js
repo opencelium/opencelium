@@ -15,7 +15,8 @@
  */
 
 /**
- * validation of the adding webhook
+ * @param webhook - webhook
+ * to validate before add webhook
  */
 export function validateAddWebHook(webhook){
     let result = {success: true, message: ''};
@@ -27,14 +28,17 @@ export function validateAddWebHook(webhook){
 }
 
 /**
- * (not used) validation of the updating webhook
+ * NOT_USED to validate before update webhook
+ * @param webhook - webhook
+ * to validate before update webhook
  */
 export function validateUpdateWebHook(webhook){
     return {success: true, message: ''};
 }
 
 /**
- * validation of the deletion webhook
+ * @param webhook - webhook
+ * to validate before delete webhook
  */
 export function validateDeleteWebHook(webhook){
     let result = {success: true, message: ''};
