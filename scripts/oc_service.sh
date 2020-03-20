@@ -35,7 +35,24 @@ stop_backend()
 }
 
 start_backend(){
-	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
+	RETRY=20
+
+        while [ $RETRY -gt 0 ]
+        do
+            if lsof -Pi :9090 -sTCP:LISTEN -t >/dev/null ;
+            then
+                echo "Port 9090 is used. Retrying Again" >&2
+
+                RETRY=$((RETRY-1))
+                sleep 2
+            else
+                cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
+                echo "Server is UP"
+                return 1
+            fi
+        done
+
+        echo "Server couldnt be started. Port 9090 is used."
 }
 
 restart_backend(){

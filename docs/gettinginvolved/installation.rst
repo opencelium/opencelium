@@ -6,7 +6,7 @@ Installation
 	Please check the software requirements, before installing OC. 
 
 
-Windows
+Windows  (Instruction is deprecated. It will be renewed.)
 """""""""""""""""
 
 **Instructions:**
