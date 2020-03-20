@@ -324,7 +324,7 @@ public class ConnectorExecutor {
             endpoint = endpoint.replace(part, value);
          }
 
-        endpoint = endpoint.replace(" ", "%20"); // In OpenMS url could name with whitespace
+//        endpoint = endpoint.replace(" ", "%20"); // In OpenMS url could name with whitespace
         return endpoint;
     }
 
