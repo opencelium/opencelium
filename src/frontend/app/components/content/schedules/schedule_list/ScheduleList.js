@@ -115,6 +115,9 @@ class ScheduleList extends Component{
             let amount = this.props.schedules.length;
             let pageAmount = amount % SCHEDULES_PER_PAGE === 0 ? parseInt(amount / SCHEDULES_PER_PAGE) : parseInt(amount / SCHEDULES_PER_PAGE) + 1;
             currentPage = currentPage > pageAmount ? currentPage - 1 : currentPage;
+            if(currentPage < 1){
+                currentPage = 1;
+            }
             this.setState({
                 allCurrentSchedules: this.filterAllCurrentSchedules({filterTitle}),
                 currentPage,
