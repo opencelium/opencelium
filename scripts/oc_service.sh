@@ -37,27 +37,25 @@ stop_backend()
 start_backend(){
 	RETRY=20
 
-        while [ $RETRY -gt 0 ]
-        do
-            if lsof -Pi :9090 -sTCP:LISTEN -t >/dev/null ;
-            then
-                echo "Port 9090 is used. Retrying Again" >&2
+	while [ $RETRY -gt 0 ]
+	do
+	    	if lsof -Pi :9090 -sTCP:LISTEN -t >/dev/null ;
+	    	then
+	        	echo "Port 9090 is used. Retrying Again" >&2
+		        RETRY=$((RETRY-1))
+		        sleep 2
+	    	else
+	        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
+	        	echo "backend started..."
+	        	return 1
+		fi
+	done
 
-                RETRY=$((RETRY-1))
-                sleep 2
-            else
-                cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
-                echo "Server is UP"
-                return 1
-            fi
-        done
-
-        echo "Server couldnt be started. Port 9090 is used."
+	echo "Server couldnt be started. Port 9090 is used."
 }
 
 restart_backend(){
 	stop_backend
-	sleep 10
 	start_backend
 }
 
@@ -67,7 +65,23 @@ stop_frontend()
 }
 
 start_frontend(){
-        cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_dev > /opt/logs/oc_frontend.out &
+        RETRY=20
+
+        while [ $RETRY -gt 0 ]
+        do	
+		if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ;
+        	then
+        		echo "Port 8888 is used. Retrying Again" >&2
+		        RETRY=$((RETRY-1))
+                	sleep 2
+		else
+        		cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_dev > /opt/logs/oc_frontend.out &
+		        echo "frontend started..."
+                	return 1
+		fi
+	done
+
+        echo "Server couldnt be started. Port 8888 is used."	
 }
 
 restart_frontend(){
@@ -75,11 +89,36 @@ restart_frontend(){
         start_frontend
 }
 
+check_frontend(){
+                
+	if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ;
+        then echo ""
+        else
+        	cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_dev > /opt/logs/oc_frontend.out &
+                echo "frontend started..."
+                return 1
+        fi
+
+        echo "Frontend already started."    
+}
+
+check_backend(){
+
+        if lsof -Pi :9090 -sTCP:LISTEN -t >/dev/null ;
+        then echo ""
+        else
+        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
+                echo "backend started..."
+                return 1
+        fi
+
+        echo "Backtend already started."
+}
 
 ###### MAIN
 if [ "$1" != "" ]
 then
 	$1 $2
 else
-    echo "please use one of the following commands: refresh_db rebuild_backend stop_backend start_backend restart_backend stop_frontend start_frontend restart_frontend"
+    echo "please use one of the following commands: refresh_db rebuild_backend stop_backend start_backend restart_backend stop_frontend start_frontend restart_frontend check_frontend check_backend"
 fi
