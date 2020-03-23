@@ -27,5 +27,6 @@ Run command to enable oc service.
 
 Check health
 """""""""""""""""
-*/5 * * * * /usr/bin/oc check_frontend >/dev/null 2>&1
-*/5 * * * * /usr/bin/oc check_backend >/dev/null 2>&1
+
+- */5 * * * * /usr/bin/oc check_frontend >/dev/null 2>&1
+- */5 * * * * /usr/bin/oc check_backend >/dev/null 2>&1
