@@ -114,6 +114,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
 	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
         root@shell> service neo4j restart
+        root@shell> systemctl enable neo4j
 
 8. Install MariaDB:
 
@@ -171,6 +172,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 	 root@shell> apt-get install kibana
 	 root@shell> sed -i '/\#server.host: "localhost"/c\server.host: "0.0.0.0"' /etc/kibana/kibana.yml
 	 root@shell> sed -i '/\#elasticsearch.hosts: ["http://localhost:9200"]/c\elasticsearch.hosts: ["http://localhost:9200"]' /etc/kibana/kibana.yml
+	 root@shell> /bin/systemctl enable kibana.service
 	 root@shell> service kibana start
 
 **Install Application:**
@@ -308,7 +310,8 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 	root@shell> neo4j status  // to check
 	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
 	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
-    root@shell> neo4j restart
+    	root@shell> neo4j restart
+        root@shell> systemctl enable neo4j
 
 8. Install MariaDB:
 
@@ -510,6 +513,7 @@ Red Hat Enterprise Linux
 	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
 	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
         root@shell> service neo4j restart
+        root@shell> systemctl enable neo4j
 
 8. Install MariaDB:
 
