@@ -96,6 +96,12 @@
     "CHECK_NEO4J": {
       "DOWN": "Neo4j is down"
     },
+    "CHECK_ELASTICSEARCH": {
+      "DOWN": "Elasticsearch is down"
+    },
+    "CHECK_APP": {
+      "DOWN": "is down"
+    },
     "TRIGGER_SCHEDULE": {
       "__DEFAULT__": "The job was not triggered"
     },
@@ -178,5 +184,10 @@
     "IDOIT": "i-doit",
     "OTRS": "OTRS",
     "SENSU": "Sensu"
+  },
+  "DETAILS": "In details",
+  "DIALOG_DETAILS": {
+    "TITLE": "Error Message",
+    "CLOSE": "Close"
   }
 }

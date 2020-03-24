@@ -22,6 +22,7 @@ import {ErrorNotification} from '../../../utils/constants/errors';
 
 import styles from '../../../themes/default/general/app.scss';
 import FontIcon from "../basic_components/FontIcon";
+import TooltipFontIcon from "../basic_components/tooltips/TooltipFontIcon";
 
 
 /**
@@ -33,21 +34,46 @@ class Notification extends Component{
     constructor(props){
         super(props);
 
+        this.state = {
+            returnNull: false,
+            hasCloseButton: false,
+        };
         this.data = this.selectData();
     }
 
     componentDidMount(){
         let that = this;
+        const {hasCloseButton} = this.state;
         const {id, timeOfBeing} = that.props;
         if(timeOfBeing !== 'infinite') {
             setTimeout(function () {
                 let element = document.getElementById(id);
-                if (element) {
+                if (element && !that.state.hasCloseButton) {
                     element.classList.remove(styles['notification_show']);
                     element.classList.add(styles['notification_hide']);
                 }
             }, timeOfBeing);
+            setTimeout(() => {
+                if(!that.state.hasCloseButton)
+                    that.setState({returnNull: true});
+            }, timeOfBeing + 2000);
         }
+    }
+
+    closeNotification(){
+        let that = this;
+        const {id, timeOfBeing} = that.props;
+        let element = document.getElementById(id);
+        if (element) {
+            element.classList.remove(styles['notification_show']);
+            element.classList.add(styles['notification_hide']);
+            setTimeout(() => {that.setState({returnNull: true});}, timeOfBeing + 2000);
+        }
+    }
+
+    setHasCloseButton(){
+        if(!this.state.hasCloseButton)
+            this.setState({hasCloseButton: true});
     }
 
     /**
@@ -55,7 +81,7 @@ class Notification extends Component{
      */
     selectData(){
         const {data, params, t} = this.props;
-        const {type, message, systemTitle} = data;
+        const {type, message, systemTitle, shortMessage} = data;
         let result = {};
         switch(type){
             case NotificationType.SUCCESS:
@@ -77,15 +103,27 @@ class Notification extends Component{
         }
         result.systemTitle = t(`SYSTEMS.${systemTitle.toUpperCase()}`);
         result.header = t("HEADERS" + '.' + type);
-        result.message = <NotificationMessage status={type} message={message} params={params}/>;
+        result.message = <NotificationMessage status={type} message={message} params={params} shortMessage={shortMessage ? shortMessage : ''} setHasCloseButton={::this.setHasCloseButton}/>;
         return result;
     }
 
+    renderCloseButton(){
+        if(this.state.hasCloseButton){
+            return (
+                <TooltipFontIcon className={styles.close_icon} value={'close'} tooltip={'Close'} onClick={::this.closeNotification}/>
+            );
+        }
+        return null;
+    }
+
     render(){
+        const {returnNull} = this.state;
+        if(returnNull) return null;
         const {id} = this.props;
         let text = this.data.message || ErrorNotification.TEXT_ABSENT;
         return (
             <div className={styles.notification_show+ ' ' + this.data.style} id={id}>
+                {this.renderCloseButton()}
                 <div className={styles.notification_header}>
                     <div className={styles.notification_icon}>{this.data.icon}</div>
                     <div className={styles.notification_header_text}>{this.data.systemTitle}{`. `}<span>{this.data.header}</span></div>

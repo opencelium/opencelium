@@ -19,6 +19,8 @@ import i18n from '../../i18n';
 
 import {NotificationMessageHandlers} from './notifications';
 import {parseConnectionPointer} from "../../app";
+import Dialog from "../../../components/general/basic_components/Dialog";
+import styles from "../../../themes/default/general/app.scss";
 
 
 /**
@@ -28,12 +30,49 @@ import {parseConnectionPointer} from "../../app";
 class NotificationMessage extends Component{
     constructor(props){
         super(props);
+
+        this.state = {
+            showDialogInDetails: false,
+            inDetailsMessage: '',
+        };
     }
 
-    setColoredSpan(comingMessage){
+    toggleShowDialogInDetails(){
+        this.setState({showDialogInDetails: !this.state.showDialogInDetails});
+    }
+
+    openDialog(e, inDetailsMessage){
+        this.setState({showDialogInDetails: true, inDetailsMessage});
+    }
+
+    renderDialogInDetails(){
+        const {showDialogInDetails, inDetailsMessage} = this.state;
+        const {t} = this.props;
+        return(
+            <Dialog
+                actions={[{label: t('DIALOG_DETAILS.CLOSE'), onClick: ::this.toggleShowDialogInDetails}]}
+                active={showDialogInDetails}
+                onEscKeyDown={::this.toggleShowDialogInDetails}
+                onOverlayClick={::this.toggleShowDialogInDetails}
+                title={t('DIALOG_DETAILS.TITLE')}
+            >
+                <p>{inDetailsMessage}</p>
+            </Dialog>
+        );
+    }
+
+    renderServerMessage(comingMessage){
+        const {t, shortMessage} = this.props;
         let result = '';
         let colorRegExp = /^(.*)#[0-9a-f]{6}(.*)/gi;
         let checkColorRegExp = colorRegExp.exec(comingMessage);
+        if(comingMessage.length > 50){
+            const {setHasCloseButton} = this.props;
+            if(setHasCloseButton) {
+                setHasCloseButton(true);
+            }
+            return <span>{`${shortMessage} (`}<a href='#' onClick={(e) => ::this.openDialog(e, comingMessage)}>{t('DETAILS')}</a>)</span>;
+        }
         if(checkColorRegExp && checkColorRegExp.length > 2){
             let color = comingMessage.substring(checkColorRegExp[1].length, checkColorRegExp[1].length + 7);
             let colorStyles = {height: '17px', width: '40px', display: 'inline-block', margin: '0 5px'};
@@ -60,7 +99,7 @@ class NotificationMessage extends Component{
                         let connectionPointer = parseConnectionPointer(params.response.data.connectionPointer);
                         if(connectionPointer.field !== '' && connectionPointer.color !== '') {
                             notificationMessage = t(status + '.' + message + '.' + comingMessage, {methodPath: connectionPointer.field});
-                            notificationMessage = this.setColoredSpan(`${notificationMessage} ${connectionPointer.color}`);
+                            notificationMessage = this.renderServerMessage(`${notificationMessage} ${connectionPointer.color}`);
                         } else{
                             notificationMessage = t(status + '.' + message + '.' + comingMessage);
                         }
@@ -71,7 +110,7 @@ class NotificationMessage extends Component{
                         }
                     }
                 } else{
-                    notificationMessage = this.setColoredSpan(comingMessage);
+                    notificationMessage = this.renderServerMessage(comingMessage);
                 }
             } else {
                 if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
@@ -86,10 +125,16 @@ class NotificationMessage extends Component{
             }
         }
         return (
-            <span>{notificationMessage}</span>
+            <React.Fragment>
+                <span>{notificationMessage}</span>
+                {::this.renderDialogInDetails()}
+            </React.Fragment>
         );
     }
 }
 
+NotificationMessage.defaultProps = {
+    setHasCloseButton: null,
+};
 
 export default NotificationMessage;

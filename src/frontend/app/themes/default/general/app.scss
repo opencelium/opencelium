@@ -69,12 +69,19 @@
   animation-duration: 1.5s;
   animation-fill-mode: forwards;
   min-height: 40px;
-  padding: 5px;
+  padding: 10px 5px 5px 5px;
   background: #fff;
   box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
   animation-name: ANotificationAppear;
 }
 @media screen and (min-width: 650px) {
+  .close_icon{
+    float: right;
+    margin-right: -3px;
+    margin-top: -10px;
+    font-size: 20px;
+    cursor: pointer;
+  }
   .notification_show{
     width: 230px;
   }
@@ -84,6 +91,13 @@
 }
 
 @media screen and (max-width: 649px) {
+  .close_icon{
+    float: right;
+    margin-right: -3px;
+    margin-top: -10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
   .notification_show{
     width: 160px;
   }
@@ -101,7 +115,7 @@
   animation-duration: 1.5s;
   animation-fill-mode: forwards;
   min-height: 40px;
-  padding: 5px;
+  padding: 10px 5px 5px 5px;
   background: #fff;
   box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
   animation-name: ANotificationDisappear;
@@ -131,6 +145,7 @@
 }
 
 .notification_header{
+  width: 90%;
   font-family: $FONT_FAMILY;
   height: 30px;
   line-height: 23px;
