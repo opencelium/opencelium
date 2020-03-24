@@ -51,6 +51,12 @@ class ScheduleUpdate extends Component{
         };
     }
 
+    componentDidUpdate(prevProps){
+        if(prevProps.schedule.title !== this.props.schedule.title){
+            this.setState({scheduleTitle: this.props.schedule.title});
+        }
+    }
+
     /**
      * to update schedule
      */

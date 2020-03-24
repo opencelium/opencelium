@@ -15,6 +15,11 @@
 
 @import '../../constants';
 
+@keyframes AEmphasize {
+  0%   {background-color: unset;}
+  50%  {background-color: #7aced2;}
+  100% {background-color: unset;}
+}
 .last_success_cell{
   transition: all 1s;
 }
@@ -24,7 +29,8 @@
 }
 
 .emphasize_cell{
-  background-color: #7aced2;
+  animation-name: AEmphasize;
+  animation-duration: 2s;
 }
 
 .navigation_button_title{

@@ -29,28 +29,31 @@ class LastSuccessCell extends Component{
 
     constructor(props){
         super(props);
-        this.appearClassName = '';
+        this.state = {
+            appearClassName: '',
+        };
     }
 
     componentDidUpdate(prevProps){
-        if(this.appearClassName !== '') {
-            this.appearClassName = '';
-            let that = this;
-            setTimeout(() => {if(that) that.forceUpdate();}, EMPHASIZE_DURATION_ANIMATION);
+        const {appearClassName} = this.state;
+        let newTime = this.props.schedule.getSuccessEndTime();
+        let newId = this.props.schedule.id;
+        let oldTime = prevProps.schedule.getSuccessEndTime();
+        let oldId = prevProps.schedule.id;
+        if(newTime !== NO_DATA) {
+            if(newId === oldId && newTime !== oldTime && appearClassName !== styles.emphasize_cell) {
+                this.setState({appearClassName: styles.emphasize_cell});
+                setTimeout(() => {this.setState({appearClassName: ''});}, 2000);
+            }
         } else{
-            let newTime = this.props.schedule.getSuccessEndTime();
-            let oldTime = prevProps.schedule.getSuccessEndTime();
-            if(newTime !== NO_DATA) {
-                if(oldTime !== NO_DATA) {
-                    if(newTime !== oldTime) {
-                        this.appearClassName = styles.emphasize_cell;
-                    }
-                }
+            if(appearClassName !== '') {
+                this.setState({appearClassName: ''});
             }
         }
     }
 
     renderData(){
+        const {appearClassName} = this.state;
         let {schedule, hasElasticSearch} = this.props;
         let time = schedule.getSuccessEndTime();
         let taId = schedule.getSuccessTaId();
@@ -65,7 +68,7 @@ class LastSuccessCell extends Component{
             taId = '';
         }
         return (
-            <div className={`${styles.last_success_cell} ${this.appearClassName}`}>
+            <div className={`${styles.last_success_cell} ${appearClassName}`}>
                 <div>{time}</div>
                 {
                     taId === ''
