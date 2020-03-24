@@ -46,8 +46,6 @@ export function checkConnection(){
             class C extends Component {
                 constructor(props) {
                     super(props);
-
-                    this.startCheckingConnection = false;
                 }
 
                 componentDidMount() {
@@ -56,8 +54,7 @@ export function checkConnection(){
 
                 componentDidUpdate() {
                     const {checkingOCConnection, error, logoutUserFulfilled} = this.props;
-                    if (this.startCheckingConnection && checkingOCConnection === API_REQUEST_STATE.FINISH) {
-                        this.startCheckingConnection = false;
+                    if (checkingOCConnection === API_REQUEST_STATE.FINISH) {
                         if (error !== null) {
                             logoutUserFulfilled({});
                             history.push('/login');
@@ -66,15 +63,19 @@ export function checkConnection(){
                 }
 
                 checkOCConnection() {
-                    this.startCheckingConnection = true;
                     this.props.checkOCConnection();
                 }
 
                 render() {
                     const {authUser, logining, logouting, checkingOCConnection} = this.props;
-                    let isCheckingConnection = this.startCheckingConnection && checkingOCConnection !== API_REQUEST_STATE.FINISH;
-                    if (logining || logouting || isCheckingConnection)
-                        return <div style={{padding: '0 15px', maxWidth: '1140px', marginLeft: 'auto', marginRight: 'auto'}}><Loading authUser={authUser}/></div>;
+                    let isCheckingConnection = checkingOCConnection !== API_REQUEST_STATE.FINISH;
+                    if (logining || logouting || isCheckingConnection){
+                        return (
+                            <div style={{padding: '0 15px', maxWidth: '1140px', marginLeft: 'auto', marginRight: 'auto'}}>
+                                <Loading authUser={authUser}/>
+                            </div>
+                        );
+                    }
                     return <Component {...this.props}/>;
                 }
             }

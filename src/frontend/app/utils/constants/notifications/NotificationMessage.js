@@ -20,7 +20,6 @@ import i18n from '../../i18n';
 import {NotificationMessageHandlers} from './notifications';
 import {parseConnectionPointer} from "../../app";
 import Dialog from "../../../components/general/basic_components/Dialog";
-import styles from "../../../themes/default/general/app.scss";
 
 
 /**
