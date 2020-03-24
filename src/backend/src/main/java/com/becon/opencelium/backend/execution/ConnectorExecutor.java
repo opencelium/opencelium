@@ -235,10 +235,10 @@ public class ConnectorExecutor {
         }
 
         // TODO: works only for CheckMk. Should be deleted in future.
-        if (invoker.getName().equals("CheckMK")){
-            formData.add("request", body);
-            data = formData;
-        }
+//        if (invoker.getName().equals("CheckMK")){
+//            formData.add("request", body);
+//            data = formData;
+//        }
 
         // TODO: Changed string to object in httpEntity;
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
