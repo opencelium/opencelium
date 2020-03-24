@@ -64,6 +64,12 @@ export default function (store){
                     break;
             }
             const notification = document.getElementById('notification');
+            for(let i = notification.children.length - 1; i >= 0; i--){
+                let child = notification.children[i];
+                if(child.innerHTML === ''){
+                    child.remove();
+                }
+            }
             let idName = 'note_';
             if(notification.children.length === 0 || typeof notification.children[notification.children.length - 1].children[0] === 'undefined') {
                 idName += 1;

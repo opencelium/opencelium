@@ -61,13 +61,10 @@ class Notification extends Component{
     }
 
     closeNotification(){
-        let that = this;
-        const {id, timeOfBeing} = that.props;
+        const {id} = this.props;
         let element = document.getElementById(id);
         if (element) {
-            element.classList.remove(styles['notification_show']);
-            element.classList.add(styles['notification_hide']);
-            setTimeout(() => {that.setState({returnNull: true});}, timeOfBeing + 2000);
+            this.setState({returnNull: true});
         }
     }
 
