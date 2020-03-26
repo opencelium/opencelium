@@ -213,7 +213,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 
 	root@shell> cd /opt/src/backend
 	root@shell> cp src/main/resources/application_default.yml src/main/resources/application.yml
-	root@shell> make changes inside of application.yml. change neo4j and mysql database password
+	root@shell> // make changes inside of application.yml. change neo4j and mysql database password
 
 6. Install database 
 
@@ -246,7 +246,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 
 
 
-SUSE Linux Enterprise Server (example for SLES 12 SP4)
+SUSE Linux Enterprise Server (example for SLES 15 SP1)
 """""""""""""""""
 **Prepare environment:**
 
@@ -255,7 +255,7 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 .. code-block:: sh
 	:linenos:
 	
-	root@shell> zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/nodejs/SLE_12_SP4 node10
+	root@shell> zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/nodejs/SLE_15_SP1 node10
 	root@shell> zypper refresh
 	root@shell> zypper install nodejs10
 	root@shell> node -v
@@ -311,6 +311,7 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 	root@shell> sed -i '/#dbms.connectors.default_listen_address=0.0.0.0/c\dbms.connectors.default_listen_address=0.0.0.0' /etc/neo4j/neo4j.conf
 	root@shell> sed -i '/#dbms.security.auth_enabled=false/c\dbms.security.auth_enabled=false' /etc/neo4j/neo4j.conf	
     	root@shell> neo4j restart
+    	root@shell> zypper install insserv
         root@shell> systemctl enable neo4j
 
 8. Install MariaDB:
@@ -328,9 +329,9 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 .. code-block:: sh
 	:linenos:
 
-	root@shell> zypper addrepo https://download.opensuse.org/repositories/devel:libraries:c_c++/SLE_12_SP4/devel:libraries:c_c++.repo
+	root@shell> zypper addrepo https://download.opensuse.org/repositories/devel:libraries:c_c++/SLE_15_SP1/devel:libraries:c_c++.repo
 	root@shell> zypper refresh
-	root@shell> zypper install zlib-devel libuv-devel libuuid-devel libmnl-dev pkg-config gcc make autoconf autoconf-archive autogen automake python python-yaml python-mysqldb nodejs lm-sensors python-psycopg2 netcat 
+	root@shell> zypper install zlib-devel libuv-devel libuuid-devel pkg-config gcc make autoconf autoconf-archive autogen automake python python-yaml nodejs netcat 
 	root@shell> git clone https://github.com/firehol/netdata.git --depth=1 /usr/lib/netdata
 	root@shell> cd /usr/lib/netdata
 	root@shell> sudo ./netdata-installer.sh
@@ -359,7 +360,7 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 .. code-block:: sh
 	:linenos:
 
-	 root@shell> echo -e "[kibana-7.x]\nname=Kibana repository for 7.x packages\nbaseurl=https://artifacts.elastic.co/packages/7.x/yum\ngpgcheck=1\ngpgkey=https://artifacts.elastic.co/\nGPG-KEY-elasticsearch\nenabled=1\nautorefresh=1\ntype=rpm-md" >> /etc/zypp/repos.d/kibana.repo
+	 root@shell> echo -e "[kibana-7.x]\nname=Kibana repository for 7.x packages\nbaseurl=https://artifacts.elastic.co/packages/7.x/yum\ngpgcheck=1\ngpgkey=https://artifacts.elastic.co/\GPG-KEY-elasticsearch\nenabled=1\nautorefresh=1\ntype=rpm-md" >> /etc/zypp/repos.d/kibana.repo
 	 root@shell> zypper install kibana
 	 root@shell> sed -i '/\#server.host: "localhost"/c\server.host: "0.0.0.0"' /etc/kibana/kibana.yml
 	 root@shell> sed -i '/\#elasticsearch.hosts: ["http://localhost:9200"]/c\elasticsearch.hosts: ["http://localhost:9200"]' /etc/kibana/kibana.yml
@@ -380,12 +381,13 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
 
-2. Build frontend project
+2. Run frontend with yarn
 
 .. code-block:: sh
 
-	root@shell> cd src/frontend
-	root@shell> yarn
+        root@shell> cd src/frontend
+        root@shell> yarn
+        root@shell> echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p // increasing the amount of inotify watchers
 
 3. Enable OC service
 
@@ -405,7 +407,7 @@ SUSE Linux Enterprise Server (example for SLES 12 SP4)
 
 	root@shell> cd /opt/src/backend
 	root@shell> cp src/main/resources/application_default.yml src/main/resources/application.yml
-	root@shell> make changes inside of application.yml. change neo4j and mysql database password
+	root@shell> // make changes inside of application.yml. change neo4j and mysql database password
 
 6. Install database 
 
@@ -574,7 +576,7 @@ Red Hat Enterprise Linux
 
 	root@shell> cd /opt/src/backend
 	root@shell> cp src/main/resources/application_default.yml src/main/resources/application.yml
-	root@shell> make changes inside of application.yml. change neo4j and mysql database password
+	root@shell> // make changes inside of application.yml. change neo4j and mysql database password
 
 5. Install database 
 
