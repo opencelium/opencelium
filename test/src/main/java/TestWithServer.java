@@ -8,7 +8,9 @@ import org.openqa.selenium.logging.*;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -57,7 +59,7 @@ public class TestWithServer {
 
     @AfterTest
     public void afterTest(){
-        //driver.quit();
+       // driver.quit();
     }
 
    @Test(priority = 0)
@@ -75,9 +77,9 @@ public class TestWithServer {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
         WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys("khmuminov@gmail.com");
+        element_login.sendKeys(Constants.USERNAME);
         WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys("12345678");
+        element_password.sendKeys(Constants.PASSWORD);
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
 
         buttonConnect.click();
@@ -118,16 +120,59 @@ public class TestWithServer {
 
         driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);*/
 
-        WebElement elementU = driver.findElement(By.linkText("Users"));
+       WebElement elementU = driver.findElement(By.linkText("Users"));
 
-        elementU.click();
+       elementU.click();
 
-        //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+       driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        //WebElement elementAddUser = driver.findElement(By.linkText("Add User"));
 
-        //elementAddUser.click();
+       //PRESS Add User button
+       driver.navigate().to(Constants.BASE_URL+"users/add");
+
+       driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+       WebElement emailField = driver.findElement(By.id("input_email"));
+       emailField.sendKeys("test@test.io");
+
+       WebElement passwordField = driver.findElement(By.id("input_password"));
+       passwordField.sendKeys("12345678");
+
+
+       WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
+       repeatField.sendKeys("12345678");
+
+
+       //PRESS -> button
+
+       WebElement nameField = driver.findElement(By.id("input_name"));
+       nameField.sendKeys("Selenium");
+
+       WebElement surnameField = driver.findElement(By.id("input_surname"));
+       surnameField.sendKeys("Tester");
+
+       WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
+       phoneField.sendKeys("++7777777");
+
+       WebElement organisationField = driver.findElement(By.id("input_organisation"));
+       organisationField.sendKeys("Becon");
+
+       WebElement departmentField = driver.findElement(By.id("input_department"));
+       organisationField.sendKeys("OpenCelium");
+
+       //Select title
+
+       //Press ->
+
+       WebElement userGroup = driver.findElement(By.id("input_userGroup"));
+       userGroup.sendKeys("User");
+
+
+       //Press Add button
     }
+
+
+
 }
 
 
