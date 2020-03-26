@@ -21,10 +21,8 @@ import java.util.logging.Level;
 
 public class TestWithServer {
     WebDriver driver;
-    String baseUrl, nodeUrl;
 
-    private static ChromeDriver chromeDriver;
-  //  private static DevTools chromeDevTools;
+
 
     @BeforeTest
     public void setUp() throws MalformedURLException{
@@ -37,7 +35,6 @@ public class TestWithServer {
         logs.enable(LogType.SERVER, Level.ALL);
         logs.enable(LogType.PROFILER, Level.ALL);
 
-        //DesiredCapabilities desiredCapabilities = DesiredCapabilities.firefox();
 
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("chrome");
@@ -46,14 +43,14 @@ public class TestWithServer {
 
 
 
-        baseUrl = "http://oc-demo.westeurope.cloudapp.azure.com:8888/";
-        nodeUrl = "http://localhost:5566/wd/hub";
+        /*baseUrl = "http://oc-demo.westeurope.cloudapp.azure.com:8888/";
+        nodeUrl = "http://localhost:4444/wd/hub";*/
         /*System.setProperty("webdriver.gecko.driver","/home/khmuminov/geckodriver");
         DesiredCapabilities capability = DesiredCapabilities.firefox();
         capability.setBrowserName("firefox");
         capability.setPlatform(Platform.LINUX);*/
 
-        driver = new RemoteWebDriver(new URL(nodeUrl),desiredCapabilities);
+        driver = new RemoteWebDriver(new URL(Constants.NODE_URL),desiredCapabilities);
 
 
     }
@@ -65,7 +62,7 @@ public class TestWithServer {
 
    @Test(priority = 0)
     public void SimpleTest(){
-        driver.get(baseUrl);
+        driver.get(Constants.BASE_URL);
         Assert.assertEquals("OpenCelium", driver.getTitle());
     }
 
@@ -73,7 +70,7 @@ public class TestWithServer {
     public void LoginTest(){
         //driver.get(baseUrl+"login");
 
-        driver.navigate().to(baseUrl+"login");
+        driver.navigate().to(Constants.BASE_URL+"login");
 
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
