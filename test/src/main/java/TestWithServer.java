@@ -8,7 +8,9 @@ import org.openqa.selenium.logging.*;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -21,10 +23,8 @@ import java.util.logging.Level;
 
 public class TestWithServer {
     WebDriver driver;
-    String baseUrl, nodeUrl;
 
-    private static ChromeDriver chromeDriver;
-  //  private static DevTools chromeDevTools;
+
 
     @BeforeTest
     public void setUp() throws MalformedURLException{
@@ -37,7 +37,6 @@ public class TestWithServer {
         logs.enable(LogType.SERVER, Level.ALL);
         logs.enable(LogType.PROFILER, Level.ALL);
 
-        //DesiredCapabilities desiredCapabilities = DesiredCapabilities.firefox();
 
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("chrome");
@@ -45,27 +44,19 @@ public class TestWithServer {
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
 
-
-        baseUrl = "http://oc-demo.westeurope.cloudapp.azure.com:8888/";
-        nodeUrl = "http://localhost:5566/wd/hub";
-        /*System.setProperty("webdriver.gecko.driver","/home/khmuminov/geckodriver");
-        DesiredCapabilities capability = DesiredCapabilities.firefox();
-        capability.setBrowserName("firefox");
-        capability.setPlatform(Platform.LINUX);*/
-
-        driver = new RemoteWebDriver(new URL(nodeUrl),desiredCapabilities);
+        driver = new RemoteWebDriver(new URL(Constants.NODE_URL),desiredCapabilities);
 
 
     }
 
     @AfterTest
     public void afterTest(){
-        //driver.quit();
+       // driver.quit();
     }
 
    @Test(priority = 0)
     public void SimpleTest(){
-        driver.get(baseUrl);
+        driver.get(Constants.BASE_URL);
         Assert.assertEquals("OpenCelium", driver.getTitle());
     }
 
@@ -73,14 +64,14 @@ public class TestWithServer {
     public void LoginTest(){
         //driver.get(baseUrl+"login");
 
-        driver.navigate().to(baseUrl+"login");
+        driver.navigate().to(Constants.BASE_URL+"login");
 
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
         WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys("khmuminov@gmail.com");
+        element_login.sendKeys(Constants.USERNAME);
         WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys("12345678");
+        element_password.sendKeys(Constants.PASSWORD);
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
 
         buttonConnect.click();
@@ -105,32 +96,132 @@ public class TestWithServer {
     }
 
    @Test(priority = 2)
-    public void AddUSerTest(){
+   public void AddUserTest(){
+        WebElement elementU = driver.findElement(By.linkText("Users"));
 
-       /* driver.navigate().to(baseUrl+"login");
+        elementU.click();
 
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys("khmuminov@gmail.com");
-        WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys("12345678");
-        WebElement buttonConnect=driver.findElement(By.xpath("//button"));
+        //PRESS Add User button
 
-        buttonConnect.click();
+       driver.navigate().to(Constants.BASE_URL+"users/add");
 
-        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);*/
+       driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+       WebElement emailField = driver.findElement(By.id("input_email"));
+       emailField.sendKeys("test@test.io");
+
+       WebElement passwordField = driver.findElement(By.id("input_password"));
+       passwordField.sendKeys("12345678");
+
+
+       WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
+       repeatField.sendKeys("12345678");
+
+
+       //PRESS -> button
+
+       WebElement nameField = driver.findElement(By.id("input_name"));
+       nameField.sendKeys("Selenium");
+
+       WebElement surnameField = driver.findElement(By.id("input_surname"));
+       surnameField.sendKeys("Tester");
+
+       WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
+       phoneField.sendKeys("++7777777");
+
+       WebElement organisationField = driver.findElement(By.id("input_organisation"));
+       organisationField.sendKeys("Becon");
+
+       WebElement departmentField = driver.findElement(By.id("input_department"));
+       organisationField.sendKeys("OpenCelium");
+
+       //Select title
+
+       //Press ->
+
+       //Set user group
+       WebElement userGroup = driver.findElement(By.id("input_userGroup"));
+       userGroup.sendKeys("User");
+
+
+       //Press Add button
+
+       //Check if user added successfully
+    }
+
+    @Test(priority = 3)
+    public void UpdateUserTest(){
 
         WebElement elementU = driver.findElement(By.linkText("Users"));
 
         elementU.click();
 
-        //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        //WebElement elementAddUser = driver.findElement(By.linkText("Add User"));
+        //Find "Selenium Tester" user div
 
-        //elementAddUser.click();
+        //Find update button for selected user
+        WebElement elementUpdate = driver.findElement(By.linkText("Update"));
+
+
+        //Change Fields if needed
+        WebElement emailField = driver.findElement(By.id("input_email"));
+        emailField.sendKeys("test@test.io");
+
+        WebElement passwordField = driver.findElement(By.id("input_password"));
+        passwordField.sendKeys("12345678");
+
+
+        WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
+        repeatField.sendKeys("12345678");
+
+
+        //PRESS -> button
+
+        WebElement nameField = driver.findElement(By.id("input_name"));
+        nameField.sendKeys("Selenium");
+
+        WebElement surnameField = driver.findElement(By.id("input_surname"));
+        surnameField.sendKeys("Tester");
+
+        WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
+        phoneField.sendKeys("++7777777");
+
+        WebElement organisationField = driver.findElement(By.id("input_organisation"));
+        organisationField.sendKeys("Becon");
+
+        WebElement departmentField = driver.findElement(By.id("input_department"));
+        organisationField.sendKeys("OpenCelium");
+
+        //Set User group
+
+        //Press Update Button
+
+        //Check if succesfully modified
     }
-}
+
+    @Test(priority = 4)
+    public void DeleteUserTest(){
+
+        WebElement elementU = driver.findElement(By.linkText("Users"));
+
+        elementU.click();
+
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+        //Find "Selenium Tester" user div
+
+        //Find delete button for selected user
+        WebElement elementUpdate = driver.findElement(By.linkText("Delete"));
+
+    }
+
+
+
+
+
+    }
 
 
