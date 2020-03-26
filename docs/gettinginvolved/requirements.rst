@@ -6,7 +6,7 @@ Requirements
 
 - 2 vCPUs
 - 8 GB RAM
-- 20 GB disc space
+- 50 GB disc space
 
 **Software:**
 
