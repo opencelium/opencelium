@@ -89,7 +89,40 @@
                         <field name="node" type="array">
                             <field name="id" type="string"/>
                             <field name="foreignId" type="string"/>
+                            <field name="foreignSource" type="string"/>
                             <field name="label" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getRequisitions" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/rest/requisitions</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body>
+                        <field name="model-import" type="array">
+                            <field name="date-stamp" type="number"/>
+                            <field name="foreign-source" type="string"/>
+                            <field name="last-import" type="number"/>
+                            <field name="node" type="array">
+                                <field name="node-label" type="string"/>
+                                <field name="foreign-id" type="string"/>
+                            </field>
                         </field>
                     </body>
                 </success>

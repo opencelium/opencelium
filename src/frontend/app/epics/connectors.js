@@ -142,7 +142,7 @@ const updateConnectorEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.UPDATE_CONNECTOR)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}`;
+            let url = `${urlPrefix}/${action.payload.id}`;
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = updateConnectorFulfilled;

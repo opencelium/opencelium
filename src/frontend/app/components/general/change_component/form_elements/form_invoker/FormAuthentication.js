@@ -25,10 +25,10 @@ import FontIcon from "../../../basic_components/FontIcon";
 import Input from "../../../basic_components/inputs/Input";
 
 const types = [
-    {value: 'apikey',                label: 'API Key (i-doit)'},
-    {value: 'token',                 label: 'Token (zabbix)'},
-    {value: 'basic',                 label: 'Basic Auth (icinga2)'},
-    {value: 'endpointAuth',          label: 'Endpoint Auth (otrs)'},
+    {value: 'apikey',                label: 'API Key'},
+    {value: 'token',                 label: 'Token'},
+    {value: 'basic',                 label: 'Basic Auth'},
+    {value: 'endpointAuth',          label: 'Endpoint Auth'},
     {value: 'bearer_token',          label: 'Bearer Token', visible: false},
     {value: 'digest_auth',           label: 'Digest Auth', visible: false},
     {value: 'oauth_1_0',             label: 'OAuth 1.0', visible: false},

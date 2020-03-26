@@ -28,14 +28,16 @@ import COperation from "../../../../../../classes/components/content/invoker/COp
 import Status from "./Status";
 
 import styles from '../../../../../../themes/default/general/change_component.scss';
+import {METHOD_TYPES} from "../../../../../../classes/components/content/invoker/request/CRequest";
 
 class OperationItem extends Component{
 
     constructor(props){
         super(props);
-
+        const method = props.operation.request.method;
         this.state = {
-            tabKey: 'request',
+            tabKey: method === METHOD_TYPES[1].value ? 'response_success' : 'request',
+            operationMethod: method,
         };
     }
 
@@ -48,6 +50,22 @@ class OperationItem extends Component{
         return null;
     }
 
+    componentDidUpdate(prevProps){
+        let thisMethod = this.props.operation.request.method;
+        let prevMethod = this.state.operationMethod;
+        if(thisMethod !== prevMethod) {
+            if (thisMethod === METHOD_TYPES[1].value) {
+                if (this.state.tabKey !== 'response_success') {
+                    this.setState({tabKey: 'response_success'});
+                    return;
+                }
+            }
+            this.setState({
+                operationMethod: thisMethod,
+            });
+        }
+    }
+
     handleTabChange(tabKey){
         this.setState({tabKey});
     }
@@ -55,6 +73,8 @@ class OperationItem extends Component{
     render(){
         const {isVisible, operation, className, data, hasTour, forConnection} = this.props;
         const {tourSteps} = data;
+        const showTabs = operation.request.method !== '';
+        const isNotGetMethod = operation.request.method !== METHOD_TYPES[1].value;
         let tourClassNames = [];
         if(hasTour && tourSteps && tourSteps.length > 0){
             for(let i = 0; i < tourSteps.length; i++){
@@ -69,12 +89,19 @@ class OperationItem extends Component{
                 <Endpoint {...this.props} tourStep={tourClassNames[1] ? tourClassNames[1] : ''}/>
                 {forConnection ? null : <Method {...this.props} tourStep={tourClassNames[2] ? tourClassNames[2] : ''}/>}
                 {
-                    isVisible
+                    isVisible && showTabs
                     ?
                         <Tabs activeKey={this.state.tabKey} onSelect={::this.handleTabChange} className={tabsClassname}>
-                            <Tab title='Request' eventKey={'request'}>
-                                <Body {...this.props} entity={operation.request} bodyType={'request'} tourStep={tourClassNames[5] ? tourClassNames[5] : ''}/>
-                            </Tab>
+                            {
+                                isNotGetMethod
+                                ?
+                                    <Tab title='Request' eventKey={'request'}>
+                                        <Body {...this.props} entity={operation.request} bodyType={'request'}
+                                              tourStep={tourClassNames[5] ? tourClassNames[5] : ''}/>
+                                    </Tab>
+                                :
+                                    null
+                            }
                             <Tab title={forConnection ? 'Success' : 'Response(success)'} eventKey={'response_success'}>
                                 <Status {...this.props} entity={operation.response.success} headerType={'response_success'}/>
                                 <Header {...this.props} entity={operation.response.success} headerType={'response_success'}/>

@@ -1532,13 +1532,6 @@ axios@0.19.0:
     follow-redirects "1.5.10"
     is-buffer "^2.0.2"
 
-axios@^0.18.0:
-  version "0.18.1"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.18.1.tgz#ff3f0de2e7b5d180e757ad98000f1081b87bcea3"
-  dependencies:
-    follow-redirects "1.5.10"
-    is-buffer "^2.0.2"
-
 babel-cli@^6.18.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-cli/-/babel-cli-6.26.0.tgz#502ab54874d7db88ad00b887a06383ce03d002f1"
@@ -9450,6 +9443,11 @@ react-dom@^16.8.3:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.17.0"
+
+react-favicon@^0.0.18:
+  version "0.0.18"
+  resolved "https://registry.yarnpkg.com/react-favicon/-/react-favicon-0.0.18.tgz#a5fbb57ae89a90d3790518125cbb8c8dcefd3d98"
+  integrity sha512-FB3WAuzqGjMxFSi+QzPTnXlCeOmuBZpl/Ilxkd9sf73cW6Q31ThBjS1j3tfN9Uxo88ECOsR7NIAUedbiddc7VQ==
 
 react-focus-lock@2.2.1:
   version "2.2.1"

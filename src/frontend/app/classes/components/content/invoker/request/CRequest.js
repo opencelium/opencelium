@@ -18,6 +18,12 @@ import {
     convertHeaderFormatToObject,
     parseHeader
 } from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
+export const METHOD_TYPES = [
+    {value: 'POST', label: 'POST'},
+    {value: 'GET', label: 'GET'},
+    {value: 'PUT', label: 'PUT'},
+    {value: 'DELETE', label: 'DELETE'},
+];
 /**
  * (not used)
  */

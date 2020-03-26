@@ -34,6 +34,7 @@
     "react-bootstrap": "^1.0.0-beta.11",
     "react-contenteditable": "^3.3.2",
     "react-dom": "^16.8.3",
+    "react-favicon": "^0.0.18",
     "react-grid-system": "^4.4.2",
     "react-i18next": "v10.0.0",
     "react-id-swiper": "^2.3.2",
