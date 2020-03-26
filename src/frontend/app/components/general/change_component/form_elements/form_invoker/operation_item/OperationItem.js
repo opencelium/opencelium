@@ -36,8 +36,7 @@ class OperationItem extends Component{
         super(props);
         const method = props.operation.request.method;
         this.state = {
-            tabKey: method === METHOD_TYPES[1].value ? 'response_success' : 'request',
-            operationMethod: method,
+            tabKey: 'request',
         };
     }
 
@@ -48,22 +47,6 @@ class OperationItem extends Component{
             };
         }
         return null;
-    }
-
-    componentDidUpdate(prevProps){
-        let thisMethod = this.props.operation.request.method;
-        let prevMethod = this.state.operationMethod;
-        if(thisMethod !== prevMethod) {
-            if (thisMethod === METHOD_TYPES[1].value) {
-                if (this.state.tabKey !== 'response_success') {
-                    this.setState({tabKey: 'response_success'});
-                    return;
-                }
-            }
-            this.setState({
-                operationMethod: thisMethod,
-            });
-        }
     }
 
     handleTabChange(tabKey){
@@ -92,16 +75,17 @@ class OperationItem extends Component{
                     isVisible && showTabs
                     ?
                         <Tabs activeKey={this.state.tabKey} onSelect={::this.handleTabChange} className={tabsClassname}>
-                            {
-                                isNotGetMethod
-                                ?
-                                    <Tab title='Request' eventKey={'request'}>
-                                        <Body {...this.props} entity={operation.request} bodyType={'request'}
-                                              tourStep={tourClassNames[5] ? tourClassNames[5] : ''}/>
-                                    </Tab>
-                                :
-                                    null
-                            }
+                            <Tab title='Request' eventKey={'request'}>
+                                <Header {...this.props} entity={operation.request} headerType={'request'}/>
+                                {
+                                    isNotGetMethod
+                                        ?
+                                <Body {...this.props} entity={operation.request} bodyType={'request'}
+                                      tourStep={tourClassNames[5] ? tourClassNames[5] : ''}/>
+                                        :
+                                        null
+                                }
+                            </Tab>
                             <Tab title={forConnection ? 'Success' : 'Response(success)'} eventKey={'response_success'}>
                                 <Status {...this.props} entity={operation.response.success} headerType={'response_success'}/>
                                 <Header {...this.props} entity={operation.response.success} headerType={'response_success'}/>

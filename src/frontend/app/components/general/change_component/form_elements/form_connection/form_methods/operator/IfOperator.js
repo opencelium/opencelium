@@ -269,7 +269,7 @@ class IfOperator extends Component{
                     {
                         relationalOperator !== ''
                         ?
-                            <div className={styles.if_placeholder_relational_operator} style={{maxWidth: hasValue ? '14%' : '30%'}} title={relationalOperator}>{this.getOperatorLabel()}</div>
+                            <div className={styles.if_placeholder_relational_operator} style={{maxWidth: hasValue ? '14%' : '20%'}} title={relationalOperator}>{this.getOperatorLabel()}</div>
                         :
                             null
                     }
