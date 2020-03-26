@@ -13,12 +13,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
+import React, {Suspense} from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
+import Favicon from "react-favicon";
 
 
 /**
  * root enter of the app
  */
-ReactDOM.render(<App/>, document.getElementById('app'));
+ReactDOM.render(
+    <React.Fragment>
+        <Favicon url="../fav_icon.png" />
+        <App/>
+    </React.Fragment>, document.getElementById('app'));

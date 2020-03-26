@@ -18,14 +18,9 @@ import styles from '../../../../../../themes/default/general/change_component.sc
 import theme from "react-toolbox/lib/input/theme.css";
 import FontIcon from "../../../../basic_components/FontIcon";
 import {onEnter} from "../../../../../../utils/app";
+import {METHOD_TYPES} from "../../../../../../classes/components/content/invoker/request/CRequest";
 
 
-const types = [
-    {value: 'POST', label: 'POST'},
-    {value: 'GET', label: 'GET'},
-    {value: 'PUT', label: 'PUT'},
-    {value: 'DELETE', label: 'DELETE'},
-];
 
 /**
  * Component for Method in Invoker.RequestItem
@@ -73,7 +68,7 @@ class Method extends Component{
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={{padding: '8px 0 0 0'}}/>
                 <div>
                     {
-                        types.map((type, key) => {
+                        METHOD_TYPES.map((type, key) => {
                             return (
                                 <span
                                     id={`method_${type.value}`}
