@@ -44,14 +44,6 @@ public class TestWithServer {
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
 
-
-        /*baseUrl = "http://oc-demo.westeurope.cloudapp.azure.com:8888/";
-        nodeUrl = "http://localhost:4444/wd/hub";*/
-        /*System.setProperty("webdriver.gecko.driver","/home/khmuminov/geckodriver");
-        DesiredCapabilities capability = DesiredCapabilities.firefox();
-        capability.setBrowserName("firefox");
-        capability.setPlatform(Platform.LINUX);*/
-
         driver = new RemoteWebDriver(new URL(Constants.NODE_URL),desiredCapabilities);
 
 
@@ -104,30 +96,15 @@ public class TestWithServer {
     }
 
    @Test(priority = 2)
-    public void AddUSerTest(){
+   public void AddUserTest(){
+        WebElement elementU = driver.findElement(By.linkText("Users"));
 
-       /* driver.navigate().to(baseUrl+"login");
+        elementU.click();
 
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys("khmuminov@gmail.com");
-        WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys("12345678");
-        WebElement buttonConnect=driver.findElement(By.xpath("//button"));
+        //PRESS Add User button
 
-        buttonConnect.click();
-
-        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);*/
-
-       WebElement elementU = driver.findElement(By.linkText("Users"));
-
-       elementU.click();
-
-       driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-
-
-       //PRESS Add User button
        driver.navigate().to(Constants.BASE_URL+"users/add");
 
        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
@@ -164,15 +141,87 @@ public class TestWithServer {
 
        //Press ->
 
+       //Set user group
        WebElement userGroup = driver.findElement(By.id("input_userGroup"));
        userGroup.sendKeys("User");
 
 
        //Press Add button
+
+       //Check if user added successfully
+    }
+
+    @Test(priority = 3)
+    public void UpdateUserTest(){
+
+        WebElement elementU = driver.findElement(By.linkText("Users"));
+
+        elementU.click();
+
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+        //Find "Selenium Tester" user div
+
+        //Find update button for selected user
+        WebElement elementUpdate = driver.findElement(By.linkText("Update"));
+
+
+        //Change Fields if needed
+        WebElement emailField = driver.findElement(By.id("input_email"));
+        emailField.sendKeys("test@test.io");
+
+        WebElement passwordField = driver.findElement(By.id("input_password"));
+        passwordField.sendKeys("12345678");
+
+
+        WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
+        repeatField.sendKeys("12345678");
+
+
+        //PRESS -> button
+
+        WebElement nameField = driver.findElement(By.id("input_name"));
+        nameField.sendKeys("Selenium");
+
+        WebElement surnameField = driver.findElement(By.id("input_surname"));
+        surnameField.sendKeys("Tester");
+
+        WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
+        phoneField.sendKeys("++7777777");
+
+        WebElement organisationField = driver.findElement(By.id("input_organisation"));
+        organisationField.sendKeys("Becon");
+
+        WebElement departmentField = driver.findElement(By.id("input_department"));
+        organisationField.sendKeys("OpenCelium");
+
+        //Set User group
+
+        //Press Update Button
+
+        //Check if succesfully modified
+    }
+
+    @Test(priority = 4)
+    public void DeleteUserTest(){
+
+        WebElement elementU = driver.findElement(By.linkText("Users"));
+
+        elementU.click();
+
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+        //Find "Selenium Tester" user div
+
+        //Find delete button for selected user
+        WebElement elementUpdate = driver.findElement(By.linkText("Delete"));
+
     }
 
 
 
-}
+
+
+    }
 
 
