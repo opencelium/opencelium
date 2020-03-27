@@ -54,7 +54,7 @@ class Hint extends Component{
                     {
                         openTour
                         ?
-                            <HelpIcon onClick={openTour}/>
+                            <HelpIcon onClick={openTour} id={text}/>
                         :
                             null
                     }

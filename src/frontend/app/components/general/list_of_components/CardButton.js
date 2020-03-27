@@ -17,6 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {permission} from "../../../decorators/permission";
+import {formatHtmlId} from "../../../utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -38,9 +39,10 @@ class CardButton extends Component{
     }
 
     render(){
-        const {className, onClick, text} = this.props;
+        const {className, onClick, text, index} = this.props;
+        let id = formatHtmlId(`button_${text}_${index}`);
         return (
-            <div className={className} onClick={onClick}>{text}</div>
+            <div className={className} onClick={onClick} id={id}>{text}</div>
         );
     }
 }
@@ -49,6 +51,7 @@ CardButton.propTypes = {
     className: PropTypes.string,
     onClick: PropTypes.func,
     text: PropTypes.string.isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 CardButton.defaultProps = {

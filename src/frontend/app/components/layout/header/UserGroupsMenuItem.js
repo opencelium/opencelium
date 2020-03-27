@@ -58,6 +58,7 @@ class UserGroupsMenuItem extends Component{
                 label={{text: t('HEADER.USER_GROUPS.TITLE'), index: 0}}
                 to='/usergroups'
                 navigationTitleClass={'tour-step-usergroup'}
+                id={'menu_user_groups'}
             />
         );
     }

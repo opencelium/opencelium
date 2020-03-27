@@ -48,10 +48,10 @@ class TitleCell extends Component{
 
     render(){
         const {appearClassName} = this.state;
-        const {schedule} = this.props;
+        const {schedule, index} = this.props;
         return (
             <TableCell style={{position: 'relative'}}>
-                <WebHook schedule={schedule}/>
+                <WebHook index={index} schedule={schedule}/>
                 <div className={`${styles.title_cell} ${styles.schedule_list_title} ${appearClassName}`} style={{animationDelay: '0.5s'}} title={schedule.title}>
                     <span>{schedule.title}</span>
                 </div>
@@ -62,10 +62,12 @@ class TitleCell extends Component{
 
 TitleCell.propTypes = {
     schedule: PropTypes.object.isRequired,
+    index: PropTypes.number,
 };
 
 TitleCell.defaultProps = {
     schedule: null,
+    index: 0,
 };
 
 export default TitleCell;

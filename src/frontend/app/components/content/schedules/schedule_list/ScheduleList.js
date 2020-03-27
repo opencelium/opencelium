@@ -336,7 +336,7 @@ class ScheduleList extends Component{
         return(
             <Table authUser={authUser} selectable={false}>
                 <TableHead>
-                    <TableCell><Checkbox checked={allChecked} onChange={checkAllSchedules} theme={{check: styles[classNames.checkbox]}}/></TableCell>
+                    <TableCell><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} theme={{check: styles[classNames.checkbox]}}/></TableCell>
                     <TableCell><span>{t('LIST.TITLE')}</span></TableCell>
                     <TableCell><span>{t('LIST.CONNECTION')}</span></TableCell>
                     <TableCell className={'tour-step-3'}><span>{t('LIST.CRON')}</span></TableCell>
@@ -361,27 +361,28 @@ class ScheduleList extends Component{
                             <TableRow key={key} style={backgroundColorStyle}>
                                 <TableCell style={{padding: "8px 18px 8px 24px"}}>
                                     <Checkbox
+                                        id={`input_check_${key}`}
                                         checked={checked}
                                         onChange={(e) => checkOneSchedule(e, {key, id: schedule.id})}
                                         theme={{check: styles[classNames.checkbox]}}
                                     />
                                 </TableCell>
-                                <TitleCell schedule={schedule} notEmphasize={this.notEmphasize}/>
+                                <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>
                                 <TableCell className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></TableCell>
                                 <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
-                                <LastSuccessCell schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
-                                <LastFailureCell schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
+                                <LastSuccessCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
+                                <LastFailureCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
                                 <LastDurationCell schedule={schedule} t={t}/>
-                                <StatusCell schedule={schedule}/>
+                                <StatusCell index={key} schedule={schedule}/>
                                 <TableCell style={{padding: '5px'}}>
                                     <div className={styles[classNames.schedule_list_actions]}>
                                         <div>
-                                            <ScheduleStart schedule={schedule}/>
-                                            <ScheduleUpdate schedule={schedule}/>
+                                            <ScheduleStart index={key} schedule={schedule}/>
+                                            <ScheduleUpdate index={key} schedule={schedule}/>
                                         </div>
                                         <div>
-                                            <ScheduleDelete schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
-                                            <WebHookTools schedule={schedule} t={t}/>
+                                            <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
+                                            <WebHookTools index={key} schedule={schedule} t={t}/>
                                         </div>
                                     </div>
                                 </TableCell>

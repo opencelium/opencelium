@@ -13,9 +13,6 @@ import CMethodItem from "../../../../../../../classes/components/content/connect
 import CConnectorItem, {CONNECTOR_FROM} from "../../../../../../../classes/components/content/connection/CConnectorItem";
 import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
 import Enhancement from "../mapping/enhancement/Enhancement";
-import {FIELD_TYPE_REQUEST} from "../utils";
-import CBindingItem from "../../../../../../../classes/components/content/connection/field_binding/CBindingItem";
-import TooltipText from "../../../../../basic_components/tooltips/TooltipText";
 
 class Body extends Component{
 
@@ -138,7 +135,7 @@ class Body extends Component{
         bindingItem.enhancement = null;
         return (
             <Dialog
-                actions={[{label: 'Ok', onClick: ::this.updateEnhancement}, {label: 'Cancel', onClick: ::this.toggleEnhancement}]}
+                actions={[{label: 'Ok', onClick: ::this.updateEnhancement, id: 'body_ok'}, {label: 'Cancel', onClick: ::this.toggleEnhancement, id: 'body_cancel'}]}
                 active={showEnhancement}
                 onEscKeyDown={::this.toggleEnhancement}
                 onOverlayClick={::this.toggleEnhancement}

@@ -58,6 +58,7 @@ class ConnectorsMenuItem extends Component{
                 label={{text: t('HEADER.CONNECTORS.TITLE'), index: 0}}
                 to='/connectors'
                 navigationTitleClass={'tour-step-connector'}
+                id={'menu_connectors'}
             />
         );
     }

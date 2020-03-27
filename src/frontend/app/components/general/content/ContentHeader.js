@@ -71,7 +71,7 @@ class ContentHeader extends Component{
                 {
                     hasHelp
                         ?
-                            <HelpIcon onClick={header.onHelpClick}/>
+                            <HelpIcon onClick={header.onHelpClick} id={title}/>
                         :
                             null
                 }

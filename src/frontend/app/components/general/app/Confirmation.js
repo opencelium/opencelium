@@ -35,8 +35,8 @@ class Confirmation extends Component{
         const {t, okClick, cancelClick, active, title, message} = this.props;
         let {onEscKeyDown, onOverlayClick} = this.props;
         const actions = [
-            {label: t('CONFIRMATION.OK'), onClick: okClick, tabIndex: 2},
-            {label: t('CONFIRMATION.CANCEL'), onClick: cancelClick, autoFocus: true, tabIndex: 1},
+            {label: t('CONFIRMATION.OK'), onClick: okClick, tabIndex: 2, id: 'confirmation_ok'},
+            {label: t('CONFIRMATION.CANCEL'), onClick: cancelClick, autoFocus: true, tabIndex: 1, id: 'confirmation_cancel'},
         ];
         if(onEscKeyDown === null){
             onEscKeyDown = cancelClick;

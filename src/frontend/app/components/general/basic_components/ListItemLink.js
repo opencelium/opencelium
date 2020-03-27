@@ -37,6 +37,7 @@ export default function (data){
     return(
         <NavItem className={data.itemClassName ? data.itemClassName : ''}>
             <NavLink
+                id={data.id}
                 tag={Link}
                 to={data.to}
                 onClick={onClick}

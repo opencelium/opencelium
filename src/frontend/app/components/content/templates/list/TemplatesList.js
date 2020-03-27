@@ -95,7 +95,7 @@ class TemplatesList extends Component{
         translations.add_button = t('LIST.IMPORT_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         let mapEntity = {};
-        mapEntity.map = (template) => {
+        mapEntity.map = (template, key) => {
             let result = {};
             let fromInvokerName = template.connection.fromConnector.invoker.name;
             let toInvokerName = template.connection.toConnector.invoker.name;
@@ -103,7 +103,7 @@ class TemplatesList extends Component{
             if(exportedTemplate.templateId === template.templateId && exportingTemplate === API_REQUEST_STATE.START){
                 avatarElement = <Loading authUser={authUser} className={styles.export_loading}/>;
             } else{
-                avatarElement = <TooltipFontIcon className={styles.export} value={'get_app'} tooltip={'Download'} onClick={(e) => ::this.exportTemplate(e, template)}/>;
+                avatarElement = <TooltipFontIcon id={`template_download_${key}`} className={styles.export} value={'get_app'} tooltip={'Download'} onClick={(e) => ::this.exportTemplate(e, template)}/>;
             }
             result.id = template.templateId;
             result.title = template.name;

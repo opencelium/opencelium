@@ -60,6 +60,7 @@ class LogoMenuItem extends Component{
                 icon={<img src={'../../../img/logo.png'} width={'44px'} style={{cursor: 'pointer'}} alt={t('HEADER.LOGO.LOGO_TOOLTIP')}/>}
                 style={{padding: '0', height: '40px'}}
                 className={'tour-step-dashboard'}
+                id={'menu_logo'}
             />
         );
     }

@@ -31,6 +31,18 @@ export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPP
 
 
 /**
+ * to format html id
+ *
+ * @param id - id of the html element
+ */
+export function formatHtmlId(id){
+    if(isString(id)) {
+        return id.replace(' ', '_').toLowerCase();
+    }
+    return 'no_id';
+}
+
+/**
  * to validate before add schedule
  *
  * @param connectionPointer - string pointer for connection

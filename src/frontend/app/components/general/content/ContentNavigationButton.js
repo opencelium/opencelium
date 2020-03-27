@@ -22,7 +22,7 @@ import {Row, Col} from 'react-grid-system';
 
 import styles from '../../../themes/default/general/content.scss';
 import {permission} from "../../../decorators/permission";
-import {getThemeClass, isString} from "../../../utils/app";
+import {formatHtmlId, getThemeClass, isString} from "../../../utils/app";
 import Button from "../basic_components/buttons/Button";
 import {generateLabel} from "../../../utils/app";
 import FontIcon from "../basic_components/FontIcon";
@@ -102,7 +102,7 @@ class ContentNavigationButton extends Component{
                     {
                         type !== 'add' 
                             ?
-                            <span className={styles[classNames.navigation_button]} onClick={::this.click}>
+                            <span className={styles[classNames.navigation_button]} onClick={::this.click} id={formatHtmlId(`button_${title}`)}>
                                 {icon !== '' ? <FontIcon value={icon}/> : null}
                                 {::this.renderTitle()}
                             </span>

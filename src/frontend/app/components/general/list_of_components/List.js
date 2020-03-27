@@ -237,7 +237,7 @@ class List extends Component{
                                 filteredEntities.length > 0
                                     ?
                                         filteredEntities.map((entity, key) => {
-                                            let mappedEntity = mapEntity.map(entity);
+                                            let mappedEntity = mapEntity.map(entity, key);
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
                                             let graphLink = mapEntity.hasOwnProperty('getGraphLink') ? mapEntity.getGraphLink(entity) : '';

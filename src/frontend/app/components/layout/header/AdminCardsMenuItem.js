@@ -58,6 +58,7 @@ class AdminCardsMenuItem extends Component{
                 label={{text: t('HEADER.ADMIN.TITLE'), index: 0}}
                 to='/admin_cards'
                 navigationTitleClass={'tour-step-app'}
+                id={'menu_admin'}
             />
         );
     }

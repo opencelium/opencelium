@@ -171,7 +171,7 @@ class CreateParam extends Component{
         const {isCreateParam, currentAddParam} = this.state;
         return (
             <Dialog
-                actions={[{label: 'Ok', onClick: ::this.addFromParam}, {label: 'Cancel', onClick: ::this.toggleCreateParam}]}
+                actions={[{label: 'Ok', onClick: ::this.addFromParam, id: 'create_param_ok'}, {label: 'Cancel', onClick: ::this.toggleCreateParam, id: 'create_param_cancel'}]}
                 active={isCreateParam}
                 onEscKeyDown={::this.toggleCreateParam}
                 onOverlayClick={::this.toggleCreateParam}

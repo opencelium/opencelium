@@ -58,6 +58,7 @@ class SchedulesMenuItem extends Component{
                 label={{text: t('HEADER.SCHEDULES.TITLE'), index: 0}}
                 to='/schedules'
                 navigationTitleClass={'tour-step-schedule'}
+                id={'menu_schedules'}
             />
         );
     }

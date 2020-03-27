@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {Input as ToolboxInput} from "react-toolbox/lib/input";
 import styles from '../../../../themes/default/general/basic_components.scss';
-import {getThemeClass} from "../../../../utils/app";
+import {formatHtmlId, getThemeClass} from "../../../../utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -99,7 +99,8 @@ class Input extends Component{
     }
 
     render(){
-        const {authUser, onChange, onBlur, isPopupInput, ...props} = this.props;
+        let {authUser, onChange, onBlur, isPopupInput, ...props} = this.props;
+        props.id = `input_${formatHtmlId(props.name ? props.name : props.label)}`;
         let {theme, className} = this.props;
         let classNames = [
             'input_input_element',
