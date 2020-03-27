@@ -34,26 +34,21 @@ class LastDurationCell extends Component{
             appearClassName: '',
         };
     }
-
-    static getDerivedStateFromProps(props, state) {
-        let newTime = props.schedule ? props.schedule.getSuccessDuration() : NO_DATA;
-        let oldTime = state.schedule ? state.schedule.getSuccessDuration() : NO_DATA;
+    componentDidUpdate(prevProps){
+        const {appearClassName} = this.state;
+        let newTime = this.props.schedule.getSuccessDuration();
+        let newId = this.props.schedule.id;
+        let oldTime = prevProps.schedule.getSuccessDuration();
+        let oldId = prevProps.schedule.id;
         if(newTime !== NO_DATA) {
-            if(oldTime !== NO_DATA) {
-                if(newTime !== oldTime) {
-                    return {appearClassName : styles.emphasize_cell};
-                }
+            if(newId === oldId && newTime !== oldTime && appearClassName !== styles.emphasize_cell) {
+                this.setState({appearClassName: styles.emphasize_cell});
+                setTimeout(() => {this.setState({appearClassName: ''});}, 2000);
             }
-        }
-        return null;
-    }
-
-    componentDidUpdate(nextProps, nextState){
-        if(this.state.appearClassName !== '') {
-            let that = this;
-            setTimeout(() => {
-                that.setState({appearClassName: ''});
-                }, EMPHASIZE_DURATION_ANIMATION);
+        } else{
+            if(appearClassName !== '') {
+                this.setState({appearClassName: ''});
+            }
         }
     }
 

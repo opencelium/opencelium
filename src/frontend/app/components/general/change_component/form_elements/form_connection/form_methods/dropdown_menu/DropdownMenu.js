@@ -217,6 +217,12 @@ class DropdownMenu extends Component{
                     placeholder={name}
                     maxMenuHeight={200}
                     minMenuHeight={50}
+                    styles={{
+                        menu: (provided) => ({
+                            ...provided,
+                            width: '250px'
+                        })
+                    }}
                 />
                 <span className={theme.bar}/>
                 <label className={theme.label}>{name}</label>

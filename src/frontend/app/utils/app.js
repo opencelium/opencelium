@@ -99,6 +99,15 @@ export function sortByNameFunction(a, b){
 }
 
 /**
+ * a callback to sort by id
+ */
+export function sortByIdFunction(a, b){
+    let propertyA = parseInt(a.schedulerId);
+    let propertyB = parseInt(b.schedulerId);
+    if(propertyA < propertyB){return 1;} if(propertyA > propertyB){return -1;} return 0;
+}
+
+/**
  * to run callback on Enter event
  *
  * @param e - event

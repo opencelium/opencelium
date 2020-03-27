@@ -33,7 +33,8 @@ import Loading from "../components/general/app/Loading";
 export default function (store){
     return next => action => {
         let systemTitle = action.payload && action.payload.hasOwnProperty('systemTitle') ? action.payload.systemTitle : 'OC';
-        let data = {type: '', message: '', systemTitle};
+        let shortMessage = action.payload && action.payload.hasOwnProperty('shortMessage') ? action.payload.shortMessage : '';
+        let data = {type: '', message: '', systemTitle, shortMessage};
         const dividedState = divideState(action.type);
         if(hasNotification(dividedState) && isNotBackground(action)) {
             data.message = dividedState.prefix;
@@ -63,6 +64,12 @@ export default function (store){
                     break;
             }
             const notification = document.getElementById('notification');
+            for(let i = notification.children.length - 1; i >= 0; i--){
+                let child = notification.children[i];
+                if(child.innerHTML === ''){
+                    child.remove();
+                }
+            }
             let idName = 'note_';
             if(notification.children.length === 0 || typeof notification.children[notification.children.length - 1].children[0] === 'undefined') {
                 idName += 1;
@@ -74,9 +81,6 @@ export default function (store){
             const newDiv = document.createElement("div");
             notification.appendChild(newDiv);
             let domElem = notification.children[notification.children.length - 1];
-            setTimeout(function(){
-                document.getElementById(idName).parentNode.remove();
-            }, 5500);
             ReactDOM.render(
                 <Suspense fallback={(<Loading/>)}>
                     <Notification data={data} id={idName} params={action.payload}/>

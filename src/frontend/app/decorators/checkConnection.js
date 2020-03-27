@@ -47,7 +47,9 @@ export function checkConnection(){
                 constructor(props) {
                     super(props);
 
-                    this.startCheckingConnection = false;
+                    this.state = {
+                        checkedOnce: false,
+                    };
                 }
 
                 componentDidMount() {
@@ -56,8 +58,10 @@ export function checkConnection(){
 
                 componentDidUpdate() {
                     const {checkingOCConnection, error, logoutUserFulfilled} = this.props;
-                    if (this.startCheckingConnection && checkingOCConnection === API_REQUEST_STATE.FINISH) {
-                        this.startCheckingConnection = false;
+                    if (checkingOCConnection === API_REQUEST_STATE.FINISH) {
+                        if(!this.state.checkedOnce){
+                            this.setState({checkedOnce: true});
+                        }
                         if (error !== null) {
                             logoutUserFulfilled({});
                             history.push('/login');
@@ -66,15 +70,19 @@ export function checkConnection(){
                 }
 
                 checkOCConnection() {
-                    this.startCheckingConnection = true;
                     this.props.checkOCConnection();
                 }
 
                 render() {
-                    const {authUser, logining, logouting, checkingOCConnection} = this.props;
-                    let isCheckingConnection = this.startCheckingConnection && checkingOCConnection !== API_REQUEST_STATE.FINISH;
-                    if (logining || logouting || isCheckingConnection)
-                        return <div style={{padding: '0 15px', maxWidth: '1140px', marginLeft: 'auto', marginRight: 'auto'}}><Loading authUser={authUser}/></div>;
+                    const {authUser, logining, logouting} = this.props;
+                    let isCheckingConnection = !this.state.checkedOnce;
+                    if (logining || logouting || isCheckingConnection){
+                        return (
+                            <div style={{padding: '0 15px', maxWidth: '1140px', marginLeft: 'auto', marginRight: 'auto'}}>
+                                <Loading authUser={authUser}/>
+                            </div>
+                        );
+                    }
                     return <Component {...this.props}/>;
                 }
             }

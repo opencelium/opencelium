@@ -78,7 +78,12 @@ class Body extends Component{
 
     getCurrentBindingItem(fieldName){
         const {connection, method} = this.props;
-        return connection.fieldBinding.find(item => item.to.findIndex(elem => elem.color === method.color && elem.field === fieldName) !== -1);
+        return connection.fieldBinding.find(item => {
+            return item.to.findIndex(elem => {
+                let name = elem.field.replace('[]', '');
+                return elem.color === method.color && name === fieldName;
+            }) !== -1;
+        });
     }
 
     /*

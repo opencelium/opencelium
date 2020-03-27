@@ -32,7 +32,6 @@ import CurrentSchedules from "./current_schedules/CurrentSchedules";
 
 const connectorPrefixURL = '/schedule';
 
-
 function mapStateToProps(state){
     const auth = state.get('auth');
     const schedules = state.get('schedules');
