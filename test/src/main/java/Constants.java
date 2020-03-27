@@ -6,11 +6,11 @@ public interface Constants {
 
 
     //Test user credentials
-    public static final String USERNAME = "khmuminov@gmail.com";
-    public static final String PASSWORD = "12345678";
+    public static final String USERNAME = "admin@opencelium.io";
+    public static final String PASSWORD = "1234";
 
 
     //URL constants
-    public static String BASE_URL = "http://oc-demo.westeurope.cloudapp.azure.com:8888/";
+    public static String BASE_URL = "http://localhost:8888/";
     public static String NODE_URL = "http://localhost:4444/wd/hub";
 }

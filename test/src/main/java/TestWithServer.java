@@ -4,6 +4,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 //import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.*;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -16,6 +17,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import javax.sound.midi.SysexMessage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -104,8 +106,11 @@ public class TestWithServer {
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         //PRESS Add User button
+       WebElement addUserButton = driver.findElement(By.id("button_add_user"));
+       addUserButton.click();
 
-       driver.navigate().to(Constants.BASE_URL+"users/add");
+
+       //driver.navigate().to(Constants.BASE_URL+"users/add");
 
        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
@@ -121,6 +126,8 @@ public class TestWithServer {
 
 
        //PRESS -> button
+       WebElement nextArrow = driver.findElement(By.id("navigation_next"));
+       nextArrow.click();
 
        WebElement nameField = driver.findElement(By.id("input_name"));
        nameField.sendKeys("Selenium");
@@ -140,18 +147,40 @@ public class TestWithServer {
        //Select title
 
        //Press ->
+       WebElement nextArrow1 = driver.findElement(By.id("navigation_next"));
+       nextArrow1.click();
 
        //Set user group
        WebElement userGroup = driver.findElement(By.id("input_userGroup"));
-       userGroup.sendKeys("User");
+
+       Actions act = new Actions(driver);
+
+       act.clickAndHold(userGroup);
+
+       userGroup.click();
+
+       WebElement userRole = driver.findElement(By.id("react-select-2-option-2"));
+       userRole.click();
+
+
+
+
+       //System.out.println("VALUE "+userGroup.getAttribute("value"));
 
 
        //Press Add button
 
+       WebElement buttonAdd = driver.findElement(By.id("button_add"));
+       buttonAdd.click();
+
+       WebElement elementUsers=driver.findElement (By.linkText("Users"));
+
+       Assert.assertNotNull(elementUsers);
+
        //Check if user added successfully
     }
 
-    @Test(priority = 3)
+   /* @Test(priority = 3)
     public void UpdateUserTest(){
 
         WebElement elementU = driver.findElement(By.linkText("Users"));
@@ -217,11 +246,11 @@ public class TestWithServer {
         WebElement elementUpdate = driver.findElement(By.linkText("Delete"));
 
     }
+*/
 
 
 
 
-
-    }
+}
 
 
