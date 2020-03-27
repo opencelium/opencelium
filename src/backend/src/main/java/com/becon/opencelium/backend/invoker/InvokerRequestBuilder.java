@@ -130,11 +130,19 @@ public class InvokerRequestBuilder{
             String requiredField;
             if (v.contains("{") && v.contains("}")){
                 requiredField = v.replace("{","").replace("}","");
-                String value = requestData.stream()
-                        .filter(r -> r.getField().equals(requiredField))
-                        .map(RequestData::getValue).findFirst().get();
+//                String value = requestData.stream()
+//                        .filter(r -> r.getField().equals(requiredField))
+//                        .map(RequestData::getValue).findFirst().get();
+                String curlyValue = "";
+                for (RequestData data : requestData) {
+                    String field = "{" + data.getField() + "}";// TODO: should be regular expression
+                    curlyValue = v;
+                    if (v.contains(field)){
+                        curlyValue = curlyValue.replace(field,data.getValue());
+                    }
+                }
 
-                headerItem.put(k, value);
+                headerItem.put(k, curlyValue);
                 return;
             }
             headerItem.put(k, v);

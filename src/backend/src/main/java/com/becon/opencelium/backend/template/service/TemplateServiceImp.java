@@ -143,7 +143,8 @@ public class TemplateServiceImp implements TemplateService {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
                             return objectMapper.readValue(contentBuilder.toString(), Template.class);
                         } catch (Exception e) {
-                            throw new RuntimeException(e);
+                            e.printStackTrace();
+                            throw new RuntimeException("ENCODE_MUST_BE_UTF8");
                         }
                     }).collect(Collectors.toList());
         } catch (Exception e) {
