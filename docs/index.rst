@@ -13,6 +13,7 @@ This documentation is organized into a couple of sections:
    gettinginvolved/introduction
    gettinginvolved/requirements
    gettinginvolved/installation
+   gettinginvolved/administration
 
 .. toctree::
    :caption: Usage
@@ -26,6 +27,12 @@ This documentation is organized into a couple of sections:
    usage/connections
    usage/schedules
    usage/apps
+
+.. toctree::
+   :caption: Use Cases
+   :maxdepth: 2
+
+   usecases/manage_templates
 
 .. toctree::
    :caption: REST API Reference
