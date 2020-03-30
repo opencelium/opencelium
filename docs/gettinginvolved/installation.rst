@@ -182,7 +182,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone https://bitbucket.org/becon_gmbh/opencelium.git
+	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 	root@shell> mv opencelium/* .
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
@@ -376,7 +376,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone https://bitbucket.org/becon_gmbh/opencelium.git
+	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 	root@shell> mv opencelium/* .
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
@@ -549,8 +549,7 @@ Red Hat Enterprise Linux
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b StableVersion_ https://bitbucket.org/becon_gmbh/opencelium.git
-.. _StableVersion: https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 	root@shell> mv opencelium/* .
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
