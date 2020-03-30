@@ -16,19 +16,13 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
-import com.becon.opencelium.backend.execution.ExecutionContainer;
 import com.becon.opencelium.backend.neo4j.entity.BodyNode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
 public class BodyNodeServiceImp implements BodyNodeService {
-
-    @Autowired
-    private ExecutionContainer executionContainer;
-
 
     public static Map<String, Object> toResource(BodyNode entity){
         return FieldNodeServiceImp.toResource(entity.getFields());
