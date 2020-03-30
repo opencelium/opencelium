@@ -14,17 +14,18 @@ import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class TestStandalone {
-    public static void main(String[] args){
+    public static void main(String[] args) throws MalformedURLException {
 
-        System.setProperty("webdriver.gecko.driver","/home/khmuminov/geckodriver");
+        /*System.setProperty("webdriver.gecko.driver","/home/khmuminov/geckodriver");
 
         FirefoxOptions option = new FirefoxOptions();
         DesiredCapabilities cap = DesiredCapabilities.firefox();
-        cap.setPlatform(Platform.LINUX);
+        cap.setPlatform(Platform.LINUX);ll
         cap.setBrowserName(BrowserType.FIREFOX);
 
         cap.setCapability(FirefoxOptions.FIREFOX_OPTIONS, option);
@@ -43,7 +44,7 @@ public class TestStandalone {
         element_password.sendKeys("12345678");
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
 
-        buttonConnect.click();
+        buttonConnect.click();*/
 
 
 
@@ -79,6 +80,22 @@ public class TestStandalone {
         //LogEntries logs = driver.manage().logs().get(LogType.PERFORMANCE);
 
         //System.out.println(logs);*/
+
+
+      TestWithServer test = new TestWithServer();
+      test.setUp();
+
+      test.SimpleTest();
+
+      test.LoginTest();
+
+      test.AddUserTest();
+
+      test.UpdateUserTest();
+
+      test.DeleteUserTest();
+
+
 
     }
 }
