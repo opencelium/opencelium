@@ -14,7 +14,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const DefaultAuthenticationType = {type: 'text', maxLength: 256, icon: 'perm_identity', defaultValue: 'NO CREDENTIAL TYPE',};
+export const DefaultAuthenticationType = {type: 'text', icon: 'perm_identity', defaultValue: 'NO CREDENTIAL TYPE',};
 
 const Url = {key: 'url', type: 'text', maxLength: 256, icon: 'link', };
 
