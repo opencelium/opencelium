@@ -29,6 +29,12 @@ This documentation is organized into a couple of sections:
    usage/apps
 
 .. toctree::
+   :caption: Use Cases
+   :maxdepth: 2
+
+   usecases/manage_templates
+
+.. toctree::
    :caption: REST API Reference
    :maxdepth: 2
 
