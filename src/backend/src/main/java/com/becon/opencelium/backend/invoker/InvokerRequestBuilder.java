@@ -131,15 +131,13 @@ public class InvokerRequestBuilder{
 //                String value = requestData.stream()
 //                        .filter(r -> r.getField().equals(requiredField))
 //                        .map(RequestData::getValue).findFirst().get();
-                String curlyValue = "";
+                String curlyValue = v;
                 for (RequestData data : requestData) {
                     String field = "{" + data.getField() + "}";// TODO: should be regular expression
-                    curlyValue = v;
                     if (v.contains(field)){
                         curlyValue = curlyValue.replace(field,data.getValue());
                     }
                 }
-
                 headerItem.put(k, curlyValue);
                 return;
             }
