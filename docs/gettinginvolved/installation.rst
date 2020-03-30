@@ -549,10 +549,13 @@ Red Hat Enterprise Linux
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone https://bitbucket.org/becon_gmbh/opencelium.git
+	root@shell> git clone -b <`stableversion`> https://bitbucket.org/becon_gmbh/opencelium.git
 	root@shell> mv opencelium/* .
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
+
+
+.. _stableversion: https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 2. Run frontend with yarn
 
