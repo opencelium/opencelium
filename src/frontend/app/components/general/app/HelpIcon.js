@@ -16,6 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import TooltipFontIcon from "../basic_components/tooltips/TooltipFontIcon";
+import {formatHtmlId} from "../../../utils/app";
 
 /**
  * Component for displaying Help Icon in Content, List
@@ -27,7 +28,7 @@ class HelpIcon extends Component{
     }
 
     render(){
-        const {onClick} = this.props;
+        const {onClick, id} = this.props;
         return (
             <sup>
                 <TooltipFontIcon
@@ -35,6 +36,7 @@ class HelpIcon extends Component{
                     value={'help_outline'}
                     tooltip={'Help'}
                     onClick={onClick}
+                    id={`help_icon_${formatHtmlId(id)}`}
                 />
             </sup>
         );
@@ -43,6 +45,7 @@ class HelpIcon extends Component{
 
 HelpIcon.propTypes = {
     onClick: PropTypes.func.isRequired,
+    id: PropTypes.string.isRequired,
 };
 
 export default HelpIcon;

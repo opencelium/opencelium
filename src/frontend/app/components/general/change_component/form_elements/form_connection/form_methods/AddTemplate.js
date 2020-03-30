@@ -83,7 +83,7 @@ class AddTemplate extends Component{
             <div style={{textAlign: 'right'}}>
                 <Button authUser={authUser} title={templateLabels.addTemplate} onClick={::this.toggleAddTemplateDialog}/>
                 <Dialog
-                    actions={[{label: 'Ok', onClick: ::this.addTemplate}, {label: 'Cancel', onClick: ::this.toggleAddTemplateDialog}]}
+                    actions={[{label: 'Ok', onClick: ::this.addTemplate, id: 'add_template_ok'}, {label: 'Cancel', onClick: ::this.toggleAddTemplateDialog, id: 'add_template_cancel'}]}
                     active={visibleAddTemplateDialog}
                     onEscKeyDown={::this.toggleAddTemplateDialog}
                     onOverlayClick={::this.toggleAddTemplateDialog}

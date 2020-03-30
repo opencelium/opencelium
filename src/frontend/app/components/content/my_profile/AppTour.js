@@ -75,6 +75,7 @@ class AppTour extends Component{
                         <Col md={12}>
                             <span className={styles[classNames.user_details_app_tour_title]}>{t('APP_TOUR.TITLE')}</span>
                                 <TooltipSwitch
+                                    id={'app_tour'}
                                     authUser={authUser}
                                     tooltip={appTour ? t('APP_TOUR.DISABLE') : t('APP_TOUR.ENABLE')}
                                     checked={appTour}

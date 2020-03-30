@@ -50,9 +50,6 @@ class Themes extends Component{
         let authUser = Object.assign({}, this.props.authUser);
         authUser.theme = theme;
         this.props.updateTheme(authUser);
-/*
-        let {authUser} = this.props;
-        this.props.updateTheme({authUser, theme});*/
     }
 
     render(){
@@ -70,8 +67,8 @@ class Themes extends Component{
                     <Row className={styles[classNames.user_details_themes]}>
                         <Col md={12}>
                             <RadioGroup name='theme' value={theme} onChange={::this.handleChangeTheme}>
-                                <RadioButton label={`${t('THEME.DEFAULT')}`} value='default'/>
-                                <RadioButton label={`${t('THEME.OTHER')}`} value='other'/>
+                                <RadioButton id={`theme_default`} label={`${t('THEME.DEFAULT')}`} value='default'/>
+                                <RadioButton id={`theme_other`} label={`${t('THEME.OTHER')}`} value='other'/>
                             </RadioGroup>
                         </Col>
                     </Row>

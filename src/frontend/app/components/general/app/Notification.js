@@ -43,7 +43,6 @@ class Notification extends Component{
 
     componentDidMount(){
         let that = this;
-        const {hasCloseButton} = this.state;
         const {id, timeOfBeing} = that.props;
         if(timeOfBeing !== 'infinite') {
             setTimeout(function () {
@@ -107,7 +106,7 @@ class Notification extends Component{
     renderCloseButton(){
         if(this.state.hasCloseButton){
             return (
-                <TooltipFontIcon className={styles.close_icon} value={'close'} tooltip={'Close'} onClick={::this.closeNotification}/>
+                <TooltipFontIcon id={'notification_close'} className={styles.close_icon} value={'close'} tooltip={'Close'} onClick={::this.closeNotification}/>
             );
         }
         return null;

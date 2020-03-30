@@ -69,6 +69,7 @@ class FormInputFile extends Component{
                     onChange={::this.handleChange}
                     accept="image/x-png,image/jpeg"
                     className={`${styles.input_file_browse}`}
+                    name={label}
                 />
                 <FontIcon value={icon} className={theme.icon}/>
                 <span className={theme.bar}/>

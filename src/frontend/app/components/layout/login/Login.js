@@ -190,7 +190,7 @@ class Login extends Component{
                 <Button
                     className={styles.button_connect}
                     onClick={::this.login}
-                    autoFocus
+                    id={'login_button'}
                 >
                     {generateLabel(t("LOGIN.BUTTON_CONNECT"), 0, {keyNavigationLetter: styles.key_navigation_letter})}
                 </Button>

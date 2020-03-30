@@ -90,7 +90,7 @@ class ScheduleUpdate extends Component{
     renderDialogUpdateSchedule(){
         return (
             <Dialog
-                actions={[{label: 'Ok', onClick: ::this.updateSchedule}, {label: 'Cancel', onClick: ::this.toggleUpdateSchedule}]}
+                actions={[{label: 'Ok', onClick: ::this.updateSchedule, id: 'schedule_update_ok'}, {label: 'Cancel', onClick: ::this.toggleUpdateSchedule, id: 'schedule_update_cancel'}]}
                 active={this.state.showUpdateSchedule}
                 onEscKeyDown={::this.toggleUpdateSchedule}
                 onOverlayClick={::this.toggleUpdateSchedule}
@@ -107,12 +107,17 @@ class ScheduleUpdate extends Component{
     }
 
     render(){
-        const {t, authUser} = this.props;
+        const {t, authUser, index} = this.props;
         let classNames = ['schedule_list_action'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <span className={styles[classNames.schedule_list_action]}>
-                <TooltipFontIcon value={'edit'} tooltip={t('LIST.TOOLTIP_UPDATE_ICON')} onClick={::this.toggleUpdateSchedule}/>
+                <TooltipFontIcon
+                    id={`schedule_update_${index}`}
+                    value={'edit'}
+                    tooltip={t('LIST.TOOLTIP_UPDATE_ICON')}
+                    onClick={::this.toggleUpdateSchedule}
+                />
                 {this.renderDialogUpdateSchedule()}
             </span>
         );
@@ -121,6 +126,7 @@ class ScheduleUpdate extends Component{
 
 ScheduleUpdate.propTypes = {
     schedule: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 export default ScheduleUpdate;

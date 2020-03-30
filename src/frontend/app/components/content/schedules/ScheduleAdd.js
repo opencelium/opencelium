@@ -181,7 +181,7 @@ class ScheduleAdd extends Component{
                     <div className={`${theme.input}`}>
                         <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.multiselect_label]}`}/>
                             <Select
-                                inputId={'add_connection'}
+                                id={'input_connection'}
                                 name={'connection'}
                                 value={connection}
                                 onChange={::this.onChangeConnections}

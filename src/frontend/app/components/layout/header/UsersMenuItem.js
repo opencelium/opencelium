@@ -58,6 +58,7 @@ class UsersMenuItem extends Component{
                 label={{text: t('HEADER.USERS.TITLE'), index: 0}}
                 to='/users'
                 navigationTitleClass={'tour-step-user'}
+                id={'menu_users'}
             />
         );
     }

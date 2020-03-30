@@ -56,6 +56,7 @@ class DashboardMenuItem extends Component{
                 label={{text: t('HEADER.DASHBOARD.TITLE'), index: 0}}
                 to='/'
                 navigationTitleClass={'tour-step-dashboard'}
+                id={'menu_dashboard'}
             />
         );
     }

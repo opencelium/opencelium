@@ -58,6 +58,7 @@ class MyProfileMenuItem extends Component{
         const {t} = this.props;
         return (
             <ListItemLink
+                id={'menu_my_profile'}
                 label={{text: '', index: 3}}
                 tooltip={t('HEADER.MY_PROFILE.TITLE')}
                 to='/myprofile'

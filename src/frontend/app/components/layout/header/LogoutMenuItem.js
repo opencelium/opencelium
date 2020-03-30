@@ -84,6 +84,7 @@ class LogoutMenuItem extends Component{
         const {t} = this.props;
         return [
             <ListItemLink
+                id={'menu_logout'}
                 label={{text: '', index: 4}}
                 onClick={::this.wantLogout}
                 tooltip={t('HEADER.LOGOUT.TITLE')}

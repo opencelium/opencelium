@@ -49,7 +49,7 @@ class NotificationMessage extends Component{
         const {t} = this.props;
         return(
             <Dialog
-                actions={[{label: t('DIALOG_DETAILS.CLOSE'), onClick: ::this.toggleShowDialogInDetails}]}
+                actions={[{label: t('DIALOG_DETAILS.CLOSE'), onClick: ::this.toggleShowDialogInDetails, id: 'dialog_close'}]}
                 active={showDialogInDetails}
                 onEscKeyDown={::this.toggleShowDialogInDetails}
                 onOverlayClick={::this.toggleShowDialogInDetails}
@@ -70,7 +70,7 @@ class NotificationMessage extends Component{
             if(setHasCloseButton) {
                 setHasCloseButton(true);
             }
-            return <span>{`${shortMessage} (`}<a href='#' onClick={(e) => ::this.openDialog(e, comingMessage)}>{t('DETAILS')}</a>)</span>;
+            return <span>{`${shortMessage} (`}<a id='notification_url' href='#' onClick={(e) => ::this.openDialog(e, comingMessage)}>{t('DETAILS')}</a>)</span>;
         }
         if(checkColorRegExp && checkColorRegExp.length > 2){
             let color = comingMessage.substring(checkColorRegExp[1].length, checkColorRegExp[1].length + 7);

@@ -54,7 +54,7 @@ class LastSuccessCell extends Component{
 
     renderData(){
         const {appearClassName} = this.state;
-        let {schedule, hasElasticSearch} = this.props;
+        let {schedule, hasElasticSearch, index} = this.props;
         let time = schedule.getSuccessEndTime();
         let taId = schedule.getSuccessTaId();
         let executionId = schedule.getSuccessExecutionId();
@@ -79,7 +79,7 @@ class LastSuccessCell extends Component{
                         ?
                             <span>#{executionId}</span>
                         :
-                            <a href={url} target={'_blank'}>#{executionId}</a>
+                            <a id={`last_success_${index}`} href={url} target={'_blank'}>#{executionId}</a>
                 }
             </div>
         );
@@ -97,6 +97,7 @@ class LastSuccessCell extends Component{
 LastSuccessCell.propTypes = {
     schedule: PropTypes.object.isRequired,
     hasElasticSearch: PropTypes.bool,
+    index: PropTypes.number.isRequired,
 };
 
 LastSuccessCell.defaultProps = {

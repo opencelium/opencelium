@@ -36,6 +36,8 @@
 
 /*button*/
 .button {
+  box-shadow: 0 0 0 transparent;
+  border: 0 solid transparent;
   cursor: pointer;
   display: inline-block;
   text-align: center;
@@ -68,6 +70,8 @@
 }
 
 .active_button{
+  box-shadow: 0 0 0 transparent;
+  border: 0 solid transparent;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
@@ -95,6 +99,8 @@
 }
 
 .button_disable{
+  box-shadow: 0 0 0 transparent;
+  border: 0 solid transparent;
   cursor: default;
   display: inline-block;
   text-align: center;

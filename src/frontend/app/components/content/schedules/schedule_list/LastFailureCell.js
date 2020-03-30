@@ -54,7 +54,7 @@ class LastFailureCell extends Component{
 
     renderData(){
         const {appearClassName} = this.state;
-        let {schedule, hasElasticSearch} = this.props;
+        let {schedule, hasElasticSearch, index} = this.props;
         let time = schedule.getFailEndTime();
         let taId = schedule.getFailTaId();
         let executionId = schedule.getFailExecutionId();
@@ -79,7 +79,7 @@ class LastFailureCell extends Component{
                         ?
                             <span>#{executionId}</span>
                         :
-                            <a href={url} target={'_blank'}>#{executionId}</a>
+                            <a id={`last_fail_${index}`} href={url} target={'_blank'}>#{executionId}</a>
                 }
             </div>
         );
@@ -97,6 +97,7 @@ class LastFailureCell extends Component{
 LastFailureCell.propTypes = {
     schedule: PropTypes.object.isRequired,
     hasElasticSearch: PropTypes.bool,
+    index: PropTypes.number.isRequired,
 };
 
 LastFailureCell.defaultProps = {

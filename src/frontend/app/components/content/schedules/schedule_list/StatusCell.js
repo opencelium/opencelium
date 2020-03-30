@@ -61,7 +61,7 @@ class StatusCell extends Component{
     }
 
     render(){
-        const {schedule, currentSchedule, updatingScheduleStatus, triggeringSchedule, triggeringScheduleSuccessfully, authUser, t} = this.props;
+        const {schedule, currentSchedule, updatingScheduleStatus, triggeringSchedule, triggeringScheduleSuccessfully, authUser, t, index} = this.props;
         let classNames = [
             'schedule_list_status',
             'schedule_list_status_cell_loading',
@@ -104,6 +104,7 @@ class StatusCell extends Component{
         return (
             <TableCell className={backgroundStyle}>
                 <TooltipSwitch
+                    id={`switch_status_${index}`}
                     authUser={authUser}
                     tooltip={schedule.status ? t('LIST.TOOLTIP_ENABLE_SWITCH_FALSE') : t('LIST.TOOLTIP_ENABLE_SWITCH_TRUE')}
                     checked={status}
@@ -116,6 +117,7 @@ class StatusCell extends Component{
 
 StatusCell.propTypes = {
     schedule: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 export default StatusCell;

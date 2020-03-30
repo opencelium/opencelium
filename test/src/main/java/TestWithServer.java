@@ -4,6 +4,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 //import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.*;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -16,6 +17,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import javax.sound.midi.SysexMessage;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -104,8 +106,11 @@ public class TestWithServer {
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         //PRESS Add User button
+       WebElement addUserButton = driver.findElement(By.id("button_add_user"));
+       addUserButton.click();
 
-       driver.navigate().to(Constants.BASE_URL+"users/add");
+
+       //driver.navigate().to(Constants.BASE_URL+"users/add");
 
        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
@@ -121,6 +126,8 @@ public class TestWithServer {
 
 
        //PRESS -> button
+       WebElement nextArrow = driver.findElement(By.id("navigation_next"));
+       nextArrow.click();
 
        WebElement nameField = driver.findElement(By.id("input_name"));
        nameField.sendKeys("Selenium");
@@ -140,13 +147,34 @@ public class TestWithServer {
        //Select title
 
        //Press ->
+       WebElement nextArrow1 = driver.findElement(By.id("navigation_next"));
+       nextArrow1.click();
 
        //Set user group
        WebElement userGroup = driver.findElement(By.id("input_userGroup"));
-       userGroup.sendKeys("User");
+
+       Actions act = new Actions(driver);
+
+       act.clickAndHold(userGroup);
+
+       userGroup.click();
+
+       WebElement userRole = driver.findElement(By.id("react-select-2-option-2"));
+       userRole.click();
+
+
+
+       //System.out.println("VALUE "+userGroup.getAttribute("value"));
 
 
        //Press Add button
+
+       WebElement buttonAdd = driver.findElement(By.id("button_add"));
+       buttonAdd.click();
+
+       WebElement elementUsers=driver.findElement (By.linkText("Users"));
+
+       Assert.assertNotNull(elementUsers);
 
        //Check if user added successfully
     }
@@ -163,12 +191,14 @@ public class TestWithServer {
         //Find "Selenium Tester" user div
 
         //Find update button for selected user
-        WebElement elementUpdate = driver.findElement(By.linkText("Update"));
+        WebElement elementUpdate = driver.findElement(By.id("button_update_1"));
+        elementUpdate.click();
 
 
         //Change Fields if needed
         WebElement emailField = driver.findElement(By.id("input_email"));
-        emailField.sendKeys("test@test.io");
+        emailField.clear();
+        emailField.sendKeys("test123@test.io");
 
         WebElement passwordField = driver.findElement(By.id("input_password"));
         passwordField.sendKeys("12345678");
@@ -179,27 +209,52 @@ public class TestWithServer {
 
 
         //PRESS -> button
+        WebElement nextArrow = driver.findElement(By.id("navigation_next"));
+        nextArrow.click();
 
         WebElement nameField = driver.findElement(By.id("input_name"));
-        nameField.sendKeys("Selenium");
+        nameField.clear();
+        nameField.sendKeys("SeleniumEdited123");
 
         WebElement surnameField = driver.findElement(By.id("input_surname"));
+        surnameField.clear();
         surnameField.sendKeys("Tester");
 
         WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
-        phoneField.sendKeys("++7777777");
+        phoneField.clear();
+        phoneField.sendKeys("++7777778");
 
         WebElement organisationField = driver.findElement(By.id("input_organisation"));
-        organisationField.sendKeys("Becon");
+        organisationField.clear();
+        organisationField.sendKeys("Becon1");
 
         WebElement departmentField = driver.findElement(By.id("input_department"));
-        organisationField.sendKeys("OpenCelium");
+        departmentField.clear();
+        departmentField.sendKeys("OpenCelium1");
+
+        //PRESS -> button
+        WebElement nextArrowNext = driver.findElement(By.id("navigation_next"));
+        nextArrowNext.click();
 
         //Set User group
+        //Set user group
+        WebElement userGroup = driver.findElement(By.id("input_userGroup"));
+
+        Actions act = new Actions(driver);
+
+        act.clickAndHold(userGroup);
+
+        userGroup.click();
+
+        //Change to Moderator
+        WebElement userRole = driver.findElement(By.id("react-select-2-option-3"));
+        userRole.click();
 
         //Press Update Button
-
+        WebElement buttonUpdate = driver.findElement(By.id("button_update"));
+        buttonUpdate.click();
         //Check if succesfully modified
+        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
     }
 
     @Test(priority = 4)
@@ -211,10 +266,19 @@ public class TestWithServer {
 
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
+        WebElement elementDel = driver.findElement(By.id("button_delete_1"));
+
+        elementDel.click();
+
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
         //Find "Selenium Tester" user div
 
         //Find delete button for selected user
-        WebElement elementUpdate = driver.findElement(By.linkText("Delete"));
+        WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
+        elementOk.click();
+
+        Assert.assertNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
 
     }
 
@@ -222,6 +286,6 @@ public class TestWithServer {
 
 
 
-    }
+}
 
 
