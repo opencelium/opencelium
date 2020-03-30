@@ -549,7 +549,7 @@ Red Hat Enterprise Linux
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b <`stableversion`> https://bitbucket.org/becon_gmbh/opencelium.git
+	root@shell> git clone -b <stableversion_> https://bitbucket.org/becon_gmbh/opencelium.git
 	root@shell> mv opencelium/* .
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
