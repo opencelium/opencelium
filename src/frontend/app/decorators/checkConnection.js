@@ -53,9 +53,9 @@ export function checkConnection(){
                 }
 
                 componentDidMount() {
-                    this.checkOCConnection();
+                    //this.checkOCConnection();
                 }
-
+/*
                 componentDidUpdate() {
                     const {checkingOCConnection, error, logoutUserFulfilled} = this.props;
                     if (checkingOCConnection === API_REQUEST_STATE.FINISH) {
@@ -67,7 +67,7 @@ export function checkConnection(){
                             history.push('/login');
                         }
                     }
-                }
+                }*/
 
                 checkOCConnection() {
                     this.props.checkOCConnection();
@@ -76,7 +76,7 @@ export function checkConnection(){
                 render() {
                     const {authUser, logining, logouting} = this.props;
                     let isCheckingConnection = !this.state.checkedOnce;
-                    if (logining || logouting || isCheckingConnection){
+                    if (logining || logouting/* || isCheckingConnection*/){
                         return (
                             <div style={{padding: '0 15px', maxWidth: '1140px', marginLeft: 'auto', marginRight: 'auto'}}>
                                 <Loading authUser={authUser}/>
