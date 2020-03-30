@@ -164,7 +164,6 @@ public class TestWithServer {
 
 
 
-
        //System.out.println("VALUE "+userGroup.getAttribute("value"));
 
 
@@ -180,7 +179,7 @@ public class TestWithServer {
        //Check if user added successfully
     }
 
-   /* @Test(priority = 3)
+    @Test(priority = 3)
     public void UpdateUserTest(){
 
         WebElement elementU = driver.findElement(By.linkText("Users"));
@@ -192,12 +191,14 @@ public class TestWithServer {
         //Find "Selenium Tester" user div
 
         //Find update button for selected user
-        WebElement elementUpdate = driver.findElement(By.linkText("Update"));
+        WebElement elementUpdate = driver.findElement(By.id("button_update_1"));
+        elementUpdate.click();
 
 
         //Change Fields if needed
         WebElement emailField = driver.findElement(By.id("input_email"));
-        emailField.sendKeys("test@test.io");
+        emailField.clear();
+        emailField.sendKeys("test123@test.io");
 
         WebElement passwordField = driver.findElement(By.id("input_password"));
         passwordField.sendKeys("12345678");
@@ -208,27 +209,52 @@ public class TestWithServer {
 
 
         //PRESS -> button
+        WebElement nextArrow = driver.findElement(By.id("navigation_next"));
+        nextArrow.click();
 
         WebElement nameField = driver.findElement(By.id("input_name"));
-        nameField.sendKeys("Selenium");
+        nameField.clear();
+        nameField.sendKeys("SeleniumEdited123");
 
         WebElement surnameField = driver.findElement(By.id("input_surname"));
+        surnameField.clear();
         surnameField.sendKeys("Tester");
 
         WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
-        phoneField.sendKeys("++7777777");
+        phoneField.clear();
+        phoneField.sendKeys("++7777778");
 
         WebElement organisationField = driver.findElement(By.id("input_organisation"));
-        organisationField.sendKeys("Becon");
+        organisationField.clear();
+        organisationField.sendKeys("Becon1");
 
         WebElement departmentField = driver.findElement(By.id("input_department"));
-        organisationField.sendKeys("OpenCelium");
+        departmentField.clear();
+        departmentField.sendKeys("OpenCelium1");
+
+        //PRESS -> button
+        WebElement nextArrowNext = driver.findElement(By.id("navigation_next"));
+        nextArrowNext.click();
 
         //Set User group
+        //Set user group
+        WebElement userGroup = driver.findElement(By.id("input_userGroup"));
+
+        Actions act = new Actions(driver);
+
+        act.clickAndHold(userGroup);
+
+        userGroup.click();
+
+        //Change to Moderator
+        WebElement userRole = driver.findElement(By.id("react-select-2-option-3"));
+        userRole.click();
 
         //Press Update Button
-
+        WebElement buttonUpdate = driver.findElement(By.id("button_update"));
+        buttonUpdate.click();
         //Check if succesfully modified
+        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
     }
 
     @Test(priority = 4)
@@ -240,13 +266,22 @@ public class TestWithServer {
 
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
+        WebElement elementDel = driver.findElement(By.id("button_delete_1"));
+
+        elementDel.click();
+
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
         //Find "Selenium Tester" user div
 
         //Find delete button for selected user
-        WebElement elementUpdate = driver.findElement(By.linkText("Delete"));
+        WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
+        elementOk.click();
+
+        Assert.assertNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
 
     }
-*/
+
 
 
 

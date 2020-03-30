@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.operator;
 
-import com.becon.opencelium.backend.execution.ExecutionContainer;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 
 public class LessThanOrEqualTo implements Operator {

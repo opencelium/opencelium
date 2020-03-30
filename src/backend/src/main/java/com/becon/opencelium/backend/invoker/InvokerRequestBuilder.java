@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 // TODO: need to add interface for supporting multiple function conversion to response entity
-// TODO: should be strategy pattern. Because a lot of strategies to authenticate
 public class InvokerRequestBuilder{
 
     private RestTemplate restTemplate;
@@ -79,7 +78,6 @@ public class InvokerRequestBuilder{
         } else {
             data = body;
         }
-
 
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
         if (body.equals("null")){

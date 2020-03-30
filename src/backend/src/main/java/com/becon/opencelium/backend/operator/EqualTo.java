@@ -16,8 +16,6 @@
 
 package com.becon.opencelium.backend.operator;
 
-import com.becon.opencelium.backend.execution.ExecutionContainer;
-
 public class EqualTo implements Operator{
 
 

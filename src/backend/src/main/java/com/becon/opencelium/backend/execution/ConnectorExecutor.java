@@ -49,37 +49,32 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service
 public class ConnectorExecutor {
 
     private Invoker invoker;
 
-    @Autowired
     private InvokerServiceImp invokerService;
-
-    @Autowired
     private RestTemplate restTemplate;
-
-    @Autowired
     private ExecutionContainer executionContainer;
-
-    @Autowired
-    private BodyNodeServiceImp bodyNodeService;
-
-    @Autowired
     private FieldNodeServiceImp fieldNodeService;
-
-    @Autowired
     private MethodNodeServiceImp methodNodeServiceImp;
-
-    @Autowired
     private ConnectorServiceImp connectorService;
-
-    @Autowired
     private LogMessageServiceImp logMessageService;
-
-    @Autowired
     private StatementNodeServiceImp statementNodeService;
+
+    public ConnectorExecutor(InvokerServiceImp invokerService, RestTemplate restTemplate,
+                             ExecutionContainer executionContainer, FieldNodeServiceImp fieldNodeService,
+                             MethodNodeServiceImp methodNodeServiceImp, ConnectorServiceImp connectorService,
+                             LogMessageServiceImp logMessageService, StatementNodeServiceImp statementNodeService) {
+        this.invokerService = invokerService;
+        this.restTemplate = restTemplate;
+        this.executionContainer = executionContainer;
+        this.fieldNodeService = fieldNodeService;
+        this.methodNodeServiceImp = methodNodeServiceImp;
+        this.connectorService = connectorService;
+        this.logMessageService = logMessageService;
+        this.statementNodeService = statementNodeService;
+    }
 
     public void start(ConnectorNode connectorNode, Connector connector){
         this.invoker = invokerService.findByName(connector.getInvoker());

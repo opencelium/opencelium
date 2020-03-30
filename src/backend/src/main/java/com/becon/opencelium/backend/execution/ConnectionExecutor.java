@@ -32,23 +32,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-@Service
+//@Service
 public class ConnectionExecutor {
 
-    @Autowired
     private ConnectionNodeServiceImp connectionNodeService;
-
-    @Autowired
     private ConnectorServiceImp connectorService;
-
-    @Autowired
-    private EnhancementExecutor enhancementExecutor;
-
-    @Autowired
+    private ExecutionContainer executionContainer;
     private ConnectorExecutor connectorExecutor;
 
-    @Autowired
-    private ExecutionContainer executionContainer;
+    public ConnectionExecutor(ConnectionNodeServiceImp connectionNodeService, ConnectorServiceImp connectorService,
+                              ExecutionContainer executionContainer, ConnectorExecutor connectorExecutor) {
+        this.connectionNodeService = connectionNodeService;
+        this.connectorService = connectorService;
+        this.executionContainer = executionContainer;
+        this.connectorExecutor = connectorExecutor;
+    }
 
     public void start(Scheduler scheduler){
         executionContainer.setResponseData(new ArrayList<>());
@@ -63,8 +61,9 @@ public class ConnectionExecutor {
         Connector toConnector = connectorService.findById(connection.getToConnector())
                 .orElseThrow(() -> new ConnectorNotFoundException(connection.getFromConnector()));
 
+
+
         connectorExecutor.start(connectionNode.getFromConnector(), fromConnector);
-//        enhancementExecutor.start(connection.getEnhancements());
         connectorExecutor.start(connectionNode.getToConnector(), toConnector);
     }
 }
