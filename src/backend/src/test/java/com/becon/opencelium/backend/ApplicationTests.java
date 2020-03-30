@@ -34,30 +34,30 @@ import java.util.Map;
 @SpringBootTest
 public class ApplicationTests {
 
-	@Autowired
-	private RestTemplate restTemplate;
+//	@Autowired
+//	private RestTemplate restTemplate;
 
 	@Test
 	public void contextLoads() {
 	}
-
-	@Test
-	public void restTest(){
-
-		HttpMethod method = HttpMethod.GET;
-		String url = "http://oc-sensu.westeurope.cloudapp.azure.com:8080/api/core/v2/namespaces/default/events";
-
-		String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODU1Njc2OTYsImp0aSI6IjJkZDY5OWI5MDFjNWJkNWRhNDFkNmZlMzk3YTJkNDEwIiwiaXNzIjoiaHR0cDovL29jLXNlbnN1Lndlc3RldXJvcGUuY2xvdWRhcHAuYXp1cmUuY29tOjgwODAiLCJzdWIiOiJhZG1pbiIsImdyb3VwcyI6WyJjbHVzdGVyLWFkbWlucyIsInN5c3RlbTp1c2VycyJdLCJwcm92aWRlciI6eyJwcm92aWRlcl9pZCI6ImJhc2ljIiwicHJvdmlkZXJfdHlwZSI6IiIsInVzZXJfaWQiOiJhZG1pbiJ9LCJhcGlfa2V5IjpmYWxzZX0.pVVVBqGNCM3dcCaDhDQmwFPaoZHvfx0o89jHZbD591M";
-		HttpHeaders header = new HttpHeaders();
-		Map<String, String> headerItem = new HashMap<>();
-		headerItem.put("Authorization", "Bearer " + token);
-		headerItem.put("Content-Type", "application/json");
-		header.setAll(headerItem);
-
-		String body = "null";
-		HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, header);
-		ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-		System.out.println(response);
-	}
+//
+//	@Test
+//	public void restTest(){
+//
+//		HttpMethod method = HttpMethod.GET;
+//		String url = "http://oc-sensu.westeurope.cloudapp.azure.com:8080/api/core/v2/namespaces/default/events";
+//
+//		String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODU1Njc2OTYsImp0aSI6IjJkZDY5OWI5MDFjNWJkNWRhNDFkNmZlMzk3YTJkNDEwIiwiaXNzIjoiaHR0cDovL29jLXNlbnN1Lndlc3RldXJvcGUuY2xvdWRhcHAuYXp1cmUuY29tOjgwODAiLCJzdWIiOiJhZG1pbiIsImdyb3VwcyI6WyJjbHVzdGVyLWFkbWlucyIsInN5c3RlbTp1c2VycyJdLCJwcm92aWRlciI6eyJwcm92aWRlcl9pZCI6ImJhc2ljIiwicHJvdmlkZXJfdHlwZSI6IiIsInVzZXJfaWQiOiJhZG1pbiJ9LCJhcGlfa2V5IjpmYWxzZX0.pVVVBqGNCM3dcCaDhDQmwFPaoZHvfx0o89jHZbD591M";
+//		HttpHeaders header = new HttpHeaders();
+//		Map<String, String> headerItem = new HashMap<>();
+//		headerItem.put("Authorization", "Bearer " + token);
+//		headerItem.put("Content-Type", "application/json");
+//		header.setAll(headerItem);
+//
+//		String body = "null";
+//		HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, header);
+//		ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+//		System.out.println(response);
+//	}
 
 }
