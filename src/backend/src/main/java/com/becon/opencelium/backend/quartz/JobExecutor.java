@@ -16,19 +16,18 @@
 
 package com.becon.opencelium.backend.quartz;
 
+import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Execution;
 import com.becon.opencelium.backend.mysql.entity.LastExecution;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
-import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.mysql.service.ExecutionServiceImp;
-import com.becon.opencelium.backend.mysql.service.LastExecutionServiceImp;
-import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.mysql.service.*;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeService;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
+import com.becon.opencelium.backend.neo4j.service.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -37,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -54,9 +54,6 @@ public class JobExecutor extends QuartzJobBean {
     private ConnectionNodeServiceImp connectionNodeService;
 
     @Autowired
-    private ConnectionExecutor connectionExecutor;
-
-    @Autowired
     private ExecutionServiceImp executionServiceImp;
 
     @Autowired
@@ -66,10 +63,41 @@ public class JobExecutor extends QuartzJobBean {
     private SchedulerServiceImp schedulerServiceImp;
 
     @Autowired
-    private ExecutionContainer executionContainer;
+    private EnhancementNodeServiceImp enhancementNodeServiceImp;
+
+    @Autowired
+    private EnhancementServiceImp enhancementServiceImp;
+
+    @Autowired
+    private FieldNodeServiceImp fieldNodeServiceImp;
+
+    @Autowired
+    private MethodNodeServiceImp methodNodeServiceImp;
+
+    @Autowired
+    private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private InvokerServiceImp invokerService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private BodyNodeServiceImp bodyNodeService;
+
+    @Autowired
+    private FieldNodeServiceImp fieldNodeService;
+
+    @Autowired
+    private LogMessageServiceImp logMessageService;
+
+    @Autowired
+    private StatementNodeServiceImp statementNodeService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
         logger.info("Executing Job with key {}", context.getJobDetail().getKey());
         logger.info("Firing  Trigger with key {}", context.getTrigger().getKey());
         System.out.println("==================================================================");
@@ -99,6 +127,11 @@ public class JobExecutor extends QuartzJobBean {
         }
 
         try {
+            ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, restTemplate, executionContainer,
+                                                                        fieldNodeServiceImp, methodNodeServiceImp,
+                                                                        connectorService, logMessageService, statementNodeService);
+            ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
+                                                                           executionContainer, connectorExecutor);
             connectionExecutor.start(scheduler);
         }catch (Exception e){
             e.printStackTrace();

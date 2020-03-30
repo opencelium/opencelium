@@ -41,7 +41,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service
 public class ExecutionContainer {
 
     private Invoker invoker;
@@ -51,14 +50,15 @@ public class ExecutionContainer {
     private String taId;
     private int order;
 
-    @Autowired
     private EnhancementServiceImp enhancementService;
-
-    @Autowired
     private FieldNodeServiceImp fieldNodeService;
-
-    @Autowired
     private MethodNodeServiceImp methodNodeService;
+
+    public ExecutionContainer(EnhancementServiceImp enhancementService, FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeService) {
+        this.enhancementService = enhancementService;
+        this.fieldNodeService = fieldNodeService;
+        this.methodNodeService = methodNodeService;
+    }
 
     public Object getValueFromEnhancementData(FieldNode outgoingFiled){
         Enhancement enhancement = enhancementService.findByFieldId(outgoingFiled.getId());

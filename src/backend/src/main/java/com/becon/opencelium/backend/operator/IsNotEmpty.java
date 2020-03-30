@@ -16,8 +16,6 @@
 
 package com.becon.opencelium.backend.operator;
 
-import com.becon.opencelium.backend.execution.ExecutionContainer;
-
 import java.util.ArrayList;
 import java.util.List;
 
