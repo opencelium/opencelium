@@ -147,14 +147,14 @@ export default class CStatement{
             if(this._color === DEFAULT_COLOR){         //for static values
                 return {
                     color: '',
-                    field: field,
+                    field: field !== '""' ? field : '',
                     rightPropertyValue: '',
                     type: '',
                 };
             } else {
                 return {
                     color: this._color,
-                    field: `${this.responseType}.${field}`,
+                    field: field ? `${this.responseType}.${field}` : this.responseType,
                     type: this._type,
                     rightPropertyValue: this._rightPropertyValue,
                 };

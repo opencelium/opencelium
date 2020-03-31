@@ -130,7 +130,7 @@ public class ConnectorController {
         ResponseEntity<?> responseEntity;
         try {
             responseEntity = connectorService.checkCommunication(connector);
-        }catch (Exception ex){
+        } catch (Exception ex){
             ex.printStackTrace();
             throw new CommunicationFailedException();
         }
