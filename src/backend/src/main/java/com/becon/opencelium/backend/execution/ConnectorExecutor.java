@@ -457,7 +457,9 @@ public class ConnectorExecutor {
         Operator operator = operatorFactory.getOperator(ifStatement.getOperand());
         Object leftStatement = getValue(ifStatement.getLeftStatement(), "");
         System.out.println("=============== " + ifStatement.getOperand() + " =================");
-        System.out.println("Left Statement: " + leftStatement.toString());
+        if(leftStatement != null){
+            System.out.println("Left Statement: " + leftStatement.toString());
+        }
 
         String ref = statementNodeService.convertToRef(ifStatement.getLeftStatement());
         Object rightStatement = getValue(ifStatement.getRightStatement(), ref);
