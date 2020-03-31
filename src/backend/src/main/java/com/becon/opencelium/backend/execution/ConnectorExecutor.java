@@ -518,7 +518,7 @@ public class ConnectorExecutor {
                 (List<Map<String, Object>>) message.getValue(condition, loopStack);
 
         for (int i = 0; i < array.size(); i++) {
-            System.out.println("Loop " + condition + "[" + i + "]");
+            System.out.println("Loop " + condition + "-------- index : " + i);
             loopStack.put(condition, i);
             executeMethod(operatorNode.getBodyFunction());
             executeDecisionStatement(operatorNode.getBodyOperator());
