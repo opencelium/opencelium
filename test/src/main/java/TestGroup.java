@@ -95,7 +95,29 @@ public class TestGroup {
         WebElement buttonNext1 = driver.findElement(By.id("navigation_next"));
         buttonNext1.click();
 
+        //checkboxes
+
+        //Add group
+
     }
+
+    @Test(priority = 2)
+    public void UpdateGroupTest(){
+
+        WebElement elementUsers=driver.findElement (By.linkText("Groups"));
+        elementUsers.click();
+
+    }
+
+    @Test(priority = 3)
+    public void DeleteGroupTest(){
+
+        WebElement elementUsers=driver.findElement (By.linkText("Groups"));
+        elementUsers.click();
+
+    }
+
+
 
 
 
