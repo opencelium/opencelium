@@ -165,12 +165,6 @@ public class ConnectorServiceImp implements ConnectorService{
                     return MethodNodeServiceImp.toResource(methodNode);
                 }).collect(Collectors.toList());
 
-//        List<Long> methodIds = methodNodeService.findMethodsByConnectionIdAndConnectorId(connectionId, entity.getId())
-//                .stream().map(m -> m.getId()).collect(Collectors.toList());
-//
-//        List<MethodResource> methodResources = new ArrayList<>();
-//        methodNodeService.findAllById(methodIds).forEach(m -> methodResources.add(MethodNodeServiceImp.toResource(m)));
-
         List<OperatorResource> operatorResources = operatorNodeService
                 .findOperatorsByConnectionIdAndConnectorId(connectionId, entity.getId()).stream()
                 .map(OperatorNodeServiceImp::toResource).collect(Collectors.toList());
