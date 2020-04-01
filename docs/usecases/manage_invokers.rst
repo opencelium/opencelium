@@ -1,5 +1,5 @@
 ##################
-Manage Invoker
+Manage Invoker (only for subscribers)
 ##################
 
 
