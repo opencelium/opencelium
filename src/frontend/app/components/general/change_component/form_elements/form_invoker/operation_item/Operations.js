@@ -114,17 +114,20 @@ class Operations extends Component{
 
     renderAddOperation(){
         const {addOperationState} = this.state;
-        const {entity, ...props} = this.props;
+        let {entity, data, ...props} = this.props;
+        let canAddMethods = this.props.data.hasOwnProperty('canAddMethods') ? this.props.data.canAddMethods : true;
+        data.readOnly = !canAddMethods;
         let operations = entity.getOperationsWithoutConnection();
         return (
             <Card style={operations.length === 0 ? {border: '1px solid #00000020'} : null}>
-                <Accordion.Toggle as={Card.Header} eventKey={operations.length} id={'add_invoker_header'} className={styles.invoker_operation_header}>
+                <Accordion.Toggle as={Card.Header} eventKey={operations.length + 1} id={'add_invoker_header'} className={styles.invoker_operation_header}>
                     {'Add Operation'}
                 </Accordion.Toggle>
-                <Accordion.Collapse eventKey={operations.length}>
+                <Accordion.Collapse eventKey={operations.length + 1}>
                     <Card.Body className={styles.no_card_header_tabs}>
                         <OperationItem
                             {...props}
+                            data={data}
                             isVisible={true}
                             updateEntity={::this.updateAddOperation}
                             operation={addOperationState}
@@ -141,14 +144,14 @@ class Operations extends Component{
     }
 
     render(){
-        const {readOnly} = this.props.data;
+        let canAddMethods = this.props.data.hasOwnProperty('canAddMethods') ? this.props.data.canAddMethods : true;
         return (
             <div>
                 <Accordion defaultActiveKey="0">
                     {this.renderOperations()}
-                    {readOnly ? null : this.renderAddOperation()}
+                    {!canAddMethods ? null : this.renderAddOperation()}
                 </Accordion>
-                {readOnly ? null : this.renderAddIcon()}
+                {!canAddMethods ? null : this.renderAddIcon()}
             </div>
         );
     }

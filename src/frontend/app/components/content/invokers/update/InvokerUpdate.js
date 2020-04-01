@@ -178,42 +178,36 @@ class InvokerUpdate extends Component{
                     label: t('UPDATE.FORM.NAME'),
                     required: true,
                     check: (e, entity) => ::this.validateName(e, entity),
+                    readOnly: true,
                     maxLength: 255,
                 },
                 {
                     ...INPUTS.INVOKER_DESCRIPTION,
                     tourStep: INVOKER_TOURS.page_1[1].selector,
                     label: t('UPDATE.FORM.DESCRIPTION'),
+                    readOnly: true,
                 },
                 {
                     ...INPUTS.INVOKER_HINT,
                     tourStep: INVOKER_TOURS.page_1[2].selector,
                     label: t('UPDATE.FORM.HINT'),
                     maxLength: 255,
+                    readOnly: true,
                 },
                 {
-                    ...INPUTS.INVOKER_ICON,
-                    tourStep: INVOKER_TOURS.page_1[3].selector,
-                    label: t('UPDATE.FORM.ICON'),
-                    browseTitle: t('UPDATE.FORM.ICON_PLACEHOLDER')
+                    ...INPUTS.INVOKER_AUTHENTICATION,
+                    tourStep: INVOKER_TOURS.page_2[0].selector,
+                    label: t('UPDATE.FORM.AUTHENTICATION'),
+                    required: true,
+                    readOnly: true,
                 },
             ],
             hint: {text: t('UPDATE.FORM.HINT_1'), openTour: ::this.openTour},
         },{
             inputs: [
                 {
-                    ...INPUTS.INVOKER_AUTHENTICATION,
-                    tourStep: INVOKER_TOURS.page_2[0].selector,
-                    label: t('UPDATE.FORM.AUTHENTICATION'),
-                    required: true,
-                    check: (e, entity) => ::this.validateAuth(e, entity),
-                },
-            ],
-            hint: {text: t('UPDATE.FORM.HINT_2'), openTour: ::this.openTour},
-        },{
-            inputs: [
-                {
                     ...INPUTS.INVOKER_CONNECTION,
+                    readOnly: true,
                     tourSteps: INVOKER_TOURS.page_3,
                     label: t('UPDATE.FORM.CONNECTION'),
                     required: true,
@@ -226,6 +220,7 @@ class InvokerUpdate extends Component{
             inputs: [
                 {
                     ...INPUTS.INVOKER_OPERATIONS,
+                    readOnly: true,
                     tourSteps: INVOKER_TOURS.page_4,
                     label: t('UPDATE.FORM.OPERATIONS'),
                     required: true,
@@ -236,28 +231,28 @@ class InvokerUpdate extends Component{
         ];
         return (
             <Content
-        translations={contentTranslations}
-        getListLink={getListLink}
-        permissions={InvokerPermissions}
-        authUser={authUser}
+                translations={contentTranslations}
+                getListLink={getListLink}
+                permissions={InvokerPermissions}
+                authUser={authUser}
             >
             <ChangeContent
-        breadcrumbsItems={breadcrumbsItems}
-        contents={contents}
-        translations={changeContentTranslations}
-        action={doAction}
-        entity={CInvoker.createInvoker(invoker)}
-        isActionInProcess={updatingInvoker}
-        authUser={authUser}
-        onPageSwitch={::this.setCurrentTour}
-        type={'update'}
-        />
-        <OCTour
-        steps={INVOKER_TOURS[this.state.currentTour]}
-        isOpen={this.state.isTourOpen}
-        onRequestClose={::this.closeTour}
-        updateDelay={1000}
-        />
+                breadcrumbsItems={breadcrumbsItems}
+                contents={contents}
+                translations={changeContentTranslations}
+                action={doAction}
+                entity={CInvoker.createInvoker(invoker)}
+                isActionInProcess={updatingInvoker}
+                authUser={authUser}
+                onPageSwitch={::this.setCurrentTour}
+                type={'update'}
+            />
+            <OCTour
+                steps={INVOKER_TOURS[this.state.currentTour]}
+                isOpen={this.state.isTourOpen}
+                onRequestClose={::this.closeTour}
+                updateDelay={1000}
+            />
         </Content>
     );
     }
