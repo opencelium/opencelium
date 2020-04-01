@@ -95,10 +95,15 @@ public class TestGroup {
         WebElement buttonNext1 = driver.findElement(By.id("navigation_next"));
         buttonNext1.click();
 
-        //checkboxes
+        WebElement checkBoxAdmin = driver.findElement(By.id("input_schedule_admin"));
 
-        //Add group
+        act.moveToElement(checkBoxAdmin).perform();
+        //act.contextClick(checkBoxAdmin);
+       // checkBoxAdmin.click();
 
+        WebElement buttonAdd = driver.findElement(By.id("button_add"));
+        buttonAdd.click();
+        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='test']")));
     }
 
     @Test(priority = 2)
@@ -107,6 +112,22 @@ public class TestGroup {
         WebElement elementUsers=driver.findElement (By.linkText("Groups"));
         elementUsers.click();
 
+        WebElement buttonUpdate = driver.findElement(By.id("button_update_2"));
+        buttonUpdate.click();
+
+        WebElement inputRole = driver.findElement(By.id("input_role"));
+        inputRole.clear();
+        inputRole.sendKeys("TestGroup");
+
+        WebElement buttonNext = driver.findElement(By.id("navigation_next"));
+        buttonNext.click();
+
+        WebElement buttonNext1 = driver.findElement(By.id("navigation_next"));
+        buttonNext1.click();
+
+        WebElement buttonSave = driver.findElement(By.id("button_update"));
+        buttonSave.click();
+
     }
 
     @Test(priority = 3)
@@ -114,6 +135,12 @@ public class TestGroup {
 
         WebElement elementUsers=driver.findElement (By.linkText("Groups"));
         elementUsers.click();
+
+        WebElement buttonDelete = driver.findElement(By.id("button_delete_2"));
+        buttonDelete.click();
+
+        WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
+        elementOk.click();
 
     }
 
