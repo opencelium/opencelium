@@ -69,29 +69,27 @@ The second deletion is on the second step of adding connection, when you choose 
 
 |image11|
 
-.. role:: underline
-    :class: underline
-.. |image0| image:: ../img/usecases/add_0.png
+.. |image0| image:: ../img/usecases/manage_templates/add_0.png
    :align: middle
-.. |image1| image:: ../img/usecases/add_1.png
+.. |image1| image:: ../img/usecases/manage_templates/add_1.png
    :align: middle
-.. |image2| image:: ../img/usecases/add_2.png
+.. |image2| image:: ../img/usecases/manage_templates/add_2.png
    :align: middle
-.. |image3| image:: ../img/usecases/add_3.png
+.. |image3| image:: ../img/usecases/manage_templates/add_3.png
    :align: middle
-.. |image4| image:: ../img/usecases/add_4.png
+.. |image4| image:: ../img/usecases/manage_templates/add_4.png
    :align: middle
-.. |image5| image:: ../img/usecases/backend_0.png
+.. |image5| image:: ../img/usecases/manage_templates/backend_0.png
    :align: middle
-.. |image6| image:: ../img/usecases/download_0.png
+.. |image6| image:: ../img/usecases/manage_templates/download_0.png
    :align: middle
-.. |image7| image:: ../img/usecases/use_0.png
+.. |image7| image:: ../img/usecases/manage_templates/use_0.png
    :align: middle
-.. |image8| image:: ../img/usecases/use_1.png
+.. |image8| image:: ../img/usecases/manage_templates/use_1.png
    :align: middle
-.. |image9| image:: ../img/usecases/use_2.png
+.. |image9| image:: ../img/usecases/manage_templates/use_2.png
    :align: middle
-.. |image10| image:: ../img/usecases/delete_0.png
+.. |image10| image:: ../img/usecases/manage_templates/delete_0.png
    :align: middle
-.. |image11| image:: ../img/usecases/delete_1.png
+.. |image11| image:: ../img/usecases/manage_templates/delete_1.png
    :align: middle
