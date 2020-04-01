@@ -1,7 +1,7 @@
 import java.net.MalformedURLException;
 
 public class TestStandalone {
-    public static void main(String[] args) throws MalformedURLException {
+    public static void main(String[] args) throws MalformedURLException, InterruptedException {
 
         UserTest();
 
@@ -10,16 +10,21 @@ public class TestStandalone {
     }
 
 
-    private static void GroupTest() throws MalformedURLException {
+    private static void GroupTest() throws MalformedURLException, InterruptedException {
 
         TestGroup testGroup = new TestGroup();
         testGroup.setUp();
+
+        testGroup.SimpleTest();
+        testGroup.AddGroupTest();
+        testGroup.UpdateGroupTest();
+        testGroup.DeleteGroupTest();
 
         testGroup.afterTest();
 
     }
 
-    private static void UserTest() throws MalformedURLException {
+    private static void UserTest() throws MalformedURLException, InterruptedException {
         TestUser testUser = new TestUser();
 
         testUser.setUp();

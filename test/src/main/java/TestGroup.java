@@ -79,10 +79,6 @@ public class TestGroup {
         buttonNext.click();
 
         WebElement setRoles = driver.findElement(By.id("input_components"));
-        Actions act = new Actions(driver);
-
-        act.clickAndHold(setRoles);
-
         setRoles.click();
 
         WebElement groupPermSchedule = driver.findElement(By.id("react-select-2-option-2"));
@@ -97,9 +93,6 @@ public class TestGroup {
         buttonNext1.click();
 
         WebElement checkBoxAdmin = driver.findElement(By.id("input_admin"));
-
-        //act.moveToElement(checkBoxAdmin).perform();
-        //act.contextClick(checkBoxAdmin);
         JavascriptExecutor executor = (JavascriptExecutor)driver;
         executor.executeScript("arguments[0].click();", checkBoxAdmin);
 
@@ -108,49 +101,70 @@ public class TestGroup {
 
         TimeUnit.SECONDS.sleep(3);
 
-        //driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-
         driver.navigate().to("http://localhost:8888/usergroups");
         Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='TestGroup']")));
 
+        TimeUnit.SECONDS.sleep(3);
 
     }
 
     @Test(priority = 2)
-    public void UpdateGroupTest(){
-
-        /*WebElement elementUsers=driver.findElement (By.linkText("Groups"));
-        elementUsers.click();
+    public void UpdateGroupTest() throws InterruptedException {
 
         WebElement buttonUpdate = driver.findElement(By.id("button_update_2"));
         buttonUpdate.click();
 
         WebElement inputRole = driver.findElement(By.id("input_role"));
         inputRole.clear();
-        inputRole.sendKeys("TestGroup");
+        inputRole.sendKeys("TestGroup Edited");
 
         WebElement buttonNext = driver.findElement(By.id("navigation_next"));
         buttonNext.click();
 
+        WebElement setRoles = driver.findElement(By.id("input_components"));
+        Actions act = new Actions(driver);
+
+        act.clickAndHold(setRoles);
+
+        setRoles.click();
+
+        WebElement groupPermDashboard = driver.findElement(By.id("react-select-2-option-6"));
+        groupPermDashboard.click();
+
         WebElement buttonNext1 = driver.findElement(By.id("navigation_next"));
         buttonNext1.click();
 
-        WebElement buttonSave = driver.findElement(By.id("button_update"));
-        buttonSave.click();*/
+        WebElement checkBoxAdmin = driver.findElement(By.id("input_admin"));
+        JavascriptExecutor executor = (JavascriptExecutor)driver;
+        executor.executeScript("arguments[0].click();", checkBoxAdmin);
 
+        WebElement buttonSave = driver.findElement(By.id("button_update"));
+        buttonSave.click();
+
+        TimeUnit.SECONDS.sleep(3);
+
+        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='TestGroup Edited']")));
+
+        TimeUnit.SECONDS.sleep(3);
     }
 
     @Test(priority = 3)
-    public void DeleteGroupTest(){
+    public void DeleteGroupTest() throws InterruptedException {
 
-      /*  WebElement elementUsers=driver.findElement (By.linkText("Groups"));
+        WebElement elementUsers=driver.findElement (By.linkText("Groups"));
         elementUsers.click();
+
+        TimeUnit.SECONDS.sleep(2);
 
         WebElement buttonDelete = driver.findElement(By.id("button_delete_2"));
         buttonDelete.click();
 
+        TimeUnit.SECONDS.sleep(2);
+
         WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
-        elementOk.click();*/
+        elementOk.click();
+
+        TimeUnit.SECONDS.sleep(2);
 
     }
 
@@ -160,7 +174,7 @@ public class TestGroup {
 
     @AfterTest
     public void afterTest(){
-       // driver.quit();
+       driver.quit();
     }
 
 }
