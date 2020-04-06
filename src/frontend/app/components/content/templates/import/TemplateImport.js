@@ -64,7 +64,11 @@ class TemplateImport extends Component{
 
     import(){
         this.props.importTemplate({template: this.state.templateFile});
-        this.toggleImport();
+        this.setState({
+            showDialog: false,
+            browseTitle: 'Please, select a json file...',
+            templateFile: null,
+        });
     }
 
     render(){
