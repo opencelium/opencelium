@@ -85,6 +85,7 @@ public class MessageContainer {
         String jsonPath = "$";
         String condition = ConditionUtility.getPathToValue(ref);
         String refValue = ConditionUtility.getRefValue(ref);
+
         List<String> conditionParts =  Arrays.asList(refValue.split("\\."));
         int loopIndex = 0;
 
@@ -100,6 +101,9 @@ public class MessageContainer {
         int size = conditionParts.size() - 1;
         int i = 0;
         for (String part : conditionParts){
+            if(part.isEmpty()){
+                continue;
+            }
             condition = condition + "." + part;
             String array = ConditionUtility.getLastArray(condition);// need to find index
             int index = 0;
@@ -122,7 +126,6 @@ public class MessageContainer {
             jsonPath = jsonPath + "." + part;
             i++;
         }
-
         return JsonPath.read(message, jsonPath);
     }
 }

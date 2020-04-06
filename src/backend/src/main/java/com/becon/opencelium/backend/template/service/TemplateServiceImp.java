@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.template.service;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -144,7 +145,7 @@ public class TemplateServiceImp implements TemplateService {
                             return objectMapper.readValue(contentBuilder.toString(), Template.class);
                         } catch (Exception e) {
                             e.printStackTrace();
-                            throw new RuntimeException("ENCODE_MUST_BE_UTF8");
+                            throw new WrongEncode("UTF8");
                         }
                     }).collect(Collectors.toList());
         } catch (Exception e) {

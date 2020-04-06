@@ -129,7 +129,10 @@ public class ConditionUtility {
         if(getExchangeType(ref).equals("response")){
             return ref.replace(refParts[0]+".", "")
                       .replace(refParts[1] + ".", "")
-                      .replace(refParts[2] + ".", "");
+                      .replace(refParts[2] + ".", "")
+                      .replace(refParts[0], "")
+                      .replace(refParts[1], "")
+                      .replace(refParts[2], "");
         }
 
         return ref.replace(refParts[0]+".", "")

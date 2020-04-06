@@ -130,7 +130,7 @@ class FormAuthentication extends Component{
         let value = entity[name];
         if(readOnly) {
             return (
-                <Input readOnly={readOnly} value={types.find(t => t.value === value).label} label={label} icon={icon}/>
+                <Input className={`${tourStep ? tourStep : ''}`} readOnly={readOnly} value={types.find(t => t.value === value).label} label={label} icon={icon}/>
             );
         }
         return(

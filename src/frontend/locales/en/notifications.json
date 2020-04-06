@@ -130,7 +130,10 @@
     "DISABLE_SCHEDULES": "The selected schedules were not disabled",
     "START_SCHEDULES": "The selected schedules were not started",
     "DELETE_SCHEDULES": "The selected schedules were not removed",
-    "FETCH_TEMPLATES": "Templates were not fetched",
+    "FETCH_TEMPLATES": {
+      "ENCODE_MUST_BE_UTF8": "Encoding of one or more templates is not UTF-8",
+      "__DEFAULT__": "Templates were not fetched"
+    },
     "ADD_TEMPLATE": "Template was not added",
     "IMPORT_TEMPLATE": "Template was not imported",
     "DELETE_TEMPLATE": "The template was not removed",

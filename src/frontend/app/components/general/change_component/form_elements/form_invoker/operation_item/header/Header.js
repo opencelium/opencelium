@@ -288,8 +288,12 @@ class Header extends Component{
     }
 
     render(){
-        const {data, forConnection} = this.props;
+        const {entity, data, forConnection, mode} = this.props;
         const {readOnly} = data;
+        let items = entity.header;
+        if(items.length === 0 && mode !== 'add'){
+            return null;
+        }
         return(
             <div className={`${forConnection ? '' : theme.withIcon} ${theme.input}`} style={forConnection ? {paddingBottom: 0} : null}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={forConnection ? {padding: 0} : null}/>
@@ -308,10 +312,12 @@ class Header extends Component{
 Header.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
+    mode: PropTypes.string,
 };
 
 Header.defaultProps = {
     forConnection: false,
+    mode: 'existed'
 };
 
 

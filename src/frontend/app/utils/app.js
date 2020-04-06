@@ -139,7 +139,7 @@ export function onEnter(e, callback){
  * @param onFail - on fail callback
  */
 export function checkImage(image, onSuccess, onFail){
-    if(typeof image === 'string' && image !== '') {
+    if(isString(image) && image !== '') {
         let img = new Image();
         img.onload = onSuccess;
         img.onerror = onFail;

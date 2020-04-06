@@ -24,7 +24,7 @@ import {updateInvoker} from '../../../../actions/invokers/update';
 import {InvokerPermissions} from "../../../../utils/constants/permissions";
 import {permission} from "../../../../decorators/permission";
 import {INPUTS} from "../../../../utils/constants/inputs";
-import {automaticallyShowTour, INVOKER_TOURS} from "../../../../utils/constants/tours";
+import {automaticallyShowTour, INVOKER_UPDATE_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
@@ -169,12 +169,12 @@ class InvokerUpdate extends Component{
         let changeContentTranslations = {};
         changeContentTranslations.updateButton = t('UPDATE.UPDATE_BUTTON');
         let getListLink = `${invokerPrefixURL}`;
-        let breadcrumbsItems = [t('UPDATE.FORM.PAGE_1'), t('UPDATE.FORM.PAGE_2'), t('UPDATE.FORM.PAGE_3'), t('UPDATE.FORM.PAGE_4')];
+        let breadcrumbsItems = [t('UPDATE.FORM.PAGE_1'), t('UPDATE.FORM.PAGE_4')];
         let contents = [{
             inputs: [
                 {
                     ...INPUTS.INVOKER_NAME,
-                    tourStep: INVOKER_TOURS.page_1[0].selector,
+                    tourStep: INVOKER_UPDATE_TOURS.page_1[0].selector,
                     label: t('UPDATE.FORM.NAME'),
                     required: true,
                     check: (e, entity) => ::this.validateName(e, entity),
@@ -183,20 +183,20 @@ class InvokerUpdate extends Component{
                 },
                 {
                     ...INPUTS.INVOKER_DESCRIPTION,
-                    tourStep: INVOKER_TOURS.page_1[1].selector,
+                    tourStep: INVOKER_UPDATE_TOURS.page_1[1].selector,
                     label: t('UPDATE.FORM.DESCRIPTION'),
                     readOnly: true,
                 },
                 {
                     ...INPUTS.INVOKER_HINT,
-                    tourStep: INVOKER_TOURS.page_1[2].selector,
+                    tourStep: INVOKER_UPDATE_TOURS.page_1[2].selector,
                     label: t('UPDATE.FORM.HINT'),
                     maxLength: 255,
                     readOnly: true,
                 },
                 {
                     ...INPUTS.INVOKER_AUTHENTICATION,
-                    tourStep: INVOKER_TOURS.page_2[0].selector,
+                    tourStep: INVOKER_UPDATE_TOURS.page_1[3].selector,
                     label: t('UPDATE.FORM.AUTHENTICATION'),
                     required: true,
                     readOnly: true,
@@ -206,22 +206,9 @@ class InvokerUpdate extends Component{
         },{
             inputs: [
                 {
-                    ...INPUTS.INVOKER_CONNECTION,
-                    readOnly: true,
-                    tourSteps: INVOKER_TOURS.page_3,
-                    label: t('UPDATE.FORM.CONNECTION'),
-                    required: true,
-                    check: (e, entity) => ::this.validateConnection(e, entity),
-                    defaultValue: {name: '', path: '', method: 'post', request: {header: [], body: {}}, response: {success: {header: [], body: {}}, fail: {header: [], body: {}}}}
-                },
-            ],
-            hint: {text: t('UPDATE.FORM.HINT_3'), openTour: ::this.openTour},
-        },{
-            inputs: [
-                {
                     ...INPUTS.INVOKER_OPERATIONS,
                     readOnly: true,
-                    tourSteps: INVOKER_TOURS.page_4,
+                    tourSteps: INVOKER_UPDATE_TOURS.page_2,
                     label: t('UPDATE.FORM.OPERATIONS'),
                     required: true,
                     defaultValue: [],
@@ -248,7 +235,7 @@ class InvokerUpdate extends Component{
                 type={'update'}
             />
             <OCTour
-                steps={INVOKER_TOURS[this.state.currentTour]}
+                steps={INVOKER_UPDATE_TOURS[this.state.currentTour]}
                 isOpen={this.state.isTourOpen}
                 onRequestClose={::this.closeTour}
                 updateDelay={1000}
