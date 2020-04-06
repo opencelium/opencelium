@@ -23,7 +23,7 @@ import {addInvoker} from '../../../../actions/invokers/add';
 import {InvokerPermissions} from "../../../../utils/constants/permissions";
 import {permission} from "../../../../decorators/permission";
 import {INPUTS} from "../../../../utils/constants/inputs";
-import {automaticallyShowTour, INVOKER_TOURS} from "../../../../utils/constants/tours";
+import {automaticallyShowTour, INVOKER_ADD_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
@@ -174,7 +174,7 @@ class InvokerAdd extends Component{
             inputs: [
                 {
                     ...INPUTS.INVOKER_NAME,
-                    tourStep: INVOKER_TOURS.page_1[0].selector,
+                    tourStep: INVOKER_ADD_TOURS.page_1[0].selector,
                     label: t('ADD.FORM.NAME'),
                     required: true,
                     check: (e, entity) => ::this.validateName(e, entity),
@@ -182,28 +182,22 @@ class InvokerAdd extends Component{
                 },
                 {
                     ...INPUTS.INVOKER_DESCRIPTION,
-                    tourStep: INVOKER_TOURS.page_1[1].selector,
+                    tourStep: INVOKER_ADD_TOURS.page_1[1].selector,
                     label: t('ADD.FORM.DESCRIPTION'),
                 },
                 {
                     ...INPUTS.INVOKER_HINT,
-                    tourStep: INVOKER_TOURS.page_1[2].selector,
+                    tourStep: INVOKER_ADD_TOURS.page_1[2].selector,
                     label: t('ADD.FORM.HINT'),
                     maxLength: 255,
-                },/*
-                {
-                    ...INPUTS.INVOKER_ICON,
-                    tourStep: INVOKER_TOURS.page_1[3].selector,
-                    label: t('ADD.FORM.ICON'),
-                    browseTitle: t('ADD.FORM.ICON_PLACEHOLDER')
-                },*/
+                },
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
         },{
             inputs: [
                 {
                     ...INPUTS.INVOKER_AUTHENTICATION,
-                    tourStep: INVOKER_TOURS.page_2[0].selector,
+                    tourStep: INVOKER_ADD_TOURS.page_2[0].selector,
                     label: t('ADD.FORM.AUTHENTICATION'),
                     required: true,
                     check: (e, entity) => ::this.validateAuth(e, entity),
@@ -214,7 +208,7 @@ class InvokerAdd extends Component{
             inputs: [
                 {
                     ...INPUTS.INVOKER_CONNECTION,
-                    tourSteps: INVOKER_TOURS.page_3,
+                    tourSteps: INVOKER_ADD_TOURS.page_3,
                     label: t('ADD.FORM.CONNECTION'),
                     required: true,
                     check: (e, entity) => ::this.validateConnection(e, entity),
@@ -226,7 +220,7 @@ class InvokerAdd extends Component{
             inputs: [
                 {
                     ...INPUTS.INVOKER_OPERATIONS,
-                    tourSteps: INVOKER_TOURS.page_4,
+                    tourSteps: INVOKER_ADD_TOURS.page_4,
                     label: t('ADD.FORM.OPERATIONS'),
                     required: true,
                     defaultValue: [],
@@ -252,7 +246,7 @@ class InvokerAdd extends Component{
                     onPageSwitch={::this.setCurrentTour}
                 />
                 <OCTour
-                    steps={INVOKER_TOURS[this.state.currentTour]}
+                    steps={INVOKER_ADD_TOURS[this.state.currentTour]}
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                     updateDelay={1000}

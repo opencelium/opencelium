@@ -40,6 +40,13 @@ class CardIcon extends Component{
         this.notMounted = false;
     }
 
+    componentDidUpdate(prevProps){
+        const {icon} = this.props;
+        if(prevProps.icon !== icon) {
+            checkImage(icon, () => this.setState({isCorrectIcon: true}), () => this.setState({isCorrectIcon: false}));
+        }
+    }
+
     renderIcon(){
         const {isCorrectIcon} = this.state;
         const {authUser, icon} = this.props;

@@ -116,7 +116,6 @@ class Operations extends Component{
         const {addOperationState} = this.state;
         let {entity, data, ...props} = this.props;
         let canAddMethods = this.props.data.hasOwnProperty('canAddMethods') ? this.props.data.canAddMethods : true;
-        data.readOnly = !canAddMethods;
         let operations = entity.getOperationsWithoutConnection();
         return (
             <Card style={operations.length === 0 ? {border: '1px solid #00000020'} : null}>
@@ -127,7 +126,7 @@ class Operations extends Component{
                     <Card.Body className={styles.no_card_header_tabs}>
                         <OperationItem
                             {...props}
-                            data={data}
+                            data={{...data, readOnly: !canAddMethods}}
                             isVisible={true}
                             updateEntity={::this.updateAddOperation}
                             operation={addOperationState}
@@ -135,7 +134,9 @@ class Operations extends Component{
                             ids={{name:'add_invoker_name'}}
                             hasTour
                             justAdded={this.justAdded}
+                            mode={'add'}
                         />
+                        {this.renderAddIcon()}
                     </Card.Body>
                 </Accordion.Collapse>
             </Card>
@@ -144,14 +145,15 @@ class Operations extends Component{
     }
 
     render(){
-        let canAddMethods = this.props.data.hasOwnProperty('canAddMethods') ? this.props.data.canAddMethods : true;
+        let {entity, data} = this.props;
+        let canAddMethods = data.hasOwnProperty('canAddMethods') ? data.canAddMethods : true;
+        let operations = entity.getOperationsWithoutConnection();
         return (
             <div>
-                <Accordion defaultActiveKey="0">
+                <Accordion defaultActiveKey={operations.length + 1}>
                     {this.renderOperations()}
                     {!canAddMethods ? null : this.renderAddOperation()}
                 </Accordion>
-                {!canAddMethods ? null : this.renderAddIcon()}
             </div>
         );
     }

@@ -20,7 +20,7 @@ import {withTranslation} from "react-i18next";
 import {permission} from "../../../../decorators/permission";
 import {SchedulePermissions} from "../../../../utils/constants/permissions";
 import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "../../../../utils/app";
+import {getThemeClass, setFocusById} from "../../../../utils/app";
 import styles from '../../../../themes/default/content/schedules/schedules.scss';
 import Input from "../../../general/basic_components/inputs/Input";
 import {updateSchedule} from '../../../../actions/schedules/update';
@@ -52,6 +52,9 @@ class ScheduleUpdate extends Component{
     }
 
     componentDidUpdate(prevProps){
+        if(this.state.showUpdateSchedule){
+            setFocusById('input_title');
+        }
         if(prevProps.schedule.title !== this.props.schedule.title){
             this.setState({scheduleTitle: this.props.schedule.title});
         }

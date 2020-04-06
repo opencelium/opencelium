@@ -278,7 +278,7 @@ export const APP_TOURS = [
     },
 ];
 
-export const INVOKER_TOURS = {
+export const INVOKER_ADD_TOURS = {
     page_1: [
         {
             selector: '.tour-page-1-step-1',
@@ -294,10 +294,6 @@ export const INVOKER_TOURS = {
         {
             selector: '.tour-page-1-step-3',
             content: 'Provide hint to display more information (optional)',
-        },
-        {
-            selector: '.tour-page-1-step-4',
-            content: 'Provide icon (optional)',
         },
     ],
     page_2: [
@@ -368,6 +364,62 @@ export const INVOKER_TOURS = {
         },
         {
             selector: '.tour-page-4-step-7',
+            content: 'Click on the plus to add a new operation',
+        },
+    ],
+};
+export const INVOKER_UPDATE_TOURS = {
+    page_1: [
+        {
+            selector: '.tour-page-1-step-1',
+            content:
+                <SwitchOffTour>
+                    Name for the invoker
+                </SwitchOffTour>,
+        },
+        {
+            selector: '.tour-page-1-step-2',
+            content: 'Description for the invoker (optional)',
+        },
+        {
+            selector: '.tour-page-1-step-3',
+            content: 'Hint to display more information (optional)',
+        },
+        {
+            selector: '.tour-page-1-step-4',
+            content: 'Authentication for requests'
+        }
+    ],
+    page_2: [
+        {
+            selector: '.tour-page-2-step-1',
+            content:
+                <SwitchOffTour>
+                    Please, provide name of the method to test request
+                </SwitchOffTour>,
+        },
+        {
+            selector: '.tour-page-2-step-2',
+            content: 'Please, provide path to the request',
+        },
+        {
+            selector: '.tour-page-2-step-3',
+            content: 'Please, choose method of the request',
+        },
+        {
+            selector: '.tour-page-2-step-4',
+            content: 'Please, provide header and body to make request, to receive success and fail results',
+        },
+        {
+            selector: '.tour-page-2-step-5',
+            content: 'Here you can read information about the chosen key in details',
+        },
+        {
+            selector: '.tour-page-2-step-6',
+            content: 'Instead of adding items separately, you can type or paste json clicking here',
+        },
+        {
+            selector: '.tour-page-2-step-7',
             content: 'Click on the plus to add a new operation',
         },
     ],
