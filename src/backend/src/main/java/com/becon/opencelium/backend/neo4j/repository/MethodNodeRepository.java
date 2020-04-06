@@ -35,7 +35,8 @@ public interface MethodNodeRepository extends Neo4jRepository<MethodNode, Long> 
     @Query("match p=((m:Method)-[:has_response|:has_request]->()-[*]->()) where ID(m)={0} return p;")
     Optional<MethodNode> findById(Long id);
 
-    @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector|:from_connector]->(:Connector{connectorId:{1}})-[*]->(m:Method) RETURN m")
+    @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector|:from_connector]->(:Connector{connectorId:{1}})-[*]->(m:Method) " +
+            "optional match p=((m)-[:has_request|:has_response]->()-[*0..]->()) RETURN p")
     List<MethodNode> findMethodsByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
 
     @Query("match (c:Connection{connectionId:{0}})-[*]->(m:Method{color:{1}}) return m")
