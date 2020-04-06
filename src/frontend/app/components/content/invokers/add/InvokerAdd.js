@@ -190,13 +190,13 @@ class InvokerAdd extends Component{
                     tourStep: INVOKER_TOURS.page_1[2].selector,
                     label: t('ADD.FORM.HINT'),
                     maxLength: 255,
-                },
+                },/*
                 {
                     ...INPUTS.INVOKER_ICON,
                     tourStep: INVOKER_TOURS.page_1[3].selector,
                     label: t('ADD.FORM.ICON'),
                     browseTitle: t('ADD.FORM.ICON_PLACEHOLDER')
-                },
+                },*/
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
         },{

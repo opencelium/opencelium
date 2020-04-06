@@ -99,6 +99,7 @@ class InvokerView extends Component{
                     label: t('VIEW.FORM.OPERATIONS'),
                     defaultValue: [],
                     readOnly: true,
+                    canAddMethods: false,
                 },
             ],
             hint: {text: t('VIEW.FORM.HINT_4')},},

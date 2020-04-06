@@ -54,7 +54,7 @@ public class TestUser {
     }
 
    @Test(priority = 1)
-    public void LoginTest(){
+    public void LoginTest() throws InterruptedException {
         //driver.get(baseUrl+"login");
 
         driver.navigate().to(Constants.BASE_URL+"login");
@@ -63,10 +63,12 @@ public class TestUser {
 
         WebElement element_login=driver.findElement (By.id("login_email"));
         element_login.sendKeys(Constants.USERNAME);
+        TimeUnit.SECONDS.sleep(2);
+
         WebElement element_password=driver.findElement (By.id("login_password"));
         element_password.sendKeys(Constants.PASSWORD);
+       TimeUnit.SECONDS.sleep(2);
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
-
         buttonConnect.click();
 
         Logs logs = driver.manage().logs();
@@ -78,8 +80,7 @@ public class TestUser {
         }
 
 
-       driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
-
+       TimeUnit.SECONDS.sleep(2);
        WebElement elementUsers=driver.findElement (By.linkText("Users"));
 
        Assert.assertNotNull(elementUsers);
@@ -89,13 +90,13 @@ public class TestUser {
     }
 
    @Test(priority = 2)
-   public void AddUserTest(){
+   public void AddUserTest() throws InterruptedException {
         WebElement elementU = driver.findElement(By.linkText("Users"));
-
         elementU.click();
 
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
+       TimeUnit.SECONDS.sleep(2);
         //PRESS Add User button
        WebElement addUserButton = driver.findElement(By.id("button_add_user"));
        addUserButton.click();
@@ -107,14 +108,14 @@ public class TestUser {
 
        WebElement emailField = driver.findElement(By.id("input_email"));
        emailField.sendKeys("test@test.io");
+       TimeUnit.SECONDS.sleep(2);
 
        WebElement passwordField = driver.findElement(By.id("input_password"));
        passwordField.sendKeys("12345678");
 
-
        WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
        repeatField.sendKeys("12345678");
-
+       TimeUnit.SECONDS.sleep(2);
 
        //PRESS -> button
        WebElement nextArrow = driver.findElement(By.id("navigation_next"));
@@ -122,18 +123,23 @@ public class TestUser {
 
        WebElement nameField = driver.findElement(By.id("input_name"));
        nameField.sendKeys("Selenium");
+       TimeUnit.SECONDS.sleep(1);
 
        WebElement surnameField = driver.findElement(By.id("input_surname"));
        surnameField.sendKeys("Tester");
+       TimeUnit.SECONDS.sleep(1);
 
        WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
-       phoneField.sendKeys("++7777777");
+       phoneField.sendKeys("+7777777");
+       TimeUnit.SECONDS.sleep(1);
 
        WebElement organisationField = driver.findElement(By.id("input_organisation"));
        organisationField.sendKeys("Becon");
+       TimeUnit.SECONDS.sleep(1);
 
        WebElement departmentField = driver.findElement(By.id("input_department"));
-       organisationField.sendKeys("OpenCelium");
+       departmentField.sendKeys("OpenCelium");
+       TimeUnit.SECONDS.sleep(1);
 
        //Select title
 
@@ -152,7 +158,7 @@ public class TestUser {
 
        WebElement userRole = driver.findElement(By.id("react-select-2-option-2"));
        userRole.click();
-
+       TimeUnit.SECONDS.sleep(1);
        //System.out.println("VALUE "+userGroup.getAttribute("value"));
 
 
@@ -160,7 +166,7 @@ public class TestUser {
 
        WebElement buttonAdd = driver.findElement(By.id("button_add"));
        buttonAdd.click();
-
+       TimeUnit.SECONDS.sleep(1);
        WebElement elementUsers=driver.findElement (By.linkText("Users"));
 
        Assert.assertNotNull(elementUsers);
@@ -169,7 +175,7 @@ public class TestUser {
     }
 
     @Test(priority = 3)
-    public void UpdateUserTest(){
+    public void UpdateUserTest() throws InterruptedException {
 
         WebElement elementU = driver.findElement(By.linkText("Users"));
 
@@ -178,16 +184,16 @@ public class TestUser {
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
         //Find "Selenium Tester" user div
-
+        TimeUnit.SECONDS.sleep(2);
         //Find update button for selected user
         WebElement elementUpdate = driver.findElement(By.id("button_update_1"));
         elementUpdate.click();
-
 
         //Change Fields if needed
         WebElement emailField = driver.findElement(By.id("input_email"));
         emailField.clear();
         emailField.sendKeys("test123@test.io");
+        TimeUnit.SECONDS.sleep(1);
 
         WebElement passwordField = driver.findElement(By.id("input_password"));
         passwordField.sendKeys("12345678");
@@ -195,7 +201,7 @@ public class TestUser {
 
         WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
         repeatField.sendKeys("12345678");
-
+        TimeUnit.SECONDS.sleep(1);
 
         //PRESS -> button
         WebElement nextArrow = driver.findElement(By.id("navigation_next"));
@@ -204,22 +210,26 @@ public class TestUser {
         WebElement nameField = driver.findElement(By.id("input_name"));
         nameField.clear();
         nameField.sendKeys("SeleniumEdited123");
+        TimeUnit.SECONDS.sleep(1);
 
         WebElement surnameField = driver.findElement(By.id("input_surname"));
         surnameField.clear();
         surnameField.sendKeys("Tester");
+        TimeUnit.SECONDS.sleep(1);
 
         WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
         phoneField.clear();
-        phoneField.sendKeys("++7777778");
+        phoneField.sendKeys("+999999999");
 
         WebElement organisationField = driver.findElement(By.id("input_organisation"));
         organisationField.clear();
-        organisationField.sendKeys("Becon1");
+        organisationField.sendKeys("Becon Edited");
+        TimeUnit.SECONDS.sleep(1);
 
         WebElement departmentField = driver.findElement(By.id("input_department"));
         departmentField.clear();
-        departmentField.sendKeys("OpenCelium1");
+        departmentField.sendKeys("OpenCelium Edited");
+        TimeUnit.SECONDS.sleep(1);
 
         //PRESS -> button
         WebElement nextArrowNext = driver.findElement(By.id("navigation_next"));
@@ -236,7 +246,7 @@ public class TestUser {
         userGroup.click();
 
         //Change to Moderator
-        WebElement userRole = driver.findElement(By.id("react-select-3-option-3"));
+        WebElement userRole = driver.findElement(By.id("react-select-3-option-1"));
         userRole.click();
 
         //Press Update Button
@@ -244,10 +254,12 @@ public class TestUser {
         buttonUpdate.click();
         //Check if succesfully modified
         Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
+        TimeUnit.SECONDS.sleep(3);
+
     }
 
     @Test(priority = 4)
-    public void DeleteUserTest(){
+    public void DeleteUserTest() throws InterruptedException {
 
         WebElement elementU = driver.findElement(By.linkText("Users"));
 
@@ -255,19 +267,21 @@ public class TestUser {
 
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
+        TimeUnit.SECONDS.sleep(1);
+
         WebElement elementDel = driver.findElement(By.id("button_delete_1"));
 
         elementDel.click();
 
-        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-
+        TimeUnit.SECONDS.sleep(2);
         //Find "Selenium Tester" user div
 
         //Find delete button for selected user
         WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
         elementOk.click();
 
-        //Assert.assertNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
+        TimeUnit.SECONDS.sleep(3);
+        //Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
 
     }
 

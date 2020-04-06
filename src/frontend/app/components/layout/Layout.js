@@ -73,6 +73,10 @@ class Layout extends Component{
         if(checkingOCConnection === API_REQUEST_STATE.FINISH) {
             if (checkOCConnectionResult !== null && !isNotAuthButStayInSystem) {
                 removeAllLS();
+                let elem = document.getElementById('notification');
+                if(elem){
+                    elem.innerHTML = '';
+                }
                 this.setState({isNotAuthButStayInSystem: true});
             }
             if (checkOCConnectionResult === null && isNotAuthButStayInSystem) {
