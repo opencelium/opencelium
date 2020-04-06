@@ -20,14 +20,10 @@ import com.becon.opencelium.backend.constant.ExceptionConstant;
 
 public class WrongEncode extends RuntimeException{
 
-    private final String encodeType;
+//    private final String encodeType;
 
     public WrongEncode(final String encodeType) {
         super("ENCODE_MUST_BE_" + encodeType);
-        this.encodeType = encodeType;
-    }
-
-    public String getAuthTpe() {
-        return encodeType;
+//        this.encodeType = encodeType;
     }
 }
