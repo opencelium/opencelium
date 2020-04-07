@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (C) <2019>  <becon GmbH>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, version 3 of the License.
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<invoker type="RESTful">
+    <name>sensu</name>
+    <description>Sensu is a unified infrastructure and application monitoring solution for multi-cloud monitoring at scale.</description>
+    <hint>Application Monitoring System. Read api documentation https://docs.sensu.io/sensu-go/latest/api/overview/</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="public"/>
+        <item name="refresh_token" type="string" visibility="public"/>
+        <item name="expires_at" type="string" visibility="public"/>
+    </requiredData>
+    <authType>token</authType>
+    <operations>
+        <operation name="getEvents" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/core/v2/namespaces/default/events</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body>
+                        <field name="id" type="string"/>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header>
+                        <item name="Content-Type" type="string">text/plain</item>
+                    </header>
+                    <body>
+                        <field name="error" type="string"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getEntities" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/core/v2/namespaces/default/entities</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body>
+                        <field name="entity_class" type="string"/>
+                        <field name="metadata" type="object">
+                            <field name="name" type="string"/>
+                            <field name="namespace" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header>
+                        <item name="Content-Type" type="string">text/plain</item>
+                    </header>
+                    <body>
+                        <field name="error" type="string"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteEntity" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/api/core/v2/namespaces/default/entities</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body/>
+                </success>
+                <fail status="500">
+                    <header>
+                        <item name="Content-Type" type="string">text/plain</item>
+                    </header>
+                    <body>
+                        <field name="error" type="string"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="createOrUpdateEntity" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/api/core/v2/namespaces/default/entities</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body>
+                    <field name="entity_class" type="string"/>
+                    <field name="sensu_agent_version" type="string"/>
+                    <field name="subscriptions" type="array"/>
+                    <field name="deregister" type="boolean"/>
+                    <field name="deregistration" type="object"/>
+                    <field name="metadata" type="object">
+                        <field name="name" type="string"/>
+                        <field name="namespace" type="string"/>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body>
+                        <field name="id" type="string"/>
+                    </body>
+                </success>
+                <fail status="500">
+                    <header>
+                        <item name="Content-Type" type="string">text/plain</item>
+                    </header>
+                    <body>
+                        <field name="error" type="string"/>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

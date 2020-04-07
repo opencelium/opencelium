@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (C) <2019>  <becon GmbH>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, version 3 of the License.
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<invoker type="RESTful">
+    <name>zabbix</name>
+    <description>Zabbix is a mature and effortless enterprise-class open source monitoring solution for network monitoring and application monitoring of millions of metrics.</description>
+    <hint>Zabbix is an open-source monitoring software tool. Read api documentation https://www.zabbix.com/documentation/4.0/manual/api</hint>
+    <icon>zabbix.jpg</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="user" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">%{body.result}</item>
+    </requiredData>
+    <authType>token</authType>
+    <operations>
+        <operation name="user.login" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body>
+                    <field name="jsonrpc" type="string">2.0</field>
+                    <field name="method" type="string">user.login</field>
+                    <field name="params" type="object">
+                        <field name="user" type="string">{user}</field>
+                        <field name="password" type="string">{password}</field>
+                    </field>
+                    <field name="id" type="int">1</field>
+                    <field name="auth" type="string">null</field>>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Authorization" type="string"/>
+                    </header>
+                    <body>
+                        <field name="jsonrpc" type="string">2.0</field>
+                        <field name="result" type="string"/>
+                        <field name="id" type="int">1</field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header/>
+                    <body>
+                        <field name="error" type="object">
+                            <field name="code" type="string">-32500</field>
+                            <field name="message" type="string">Application error.</field>
+                            <field name="data" type="string">Login name or password is incorrect.</field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host.get" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/objects/hosts</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body>
+                    <field name="jsonrpc" type="string">2.0</field>
+                    <field name="method" type="string">host.get</field>
+                    <field name="params" type="object">
+                        <field name="output" type="array">hostid,host</field>
+                        <field name="selectInterfaces" type="array">interfaceid,ip</field>
+                        <field name="filter" type="object">
+                            <field name="host" type="array"/>
+                        </field>
+                    </field>
+                    <field name="id" type="int">1</field>
+                    <field name="auth" type="string">{token}</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="result" type="array">
+                            <field name="hostid" type="string"/>
+                            <field name="proxy_hostid" type="string"/>
+                            <field name="host" type="string"/>
+                            <field name="status" type="string"/>
+                            <field name="disable_until" type="string"/>
+                            <field name="error" type="string"/>
+                            <field name="available" type="string"/>
+                            <field name="errors_from" type="string"/>
+                            <field name="lastaccess" type="string"/>
+                            <field name="ipmi_authtype" type="string"/>
+                            <field name="ipmi_privilege" type="string"/>
+                            <field name="ipmi_username" type="string"/>
+                            <field name="ipmi_password" type="string"/>
+                            <field name="ipmi_disable_until" type="string"/>
+                            <field name="ipmi_available" type="string"/>
+                            <field name="snmp_disable_until" type="string"/>
+                            <field name="snmp_available" type="string"/>
+                            <field name="maintenanceid" type="string"/>
+                            <field name="maintenance_status" type="string"/>
+                            <field name="maintenance_type" type="string"/>
+                            <field name="maintenance_from" type="string"/>
+                            <field name="ipmi_errors_from" type="string"/>
+                            <field name="snmp_errors_from" type="string"/>
+                            <field name="ipmi_error" type="string"/>
+                            <field name="snmp_error" type="string"/>
+                            <field name="jmx_disable_until" type="string"/>
+                            <field name="jmx_available" type="string"/>
+                            <field name="jmx_errors_from" type="string"/>
+                            <field name="jmx_error" type="string"/>
+                            <field name="name" type="string"/>
+                            <field name="flags" type="string"/>
+                            <field name="templateid" type="string"/>
+                            <field name="description" type="string"/>
+                            <field name="tls_connect" type="string"/>
+                            <field name="tls_accept" type="string"/>
+                            <field name="tls_issuer" type="string"/>
+                            <field name="tls_subject" type="string"/>
+                            <field name="tls_psk_identity" type="string"/>
+                            <field name="tls_psk" type="string"/>
+                            <field name="proxy_address" type="string"/>
+                            <field name="auto_compress" type="string"/>
+                            <field name="interfaces" type="array">
+                                <field name="interfaceid" type="string"/>
+                                <field name="ip" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host.create" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body>
+                    <field name="jsonrpc" type="string">2.0</field>
+                    <field name="method" type="string">host.create</field>
+                    <field name="params" type="object">
+                        <field name="host" type="string"/>
+                        <field name="interfaces" type="array">
+                            <field name="type" type="string"/>
+                            <field name="main" type="string"/>
+                            <field name="useip" type="string"/>
+                            <field name="ip" type="string"/>
+                            <field name="dns" type="string"/>
+                            <field name="port" type="string"/>
+                        </field>
+                        <field name="groups" type="array">
+                            <field name="groupid" type="string"/>
+                        </field>
+                        <field name="templates" type="array">
+                            <field name="templateid" type="string"/>
+                        </field>
+                    </field>
+                    <field name="id" type="int">1</field>
+                    <field name="auth" type="string">{token}</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="result" type="array">
+                            <field name="code" type="string"/>
+                            <field name="status" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host.delete" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body>
+                    <field name="jsonrpc" type="string">2.0</field>
+                    <field name="method" type="string">host.delete</field>
+                    <field name="params" type="array"/>
+                    <field name="id" type="int">1</field>
+                    <field name="auth" type="string">{token}</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="result" type="object">
+                            <field name="hostids" type="array"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>
