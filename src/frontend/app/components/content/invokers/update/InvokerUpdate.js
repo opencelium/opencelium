@@ -15,7 +15,6 @@
 
 import React, {Component} from 'react';
 
-
 /**
  * Component to Update Invoker
  */
@@ -26,7 +25,7 @@ class InvokerUpdate extends Component{
     }
 
     render(){
-        return <div style={{fontSize: '30px', textAlign: 'center', marginTop: '150px'}}>Sorry, you do not have a subscription to use this function</div>
+        return <div style={{fontSize: '30px', textAlign: 'center', marginTop: '150px'}}>Sorry, you do not have a subscription to use this function</div>;
     }
 }
 

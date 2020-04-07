@@ -17,7 +17,7 @@
 import {isString, isArray, isEmptyObject} from "../../../../../utils/app";
 import {FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT, FIELD_TYPE_STRING} from "../../connection/method/CMethodItem";
 import {
-    convertFieldNameForBackend,
+    convertFieldNameForBackend, convertHeaderFormatToObject,
     getFieldsForSelectSearch, parseHeader
 } from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
 
@@ -32,7 +32,7 @@ export default class CSuccess{
         this._header = parseHeader(header);
     }
 
-    static createSuccess(success){
+    static createSuccess(success = null){
         let status = success && success.hasOwnProperty('status') ? success.status : '';
         let body = success && success.hasOwnProperty('body') ? success.body : {};
         let header = success && success.hasOwnProperty('header') ? success.header : [];
@@ -101,7 +101,7 @@ export default class CSuccess{
             body: isEmptyObject(this._body) ? null : this._body,
         };
         if(this._header && this._header.length > 0){
-            obj.header = this._header;
+            obj.header = convertHeaderFormatToObject(this._header);
         }
         return obj;
     }

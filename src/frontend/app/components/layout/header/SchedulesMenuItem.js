@@ -16,6 +16,7 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
+import {withTranslation} from "react-i18next";
 
 import ListItemLink from "../../general/basic_components/ListItemLink";
 import {addMenuSchedulesKeyNavigation, removeMenuSchedulesKeyNavigation} from "../../../utils/key_navigation";
@@ -31,10 +32,11 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for Schedules
+ * Menu Schedules
  */
 @connect(mapStateToProps, {})
 @permission(SchedulePermissions.READ)
+@withTranslation('layout')
 class SchedulesMenuItem extends Component{
 
     constructor(props){
@@ -50,11 +52,13 @@ class SchedulesMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
-                label={{text: 'Scheduler', index: 0}}
+                label={{text: t('HEADER.SCHEDULES.TITLE'), index: 0}}
                 to='/schedules'
                 navigationTitleClass={'tour-step-schedule'}
+                id={'menu_schedules'}
             />
         );
     }

@@ -16,6 +16,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
+import i18n from '../../../../utils/i18n';
 import Content from "../../../general/content/Content";
 import ChangeContent from "../../../general/change_component/ChangeContent";
 
@@ -30,7 +31,7 @@ import {INPUTS} from "../../../../utils/constants/inputs";
 import {automaticallyShowTour, CONNECTOR_TOURS} from "../../../../utils/constants/tours";
 import OCTour from "../../../general/basic_components/OCTour";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
-import {setFocusById} from "../../../../utils/app";
+import {capitalize, setFocusById} from "../../../../utils/app";
 
 
 const connectorPrefixURL = '/connectors';
@@ -55,7 +56,7 @@ function mapConnector(connector){
     const {title, description, icon, invoker, authenticationFields} = connector;
     data['title'] = title;
     data['description'] = description;
-    data['icon'] = icon;
+    data['icon'] = icon === '' ? null : icon;
     data['invoker'] = {name: invoker.hasOwnProperty('value') ? invoker.value : invoker};
     data['requestData'] = {};
     for(let field in authenticationFields){
@@ -255,7 +256,7 @@ class ConnectorAdd extends Component{
                 if(tourIndex !== -1) {
                     field.tourStep = CONNECTOR_TOURS.page_2[tourIndex].selector;
                 }
-                field.label = t('ADD.FORM.'+fieldName.toUpperCase());
+                field.label = i18n.exists(`ADD.FORM.${fieldName.toUpperCase()}`) ? t(`ADD.FORM.${fieldName.toUpperCase()}`) : capitalize(fieldName);
                 field.visible = authenticationFields[invokerName + '__' + fieldName];
                 field.required = authenticationFields[invokerName + '__' + fieldName];
                 result.push(field);
@@ -341,12 +342,11 @@ class ConnectorAdd extends Component{
                 },
                 {
                     ...INPUTS.DESCRIPTION,
-                    tourStep: CONNECTOR_TOURS.page_1[1].selector,
                     label: t('ADD.FORM.DESCRIPTION'),
                 },
                 {
                     ...INPUTS.INVOKER,
-                    tourStep: CONNECTOR_TOURS.page_1[2].selector,
+                    tourStep: CONNECTOR_TOURS.page_1[1].selector,
                     label: t('ADD.FORM.INVOKER'),
                     required: true,
                     source: invokers,

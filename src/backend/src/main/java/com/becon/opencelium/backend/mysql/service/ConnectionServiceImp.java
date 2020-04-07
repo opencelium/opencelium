@@ -70,6 +70,11 @@ public class ConnectionServiceImp implements ConnectionService{
     }
 
     @Override
+    public void delete(Connection connection) {
+        connectionRepository.delete(connection);
+    }
+
+    @Override
     public Optional<Connection> findById(Long id) {
         return connectionRepository.findById(id);
     }
@@ -77,6 +82,11 @@ public class ConnectionServiceImp implements ConnectionService{
     @Override
     public List<Connection> findAll() {
         return connectionRepository.findAll();
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return connectionRepository.existsByName(name);
     }
 
     @Override
@@ -88,6 +98,11 @@ public class ConnectionServiceImp implements ConnectionService{
                 .orElseThrow(() -> new RuntimeException("Connection - " + connectionId + " not found."));
 
         connectionNode.getToConnector();
+    }
+
+    @Override
+    public List<Connection> findAllByConnectorId(int connectorId) {
+        return connectionRepository.findAllByConnectorId(connectorId);
     }
 
     @Override

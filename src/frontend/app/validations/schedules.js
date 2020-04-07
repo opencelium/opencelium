@@ -13,11 +13,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import moment from 'moment';
-
-
 /**
- * validation of the adding schedule
+ * @param schedule - schedule
+ * to validate before add schedule
  */
 export function validateAddSchedule(schedule){
     let result = {success: true, message: ''};

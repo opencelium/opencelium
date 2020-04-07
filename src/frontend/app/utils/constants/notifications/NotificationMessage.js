@@ -18,6 +18,8 @@ import {withTranslation} from "react-i18next";
 import i18n from '../../i18n';
 
 import {NotificationMessageHandlers} from './notifications';
+import {parseConnectionPointer} from "../../app";
+import Dialog from "../../../components/general/basic_components/Dialog";
 
 
 /**
@@ -27,6 +29,57 @@ import {NotificationMessageHandlers} from './notifications';
 class NotificationMessage extends Component{
     constructor(props){
         super(props);
+
+        this.state = {
+            showDialogInDetails: false,
+            inDetailsMessage: '',
+        };
+    }
+
+    toggleShowDialogInDetails(){
+        this.setState({showDialogInDetails: !this.state.showDialogInDetails});
+    }
+
+    openDialog(e, inDetailsMessage){
+        this.setState({showDialogInDetails: true, inDetailsMessage});
+    }
+
+    renderDialogInDetails(){
+        const {showDialogInDetails, inDetailsMessage} = this.state;
+        const {t} = this.props;
+        return(
+            <Dialog
+                actions={[{label: t('DIALOG_DETAILS.CLOSE'), onClick: ::this.toggleShowDialogInDetails, id: 'dialog_close'}]}
+                active={showDialogInDetails}
+                onEscKeyDown={::this.toggleShowDialogInDetails}
+                onOverlayClick={::this.toggleShowDialogInDetails}
+                title={t('DIALOG_DETAILS.TITLE')}
+            >
+                <p>{inDetailsMessage}</p>
+            </Dialog>
+        );
+    }
+
+    renderServerMessage(comingMessage){
+        const {t, shortMessage} = this.props;
+        let result = '';
+        let colorRegExp = /^(.*)#[0-9a-f]{6}(.*)/gi;
+        let checkColorRegExp = colorRegExp.exec(comingMessage);
+        if(comingMessage.length > 50){
+            const {setHasCloseButton} = this.props;
+            if(setHasCloseButton) {
+                setHasCloseButton(true);
+            }
+            return <span>{`${shortMessage} (`}<a id='notification_url' href='#' onClick={(e) => ::this.openDialog(e, comingMessage)}>{t('DETAILS')}</a>)</span>;
+        }
+        if(checkColorRegExp && checkColorRegExp.length > 2){
+            let color = comingMessage.substring(checkColorRegExp[1].length, checkColorRegExp[1].length + 7);
+            let colorStyles = {height: '17px', width: '40px', display: 'inline-block', margin: '0 5px'};
+            result = <span>{checkColorRegExp[1]}<span style={{...colorStyles, background: color}}/>{checkColorRegExp[2]}</span>;
+        } else{
+            result = comingMessage;
+        }
+        return result;
     }
 
     render() {
@@ -35,28 +88,52 @@ class NotificationMessage extends Component{
         if(NotificationMessageHandlers[status] && NotificationMessageHandlers[status][message]){
             notificationMessage = NotificationMessageHandlers[status][message](params);
         } else{
-            if(params && params.hasOwnProperty('message') && params.message !== 'No message available'){
-                if(i18n.exists(`notifications:${status}.${message}.${params.message}`)) {
-                    notificationMessage = t(status + '.' + message + '.' + params.message);
-                    if (notificationMessage === `${status}.${message}.${params.message}`) {
-                        notificationMessage = t(`${status}.${message}.__DEFAULT__`);
+            let comingMessage = params && params.hasOwnProperty('response') && params.response && params.response.hasOwnProperty('message') ? params.response.message : '';
+            if(comingMessage === ''){
+                comingMessage = params &&  params.hasOwnProperty('message') && params.message !== 'No message available' ? params.message : '';
+            }
+            if(comingMessage){
+                if(i18n.exists(`notifications:${status}.${message}.${comingMessage}`)) {
+                    if(params.hasOwnProperty('response') && params.response.hasOwnProperty('data') && params.response.data.hasOwnProperty('connectionPointer')){
+                        let connectionPointer = parseConnectionPointer(params.response.data.connectionPointer);
+                        if(connectionPointer.field !== '' && connectionPointer.color !== '') {
+                            notificationMessage = t(status + '.' + message + '.' + comingMessage, {methodPath: connectionPointer.field});
+                            notificationMessage = this.renderServerMessage(`${notificationMessage} ${connectionPointer.color}`);
+                        } else{
+                            notificationMessage = t(status + '.' + message + '.' + comingMessage);
+                        }
+                    } else {
+                        notificationMessage = t(status + '.' + message + '.' + comingMessage);
+                        if (notificationMessage === `${status}.${message}.${comingMessage}`) {
+                            notificationMessage = t(`${status}.${message}.__DEFAULT__`);
+                        }
                     }
                 } else{
-                    notificationMessage = params.message;
+                    notificationMessage = this.renderServerMessage(comingMessage);
                 }
             } else {
                 if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
                     notificationMessage = t(`${status}.${message}.__DEFAULT__`);
                 } else{
-                    notificationMessage = t(`${status}.${message}`);
+                    if(i18n.exists(`notifications:${status}.${message}`)){
+                        notificationMessage = t(`${status}.${message}`);
+                    } else{
+                        notificationMessage = message;
+                    }
                 }
             }
         }
         return (
-            <span>{notificationMessage}</span>
+            <React.Fragment>
+                <span>{notificationMessage}</span>
+                {::this.renderDialogInDetails()}
+            </React.Fragment>
         );
     }
 }
 
+NotificationMessage.defaultProps = {
+    setHasCloseButton: null,
+};
 
 export default NotificationMessage;

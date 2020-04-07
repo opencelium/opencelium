@@ -18,13 +18,20 @@ package com.becon.opencelium.backend.mysql.repository;
 
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.LinkedList;
 
 @Repository
 public interface EnhancementRepository extends JpaRepository<Enhancement, Integer> {
 
     @Transactional
-    void removeByConnectionId(Long connectionId);
+    @Modifying
+    @Query(value = "delete from enhancement where connection_id = ?1", nativeQuery = true)
+    void deleteByConnectionId(Long connectionId);
+
+    LinkedList<Enhancement> findAllByConnectionId(Long connectionId);
 }

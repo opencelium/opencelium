@@ -40,7 +40,7 @@ class UserGroupIcon extends Component{
         const {isCorrectIcon} = this.state;
         const {icon, className} = this.props;
         if(isCorrectIcon){
-            return <img src={icon} />;
+            return <img src={icon} alt={'icon'}/>;
         } else{
             return <FontIcon value={'monochrome_photos'} className={className}/>;
         }

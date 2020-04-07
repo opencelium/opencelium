@@ -27,9 +27,12 @@ const initialState = fromJS({
     fetchingConnections: API_REQUEST_STATE.INITIAL,
     deletingConnection: API_REQUEST_STATE.INITIAL,
     testingConnection: API_REQUEST_STATE.INITIAL,
+    checkingNeo4j: false,
     checkingConnectionTitle: false,
-    connection: null,
     checkTitleResult: null,
+    validatingFormMethods: false,
+    validateFormMethodsResult: null,
+    connection: null,
     testResult: {},
     connections: List(),
     error: null,
@@ -47,6 +50,18 @@ let index = 0;
 const reducer = (state = initialState, action) => {
     connections = state.get('connections');
     switch (action.type) {
+        case ConnectionsAction.CHECK_NEO4J:
+            return state.set('checkingNeo4j', true).set('error', null);
+        case ConnectionsAction.CHECK_NEO4J_FULFILLED:
+            return state.set('checkingNeo4j', false);
+        case ConnectionsAction.CHECK_NEO4J_REJECTED:
+            return state.set('checkingNeo4j', false).set('error', action.payload);
+        case ConnectionsAction.VALIDATE_FORMMETHODS:
+            return state.set('validatingFormMethods', true).set('validateFormMethodsResult', null).set('error', null);
+        case ConnectionsAction.VALIDATE_FORMMETHODS_FULFILLED:
+            return state.set('validatingFormMethods', false).set('validateFormMethodsResult', action.payload);
+        case ConnectionsAction.VALIDATE_FORMMETHODS_REJECTED:
+            return state.set('validatingFormMethods', false).set('error', null).set('validateFormMethodsResult', action.payload);
         case ConnectionsAction.CHECK_CONNECTIONTITLE:
             return state.set('checkingConnectionTitle', true).set('checkTitleResult', null).set('error', null);
         case ConnectionsAction.CHECK_CONNECTIONTITLE_FULFILLED:
@@ -76,7 +91,7 @@ const reducer = (state = initialState, action) => {
             addConnectionSubscriber(action.payload);
             return state.set('addingConnection', API_REQUEST_STATE.FINISH).set('connections', connections.set(connections.size, action.payload));
         case ConnectionsAction.ADD_CONNECTION_REJECTED:
-            return state.set('addingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('addingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
         case ConnectionsAction.UPDATE_CONNECTION:
             return state.set('updatingConnection', API_REQUEST_STATE.START).set('error', null);
         case ConnectionsAction.UPDATE_CONNECTION_FULFILLED:

@@ -46,15 +46,15 @@ class Status extends Component{
     }
 
     render(){
-        const {readonly} = this.props.data;
+        const {readOnly} = this.props.data;
         const {status} = this.state;
-        let {tourStep} = this.props;
+        let {tourStep, forConnection} = this.props;
         let isReadonly = false;
         let inputStyle = '';
         if(tourStep){
             inputStyle = tourStep;
         }
-        if(readonly){
+        if(readOnly){
             isReadonly = true;
         }
         return (
@@ -65,13 +65,17 @@ class Status extends Component{
                 id={'input_invoker_connection_status'}
                 label={'Status'}
                 type={'number'}
-                icon={'all_inclusive'}
-                maxLength={255}
+                icon={forConnection ? '' : 'all_inclusive'}
+                maxLength={forConnection ? 0 : 255}
                 value={status}
                 readOnly={isReadonly}
                 className={inputStyle}
                 required={false}
-                theme={{label: styles.form_input_label}}
+                theme={{
+                    label: forConnection ? styles.form_input_status_label_for_connection : styles.form_input_status_label,
+                    input: forConnection ? styles.form_input_input_for_connection : '',
+                    inputElement: forConnection ? styles.form_input_status_element_for_connection : '',
+                }}
             />
         );
     }
@@ -80,6 +84,10 @@ class Status extends Component{
 Status.propTypes = {
     operation: PropTypes.instanceOf(COperation).isRequired,
     data: PropTypes.object.isRequired,
+};
+
+Status.defaultProps = {
+    forConnection: false,
 };
 
 

@@ -14,7 +14,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const DefaultAuthenticationType = {type: 'text', maxLength: 256, icon: 'perm_identity', defaultValue: 'NO CREDENTIAL TYPE',};
+export const DefaultAuthenticationType = {type: 'text', icon: 'perm_identity', defaultValue: 'NO CREDENTIAL TYPE',};
 
 const Url = {key: 'url', type: 'text', maxLength: 256, icon: 'link', };
 
@@ -23,6 +23,10 @@ const ApiKey = {key: 'apikey', type: 'secret', maxLength: 256, icon: 'vpn_key', 
 const Login = {key: 'userlogin', type: 'text', maxLength: 256, icon: 'perm_identity', defaultValue: 'userlogin',};
 
 const Username = {key: 'username', type: 'text', maxLength: 256, icon: 'perm_identity', defaultValue: 'username',};
+
+const Secret = {key: '_secret',type: 'secret', maxLength: 256, icon: 'vpn_key', defaultValue: '1234',};
+
+const RefreshToken = {key: 'refresh_token', type: 'secret', icon: 'vpn_key', defaultValue: '1234',};
 
 const Password = {key: 'password',type: 'secret', maxLength: 256, icon: 'local_parking', defaultValue: '1234',};
 
@@ -39,6 +43,8 @@ export const AuthenticationTypes = {
     userlogin: Login,
     username: Username,
     password: Password,
+    _secret: Secret,
+    refresh_token: RefreshToken,
     token: Token,
     webservice: Webservice,
 };

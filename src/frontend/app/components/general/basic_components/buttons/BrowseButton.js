@@ -15,6 +15,7 @@
 
 import React, {Component} from 'react';
 import { BrowseButton as ToolboxBrowseButton } from "react-toolbox/lib/button";
+import {formatHtmlId} from "../../../../utils/app";
 
 
 /**
@@ -27,8 +28,9 @@ class BrowseButton extends Component{
     }
 
     render(){
+        const {name, label} = this.props;
         return (
-            <ToolboxBrowseButton {...this.props}/>
+            <ToolboxBrowseButton {...this.props} id={formatHtmlId(`button_${name ? name : label}`)}/>
         );
     }
 }

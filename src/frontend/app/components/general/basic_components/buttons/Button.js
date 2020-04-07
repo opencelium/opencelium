@@ -16,7 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styles from '../../../../themes/default/general/basic_components.scss';
-import {getThemeClass} from "../../../../utils/app";
+import {getThemeClass, formatHtmlId} from "../../../../utils/app";
 import FontIcon from "../FontIcon";
 
 
@@ -41,8 +41,9 @@ class Button extends Component{
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         className = `${className} ${disabled ? styles[classNames.button_disable] : isActive ? styles[classNames.active_button] : styles[classNames.button]}`;
+        let id = formatHtmlId(`button_${title}`);
         return (
-            <div {...props} className={className} onClick={disabled || isActive ? null : onClick}>
+            <button {...props} className={className} onClick={disabled || isActive ? null : onClick} id={id}>
                 {
                     icon !== ''
                     ?
@@ -51,7 +52,7 @@ class Button extends Component{
                         null
                 }
                 <span style={{cursor: disabled || isActive ? 'default' : 'pointer'}}>{title}</span>
-            </div>
+            </button>
         );
     }
 }

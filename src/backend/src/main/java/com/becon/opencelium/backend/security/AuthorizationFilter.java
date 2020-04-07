@@ -88,7 +88,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         activityService.registerTokenActivity(userDetail);
-        return new UsernamePasswordAuthenticationToken(userDetail.getUsername(),
+        return new UsernamePasswordAuthenticationToken(userDetail,
                                                        null,
                                                        userDetail.getAuthorities());
     }

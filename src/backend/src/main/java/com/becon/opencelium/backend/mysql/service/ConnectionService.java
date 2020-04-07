@@ -28,11 +28,17 @@ public interface ConnectionService {
 
     void deleteById(Long id);
 
+    void delete(Connection connection);
+
     Optional<Connection> findById(Long id);
 
     List<Connection> findAll();
 
+    boolean existsByName(String name);
+
     void execute(Long connectionId, int schedulerId);
+
+    List<Connection> findAllByConnectorId(int connectorId);
 
     Connection toEntity(ConnectionResource resource);
 

@@ -27,18 +27,54 @@ export const DEBUGGER_ERRORS = true;
 /**
  * messages from backend if token was expired
  */
-export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied'];
+export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
 /**
- * callback to sort by index
+ * to format html id
+ *
+ * @param id - id of the html element
+ */
+export function formatHtmlId(id){
+    if(isString(id)) {
+        return id.replace(' ', '_').toLowerCase();
+    }
+    return 'no_id';
+}
+
+/**
+ * to validate before add schedule
+ *
+ * @param connectionPointer - string pointer for connection
+ * #format [color].([response|request]).[success|error].[parameter name]
+ * #example #e2e2e2.(response).success.result.title
+ */
+export function parseConnectionPointer(connectionPointer){
+    let result = {
+        color: '',
+        field: '',
+        type: '',
+    };
+    if(isString(connectionPointer)){
+        let parsedConnectionPointer = connectionPointer.split('.');
+        if(parsedConnectionPointer.length > 2){
+            result.color = parsedConnectionPointer[0];
+            result.type = parsedConnectionPointer[1].substring(1, parsedConnectionPointer[1].length - 1);
+            result.field = subArrayToString(parsedConnectionPointer, '.', 2, parsedConnectionPointer.length);
+        }
+    }
+    return result;
+}
+
+/**
+ * a callback to sort by index
  */
 export function sortByIndexFunction(a, b){
     if(a.index < b.index){return -1;} if(a.index > b.index){return 1;} return 0;
 }
 
 /**
- * callback to search by name
+ * a callback to search by name
  */
 export function searchByNameFunction(element, searchValue){
     let elementValue = element && element.hasOwnProperty('name') ? element.name.toUpperCase() : element && element.hasOwnProperty('title') ? element.title.toUpperCase() : '';
@@ -55,7 +91,7 @@ export function searchByNameFunction(element, searchValue){
 }
 
 /**
- * callback to sort by name
+ * a callback to sort by name
  */
 export function sortByNameFunction(a, b){
     let propertyA = a && a.hasOwnProperty('name') ? a.name.toUpperCase() : a.hasOwnProperty('title') ? a.title.toUpperCase() : '';
@@ -75,7 +111,19 @@ export function sortByNameFunction(a, b){
 }
 
 /**
- * on enter event
+ * a callback to sort by id
+ */
+export function sortByIdFunction(a, b){
+    let propertyA = parseInt(a.schedulerId);
+    let propertyB = parseInt(b.schedulerId);
+    if(propertyA < propertyB){return 1;} if(propertyA > propertyB){return -1;} return 0;
+}
+
+/**
+ * to run callback on Enter event
+ *
+ * @param e - event
+ * @param callback - callback that should be called
  */
 export function onEnter(e, callback){
     if(e.key === 'Enter'){
@@ -84,43 +132,14 @@ export function onEnter(e, callback){
 }
 
 /**
- * check params of the object on valid type
- */
-export function checkAndDoParam(obj, param, type){
-    switch(type){
-        case 'id':
-            if(obj !== null) {
-                return obj.hasOwnProperty(param) && isInteger(obj[param]) && obj[param] > 0 ? obj[param] : -1;
-            } else{
-                return isInteger(param) && param > 0 ? param : -1;
-            }
-        case 'string':
-            if(obj !== null) {
-                return obj.hasOwnProperty(param) && isString(obj[param]) ? obj[param] : '';
-            } else{
-                return isString(param) ? param : '';
-            }
-        case 'object':
-            if(obj !== null) {
-                return obj.hasOwnProperty(param) && isObject(obj[param]) ? obj[param] : null;
-            } else{
-                return isObject(param) ? param : null;
-            }
-        default:
-            consoleLog('Wrong type of data');
-            break;
-    }
-    return null;
-}
-
-/**
- * check if image is valid or not
- * @param image - data
+ * to check if image is valid or not
+ *
+ * @param image - image itself
  * @param onSuccess - on success callback
  * @param onFail - on fail callback
  */
 export function checkImage(image, onSuccess, onFail){
-    if(typeof image === 'string' && image !== '') {
+    if(isString(image) && image !== '') {
         let img = new Image();
         img.onload = onSuccess;
         img.onerror = onFail;
@@ -131,29 +150,26 @@ export function checkImage(image, onSuccess, onFail){
 }
 
 /**
- * shuffle array
+ * to shuffle array
+ *
+ * @param array - array itself
  */
 export function shuffle(array) {
     let currentIndex = array.length, temporaryValue, randomIndex;
-
-    // While there remain elements to shuffle...
     while (0 !== currentIndex) {
-
-        // Pick a remaining element...
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex -= 1;
-
-        // And swap it with the current element.
         temporaryValue = array[currentIndex];
         array[currentIndex] = array[randomIndex];
         array[randomIndex] = temporaryValue;
     }
-
     return array;
 }
 
 /**
- * focus input by id
+ * to focus on input by id
+ *
+ * @param id - id of the html element
  */
 export function setFocusById(id){
     let element = document.getElementById(id);
@@ -176,16 +192,22 @@ export function setFocusById(id){
 }
 
 /**
- * cut subarray and convert to string with separator
+ * to cut subarray and convert to string with separator
+ *
+ * @param arr - array
+ * @param separator - separator for string
+ * @param start - start index
+ * @param end - end index
  */
-export function subArrayToString(arr, separator,start,end){
-    if(!start) start = 0;
+export function subArrayToString(arr, separator, start = 0, end){
     if(!end) end = arr.length - 1;
     return arr.slice(start,end).join(separator);
 }
 
 /**
- * clone Object
+ * to clone Object
+ *
+ * @param obj - Object itself
  */
 export function cloneObject(obj) {
     let copy = {};
@@ -198,16 +220,9 @@ export function cloneObject(obj) {
 }
 
 /**
- * return unique Array
- */
-export function uniqueArray(a){
-    return a.filter(function(item, pos) {
-        return a.indexOf(item) === pos;
-    });
-}
-
-/**
  * console.log in debug mode
+ *
+ * @param value - value that should be consoled
  */
 export function consoleLog(value){
     if(DEBUGGER_LOGS) {
@@ -216,6 +231,8 @@ export function consoleLog(value){
 }
 /**
  * console.error in debug mode
+ *
+ * @param value - value that should be consoled
  */
 export function consoleError(value){
     if(DEBUGGER_ERRORS) {
@@ -224,37 +241,46 @@ export function consoleError(value){
 }
 
 /**
- * check if element is Number
+ * to check if element is Number
+ *
+ * @param number - number itself
  */
 export function isNumber(number){
     return !isNaN(parseInt(number));
 }
 
 /**
- * check if element is ID
+ * to check if element is ID
+ *
+ * @param id - id itself
  */
 export function isId(id){
     let result = isNumber(id) && id > 0;
     return !!result;
-
 }
 
 /**
- * check if element is Integer
+ * to check if element is Integer
+ *
+ * @param number - number
  */
 export function isInteger(number) {
     Number.isInteger(number);
 }
 
 /**
- * check if element is String
+ * to check if element is String
+ *
+ * @param str - String itself
  */
 export function isString(str){
     return typeof str  === 'string';
 }
 
 /**
- * check if string is in json format
+ * to check if String is in json format
+ *
+ * @param str - String itself
  */
 export function isJsonString(str) {
     try {
@@ -266,7 +292,9 @@ export function isJsonString(str) {
 }
 
 /**
- * check if an Object is empty
+ * to check if an Object is empty
+ *
+ * @param obj - Object itself
  */
 export function isEmptyObject(obj){
     if(isObject(obj)) {
@@ -276,43 +304,46 @@ export function isEmptyObject(obj){
 }
 
 /**
- * capitalize first charachter of the string
+ * to capitalize first character of the string
+ *
+ * @param string - String itself
  */
 export function capitalize(string){
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 /**
- * check if element is an Object
+ * to check if element is an Object
+ *
+ * @param obj - Object itself
  */
-export function isObject (value) {
-    return value && typeof value === 'object' && value.constructor === Object;
+export function isObject (obj) {
+    return obj && typeof obj === 'object' && obj.constructor === Object;
 }
 
 /**
- * check if element is an Array
+ * to check if element is an Array
+ *
+ * @param array - Array itself
  */
 export function isArray(array){
     return Array.isArray(array);
 }
 
-export function getInputsState(inputs){
-    let obj = {};
-    if(Array.isArray(inputs)) {
-        inputs.forEach(input => input.hasOwnProperty('defaultValue') ? obj[input.name] = input.defaultValue : obj[input.name] = '');
-    }
-    return obj;
-}
-
 /**
- * convert cron expression value in ScheduleList component
+ * to convert cron expression value in ScheduleList component
+ *
+ * @param cronExp - cron expression
  */
 export function convertCronExpForSchedulerlist(cronExp){
     return cronExp;
 }
 
 /**
- * convert time value in ScheduleList component
+ * to convert time value in ScheduleList component
+ *
+ * @param t - time
+ * @param mode - 'short' or 'full' format of time
  */
 export function convertTimeForSchedulerList(t, mode = 'short'){
     let date = new Date(t);
@@ -335,7 +366,12 @@ export function convertTimeForSchedulerList(t, mode = 'short'){
 }
 
 /**
- * get classnames from the theme
+ * to get classnames from the themes folder
+ * if theme does not exist, then get default one
+ *
+ * @param authUser - current authorized user
+ * @param classNames - a classname or an array of classnames
+ * @param styles - an imported default css/scss file *
  */
 export function getThemeClass({classNames, authUser, styles}){
     if(authUser && authUser.userDetail && authUser.userDetail.hasOwnProperty('theme') && authUser.userDetail.theme && styles) {
@@ -372,11 +408,13 @@ export function getThemeClass({classNames, authUser, styles}){
 }
 
 /**
- * copy text to a clipboard
+ * tp copy text to a clipboard
+ *
+ * @param text - text that is going to be copied
  */
-export function copyStringToClipboard(str) {
+export function copyStringToClipboard(text) {
     let el = document.createElement('textarea');
-    el.value = str;
+    el.value = text;
     el.setAttribute('readonly', '');
     el.style.opacity = '0';
     document.body.appendChild(el);
@@ -386,7 +424,11 @@ export function copyStringToClipboard(str) {
 }
 
 /**
- * update object immutably
+ * to update object immutably
+ *
+ * @param obj - object itself
+ * @param prop - property of the object
+ * @param value - value for object's property
  */
 export const updateObj = (obj, prop, value) => {
     let tmp = obj;
@@ -395,35 +437,17 @@ export const updateObj = (obj, prop, value) => {
 };
 
 /**
- * generate label that has key navigation
+ * to generate label that has key navigation
+ *
+ * @param title - title for label
+ * @param index - index of the char in title that should be emphasized
+ * @param classNames - keyNavigationTitle and keyNavigationLetter css classNames
  */
-export function generateLabel(text, index, classNames = {keyNavigationTitle: 'key_navigation_title', keyNavigationLetter: 'key_navigation_letter'}){
-    let startText = text.substr(0, index);
-    let selectedLetter = text.charAt(index);
-    let endText = text.substr(index + 1);
+export function generateLabel(title, index, classNames = {keyNavigationTitle: 'key_navigation_title', keyNavigationLetter: 'key_navigation_letter'}){
+    let startText = title.substr(0, index);
+    let selectedLetter = title.charAt(index);
+    let endText = title.substr(index + 1);
     return <span className={classNames.keyNavigationTitle}>{startText}<span className={classNames.keyNavigationLetter}>{selectedLetter}</span>{endText}</span>;
-}
-
-/**
- * inject FieldBinding parameter into coming Connection
- */
-export function injectFieldBindingIntoConnection(connection){
-    injectFieldBinding(connection);
-}
-
-/**
- * convert field binding with the right parameter names
- */
-export function convertFieldBindingElement(data){
-    let result = [];
-    for(let i = 0; i < data.length; i++){
-        result.push({
-            type: data[i].hasOwnProperty('exchangeType') ? data[i].exchangeType : data[i].type,
-            methodKey: data[i].hasOwnProperty('methodKey') ? data[i].methodKey : data[i].methodKey,
-            field: data[i].hasOwnProperty('name') ? data[i].name : data[i].field,
-        });
-    }
-    return result;
 }
 
 /**
@@ -586,33 +610,6 @@ function mapConnector(connector){
         }
     }
     return result;
-}
-function mapRequestField(requestField){
-    if(requestField){
-        let result = {};
-        result.exchangeType = requestField.exchangeType;
-        result.fieldType = requestField.fieldType;
-        result.name = requestField.name;
-        result.subFieldList = requestField.subFieldList;
-        result.value = requestField.value;
-        return result;
-    }
-    return requestField;
-}
-function mapResponseField(responseField){
-    if(responseField){
-        let result = {};
-        result.exchangeType = responseField.exchangeType;
-        result.fieldType = responseField.fieldType;
-        result.name = responseField.name;
-        result.subFieldList = responseField.subFieldList;
-        result.value = responseField.value;
-        return result;
-    }
-    return responseField;
-}
-function mapOperation(operation){
-    return operation;
 }
 function mapInvoker(invoker){
     return invoker;

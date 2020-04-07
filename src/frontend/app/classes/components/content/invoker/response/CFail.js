@@ -17,7 +17,7 @@
 import {isArray, isString, isEmptyObject} from "../../../../../utils/app";
 import {FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT, FIELD_TYPE_STRING} from "../../connection/method/CMethodItem";
 import {
-    convertFieldNameForBackend,
+    convertFieldNameForBackend, convertHeaderFormatToObject,
     getFieldsForSelectSearch, parseHeader
 } from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
 
@@ -32,7 +32,7 @@ export default class CFail{
         this._header = parseHeader(header);
     }
 
-    static createFail(fail){
+    static createFail(fail = null){
         let status = fail && fail.hasOwnProperty('status') ? fail.status : '';
         let body = fail && fail.hasOwnProperty('body') ? fail.body : {};
         let header = fail && fail.hasOwnProperty('header') ? fail.header : [];
@@ -101,7 +101,7 @@ export default class CFail{
             body: isEmptyObject(this._body) ? null : this._body,
         };
         if(this._header && this._header.length > 0){
-            obj.header = this._header;
+            obj.header = convertHeaderFormatToObject(this._header);
         }
         return obj;
     }

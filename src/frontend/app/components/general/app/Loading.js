@@ -14,15 +14,15 @@
  */
 
 import React, { Component }  from 'react';
-import PropTypes from 'prop-types';
 
 import styles from '../../../themes/default/general/app.scss';
 import CancelLoadingButton from "../basic_components/CancelLoadingButton";
 import {consoleError, getThemeClass} from "../../../utils/app";
 import {LoadingComponentError} from "../../../utils/constants/errors";
-import ProgressBar from "../basic_components/ProgressBar";
 import ComponentError from "./ComponentError";
 import {ERROR_TYPE} from "../../../utils/constants/app";
+import {Spinner} from "reactstrap";
+
 
 
 /**
@@ -68,20 +68,17 @@ class Loading extends Component{
         }
         return (
             <div className={`${loadingClassName} ${className}`}>
-                <ProgressBar type='circular' mode='indeterminate'/>
+                <Spinner type="grow" color="primary" />
                 {this.renderCancelButton()}
             </div>
         );
     }
 }
 
-Loading.propTypes = {
-    authUser: PropTypes.object,
-};
 Loading.defaultProps = {
-    authUser: null,
     className: '',
-    cancelCallback: null
+    error: null,
+    cancelCallback: null,
 };
 
 export default Loading;

@@ -223,13 +223,21 @@ class List extends Component{
                 <Col xl={8} lg={10} md={12} sm={12} offset={{ xl: 2, lg: 1 }} >
                     <Container style={containerStyles} style={{marginBottom: '70px'}}>
                         <ListHeader header={translations.header} authUser={authUser}/>
-                        {entities.length > 0 && !noSearchField ? <div><Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'}/></div> : null}
+                        {
+                            entities.length > 0 && !noSearchField
+                            ?
+                                <div className={'tour-step-search-1'}>
+                                    <Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'}/>
+                                </div>
+                            :
+                                null
+                        }
                         <Row>
                             {
                                 filteredEntities.length > 0
                                     ?
                                         filteredEntities.map((entity, key) => {
-                                            let mappedEntity = mapEntity.map(entity);
+                                            let mappedEntity = mapEntity.map(entity, key);
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
                                             let graphLink = mapEntity.hasOwnProperty('getGraphLink') ? mapEntity.getGraphLink(entity) : '';

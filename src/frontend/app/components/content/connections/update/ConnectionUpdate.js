@@ -51,6 +51,8 @@ function mapStateToProps(state){
         fetchingConnectors: connectors.get('fetchingConnectors'),
         checkingConnectionTitle: connections.get('checkingConnectionTitle'),
         checkTitleResult: connections.get('checkTitleResult'),
+        validatingFormMethods: connections.get('validatingFormMethods'),
+        validateFormMethodsResult: connections.get('validateFormMethodsResult'),
     };
 }
 
@@ -87,6 +89,7 @@ class ConnectionUpdate extends Component{
     setCurrentTour(pageNumber){
         const {authUser} = this.props;
         this.startCheckingTitle = false;
+        this.startValidatingFormMethods = false;
         this.setState({
             currentTour: `page_${pageNumber}`,
             isTourOpen: automaticallyShowTour(authUser),
@@ -200,8 +203,13 @@ class ConnectionUpdate extends Component{
     }
 
     render(){
-        const {t, connectors, authUser, checkingConnectionTitle, checkTitleResult, updatingConnection, doAction} = this.props;
-        let {connection} = this.props;
+        const {
+            t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
+            updatingConnection, doAction,
+        } = this.props;
+        let {connection, error} = this.props;
+        connection.error = error;
+        let connectionClass = CConnection.createConnection(connection);
         let connectorMenuItems = this.getConnectorMenuItems();
         let contentTranslations = {};
         contentTranslations.header = t('UPDATE.HEADER');
@@ -227,15 +235,11 @@ class ConnectionUpdate extends Component{
                         notSuccessMessage: t('UPDATE.FORM.TITLE_EXIST'),
                     }},
                 {
-                    ...INPUTS.CONNECTOR,
-                    tourStep: CONNECTION_UPDATE_TOURS.page_1[1].selector,
+                    ...INPUTS.CONNECTOR_READONLY,
                     label: t('UPDATE.FORM.CONNECTORS'),
-                    placeholders: [t('UPDATE.FORM.CONNECTORS_PLACEHOLDER_1'), t('UPDATE.FORM.CONNECTORS_PLACEHOLDER_2')],
-                    required: true,
+                    placeholders: [t('UPDATE.FORM.CHOSEN_CONNECTOR_FROM'), t('UPDATE.FORM.CHOSEN_CONNECTOR_TO')],
                     source: connectorMenuItems,
-                    callback: ::this.setMethods,
-                    connectors: connectors,
-                    check: (e, entity) => ::this.validateConnectors(e, entity),
+                    readOnly: true,
                 },
             ],
             hint: {text: t('UPDATE.FORM.HINT_1'), openTour: ::this.openTour},
@@ -268,7 +272,7 @@ class ConnectionUpdate extends Component{
                     contents={contents}
                     translations={changeContentTranslations}
                     action={doAction}
-                    entity={CConnection.createConnection(connection)}
+                    entity={connectionClass}
                     type={'update'}
                     isActionInProcess={updatingConnection}
                     authUser={authUser}

@@ -45,32 +45,6 @@ public class ConditionUtility {
             return null;
         }
         return new StatementResource(statementNode);
-//        StatementResource statementResource = new StatementResource();
-//        String type = "";
-//        String color = "";
-//        String field = "";
-//        String rightPropertyValue = "";
-//        if (direction.equals("left")){
-////            type = condition.substring(params[0].indexOf('(') + 1, params[0].indexOf(')'));
-////            color = condition.substring(params[0].indexOf('#'), params[0].indexOf('.'));
-////            field = params[0].replace("(" + type + ").", "").replace(color + ".","");
-//            type = getExchangeType(condition);
-//            color = getMethodKey(condition);
-//            field = getRefValue(condition);
-//        }else {
-////            field = params[1];
-////            if(params[1] != null && params[1].contains("#") && params[1].contains("(") && params[1].contains(")")){
-////                type = condition.substring(params[1].indexOf('(') + 1, params[1].indexOf(')'));
-////                color = condition.substring(params[1].indexOf('#'), params[1].indexOf('.'));
-////                field = params[1].replace("(" + type + ").", "").replace(color + ".","");
-////            }
-//            type = null;
-//            color = null;
-//            field = condition;
-//        }
-//        statementResource.setType(type);
-//        statementResource.setColor(color);
-//        statementResource.setField(field);
     }
 
     //TODO: should be in StatementNodeService class;
@@ -78,15 +52,6 @@ public class ConditionUtility {
         if (statementResource == null){
             return null;
         }
-//        String result = "";
-//
-//        if (statementResource.getColor() != null && !statementResource.getColor().isEmpty()){
-//            result = result + statementResource.getColor() + ".(";
-//        }
-//
-//        if (statementResource.getType() != null && !statementResource.getType().isEmpty()){
-//            result = result + statementResource.getType() + ").";
-//        }
 
         return new StatementNode(statementResource);
     }
@@ -164,7 +129,10 @@ public class ConditionUtility {
         if(getExchangeType(ref).equals("response")){
             return ref.replace(refParts[0]+".", "")
                       .replace(refParts[1] + ".", "")
-                      .replace(refParts[2] + ".", "");
+                      .replace(refParts[2] + ".", "")
+                      .replace(refParts[0], "")
+                      .replace(refParts[1], "")
+                      .replace(refParts[2], "");
         }
 
         return ref.replace(refParts[0]+".", "")

@@ -32,7 +32,9 @@ import Loading from "../components/general/app/Loading";
  */
 export default function (store){
     return next => action => {
-        let data = {type: '', message: ''};
+        let systemTitle = action.payload && action.payload.hasOwnProperty('systemTitle') ? action.payload.systemTitle : 'OC';
+        let shortMessage = action.payload && action.payload.hasOwnProperty('shortMessage') ? action.payload.shortMessage : '';
+        let data = {type: '', message: '', systemTitle, shortMessage};
         const dividedState = divideState(action.type);
         if(hasNotification(dividedState) && isNotBackground(action)) {
             data.message = dividedState.prefix;
@@ -42,11 +44,16 @@ export default function (store){
                     break;
                 case 'REJECTED':
                     data.type = NotificationType.ERROR;
-                    if (action.payload && (action.payload.status === 403 || TOKEN_EXPIRED_MESSAGES.indexOf(action.payload.message) !== -1)){
+                    if(data.message === AuthAction.CHECK_OCCONNECTION){
+                        next(action);
+                        return;
+                    }
+                    if (action.payload
+                        && (action.payload.status === 403 || TOKEN_EXPIRED_MESSAGES.indexOf(action.payload.message) !== -1)
+                    ) {
                         store.dispatch(sessionExpired({}));
                         history.push('/login');
                         next({type: AuthAction.INITIAL_STATE, payload: {}});
-                        return;
                     }
                     break;
                 case 'CANCELED':
@@ -57,6 +64,12 @@ export default function (store){
                     break;
             }
             const notification = document.getElementById('notification');
+            for(let i = notification.children.length - 1; i >= 0; i--){
+                let child = notification.children[i];
+                if(child.innerHTML === ''){
+                    child.remove();
+                }
+            }
             let idName = 'note_';
             if(notification.children.length === 0 || typeof notification.children[notification.children.length - 1].children[0] === 'undefined') {
                 idName += 1;
@@ -68,12 +81,9 @@ export default function (store){
             const newDiv = document.createElement("div");
             notification.appendChild(newDiv);
             let domElem = notification.children[notification.children.length - 1];
-            setTimeout(function(){
-                document.getElementById(idName).parentNode.remove();
-            }, 5500);
             ReactDOM.render(
                 <Suspense fallback={(<Loading/>)}>
-                    <Notification type={data.type} message={data.message} id={idName} params={action.payload}/>
+                    <Notification data={data} id={idName} params={action.payload}/>
                 </Suspense>, domElem);
         }
         next(action);
@@ -85,8 +95,8 @@ export default function (store){
  */
 function isNotBackground(action){
     if(action.hasOwnProperty('settings')){
-        if(action.settings.hasOwnProperty('onBackground')){
-            return !action.settings.onBackground;
+        if(action.settings.hasOwnProperty('background')){
+            return !action.settings.background;
         }
     }
     return true;

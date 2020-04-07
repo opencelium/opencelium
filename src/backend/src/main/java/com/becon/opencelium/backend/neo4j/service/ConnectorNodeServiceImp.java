@@ -30,13 +30,15 @@ public class ConnectorNodeServiceImp implements ConnectorNodeService {
     @Autowired
     private OperatorNodeServiceImp operatorNodeServiceImp;
 
-    public ConnectorNode toEntity(ConnectorNodeResource resource){
+    public ConnectorNode toEntity(ConnectorNodeResource resource, String connectionName){
         ConnectorNode connectorNode = new ConnectorNode();
         connectorNode.setConnectorId(resource.getConnectorId());
         connectorNode.setName(resource.getInvoker().getName());
         connectorNode.setConnectorId(resource.getConnectorId());
-        connectorNode.setStartMethod(methodNodeServiceImp.toEntity(resource.getMethods(), resource.getOperators(), resource.getInvoker().getName()));
-        connectorNode.setStartOperator(operatorNodeServiceImp.toEntity(resource.getMethods(), resource.getOperators(), resource.getInvoker().getName()));
+        connectorNode.setStartMethod(methodNodeServiceImp.toEntity(resource.getMethods(), resource.getOperators(),
+                                                                   connectorNode, connectionName));
+        connectorNode.setStartOperator(operatorNodeServiceImp.toEntity(resource.getMethods(), resource.getOperators(),
+                                                                       connectorNode, connectionName));
         return connectorNode;
     }
 

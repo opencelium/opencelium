@@ -41,7 +41,7 @@ class Navigation extends Component{
         if(page === 0 || prevPage === null){
             return null;
         }
-        return <FontIcon className={styles[classNames.navigation_prev_icon]} value={'arrow_back'} onClick={prevPage}/>;
+        return <FontIcon className={styles[classNames.navigation_prev_icon]} value={'arrow_back'} onClick={prevPage} id={'navigation_back'}/>;
     }
 
     /**
@@ -84,6 +84,8 @@ class Navigation extends Component{
                 case 'update':
                     icon = 'autorenew';
                     break;
+                case 'view':
+                    icon = '';
             }
             let onClickAction = null;
             if(test.isTested === -1 || test.isTested === 0){
@@ -92,6 +94,9 @@ class Navigation extends Component{
                 onClickAction = ::this.test;
             } else {
                 onClickAction = action;
+            }
+            if(icon === ''){
+                return null;
             }
             return (
                 <Button
@@ -103,7 +108,7 @@ class Navigation extends Component{
                 />
             );
         }
-        return <FontIcon className={styles[classNames.navigation_next_icon]} value={icon} onClick={nextPage}/>;
+        return <FontIcon className={styles[classNames.navigation_next_icon]} value={icon} onClick={nextPage} id={'navigation_next'}/>;
     }
     
     render(){

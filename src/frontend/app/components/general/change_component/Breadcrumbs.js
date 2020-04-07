@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import styles from '../../../themes/default/general/change_component.scss';
-import {getThemeClass} from "../../../utils/app";
+import {formatHtmlId, getThemeClass} from "../../../utils/app";
 import FontIcon from "../basic_components/FontIcon";
 
 
@@ -48,16 +48,18 @@ class Breadcrumbs extends Component{
             itemStyle = styles[classNames.breadcrumbs_item_text];
             onClickItem = null;
         }
+        let id = formatHtmlId(`breadcrumb_${item}`);
         if(key < items.length - 1){
             return (
                 <span>
-                    <span className={itemStyle} onClick={onClickItem}>{item}</span>
+                    <span id={id} className={itemStyle} onClick={onClickItem}>{item}</span>
                     <FontIcon value={'keyboard_arrow_right'} style={{fontSize: '17px'}}/>
                 </span>
             );
         }
         return (
             <span
+                id={id}
                 className={itemStyle}
                 onClick={onClickItem}>
                 {item}

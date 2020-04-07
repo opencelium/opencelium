@@ -24,14 +24,19 @@ import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
 
 const DEFAULT_COLOR = '#ffffff';
 
-const ALL_COLORS = ['#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7', '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2', '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6'];
+const ALL_COLORS = [
+    '#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7',
+    '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2',
+    '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6',
+    '#5FC798', '#5F3798', '#A6E6EA', '#E1C798',
+];
 
 /**
  * Connection class for manipulating data in the Connection Component
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -56,6 +61,7 @@ export default class CConnection{
             this.removeRestColor(this._toConnector.methods[i].color);
         }
         this._currentFieldBindingTo = -1;
+        this.setError(error);
     }
 
     static createConnection(connection){
@@ -66,7 +72,8 @@ export default class CConnection{
         let toConnector = connection && connection.hasOwnProperty('toConnector') ? connection.toConnector : null;
         let fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
         let template = connection && connection.hasOwnProperty('template') ? connection.template : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template);
+        let error = connection && connection.hasOwnProperty('error') ? connection.error : null;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error);
     }
 
     convertBindingItem(bindingItem){
@@ -96,13 +103,6 @@ export default class CConnection{
             return CTemplate.createTemplate(template);
         }
         return template;
-    }
-
-    convertEnhancement(enhancement){
-        if(!(enhancement instanceof CEnhancement) || enhancement === null) {
-            return CEnhancement.createEnhancement(enhancement);
-        }
-        return enhancement;
     }
 
     isEmpty(){
@@ -156,6 +156,35 @@ export default class CConnection{
                 this._colors.splice(index, 1);
             }
         }
+    }
+
+    setError(error){
+        if(error && error.hasOwnProperty('data') && error.data.hasOwnProperty('connectorId') && error.data.hasOwnProperty('index')){
+            let item = this.getItemByConnectorIdAndIndex(error.data.connectorId, error.data.index);
+            if(item){
+                item.error = {hasError: true, location: error.data.location, message: error.message};
+            }
+        }
+    }
+
+    getItemByConnectorIdAndIndex(connectorId, index){
+        let item = null;
+        if(this._fromConnector && this._toConnector) {
+            let connector = null;
+            if(this._fromConnector.id === connectorId){
+                connector = this._fromConnector;
+            }
+            if(this._toConnector.id === connectorId){
+                connector = this._toConnector;
+            }
+            if (connector) {
+                item = connector.getMethodByIndex(index);
+                if (!item) {
+                    item = connector.getOperatorByIndex(index);
+                }
+            }
+        }
+        return item;
     }
 
     get id(){
@@ -378,12 +407,6 @@ export default class CConnection{
                 for(let i = 0; i < fields.length; i++) {
                     if(this.checkFieldFormat(fields[i])) {
                         counter++;
-                        /*for (let j = 0; j < this._fieldBinding.length; j++) {
-                            if (this._fieldBinding[j].from.findIndex(f => f.color === fields[i].color && f.field === fields[i].field) !== -1) {
-                                counter++;
-                                break;
-                            }
-                        }*/
                     } else{
                         result = false;
                         break;
@@ -447,12 +470,10 @@ export default class CConnection{
     }
 
     updateFieldBinding(connectorType, bindingItem){
-        let newFieldBinding = new CFieldBinding();
+        let newFieldBinding = null;
         switch(connectorType){
             case CONNECTOR_FROM:
-                newFieldBinding.from.push(this.convertBindingItem(bindingItem));
-                newFieldBinding.enhancement = null;
-                newFieldBinding.to = [];
+                newFieldBinding = CFieldBinding.createFieldBinding({from: [this.convertBindingItem(bindingItem)]});
                 this._fieldBinding.push(newFieldBinding);
                 break;
             case CONNECTOR_TO:
@@ -484,9 +505,7 @@ export default class CConnection{
                             }
                         }
                     }
-                    newFieldBinding.from = bindingItem.from;
-                    newFieldBinding.enhancement = null;
-                    newFieldBinding.to = bindingItem.to;
+                    newFieldBinding = CFieldBinding.createFieldBinding({from: bindingItem.from, to: bindingItem.to});
                     this._fieldBinding.push(newFieldBinding);
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].from.length === 1 && this._fieldBinding[i].to.length === 0){
@@ -514,9 +533,6 @@ export default class CConnection{
                     return enhancement = this._fieldBinding[i].enhancement;
                 }
             }
-        }
-        if(enhancement === null){
-            enhancement = CEnhancement.createEnhancement();
         }
         return enhancement;
     }

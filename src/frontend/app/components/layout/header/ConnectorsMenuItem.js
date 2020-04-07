@@ -16,8 +16,9 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import {withTranslation} from "react-i18next";
 
+import ListItemLink from "../../general/basic_components/ListItemLink";
 import {addMenuConnectorsKeyNavigation, removeMenuConnectorsKeyNavigation} from "../../../utils/key_navigation";
 import {permission} from "../../../decorators/permission";
 import {ConnectorPermissions} from "../../../utils/constants/permissions";
@@ -31,10 +32,11 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for Connectors
+ * Menu Connectors
  */
 @connect(mapStateToProps, {})
 @permission(ConnectorPermissions.READ)
+@withTranslation('layout')
 class ConnectorsMenuItem extends Component{
 
     constructor(props){
@@ -50,11 +52,13 @@ class ConnectorsMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
-                label={{text: 'Connectors', index: 0}}
+                label={{text: t('HEADER.CONNECTORS.TITLE'), index: 0}}
                 to='/connectors'
                 navigationTitleClass={'tour-step-connector'}
+                id={'menu_connectors'}
             />
         );
     }

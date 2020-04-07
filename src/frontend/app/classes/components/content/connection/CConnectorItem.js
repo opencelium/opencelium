@@ -27,7 +27,7 @@ export const CONNECTOR_TO = 'toConnector';
 export const METHOD_ITEM = 'method';
 export const OPERATOR_ITEM = 'operator';
 
-export const CONNECTOR_DEPTH_LIMIT = 4;
+export const CONNECTOR_DEPTH_LIMIT = 7;
 
 /**
  * Connector class for manipulating data in the Connector Component
@@ -376,8 +376,14 @@ export default class CConnectorItem{
         this.addItem(METHOD_ITEM, method, mode);
     }
 
-    getMethodByColor(color){
-        return this._methods.find(m => m.color === color);
+    getMethodByIndex(index){
+        let method = this._methods.find(m => m.index === index);
+        return method ? method : null;
+    }
+
+    getOperatorByIndex(index){
+        let operator = this._operators.find(o => o.index === index);
+        return operator ? operator : null;
     }
 
     getCloserItem(itemIndex){

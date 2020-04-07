@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.factory;
 
-import com.becon.opencelium.backend.execution.ExecutionContainer;
 import com.becon.opencelium.backend.operator.*;
 
 public class OperatorFactory {

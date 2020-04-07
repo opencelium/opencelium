@@ -23,17 +23,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class RequestNodeServiceImp implements RequestNodeService{
 
-
-    public static RequestResource toResource(RequestNode entity) {
-        if (entity == null){
+    public static RequestResource toResource(RequestNode requestNode) {
+        if (requestNode == null){
             return null;
         }
         RequestResource requestResource = new RequestResource();
-        requestResource.setNodeId(entity.getId());
-        requestResource.setEndpoint(entity.getEndpoint());
-        requestResource.setMethod(entity.getMethod());
-        if (entity.getBodyNode() != null){
-            requestResource.setBody(BodyNodeServiceImp.toResource(entity.getBodyNode()));
+        requestResource.setNodeId(requestNode.getId());
+        requestResource.setEndpoint(requestNode.getEndpoint());
+        requestResource.setMethod(requestNode.getMethod());
+        if (requestNode.getBodyNode() != null){
+            requestResource.setBody(BodyNodeServiceImp.toResource(requestNode.getBodyNode()));
         }
         requestResource.setHeader(null);
         return requestResource;

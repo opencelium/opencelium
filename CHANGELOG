@@ -1,0 +1,39 @@
+OC Changelog
+--------------------------------------------------------------------------------
+
+1.1
+--------------------------------------------------------------------------------
+[New connector]                                 Azure
+[New business template][Azure][i-doit]          Create/update virtual hosts
+[New business template][Azure][i-doit]          Delete hosts
+[New connector]                                 Sensu
+[New business template][i-doit][Sensu]          Create/update hosts
+[New business template][i-doit][Sensu]          Delete hosts
+[New connector]                                 OpenNMS
+[New business template][i-doit][OpenNMS]        Create/update hosts
+[New business template][i-doit][OpenNMS]        Delete hosts
+[New connector]                                 CheckMK
+[New business template][i-doit][CheckMK]        Create/update hosts
+[New business template][i-doit][CheckMK]        Delete hosts
+[New connector]                                 AWS
+[Improvement]                                   Showing documentation of connectors in connection assistant
+[Improvement]                                   Integration of logical validation in connection assistant
+[Improvement]                                   Supporting of template management via GUI
+[Bug][OC-226]                                   Execute several jobs doesnt work
+[Bug][OC-206]                                   Connection get error via notification
+[Bug][OC-189]                                   No kibana link was created after triggering a job
+[Bug][OC-189]                                   Connection get error via notification
+[Bug][OC-225]                                   First execution job will not be updated on scheduler view
+
+1.0 Stable Release
+--------------------------------------------------------------------------------
+[New connector]                                 I-doit
+[New connector]                                 Zabbix
+[New business template][i-doit][Zabbix]         Create/update hosts
+[New business template][i-doit][Zabbix]         delete
+[New connector]                                 Icinga2
+[New business template][i-doit][Icinga2]        Create/update hosts
+[New business template][i-doit][Icinga2]        delete
+[New connector]                                 OTRS
+[New business template][i-doit][OTRS]           Create/update hosts
+[New business template][i-doit][OTRS]           Delete hosts

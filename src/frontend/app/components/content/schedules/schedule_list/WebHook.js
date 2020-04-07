@@ -53,7 +53,7 @@ class WebHook extends Component{
     }
     
     render(){
-        const {authUser, t, schedule} = this.props;
+        const {authUser, t, schedule, index} = this.props;
         let url = schedule.getWebhookUrl();
         if(url === ''){
             return null;
@@ -62,7 +62,7 @@ class WebHook extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <div className={styles[classNames.webhook]}>
-                <TooltipFontIcon value={'file_copy'} tooltip={t('LIST.WEBHOOK_TOOLTIP')} onClick={::this.copyToClipboard} className={styles[classNames.webhook_url]}/>
+                <TooltipFontIcon id={`webhook_${index}`} value={'file_copy'} tooltip={t('LIST.WEBHOOK_TOOLTIP')} onClick={::this.copyToClipboard} className={styles[classNames.webhook_url]}/>
             </div>
         );
     }
@@ -70,6 +70,7 @@ class WebHook extends Component{
 
 WebHook.propTypes = {
     schedule: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 export default WebHook;

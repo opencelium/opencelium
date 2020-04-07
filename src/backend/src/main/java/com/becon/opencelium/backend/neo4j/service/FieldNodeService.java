@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
 import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldResource;
@@ -27,7 +28,7 @@ import java.util.Map;
 
 public interface FieldNodeService {
 
-    FieldNode findFieldByResource(LinkedFieldResource fieldResource, Long connectionId);
+    FieldNode findFieldByResource(LinkedFieldResource fieldResource, Connection connection);
     LinkedFieldResource toLinkedFieldResource(FieldNode node);
     String getPath(MethodNode methodNode, FieldNode fieldNode);
     boolean fieldHasRequest(Long fieldId);
@@ -36,7 +37,7 @@ public interface FieldNodeService {
     List<FieldNode> findIncoming(Long outgoingId);
     String getFieldValue(FieldNode fieldNode);
     boolean hasReference(String fieldValue);
-
+    boolean existsInInvokerMethod(String invoker, String method, String path);
     Map<String, Object> deleteEmptyFields(Map<String, Object> body);
     boolean valueIsJSON(String value);
 }

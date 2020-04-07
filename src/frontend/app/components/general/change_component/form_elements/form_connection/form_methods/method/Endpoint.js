@@ -142,6 +142,15 @@ class Endpoint extends Component{
     render(){
         const {authUser, connection, connector, method, readOnly} = this.props;
         const endpoint = method.request ? method.request.query : '';
+        let hasError = false;
+        if(method.error.hasError){
+            if(method.error.location === 'query'){
+                hasError = true;
+            }
+        }
+        let depth = method.getDepth();
+        let tooltipTextStyles = {width: depth < 4 ? '10%' : depth < 6 ? '12%' : depth < 8 ? '15%' : '18%' };
+        let contentEditableStyles = {width: depth < 4 ? '85%' : depth < 6 ? '83%' : depth < 8 ? '80%' : '77%', overflow: 'hidden', whiteSpace: 'nowrap', height: '41px', color: hasError ? 'red' : 'black'};
         return (
             <div>
                 <div className={`${theme.input}`}>
@@ -150,10 +159,11 @@ class Endpoint extends Component{
                         tooltip={endpoint}
                         text={'[...]'}
                         className={styles.method_affix}
+                        style={hasError ? {...tooltipTextStyles, color: 'red'} : tooltipTextStyles}
                     />
                     <div
                         className={`${theme.inputElement} ${theme.filled}`}
-                        style={{width: '5%', float: 'left', paddingLeft: '3px'}}>
+                        style={{width: '5%', float: 'left', paddingLeft: '3px', color: hasError ? 'red' : 'black'}}>
                         {`/ `}
                     </div>
                     <ContentEditable
@@ -163,7 +173,7 @@ class Endpoint extends Component{
                         disabled={readOnly}
                         onChange={::this.onChangeEndpoint}
                         className={`${theme.inputElement} ${theme.filled}`}
-                        style={{width: '85%', overflow: 'hidden', whiteSpace: 'nowrap', height: '41px'}}
+                        style={contentEditableStyles}
                     />
                     <ParamGenerator
                         connection={connection}
@@ -173,7 +183,7 @@ class Endpoint extends Component{
                         readOnly={readOnly}
                     />
                     <span className={theme.bar}/>
-                    <label className={theme.label}>{'Query'}</label>
+                    <label className={theme.label} style={hasError ? {color: 'red'} : {}}>{'Query'}</label>
                 </div>
             </div>
         );

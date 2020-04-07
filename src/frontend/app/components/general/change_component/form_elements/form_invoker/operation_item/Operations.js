@@ -20,7 +20,8 @@ import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
 
 import styles from '../../../../../../themes/default/general/change_component.scss';
-import COperation from "../../../../../../classes/components/content/invoker/COperation";
+import COperation, {METHOD_TYPE_TEST} from "../../../../../../classes/components/content/invoker/COperation";
+import AccordionItem from "./AccordionItem";
 
 
 class Operations extends Component{
@@ -35,8 +36,10 @@ class Operations extends Component{
     }
 
     updateEntity(){
-        const {entity, updateEntity} = this.props;
-        updateEntity(entity);
+        const {entity, updateEntity, readOnly, forConnection} = this.props;
+        if(!readOnly && !forConnection) {
+            updateEntity(entity);
+        }
     }
 
     updateAddOperation(){
@@ -75,26 +78,19 @@ class Operations extends Component{
 
     renderOperations(){
         const {entity, ...props} = this.props;
-        let operations = entity.getOperationsWithoutConnection();
+        let {readOnly} = this.props.data;
+        let operations = readOnly ? entity.operations : entity.getOperationsWithoutConnection();
         return operations.map((operation, key) => {
             return (
                 <Card key={key}>
-                    <Accordion.Toggle as={Card.Header} eventKey={key}>
-                        <div className={`${styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
-                        <span className={`${styles.invoker_item_name}`}>{operation.name}</span>
-                    </Accordion.Toggle>
-                    <Accordion.Collapse eventKey={key}>
-                        <Card.Body className={styles.no_card_header_tabs}>
-                            <OperationItem
-                                {...props}
-                                index={key}
-                                invoker={entity}
-                                operation={operation}
-                                updateEntity={::this.updateEntity}
-                                className={styles.slider_item}
-                            />
-                        </Card.Body>
-                    </Accordion.Collapse>
+                    <AccordionItem
+                        {...props}
+                        index={key}
+                        entity={entity}
+                        operation={operation}
+                        readOnly={readOnly}
+                        updateEntity={::this.updateEntity}
+                    />
                 </Card>
             );
         });
@@ -118,24 +114,29 @@ class Operations extends Component{
 
     renderAddOperation(){
         const {addOperationState} = this.state;
-        const {entity, ...props} = this.props;
+        let {entity, data, ...props} = this.props;
+        let canAddMethods = this.props.data.hasOwnProperty('canAddMethods') ? this.props.data.canAddMethods : true;
         let operations = entity.getOperationsWithoutConnection();
         return (
             <Card style={operations.length === 0 ? {border: '1px solid #00000020'} : null}>
-                <Accordion.Toggle as={Card.Header} eventKey={operations.length} id={'add_invoker_header'}>
+                <Accordion.Toggle as={Card.Header} eventKey={operations.length + 1} id={'add_invoker_header'} className={styles.invoker_operation_header}>
                     {'Add Operation'}
                 </Accordion.Toggle>
-                <Accordion.Collapse eventKey={operations.length}>
+                <Accordion.Collapse eventKey={operations.length + 1}>
                     <Card.Body className={styles.no_card_header_tabs}>
                         <OperationItem
                             {...props}
+                            data={{...data, readOnly: !canAddMethods}}
+                            isVisible={true}
                             updateEntity={::this.updateAddOperation}
                             operation={addOperationState}
                             invoker={entity}
                             ids={{name:'add_invoker_name'}}
                             hasTour
                             justAdded={this.justAdded}
+                            mode={'add'}
                         />
+                        {this.renderAddIcon()}
                     </Card.Body>
                 </Accordion.Collapse>
             </Card>
@@ -144,13 +145,15 @@ class Operations extends Component{
     }
 
     render(){
+        let {entity, data} = this.props;
+        let canAddMethods = data.hasOwnProperty('canAddMethods') ? data.canAddMethods : true;
+        let operations = entity.getOperationsWithoutConnection();
         return (
             <div>
-                <Accordion defaultActiveKey="0">
+                <Accordion defaultActiveKey={operations.length + 1}>
                     {this.renderOperations()}
-                    {this.renderAddOperation()}
+                    {!canAddMethods ? null : this.renderAddOperation()}
                 </Accordion>
-                {this.renderAddIcon()}
             </div>
         );
     }

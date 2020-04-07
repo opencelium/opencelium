@@ -41,7 +41,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service
 public class ExecutionContainer {
 
     private Invoker invoker;
@@ -51,14 +50,15 @@ public class ExecutionContainer {
     private String taId;
     private int order;
 
-    @Autowired
     private EnhancementServiceImp enhancementService;
-
-    @Autowired
     private FieldNodeServiceImp fieldNodeService;
-
-    @Autowired
     private MethodNodeServiceImp methodNodeService;
+
+    public ExecutionContainer(EnhancementServiceImp enhancementService, FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeService) {
+        this.enhancementService = enhancementService;
+        this.fieldNodeService = fieldNodeService;
+        this.methodNodeService = methodNodeService;
+    }
 
     public Object getValueFromEnhancementData(FieldNode outgoingFiled){
         Enhancement enhancement = enhancementService.findByFieldId(outgoingFiled.getId());
@@ -223,15 +223,19 @@ public class ExecutionContainer {
     // ==================================== private zone ====================================================== //
 
     private List<?> convertToArray(String stringifiedArray){
-        List<String> array = new ArrayList<>();
-
-        String withoutBrackets = stringifiedArray.replaceAll("[\\[\\](){}]", ""); // Remove all the brackets
-        for (String word : withoutBrackets.split(",")) {
-            String element = word.replaceAll("\"", "");
-            array.add(element);
+        try {
+//            List<String> array = new ArrayList<>();
+            ObjectMapper mapper = new ObjectMapper();
+            List jsonString = (List) mapper.readValue(stringifiedArray, Object.class);
+//            String withoutBrackets = stringifiedArray.replaceAll("[\\[\\](){}]", ""); // Remove all the brackets
+//            for (String word : withoutBrackets.split(",")) {
+//                String element = word.replaceAll("\"", "");
+//                array.add(element);
+//            }
+            return jsonString;
+        } catch (Exception e){
+            throw new RuntimeException(e);
         }
-
-        return array;
     }
 
     private Map<String, String> parseExpertVars(String vars){

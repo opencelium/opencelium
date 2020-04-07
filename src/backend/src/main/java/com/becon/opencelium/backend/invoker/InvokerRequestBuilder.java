@@ -24,6 +24,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -31,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 // TODO: need to add interface for supporting multiple function conversion to response entity
-// TODO: should be strategy pattern. Because a lot of strategies to authenticate
 public class InvokerRequestBuilder{
 
     private RestTemplate restTemplate;
@@ -58,9 +59,29 @@ public class InvokerRequestBuilder{
         HttpHeaders header = buildHeader();
         String body = buildBody();
 
-        HttpEntity<String> httpEntity = new HttpEntity <String> (body, header);
+        Object data;
+        MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+
+        String contentType = "";
+        if (header.containsKey("Content-Type")){
+            contentType = header.get("Content-Type").get(0);
+        }
+
+        if (header.containsKey("Content-Type") && contentType.equals("application/x-www-form-urlencoded")){
+            try {
+                HashMap<String, Object> mapData = new ObjectMapper().readValue(body, HashMap.class);
+                mapData.forEach(formData::add);
+                data = formData;
+            } catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        } else {
+            data = body;
+        }
+
+        HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
         if (body.equals("null")){
-            httpEntity = new HttpEntity <String> (header);
+            httpEntity = new HttpEntity <Object> (header);
         }
         return restTemplate.exchange(url, method ,httpEntity, String.class);
     }
@@ -107,11 +128,17 @@ public class InvokerRequestBuilder{
             String requiredField;
             if (v.contains("{") && v.contains("}")){
                 requiredField = v.replace("{","").replace("}","");
-                String value = requestData.stream()
-                        .filter(r -> r.getField().equals(requiredField))
-                        .map(RequestData::getValue).findFirst().get();
-
-                headerItem.put(k, value);
+//                String value = requestData.stream()
+//                        .filter(r -> r.getField().equals(requiredField))
+//                        .map(RequestData::getValue).findFirst().get();
+                String curlyValue = v;
+                for (RequestData data : requestData) {
+                    String field = "{" + data.getField() + "}";// TODO: should be regular expression
+                    if (v.contains(field)){
+                        curlyValue = curlyValue.replace(field,data.getValue());
+                    }
+                }
+                headerItem.put(k, curlyValue);
                 return;
             }
             headerItem.put(k, v);

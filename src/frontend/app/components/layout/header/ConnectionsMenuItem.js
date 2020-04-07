@@ -32,11 +32,11 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for Connections
+ * Menu Connections
  */
 @connect(mapStateToProps, {})
 @permission(ConnectionPermissions.READ)
-@withTranslation('connections')
+@withTranslation('layout')
 class ConnectionsMenuItem extends Component{
 
     constructor(props){
@@ -55,9 +55,10 @@ class ConnectionsMenuItem extends Component{
         const {t} = this.props;
         return (
             <ListItemLink
-                label={{text: t('MENU.TITLE'), index: 2}}
+                label={{text: t('HEADER.CONNECTIONS.TITLE'), index: 2}}
                 to='/connections'
                 navigationTitleClass={'tour-step-connection'}
+                id={'menu_connections'}
             />
         );
     }

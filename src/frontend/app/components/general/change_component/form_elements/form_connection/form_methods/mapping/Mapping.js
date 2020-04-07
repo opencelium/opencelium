@@ -25,7 +25,7 @@ import {
 } from "storm-react-diagrams";
 
 import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {isNumber, isArray} from "../../../../../../../utils/app";
+import {isArray, setFocusById} from "../../../../../../../utils/app";
 import Enhancement from "./enhancement/Enhancement";
 import {
     FIELD_TYPE_REQUEST, FIELD_TYPE_RESPONSE,
@@ -161,69 +161,14 @@ class Mapping extends Component{
     }
 
     /**
-     * convert simple code to expert code
-     */
-    convertSimpleCode(currentCode){
-        let code = '';
-        if(currentCode && currentCode.hasOwnProperty('code') && currentCode.code.length > 0) {
-            for (let i = 1; i < currentCode.code.length; i++) {
-                let name = currentCode.code[i].name;
-                let value = currentCode.code[i].value;
-                switch (currentCode.code[i].type) {
-                    case 'variable':
-                        code += `var ${name};
-`;
-                        break;
-                    case 'constant':
-                        code += isNumber(value) ? `var ${name} = ${value};` : `var ${name} = "${value}";`;
-                        code += `
-`;
-                        break;
-                }
-            }
-            code += `
-var ${currentCode.code[0].name} =`;
-            for (let i = 1; i < currentCode.code.length; i++) {
-                let name = currentCode.code[i].name;
-                let value = currentCode.code[i].value;
-                switch (currentCode.code[i].type) {
-                    case 'variable':
-                        code += ` ${name}`;
-                        break;
-                    case 'constant':
-                        code += ` ${name}`;
-                        break;
-                    case 'operator':
-                        code += ` ${value}`;
-                        break;
-                }
-                if(i === currentCode.code.length - 1){
-                    code += ';';
-                }
-            }
-        }
-        return code;
-    }
-
-    /**
      * to update enhancement in entity
      */
     updateEnhancement(){
         const {currentEnhancement} = this.state;
         const {connection, updateEntity} = this.props;
         connection.updateEnhancement(currentEnhancement);
-        if(this.validateFieldsForEnhancement()) {
-            updateEntity();
-        }
+        updateEntity();
         this.toggleEnhancement();
-    }
-
-    /**
-     * to validate fields for enhancement
-     */
-    validateFieldsForEnhancement(){
-        let {currentEnhancement} = this.state;
-        return currentEnhancement.name !== '';
     }
 
     /**
@@ -289,14 +234,13 @@ var ${currentCode.code[0].name} =`;
         return nodes;
     }
 
-
     renderEnhancement(){
         const {currentBindingItem, showEnhancement, currentEnhancement} = this.state;
         const {readOnly, getEnhancement} = this.props;
         let enhancement = currentEnhancement ? currentEnhancement : isArray(currentBindingItem) && currentBindingItem.length > 0 && currentBindingItem[0].hasOwnProperty('to') ? getEnhancement(currentBindingItem[0].to) :  null;
         return (
             <Dialog
-                actions={[{label: 'Ok', onClick: ::this.updateEnhancement}, {label: 'Cancel', onClick: ::this.toggleEnhancement}]}
+                actions={[{label: 'Ok', onClick: ::this.updateEnhancement, id: 'mapping_ok'}, {label: 'Cancel', onClick: ::this.toggleEnhancement, id: 'mapping_cancel'}]}
                 active={showEnhancement}
                 onEscKeyDown={::this.toggleEnhancement}
                 onOverlayClick={::this.toggleEnhancement}
@@ -309,7 +253,6 @@ var ${currentCode.code[0].name} =`;
                         binding={currentBindingItem}
                         setEnhancement={::this.setCurrentEnhancement}
                         readOnly={readOnly}
-                        convertSimpleCode={::this.convertSimpleCode}
                         enhancement={enhancement}
                     />
                 </div>
@@ -318,7 +261,7 @@ var ${currentCode.code[0].name} =`;
     }
 
     render(){
-        const {connection, readOnly, tourClassNames, updateEntity} = this.props;
+        const {connection, tourClassNames} = this.props;
         let fromConnectorNodes = this.getNodes('fromConnector');
         let toConnectorNodes = this.getNodes('toConnector');
         let toBindings = connection.fieldBinding.filter(f => f.to.length !== 0);

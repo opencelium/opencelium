@@ -18,6 +18,78 @@ import Rx from 'rxjs/Rx';
 import { ConnectionsAction } from '../../utils/actions';
 
 
+
+/**
+ * check neo4j
+ * @returns {{type: string}}
+ */
+const checkNeo4j = (callbackData = null) => {
+    return Rx.Observable.of({
+        type: ConnectionsAction.CHECK_NEO4J,
+        callbackData,
+    });
+};
+
+/**
+ * check neo4j fulfilled
+ * @param result
+ * @returns {{type: string, payload: []}}
+ */
+const checkNeo4jFulfilled = (result) => {
+    return {
+        type: ConnectionsAction.CHECK_NEO4J_FULFILLED,
+        payload: result,
+    };
+};
+
+/**
+ * check neo4j rejected
+ * @param error
+ * @returns {promise}
+ */
+const checkNeo4jRejected = (error) => {
+    return {
+        type: ConnectionsAction.CHECK_NEO4J_REJECTED,
+        payload: error
+    };
+};
+
+/**
+ * validate form methods
+ * @param connection
+ * @returns {{type: string, payload: {}}}
+ */
+const validateConnectionFormMethods = (connection) => {
+    return {
+        type: ConnectionsAction.VALIDATE_FORMMETHODS,
+        payload: connection,
+    };
+};
+
+/**
+ * validate form methods fulfilled
+ * @param connection
+ * @returns {{type: string, payload: {}}}
+ */
+const validateConnectionFormMethodsFulfilled = (connection) => {
+    return {
+        type: ConnectionsAction.VALIDATE_FORMMETHODS_FULFILLED,
+        payload: connection,
+    };
+};
+
+/**
+ * validate form methods rejected
+ * @param error
+ * @returns {promise}
+ */
+const validateConnectionFormMethodsRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectionsAction.VALIDATE_FORMMETHODS_REJECTED,
+        payload: error
+    });
+};
+
 /**
  * check uniqueness of the title
  * @param connection
@@ -59,10 +131,11 @@ const checkConnectionTitleRejected = (error) => {
  * @param connection
  * @returns {{type: string, payload: {}}}
  */
-const fetchConnection = (connection) => {
+const fetchConnection = (connection, settings) => {
     return {
         type: ConnectionsAction.FETCH_CONNECTION,
         payload: connection,
+        settings,
     };
 };
 
@@ -168,4 +241,10 @@ export {
     checkConnectionTitle,
     checkConnectionTitleRejected,
     checkConnectionTitleFulfilled,
+    validateConnectionFormMethods,
+    validateConnectionFormMethodsFulfilled,
+    validateConnectionFormMethodsRejected,
+    checkNeo4j,
+    checkNeo4jFulfilled,
+    checkNeo4jRejected,
 };

@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import { withRouter } from 'react-router';
 
-import {generateLabel} from "../../../utils/app";
+import {formatHtmlId, generateLabel} from "../../../utils/app";
 import {switchUserListKeyNavigation} from "../../../utils/key_navigation";
 import Confirmation from "../app/Confirmation";
 import CardButton from "./CardButton";
@@ -280,25 +280,25 @@ class ListCard extends Component{
         if(this.hasNotActions()){
             return (
                 <div className={styles[classNames.card_actions]}>
-                    <CardButton className={styles[classNames.no_actions_card]} text={'nothing'} permission={permissions.READ}/>
+                    <CardButton className={styles[classNames.no_actions_card]} text={'nothing'} permission={permissions.READ} index={index}/>
                 </div>
             );
         }
         if(!isException){
             return (
                 <div className={styles[classNames.card_actions]} style={!hasView && !hasUpdate && !hasGraph ? {textAlign: 'right'} : null}>
-                    {hasView ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/> : null}
-                    {hasUpdate ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/> : null}
-                    {hasGraph ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-graph-${index + 1}` : ''}`} onClick={::this.viewGraph} text={graphButtonText} permission={permissions.READ}/> : null}
-                    {hasDelete ? <CardButton className={`${deleteButtonStyle} ${hasTour ? `tour-step-delete-${index + 1}` : ''}`} onClick={::this.wantDelete} text={deleteButtonText} permission={permissions.DELETE}/> : null}
+                    {hasView ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/> : null}
+                    {hasUpdate ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/> : null}
+                    {hasGraph ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-graph-${index + 1}` : ''}`} index={index} onClick={::this.viewGraph} text={graphButtonText} permission={permissions.READ}/> : null}
+                    {hasDelete ? <CardButton className={`${deleteButtonStyle} ${hasTour ? `tour-step-delete-${index + 1}` : ''}`} index={index} onClick={::this.wantDelete} text={deleteButtonText} permission={permissions.DELETE}/> : null}
                 </div>
             );
         } else{
             return (
                 <div className={styles[classNames.card_actions]}>
-                    {hasView ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/> : null}
-                    {hasUpdate ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/> : null}
-                    <CardButton className={`${currentCardStyle}`} text={exceptionLabel} permission={permissions.READ}/>
+                    {hasView ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/> : null}
+                    {hasUpdate ? <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/> : null}
+                    <CardButton className={`${currentCardStyle}`} index={index} text={exceptionLabel} permission={permissions.READ}/>
                 </div>
             );
         }
@@ -321,7 +321,7 @@ class ListCard extends Component{
             cardStyle.cursor = 'pointer';
         }
         return (
-            <div className={cardClassName} style={cardStyle} onClick={::this.onCardClick} onMouseOver={::this.onMouseOverCard} onMouseLeave={::this.onMouseLeaveCard}>
+            <div id={`list_card_${index}`} className={cardClassName} style={cardStyle} onClick={::this.onCardClick} onMouseOver={::this.onMouseOverCard} onMouseLeave={::this.onMouseLeaveCard}>
                 <div className={styles[classNames.top_section]}>
                     <div className={styles[classNames.card_title]}>
                         <div className={styles[classNames.title]} title={entity.title}>{entity.title}</div>

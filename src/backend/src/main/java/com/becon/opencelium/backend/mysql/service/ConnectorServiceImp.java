@@ -127,7 +127,8 @@ public class ConnectorServiceImp implements ConnectorService{
             String visibility = requiredData.stream()
                     .filter(d -> d.getName().equals(data.getField()))
                     .map(RequiredData::getVisibility)
-                    .findFirst().orElseThrow(() -> new RuntimeException("Visibility not found while converting to entity"));
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Visibility not found while converting to entity for field:" + data.getField()));
             
             data.setVisibility(visibility);
         });
@@ -163,12 +164,6 @@ public class ConnectorServiceImp implements ConnectorService{
                     MethodNode methodNode = methodNodeService.findById(m.getId()).get();
                     return MethodNodeServiceImp.toResource(methodNode);
                 }).collect(Collectors.toList());
-
-//        List<Long> methodIds = methodNodeService.findMethodsByConnectionIdAndConnectorId(connectionId, entity.getId())
-//                .stream().map(m -> m.getId()).collect(Collectors.toList());
-//
-//        List<MethodResource> methodResources = new ArrayList<>();
-//        methodNodeService.findAllById(methodIds).forEach(m -> methodResources.add(MethodNodeServiceImp.toResource(m)));
 
         List<OperatorResource> operatorResources = operatorNodeService
                 .findOperatorsByConnectionIdAndConnectorId(connectionId, entity.getId()).stream()

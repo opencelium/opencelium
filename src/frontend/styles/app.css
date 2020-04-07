@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2019>  <becon GmbH>
+ * Copyright (C) <2020>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ body{
     right: 70px;
     height: 1px;
     width: 200px;
+    z-index: 1;
   }
 }
 @media screen and (max-width: 649px) {
@@ -67,6 +68,7 @@ body{
     right: 120px;
     height: 1px;
     width: 70px;
+    z-index: 1;
   }
 }
 
@@ -89,4 +91,8 @@ body{
 textarea{
   resize: none;
   height: 100% !important;
+}
+
+#atlwdg-trigger{
+  top: 15% !important;
 }

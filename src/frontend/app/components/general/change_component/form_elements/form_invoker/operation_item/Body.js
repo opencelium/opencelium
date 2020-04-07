@@ -116,30 +116,30 @@ class Body extends Component{
         if(focused){
             labelStyle += ' ' + styles.multiselect_focused;
         }
-        return <label className={labelStyle}>{label}</label>;
+        return <label className={labelStyle} style={{top: '15px'}}>{label}</label>;
     }
 
     render(){
-        const {icon, readonly} = this.props.data;
-        let {tourStep, entity} = this.props;
+        const {icon, readOnly} = this.props.data;
+        let {tourStep, entity, forConnection} = this.props;
         let value = entity.body;
         if(value === ''){
             value = {};
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input}`}>
+            <div className={`${forConnection ? '' : theme.withIcon} ${theme.input}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <ReactJson
                     name={'body'}
                     collapsed={false}
                     src={value}
                     onSelect={::this.onSelectValue}
-                    onEdit={readonly ? false : ::this.handleInput}
-                    onDelete={readonly ? false : ::this.handleInput}
-                    onAdd={readonly ? false : ::this.handleInput}
-                    style={{padding: '0', width: '80%', display: 'inline-block'}}
+                    onEdit={readOnly ? false : ::this.handleInput}
+                    onDelete={readOnly ? false : ::this.handleInput}
+                    onAdd={readOnly ? false : ::this.handleInput}
+                    style={{padding: '10px 0 0 0', width: '80%', display: 'inline-block'}}
                 />
-                {!readonly
+                {!readOnly
                     ?
                         <TooltipFontIcon
                             className={`${styles.input_import_json_button} ${tourStep ? tourStep : ''}`}
@@ -150,7 +150,7 @@ class Body extends Component{
                     :
                         null
                 }
-                {!readonly ? this.renderDialogImportJson() : null}
+                {!readOnly ? this.renderDialogImportJson() : null}
 
                 <FontIcon value={icon} className={theme.icon}/>
                 <span className={theme.bar}/>

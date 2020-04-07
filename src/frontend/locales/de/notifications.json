@@ -143,7 +143,7 @@
     "FETCH_USERGROUPS": "Fetching was canceled.",
     "UPDATE_USERGROUP": "Updating was canceled.",
     "DELETE_USERGROUP": "Deleting was canceled.",
-    "SESSION_EXPIRED": "Your sessions is expired."
+    "SESSION_EXPIRED": "Your session is expired."
   },
   "NOTE": {
     "ADD_USER": "You have a new user.",

@@ -16,13 +16,15 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import {withTranslation} from "react-i18next";
 
+import ListItemLink from "../../general/basic_components/ListItemLink";
 import {
 addMenuMyProfileKeyNavigation, removeMenuMyProfileKeyNavigation,
 } from "../../../utils/key_navigation";
 import {permission} from "../../../decorators/permission";
 import {MyProfilePermissions} from "../../../utils/constants/permissions";
+import styles from '../../../themes/default/layout/header.scss';
 
 
 function mapStateToProps(state){
@@ -33,10 +35,11 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for MyProfile
+ * Menu MyProfile
  */
 @connect(mapStateToProps, {})
 @permission(MyProfilePermissions.READ)
+@withTranslation('layout')
 class MyProfileMenuItem extends Component{
 
     constructor(props){
@@ -52,14 +55,17 @@ class MyProfileMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
+                id={'menu_my_profile'}
                 label={{text: '', index: 3}}
-                tooltip={'My Profile'}
+                tooltip={t('HEADER.MY_PROFILE.TITLE')}
                 to='/myprofile'
                 icon='face'
                 style={{paddingRight: '30px', height: '40px', paddingTop: '8px'}}
                 className={'tour-step-myprofile'}
+                itemClassName={styles.my_profile_header}
             />
         );
     }

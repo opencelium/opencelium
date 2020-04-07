@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
+import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
@@ -26,6 +27,10 @@ import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
+import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
+import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
@@ -56,6 +61,8 @@ public class ConnectionController {
     @Autowired
     private LinkRelationServiceImp linkRelationService;
 
+    @Autowired
+    private ValidationContext validationContext;
 
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
@@ -76,9 +83,11 @@ public class ConnectionController {
     @PostMapping
     public ResponseEntity<?> add(@RequestBody ConnectionResource connectionResource) throws Exception{
         Connection connection = connectionService.toEntity(connectionResource);
+        if (connectionService.existsByName(connection.getName())){
+            throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
+        }
         Long connectionId = 0L;
         try {
-
             connectionService.save(connection);
             connectionId = connection.getId();
 
@@ -91,6 +100,7 @@ public class ConnectionController {
                     final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
                     return ResponseEntity.ok().body(resource);
                 }
+
                 List<EnhancementNode> enhancementNodes =  connectionNodeService
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
                 enhancementNodeService.saveAll(enhancementNodes);
@@ -103,12 +113,43 @@ public class ConnectionController {
             }
 
             final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
+            validationContext.remove(connection.getName());
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             e.printStackTrace();
+            enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.deleteById(connectionId);
             connectionNodeService.deleteById(connectionId);
-            throw new RuntimeException(e.getMessage());
+
+            ErrorMessageDataResource errorMessageDataResource =
+                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
+            ValidationResource validationResource =
+                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
+            validationContext.remove(connection.getName());
+
+            return ResponseEntity.badRequest().body(validationResource);
+        }
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<?> validate(@RequestBody ConnectionResource connectionResource) throws Exception{
+        Connection connection = connectionService.toEntity(connectionResource);
+        if (connectionService.existsByName(connection.getName())){
+            throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
+        }
+        Long connectionId = 0L;
+        try {
+            connectionNodeService.toEntity(connectionResource);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e){
+            ErrorMessageDataResource errorMessageDataResource =
+                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
+            ValidationResource validationResource =
+                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
+            validationContext.remove(connection.getName());
+
+            return ResponseEntity.badRequest().body(validationResource);
         }
     }
 
@@ -117,20 +158,37 @@ public class ConnectionController {
                                     @RequestBody ConnectionResource connectionResource) throws Exception{
         connectionResource.setConnectionId(connectionId);
         Connection connection = connectionService.toEntity(connectionResource);
-        enhancementService.deleteAllByConnectionId(connectionId);
-        connectionService.save(connection);
+        Connection connectionClone = connectionService.findById(connectionId)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        ConnectionNode connectionNodeClone = connectionNodeService.findByConnectionId(connectionId)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        try {
+//            List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
+            enhancementService.deleteAllByConnectionId(connectionId);
+            connectionService.save(connection);
 
-        ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
-        connectionNodeService.deleteById(connectionId);
-        connectionNodeService.save(connectionNode);
+            ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
+            connectionNodeService.deleteById(connectionId);
+            connectionNodeService.save(connectionNode);
 
-        if (connectionResource.getFieldBinding() != null || !connectionResource.getFieldBinding().isEmpty()){
-            List<EnhancementNode> enhancementNodes =  connectionNodeService
-                    .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
-            enhancementNodeService.saveAll(enhancementNodes);
+            if (connectionResource.getFieldBinding() != null || !connectionResource.getFieldBinding().isEmpty()){
+                List<EnhancementNode> enhancementNodes = connectionNodeService
+                        .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
+                enhancementNodeService.saveAll(enhancementNodes);
+            }
+            final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
+            return ResponseEntity.ok().body(resource);
+        } catch (Exception e){
+            connectionService.save(connectionClone);
+            connectionNodeService.save(connectionNodeClone);
+            ErrorMessageDataResource errorMessageDataResource =
+                    new ErrorMessageDataResource(validationContext.get(connection.getName()));
+            ValidationResource validationResource =
+                    new ValidationResource(e, HttpStatus.BAD_REQUEST, "/connection", errorMessageDataResource);
+            validationContext.remove(connection.getName());
+
+            return ResponseEntity.badRequest().body(validationResource);
         }
-        final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
-        return ResponseEntity.ok().body(resource);
     }
 
     @DeleteMapping("{id}")
@@ -142,7 +200,7 @@ public class ConnectionController {
 
     @GetMapping("/check/{name}")
     public ResponseEntity<?> existsByName(@PathVariable("name") String name) throws IOException {
-        if (name.equals("")){
+        if (connectionService.existsByName(name)){
             throw new ResponseStatusException(
                     HttpStatus.OK, "EXISTS");
         } else {

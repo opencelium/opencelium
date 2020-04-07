@@ -55,5 +55,9 @@
     },
     "LINK": "Write to support team?",
     "MESSAGE": "{{entity}} Page has invalid data"
+  },
+  "HEADER": {
+    "MENU": "Menu",
+    "LOGO_TOOLTIP": "Home"
   }
 }

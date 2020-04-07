@@ -14,7 +14,6 @@
  */
 
 import React, {Component, Suspense} from 'react';
-import {connect} from 'react-redux';
 import {Container} from 'react-grid-system';
 
 import Loading from '../../general/app/Loading';
@@ -23,16 +22,9 @@ import {ERROR_TYPE} from "../../../utils/constants/app";
 import DashboardView from "./view/DashboardView";
 import {OC_TOURS} from "../../../utils/constants/tours";
 import {tour} from "../../../decorators/tour";
+import {checkConnection} from "../../../decorators/checkConnection";
 
 
-function mapStateToProps(state){
-    const auth = state.get('auth');
-    return{
-        authUser: auth.get('authUser'),
-        logining: auth.get('logining'),
-        logouting: auth.get('logouting'),
-    };
-}
 function filterOCSteps(tourSteps){
     const {authUser} = this.props;
     let steps = [];
@@ -63,7 +55,7 @@ function filterOCSteps(tourSteps){
 /**
  * Layout for Connectors
  */
-@connect(mapStateToProps, {})
+@checkConnection()
 @tour(OC_TOURS, filterOCSteps)
 class DashboardLayout extends Component{
 
@@ -71,15 +63,13 @@ class DashboardLayout extends Component{
         super(props);
     }
 
-
     render(){
-        const {logining, logouting, authUser} = this.props;
-        const content = logining || logouting ? <Loading authUser={authUser}/> : <DashboardView/>;
+        const {authUser} = this.props;
         return (
             <Container>
                 <Suspense fallback={(<Loading authUser={authUser}/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {content}
+                        <DashboardView/>
                     </ComponentError>
                 </Suspense>
             </Container>

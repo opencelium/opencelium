@@ -25,5 +25,6 @@ public interface MethodNodeService {
     Optional<MethodNode> getByFieldNodeId(Long nodeId);
     Optional<MethodNode> findById(Long id);
     Iterable<MethodNode> findAllById(List<Long> ids);
+    Optional<MethodNode> findByConnectionIdAndColor(Long connectionId, String color);
     List<MethodNode> findMethodsByConnectionIdAndConnectorId(Long connectionId, Integer id);
 }

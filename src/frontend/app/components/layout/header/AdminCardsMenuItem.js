@@ -16,8 +16,9 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import {withTranslation} from "react-i18next";
 
+import ListItemLink from "../../general/basic_components/ListItemLink";
 import {addMenuAdminCardsKeyNavigation, removeMenuAdminCardsKeyNavigation} from "../../../utils/key_navigation";
 import {permission} from "../../../decorators/permission";
 import {AppPermissions} from "../../../utils/constants/permissions";
@@ -31,10 +32,11 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for Apps
+ * Menu Admin
  */
 @connect(mapStateToProps, {})
 @permission(AppPermissions.READ)
+@withTranslation('layout')
 class AdminCardsMenuItem extends Component{
 
     constructor(props){
@@ -50,11 +52,13 @@ class AdminCardsMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
-                label={{text: 'Admin', index: 0}}
+                label={{text: t('HEADER.ADMIN.TITLE'), index: 0}}
                 to='/admin_cards'
-                navigationTitleClass={'tour-step-admin_cards'}
+                navigationTitleClass={'tour-step-app'}
+                id={'menu_admin'}
             />
         );
     }

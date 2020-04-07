@@ -60,7 +60,7 @@ class ScheduleStart extends Component{
     }
 
     render(){
-        const {t, authUser, stateSchedule, schedule, triggeringSchedule} = this.props;
+        const {t, authUser, stateSchedule, schedule, triggeringSchedule, index} = this.props;
         let classNames = ['schedule_list_action', 'trigger_schedule_start_off', 'schedule_start_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
         let trigger_schedule_start = '';
@@ -75,6 +75,7 @@ class ScheduleStart extends Component{
                         <Loading authUser={authUser} className={styles[classNames.schedule_start_loading]}/>
                         :
                         <TooltipFontIcon
+                            id={`schedule_start_${index}`}
                             className={trigger_schedule_start}
                             value={'play_arrow'}
                             tooltip={t('LIST.TOOLTIP_START_ICON')}
@@ -87,6 +88,7 @@ class ScheduleStart extends Component{
 
 ScheduleStart.propTypes = {
     schedule: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 export default ScheduleStart;

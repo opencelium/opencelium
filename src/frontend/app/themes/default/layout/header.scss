@@ -52,7 +52,7 @@
 
 .loading{
   height: 15px;
-  background: gray;
+  background: #c2c2c2;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   float: left;
@@ -60,7 +60,7 @@
 
 .loading_icon{
   height: 15px;
-  background: gray;
+  background: #c2c2c2;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   float: left;
@@ -129,4 +129,20 @@
 
 .left_icon{
   margin-top: -5px;
+}
+.my_profile_header{
+  padding: 8px 10px;
+  a{
+    span{
+      line-height: 35px;
+    }
+  }
+}
+.logout_header{
+  padding: 8px 10px;
+  a{
+    span{
+      line-height: 35px;
+    }
+  }
 }

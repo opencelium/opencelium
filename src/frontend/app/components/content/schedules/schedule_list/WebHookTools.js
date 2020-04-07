@@ -19,7 +19,7 @@ import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipF
 import {addWebHook} from "../../../../actions/webhooks/add";
 import {deleteWebHook} from "../../../../actions/webhooks/delete";
 import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "../../../../utils/app";
+import {formatHtmlId, getThemeClass} from "../../../../utils/app";
 import {connect} from "react-redux";
 import Loading from "../../../general/app/Loading";
 
@@ -79,7 +79,7 @@ class WebHookTools extends Component{
     }
     
     render(){
-        const {authUser, addingWebHook, deletingWebHook, t, stateSchedule, schedule} = this.props;
+        const {authUser, addingWebHook, deletingWebHook, t, stateSchedule, schedule, index} = this.props;
         let classNames = ['webhook_tools', 'webhook_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
         let icon = 'link';
@@ -95,7 +95,12 @@ class WebHookTools extends Component{
                         ?
                             <Loading authUser={authUser} className={styles[classNames.webhook_loading]}/>
                         :
-                            <TooltipFontIcon value={icon} tooltip={tooltip} onClick={::this.onClick}/>
+                            <TooltipFontIcon
+                                id={`webhook_tools_${index}`}
+                                value={icon}
+                                tooltip={tooltip}
+                                onClick={::this.onClick}
+                            />
                 }
             </span>
         );
@@ -104,6 +109,7 @@ class WebHookTools extends Component{
 
 WebHookTools.propTypes = {
     schedule: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 export default WebHookTools;

@@ -20,7 +20,7 @@ import {withTranslation} from "react-i18next";
 import {permission} from "../../../../decorators/permission";
 import {SchedulePermissions} from "../../../../utils/constants/permissions";
 import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "../../../../utils/app";
+import {getThemeClass, setFocusById} from "../../../../utils/app";
 import styles from '../../../../themes/default/content/schedules/schedules.scss';
 import Input from "../../../general/basic_components/inputs/Input";
 import {updateSchedule} from '../../../../actions/schedules/update';
@@ -49,6 +49,15 @@ class ScheduleUpdate extends Component{
             showUpdateSchedule: false,
             scheduleTitle: props.schedule.title,
         };
+    }
+
+    componentDidUpdate(prevProps){
+        if(this.state.showUpdateSchedule){
+            setFocusById('input_title');
+        }
+        if(prevProps.schedule.title !== this.props.schedule.title){
+            this.setState({scheduleTitle: this.props.schedule.title});
+        }
     }
 
     /**
@@ -84,7 +93,7 @@ class ScheduleUpdate extends Component{
     renderDialogUpdateSchedule(){
         return (
             <Dialog
-                actions={[{label: 'Ok', onClick: ::this.updateSchedule}, {label: 'Cancel', onClick: ::this.toggleUpdateSchedule}]}
+                actions={[{label: 'Ok', onClick: ::this.updateSchedule, id: 'schedule_update_ok'}, {label: 'Cancel', onClick: ::this.toggleUpdateSchedule, id: 'schedule_update_cancel'}]}
                 active={this.state.showUpdateSchedule}
                 onEscKeyDown={::this.toggleUpdateSchedule}
                 onOverlayClick={::this.toggleUpdateSchedule}
@@ -101,12 +110,17 @@ class ScheduleUpdate extends Component{
     }
 
     render(){
-        const {t, authUser} = this.props;
+        const {t, authUser, index} = this.props;
         let classNames = ['schedule_list_action'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <span className={styles[classNames.schedule_list_action]}>
-                <TooltipFontIcon value={'edit'} tooltip={t('LIST.TOOLTIP_UPDATE_ICON')} onClick={::this.toggleUpdateSchedule}/>
+                <TooltipFontIcon
+                    id={`schedule_update_${index}`}
+                    value={'edit'}
+                    tooltip={t('LIST.TOOLTIP_UPDATE_ICON')}
+                    onClick={::this.toggleUpdateSchedule}
+                />
                 {this.renderDialogUpdateSchedule()}
             </span>
         );
@@ -115,6 +129,7 @@ class ScheduleUpdate extends Component{
 
 ScheduleUpdate.propTypes = {
     schedule: PropTypes.object.isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 export default ScheduleUpdate;

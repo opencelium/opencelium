@@ -28,4 +28,6 @@ public interface EnhancementNodeService {
     void saveAll(List<EnhancementNode> enhancementNodes);
     Optional<EnhancementNode> findByEnhanceId(Integer enhanceId);
     Optional<EnhancementNode> findByFieldId(Long fieldId);
+
+    List<EnhancementNode> findAllByConnectionId(Long connectionId);
 }

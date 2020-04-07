@@ -162,6 +162,36 @@
 .form_input_label{
   font-family: $FONT_FAMILY;
 }
+.form_input_label_for_connection{
+  font-family: $FONT_FAMILY;
+  top: 0 !important;
+}
+.form_input_status_label{
+  font-family: $FONT_FAMILY;
+}
+.form_input_status_label_for_connection{
+  font-family: $FONT_FAMILY;
+  top: 15px !important;
+}
+
+.form_input_input_for_connection{
+  padding: 5px 0 10px 0 !important;
+}
+.form_input_input_header_for_connection{
+  padding: 5px 0 0 0 !important;
+}
+.form_input_element_for_connection{
+  padding: 10px 0 0 0 !important;
+  font-size: 14px !important;
+}
+.form_input_status_element_for_connection{
+  padding: 25px 0 0 0 !important;
+  font-size: 14px !important;
+}
+.form_input_header_element_for_connection{
+  padding: 0 !important;
+  font-size: 14px !important;
+}
 
 .input_file_label{
   font-family: $FONT_FAMILY;
@@ -442,6 +472,13 @@
 .invoker_item_prop>div{
   padding: 0;
 }
+.invoker_item_prop_for_connection{
+  float: left;
+  width: 48%;
+}
+.invoker_item_prop_for_connection>div{
+  padding: 0;
+}
 
 .invoker_item_val{
   float: right;
@@ -539,6 +576,28 @@
   }
 }
 
+.invoker_operation_header{
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.invoker_operation_header:hover{
+  background: #fffdfd;
+}
+
+.invoker_operation_header_for_connection{
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 14px;
+  padding: 5px 10px;
+}
+.invoker_operation_header_for_connection:hover{
+  background: #fffdfd;
+}
+
 .invoker_request_item_method{
   background: #eeeeee;
   padding: 5px 20px;
@@ -546,10 +605,10 @@
   margin-right: 10px;
   cursor: pointer;
 }
-.invoker_request_item_method:hover{
+.invoker_request_item_method_not_readonly:hover{
   background: #bcbcbc;
 }
-.invoker_request_item_method:focus{
+.invoker_request_item_method_not_readonly:focus{
   background: #bcbcbc;
 }
 
@@ -565,6 +624,17 @@
   float: left;
   padding: 1px;
   width: 70px;
+  text-align: center;
+  border-radius: 3px;
+  color: #fff;
+  font-family: $FONT_FAMILY;
+}
+
+.invoker_item_method_for_connection{
+  font-size: $FONT_SIZE_TINY;
+  float: left;
+  padding: 1px;
+  width: 50px;
   text-align: center;
   border-radius: 3px;
   color: #fff;
@@ -587,9 +657,27 @@
   background-color: #a41e22;
 }
 
+.invoker_item_method_test{
+  float: right;
+  color: #5a5757;
+}
+
 .invoker_item_name{
   margin-left: 20px;
   font-family: $FONT_FAMILY;
+}
+.invoker_item_name_for_connection{
+  margin-left: 5px;
+  font-family: $FONT_FAMILY;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.no_card_header_tabs_for_connection{
+  margin: 0;
+  border-bottom: 1px solid #dee2e6;
+  padding: 10px;
 }
 
 .no_card_header_tabs nav{
@@ -636,4 +724,126 @@
   font-family: $FONT_FAMILY;
   padding: 15px 0 0 0;
   border: none !important;
+}
+
+.form_connector_invoker{
+  position: fixed;
+  width: 250px;
+  top: 300px;
+  z-index: 1;
+  max-height: 300px;
+  overflow: auto;
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+}
+
+.form_connector_from_invoker{
+  @extend .form_connector_invoker;
+  left: 0;
+}
+.form_connector_from_invoker_appear{
+  animation-name: $ANIMATION_FADE_IN_LEFT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+.form_connector_from_invoker_disappear{
+  animation-name: $ANIMATION_FADE_OUT_LEFT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+.form_connector_to_invoker{
+  @extend .form_connector_invoker;
+  right: 0;
+}
+.form_connector_to_invoker_appear{
+  animation-name: $ANIMATION_FADE_IN_RIGHT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+.form_connector_to_invoker_disappear{
+  animation-name: $ANIMATION_FADE_OUT_RIGHT;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+.form_connector_invoker_button{
+  text-align: center;
+  width: 100px;
+  color: black;
+  display: inline-block;
+  vertical-align: middle;
+  position: fixed;
+  top: 270px;
+  cursor: pointer;
+  background: #e1e1e1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  transition: color 0.3s, transform 0.3s;
+  border: 1px solid #9b9bac;
+}
+.form_connector_invoker_button:hover{
+  color: white;
+}
+.form_connector_invoker_button:before{
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #2e75b6;
+  transform: scaleY(0);
+  transform-origin: 50%;
+  transition: transform 0.3s;
+  transition-timing-function: ease-out;
+  border: 1px solid #2e75b6;
+}
+.form_connector_invoker_button:hover:before{
+  transform: scaleY(1);
+}
+
+.form_connector_invoker_button_from{
+  @extend .form_connector_invoker_button;
+  transform-origin: center left;
+  transform: rotate(90deg);
+  left: 15px;
+}
+
+.form_connector_invoker_button_to{
+  @extend .form_connector_invoker_button;
+  transform-origin: center right;
+  transform: rotate(270deg);
+  right: 15px;
+  div{
+    transform: rotate(180deg);
+  }
+}
+
+.form_connector_invoker_opened{
+  background: #2e75b6;
+  color: white;
+}
+.form_connector_invoker_opened_from{
+  @extend .form_connector_invoker_opened;
+  transform: rotate(0deg);
+  left: 0;
+}
+.form_connector_invoker_opened_to{
+  @extend .form_connector_invoker_opened;
+  transform: rotate(360deg);
+  right: 0;
+  div{
+    transform: rotate(0deg);
+  }
+}
+
+.operation_item_tabs{
+  a{
+    padding: 5px 10px;
+    font-size: $FONT_SIZE_14;
+  }
 }

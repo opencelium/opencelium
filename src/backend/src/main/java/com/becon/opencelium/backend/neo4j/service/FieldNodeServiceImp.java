@@ -16,12 +16,18 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.neo4j.entity.*;
 import com.becon.opencelium.backend.neo4j.repository.FieldNodeRepository;
 import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldResource;
+import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.StringUtility;
+import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -52,9 +58,28 @@ public class FieldNodeServiceImp implements FieldNodeService {
     @Autowired
     private InvokerServiceImp invokerService;
 
+    @Autowired
+    private MethodNodeServiceImp methodNodeServiceImp;
+
+    @Autowired
+    private ValidationContext validationContext;
+
     @Override
-    public FieldNode findFieldByResource(LinkedFieldResource fieldResource, Long connectionId) {
-        FieldNode currentField = new FieldNode();
+    public FieldNode findFieldByResource(LinkedFieldResource fieldResource, Connection connection) {
+        Long connectionId = connection.getId();
+
+        MethodNode methodNode = methodNodeServiceImp.findByConnectionIdAndColor(connectionId, fieldResource.getColor())
+                .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND_FOR_FIELD"));
+        ErrorMessageData messageData = validationContext.get(connection.getName());
+        if (messageData == null){
+            messageData = new ErrorMessageData();
+            validationContext.put(connection.getName(), messageData);
+        }
+        messageData.setConnectorId(connection.getFromConnector());
+        messageData.setIndex(methodNode.getIndex());
+        messageData.setLocation("body");
+
+        FieldNode currentField;
         String color = fieldResource.getColor();
         String type = fieldResource.getType();
         String field = fieldResource.getField();
@@ -291,6 +316,52 @@ public class FieldNodeServiceImp implements FieldNodeService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean existsInInvokerMethod(String invokerName, String methodName, String path) {
+        String pathValue = ConditionUtility.getRefValue(path);
+        String exchangeType = ConditionUtility.getExchangeType(path);
+        String result = ConditionUtility.getResult(path);
+        Invoker invoker = invokerService.findByName(invokerName);
+        FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
+                .findFirst().orElseThrow(() -> new RuntimeException("Method not found in invoker"));
+
+        Map<String, Object> body;
+        if (exchangeType.equals("response") && result.equals("success")){
+            body = functionInvoker.getResponse().getSuccess().getBody();
+        } else if (exchangeType.equals("response") && result.equals("fail")){
+            body = functionInvoker.getResponse().getFail().getBody();
+        } else {
+            body = functionInvoker.getRequest().getBody();
+        }
+
+        Object value = new Object();
+        String[] valueParts;
+        if (pathValue.contains(".")){
+            valueParts = pathValue.split("\\.");
+        } else {
+            valueParts = new String[1];
+            valueParts[0] = pathValue;
+        }
+
+        boolean exists = false;
+        for (String part : valueParts) {
+            exists = body.containsKey(part);
+            if (!exists){
+                continue;
+            }
+
+            value = body.get(part);
+            if (value instanceof Map){
+                body = ( Map<String, Object>) value;
+            }
+            if (value instanceof ArrayList){
+                body = (( ArrayList<Map<String, Object>>) value).get(0);
+            }
+
+        }
+        return exists;
     }
 
     @Override

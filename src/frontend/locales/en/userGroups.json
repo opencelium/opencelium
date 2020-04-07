@@ -1,4 +1,7 @@
 {
+  "MENU": {
+    "TITLE": "Groups"
+  },
   "ADD": {
     "HEADER": "Add Group",
     "LIST_BUTTON": "Groups",

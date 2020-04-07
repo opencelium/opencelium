@@ -24,6 +24,7 @@ import styles from '../../../../themes/default/general/change_component.scss';
 import {FormElement} from "../../../../decorators/FormElement";
 import FontIcon from "../../basic_components/FontIcon";
 import Checkbox from "../../basic_components/inputs/Checkbox";
+import {formatHtmlId} from "../../../../utils/app";
 
 
 /**
@@ -145,33 +146,32 @@ class FormPermissionTable extends Component{
                 if(tmpValuesLength === 0){
                     componentAdminValues.push(false);
                     for(let j = 0; j < permissionCheckValues.length; j++){
-                        permissionCheckValues[j] = permissionCheckValues[j] & false;
+                        permissionCheckValues[j] = Boolean(permissionCheckValues[j] & false);
                     }
                 } else {
                     if (tmpValuesLength === 4) {
                         componentAdminValues.push(true);
-                        permissionCheckValues[4] = permissionCheckValues[4] & true;
+                        permissionCheckValues[4] = Boolean(permissionCheckValues[4] & true);
                     } else {
                         componentAdminValues.push(false);
-                        permissionCheckValues[4] = permissionCheckValues[4] & false;
+                        permissionCheckValues[4] = Boolean(permissionCheckValues[4] & false);
                     }
                     for (let j = 0; j < Permissions.length; j++) {
                         let ind = values[components[i].label].indexOf(Permissions[j]);
                         if (ind > -1) {
-                            permissionCheckValues[j] = permissionCheckValues[j] & true;
+                            permissionCheckValues[j] = Boolean(permissionCheckValues[j] & true);
                         } else {
-                            permissionCheckValues[j] = permissionCheckValues[j] & false;
+                            permissionCheckValues[j] = Boolean(permissionCheckValues[j] & false);
                         }
                     }
                 }
             } else{
                 componentAdminValues.push(false);
                 for(let j = 0; j < permissionCheckValues.length; j++){
-                    permissionCheckValues[j] = permissionCheckValues[j] & false;
+                    permissionCheckValues[j] = Boolean(permissionCheckValues[j] & false);
                 }
             }
         }
-
         let iconStyle = theme.icon;
         let labelStyle = theme.label;
         if(this.state.focused){
@@ -190,7 +190,7 @@ class FormPermissionTable extends Component{
                                     <TableCell key={key} className={styles.header_cell}>
                                         <span>{t(`PERMISSIONS.${permission}`)}</span>
                                         <Checkbox
-                                            id={key === 0 ? `input_${name}` : ''}
+                                            id={key === 0 ? `input_${formatHtmlId(name)}` : `input_${formatHtmlId(permission)}`}
                                             checked={permissionCheckValues[key]}
                                             onChange={(e) => ::this.checkAllByPermission(e, permission)}
                                             theme={{field: styles.checkbox_field}}
@@ -201,6 +201,7 @@ class FormPermissionTable extends Component{
                             <TableCell className={styles.header_cell}>
                                 <span>{t(`PERMISSIONS.ADMIN`)}</span>
                                 <Checkbox
+                                    id={'input_admin'}
                                     checked={permissionCheckValues[4]}
                                     onChange={::this.checkAll}
                                     theme={{field: styles.checkbox_field}}
@@ -222,6 +223,7 @@ class FormPermissionTable extends Component{
                                             return (
                                                 <TableCell key={key2} className={styles.row_cell}>
                                                     <Checkbox
+                                                        id={formatHtmlId(`input_${component.label}_${permission}`)}
                                                         checked={checkValue}
                                                         onChange={(e) => ::this.setPermission(e, component, permission)}
                                                         theme={{field: styles.checkbox_field_value}}
@@ -232,6 +234,7 @@ class FormPermissionTable extends Component{
                                     }
                                     <TableCell className={styles.row_cell}>
                                         <Checkbox
+                                            id={formatHtmlId(`input_${component.label}_admin`)}
                                             checked={componentAdminValues[key]}
                                             onChange={(e) => ::this.checkAllByComponent(e, component)}
                                             theme={{field: styles.checkbox_field_value}}

@@ -40,9 +40,11 @@ class FormConnection extends Component{
         return (
             <OperationItem
                 {...props}
+                isVisible={true}
                 invoker={entity}
                 operation={connection}
                 updateEntity={::this.updateEntity}
+                mode={'add'}
                 hasTour
             />
         );

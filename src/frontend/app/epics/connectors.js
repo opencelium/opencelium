@@ -20,15 +20,16 @@ import {
 } from '../actions/connectors/fetch';
 import {
     addConnectorFulfilled ,addConnectorRejected,
-    addConnectorIconFulfilled, addConnectorIconRejected,
+    addConnectorIcon, addConnectorIconFulfilled, addConnectorIconRejected,
 } from '../actions/connectors/add';
 import {testConnectorFulfilled, testConnectorRejected} from '../actions/connectors/test';
 import {
     updateConnectorFulfilled, updateConnectorRejected,
-    updateConnectorIconFulfilled, updateConnectorIconRejected,
+    updateConnectorIcon, updateConnectorIconFulfilled, updateConnectorIconRejected,
 } from '../actions/connectors/update';
 import {deleteConnectorFulfilled, deleteConnectorRejected} from '../actions/connectors/delete';
 import {doRequest} from "../utils/auth";
+import {addProfilePicture, addUserFulfilled, addUserRejected} from "../actions/users/add";
 
 
 /**
@@ -95,10 +96,23 @@ const addConnectorEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return doRequest({url, method: 'post', data: action.payload},{
-                    success: addConnectorFulfilled,
+            let connectorIcon = action.payload.icon;
+            let data = {...action.payload};
+            let successResponse = addConnectorFulfilled;
+            /*
+            TODO: #214
+            if(data.icon !== null){
+                successResponse = addConnectorIcon;
+            }
+            delete data.icon;*/
+            return doRequest({url, method: 'post', data: {...data}},{
+                    success: successResponse,
                     reject: addConnectorRejected,},
-            );
+                res => {
+                    let result = res.response;
+                    result.icon = connectorIcon;
+                    return result;
+                });
         });
 };
 /**
@@ -129,10 +143,23 @@ const updateConnectorEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            return doRequest({url, method: 'put', data: action.payload},{
-                    success: updateConnectorFulfilled,
+            let connectorIcon = action.payload.icon;
+            let data = {...action.payload};
+            let successResponse = updateConnectorFulfilled;
+            /*
+            TODO: #214
+            if(data.icon !== null){
+                successResponse = updateConnectorIcon;
+            }
+            delete data.icon;*/
+            return doRequest({url, method: 'put', data: {...data}},{
+                    success: successResponse,
                     reject: updateConnectorRejected,},
-            );
+                res => {
+                    let result = res.response;
+                    result.icon = connectorIcon;
+                    return result;
+                });
         });
 };
 

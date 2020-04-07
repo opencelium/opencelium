@@ -29,33 +29,34 @@
   border: 1px solid #f7f7f7;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-
+  .login{
+    position: relative;
+  }
   .caption{
     font-family: $FONT_FAMILY;
     font-size: $FONT_SIZE_MEDIUM;
     padding: 10px;
     text-align: center;
   }
-
-
-
   .button_connect{
     font-family: $FONT_FAMILY;
     margin: 35px 15px 0 0;
     float: right;
     border: 1px solid #dbdbdb;
   }
-
 }
 
 .input {
   font-family: $FONT_FAMILY;
   background: #2e75b6;
   input {
-    border-bottom-color: #ffd807 !important;
+    border-bottom-color: #c2c2c2 !important;
     color: white;
     width: 96%;
     margin: 0 2% 0 2%;
+  }
+  input::placeholder{
+    color: #c2c2c2;
   }
 }
 .bar::before,.bar::after{

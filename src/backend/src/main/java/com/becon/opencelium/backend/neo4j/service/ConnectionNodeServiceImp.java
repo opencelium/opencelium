@@ -16,18 +16,26 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
+import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
+import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.neo4j.repository.ConnectionNodeRepository;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
+import com.becon.opencelium.backend.security.UserPrincipals;
+import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +55,9 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
 
     @Autowired
     private ConnectorNodeServiceImp connectorNodeServiceImp;
+
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
 
     @Override
     public void save(ConnectionNode connectionNode) {
@@ -71,21 +82,23 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
             if (e.getEnhancement() == null){
                 return;
             }
+
             Enhancement enhancement = enhancementService.toEntity(e.getEnhancement());
             enhancement.setConnection(connection);
             enhancementService.save(enhancement);
             enhancements.add(enhancement);
+
+            List<FieldNode> fromFields = e.getFrom().stream()
+                    .map(f -> fieldNodeService.findFieldByResource(f, connection)).collect(Collectors.toList());
+
+            List<FieldNode> toFields = e.getTo().stream()
+                    .map(f -> fieldNodeService.findFieldByResource(f, connection)).collect(Collectors.toList());
+
             EnhancementNode enhancementNode = new EnhancementNode();
             enhancementNode.setEnhanceId(enhancement.getId());
             enhancementNode.setName(enhancement.getName());
-            List<FieldNode> toFields = e.getTo().stream()
-                    .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
-
-            List<FieldNode> fromFields = e.getFrom().stream()
-                    .map(f -> fieldNodeService.findFieldByResource(f, connection.getId())).collect(Collectors.toList());
             enhancementNode.setIncomeField(fromFields);
             enhancementNode.setOutgoingField(toFields);
-
             enhancementNodes.add(enhancementNode);
         });
         connection.setEnhancements(enhancements);
@@ -97,8 +110,8 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
         connectionNode.setId(resource.getNodeId());
         connectionNode.setConnectionId(resource.getConnectionId());
         connectionNode.setName(resource.getTitle());
-        connectionNode.setFromConnector(connectorNodeServiceImp.toEntity(resource.getFromConnector()));
-        connectionNode.setToConnector(connectorNodeServiceImp.toEntity(resource.getToConnector()));
+        connectionNode.setFromConnector(connectorNodeServiceImp.toEntity(resource.getFromConnector(), resource.getTitle()));
+        connectionNode.setToConnector(connectorNodeServiceImp.toEntity(resource.getToConnector(), resource.getTitle()));
         return connectionNode;
     }
 

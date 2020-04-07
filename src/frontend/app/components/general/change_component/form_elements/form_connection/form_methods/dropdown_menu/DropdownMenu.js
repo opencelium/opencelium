@@ -143,7 +143,7 @@ class DropdownMenu extends Component{
             };
             let currentItem = connector.getCurrentItem();
             if(currentItem){
-                let depth = connector.getCurrentItem().index.split('_').length;
+                let depth = connector.getCurrentItem().getDepth();
                 if(depth >= CONNECTOR_DEPTH_LIMIT){
                     newState.itemType = METHOD_ITEM;
                     newState.dropdownValue = null;
@@ -217,6 +217,12 @@ class DropdownMenu extends Component{
                     placeholder={name}
                     maxMenuHeight={200}
                     minMenuHeight={50}
+                    styles={{
+                        menu: (provided) => ({
+                            ...provided,
+                            width: '250px'
+                        })
+                    }}
                 />
                 <span className={theme.bar}/>
                 <label className={theme.label}>{name}</label>

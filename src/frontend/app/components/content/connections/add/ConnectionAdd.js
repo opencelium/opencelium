@@ -23,10 +23,9 @@ import {checkConnectionTitle} from '../../../../actions/connections/fetch';
 import {addConnection} from '../../../../actions/connections/add';
 import {addTemplate} from "../../../../actions/templates/add";
 import {fetchConnectors} from '../../../../actions/connectors/fetch';
-import Loading from "../../../general/app/Loading";
 import {ConnectionPermissions} from "../../../../utils/constants/permissions";
 import {permission} from "../../../../decorators/permission";
-import {injectFieldBindingIntoConnection, setFocusById} from "../../../../utils/app";
+import {setFocusById} from "../../../../utils/app";
 import {INPUTS} from "../../../../utils/constants/inputs";
 import OCTour from "../../../general/basic_components/OCTour";
 import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "../../../../utils/constants/tours";
@@ -51,6 +50,8 @@ function mapStateToProps(state){
         fetchingConnectors: connectors.get('fetchingConnectors'),
         checkingConnectionTitle: connections.get('checkingConnectionTitle'),
         checkTitleResult: connections.get('checkTitleResult'),
+        validatingFormMethods: connections.get('validatingFormMethods'),
+        validateFormMethodsResult: connections.get('validateFormMethodsResult'),
     };
 }
 
@@ -88,6 +89,7 @@ class ConnectionAdd extends Component{
     setCurrentTour(pageNumber){
         const {authUser} = this.props;
         this.startCheckingTitle = false;
+        this.startValidatingFormMethods = false;
         this.setState({
             currentTour: `page_${pageNumber}`,
             isTourOpen: automaticallyShowTour(authUser),
@@ -215,8 +217,12 @@ class ConnectionAdd extends Component{
 
 
     render(){
-        const {t, connectors, authUser, checkingConnectionTitle, checkTitleResult, addingConnection, doAction} = this.props;
+        const {
+            t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
+            addingConnection, doAction, error,
+        } = this.props;
         let {connection} = this.state;
+        connection.setError(error);
         let connectorMenuItems = this.getConnectorMenuItems();
         let contentTranslations = {};
         contentTranslations.header = t('ADD.HEADER');

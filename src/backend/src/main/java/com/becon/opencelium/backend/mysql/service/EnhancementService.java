@@ -28,10 +28,11 @@ import java.util.Optional;
 public interface EnhancementService {
     void save(Enhancement enhancement);
     void saveAll(List<Enhancement> enhancement);
-    List<EnhancementNode> findAllByConnectionId(Long connectionId);
+    List<Enhancement> findAllByConnectionId(Long connectionId);
     void deleteAllByConnectionId(Long connectionId);
     Enhancement findByFieldId(Long fieldId);
     Optional<Enhancement> findById(Integer enhId);
+    void deleteAll(List<Enhancement> enhancements);
     Enhancement toEntity(EnhancementResource resource);
     EnhancementResource toResource(Enhancement entity);
     FieldBindingResource toFieldBindingResource(Enhancement enhancement);

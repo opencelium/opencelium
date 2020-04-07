@@ -25,6 +25,8 @@ import com.becon.opencelium.backend.resource.connection.OperatorResource;
 import com.becon.opencelium.backend.resource.connector.RequestResource;
 import com.becon.opencelium.backend.resource.connector.ResponseResource;
 import com.becon.opencelium.backend.resource.connector.ResultResource;
+import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,14 +43,22 @@ public class ActionUtility {
     @Autowired
     private FieldNodeServiceImp fieldNodeService;
 
+    @Autowired
+    private ValidationContext validationContext;
+
+    private String methodIndex;
     private String methodName; // need for determine type of field
     private String result; // need for determine type of field
     private String exchangeType; // need for determine type of field
-    private String invoker; // need for determine type of field
+    private ConnectorNode connectorNode; // need for determine type of field
+    private String connectionName;
 
     public MethodNode buildMethodEntity(List<MethodResource> methodResources,
                                         List<OperatorResource> operatorResources,
-                                        final String invokerName){
+                                        final ConnectorNode connectorNode,
+                                        final String connectionName){
+
+
         LinkedList<String> indexes = getIndexes(methodResources, operatorResources);
         if (indexes.isEmpty() || !startsWithMethod(indexes.get(0), methodResources)){
             return null;
@@ -64,21 +74,28 @@ public class ActionUtility {
 
         methodResources.remove(methodResource);
 
-        this.methodName = methodResource.getName();
-        this.invoker = invokerName;
+        ErrorMessageData messageData = validationContext.get(connectionName);
+        if (messageData == null){
+            messageData = new ErrorMessageData();
+            validationContext.put(connectionName, messageData);
+        }
+        messageData.setConnectorId(connectorNode.getConnectorId());
+        messageData.setIndex(methodResource.getIndex());
+        messageData.setLocation("method");
 
-        MethodNode methodNode = new MethodNode();
-        methodNode.setId(methodResource.getNodeId());
-        methodNode.setIndex(methodResource.getIndex());
-        methodNode.setName(methodResource.getName());
-        methodNode.setColor(methodResource.getColor());
+        this.methodIndex = methodResource.getIndex();
+        this.methodName = methodResource.getName();
+        this.connectorNode = connectorNode;
+        this.connectionName = connectionName;
+
+        MethodNode methodNode = toNodeEntity(methodResource);
 
         methodNode.setRequestNode(buildRequest(methodResource.getRequest()));
         methodNode.setResponseNode(buildResponse(methodResource.getResponse()));
 
-        if (i.length() == nextElement.length()){ // TODO: should be refactored. Invoker name initialization is not clear
-            methodNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, this.invoker));
-            methodNode.setNextOperator(buildOperatorEntity(methodResources, operatorResources, this.invoker));
+        if (i.length() == nextElement.length()){
+            methodNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, this.connectionName));
+            methodNode.setNextOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, this.connectionName));
         }
 
         return methodNode;
@@ -126,6 +143,14 @@ public class ActionUtility {
 
     private List<FieldNode> buildFields(Map<String, Object> bodyResource){
         List<FieldNode> fieldNodeList = new ArrayList<>();
+        ErrorMessageData messageData = validationContext.get(connectionName);
+        if (messageData == null){
+            messageData = new ErrorMessageData();
+            validationContext.put(connectionName, messageData);
+        }
+        messageData.setConnectorId(connectorNode.getConnectorId());
+        messageData.setIndex(methodIndex);
+        messageData.setLocation("body");
 
         bodyResource.forEach((k,v) -> {
             FieldNode fieldNode = new FieldNode();
@@ -135,7 +160,14 @@ public class ActionUtility {
                 v = "";
             }
 
-            String type = invokerServiceImp.findFieldType(this.invoker, methodName, exchangeType, result, k);
+            // TODO: bug when determining invoker file in ref.
+//            if (v instanceof String && fieldNodeService.hasReference(v.toString())){
+//                if (!fieldNodeService.existsInInvokerMethod(connectorNode.getName(), methodName, v.toString())){
+//                    throw new RuntimeException("FIELD_NOT_FOUND_IN_REF_METHOD");
+//                }
+//            }
+
+            String type = invokerServiceImp.findFieldType(connectorNode.getName(), methodName, exchangeType, result, k);
             // for situation = "ConfigItem": "#FFCFB5.(response).success.result[];#C77E7E.(response).success.result[]"
             if ((type.equals("object") || type.equals("array")) && ( v instanceof String )){
                 fieldNode.setType("array");
@@ -169,7 +201,6 @@ public class ActionUtility {
                     }
                 } else {
                     fieldNode.setType("object");
-
                     child = objectMapper.convertValue(v, Map.class);
                 }
 
@@ -183,31 +214,34 @@ public class ActionUtility {
             fieldNode.setValue(v.toString());
             fieldNodeList.add(fieldNode);
         });
-
         return fieldNodeList;
     }
 
     private BodyNode buildBody(Map<String, Object> body){
         BodyNode bodyNode = new BodyNode();
+        ErrorMessageData messageData = validationContext.get(connectionName);
+        messageData.setLocation("body");
         bodyNode.setFields(buildFields(body));
-
         return bodyNode;
     }
 
     private HeaderNode buildHeader(Map<String, String> headerResource){
         HeaderNode headerNode = new HeaderNode();
+        ErrorMessageData messageData = validationContext.get(connectionName);
+        messageData.setLocation("header");
 
         List<ItemNode> itemNodes = headerResource.entrySet().stream()
                 .map(k -> new ItemNode(k.getKey(), k.getValue())).collect(Collectors.toList());
 
         headerNode.setItems(itemNodes);
-
         return headerNode;
     }
 
     public OperatorNode buildOperatorEntity(List<MethodResource> methodResources,
                                             List<OperatorResource> operatorResources,
-                                            String invokerName){
+                                            ConnectorNode connectorNode,
+                                            String connectionName){
+        String invokerName = connectorNode.getName();
         LinkedList<String> indexes = getIndexes(methodResources, operatorResources);
         if (indexes.isEmpty() || startsWithMethod(indexes.get(0), methodResources)){
             return null;
@@ -222,19 +256,26 @@ public class ActionUtility {
         OperatorResource operatorResource = operatorResources.stream()
                 .filter(m -> m.getIndex().equals(i)).findAny().get();
 
+
+        ErrorMessageData messageData = validationContext.get(connectionName);
+        if (messageData == null){
+            messageData = new ErrorMessageData();
+            validationContext.put(connectionName, messageData);
+        }
+        messageData.setConnectorId(connectorNode.getConnectorId());
+        messageData.setLocation("operator");
+        messageData.setIndex(operatorResource.getIndex());
+
         operatorResources.remove(operatorResource);
 
-        OperatorNode operatorNode = new OperatorNode();
-        operatorNode.setId(operatorResource.getNodeId());
-        operatorNode.setIndex(operatorResource.getIndex());
-        operatorNode.setType(operatorResource.getType());
-        operatorNode.setOperand(operatorResource.getCondition().getRelationalOperator());
+        OperatorNode operatorNode = toOperatorNode(operatorResource);
+
         operatorNode.setRightStatement(ConditionUtility.buildStringStatement(operatorResource.getCondition().getRightStatement()));
         operatorNode.setLeftStatement(ConditionUtility.buildStringStatement(operatorResource.getCondition().getLeftStatement()));
 
         if (i.length() < nextElement.length()){ // TODO: should be refactored. Invoker name initialization is not clear
-            operatorNode.setBodyOperator(buildOperatorEntity(methodResources, operatorResources, invokerName));
-            operatorNode.setBodyFunction(buildMethodEntity(methodResources, operatorResources, invokerName));
+            operatorNode.setBodyOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName));
+            operatorNode.setBodyFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
         }
 
         List<String> restIndex = getIndexes(methodResources, operatorResources);
@@ -245,10 +286,9 @@ public class ActionUtility {
         }
 
         if (i.length() == nextElement.length()){
-            operatorNode.setNextOperator(buildOperatorEntity(methodResources, operatorResources, invokerName));
-            operatorNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, invokerName));
+            operatorNode.setNextOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName));
+            operatorNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
         }
-
         return operatorNode;
     }
 
@@ -291,5 +331,23 @@ public class ActionUtility {
 
     private boolean startsWithMethod(String index, List<MethodResource> methodResources){
         return methodResources.stream().anyMatch(m -> m.getIndex().equals(index));
+    }
+
+    private MethodNode toNodeEntity(MethodResource methodResource){
+        MethodNode methodNode = new MethodNode();
+        methodNode.setId(methodResource.getNodeId());
+        methodNode.setIndex(methodResource.getIndex());
+        methodNode.setName(methodResource.getName());
+        methodNode.setColor(methodResource.getColor());
+        return methodNode;
+    }
+
+    private OperatorNode toOperatorNode(OperatorResource operatorResource){
+        OperatorNode operatorNode = new OperatorNode();
+        operatorNode.setId(operatorResource.getNodeId());
+        operatorNode.setIndex(operatorResource.getIndex());
+        operatorNode.setType(operatorResource.getType());
+        operatorNode.setOperand(operatorResource.getCondition().getRelationalOperator());
+        return operatorNode;
     }
 }

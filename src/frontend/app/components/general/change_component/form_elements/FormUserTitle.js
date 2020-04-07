@@ -60,8 +60,8 @@ class FormUserTitle extends Component{
             <div className={`${theme.withIcon} ${theme.input} ${styles.form_user_title} ${tourStep ? tourStep : ''}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.label}`}/>
                 <RadioGroup name='theme' value={value} onChange={::this.handleChangeTitle} className={`${styles.radio_group}`}>
-                    <RadioButton label={`${t('TITLE.MR')}`} value='mr' className={`${styles.radio_button} ${styles.first_radio_button}`}/>
-                    <RadioButton label={`${t('TITLE.MRS')}`} value='mrs' className={`${styles.radio_button}`}/>
+                    <RadioButton id='input_mr' label={`${t('TITLE.MR')}`} value='mr' className={`${styles.radio_button} ${styles.first_radio_button}`}/>
+                    <RadioButton id='input_mrs' label={`${t('TITLE.MRS')}`} value='mrs' className={`${styles.radio_button}`}/>
                 </RadioGroup>
                 <FontIcon value={icon} className={theme.icon}/>
                 <span className={theme.bar}/>

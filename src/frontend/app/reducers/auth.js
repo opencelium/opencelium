@@ -17,6 +17,7 @@ import {fromJS} from 'immutable';
 
 import {AuthAction} from '../utils/actions';
 import {updateDashboardSettingsSubscriber} from "../utils/socket/users";
+import {API_REQUEST_STATE} from "../utils/constants/app";
 
 
 const initialState = fromJS({
@@ -29,6 +30,8 @@ const initialState = fromJS({
     togglingAppTour: false,
     updatingTheme: false,
     updatingAuthUserLanguage: false,
+    checkingOCConnection: API_REQUEST_STATE.INITIAL,
+    checkOCConnectionResult: null,
     error: null,
     message: {},
 });
@@ -45,7 +48,7 @@ const reducer = (state = initialState, action) => {
         case AuthAction.LOG_IN:
             return state.set('logining', true).set('error', null);
         case AuthAction.LOG_IN_FULFILLED:
-            return state.set('logining', false).set('authUser', action.payload).set('isAuth', true);
+            return state.set('logining', false).set('authUser', action.payload).set('isAuth', true).set('checkOCConnectionResult', null);
         case AuthAction.LOG_IN_REJECTED:
             return state.set('logining', false).set('error', action.payload).set('isAuth', false);
         case AuthAction.LOG_IN_CANCELED:
@@ -89,6 +92,12 @@ const reducer = (state = initialState, action) => {
             return state.set('togglingAppTour', false).set('authUser', authUser);
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
             return state.set('togglingAppTour', false).set('error', fromJS(action.payload));
+        case AuthAction.CHECK_OCCONNECTION:
+            return state.set('checkingOCConnection', API_REQUEST_STATE.START).set('error', null).set('checkOCConnectionResult', null);
+        case AuthAction.CHECK_OCCONNECTION_FULFILLED:
+            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH);
+        case AuthAction.CHECK_OCCONNECTION_REJECTED:
+            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH).set('error', fromJS(action.payload)).set('checkOCConnectionResult', fromJS(action.payload));
         default:
             return state;
     }

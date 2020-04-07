@@ -16,6 +16,7 @@
 import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
+import {withTranslation} from "react-i18next";
 
 import ListItemLink from "../../general/basic_components/ListItemLink";
 import {addMenuUsersKeyNavigation, removeMenuUsersKeyNavigation} from "../../../utils/key_navigation";
@@ -31,10 +32,11 @@ function mapStateToProps(state){
 }
 
 /**
- * Menu Item for Users
+ * Menu Users
  */
 @connect(mapStateToProps, {})
 @permission(UserPermissions.READ)
+@withTranslation('layout')
 class UsersMenuItem extends Component{
 
     constructor(props){
@@ -50,11 +52,13 @@ class UsersMenuItem extends Component{
     }
 
     render(){
+        const {t} = this.props;
         return (
             <ListItemLink
-                label={{text: 'Users', index: 0}}
+                label={{text: t('HEADER.USERS.TITLE'), index: 0}}
                 to='/users'
                 navigationTitleClass={'tour-step-user'}
+                id={'menu_users'}
             />
         );
     }

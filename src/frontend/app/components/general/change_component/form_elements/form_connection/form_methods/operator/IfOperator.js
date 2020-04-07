@@ -265,11 +265,11 @@ class IfOperator extends Component{
         if(leftColor !== ''){
             return(
                 <div className={styles.if_placeholder} onClick={toggleIsVisibleMenuEdit}>
-                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor, maxWidth: hasValue ? '43%' : '70%'}} title={title}>{title}</div>
+                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor, maxWidth: hasValue ? '43%' : '80%'}} title={title}>{title}</div>
                     {
                         relationalOperator !== ''
                         ?
-                            <div className={styles.if_placeholder_relational_operator} style={{maxWidth: hasValue ? '14%' : '30%'}} title={relationalOperator}>{this.getOperatorLabel()}</div>
+                            <div className={styles.if_placeholder_relational_operator} style={{maxWidth: hasValue ? '14%' : '20%'}} title={relationalOperator}>{this.getOperatorLabel()}</div>
                         :
                             null
                     }
@@ -772,13 +772,13 @@ class IfOperator extends Component{
     }
 
     render(){
-        const {connector, operator, tooltip, depth, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
+        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
         let classNames = styles.operator_icon;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : null;
         let operatorStyle = {
             height: '50px',
-            marginLeft: `${depth * 20}px`,
+            marginLeft: `${operator.getDepth() * 20}px`,
             padding: '5px',
             transition: 'all 0.3s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',
@@ -787,6 +787,10 @@ class IfOperator extends Component{
             operatorStyle.boxShadow = `0 0 0 0 rgba(0, 0, 0, .14), 0px 1px 7px 1px rgb(159, 159, 159), 0 1px 1px 0 rgba(0, 0, 0, .22)`;
             operatorStyle.borderRadius = '3px';
             classNames += ` ${styles.selected_item}`;
+        }
+        if(operator.error.hasError){
+            operatorStyle.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
+            operatorStyle.border = 'border: 1px solid #d14b4b';
         }
         let menuEditStyles = {width: '300px'};
         if(isOperatorHasThreeParams){

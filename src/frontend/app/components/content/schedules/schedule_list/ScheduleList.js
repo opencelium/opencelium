@@ -22,7 +22,7 @@ import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 import Pagination from 'react-bootstrap/Pagination';
 
 import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass, sortByNameFunction} from "../../../../utils/app";
+import {getThemeClass, sortByIdFunction} from "../../../../utils/app";
 import {deleteSchedules} from '../../../../actions/schedules/delete';
 import {startSchedules, enableSchedules, disableSchedules} from '../../../../actions/schedules/update';
 import {checkApp, checkAppCanceled} from "../../../../actions/apps/fetch";
@@ -44,7 +44,7 @@ import LastFailureCell from "./LastFailureCell";
 import LastDurationCell from "./LastDurationCell";
 import Checkbox from "../../../general/basic_components/inputs/Checkbox";
 import Input from "../../../general/basic_components/inputs/Input";
-import {APP_STATUS_UP} from "../../../../utils/constants/url";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "../../../../utils/constants/url";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
 
 export const EMPHASIZE_DURATION_ANIMATION = 900;
@@ -73,9 +73,11 @@ class ScheduleList extends Component{
     constructor(props){
         super(props);
 
+        this.notEmphasize = false;
+        let allCurrentSchedules = this.filterAllCurrentSchedules({filterTitle: ''});
         this.state = {
-            currentSchedules: this.filterCurrentSchedules({pageNumber: 1, filterTitle: '', allCurrentSchedules: props.schedules}),
-            allCurrentSchedules: props.schedules,
+            currentSchedules: this.filterCurrentSchedules({pageNumber: 1, filterTitle: '', allCurrentSchedules}),
+            allCurrentSchedules,
             currentPage: 1,
             filterTitle: '',
         };
@@ -91,20 +93,28 @@ class ScheduleList extends Component{
         let notEqualedSchedules = false;
         if(prevSchedules.length !== curSchedules.length){
             notEqualedSchedules = true;
+            this.notEmphasize = true;
         } else{
             for(let i = 0; i < prevSchedules.length; i++){
                 if(prevSchedules[i].title !== curSchedules[i].title){
                     notEqualedSchedules = true;
+                    this.notEmphasize = false;
+                }
+                if(!prevSchedules[i].lastExecution && curSchedules[i].lastExecution){
+                    notEqualedSchedules = true;
+                    this.notEmphasize = false;
                 }
                 if(prevSchedules[i].lastExecution && curSchedules[i].lastExecution){
                     if(prevSchedules[i].lastExecution.success && curSchedules[i].lastExecution.success){
                         if(prevSchedules[i].lastExecution.success.endTime !== curSchedules[i].lastExecution.success.endTime){
                             notEqualedSchedules = true;
+                            this.notEmphasize = false;
                         }
                     }
                     if(prevSchedules[i].lastExecution.fail && curSchedules[i].lastExecution.fail){
                         if(prevSchedules[i].lastExecution.fail.endTime !== curSchedules[i].lastExecution.fail.endTime){
                             notEqualedSchedules = true;
+                            this.notEmphasize = false;
                         }
                     }
                 }
@@ -115,10 +125,14 @@ class ScheduleList extends Component{
             let amount = this.props.schedules.length;
             let pageAmount = amount % SCHEDULES_PER_PAGE === 0 ? parseInt(amount / SCHEDULES_PER_PAGE) : parseInt(amount / SCHEDULES_PER_PAGE) + 1;
             currentPage = currentPage > pageAmount ? currentPage - 1 : currentPage;
+            if(currentPage < 1){
+                currentPage = 1;
+            }
+            let allCurrentSchedules = this.filterAllCurrentSchedules({filterTitle});
             this.setState({
-                allCurrentSchedules: this.filterAllCurrentSchedules({filterTitle}),
+                allCurrentSchedules,
                 currentPage,
-                currentSchedules: this.filterCurrentSchedules({pageNumber: currentPage, allCurrentSchedules: this.filterAllCurrentSchedules({filterTitle})}),
+                currentSchedules: this.filterCurrentSchedules({pageNumber: currentPage, allCurrentSchedules}),
             });
         }
     }
@@ -130,11 +144,12 @@ class ScheduleList extends Component{
     }
 
     onChangeFilterTitle(filterTitle){
+        let allCurrentSchedules = this.filterAllCurrentSchedules({filterTitle});
         this.setState({
             currentPage: 1,
             filterTitle,
-            allCurrentSchedules: this.filterAllCurrentSchedules({filterTitle}),
-            currentSchedules: this.filterCurrentSchedules({pageNumber: 1, allCurrentSchedules: this.filterAllCurrentSchedules({filterTitle})}),
+            allCurrentSchedules,
+            currentSchedules: this.filterCurrentSchedules({pageNumber: 1, allCurrentSchedules}),
         });
     }
 
@@ -199,11 +214,11 @@ class ScheduleList extends Component{
     }
 
     /**
-     * to sort all schedules by title
+     * to sort all schedules by id
      */
     sortAllCurrentSchedules(){
         let {schedules} = this.props;
-        return schedules.sort(sortByNameFunction);
+        return schedules.sort(sortByIdFunction);
     }
 
     /**
@@ -321,7 +336,7 @@ class ScheduleList extends Component{
         return(
             <Table authUser={authUser} selectable={false}>
                 <TableHead>
-                    <TableCell><Checkbox checked={allChecked} onChange={checkAllSchedules} theme={{check: styles[classNames.checkbox]}}/></TableCell>
+                    <TableCell><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} theme={{check: styles[classNames.checkbox]}}/></TableCell>
                     <TableCell><span>{t('LIST.TITLE')}</span></TableCell>
                     <TableCell><span>{t('LIST.CONNECTION')}</span></TableCell>
                     <TableCell className={'tour-step-3'}><span>{t('LIST.CRON')}</span></TableCell>
@@ -346,27 +361,28 @@ class ScheduleList extends Component{
                             <TableRow key={key} style={backgroundColorStyle}>
                                 <TableCell style={{padding: "8px 18px 8px 24px"}}>
                                     <Checkbox
+                                        id={`input_check_${key}`}
                                         checked={checked}
                                         onChange={(e) => checkOneSchedule(e, {key, id: schedule.id})}
                                         theme={{check: styles[classNames.checkbox]}}
                                     />
                                 </TableCell>
-                                <TitleCell schedule={schedule}/>
+                                <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>
                                 <TableCell className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></TableCell>
                                 <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
-                                <LastSuccessCell schedule={schedule} hasElasticSearch={`${checkingAppResult}` === APP_STATUS_UP}/>
-                                <LastFailureCell schedule={schedule} hasElasticSearch={`${checkingAppResult}` === APP_STATUS_UP}/>
+                                <LastSuccessCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
+                                <LastFailureCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
                                 <LastDurationCell schedule={schedule} t={t}/>
-                                <StatusCell schedule={schedule}/>
+                                <StatusCell index={key} schedule={schedule}/>
                                 <TableCell style={{padding: '5px'}}>
                                     <div className={styles[classNames.schedule_list_actions]}>
                                         <div>
-                                            <ScheduleStart schedule={schedule}/>
-                                            <ScheduleUpdate schedule={schedule}/>
+                                            <ScheduleStart index={key} schedule={schedule}/>
+                                            <ScheduleUpdate index={key} schedule={schedule}/>
                                         </div>
                                         <div>
-                                            <ScheduleDelete schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
-                                            <WebHookTools schedule={schedule} t={t}/>
+                                            <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
+                                            <WebHookTools index={key} schedule={schedule} t={t}/>
                                         </div>
                                     </div>
                                 </TableCell>

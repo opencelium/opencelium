@@ -27,7 +27,7 @@ import {
 } from '../epics/usergroups';
 import {
     loginUserEpic, logoutUserEpic, updateAuthUserLanguageEpic, updateDashboardSettingsEpic,
-    updateThemeEpic, toggleAppTourEpic,
+    updateThemeEpic, toggleAppTourEpic, checkOCConnectionEpic,
 } from '../epics/auth';
 import {
     fetchComponentsEpic,
@@ -43,6 +43,7 @@ import {
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
     updateConnectionEpic, deleteConnectionEpic, checkConnectionTitleEpic,
+    validateConnectionFormMethodsEpic, checkNeo4jEpic, checkNeo4jFulfilledEpic,
 } from '../epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
@@ -110,6 +111,9 @@ export default combineEpics(
     fetchConnectionEpic,
     fetchConnectionsEpic,
     checkConnectionTitleEpic,
+    validateConnectionFormMethodsEpic,
+    checkNeo4jEpic,
+    checkNeo4jFulfilledEpic,
     addConnectionEpic,
     updateConnectionEpic,
     deleteConnectionEpic,
@@ -139,6 +143,7 @@ export default combineEpics(
     deleteWebHookEpic,
     checkUserEmailEpic,
     toggleAppTourEpic,
+    checkOCConnectionEpic,
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,
