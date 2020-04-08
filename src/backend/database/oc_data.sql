@@ -465,6 +465,7 @@ CREATE TABLE `connector` (
   `created_on` timestamp NULL DEFAULT NULL,
   `modified_by` int(11) NOT NULL,
   `modified_on` timestamp NULL DEFAULT NULL,
+  `icon` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `title_UNIQUE` (`title`)
