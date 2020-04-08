@@ -109,6 +109,7 @@ public class ConnectorServiceImp implements ConnectorService{
         Connector connector = new Connector();
         connector.setId(resource.getConnectorId());
         connector.setTitle(resource.getTitle());
+        connector.setIcon(resource.getIcon());
         connector.setDescription(resource.getDescription());
         connector.setInvoker(resource.getInvoker().getName());
 
@@ -143,6 +144,7 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorResource.setConnectorId(entity.getId());
         connectorResource.setTitle(entity.getTitle());
         connectorResource.setDescription(entity.getTitle());
+        connectorResource.setIcon(entity.getIcon());
 
         Invoker invoker = invokerServiceImp.findByName(entity.getInvoker());
         connectorResource.setInvoker(invokerServiceImp.toResource(invoker));

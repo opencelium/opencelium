@@ -27,6 +27,7 @@ public class ConnectorResource extends ResourceSupport {
     private int connectorId;
     private String title;
     private String description;
+    private String icon;
     private InvokerResource invoker;
     private Map<String, String> requestData;
 
@@ -52,6 +53,14 @@ public class ConnectorResource extends ResourceSupport {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     public InvokerResource getInvoker() {

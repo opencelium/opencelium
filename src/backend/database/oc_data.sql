@@ -433,6 +433,7 @@ CREATE TABLE `connection` (
   `created_on` timestamp NULL DEFAULT NULL,
   `modified_by` int(11) NOT NULL,
   `modified_on` timestamp NULL DEFAULT NULL,
+  `icon` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
