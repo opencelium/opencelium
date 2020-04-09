@@ -143,7 +143,7 @@ public class ConnectorServiceImp implements ConnectorService{
     @Override
     public ConnectorResource toResource(Connector entity) {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        final String path = uri.getScheme() + "://" + uri.getAuthority() + "/api/connector/";
+        final String path = uri.getScheme() + "://" + uri.getAuthority() + "/api/connector/file/";
         ConnectorResource connectorResource = new ConnectorResource();
         connectorResource.setConnectorId(entity.getId());
         connectorResource.setTitle(entity.getTitle());
