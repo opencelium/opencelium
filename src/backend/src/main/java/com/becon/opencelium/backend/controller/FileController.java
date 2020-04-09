@@ -77,7 +77,9 @@ public class FileController {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
-        checkImageExtension(extension);
+        if (!checkImageExtension(extension)){
+            throw new StorageException("File should be jpg or png");
+        }
 
         // Get user from database
         User user = userService.findByEmail(email).get();
@@ -113,7 +115,9 @@ public class FileController {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
-        checkImageExtension(extension);
+        if (!checkImageExtension(extension)){
+            throw new StorageException("File should be jpg or png");
+        }
 
         // Get userGroup data from database
         UserRole userRole = userRoleService.getOne(userGroupId);
@@ -169,8 +173,8 @@ public class FileController {
                 new RuntimeException("CONNECTOR_NOT_FOUND"));
         // Get extension
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (!checkJsonExtension(extension)){
-            throw new StorageException("File should be JSON");
+        if (!checkImageExtension(extension)){
+            throw new StorageException("File should be jpg or png");
         }
 
         try {
@@ -208,10 +212,11 @@ public class FileController {
         return ResponseEntity.notFound().build();
     }
 
-    private void checkImageExtension(String extension){
+    private boolean checkImageExtension(String extension){
         if (!(extension.equals("jpeg") || extension.equals("png")
                 || extension.equals("jpg"))){
-            throw new StorageException("File should be jpg or png");
+            return false;
         }
+        return true;
     }
 }
