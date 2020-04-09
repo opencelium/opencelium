@@ -70,7 +70,7 @@ class OperatorItem extends Component{
         }
         if(isHidden !== prevState.isHidden){
             let that = this;
-            setTimeout(() => that.setState({isHidden}), 500);
+            setTimeout(() => that.setState({isHidden}), 300);
         }
     }
 
@@ -213,16 +213,42 @@ class OperatorItem extends Component{
         );
     }
 
+    renderTogglePanel(){
+        const {connector, operator} = this.props;
+        let hasChildren = connector.hasItemChildren(operator);
+        if(!hasChildren){
+            return null;
+        }
+        let togglePanelStyles = {};
+        togglePanelStyles.marginLeft = `${operator.getDepth() * 20}px`;
+        if(operator.isMinimized) {
+            togglePanelStyles.height = '15px';
+            togglePanelStyles.marginTop = '10px';
+            togglePanelStyles.marginBottom = '10px';
+        }
+        return(
+            <div className={styles.toggle_panel} style={togglePanelStyles}>
+                {this.renderToggleIcon()}
+                {this.renderMoreIcon()}
+            </div>
+        );
+    }
+
     renderToggleIcon(){
         const {hasDeleteButton, isVisibleMenuEdit} = this.state;
         const {operator} = this.props;
-        const value = operator.isMinimized ? 'vertical_align_bottom' : 'vertical_align_top';
-        const tooltip = operator.isMinimized ? 'Maximize' : 'Minimize';
-        if((!hasDeleteButton && !::this.isCurrentItem()) || isVisibleMenuEdit){
+        if((!hasDeleteButton && !::this.isCurrentItem()) || isVisibleMenuEdit || operator.isMinimized){
             return null;
         }
+        let value = 'vertical_align_top';
+        let tooltip = 'Minimize';
+        let fontIconStyles = {};
+        if(operator.isMinimized) {
+            value = 'vertical_align_bottom';
+            tooltip = 'Maximize';
+        }
         return(
-            <TooltipFontIcon value={value} tooltip={tooltip} className={styles.toggle_icon} onClick={::this.toggleItem}/>
+            <TooltipFontIcon value={value} tooltip={tooltip} className={styles.toggle_icon} style={fontIconStyles} onClick={::this.toggleItem}/>
         );
     }
 
@@ -238,14 +264,7 @@ class OperatorItem extends Component{
 
     render(){
         const {operatorClassName, isHidden} = this.state;
-        const {connector, operator} = this.props;
-        let togglePanelStyles = {};
-        togglePanelStyles.marginLeft = `${operator.getDepth() * 20}px`;
-        if(operator.isMinimized) {
-            togglePanelStyles.height = '15px';
-            togglePanelStyles.marginTop = '10px';
-            togglePanelStyles.marginBottom = '10px';
-        }
+        const {connector, operator, index} = this.props;
         if(isHidden){
             return null;
         }
@@ -256,15 +275,13 @@ class OperatorItem extends Component{
             <div
                 id={`${operator.index}__${connector.getConnectorType()}`}
                 className={`${styles.operator} ${operatorClassName}`}
+                style={{zIndex: 99 - index}}
                 onMouseEnter={::this.showDeleteButton}
                 onMouseLeave={::this.hideDeleteButton}
             >
                 {this.renderOperatorType()}
                 {this.renderDeleteIcon()}
-                <div className={styles.toggle_panel} style={togglePanelStyles}>
-                    {this.renderToggleIcon()}
-                    {this.renderMoreIcon()}
-                </div>
+                {this.renderTogglePanel()}
             </div>
         );
     }

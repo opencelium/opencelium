@@ -39,13 +39,13 @@
 
 .item_toggle_in{
   animation-name: $ANIMATION_FADE_IN_DOWN;
-  animation-duration: .5s;
+  animation-duration: .3s;
   animation-fill-mode: forwards;
 }
 
 .item_toggle_out{
   animation-name: $ANIMATION_FADE_OUT_UP;
-  animation-duration: .5s;
+  animation-duration: .3s;
   animation-fill-mode: forwards;
 }
 
@@ -142,13 +142,14 @@
   cursor: pointer;
   width: 20px;
   text-align: left;
-  float: left;
+  position: absolute;
+  left: 0;
+  padding-top: 2px;
 }
 .more_icon{
   cursor: pointer;
   width: 20px;
   text-align: left;
-  margin-left: -20px;
 }
 
 .method_item_menu{

@@ -147,6 +147,12 @@ export default class CConnectorItem{
         this.toggleItems(OPERATOR_ITEM, item, value);
     }
 
+    hasItemChildren(item){
+        let result = false;
+        result = this.methods.findIndex(m => m.index !== item.index && m.index.indexOf(item.index) === 0) !== -1;
+        return result || this.operators.findIndex(o => o.index !== item.index && o.index.indexOf(item.index) === 0) !== -1;
+    }
+
     get id(){
         if(!this.hasOwnProperty('_id')){
             consoleLog(`ConnectorItem has undefined 'id'`);
