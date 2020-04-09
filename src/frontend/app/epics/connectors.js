@@ -99,12 +99,10 @@ const addConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = addConnectorFulfilled;
-            /*
-            TODO: #214
             if(data.icon !== null){
                 successResponse = addConnectorIcon;
             }
-            delete data.icon;*/
+            delete data.icon;
             return doRequest({url, method: 'post', data: {...data}},{
                     success: successResponse,
                     reject: addConnectorRejected,},
@@ -122,7 +120,7 @@ const addConnectorIconEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.ADD_CONNECTORICON)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `storage/groupIcon`;
+            let url = `storage/connector`;
             let data = new FormData();
             data.append('connectorId', action.payload.connectorId);
             data.append('file', action.payload.icon);
@@ -146,12 +144,10 @@ const updateConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = updateConnectorFulfilled;
-            /*
-            TODO: #214
             if(data.icon !== null){
                 successResponse = updateConnectorIcon;
             }
-            delete data.icon;*/
+            delete data.icon;
             return doRequest({url, method: 'put', data: {...data}},{
                     success: successResponse,
                     reject: updateConnectorRejected,},
@@ -170,7 +166,7 @@ const updateConnectorIconEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.UPDATE_CONNECTORICON)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `storage/groupIcon`;
+            let url = `storage/connector`;
             let data = new FormData();
             data.append('connectorId', action.payload.connectorId);
             data.append('file', action.payload.icon);
