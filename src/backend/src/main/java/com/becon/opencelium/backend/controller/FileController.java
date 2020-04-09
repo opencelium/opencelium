@@ -18,12 +18,15 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
+import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
@@ -56,6 +59,9 @@ public class FileController {
 
     @Autowired
     private TemplateServiceImp templateService;
+
+    @Autowired
+    private ConnectorServiceImp connectorService;
 
     private final UserStorageService storageService;
 
@@ -149,6 +155,32 @@ public class FileController {
             templateService.save(template);
             final org.springframework.hateoas.Resource<TemplateResource> resource
                     = new org.springframework.hateoas.Resource<>(templateService.toResource(template));
+            return ResponseEntity.ok().body(resource);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping(value = "/connector")
+    public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
+                                             @RequestParam("connectorId") int connectorId) {
+
+        Connector connector = connectorService.findById(connectorId).orElseThrow(() ->
+                new RuntimeException("CONNECTOR_NOT_FOUND"));
+        // Get extension
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (!checkJsonExtension(extension)){
+            throw new StorageException("File should be JSON");
+        }
+
+        try {
+            //Generate new file name
+            String newFilename = UUID.randomUUID().toString() + "." + extension;
+            connector.setIcon(newFilename);
+            // Save file in storage
+            storageService.store(file, newFilename);
+            connectorService.save(connector);
+            ConnectorResource resource = connectorService.toResource(connector);
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             throw new RuntimeException(e);

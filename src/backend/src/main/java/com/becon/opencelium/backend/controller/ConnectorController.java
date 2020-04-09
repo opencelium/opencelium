@@ -17,9 +17,11 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.authentication.AuthenticationType;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.factory.AuthenticationFactory;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
@@ -34,12 +36,17 @@ import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -146,5 +153,24 @@ public class ConnectorController {
         return ResponseEntity.ok().body("{\"status\":\"200\"}");
     }
 
+
+    @GetMapping("/file/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String filename) {
+
+        try {
+            Path rootLocation = Paths.get(PathConstant.ICONS);
+            Path filePath = rootLocation.resolve(filename);
+            org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());
+            if (!file.exists() || !file.isReadable()) {
+                throw new StorageFileNotFoundException("Could not read file: " + filename);
+            }
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+        }
+        catch (MalformedURLException e) {
+            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+        }
+    }
 
 }
