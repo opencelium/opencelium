@@ -50,6 +50,9 @@ const testConnectorEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/check`;
             let data = action.payload;
+            if(data.hasOwnProperty('icon')) {
+                delete data.icon;
+            }
             return doRequest({url, method: 'post', data},{
                     success: testConnectorFulfilled,
                     reject: testConnectorRejected,},

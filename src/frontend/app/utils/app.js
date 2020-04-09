@@ -608,6 +608,9 @@ function mapConnector(connector){
         if(connector.hasOwnProperty('invoker')) {
             result.invoker = mapInvoker(connector.invoker);
         }
+        if(connector.hasOwnProperty('icon')) {
+            result.icon = mapInvoker(connector.icon);
+        }
     }
     return result;
 }
