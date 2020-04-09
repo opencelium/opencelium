@@ -109,7 +109,7 @@ class FormConnectors extends Component{
         let invoker = entity.fromConnector.invoker;
         return(
             <div className={`${styles.form_connector_from_invoker} ${fromWillDisappear ? styles.form_connector_from_invoker_disappear : styles.form_connector_from_invoker_appear}`}>
-                <FormOperations entity={invoker} data={{readOnly: true, visible: true}} forConnection={true}/>
+                <FormOperations entity={invoker} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true}/>
             </div>
         );
     }
@@ -123,7 +123,7 @@ class FormConnectors extends Component{
         let invoker = entity.toConnector.invoker;
         return(
             <div className={`${styles.form_connector_to_invoker} ${toWillDisappear ? styles.form_connector_to_invoker_disappear : styles.form_connector_to_invoker_appear}`}>
-                <FormOperations entity={invoker} data={{readOnly: true, visible: true}} forConnection={true}/>
+                <FormOperations entity={invoker} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true}/>
             </div>
         );
     }

@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-   ~// Copyright (C) <2020> <becon GmbH>
-   ~//
-   ~// This file is licensed under the OpenCelium license agreement.
-   ~//
-   ~// If you purchased an OpenCelium subscription you can use this file
-   ~// under the terms of the OpenCelium license agreement.
-   ~// License agreement and license key will be shipped with the order
-   ~// confirmation.
+  ~ Copyright (C) <2019>  <becon GmbH>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, version 3 of the License.
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 <invoker type="RESTful">
     <name>openNMS</name>
-    <description>Open Network Monitoring System</description>
-    <hint>Open Network Monitoring System</hint>
+    <description>Open Network Monitoring System: built for scalability, integration, and high levels of configuration since 2000.</description>
+    <hint>Open Network Monitoring System. Read api documentation https://docs.opennms.org/opennms/releases/17.0.0/guide-development/guide-development.html</hint>
     <requiredData>
         <item name="url" type="string" visibility="public"/>
         <item name="username" type="string" visibility="public"/>

@@ -44,6 +44,7 @@ class FormConnection extends Component{
                 invoker={entity}
                 operation={connection}
                 updateEntity={::this.updateEntity}
+                mode={'add'}
                 hasTour
             />
         );

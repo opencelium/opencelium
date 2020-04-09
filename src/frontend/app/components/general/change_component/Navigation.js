@@ -44,18 +44,8 @@ class Navigation extends Component{
         return <FontIcon className={styles[classNames.navigation_prev_icon]} value={'arrow_back'} onClick={prevPage} id={'navigation_back'}/>;
     }
 
-    /**
-     * to test Connector
-     */
-    test(){
-        const {test, entity} = this.props;
-        if(test.isTested === -1 || test.isTested === 0){
-            test.callback(entity);
-        }
-    }
-
     renderNextButton(){
-        const {action, translations, test, authUser, makingRequest, isActionInProcess} = this.props;
+        const {action, translations, isTested, authUser, makingRequest, isActionInProcess} = this.props;
         let classNames = [
             'navigation_action_icon',
             'navigation_icon_text',
@@ -87,13 +77,9 @@ class Navigation extends Component{
                 case 'view':
                     icon = '';
             }
-            let onClickAction = null;
-            if(test.isTested === -1 || test.isTested === 0){
+            if(isTested === -1 || isTested === 0){
                 icon = 'donut_large';
                 type = 'test';
-                onClickAction = ::this.test;
-            } else {
-                onClickAction = action;
             }
             if(icon === ''){
                 return null;
@@ -103,7 +89,7 @@ class Navigation extends Component{
                     authUser={authUser}
                     title={translations[type + 'Button']}
                     icon={icon}
-                    onClick={onClickAction}
+                    onClick={action}
                     className={styles[classNames.navigation_action_icon]}
                 />
             );
@@ -132,7 +118,7 @@ Navigation.propTypes = {
     action: PropTypes.func.isRequired,
     translations: PropTypes.object.isRequired,
     add: PropTypes.string,
-    test: PropTypes.object,
+    isTested: PropTypes.number,
     entity: PropTypes.object.isRequired,
 };
 
@@ -141,7 +127,7 @@ Navigation.defaultProps = {
     nextPage: null,
     prevPage: null,
     type: 'add',
-    test: {isTested: 1, callback: null},
+    isTested: 1,
 };
 
 
