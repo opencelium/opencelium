@@ -41,15 +41,33 @@ class MethodItem extends Component{
             showConfirm: false,
             onDeleteButtonOver: false,
             showParams: false,
+            methodClassName: '',
+            isHidden: false,
         };
     }
 
-    componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps, prevState){
+        let {showParams, methodClassName, isHidden} = this.state;
         const curMethod = this.props.method;
         if(curMethod.error.hasError && !this.state.showParams){
+            showParams = true;
+        }
+        if(curMethod.isToggled){
+            methodClassName = styles.item_toggle_out;
+            isHidden = true;
+        } else{
+            methodClassName = styles.item_toggle_in;
+            isHidden = false;
+        }
+        if(showParams !== prevState.showParams || methodClassName !== prevState.methodClassName) {
             this.setState({
-                showParams: true,
+                methodClassName,
+                showParams,
             });
+        }
+        if(isHidden !== prevState.isHidden){
+            let that = this;
+            setTimeout(() => that.setState({isHidden}), 500);
         }
     }
 
@@ -69,6 +87,10 @@ class MethodItem extends Component{
     }
 
     render(){
+        const {methodClassName, isHidden} = this.state;
+        if(isHidden){
+            return null;
+        }
         const {connection, connector, method, readOnly} = this.props;
         const {showParams} = this.state;
         let methodStyles = {position: 'relative', transition: 'all 0.3s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
@@ -89,7 +111,7 @@ class MethodItem extends Component{
             methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
         }
         return (
-            <div id={`${method.index}__${connector.getConnectorType()}`}>
+            <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName}>
                 <Card
                     theme={{card: styles.item}}
                     style={methodStyles}
