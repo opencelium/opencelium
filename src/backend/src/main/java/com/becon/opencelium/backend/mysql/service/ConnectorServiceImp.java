@@ -39,7 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -140,11 +142,13 @@ public class ConnectorServiceImp implements ConnectorService{
 
     @Override
     public ConnectorResource toResource(Connector entity) {
+        final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+        final String path = uri.getScheme() + "://" + uri.getAuthority() + "/api/connector/";
         ConnectorResource connectorResource = new ConnectorResource();
         connectorResource.setConnectorId(entity.getId());
         connectorResource.setTitle(entity.getTitle());
         connectorResource.setDescription(entity.getTitle());
-        connectorResource.setIcon(entity.getIcon());
+        connectorResource.setIcon(path + entity.getIcon());
 
         Invoker invoker = invokerServiceImp.findByName(entity.getInvoker());
         connectorResource.setInvoker(invokerServiceImp.toResource(invoker));
