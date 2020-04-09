@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.authentication.AuthenticationType;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.factory.AuthenticationFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -143,7 +144,7 @@ public class ConnectorServiceImp implements ConnectorService{
     @Override
     public ConnectorResource toResource(Connector entity) {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        final String path = uri.getScheme() + "://" + uri.getAuthority() + "/api/connector/file/";
+        final String path = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
         ConnectorResource connectorResource = new ConnectorResource();
         connectorResource.setConnectorId(entity.getId());
         connectorResource.setTitle(entity.getTitle());

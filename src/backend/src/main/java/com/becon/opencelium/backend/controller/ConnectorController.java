@@ -154,23 +154,23 @@ public class ConnectorController {
     }
 
 
-    @GetMapping("/file/{filename:.+}")
-    @ResponseBody
-    public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String filename) {
-
-        try {
-            Path rootLocation = Paths.get(PathConstant.ICONS);
-            Path filePath = rootLocation.resolve(filename);
-            org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());
-            if (!file.exists() || !file.isReadable()) {
-                throw new StorageFileNotFoundException("Could not read file: " + filename);
-            }
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + file.getFilename() + "\"").body(file);
-        }
-        catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
-        }
-    }
+//    @GetMapping("/file/{filename:.+}")
+//    @ResponseBody
+//    public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String filename) {
+//
+//        try {
+//            Path rootLocation = Paths.get(PathConstant.ICONS);
+//            Path filePath = rootLocation.resolve(filename);
+//            org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());
+//            if (!file.exists() || !file.isReadable()) {
+//                throw new StorageFileNotFoundException("Could not read file: " + filename);
+//            }
+//            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+//                    "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+//        }
+//        catch (MalformedURLException e) {
+//            throw new StorageFileNotFoundException("Could not read file: " + filename, e);
+//        }
+//    }
 
 }
