@@ -18,12 +18,15 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
+import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
@@ -57,6 +60,9 @@ public class FileController {
     @Autowired
     private TemplateServiceImp templateService;
 
+    @Autowired
+    private ConnectorServiceImp connectorService;
+
     private final UserStorageService storageService;
 
     @Autowired
@@ -71,7 +77,9 @@ public class FileController {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
-        checkImageExtension(extension);
+        if (!checkImageExtension(extension)){
+            throw new StorageException("File should be jpg or png");
+        }
 
         // Get user from database
         User user = userService.findByEmail(email).get();
@@ -107,7 +115,9 @@ public class FileController {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
-        checkImageExtension(extension);
+        if (!checkImageExtension(extension)){
+            throw new StorageException("File should be jpg or png");
+        }
 
         // Get userGroup data from database
         UserRole userRole = userRoleService.getOne(userGroupId);
@@ -155,6 +165,32 @@ public class FileController {
         }
     }
 
+    @PostMapping(value = "/connector")
+    public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
+                                             @RequestParam("connectorId") int connectorId) {
+
+        Connector connector = connectorService.findById(connectorId).orElseThrow(() ->
+                new RuntimeException("CONNECTOR_NOT_FOUND"));
+        // Get extension
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (!checkImageExtension(extension)){
+            throw new StorageException("File should be jpg or png");
+        }
+
+        try {
+            //Generate new file name
+            String newFilename = UUID.randomUUID().toString() + "." + extension;
+            connector.setIcon(newFilename);
+            // Save file in storage
+            storageService.store(file, newFilename);
+            connectorService.save(connector);
+            ConnectorResource resource = connectorService.toResource(connector);
+            return ResponseEntity.ok().body(resource);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
     private boolean checkJsonExtension(String extension){
         if (!(extension.equals("json") || extension.equals("JSON"))){
             return false;
@@ -176,10 +212,11 @@ public class FileController {
         return ResponseEntity.notFound().build();
     }
 
-    private void checkImageExtension(String extension){
+    private boolean checkImageExtension(String extension){
         if (!(extension.equals("jpeg") || extension.equals("png")
                 || extension.equals("jpg"))){
-            throw new StorageException("File should be jpg or png");
+            return false;
         }
+        return true;
     }
 }

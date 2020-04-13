@@ -775,7 +775,7 @@ class IfOperator extends Component{
         const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
         let classNames = styles.operator_icon;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
-        let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : null;
+        let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : false;
         let operatorStyle = {
             height: '50px',
             marginLeft: `${operator.getDepth() * 20}px`,

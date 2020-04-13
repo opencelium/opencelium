@@ -298,9 +298,33 @@ class ChangeContent extends Component{
     doAction(){
         window.scrollTo(0,document.body.scrollHeight);
         if(this.checkFields()) {
-            const {action} = this.props;
-            action(this.state.entity);
+            if(!::this.test()) {
+                const {action} = this.props;
+                action(this.state.entity);
+            }
         }
+    }
+
+    getTestData(){
+        const {page} = this.state;
+        const {contents} = this.props;
+        return contents[page].hasOwnProperty('test') ? contents[page].test : {
+            isTested: 1,
+            callback: null
+        };
+    }
+
+    /**
+     * to test Connector
+     */
+    test(){
+        const {entity} = this.state;
+        const testData = this.getTestData();
+        if(testData.isTested === -1 || testData.isTested === 0) {
+            testData.callback(entity);
+            return true;
+        }
+        return false;
     }
 
     renderValidationMessage(){
@@ -324,6 +348,7 @@ class ChangeContent extends Component{
             prevPage: ::this.prevPage,
             nextPage: ::this.nextPage,
         };
+        const test = ::this.getTestData();
         return (
             <div>
                 <Breadcrumbs items={breadcrumbsItems} page={page} exactPage={::this.exactPage} authUser={authUser}/>
@@ -355,10 +380,7 @@ class ChangeContent extends Component{
                             translations={translations}
                             type={type}
                             isActionInProcess={isActionInProcess}
-                            test={contents[page].hasOwnProperty('test') ? contents[page].test : {
-                                isTested: 1,
-                                callback: null
-                            }}
+                            isTested={test.isTested}
                             entity={this.state.entity}
                             authUser={authUser}
                             makingRequest={this.state.makingRequest}

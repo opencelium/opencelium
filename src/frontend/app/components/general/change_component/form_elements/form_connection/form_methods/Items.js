@@ -72,10 +72,10 @@ class Items extends Component{
         }
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
-                allComponents.push(<MethodItem key={allItems[i].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<MethodItem key={allItems[i].index} index={i} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
             }
             if(allItems[i] instanceof  COperatorItem){
-                allComponents.push(<OperatorItem key={allItems[i].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<OperatorItem key={allItems[i].index} index={i} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
             }
         }
         return allComponents;

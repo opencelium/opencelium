@@ -122,6 +122,37 @@ export default class CConnectorItem{
         }
     }
 
+    toggleItems(itemType, item, value){
+        let items = [];
+        switch (itemType) {
+            case METHOD_ITEM:
+                items = this.methods;
+                break;
+            case OPERATOR_ITEM:
+                items = this.operators;
+                break;
+        }
+        for(let i = 0; i < items.length; i++){
+            if(items[i].index !== item.index && items[i].index.indexOf(item.index) === 0){
+                items[i].isToggled = value;
+            }
+            if(items[i].index === item.index){
+                items[i].isMinimized = value;
+            }
+        }
+    }
+
+    toggleByItem(item, value){
+        this.toggleItems(METHOD_ITEM, item, value);
+        this.toggleItems(OPERATOR_ITEM, item, value);
+    }
+
+    hasItemChildren(item){
+        let result = false;
+        result = this.methods.findIndex(m => m.index !== item.index && m.index.indexOf(item.index) === 0) !== -1;
+        return result || this.operators.findIndex(o => o.index !== item.index && o.index.indexOf(item.index) === 0) !== -1;
+    }
+
     get id(){
         if(!this.hasOwnProperty('_id')){
             consoleLog(`ConnectorItem has undefined 'id'`);

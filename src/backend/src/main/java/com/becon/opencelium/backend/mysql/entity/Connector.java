@@ -63,6 +63,9 @@ public class Connector {
     @Column(name = "modified_on")
     private Date modifiedOn;
 
+    @Column(name = "icon")
+    private String icon;
+
     @OneToMany(mappedBy = "connector", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RequestData> requestData = new ArrayList<>();
 
@@ -128,6 +131,14 @@ public class Connector {
 
     public void setModifiedOn(Date modifiedOn) {
         this.modifiedOn = modifiedOn;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     public List<RequestData> getRequestData() {

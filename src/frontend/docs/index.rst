@@ -30,7 +30,7 @@ This documentation is organized into a couple of sections:
 License
 ##################
 
-`becon`_ © 2013-2019 becon GmbH
+`becon`_ © 2013-2020 becon GmbH
 
 .. _becon: LICENSE.html
       

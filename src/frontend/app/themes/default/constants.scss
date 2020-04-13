@@ -37,15 +37,26 @@ $ANIMATION_FADE_IN_LEFT: fadeInLeft;
 $ANIMATION_FADE_IN_DOWN: fadeInDown;
 $ANIMATION_FADE_OUT_LEFT: fadeOutLeft;
 $ANIMATION_FADE_OUT_RIGHT: fadeOutRight;
+$ANIMATION_FADE_OUT_UP: fadeOutUp;
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translate3d(0, -100%, 0);
+    transform: translate3d(0, -50%, 0);
   }
 
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -50%, 0);
   }
 }
 @keyframes bounceInRight {

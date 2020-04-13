@@ -1,10 +1,3 @@
-/*
- * Copyright (C) <2019>  <becon GmbH>
- *
- *  3 This file is licensed under the terms of the EARLY ADOPTER PROGRAM (EAP) agreement.
- *  The license agreement was sent with the confirmation of the participation of the EAP.
- */
-
 (function( global, factory ) {
 
     if ( typeof module === "object" && typeof module.exports === "object" ) {
