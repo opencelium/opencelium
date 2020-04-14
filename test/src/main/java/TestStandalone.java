@@ -3,14 +3,25 @@ import java.net.MalformedURLException;
 public class TestStandalone {
     public static void main(String[] args) throws MalformedURLException, InterruptedException {
 
+
         String testName = System.getProperty("test");
 
+        String testLogin = System.getProperty("login");
+        String testPassword = System.getProperty("pass");
+
+        String testHubUrl = System.getProperty("hub");
+        String testUrl = System.getProperty("url");
+
+        if ( testName != null )
+        {
         if(testName.contentEquals("user_test")) {
             UserTest();
         }
         else if(testName.contentEquals("group_test")){
             GroupTest();
         }
+        }
+
         else {
             UserTest();
         }
