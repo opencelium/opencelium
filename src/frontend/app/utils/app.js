@@ -66,11 +66,19 @@ export function parseConnectionPointer(connectionPointer){
     return result;
 }
 
+export function sortByIndex(array){
+    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+    return array.sort(sortByIndexFunction, collator);
+}
+
 /**
  * a callback to sort by index
  */
 export function sortByIndexFunction(a, b){
-    if(a.index < b.index){return -1;} if(a.index > b.index){return 1;} return 0;
+    return a.index.localeCompare(b.index, undefined, {
+        numeric: true,
+        sensitivity: 'base'
+    });
 }
 
 /**

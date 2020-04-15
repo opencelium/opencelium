@@ -24,6 +24,7 @@ import CMethodItem from "../../../../../../../classes/components/content/connect
 import MethodRequest from "./MethodRequest";
 import MethodTitle from "./MethodTitle";
 import Card from "../../../../../basic_components/card/Card";
+import {consoleLog} from "../../../../../../../utils/app";
 
 
 /**
@@ -41,14 +42,28 @@ class MethodItem extends Component{
             showConfirm: false,
             onDeleteButtonOver: false,
             showParams: false,
-            methodClassName: '',
+            methodClassName: styles.item_toggle_in,
             isHidden: false,
+            deletingMethod: false,
         };
+        consoleLog(`Method.Constructor (${props.method.index})`);
     }
 
     componentDidUpdate(prevProps, prevState){
-        let {showParams, methodClassName, isHidden} = this.state;
+        let {showParams, isHidden, deletingMethod} = this.state;
+        let methodClassName = '';
         const curMethod = this.props.method;
+        const prevMethod = prevProps.method;
+/*
+        if(deletingMethod){
+            methodClassName = styles.item_toggle_out;
+            deletingMethod = false;
+            this.setState({
+                methodClassName,
+                deletingMethod,
+            });
+            return;
+        }*/
         if(curMethod.error.hasError && !this.state.showParams){
             showParams = true;
         }
@@ -76,9 +91,17 @@ class MethodItem extends Component{
         if(isHidden !== prevState.isHidden){
             let that = this;
             if(methodClassName === styles.item_toggle_out){
-                setTimeout(() => that.setState({isHidden}), 300);
+                setTimeout(() => that.setState({
+                    isHidden,
+                }), 300);
             }
         }
+    }
+
+    toggleDeleteMethod(){
+        this.setState({
+            deletingMethod: !this.state.deletingMethod,
+        });
     }
 
     updateEntity(){
@@ -134,6 +157,7 @@ class MethodItem extends Component{
                         toggleShowParams={::this.toggleShowParams}
                         showParams={showParams}
                         readOnly={readOnly}
+                        toggleDeleteMethod={::this.toggleDeleteMethod}
                     />
                     {
                         showParams
