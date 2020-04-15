@@ -100,7 +100,7 @@ class MethodTitle extends Component{
             () => {
                 toggleDeleteMethod();
                 setTimeout(() => {
-                    const {connection, connector, method, updateEntity, toggleDeleteMethod} = that.props;
+                    const {connection, connector, method, updateEntity} = that.props;
                     let connectorType = connector.getConnectorType();
                     switch (connectorType) {
                         case CONNECTOR_FROM:

@@ -46,7 +46,6 @@ class MethodItem extends Component{
             isHidden: false,
             deletingMethod: false,
         };
-        consoleLog(`Method.Constructor (${props.method.index})`);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -54,7 +53,6 @@ class MethodItem extends Component{
         let methodClassName = '';
         const curMethod = this.props.method;
         const prevMethod = prevProps.method;
-/*
         if(deletingMethod){
             methodClassName = styles.item_toggle_out;
             deletingMethod = false;
@@ -63,7 +61,7 @@ class MethodItem extends Component{
                 deletingMethod,
             });
             return;
-        }*/
+        }
         if(curMethod.error.hasError && !this.state.showParams){
             showParams = true;
         }
