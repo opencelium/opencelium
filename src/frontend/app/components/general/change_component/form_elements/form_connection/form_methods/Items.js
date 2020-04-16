@@ -26,7 +26,7 @@ import FontIcon from "../../../../basic_components/FontIcon";
 import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
 import CMethodItem from "../../../../../../classes/components/content/connection/method/CMethodItem";
 import COperatorItem from "../../../../../../classes/components/content/connection/operator/COperatorItem";
-import {sortByIndexFunction} from "../../../../../../utils/app";
+import {sortByIndex, sortByIndexFunction} from "../../../../../../utils/app";
 
 
 /**
@@ -68,7 +68,7 @@ class Items extends Component{
             allItems.push(connector.operators[i]);
         }
         if(allItems.length > 1){
-            allItems.sort(sortByIndexFunction);
+            allItems = sortByIndex(allItems);
         }
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){

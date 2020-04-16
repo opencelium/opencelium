@@ -49,6 +49,12 @@
   animation-fill-mode: forwards;
 }
 
+.item_fade{
+  animation-name: $ANIMATION_FADE;
+  animation-duration: .3s;
+  animation-fill-mode: forwards;
+}
+
 .item_delete_button{
   cursor: pointer;
   position: absolute;

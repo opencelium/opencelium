@@ -31,6 +31,7 @@ import IfOperator from "./IfOperator";
 import LoopOperator from "./LoopOperator";
 import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
 import TooltipText from "../../../../../basic_components/tooltips/TooltipText";
+import {consoleLog} from "../../../../../../../utils/app";
 
 
 /**
@@ -45,11 +46,12 @@ class OperatorItem extends Component{
             hasDeleteButton: false,
             isVisibleMenuEdit: false,
             isToggled: false,
-            operatorClassName: '',
+            operatorClassName: styles.item_toggle_in,
             isHidden: false,
         };
         this.isDisabledMouse = false;
         this.removingMethod = false;
+        consoleLog(`Operator.Constructor (${props.operator.index})`);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -64,9 +66,16 @@ class OperatorItem extends Component{
             isHidden = false;
         }
         if(operatorClassName !== prevState.operatorClassName) {
-            this.setState({
-                operatorClassName,
-            });
+            if(operatorClassName === styles.item_toggle_in && isHidden !== prevState.isHidden){
+                this.setState({
+                    operatorClassName,
+                    isHidden,
+                });
+            } else {
+                this.setState({
+                    operatorClassName,
+                });
+            }
         }
         if(isHidden !== prevState.isHidden){
             let that = this;
