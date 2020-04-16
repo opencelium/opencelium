@@ -1,4 +1,3 @@
-import com.sun.imageio.plugins.wbmp.WBMPImageReader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -16,7 +15,6 @@ import org.testng.annotations.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -24,8 +22,18 @@ public class TestGroup {
 
     WebDriver driver;
 
+    String mLogin;
+    String mPassword;
+    String mHubUrl;
+    String mAppUrl;
+
     @BeforeTest
-    public void setUp() throws MalformedURLException {
+    public void setUp(String login, String password, String hubUrl, String appUrl) throws MalformedURLException {
+
+        mLogin = login;
+        mPassword = password;
+        mHubUrl = hubUrl;
+        mAppUrl = appUrl;
 
         LoggingPreferences logs = new LoggingPreferences();
         logs.enable(LogType.BROWSER, Level.ALL);
@@ -42,16 +50,16 @@ public class TestGroup {
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
 
-        driver = new RemoteWebDriver(new URL(Constants.NODE_URL),desiredCapabilities);
+        driver = new RemoteWebDriver(new URL(mHubUrl),desiredCapabilities);
 
-        driver.navigate().to(Constants.BASE_URL+"login");
+        driver.navigate().to(appUrl +"login");
 
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
         WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys(Constants.USERNAME);
+        element_login.sendKeys(mLogin);
         WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys(Constants.PASSWORD);
+        element_password.sendKeys(mPassword);
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
 
         buttonConnect.click();
@@ -102,7 +110,7 @@ public class TestGroup {
 
         TimeUnit.SECONDS.sleep(3);
 
-        driver.navigate().to("http://localhost:8888/usergroups");
+        driver.navigate().to(mAppUrl+"usergroups");
         Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='TestGroup']")));
 
         TimeUnit.SECONDS.sleep(3);

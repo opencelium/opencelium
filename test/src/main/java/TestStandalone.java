@@ -10,20 +10,36 @@ public class TestStandalone {
         String testPassword = System.getProperty("pass");
 
         String testHubUrl = System.getProperty("hub");
-        String testUrl = System.getProperty("url");
+        String testAppUrl = System.getProperty("url");
+
+
+        if(testLogin==null){
+            testLogin = Constants.USERNAME;
+        }
+
+        if(testPassword==null){
+            testPassword = Constants.PASSWORD;
+        }
+
+        if(testHubUrl==null){
+            testHubUrl = Constants.HUB_URL;
+        }
+
+        if(testAppUrl ==null){
+            testAppUrl = Constants.APP_URL;
+        }
 
         if ( testName != null )
         {
-        if(testName.contentEquals("user_test")) {
-            UserTest();
+            if(testName.contentEquals("user_test")) {
+                UserTest(testLogin,testPassword,testHubUrl,testAppUrl);
+            }
+            else if(testName.contentEquals("group_test")){
+                GroupTest(testLogin,testPassword,testHubUrl,testAppUrl);
         }
-        else if(testName.contentEquals("group_test")){
-            GroupTest();
         }
-        }
-
         else {
-            UserTest();
+            UserTest(testLogin,testPassword,testHubUrl,testAppUrl);
         }
 
 
@@ -31,10 +47,10 @@ public class TestStandalone {
     }
 
 
-    private static void GroupTest() throws MalformedURLException, InterruptedException {
+    private static void GroupTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
 
         TestGroup testGroup = new TestGroup();
-        testGroup.setUp();
+        testGroup.setUp(login,password,hubUrl,appUrl);
 
         testGroup.SimpleTest();
         testGroup.AddGroupTest();
@@ -45,10 +61,10 @@ public class TestStandalone {
 
     }
 
-    private static void UserTest() throws MalformedURLException, InterruptedException {
+    private static void UserTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
         TestUser testUser = new TestUser();
 
-        testUser.setUp();
+        testUser.setUp(login,password,hubUrl,appUrl);
 
         testUser.SimpleTest();
 
