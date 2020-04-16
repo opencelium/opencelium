@@ -450,41 +450,15 @@ export default class CConnectorItem{
 
     isLastItemInTheTree(index){
         let splitIndex = index.split('_');
-        let lastMethod = this._methods.length !== 0 ? this._methods[this._methods.length - 1] : null;
-        let lastOperator = this._operators.length !== 0 ? this._operators[this._operators.length - 1] : null;
-        let isLastMethod = false;
-        let isLastOperator = false;
-        if(lastMethod !== null){
-            if(lastMethod.index === index){
-                isLastMethod = true;
-            }
+        let increasedLastIndex = parseInt(splitIndex[splitIndex.length - 1]) + 1;
+        splitIndex[splitIndex.length - 1] = increasedLastIndex;
+        let nextIndex = splitIndex.join('_');
+        let isExistNextIndexInMethods = this._methods.findIndex(m => m.index === nextIndex) !== -1;
+        if(!isExistNextIndexInMethods){
+            let isExistNextIndexInOperators = this._operators.findIndex(o => o.index === nextIndex) !== -1;
+            return !isExistNextIndexInOperators;
         }
-        if(lastOperator !== null){
-            if(lastOperator.index === index){
-                isLastOperator = true;
-            }
-        }
-        if(isLastMethod){
-            if(lastOperator !== null) {
-                let splitLastOperatorIndex = lastOperator.index.split('_');
-                for (let i = 0; i < splitLastOperatorIndex.length; i++) {
-                    if (parseInt(splitLastOperatorIndex[i]) > parseInt(splitIndex[i])) {
-                        return false;
-                    }
-                }
-            }
-        }
-        if(isLastOperator){
-            if(lastMethod !== null) {
-                let splitLastMethodIndex = lastMethod.index.split('_');
-                for (let i = 0; i < splitLastMethodIndex.length; i++) {
-                    if (parseInt(splitLastMethodIndex[i]) > parseInt(splitIndex[i])) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return !(!isLastMethod && !isLastOperator);
+        return !isExistNextIndexInMethods;
     }
 
 
