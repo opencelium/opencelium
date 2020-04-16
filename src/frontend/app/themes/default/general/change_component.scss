@@ -847,3 +847,23 @@
     font-size: $FONT_SIZE_14;
   }
 }
+
+.items{
+  position: relative;
+}
+.items_arrows{
+  position: absolute;
+  left: -30px;
+  top: 50%;
+}
+.item_arrow_disable{
+  cursor: default;
+  color: #eee;
+}
+.items_arrow_up{
+  display: block;
+  cursor: pointer;
+}
+.items_arrow_down{
+  cursor: pointer;
+}

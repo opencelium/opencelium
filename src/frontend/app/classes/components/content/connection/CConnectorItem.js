@@ -17,6 +17,7 @@ import {consoleLog, isId, sortByIndex, subArrayToString} from "../../../../utils
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
+import CConnectorPagination from "./CConnectorPagination";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -43,6 +44,7 @@ export default class CConnectorItem{
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._pagination = this.setConnectorPagination();
     }
 
     static createConnectorItem(connectorItem){
@@ -113,6 +115,18 @@ export default class CConnectorItem{
         return result;
     }
 
+    setConnectorPagination(){
+        return CConnectorPagination.createConnectorPagination(this);
+    }
+
+    loadPage(number){
+        this._pagination.setCurrentPageNumber(number);
+    }
+
+    reloadPagination(settings){
+        this._pagination.reload(this, settings);
+    }
+
     updateInvokerForMethods(){
         for(let i = 0; i < this._methods.length; i++){
             this._methods[i].invoker = this._invoker;
@@ -145,6 +159,7 @@ export default class CConnectorItem{
     toggleByItem(item, value){
         this.toggleItems(METHOD_ITEM, item, value);
         this.toggleItems(OPERATOR_ITEM, item, value);
+        this.reloadPagination();
     }
 
     hasItemChildren(item){
@@ -198,6 +213,10 @@ export default class CConnectorItem{
 
     set operators(operators){
         this._operators = this.convertOperators(operators);
+    }
+
+    get pagination(){
+        return this._pagination;
     }
 
     getCurrentItem(){
@@ -401,6 +420,7 @@ export default class CConnectorItem{
                 break;
         }
         this.setCurrentItem(newItem);
+        this.reloadPagination({newItem});
     }
 
     addMethod(method, mode = OUTSIDE_ITEM){
@@ -477,6 +497,7 @@ export default class CConnectorItem{
                 this.setCurrentItem(this.getCloserItem(methodIndex));
             }
         }
+        this.reloadPagination();
     }
 
     addOperator(operator, mode = OUTSIDE_ITEM){
@@ -500,6 +521,7 @@ export default class CConnectorItem{
                 this.setCurrentItem(this.getCloserItem(operatorIndex));
             }
         }
+        this.reloadPagination();
     }
 
     generateNextIndex(mode){

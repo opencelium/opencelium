@@ -44,9 +44,13 @@ class NextPage extends Component{
      * to open next page
      */
     openNextPage() {
-        const {link, router} = this.props;
-        if (link !== '' && link !== -1) {
-            router.push(link);
+        const {link, router, loadPage, current} = this.props;
+        if(!loadPage) {
+            if (link !== '' && link !== -1) {
+                router.push(link);
+            }
+        } else{
+            loadPage(current);
         }
     }
     
@@ -59,12 +63,11 @@ class NextPage extends Component{
         return(
             <Pagination.Next onClick={this.openNextPage} disabled={isLast}/>
         );
-        return (
-            <span className={className} onClick={this.openNextPage}>
-                <FontIcon value={'arrow_right'}/>
-            </span>
-        );
     }
 }
+
+NextPage.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(NextPage);
