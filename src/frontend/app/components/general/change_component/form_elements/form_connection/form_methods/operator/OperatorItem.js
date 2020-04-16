@@ -303,7 +303,7 @@ class OperatorItem extends Component{
             <div
                 id={`${operator.index}__${connector.getConnectorType()}`}
                 className={`${styles.operator} ${operatorClassName}`}
-                style={{zIndex: 99 - index}}
+                style={{zIndex: 99 - index, textAlign: 'left'}}
                 onMouseEnter={::this.showDeleteButton}
                 onMouseLeave={::this.hideDeleteButton}
             >
