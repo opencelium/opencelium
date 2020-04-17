@@ -136,8 +136,8 @@ public class ConnectionServiceImp implements ConnectionService{
         Connector to = connectorService.findById(connection.getToConnector())
                 .orElseThrow(() -> new RuntimeException("Connector - " + connection.getToConnector() + " not found"));
 
-        connectionResource.setFromConnector(connectorService.toNodeResource(from, connection.getId()));
-        connectionResource.setToConnector(connectorService.toNodeResource(to, connection.getId()));
+        connectionResource.setFromConnector(connectorService.toNodeResource(from, connection.getId(), "from_connector"));
+        connectionResource.setToConnector(connectorService.toNodeResource(to, connection.getId(), "to_connector"));
         return connectionResource;
     }
 

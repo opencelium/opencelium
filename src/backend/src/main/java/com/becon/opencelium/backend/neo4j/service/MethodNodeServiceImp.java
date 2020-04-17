@@ -77,7 +77,10 @@ public class MethodNodeServiceImp implements MethodNodeService {
     }
 
     @Override
-    public List<MethodNode> findMethodsByConnectionIdAndConnectorId(Long connectionId, Integer connectorId) {
-        return methodNodeRepository.findMethodsByConnectionIdAndConnectorId(connectionId, connectorId);
+    public List<MethodNode> findMethodsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer connectorId) {
+        if (direction.equals("to_connector")){
+            return methodNodeRepository.findToMethodsByConnectionIdAndConnectorId(connectionId, connectorId);
+        }
+        return methodNodeRepository.findFromMethodsByConnectionIdAndConnectorId(connectionId, connectorId);
     }
 }
