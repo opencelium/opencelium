@@ -45,6 +45,7 @@ export default class CConnectorItem{
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
         this._pagination = this.setConnectorPagination();
+        this._operatorsHistory = [];
     }
 
     static createConnectorItem(connectorItem){
@@ -81,6 +82,7 @@ export default class CConnectorItem{
         this._methods = [];
         this._operators = [];
         this._currentItem = null;
+        this.reloadPagination();
     }
 
     convertMethod(method){
@@ -125,6 +127,24 @@ export default class CConnectorItem{
 
     reloadPagination(settings){
         this._pagination.reload(this, settings);
+    }
+
+    reloadOperatorsHistory(){
+        this._operatorsHistory = [];
+        if(this._currentItem !== null) {
+            let indexSplitted = this._currentItem.index.split('_');
+            if(indexSplitted.length > 1) {
+                let operatorIndex = indexSplitted[0];
+                for (let i = 1; i < indexSplitted.length; i++) {
+                    let operator = this._operators.find(o => o.index === operatorIndex);
+                    if(operator) {
+                        this._operatorsHistory.push(operator);
+                    }
+                    operatorIndex += `_${indexSplitted[i]}`;
+                }
+            }
+            console.log(this._operatorsHistory.map(o => o.index));
+        }
     }
 
     updateInvokerForMethods(){
@@ -219,6 +239,10 @@ export default class CConnectorItem{
         return this._pagination;
     }
 
+    get operatorsHistory(){
+        return this._operatorsHistory;
+    }
+
     getCurrentItem(){
         if(this._currentItem === null){
             if(this._methods.length !== 0){
@@ -230,6 +254,7 @@ export default class CConnectorItem{
 
     setCurrentItem(item){
         this._currentItem = item;
+        this.reloadOperatorsHistory();
     }
 
     refactorIndex(item, refactorMode, index){

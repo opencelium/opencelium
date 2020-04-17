@@ -58,7 +58,7 @@ export default class CConnectorPagination{
                 firstItemPointer = this._allItems[index];
             }
         }
-        if(this.currentItems.length > 0) {
+        if(firstItemPointer && this.currentItems.length > 0) {
             if (firstItemPointer.index !== this._currentItems[0].index){
                 let index = this._allItems.findIndex(item => item === this.currentItems[0].index);
                 if(index !== -1){
@@ -98,9 +98,15 @@ export default class CConnectorPagination{
         let items = [];
         let firstItemPointer = this._allItems.length > 0 ? this._allItems[0] : null;
         if(this._pageAmount > 1){
-            let index = this._currentPageNumber * this._limit;
-            if(index < this._allItems.length) {
-                firstItemPointer = this._allItems[index];
+            let index = 0;
+            while(true){
+                index = this._currentPageNumber * this._limit;
+                if(index === 0 || index < this._allItems.length) {
+                    firstItemPointer = this._allItems[index];
+                    break;
+                } else{
+                    this._currentPageNumber--;
+                }
             }
         }
         let startPushing = false;

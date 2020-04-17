@@ -14,7 +14,8 @@
  */
 
 import React from 'react';
-import CConnectorItem from "../../../../../app/classes/components/content/connection/CConnectorItem";
+import CConnectorItem, {INSIDE_ITEM} from "../../../../../app/classes/components/content/connection/CConnectorItem";
+import {ALL_COLORS} from "../../../../../app/classes/components/content/connection/CConnection";
 
 
 describe('Add Method', () => {
@@ -59,5 +60,44 @@ describe('Add Method', () => {
 
     it('should be the last method in the subtree', () => {
         expect(connectorItem.isLastItemInTheTree('5')).toBeTruthy();
+    });
+});
+
+
+describe('Check OperatorsHistory', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    beforeEach(() => {
+        connectorItem.methods = [];
+        connectorItem.operators = [];
+    });
+
+    it('should NOT have any element', () => {
+        connectorItem.addMethod({name: 'method', color: ALL_COLORS[0]});
+        expect(connectorItem.operatorsHistory.length).toBe(0);
+    });
+
+    it('should NOT have any element', () => {
+        connectorItem.addMethod({name: 'method', color: ALL_COLORS[0]});
+        connectorItem.addOperator({type: 'if'});
+        expect(connectorItem.operatorsHistory.length).toBe(0);
+    });
+
+    it('should have one element with index "1"', () => {
+        connectorItem.addMethod({name: 'method', color: ALL_COLORS[0]});
+        connectorItem.addOperator({type: 'if'});
+        connectorItem.addMethod({name: 'method 2', color: ALL_COLORS[1]}, INSIDE_ITEM);
+        expect(connectorItem.operatorsHistory.length).toBe(1);
+        expect(connectorItem.operatorsHistory[0].index).toBe('1');
+    });
+
+    it('should have two elements with index "1" and "1_1"', () => {
+        connectorItem.addMethod({name: 'method', color: ALL_COLORS[0]});
+        connectorItem.addOperator({type: 'if'});
+        connectorItem.addMethod({name: 'method 2', color: ALL_COLORS[1]}, INSIDE_ITEM);
+        connectorItem.addOperator({type: 'if'});
+        connectorItem.addMethod({name: 'method 2', color: ALL_COLORS[2]}, INSIDE_ITEM);
+        expect(connectorItem.operatorsHistory.length).toBe(2);
+        expect(connectorItem.operatorsHistory[0].index).toBe('1');
+        expect(connectorItem.operatorsHistory[1].index).toBe('1_1');
     });
 });

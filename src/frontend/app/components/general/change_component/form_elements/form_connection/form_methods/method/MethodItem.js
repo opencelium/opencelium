@@ -122,7 +122,7 @@ class MethodItem extends Component{
         if(isHidden){
             return null;
         }
-        const {connection, connector, method, readOnly, index} = this.props;
+        const {connection, connector, method, readOnly, index, firstItemIndex} = this.props;
         const {showParams} = this.state;
         let methodStyles = {position: 'relative', transition: 'all 0.3s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
         let methodTitleStyles = {backgroundColor: method.color};
@@ -138,8 +138,9 @@ class MethodItem extends Component{
         }
         let indexSplitter = method.index.split('_');
         let marginLeftTimes = indexSplitter.length;
+        let firstItemIndexSplitter = firstItemIndex.split('_');
         if(marginLeftTimes > 1) {
-            methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
+            methodStyles.marginLeft = (marginLeftTimes - firstItemIndexSplitter.length) * 20 + 'px';
         }
         return (
             <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName} style={{zIndex: 99 - index, position: 'relative'}}>
@@ -182,6 +183,11 @@ MethodItem.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem),
     method: PropTypes.instanceOf(CMethodItem),
     updateEntity: PropTypes.func.isRequired,
+    firstItemIndex: PropTypes.string,
+};
+
+MethodItem.defaultProps = {
+    firstItemIndex: '0',
 };
 
 

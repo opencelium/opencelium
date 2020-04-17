@@ -867,3 +867,22 @@
 .items_arrow_down{
   cursor: pointer;
 }
+
+.operators_history{
+  position: absolute;
+  top: -25px;
+  overflow-x: hidden;
+  white-space: nowrap;
+  .history_element{
+    display: inline-block;
+  }
+  .history_color{
+    width: 20px;
+    height: 20px;
+    float: left;
+  }
+  .history_arrow{
+    margin: 0 6px 0 10px;
+    float: left;
+  }
+}

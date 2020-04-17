@@ -772,13 +772,13 @@ class IfOperator extends Component{
     }
 
     render(){
-        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
+        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton, marginLeft} = this.props;
         let classNames = styles.operator_icon;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : false;
         let operatorStyle = {
             height: '50px',
-            marginLeft: `${operator.getDepth() * 20}px`,
+            marginLeft,
             padding: '5px',
             transition: 'all 0.3s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',
@@ -832,6 +832,12 @@ IfOperator.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem).isRequired,
     operator: PropTypes.instanceOf(COperatorItem).isRequired,
     updateEntity: PropTypes.func.isRequired,
+    firstItemIndex: PropTypes.string,
+    marginLeft: PropTypes.string,
+};
+
+IfOperator.defaultProps = {
+    marginLeft: 0,
 };
 
 export default IfOperator;

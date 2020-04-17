@@ -29,10 +29,26 @@ describe('Load Pages', () => {
         connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[2]});
         connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[3]});
         connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[4]});
+        connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[5]});
+        connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[6]});
+        connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[7]});
+        connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[8]});
+        connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[9]});
     });
 
-    it('should be the last method in the subtree', () => {
-        connectorItem.addMethod({name: 'idoit.version', color: ALL_COLORS[5]});
+    afterEach(() => {
+        connectorItem = CConnectorItem.createConnectorItem();
+    });
+
+    it('Pagination should increase its currentPageNumber', () => {
+        connectorItem.addMethod({name: 'cmdb', color: ALL_COLORS[10]});
+        expect(connectorItem.pagination.currentPageNumber).toEqual(2);
+    });
+
+    it('Pagination should decrease its currentPageNumber', () => {
+        connectorItem.addMethod({name: 'cmdb', color: ALL_COLORS[10]});
+        let currentItem = connectorItem.getCurrentItem();
+        connectorItem.removeMethod(currentItem);
         expect(connectorItem.pagination.currentPageNumber).toEqual(1);
     });
 });

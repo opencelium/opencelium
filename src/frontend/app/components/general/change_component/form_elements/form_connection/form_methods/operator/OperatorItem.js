@@ -184,8 +184,9 @@ class OperatorItem extends Component{
 
     renderOperatorType(){
         const {isVisibleMenuEdit} = this.state;
-        const {connection, connector, operator, readOnly} = this.props;
-          switch (operator.type){
+        const {connection, connector, operator, readOnly, firstItemIndex} = this.props;
+        let firstItemIndexSplitter = firstItemIndex.split('_');
+        switch (operator.type){
             case IF_OPERATOR:
                 return <IfOperator
                     tooltip={'if'}
@@ -197,6 +198,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
+                    marginLeft={`${(operator.getDepth() - (firstItemIndexSplitter.length - 1)) * 20}px`}
                 />;
             case LOOP_OPERATOR:
                 return <LoopOperator
@@ -209,6 +211,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
+                    marginLeft={`${(operator.getDepth() - (firstItemIndexSplitter.length - 1)) * 20}px`}
                 />;
         }
         return null;
@@ -241,13 +244,14 @@ class OperatorItem extends Component{
 
     renderTogglePanel(){
         const {deletingOperator} = this.state;
-        const {connector, operator} = this.props;
+        const {connector, operator, firstItemIndex} = this.props;
         let hasChildren = connector.hasItemChildren(operator);
         if(!hasChildren){
             return null;
         }
         let togglePanelStyles = {};
-        togglePanelStyles.marginLeft = `${operator.getDepth() * 20}px`;
+        let firstItemIndexSplitter = firstItemIndex.split('_');
+        togglePanelStyles.marginLeft = `${(operator.getDepth() - (firstItemIndexSplitter.length - 1)) * 20}px`;
         if(operator.isMinimized && !deletingOperator) {
             togglePanelStyles.height = '15px';
             togglePanelStyles.marginTop = '10px';
@@ -320,6 +324,11 @@ OperatorItem.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem),
     method: PropTypes.instanceOf(COperatorItem),
     updateEntity: PropTypes.func.isRequired,
+    firstItemIndex: PropTypes.string,
+};
+
+OperatorItem.defaultProps = {
+    firstItemIndex: '0',
 };
 
 export default OperatorItem;

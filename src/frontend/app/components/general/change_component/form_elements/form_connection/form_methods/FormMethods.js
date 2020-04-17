@@ -52,7 +52,6 @@ class FormMethods extends Component{
      */
     updateEntity(e = null){
         const {entity, updateEntity} = this.props;
-        console.log(entity.fromConnector.methods.map(m => m.index));
         if(e === null) {
             updateEntity(entity);
         } else{

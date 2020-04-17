@@ -30,6 +30,7 @@ import {sortByIndex, sortByIndexFunction} from "../../../../../../utils/app";
 import styles from '../../../../../../themes/default/general/change_component.scss';
 import {Container, Row} from "react-grid-system";
 import Pagination from "../../../../basic_components/pagination/Pagination";
+import {DEFAULT_COLOR} from "../../../../../../classes/components/content/connection/operator/CStatement";
 
 
 /**
@@ -72,6 +73,52 @@ class Items extends Component{
         updateEntity();
     }
 
+    setCurrentItem(item){
+        this.props.connector.setCurrentItem(item);
+        this.props.updateEntity();
+    }
+
+    renderHistory(){
+        const {connector} = this.props;
+        return (
+            <div className={styles.operators_history}>
+                {
+                    connector.operatorsHistory.map((operator, key) => {
+                        let tooltip = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.field : '';
+                        let color = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.color : '';
+                        let icon;
+                        if(tooltip !== '') {
+                            icon =
+                                <TooltipFontIcon
+                                    key={operator._uniqueIndex}
+                                    tooltip={tooltip}
+                                    value={operator.type === 'if' ? 'call_split' : 'loop'}
+                                    tooltipPosition={'top'}
+                                    onClick={() => ::this.setCurrentItem(operator)}
+                                />;
+                        } else{
+                            icon =
+                                <FontIcon
+                                    key={operator._uniqueIndex}
+                                    value={operator.type === 'if' ? 'call_split' : 'loop'}
+                                    onClick={::this.setCurrentItem}
+                                />;
+                        }
+                        let colorDiv = color !== '' && color !== DEFAULT_COLOR ? <div className={styles.history_color} style={{background: color}}/> : null;
+                        let arrow = key !== 0 ? <FontIcon value={'keyboard_arrow_right'} className={styles.history_arrow}/> : null;
+                        return (
+                            <div className={styles.history_element}>
+                                {arrow}
+                                {icon}
+                                {colorDiv}
+                            </div>
+                        );
+                    })
+                }
+            </div>
+        );
+    }
+
     renderNavigation(){
         const {connector} = this.props;
         if(connector.pagination.pageAmount > 1) {
@@ -103,10 +150,10 @@ class Items extends Component{
         }*/
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
-                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} index={i} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
             }
             if(allItems[i] instanceof  COperatorItem){
-                allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
             }
         }
         return allComponents;
@@ -129,6 +176,7 @@ class Items extends Component{
     render(){
         return (
             <div className={styles.items}>
+                {::this.renderHistory()}
                 {::this.renderNavigation()}
                 {::this.renderItems()}
                 {::this.renderPointer()}
