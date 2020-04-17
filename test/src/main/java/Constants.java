@@ -11,6 +11,6 @@ public interface Constants {
 
 
     //URL constants
-    public static String BASE_URL = "http://localhost:8888/";
-    public static String NODE_URL = "http://localhost:4444/wd/hub";
+    public static String APP_URL = "http://localhost:8888/";
+    public static String HUB_URL = "http://localhost:4444/wd/hub";
 }

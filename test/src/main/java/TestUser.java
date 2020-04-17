@@ -18,10 +18,19 @@ import java.util.logging.Level;
 public class TestUser {
     WebDriver driver;
 
-
+    String mLogin;
+    String mPassword;
+    String mHubUrl;
+    String mAppUrl;
 
     @BeforeTest
-    public void setUp() throws MalformedURLException{
+    public void setUp(String login, String password, String hubUrl, String appUrl) throws MalformedURLException{
+
+        mLogin = login;
+        mPassword = password;
+        mHubUrl = hubUrl;
+        mAppUrl = appUrl;
+
 
         LoggingPreferences logs = new LoggingPreferences();
         logs.enable(LogType.BROWSER,Level.ALL);
@@ -38,7 +47,7 @@ public class TestUser {
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
 
-        driver = new RemoteWebDriver(new URL(Constants.NODE_URL),desiredCapabilities);
+        driver = new RemoteWebDriver(new URL(mHubUrl),desiredCapabilities);
 
     }
 
@@ -49,7 +58,7 @@ public class TestUser {
 
    @Test(priority = 0)
     public void SimpleTest(){
-        driver.get(Constants.BASE_URL);
+        driver.get(mAppUrl);
         Assert.assertEquals("OpenCelium", driver.getTitle());
     }
 
@@ -57,16 +66,16 @@ public class TestUser {
     public void LoginTest() throws InterruptedException {
         //driver.get(baseUrl+"login");
 
-        driver.navigate().to(Constants.BASE_URL+"login");
+        driver.navigate().to(mAppUrl +"login");
 
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
         WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys(Constants.USERNAME);
+        element_login.sendKeys(mLogin);
         TimeUnit.SECONDS.sleep(2);
 
         WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys(Constants.PASSWORD);
+        element_password.sendKeys(mPassword);
        TimeUnit.SECONDS.sleep(2);
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
         buttonConnect.click();

@@ -24,6 +24,7 @@ import CMethodItem from "../../../../../../../classes/components/content/connect
 import MethodRequest from "./MethodRequest";
 import MethodTitle from "./MethodTitle";
 import Card from "../../../../../basic_components/card/Card";
+import {consoleLog} from "../../../../../../../utils/app";
 
 
 /**
@@ -41,14 +42,26 @@ class MethodItem extends Component{
             showConfirm: false,
             onDeleteButtonOver: false,
             showParams: false,
-            methodClassName: '',
+            methodClassName: styles.item_toggle_in,
             isHidden: false,
+            deletingMethod: false,
         };
     }
 
     componentDidUpdate(prevProps, prevState){
-        let {showParams, methodClassName, isHidden} = this.state;
+        let {showParams, isHidden, deletingMethod} = this.state;
+        let methodClassName = '';
         const curMethod = this.props.method;
+        const prevMethod = prevProps.method;
+        if(deletingMethod){
+            methodClassName = styles.item_toggle_out;
+            deletingMethod = false;
+            this.setState({
+                methodClassName,
+                deletingMethod,
+            });
+            return;
+        }
         if(curMethod.error.hasError && !this.state.showParams){
             showParams = true;
         }
@@ -60,15 +73,33 @@ class MethodItem extends Component{
             isHidden = false;
         }
         if(showParams !== prevState.showParams || methodClassName !== prevState.methodClassName) {
-            this.setState({
-                methodClassName,
-                showParams,
-            });
+            if(methodClassName === styles.item_toggle_in){
+                this.setState({
+                    methodClassName,
+                    showParams,
+                    isHidden,
+                });
+            } else {
+                this.setState({
+                    methodClassName,
+                    showParams,
+                });
+            }
         }
         if(isHidden !== prevState.isHidden){
             let that = this;
-            setTimeout(() => that.setState({isHidden}), 500);
+            if(methodClassName === styles.item_toggle_out){
+                setTimeout(() => that.setState({
+                    isHidden,
+                }), 300);
+            }
         }
+    }
+
+    toggleDeleteMethod(){
+        this.setState({
+            deletingMethod: !this.state.deletingMethod,
+        });
     }
 
     updateEntity(){
@@ -91,7 +122,7 @@ class MethodItem extends Component{
         if(isHidden){
             return null;
         }
-        const {connection, connector, method, readOnly} = this.props;
+        const {connection, connector, method, readOnly, index} = this.props;
         const {showParams} = this.state;
         let methodStyles = {position: 'relative', transition: 'all 0.3s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
         let methodTitleStyles = {backgroundColor: method.color};
@@ -111,7 +142,7 @@ class MethodItem extends Component{
             methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
         }
         return (
-            <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName}>
+            <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName} style={{zIndex: 99 - index, position: 'relative'}}>
                 <Card
                     theme={{card: styles.item}}
                     style={methodStyles}
@@ -124,6 +155,7 @@ class MethodItem extends Component{
                         toggleShowParams={::this.toggleShowParams}
                         showParams={showParams}
                         readOnly={readOnly}
+                        toggleDeleteMethod={::this.toggleDeleteMethod}
                     />
                     {
                         showParams

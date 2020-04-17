@@ -47,9 +47,13 @@ class PrevPage extends Component{
      * to open previous page
      */
     openPrevPage(){
-        const {link, router} = this.props;
-        if(link !== '' && link !== -1) {
-            router.push(link);
+        const {link, router, loadPage, current} = this.props;
+        if(!loadPage) {
+            if (link !== '' && link !== -1) {
+                router.push(link);
+            }
+        } else{
+            loadPage(current);
         }
     }
 
@@ -62,12 +66,11 @@ class PrevPage extends Component{
         return(
             <Pagination.Prev onClick={this.openPrevPage} disabled={isFirst}/>
         );
-        return (
-            <span className={className} onClick={this.openPrevPage}>
-                <FontIcon value={'arrow_left'}/>
-            </span>
-        );
     }
 }
+
+PrevPage.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(PrevPage);

@@ -776,7 +776,7 @@
   position: fixed;
   top: 270px;
   cursor: pointer;
-  background: #e1e1e1;
+  background: #f7f7f7;
   padding: 2px 6px;
   border-radius: 3px;
   transform: perspective(1px) translateZ(0);
@@ -846,4 +846,24 @@
     padding: 5px 10px;
     font-size: $FONT_SIZE_14;
   }
+}
+
+.items{
+  position: relative;
+}
+.items_arrows{
+  position: absolute;
+  left: -30px;
+  top: 50%;
+}
+.item_arrow_disable{
+  cursor: default;
+  color: #eee;
+}
+.items_arrow_up{
+  display: block;
+  cursor: pointer;
+}
+.items_arrow_down{
+  cursor: pointer;
 }

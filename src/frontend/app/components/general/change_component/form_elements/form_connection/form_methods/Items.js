@@ -26,7 +26,10 @@ import FontIcon from "../../../../basic_components/FontIcon";
 import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
 import CMethodItem from "../../../../../../classes/components/content/connection/method/CMethodItem";
 import COperatorItem from "../../../../../../classes/components/content/connection/operator/COperatorItem";
-import {sortByIndexFunction} from "../../../../../../utils/app";
+import {sortByIndex, sortByIndexFunction} from "../../../../../../utils/app";
+import styles from '../../../../../../themes/default/general/change_component.scss';
+import {Container, Row} from "react-grid-system";
+import Pagination from "../../../../basic_components/pagination/Pagination";
 
 
 /**
@@ -57,10 +60,38 @@ class Items extends Component{
         }
     }
 
+    loadPrevPage(){
+        const {connector, updateEntity} = this.props;
+        connector.loadPage(connector.pagination.currentPageNumber - 1);
+        updateEntity();
+    }
+
+    loadNextPage(){
+        const {connector, updateEntity} = this.props;
+        connector.loadPage(connector.pagination.currentPageNumber + 1);
+        updateEntity();
+    }
+
+    renderNavigation(){
+        const {connector} = this.props;
+        if(connector.pagination.pageAmount > 1) {
+            let isUpDisable = connector.pagination.currentPageNumber === 0;
+            let isDownDisable = connector.pagination.currentPageNumber === connector.pagination.pageAmount - 1;
+            return (
+                <div className={styles.items_arrows}>
+                    <TooltipFontIcon tooltip={'Up'} value={'keyboard_arrow_up'} onClick={isUpDisable ? null : ::this.loadPrevPage}
+                                     className={`${styles.items_arrow_up} ${isUpDisable ? styles.item_arrow_disable : ''}`}/>
+                    <TooltipFontIcon tooltip={'Down'} value={'keyboard_arrow_down'} onClick={isDownDisable ? null : ::this.loadNextPage}
+                                     className={`${styles.items_arrow_down} ${isDownDisable ? styles.item_arrow_disable : ''}`}/>
+                </div>
+            );
+        }
+    }
+
     renderItems() {
         const {connection, connector, updateEntity, readOnly} = this.props;
-        let allItems = [];
-        let allComponents = [];
+        let allItems = connector.pagination.currentItems;
+        let allComponents = [];/*
         for(let i = 0; i < connector.methods.length; i++){
             allItems.push(connector.methods[i]);
         }
@@ -68,14 +99,14 @@ class Items extends Component{
             allItems.push(connector.operators[i]);
         }
         if(allItems.length > 1){
-            allItems.sort(sortByIndexFunction);
-        }
+            allItems = sortByIndex(allItems);
+        }*/
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
-                allComponents.push(<MethodItem key={allItems[i].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} index={i} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
             }
             if(allItems[i] instanceof  COperatorItem){
-                allComponents.push(<OperatorItem key={allItems[i].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
             }
         }
         return allComponents;
@@ -97,8 +128,9 @@ class Items extends Component{
 
     render(){
         return (
-            <div>
-                {this.renderItems()}
+            <div className={styles.items}>
+                {::this.renderNavigation()}
+                {::this.renderItems()}
                 {::this.renderPointer()}
             </div>
         );

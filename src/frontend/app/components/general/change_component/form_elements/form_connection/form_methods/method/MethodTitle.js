@@ -93,27 +93,35 @@ class MethodTitle extends Component{
      * to delete method
      */
     removeMethod(){
-        const {connection, connector, method, updateEntity} = this.props;
-        let connectorType = connector.getConnectorType();
-        switch (connectorType){
-            case CONNECTOR_FROM:
-                if(method.index === '0'){
-                    if(connector.operators.length > 0){
-                        if(connector.operators[0].index === '1'){
-                            alert('From Connector cannot start from operator');
-                            this.toggleConfirm();
-                            return;
-                        }
+        const {toggleDeleteMethod} = this.props;
+        let that = this;
+        that.toggleConfirm();
+        setTimeout(
+            () => {
+                toggleDeleteMethod();
+                setTimeout(() => {
+                    const {connection, connector, method, updateEntity} = that.props;
+                    let connectorType = connector.getConnectorType();
+                    switch (connectorType) {
+                        case CONNECTOR_FROM:
+                            if (method.index === '0') {
+                                if (connector.operators.length > 0) {
+                                    if (connector.operators[0].index === '1') {
+                                        alert('From Connector cannot start from operator');
+                                        that.toggleConfirm();
+                                        return;
+                                    }
+                                }
+                            }
+                            connection.removeFromConnectorMethod(method);
+                            break;
+                        case CONNECTOR_TO:
+                            connection.removeToConnectorMethod(method);
+                            break;
                     }
-                }
-                connection.removeFromConnectorMethod(method);
-                break;
-            case CONNECTOR_TO:
-                connection.removeToConnectorMethod(method);
-                break;
-        }
-        updateEntity();
-        this.toggleConfirm();
+                    updateEntity();
+                }, 300);
+            }, 200);
     }
 
     /**
@@ -188,6 +196,7 @@ MethodTitle.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem),
     method: PropTypes.instanceOf(CMethodItem),
     updateEntity: PropTypes.func.isRequired,
+    toggleDeleteMethod: PropTypes.func.isRequired,
 };
 
 

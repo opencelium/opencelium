@@ -39,22 +39,29 @@
 
 .item_toggle_in{
   animation-name: $ANIMATION_FADE_IN_DOWN;
-  animation-duration: .5s;
+  animation-duration: .3s;
   animation-fill-mode: forwards;
 }
 
 .item_toggle_out{
   animation-name: $ANIMATION_FADE_OUT_UP;
-  animation-duration: .5s;
+  animation-duration: .3s;
+  animation-fill-mode: forwards;
+}
+
+.item_fade{
+  animation-name: $ANIMATION_FADE;
+  animation-duration: .3s;
   animation-fill-mode: forwards;
 }
 
 .item_delete_button{
-  cursor: pointer;
-  position: absolute;
-  float: right;
+  color: #000000;
+  font-size: $FONT_SIZE_MEDIUM;
   right: 0;
-  top: 17px;
+  position: absolute;
+  cursor: pointer;
+  top: -12px;
 }
 
 .item_title_arrow{
@@ -136,19 +143,21 @@
   }
 }
 .toggle_panel{
+  text-align: center;
   position: relative;
 }
 .toggle_icon{
   cursor: pointer;
   width: 20px;
   text-align: left;
-  float: left;
+  position: absolute;
+  left: 0;
+  padding-top: 2px;
 }
 .more_icon{
   cursor: pointer;
   width: 20px;
   text-align: left;
-  margin-left: -20px;
 }
 
 .method_item_menu{

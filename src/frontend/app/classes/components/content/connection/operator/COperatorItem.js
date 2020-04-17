@@ -26,6 +26,7 @@ export const LOOP_OPERATOR = 'loop';
 export default class COperatorItem{
 
     constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false){
+        this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
         this._condition = CCondition.createCondition(condition);
@@ -74,6 +75,10 @@ export default class COperatorItem{
             depth--;
         }
         return depth;
+    }
+
+    get uniqueIndex(){
+        return this._uniqueIndex;
     }
 
     get index(){

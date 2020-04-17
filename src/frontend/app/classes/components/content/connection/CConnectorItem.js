@@ -13,10 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, sortByIndexFunction, subArrayToString} from "../../../../utils/app";
+import {consoleLog, isId, sortByIndex, subArrayToString} from "../../../../utils/app";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
+import CConnectorPagination from "./CConnectorPagination";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -43,6 +44,7 @@ export default class CConnectorItem{
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._pagination = this.setConnectorPagination();
     }
 
     static createConnectorItem(connectorItem){
@@ -72,10 +74,7 @@ export default class CConnectorItem{
     }
 
     checkConnectorType(connectorType){
-        if(connectorType === CONNECTOR_FROM || connectorType === CONNECTOR_TO){
-            return true;
-        }
-        return false;
+        return connectorType === CONNECTOR_FROM || connectorType === CONNECTOR_TO;
     }
 
     resetItems(){
@@ -96,7 +95,7 @@ export default class CConnectorItem{
         for(let i = 0; i < methods.length; i++){
             result.push(this.convertMethod(methods[i]));
         }
-        result.sort(sortByIndexFunction);
+        result = sortByIndex(result);
         return result;
     }
 
@@ -112,8 +111,20 @@ export default class CConnectorItem{
         for(let i = 0; i < operators.length; i++){
             result.push(this.convertOperator(operators[i]));
         }
-        result.sort(sortByIndexFunction);
+        result = sortByIndex(result);
         return result;
+    }
+
+    setConnectorPagination(){
+        return CConnectorPagination.createConnectorPagination(this);
+    }
+
+    loadPage(number){
+        this._pagination.setCurrentPageNumber(number);
+    }
+
+    reloadPagination(settings){
+        this._pagination.reload(this, settings);
     }
 
     updateInvokerForMethods(){
@@ -135,8 +146,11 @@ export default class CConnectorItem{
         for(let i = 0; i < items.length; i++){
             if(items[i].index !== item.index && items[i].index.indexOf(item.index) === 0){
                 items[i].isToggled = value;
+                if(itemType === OPERATOR_ITEM){
+                    items[i].isMinimized = value;
+                }
             }
-            if(items[i].index === item.index){
+            if(itemType === OPERATOR_ITEM && items[i].index === item.index){
                 items[i].isMinimized = value;
             }
         }
@@ -145,6 +159,13 @@ export default class CConnectorItem{
     toggleByItem(item, value){
         this.toggleItems(METHOD_ITEM, item, value);
         this.toggleItems(OPERATOR_ITEM, item, value);
+        this.reloadPagination();
+    }
+
+    hasItemChildren(item){
+        let result = false;
+        result = this.methods.findIndex(m => m.index !== item.index && m.index.indexOf(item.index) === 0) !== -1;
+        return result || this.operators.findIndex(o => o.index !== item.index && o.index.indexOf(item.index) === 0) !== -1;
     }
 
     get id(){
@@ -194,6 +215,10 @@ export default class CConnectorItem{
         this._operators = this.convertOperators(operators);
     }
 
+    get pagination(){
+        return this._pagination;
+    }
+
     getCurrentItem(){
         if(this._currentItem === null){
             if(this._methods.length !== 0){
@@ -235,14 +260,14 @@ export default class CConnectorItem{
         let newIndexSplitted = newIndex.split('_');
         let result = {result: false, index: 0};
         if(newIndexSplitted.length === 1){
-            if(itemIndexSplitted[0] >= newIndexSplitted[0]){
+            if(parseInt(itemIndexSplitted[0]) >= parseInt(newIndexSplitted[0])){
                 result.result = true;
                 result.index = 0;
             }
         } else {
             for(let i = 0; i < newIndexSplitted.length; i++){
                 if(i < itemIndexSplitted.length) {
-                    if (newIndexSplitted[i] < itemIndexSplitted[i]
+                    if (parseInt(newIndexSplitted[i]) < parseInt(itemIndexSplitted[i])
                         && itemIndexSplitted.length >= newIndexSplitted.length
                     ) {
                         if(itemIndex.indexOf(subArrayToString(newIndexSplitted, '_', 0, newIndexSplitted.length - 1)) === 0){
@@ -251,7 +276,7 @@ export default class CConnectorItem{
                         }
                         break;
                     }
-                    if (newIndexSplitted[i] > itemIndexSplitted[i]) {
+                    if (parseInt(newIndexSplitted[i]) > parseInt(itemIndexSplitted[i])) {
                         break;
                     }
                     if (i === newIndexSplitted.length - 1) {
@@ -358,10 +383,10 @@ export default class CConnectorItem{
             let newItemIndexSplit = newItem.index.split('_');
             let maxIndex = keySplit.length > newItemIndexSplit.length ? keySplit : newItemIndexSplit;
             for (let i = 0; i < maxIndex.length; i++) {
-                if (newItemIndexSplit[i] < keySplit[i]) {
+                if (parseInt(newItemIndexSplit[i]) < parseInt(keySplit[i])) {
                     return false;
                 }
-                if (newItemIndexSplit[i] > keySplit[i]) {
+                if (parseInt(newItemIndexSplit[i]) > parseInt(keySplit[i])) {
                     return true;
                 }
             }
@@ -383,7 +408,7 @@ export default class CConnectorItem{
                 } else {
                     this._methods.splice(this.checkIfTheSpliceIndexCorrect(itemType, key, newItem) ? key + 1 : key, 0, newItem);
                 }
-                this._methods.sort(sortByIndexFunction);
+                this._methods = sortByIndex(this._methods);
                 break;
             case OPERATOR_ITEM:
                 if (this._operators.length === 0) {
@@ -391,10 +416,11 @@ export default class CConnectorItem{
                 } else {
                     this._operators.splice(this.checkIfTheSpliceIndexCorrect(itemType, key, newItem) ? key + 1 : key, 0, newItem);
                 }
-                this._operators.sort(sortByIndexFunction);
+                this._operators = sortByIndex(this._operators);
                 break;
         }
         this.setCurrentItem(newItem);
+        this.reloadPagination({newItem});
     }
 
     addMethod(method, mode = OUTSIDE_ITEM){
@@ -444,41 +470,15 @@ export default class CConnectorItem{
 
     isLastItemInTheTree(index){
         let splitIndex = index.split('_');
-        let lastMethod = this._methods.length !== 0 ? this._methods[this._methods.length - 1] : null;
-        let lastOperator = this._operators.length !== 0 ? this._operators[this._operators.length - 1] : null;
-        let isLastMethod = false;
-        let isLastOperator = false;
-        if(lastMethod !== null){
-            if(lastMethod.index === index){
-                isLastMethod = true;
-            }
+        let increasedLastIndex = parseInt(splitIndex[splitIndex.length - 1]) + 1;
+        splitIndex[splitIndex.length - 1] = increasedLastIndex;
+        let nextIndex = splitIndex.join('_');
+        let isExistNextIndexInMethods = this._methods.findIndex(m => m.index === nextIndex) !== -1;
+        if(!isExistNextIndexInMethods){
+            let isExistNextIndexInOperators = this._operators.findIndex(o => o.index === nextIndex) !== -1;
+            return !isExistNextIndexInOperators;
         }
-        if(lastOperator !== null){
-            if(lastOperator.index === index){
-                isLastOperator = true;
-            }
-        }
-        if(isLastMethod){
-            if(lastOperator !== null) {
-                let splitLastOperatorIndex = lastOperator.index.split('_');
-                for (let i = 0; i < splitLastOperatorIndex.length; i++) {
-                    if (splitLastOperatorIndex[i] > splitIndex[i]) {
-                        return false;
-                    }
-                }
-            }
-        }
-        if(isLastOperator){
-            if(lastMethod !== null) {
-                let splitLastMethodIndex = lastMethod.index.split('_');
-                for (let i = 0; i < splitLastMethodIndex.length; i++) {
-                    if (splitLastMethodIndex[i] > splitIndex[i]) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return !(!isLastMethod && !isLastOperator);
+        return !isExistNextIndexInMethods;
     }
 
 
@@ -491,11 +491,13 @@ export default class CConnectorItem{
                 this.refactorIndexes(index, REFACTOR_REMOVE, 'method', methodIndex);
             }
             this._methods.splice(key, 1);
-            this._methods.sort(sortByIndexFunction);
+
+            this._methods = sortByIndex(this._methods);
             if(withRefactorIndexes) {
                 this.setCurrentItem(this.getCloserItem(methodIndex));
             }
         }
+        this.reloadPagination();
     }
 
     addOperator(operator, mode = OUTSIDE_ITEM){
@@ -514,11 +516,12 @@ export default class CConnectorItem{
                 this.refactorIndexes(index, REFACTOR_REMOVE, 'operator', operatorIndex);
             }
             this._operators.splice(key, 1);
-            this._operators.sort(sortByIndexFunction);
+            this._operators = sortByIndex(this._operators);
             if(withRefactorIndexes) {
                 this.setCurrentItem(this.getCloserItem(operatorIndex));
             }
         }
+        this.reloadPagination();
     }
 
     generateNextIndex(mode){
@@ -570,10 +573,10 @@ export default class CConnectorItem{
             let method = null;
             if(isKeyConsidered) {
                 for (let j = 0; j < methodIndexSplitter.length; j++) {
-                    if ((methodIndexSplitter[j] <= itemIndexSplitter[j] && j === methodIndexSplitter.length - 1)) {
+                    if ((parseInt(methodIndexSplitter[j]) <= parseInt(itemIndexSplitter[j]) && j === methodIndexSplitter.length - 1)) {
                         method = this._methods[i];
                     }
-                    if (methodIndexSplitter[j] > itemIndexSplitter[j]) {
+                    if (parseInt(methodIndexSplitter[j]) > parseInt(itemIndexSplitter[j])) {
                         shouldStop = true;
                         break;
                     }
