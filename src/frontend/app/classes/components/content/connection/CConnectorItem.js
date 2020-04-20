@@ -143,7 +143,7 @@ export default class CConnectorItem{
                     operatorIndex += `_${indexSplitted[i]}`;
                 }
             }
-            console.log(this._operatorsHistory.map(o => o.index));
+            this.reloadPagination();
         }
     }
 

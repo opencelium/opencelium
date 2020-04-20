@@ -52,6 +52,7 @@ export default class CConnectorPagination{
 
     updateCurrentPageNumber(){
         let firstItemPointer = this._allItems.length > 0 ? this._allItems[0] : null;
+        const oldCurrentPageNumber = this._currentPageNumber;
         if(this._pageAmount > 1){
             let index = this._currentPageNumber * this._limit;
             if(index < this._allItems.length) {
@@ -63,6 +64,17 @@ export default class CConnectorPagination{
                 let index = this._allItems.findIndex(item => item === this.currentItems[0].index);
                 if(index !== -1){
                     this._currentPageNumber = parseInt(index / this._limit);
+                }
+            }
+        }
+        if(oldCurrentPageNumber === this._currentPageNumber){
+            const currentItem = this._connector.getCurrentItem();
+            if(currentItem) {
+                if (this._currentItems.findIndex(item => item.index === currentItem.index) === -1) {
+                    let index = this._allItems.findIndex(item => item.index === currentItem.index);
+                    if (index !== -1) {
+                        this._currentPageNumber = parseInt(index / this._limit);
+                    }
                 }
             }
         }

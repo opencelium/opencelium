@@ -850,6 +850,7 @@
 
 .items{
   position: relative;
+  margin-top: 50px;
 }
 .items_arrows{
   position: absolute;
@@ -870,19 +871,47 @@
 
 .operators_history{
   position: absolute;
-  top: -25px;
-  overflow-x: hidden;
+  top: -40px;
+  left: 2%;
+  padding: 3px;
+  margin: 2px 0;
   white-space: nowrap;
+  overflow-x: auto;
+  width: 96%;
   .history_element{
+    cursor: pointer;
     display: inline-block;
+    height: 26px;
+    transition: all 0.3s ease 0s;
+    padding: 3px;
+    span{
+      font-size: 20px !important;
+    }
+  }
+  .history_element:hover{
+    box-shadow: rgb(159, 159, 159) 0 0 3px 0;
   }
   .history_color{
     width: 20px;
     height: 20px;
-    float: left;
+    display: inline-block;
   }
   .history_arrow{
-    margin: 0 6px 0 10px;
-    float: left;
+    margin: 0 2px;
+    display: inline-block;
+    font-size: 14px;
   }
+}
+.operators_history::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.operators_history::-webkit-scrollbar-track {
+  background: #888;
+}
+.operators_history::-webkit-scrollbar-thumb {
+  background: #464646;
+}
+.operators_history::-webkit-scrollbar-thumb:hover {
+  background: #111;
 }

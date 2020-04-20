@@ -19,18 +19,22 @@ import MethodItem from "./method/MethodItem";
 import OperatorItem from "./operator/OperatorItem";
 import CConnectorItem, {
     CONNECTOR_FROM,
-    OPERATOR_ITEM
 } from "../../../../../../classes/components/content/connection/CConnectorItem";
 import CConnection from "../../../../../../classes/components/content/connection/CConnection";
 import FontIcon from "../../../../basic_components/FontIcon";
 import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
 import CMethodItem from "../../../../../../classes/components/content/connection/method/CMethodItem";
 import COperatorItem from "../../../../../../classes/components/content/connection/operator/COperatorItem";
-import {sortByIndex, sortByIndexFunction} from "../../../../../../utils/app";
 import styles from '../../../../../../themes/default/general/change_component.scss';
-import {Container, Row} from "react-grid-system";
-import Pagination from "../../../../basic_components/pagination/Pagination";
 import {DEFAULT_COLOR} from "../../../../../../classes/components/content/connection/operator/CStatement";
+
+import Tooltip from 'react-toolbox/lib/tooltip';
+
+const HistoryColor = (props) => {
+    const {color, children, ...restProps} = props;
+    return <div {...restProps} className={styles.history_color} style={{background: color}}>{children}</div>;
+};
+const TooltipColor = Tooltip(HistoryColor);
 
 
 /**
@@ -73,7 +77,7 @@ class Items extends Component{
         updateEntity();
     }
 
-    setCurrentItem(item){
+    setCurrentItem(e, item){
         this.props.connector.setCurrentItem(item);
         this.props.updateEntity();
     }
@@ -84,34 +88,26 @@ class Items extends Component{
             <div className={styles.operators_history}>
                 {
                     connector.operatorsHistory.map((operator, key) => {
-                        let tooltip = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.field : '';
+                        let fieldTooltip = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.field : '';
+                        let typeTooltip = operator.type ? operator.type : '';
                         let color = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.color : '';
-                        let icon;
-                        if(tooltip !== '') {
-                            icon =
+                        let icon =
                                 <TooltipFontIcon
-                                    key={operator._uniqueIndex}
-                                    tooltip={tooltip}
+                                    tooltip={typeTooltip}
                                     value={operator.type === 'if' ? 'call_split' : 'loop'}
                                     tooltipPosition={'top'}
-                                    onClick={() => ::this.setCurrentItem(operator)}
                                 />;
-                        } else{
-                            icon =
-                                <FontIcon
-                                    key={operator._uniqueIndex}
-                                    value={operator.type === 'if' ? 'call_split' : 'loop'}
-                                    onClick={::this.setCurrentItem}
-                                />;
-                        }
-                        let colorDiv = color !== '' && color !== DEFAULT_COLOR ? <div className={styles.history_color} style={{background: color}}/> : null;
+
+                        const colorDiv = color !== '' && color !== DEFAULT_COLOR ? <TooltipColor tooltip={fieldTooltip} color={color} tooltipPosition={'top'} /> : null;
                         let arrow = key !== 0 ? <FontIcon value={'keyboard_arrow_right'} className={styles.history_arrow}/> : null;
                         return (
-                            <div className={styles.history_element}>
+                            <React.Fragment>
                                 {arrow}
-                                {icon}
-                                {colorDiv}
-                            </div>
+                                <div className={styles.history_element} key={operator._uniqueIndex} onClick={(e) => ::this.setCurrentItem(e, operator)}>
+                                    {icon}
+                                    {colorDiv}
+                                </div>
+                            </React.Fragment>
                         );
                     })
                 }

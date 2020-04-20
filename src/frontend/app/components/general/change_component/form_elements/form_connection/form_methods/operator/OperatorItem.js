@@ -30,8 +30,6 @@ import COperatorItem, {
 import IfOperator from "./IfOperator";
 import LoopOperator from "./LoopOperator";
 import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import TooltipText from "../../../../../basic_components/tooltips/TooltipText";
-import {consoleLog} from "../../../../../../../utils/app";
 
 
 /**
