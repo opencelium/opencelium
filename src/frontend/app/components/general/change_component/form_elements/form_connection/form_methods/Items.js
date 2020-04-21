@@ -134,16 +134,7 @@ class Items extends Component{
     renderItems() {
         const {connection, connector, updateEntity, readOnly} = this.props;
         let allItems = connector.pagination.currentItems;
-        let allComponents = [];/*
-        for(let i = 0; i < connector.methods.length; i++){
-            allItems.push(connector.methods[i]);
-        }
-        for(let i = 0; i < connector.operators.length; i++){
-            allItems.push(connector.operators[i]);
-        }
-        if(allItems.length > 1){
-            allItems = sortByIndex(allItems);
-        }*/
+        let allComponents = [];
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
                 allComponents.push(<MethodItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);

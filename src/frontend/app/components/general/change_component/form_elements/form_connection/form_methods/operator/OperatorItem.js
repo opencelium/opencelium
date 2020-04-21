@@ -101,6 +101,7 @@ class OperatorItem extends Component{
      * to toggle isVisibleMenuEdit
      */
     toggleIsVisibleMenuEdit(){
+        this.setCurrentItem();
         this.setState({isVisibleMenuEdit: !this.state.isVisibleMenuEdit});
     }
 
@@ -182,8 +183,7 @@ class OperatorItem extends Component{
 
     renderOperatorType(){
         const {isVisibleMenuEdit} = this.state;
-        const {connection, connector, operator, readOnly, firstItemIndex} = this.props;
-        let firstItemIndexSplitter = firstItemIndex.split('_');
+        const {connection, connector, operator, readOnly} = this.props;
         switch (operator.type){
             case IF_OPERATOR:
                 return <IfOperator
@@ -196,7 +196,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
-                    marginLeft={`${(operator.getDepth() - (firstItemIndexSplitter.length - 1)) * 20}px`}
+                    marginLeft={`${operator.intend * 20}px`}
                 />;
             case LOOP_OPERATOR:
                 return <LoopOperator
@@ -209,7 +209,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
-                    marginLeft={`${(operator.getDepth() - (firstItemIndexSplitter.length - 1)) * 20}px`}
+                    marginLeft={`${operator.intend * 20}px`}
                 />;
         }
         return null;
@@ -242,14 +242,13 @@ class OperatorItem extends Component{
 
     renderTogglePanel(){
         const {deletingOperator} = this.state;
-        const {connector, operator, firstItemIndex} = this.props;
+        const {connector, operator} = this.props;
         let hasChildren = connector.hasItemChildren(operator);
         if(!hasChildren){
             return null;
         }
         let togglePanelStyles = {};
-        let firstItemIndexSplitter = firstItemIndex.split('_');
-        togglePanelStyles.marginLeft = `${(operator.getDepth() - (firstItemIndexSplitter.length - 1)) * 20}px`;
+        togglePanelStyles.marginLeft = `${operator.intend * 20}px`;
         if(operator.isMinimized && !deletingOperator) {
             togglePanelStyles.height = '15px';
             togglePanelStyles.marginTop = '10px';

@@ -134,8 +134,25 @@ export default class CConnectorPagination{
                 items.push(this._allItems[i]);
             }
         }
+        items = this.setIntendForItems(items);
         return items;
+    }
 
+    setIntendForItems(items){
+        let minIndexLength = -1;
+        for(let i = 0; i < items.length; i++){
+            let indexLength = items[i].index.split('_').length;
+            if(minIndexLength === -1 || minIndexLength > indexLength){
+                minIndexLength = indexLength;
+            }
+        }
+        if(minIndexLength !== -1){
+            for(let i = 0; i < items.length; i++){
+                let indexLength = items[i].index.split('_').length;
+                items[i].intend = indexLength - minIndexLength;
+            }
+        }
+        return items;
     }
 
     setCurrentPageNumber(number){

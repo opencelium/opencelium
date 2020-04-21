@@ -33,6 +33,7 @@ export default class COperatorItem{
         this._error = this.checkError(error);
         this._isMinimized = isMinimized;
         this._isToggled = isToggled;
+        this._intend = 0;
     }
 
     static createOperatorItem(operatorItem){
@@ -175,6 +176,14 @@ export default class COperatorItem{
 
     set isToggled(isToggled){
         this._isToggled = isToggled;
+    }
+
+    get intend(){
+        return this._intend;
+    }
+
+    set intend(intend){
+        this._intend = intend;
     }
 
     getObject(){

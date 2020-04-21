@@ -136,12 +136,7 @@ class MethodItem extends Component{
             methodStyles.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
             methodStyles.border = 'border: 1px solid #d14b4b';
         }
-        let indexSplitter = method.index.split('_');
-        let marginLeftTimes = indexSplitter.length;
-        let firstItemIndexSplitter = firstItemIndex.split('_');
-        if(marginLeftTimes > 1) {
-            methodStyles.marginLeft = (marginLeftTimes - firstItemIndexSplitter.length) * 20 + 'px';
-        }
+        methodStyles.marginLeft = method.intend * 20 + 'px';
         return (
             <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName} style={{zIndex: 99 - index, position: 'relative'}}>
                 <Card

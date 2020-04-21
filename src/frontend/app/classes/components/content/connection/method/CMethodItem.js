@@ -36,6 +36,7 @@ export default class CMethodItem{
         this._response = this.convertResponse(response);
         this._error = this.checkError(error);
         this._isToggled = isToggled;
+        this._intend = 0;
     }
 
     static createMethodItem(methodItem){
@@ -192,6 +193,14 @@ export default class CMethodItem{
 
     set isToggled(isToggled){
         this._isToggled = isToggled;
+    }
+
+    get intend(){
+        return this._intend;
+    }
+
+    set intend(intend){
+        this._intend = intend;
     }
 
     getObject(){
