@@ -120,7 +120,7 @@ public class TestGroup {
     @Test(priority = 2)
     public void UpdateGroupTest() throws InterruptedException {
 
-        WebElement buttonUpdate = driver.findElement(By.id("button_update_2"));
+        WebElement buttonUpdate = driver.findElement(By.id("button_update_1"));
         buttonUpdate.click();
 
         WebElement inputRole = driver.findElement(By.id("input_role"));
