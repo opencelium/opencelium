@@ -82,13 +82,13 @@ public class TestUser {
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
         buttonConnect.click();
 
-        Logs logs = driver.manage().logs();
+        /*Logs logs = driver.manage().logs();
         LogEntries logEntries = logs.get(LogType.BROWSER);
 
         System.out.println("LogEntry count: "+logEntries.getAll().size());
         for (LogEntry logEntry : logEntries) {
             System.out.println(logEntry.getMessage());
-        }
+        }*/
 
 
        TimeUnit.SECONDS.sleep(2);
