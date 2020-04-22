@@ -165,7 +165,7 @@ public class TestGroup {
 
         TimeUnit.SECONDS.sleep(2);
 
-        WebElement buttonDelete = driver.findElement(By.id("button_delete_2"));
+        WebElement buttonDelete = driver.findElement(By.id("button_delete_1"));
         buttonDelete.click();
 
         TimeUnit.SECONDS.sleep(2);
