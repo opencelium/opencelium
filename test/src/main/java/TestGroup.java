@@ -45,7 +45,7 @@ public class TestGroup {
 
 
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        desiredCapabilities.setBrowserName("chrome");
+        desiredCapabilities.setBrowserName("firefox");
 
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
