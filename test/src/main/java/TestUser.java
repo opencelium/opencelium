@@ -41,6 +41,7 @@ public class TestUser {
         logs.enable(LogType.PROFILER, Level.ALL);
 
 
+        System.setProperty("webdriver.chrome.driver", "/home/selenium/Downloads/chromedriver");
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("chrome");
 
@@ -48,6 +49,7 @@ public class TestUser {
 
 
         driver = new RemoteWebDriver(new URL(mHubUrl),desiredCapabilities);
+
 
     }
 
