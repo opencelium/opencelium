@@ -27,6 +27,7 @@ export const FIELD_TYPE_OBJECT = 'object';
 export default class CMethodItem{
 
     constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null, isToggled = false){
+        this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._invoker = this.convertInvoker(invoker);
         this._name = name;
@@ -35,6 +36,7 @@ export default class CMethodItem{
         this._response = this.convertResponse(response);
         this._error = this.checkError(error);
         this._isToggled = isToggled;
+        this._intend = 0;
     }
 
     static createMethodItem(methodItem){
@@ -106,6 +108,10 @@ export default class CMethodItem{
 
     getValueForSelectInput(connector){
         return {label: this._name, value: `${connector.getPrefixForMethodOption()}${this._index}`, color: this._color};
+    }
+
+    get uniqueIndex(){
+        return this._uniqueIndex;
     }
 
     get index(){
@@ -187,6 +193,14 @@ export default class CMethodItem{
 
     set isToggled(isToggled){
         this._isToggled = isToggled;
+    }
+
+    get intend(){
+        return this._intend;
+    }
+
+    set intend(intend){
+        this._intend = intend;
     }
 
     getObject(){

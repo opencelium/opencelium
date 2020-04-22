@@ -54,7 +54,11 @@ public class OperatorNodeServiceImp implements OperatorNodeService {
     }
 
     @Override
-    public List<OperatorNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, Integer connectorId) {
-        return operatorNodeRepository.findOperatorByConnectionIdAndConnectorId(connectionId, connectorId);
+    public List<OperatorNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer connectorId) {
+        if (direction.equals("to_connector")){
+            return operatorNodeRepository.findToOperatorByConnectionIdAndConnectorId(connectionId, connectorId);
+        } else {
+            return operatorNodeRepository.findFromOperatorByConnectionIdAndConnectorId(connectionId, connectorId);
+        }
     }
 }

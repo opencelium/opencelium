@@ -158,7 +158,7 @@ public class ConnectorServiceImp implements ConnectorService{
     }
 
     @Override
-    public ConnectorNodeResource toNodeResource(Connector entity, Long connectionId) {
+    public ConnectorNodeResource toNodeResource(Connector entity, Long connectionId, String direction) {
         ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
 
         connectorNodeResource.setConnectorId(entity.getId());
@@ -166,14 +166,14 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorNodeResource.setInvoker(invokerResource);
         connectorNodeResource.setTitle(entity.getTitle());
         List<MethodResource> methodResources = methodNodeService
-                .findMethodsByConnectionIdAndConnectorId(connectionId, entity.getId()).stream()
+                .findMethodsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
                 .map(m -> {
                     MethodNode methodNode = methodNodeService.findById(m.getId()).get();
                     return MethodNodeServiceImp.toResource(methodNode);
                 }).collect(Collectors.toList());
 
         List<OperatorResource> operatorResources = operatorNodeService
-                .findOperatorsByConnectionIdAndConnectorId(connectionId, entity.getId()).stream()
+                .findOperatorsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
                 .map(OperatorNodeServiceImp::toResource).collect(Collectors.toList());
         connectorNodeResource.setMethods(methodResources);
         connectorNodeResource.setOperators(operatorResources);

@@ -15,7 +15,7 @@
 
 import React, {Component} from 'react';
 import { withRouter } from 'react-router';
-import {Pagination as BootPagionation} from 'react-bootstrap';
+import {Pagination as BootPagination} from 'react-bootstrap';
 
 import { Row } from "react-grid-system";
 import styles from '../../../../themes/default/general/pagination.scss';
@@ -59,21 +59,27 @@ class Pagination extends Component{
     }
 
     renderNext(){
-        const {current, total, link} = this.page;
+        const{loadPage} = this.props;
+        const {total, link} = this.page;
+        let {current} = this.page;
         let next = -1;
         if(current + 1 <= total) {
-            next = link + parseInt(current + 1);
+            current++;
+            next = link + parseInt(current);
         }
-        return <NextPage link={next} isLast={current === total}/>;
+        return <NextPage link={next} current={current} isLast={current === total} loadPage={loadPage}/>;
     }
 
     renderPrev(){
-        const {current, link} = this.page;
+        const{loadPage} = this.props;
+        const {link} = this.page;
+        let {current} = this.page;
         let prev = -1;
         if(current - 1 >= 1){
-            prev = link + parseInt(current - 1);
+            current--;
+            prev = link + parseInt(current);
         }
-        return <PrevPage link={prev} current={current} isFirst={current === 1}/>;
+        return <PrevPage link={prev} current={current} isFirst={current === 1} loadPage={loadPage}/>;
     }
 
     render(){
@@ -87,6 +93,7 @@ class Pagination extends Component{
                 }
             }
         }
+        const {loadPage} = this.props;
         const {current, total, link} = this.page;
         if(total === 1){
             return null;
@@ -94,17 +101,21 @@ class Pagination extends Component{
         return (
             <Row className={styles.row}>
                 <div className={styles.container}>
-                    <BootPagionation className='justify-content-center'>
+                    <BootPagination className='justify-content-center'>
                         {this.renderPrev()}
                             {/*<span className={styles.pagination}>*/}
-                                <Pages current={current} total={total} link={link}/>
+                                <Pages current={current} total={total} link={link} loadPage={loadPage}/>
                             {/*</span>*/}
                         {this.renderNext()}
-                    </BootPagionation>
+                    </BootPagination>
                 </div>
             </Row>
         );
     }
 }
+
+Pagination.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(Pagination);

@@ -46,7 +46,6 @@ class MethodItem extends Component{
             isHidden: false,
             deletingMethod: false,
         };
-        consoleLog(`Method.Constructor (${props.method.index})`);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -54,7 +53,6 @@ class MethodItem extends Component{
         let methodClassName = '';
         const curMethod = this.props.method;
         const prevMethod = prevProps.method;
-/*
         if(deletingMethod){
             methodClassName = styles.item_toggle_out;
             deletingMethod = false;
@@ -63,7 +61,7 @@ class MethodItem extends Component{
                 deletingMethod,
             });
             return;
-        }*/
+        }
         if(curMethod.error.hasError && !this.state.showParams){
             showParams = true;
         }
@@ -124,7 +122,7 @@ class MethodItem extends Component{
         if(isHidden){
             return null;
         }
-        const {connection, connector, method, readOnly, index} = this.props;
+        const {connection, connector, method, readOnly, index, firstItemIndex} = this.props;
         const {showParams} = this.state;
         let methodStyles = {position: 'relative', transition: 'all 0.3s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
         let methodTitleStyles = {backgroundColor: method.color};
@@ -138,11 +136,7 @@ class MethodItem extends Component{
             methodStyles.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
             methodStyles.border = 'border: 1px solid #d14b4b';
         }
-        let indexSplitter = method.index.split('_');
-        let marginLeftTimes = indexSplitter.length;
-        if(marginLeftTimes > 1) {
-            methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
-        }
+        methodStyles.marginLeft = method.intend * 20 + 'px';
         return (
             <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName} style={{zIndex: 99 - index, position: 'relative'}}>
                 <Card
@@ -184,6 +178,11 @@ MethodItem.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem),
     method: PropTypes.instanceOf(CMethodItem),
     updateEntity: PropTypes.func.isRequired,
+    firstItemIndex: PropTypes.string,
+};
+
+MethodItem.defaultProps = {
+    firstItemIndex: '0',
 };
 
 

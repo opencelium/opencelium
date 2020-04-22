@@ -30,8 +30,12 @@ class Pages extends Component{
     }
 
     openPage(pageNumber){
-        const {router, link} = this.props;
-        router.push(`${link}${pageNumber}`);
+        const {router, link, loadPage, current} = this.props;
+        if(!loadPage) {
+            router.push(`${link}${pageNumber}`);
+        } else{
+            loadPage(current);
+        }
     }
 
     renderPages(){
@@ -62,5 +66,9 @@ class Pages extends Component{
         );
     }
 }
+
+Pages.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(Pages);

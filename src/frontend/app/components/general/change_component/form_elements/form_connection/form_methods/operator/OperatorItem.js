@@ -30,8 +30,6 @@ import COperatorItem, {
 import IfOperator from "./IfOperator";
 import LoopOperator from "./LoopOperator";
 import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import TooltipText from "../../../../../basic_components/tooltips/TooltipText";
-import {consoleLog} from "../../../../../../../utils/app";
 
 
 /**
@@ -48,16 +46,22 @@ class OperatorItem extends Component{
             isToggled: false,
             operatorClassName: styles.item_toggle_in,
             isHidden: false,
+            deletingOperator: false,
         };
         this.isDisabledMouse = false;
-        this.removingMethod = false;
-        consoleLog(`Operator.Constructor (${props.operator.index})`);
     }
 
     componentDidUpdate(prevProps, prevState){
-        let {isHidden} = this.state;
+        let {isHidden, deletingOperator} = this.state;
         let operatorClassName = '';
         const curOperator = this.props.operator;
+        if(deletingOperator && this.state.operatorClassName !== styles.item_toggle_out){
+            operatorClassName = styles.item_toggle_out;
+            this.setState({
+                operatorClassName,
+            });
+            return;
+        }
         if(curOperator.isToggled){
             operatorClassName = styles.item_toggle_out;
             isHidden = true;
@@ -83,10 +87,21 @@ class OperatorItem extends Component{
         }
     }
 
+    toggleDeleteOperator(){
+        const {isToggled} = this.state;
+        const {connector, operator, updateEntity} = this.props;
+        connector.toggleByItem(operator, !isToggled);
+        updateEntity();
+        this.setState({
+            deletingOperator: !this.state.deletingOperator,
+        });
+    }
+
     /**
      * to toggle isVisibleMenuEdit
      */
     toggleIsVisibleMenuEdit(){
+        this.setCurrentItem();
         this.setState({isVisibleMenuEdit: !this.state.isVisibleMenuEdit});
     }
 
@@ -169,7 +184,7 @@ class OperatorItem extends Component{
     renderOperatorType(){
         const {isVisibleMenuEdit} = this.state;
         const {connection, connector, operator, readOnly} = this.props;
-          switch (operator.type){
+        switch (operator.type){
             case IF_OPERATOR:
                 return <IfOperator
                     tooltip={'if'}
@@ -181,6 +196,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
+                    marginLeft={`${operator.intend * 20}px`}
                 />;
             case LOOP_OPERATOR:
                 return <LoopOperator
@@ -193,6 +209,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
+                    marginLeft={`${operator.intend * 20}px`}
                 />;
         }
         return null;
@@ -205,6 +222,7 @@ class OperatorItem extends Component{
         }
         return(
             <DeleteIcon
+                toggleDeleteOperator={::this.toggleDeleteOperator}
                 removeOperator={::this.removeOperator}
                 disableMouseForOperator={::this.toggleDisableMouse}
             />
@@ -223,14 +241,15 @@ class OperatorItem extends Component{
     }
 
     renderTogglePanel(){
+        const {deletingOperator} = this.state;
         const {connector, operator} = this.props;
         let hasChildren = connector.hasItemChildren(operator);
         if(!hasChildren){
             return null;
         }
         let togglePanelStyles = {};
-        togglePanelStyles.marginLeft = `${operator.getDepth() * 20}px`;
-        if(operator.isMinimized) {
+        togglePanelStyles.marginLeft = `${operator.intend * 20}px`;
+        if(operator.isMinimized && !deletingOperator) {
             togglePanelStyles.height = '15px';
             togglePanelStyles.marginTop = '10px';
             togglePanelStyles.marginBottom = '10px';
@@ -262,8 +281,9 @@ class OperatorItem extends Component{
     }
 
     renderMoreIcon(){
+        const {deletingOperator} = this.state;
         const {operator} = this.props;
-        if(!operator.isMinimized){
+        if(!operator.isMinimized || deletingOperator){
             return null;
         }
         return(
@@ -284,7 +304,7 @@ class OperatorItem extends Component{
             <div
                 id={`${operator.index}__${connector.getConnectorType()}`}
                 className={`${styles.operator} ${operatorClassName}`}
-                style={{zIndex: 99 - index}}
+                style={{zIndex: 99 - index, textAlign: 'left'}}
                 onMouseEnter={::this.showDeleteButton}
                 onMouseLeave={::this.hideDeleteButton}
             >
@@ -301,6 +321,11 @@ OperatorItem.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem),
     method: PropTypes.instanceOf(COperatorItem),
     updateEntity: PropTypes.func.isRequired,
+    firstItemIndex: PropTypes.string,
+};
+
+OperatorItem.defaultProps = {
+    firstItemIndex: '0',
 };
 
 export default OperatorItem;

@@ -131,7 +131,7 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
-    private List<Template> getAll(){
+    private List<Template> getAll() throws WrongEncode{
         try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
             ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)

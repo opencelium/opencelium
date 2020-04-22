@@ -24,7 +24,7 @@ import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
 
 const DEFAULT_COLOR = '#ffffff';
 
-const ALL_COLORS = [
+export const ALL_COLORS = [
     '#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7',
     '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2',
     '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6',

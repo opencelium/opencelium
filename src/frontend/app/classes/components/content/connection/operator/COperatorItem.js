@@ -26,12 +26,14 @@ export const LOOP_OPERATOR = 'loop';
 export default class COperatorItem{
 
     constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false){
+        this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
         this._condition = CCondition.createCondition(condition);
         this._error = this.checkError(error);
         this._isMinimized = isMinimized;
         this._isToggled = isToggled;
+        this._intend = 0;
     }
 
     static createOperatorItem(operatorItem){
@@ -74,6 +76,10 @@ export default class COperatorItem{
             depth--;
         }
         return depth;
+    }
+
+    get uniqueIndex(){
+        return this._uniqueIndex;
     }
 
     get index(){
@@ -170,6 +176,14 @@ export default class COperatorItem{
 
     set isToggled(isToggled){
         this._isToggled = isToggled;
+    }
+
+    get intend(){
+        return this._intend;
+    }
+
+    set intend(intend){
+        this._intend = intend;
     }
 
     getObject(){

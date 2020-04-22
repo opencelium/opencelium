@@ -19,14 +19,22 @@ import MethodItem from "./method/MethodItem";
 import OperatorItem from "./operator/OperatorItem";
 import CConnectorItem, {
     CONNECTOR_FROM,
-    OPERATOR_ITEM
 } from "../../../../../../classes/components/content/connection/CConnectorItem";
 import CConnection from "../../../../../../classes/components/content/connection/CConnection";
 import FontIcon from "../../../../basic_components/FontIcon";
 import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
 import CMethodItem from "../../../../../../classes/components/content/connection/method/CMethodItem";
 import COperatorItem from "../../../../../../classes/components/content/connection/operator/COperatorItem";
-import {sortByIndex, sortByIndexFunction} from "../../../../../../utils/app";
+import styles from '../../../../../../themes/default/general/change_component.scss';
+import {DEFAULT_COLOR} from "../../../../../../classes/components/content/connection/operator/CStatement";
+
+import Tooltip from 'react-toolbox/lib/tooltip';
+
+const HistoryColor = (props) => {
+    const {color, children, ...restProps} = props;
+    return <div {...restProps} className={styles.history_color} style={{background: color}}>{children}</div>;
+};
+const TooltipColor = Tooltip(HistoryColor);
 
 
 /**
@@ -57,25 +65,82 @@ class Items extends Component{
         }
     }
 
+    loadPrevPage(){
+        const {connector, updateEntity} = this.props;
+        connector.loadPage(connector.pagination.currentPageNumber - 1);
+        updateEntity();
+    }
+
+    loadNextPage(){
+        const {connector, updateEntity} = this.props;
+        connector.loadPage(connector.pagination.currentPageNumber + 1);
+        updateEntity();
+    }
+
+    setCurrentItem(e, item){
+        this.props.connector.setCurrentItem(item);
+        this.props.updateEntity();
+    }
+
+    renderHistory(){
+        const {connector} = this.props;
+        return (
+            <div className={styles.operators_history}>
+                {
+                    connector.operatorsHistory.map((operator, key) => {
+                        let fieldTooltip = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.field : '';
+                        let typeTooltip = operator.type ? operator.type : '';
+                        let color = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.color : '';
+                        let icon =
+                                <TooltipFontIcon
+                                    tooltip={typeTooltip}
+                                    value={operator.type === 'if' ? 'call_split' : 'loop'}
+                                    tooltipPosition={'top'}
+                                />;
+
+                        const colorDiv = color !== '' && color !== DEFAULT_COLOR ? <TooltipColor tooltip={fieldTooltip} color={color} tooltipPosition={'top'} /> : null;
+                        let arrow = key !== 0 ? <FontIcon value={'keyboard_arrow_right'} className={styles.history_arrow}/> : null;
+                        return (
+                            <React.Fragment>
+                                {arrow}
+                                <div className={styles.history_element} key={operator._uniqueIndex} onClick={(e) => ::this.setCurrentItem(e, operator)}>
+                                    {icon}
+                                    {colorDiv}
+                                </div>
+                            </React.Fragment>
+                        );
+                    })
+                }
+            </div>
+        );
+    }
+
+    renderNavigation(){
+        const {connector} = this.props;
+        if(connector.pagination.pageAmount > 1) {
+            let isUpDisable = connector.pagination.currentPageNumber === 0;
+            let isDownDisable = connector.pagination.currentPageNumber === connector.pagination.pageAmount - 1;
+            return (
+                <div className={styles.items_arrows}>
+                    <TooltipFontIcon tooltip={'Up'} value={'keyboard_arrow_up'} onClick={isUpDisable ? null : ::this.loadPrevPage}
+                                     className={`${styles.items_arrow_up} ${isUpDisable ? styles.item_arrow_disable : ''}`}/>
+                    <TooltipFontIcon tooltip={'Down'} value={'keyboard_arrow_down'} onClick={isDownDisable ? null : ::this.loadNextPage}
+                                     className={`${styles.items_arrow_down} ${isDownDisable ? styles.item_arrow_disable : ''}`}/>
+                </div>
+            );
+        }
+    }
+
     renderItems() {
         const {connection, connector, updateEntity, readOnly} = this.props;
-        let allItems = [];
+        let allItems = connector.pagination.currentItems;
         let allComponents = [];
-        for(let i = 0; i < connector.methods.length; i++){
-            allItems.push(connector.methods[i]);
-        }
-        for(let i = 0; i < connector.operators.length; i++){
-            allItems.push(connector.operators[i]);
-        }
-        if(allItems.length > 1){
-            allItems = sortByIndex(allItems);
-        }
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
-                allComponents.push(<MethodItem key={allItems[i].index} index={i} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
             }
             if(allItems[i] instanceof  COperatorItem){
-                allComponents.push(<OperatorItem key={allItems[i].index} index={i} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
             }
         }
         return allComponents;
@@ -97,8 +162,10 @@ class Items extends Component{
 
     render(){
         return (
-            <div>
-                {this.renderItems()}
+            <div className={styles.items}>
+                {::this.renderHistory()}
+                {::this.renderNavigation()}
+                {::this.renderItems()}
                 {::this.renderPointer()}
             </div>
         );

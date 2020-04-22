@@ -13,10 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, sortByIndex, sortByIndexFunction, subArrayToString} from "../../../../utils/app";
+import {consoleLog, isId, sortByIndex, subArrayToString} from "../../../../utils/app";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
+import CConnectorPagination from "./CConnectorPagination";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -43,6 +44,8 @@ export default class CConnectorItem{
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._pagination = this.setConnectorPagination();
+        this._operatorsHistory = [];
     }
 
     static createConnectorItem(connectorItem){
@@ -79,6 +82,7 @@ export default class CConnectorItem{
         this._methods = [];
         this._operators = [];
         this._currentItem = null;
+        this.reloadPagination();
     }
 
     convertMethod(method){
@@ -113,6 +117,36 @@ export default class CConnectorItem{
         return result;
     }
 
+    setConnectorPagination(){
+        return CConnectorPagination.createConnectorPagination(this);
+    }
+
+    loadPage(number){
+        this._pagination.setCurrentPageNumber(number);
+    }
+
+    reloadPagination(settings){
+        this._pagination.reload(this, settings);
+    }
+
+    reloadOperatorsHistory(){
+        this._operatorsHistory = [];
+        if(this._currentItem !== null) {
+            let indexSplitted = this._currentItem.index.split('_');
+            if(indexSplitted.length > 1) {
+                let operatorIndex = indexSplitted[0];
+                for (let i = 1; i < indexSplitted.length; i++) {
+                    let operator = this._operators.find(o => o.index === operatorIndex);
+                    if(operator) {
+                        this._operatorsHistory.push(operator);
+                    }
+                    operatorIndex += `_${indexSplitted[i]}`;
+                }
+            }
+            this.reloadPagination();
+        }
+    }
+
     updateInvokerForMethods(){
         for(let i = 0; i < this._methods.length; i++){
             this._methods[i].invoker = this._invoker;
@@ -145,6 +179,7 @@ export default class CConnectorItem{
     toggleByItem(item, value){
         this.toggleItems(METHOD_ITEM, item, value);
         this.toggleItems(OPERATOR_ITEM, item, value);
+        this.reloadPagination();
     }
 
     hasItemChildren(item){
@@ -200,6 +235,14 @@ export default class CConnectorItem{
         this._operators = this.convertOperators(operators);
     }
 
+    get pagination(){
+        return this._pagination;
+    }
+
+    get operatorsHistory(){
+        return this._operatorsHistory;
+    }
+
     getCurrentItem(){
         if(this._currentItem === null){
             if(this._methods.length !== 0){
@@ -211,6 +254,7 @@ export default class CConnectorItem{
 
     setCurrentItem(item){
         this._currentItem = item;
+        this.reloadOperatorsHistory();
     }
 
     refactorIndex(item, refactorMode, index){
@@ -401,6 +445,7 @@ export default class CConnectorItem{
                 break;
         }
         this.setCurrentItem(newItem);
+        this.reloadPagination({newItem});
     }
 
     addMethod(method, mode = OUTSIDE_ITEM){
@@ -450,41 +495,15 @@ export default class CConnectorItem{
 
     isLastItemInTheTree(index){
         let splitIndex = index.split('_');
-        let lastMethod = this._methods.length !== 0 ? this._methods[this._methods.length - 1] : null;
-        let lastOperator = this._operators.length !== 0 ? this._operators[this._operators.length - 1] : null;
-        let isLastMethod = false;
-        let isLastOperator = false;
-        if(lastMethod !== null){
-            if(lastMethod.index === index){
-                isLastMethod = true;
-            }
+        let increasedLastIndex = parseInt(splitIndex[splitIndex.length - 1]) + 1;
+        splitIndex[splitIndex.length - 1] = increasedLastIndex;
+        let nextIndex = splitIndex.join('_');
+        let isExistNextIndexInMethods = this._methods.findIndex(m => m.index === nextIndex) !== -1;
+        if(!isExistNextIndexInMethods){
+            let isExistNextIndexInOperators = this._operators.findIndex(o => o.index === nextIndex) !== -1;
+            return !isExistNextIndexInOperators;
         }
-        if(lastOperator !== null){
-            if(lastOperator.index === index){
-                isLastOperator = true;
-            }
-        }
-        if(isLastMethod){
-            if(lastOperator !== null) {
-                let splitLastOperatorIndex = lastOperator.index.split('_');
-                for (let i = 0; i < splitLastOperatorIndex.length; i++) {
-                    if (parseInt(splitLastOperatorIndex[i]) > parseInt(splitIndex[i])) {
-                        return false;
-                    }
-                }
-            }
-        }
-        if(isLastOperator){
-            if(lastMethod !== null) {
-                let splitLastMethodIndex = lastMethod.index.split('_');
-                for (let i = 0; i < splitLastMethodIndex.length; i++) {
-                    if (parseInt(splitLastMethodIndex[i]) > parseInt(splitIndex[i])) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return !(!isLastMethod && !isLastOperator);
+        return !isExistNextIndexInMethods;
     }
 
 
@@ -503,6 +522,7 @@ export default class CConnectorItem{
                 this.setCurrentItem(this.getCloserItem(methodIndex));
             }
         }
+        this.reloadPagination();
     }
 
     addOperator(operator, mode = OUTSIDE_ITEM){
@@ -526,6 +546,7 @@ export default class CConnectorItem{
                 this.setCurrentItem(this.getCloserItem(operatorIndex));
             }
         }
+        this.reloadPagination();
     }
 
     generateNextIndex(mode){

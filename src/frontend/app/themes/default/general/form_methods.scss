@@ -56,11 +56,12 @@
 }
 
 .item_delete_button{
-  cursor: pointer;
-  position: absolute;
-  float: right;
+  color: #000000;
+  font-size: $FONT_SIZE_MEDIUM;
   right: 0;
-  top: 17px;
+  position: absolute;
+  cursor: pointer;
+  top: -12px;
 }
 
 .item_title_arrow{
@@ -142,6 +143,7 @@
   }
 }
 .toggle_panel{
+  text-align: center;
   position: relative;
 }
 .toggle_icon{
