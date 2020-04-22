@@ -41,13 +41,15 @@ public class TestUser {
         logs.enable(LogType.PROFILER, Level.ALL);
 
 
+        //System.setProperty("webdriver.chrome.driver", "/home/selenium/Downloads/chromedriver");
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        desiredCapabilities.setBrowserName("chrome");
+        desiredCapabilities.setBrowserName("firefox");
 
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
 
         driver = new RemoteWebDriver(new URL(mHubUrl),desiredCapabilities);
+
 
     }
 
@@ -80,13 +82,13 @@ public class TestUser {
         WebElement buttonConnect=driver.findElement(By.xpath("//button"));
         buttonConnect.click();
 
-        Logs logs = driver.manage().logs();
+        /*Logs logs = driver.manage().logs();
         LogEntries logEntries = logs.get(LogType.BROWSER);
 
         System.out.println("LogEntry count: "+logEntries.getAll().size());
         for (LogEntry logEntry : logEntries) {
             System.out.println(logEntry.getMessage());
-        }
+        }*/
 
 
        TimeUnit.SECONDS.sleep(2);

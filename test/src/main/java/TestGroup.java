@@ -45,7 +45,7 @@ public class TestGroup {
 
 
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        desiredCapabilities.setBrowserName("chrome");
+        desiredCapabilities.setBrowserName("firefox");
 
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
@@ -120,7 +120,7 @@ public class TestGroup {
     @Test(priority = 2)
     public void UpdateGroupTest() throws InterruptedException {
 
-        WebElement buttonUpdate = driver.findElement(By.id("button_update_2"));
+        WebElement buttonUpdate = driver.findElement(By.id("button_update_1"));
         buttonUpdate.click();
 
         WebElement inputRole = driver.findElement(By.id("input_role"));
@@ -165,7 +165,7 @@ public class TestGroup {
 
         TimeUnit.SECONDS.sleep(2);
 
-        WebElement buttonDelete = driver.findElement(By.id("button_delete_2"));
+        WebElement buttonDelete = driver.findElement(By.id("button_delete_1"));
         buttonDelete.click();
 
         TimeUnit.SECONDS.sleep(2);
