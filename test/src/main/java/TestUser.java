@@ -41,9 +41,9 @@ public class TestUser {
         logs.enable(LogType.PROFILER, Level.ALL);
 
 
-        System.setProperty("webdriver.chrome.driver", "/home/selenium/Downloads/chromedriver");
+        //System.setProperty("webdriver.chrome.driver", "/home/selenium/Downloads/chromedriver");
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        desiredCapabilities.setBrowserName("chrome");
+        desiredCapabilities.setBrowserName("firefox");
 
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
