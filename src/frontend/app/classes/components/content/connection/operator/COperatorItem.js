@@ -34,6 +34,7 @@ export default class COperatorItem{
         this._isMinimized = isMinimized;
         this._isToggled = isToggled;
         this._intend = 0;
+        this._isDisabled = false;
     }
 
     static createOperatorItem(operatorItem){
@@ -184,6 +185,14 @@ export default class COperatorItem{
 
     set intend(intend){
         this._intend = intend;
+    }
+
+    get isDisabled(){
+        return this._isDisabled;
+    }
+
+    set isDisabled(isDisabled){
+        this._isDisabled = isDisabled;
     }
 
     getObject(){

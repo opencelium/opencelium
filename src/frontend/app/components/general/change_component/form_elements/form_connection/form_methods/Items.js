@@ -29,6 +29,7 @@ import styles from '../../../../../../themes/default/general/change_component.sc
 import {DEFAULT_COLOR} from "../../../../../../classes/components/content/connection/operator/CStatement";
 
 import Tooltip from 'react-toolbox/lib/tooltip';
+import InputHierarchy from "../../../../basic_components/inputs/input_hierarchy/InputHierarchy";
 
 const HistoryColor = (props) => {
     const {color, children, ...restProps} = props;
@@ -46,7 +47,8 @@ class Items extends Component{
         super(props);
 
         this.state = {
-            pointerTop: 30
+            pointerTop: 30,
+            isHierarchyOpened: false,
         };
     }
 
@@ -82,6 +84,14 @@ class Items extends Component{
         this.props.updateEntity();
     }
 
+    openHierarchy(){
+        this.setState({isHierarchyOpened: true});
+    }
+
+    closeHierarchy(){
+        this.setState({isHierarchyOpened: false});
+    }
+
     renderHistory(){
         const {connector} = this.props;
         return (
@@ -101,7 +111,7 @@ class Items extends Component{
                         const colorDiv = color !== '' && color !== DEFAULT_COLOR ? <TooltipColor tooltip={fieldTooltip} color={color} tooltipPosition={'top'} /> : null;
                         let arrow = key !== 0 ? <FontIcon value={'keyboard_arrow_right'} className={styles.history_arrow}/> : null;
                         return (
-                            <React.Fragment>
+                            <React.Fragment key={operator.uniqueIndex}>
                                 {arrow}
                                 <div className={styles.history_element} key={operator._uniqueIndex} onClick={(e) => ::this.setCurrentItem(e, operator)}>
                                     {icon}
@@ -161,12 +171,17 @@ class Items extends Component{
     }
 
     render(){
+        const {isHierarchyOpened} = this.state;
+        const {connector} = this.props;
         return (
             <div className={styles.items}>
+                <InputHierarchy hierarchy={connector.getObject()} onItemClick={::this.setCurrentItem} onAppear={::this.openHierarchy} onDisappear={::this.closeHierarchy}/>
                 {::this.renderHistory()}
-                {::this.renderNavigation()}
-                {::this.renderItems()}
-                {::this.renderPointer()}
+                <div style={{opacity: isHierarchyOpened ? 0.5 : 1}}>
+                    {::this.renderNavigation()}
+                    {::this.renderItems()}
+                    {::this.renderPointer()}
+                </div>
             </div>
         );
     }

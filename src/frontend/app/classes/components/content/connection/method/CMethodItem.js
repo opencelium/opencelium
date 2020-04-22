@@ -37,6 +37,7 @@ export default class CMethodItem{
         this._error = this.checkError(error);
         this._isToggled = isToggled;
         this._intend = 0;
+        this._isDisabled = false;
     }
 
     static createMethodItem(methodItem){
@@ -201,6 +202,14 @@ export default class CMethodItem{
 
     set intend(intend){
         this._intend = intend;
+    }
+
+    get isDisabled(){
+        return this._isDisabled;
+    }
+
+    set isDisabled(isDisabled){
+        this._isDisabled = isDisabled;
     }
 
     getObject(){
