@@ -64,7 +64,7 @@ class SelectSearch extends Component{
     }
 
     /**
-     * to hadle press on Enter, Arrow Up and Arrow Down
+     * to handle press on Enter, Arrow Up and Arrow Down
      */
     onKeyDown(e){
         const {currentItem, currentItems} = this.state;
@@ -93,7 +93,6 @@ class SelectSearch extends Component{
                 e.preventDefault();
             }
         }
-
     }
 
     /**

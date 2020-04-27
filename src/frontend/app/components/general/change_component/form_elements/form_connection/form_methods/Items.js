@@ -94,19 +94,22 @@ class Items extends Component{
 
     renderHistory(){
         const {connector} = this.props;
+        const history = connector.operatorsHistory;
         return (
             <div className={styles.operators_history}>
                 {
-                    connector.operatorsHistory.map((operator, key) => {
-                        let fieldTooltip = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.field : '';
+                    history.map((operator, key) => {
+                        //let field = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.field : '';
                         let typeTooltip = operator.type ? operator.type : '';
                         let color = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.color : '';
+                        const conditionMethod = connector.getMethodByColor(color);
+                        let fieldTooltip = conditionMethod ? conditionMethod.name : '';
                         let icon =
-                                <TooltipFontIcon
-                                    tooltip={typeTooltip}
-                                    value={operator.type === 'if' ? 'call_split' : 'loop'}
-                                    tooltipPosition={'top'}
-                                />;
+                            <TooltipFontIcon
+                                tooltip={typeTooltip}
+                                value={operator.type === 'if' ? 'call_split' : 'loop'}
+                                tooltipPosition={'top'}
+                            />;
 
                         const colorDiv = color !== '' && color !== DEFAULT_COLOR ? <TooltipColor tooltip={fieldTooltip} color={color} tooltipPosition={'top'} /> : null;
                         let arrow = key !== 0 ? <FontIcon value={'keyboard_arrow_right'} className={styles.history_arrow}/> : null;
@@ -161,7 +164,7 @@ class Items extends Component{
         let {connector} = this.props;
         let connectorType = connector.getConnectorType();
         let currentItem = connector.getCurrentItem();
-        let styles = {position: 'absolute', right: '-25px', top: `${pointerTop}px`, transition: '0.2s all'};
+        let styles = {cursor: 'default', position: 'absolute', right: '-25px', top: `${pointerTop}px`, transition: '0.2s all'};
         if(currentItem) {
             return (
                 <TooltipFontIcon value={'arrow_back'} tooltip={connectorType === CONNECTOR_FROM ? 'Left Pointer' : 'Right Pointer'} style={styles}/>
@@ -173,9 +176,20 @@ class Items extends Component{
     render(){
         const {isHierarchyOpened} = this.state;
         const {connector} = this.props;
+        const history = connector.operatorsHistory;
         return (
             <div className={styles.items}>
-                <InputHierarchy hierarchy={connector.getObject()} onItemClick={::this.setCurrentItem} onAppear={::this.openHierarchy} onDisappear={::this.closeHierarchy}/>
+                <InputHierarchy hierarchy={connector.getObject()} currentItem={connector.getCurrentItem()} onItemClick={::this.setCurrentItem} onAppear={::this.openHierarchy} onDisappear={::this.closeHierarchy}/>
+                <div className={styles.history_label}>
+                    <TooltipFontIcon tooltip={'History'} value={'history'}/>
+                    {
+                        history.length > 0
+                        ?
+                            <span className={styles.colon}>:</span>
+                        :
+                            null
+                    }
+                </div>
                 {::this.renderHistory()}
                 <div style={{opacity: isHierarchyOpened ? 0.5 : 1}}>
                     {::this.renderNavigation()}

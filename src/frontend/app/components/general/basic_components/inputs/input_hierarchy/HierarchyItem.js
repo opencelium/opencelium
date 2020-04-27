@@ -3,6 +3,8 @@ import CMethodItem from "../../../../../classes/components/content/connection/me
 import FontIcon from "../../FontIcon";
 import COperatorItem from "../../../../../classes/components/content/connection/operator/COperatorItem";
 import styles from '../../../../../themes/default/general/basic_components.scss';
+import TooltipFontIcon from "../../tooltips/TooltipFontIcon";
+import keyboard from "swiper/src/components/keyboard/keyboard";
 
 
 class HierarchyItem extends Component{
@@ -21,7 +23,7 @@ class HierarchyItem extends Component{
     }
 
     render(){
-        const {item, nextItem} = this.props;
+        const {item, nextItem, isCurrentItem, isSelectedItem} = this.props;
         if(item.isToggled){
             return null;
         }
@@ -40,6 +42,9 @@ class HierarchyItem extends Component{
         if(isOperator){
             name = item.type;
         }
+        if(isSelectedItem){
+            itemClassName += ` ${styles.selected_item}`;
+        }
         if(item.isDisabled){
             itemClassName += ` ${styles.disabled_item}`;
             nameStyles.background = '#8e7575';
@@ -53,6 +58,13 @@ class HierarchyItem extends Component{
                         ?
                         <FontIcon className={styles.arrow} value={item.isMinimized ? 'keyboard_arrow_right' : 'keyboard_arrow_down'} onClick={::this.toggleItem}/>
                         :
+                        null
+                }
+                {
+                    isCurrentItem
+                    ?
+                        <TooltipFontIcon tooltip={'Current Item'} value={'arrow_back'} className={styles.pointer}/>
+                    :
                         null
                 }
             </div>

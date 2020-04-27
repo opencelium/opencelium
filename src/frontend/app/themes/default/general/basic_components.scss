@@ -275,13 +275,16 @@
   position: absolute;
   width: 100%;
   height: 78px;
-  top: -74px;
+  top: -70px;
   .input{
     width: 0;
     float: right;
   }
   .input_element{
     background: white;
+  }
+  .input_element:placeholder-shown{
+    font-size: 14px;
   }
   .input_appear{
     animation-name: AAppearInput;
@@ -295,10 +298,13 @@
   }
   .search_icon{
     transition: all 0.7s;
-    top: 30px;
+    top: 25px;
     right: 5px;
     position: absolute;
     cursor: pointer;
+  }
+  .search_icon_disabled{
+    color: #eee;
   }
   .search_icon_appear{
     right: 5px;
@@ -319,20 +325,31 @@
     border: 1px solid #eee;
     padding: 10px 5px;
     max-height: 240px;
-    min-width: 286px;
+    min-width: 100%;
     overflow-y: auto;
     .close{
       cursor: pointer;
-      position: absolute;
-      right: 5px;
-      top: 5px;
+      position: sticky;
+      float: right;
+      top: -10px;
+      margin-top: -10px;
+      margin-right: -5px;
+      font-size: $FONT_SIZE_14;
     }
     .disabled_item{
       color: #8e7575;
     }
+    .selected_item{
+      background-color: #DEEBFF;
+    }
     .item{
       transition: all 0.3s;
       margin: 3px 0;
+      .pointer{
+        font-size: 14px;
+        cursor: default;
+        color: #9e9898;
+      }
       .arrow{
         font-size: 18px !important;
         cursor: pointer;

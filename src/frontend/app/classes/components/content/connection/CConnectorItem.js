@@ -74,6 +74,14 @@ export default class CConnectorItem{
         return invoker;
     }
 
+    getMethodByColor(color){
+        let method = this._methods.find(m => m.color === color);
+        if(method){
+            return method;
+        }
+        return null;
+    }
+
     checkConnectorType(connectorType){
         return connectorType === CONNECTOR_FROM || connectorType === CONNECTOR_TO;
     }
