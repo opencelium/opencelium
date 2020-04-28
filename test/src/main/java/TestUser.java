@@ -11,10 +11,16 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import static org.testng.Assert.assertNotNull;
 
 public class TestUser {
     WebDriver driver;
@@ -24,13 +30,17 @@ public class TestUser {
     String mHubUrl;
     String mAppUrl;
 
-    @BeforeTest
-    public void setUp(String login, String password, String hubUrl, String appUrl) throws MalformedURLException{
+    TestResultXmlUtility testResultXmlUtility=new TestResultXmlUtility();
+    //create a list object that will contain number of test cases
+    List<TestCases> testCases =new ArrayList<TestCases>();
 
-        mLogin = login;
-        mPassword = password;
-        mHubUrl = hubUrl;
-        mAppUrl = appUrl;
+    @BeforeTest
+    public void setUp() throws MalformedURLException{
+
+        mLogin = Constants.USERNAME;
+        mPassword = Constants.PASSWORD;
+        mHubUrl = Constants.HUB_URL;
+        mAppUrl = Constants.APP_URL;
 
 
         LoggingPreferences logs = new LoggingPreferences();
@@ -55,14 +65,23 @@ public class TestUser {
     }
 
     @AfterTest
-    public void afterTest(){
-       driver.quit();
+    public void afterTest() throws ParserConfigurationException {
+        driver.close();
+        //write the test result to xml file with file name TestResult
+        testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testCases);
     }
 
    @Test(priority = 0)
     public void SimpleTest(){
-        driver.get(mAppUrl);
-        Assert.assertEquals("OpenCelium", driver.getTitle());
+        try {
+            driver.get(mAppUrl);
+            Assert.assertEquals("OpenCelium", driver.getTitle());
+            testCases.add(new TestCases("001","User Test Setup ","Pass"));
+        } catch (Exception e) {
+            testCases.add(new TestCases("001","User Test Setup ","Fail"));
+            e.printStackTrace();
+        }
+
     }
 
    @Test(priority = 1)
@@ -93,17 +112,33 @@ public class TestUser {
 
 
        TimeUnit.SECONDS.sleep(2);
-       WebElement elementUsers=driver.findElement (By.linkText("Users"));
 
-       Assert.assertNotNull(elementUsers);
+       for (int second = 0;; second++) {
+           if (second >= 5) Assert.fail("timeout");
 
+           try {
+               assertNotNull(driver.findElement(By.linkText("Users")));
+               //add test case to the testcases list as pass
+               testCases.add(new TestCases("002","User Test Login","Pass"));
+               break;
+           }
+           catch (Exception e) {
+               //add test case to the testcases list as Fail
+               testCases.add(new TestCases("002","User Test Login","Fail"));
+           }
+       }
 
 
     }
 
    @Test(priority = 2)
    public void AddUserTest() throws InterruptedException {
-        WebElement elementU = driver.findElement(By.linkText("Users"));
+
+        try {
+
+
+
+       WebElement elementU = driver.findElement(By.linkText("Users"));
         elementU.click();
 
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
@@ -182,12 +217,20 @@ public class TestUser {
        WebElement elementUsers=driver.findElement (By.linkText("Users"));
 
        Assert.assertNotNull(elementUsers);
+       testCases.add(new TestCases("003","User Create","Pass"));
+        } catch (Exception e) {
+            testCases.add(new TestCases("003","User Create","Fail"));
+            e.printStackTrace();
+        }
 
        //Check if user added successfully
     }
 
     @Test(priority = 3)
     public void UpdateUserTest() throws InterruptedException {
+
+        try {
+
 
         WebElement elementU = driver.findElement(By.linkText("Users"));
 
@@ -266,12 +309,22 @@ public class TestUser {
         buttonUpdate.click();
         //Check if succesfully modified
         Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
-        TimeUnit.SECONDS.sleep(3);
+
+        testCases.add(new TestCases("004","User Update","Pass"));
+        TimeUnit.SECONDS.sleep(2);
+
+        } catch (Exception e) {
+            testCases.add(new TestCases("004","User Update","Fail"));
+            e.printStackTrace();
+        }
 
     }
 
     @Test(priority = 4)
     public void DeleteUserTest() throws InterruptedException {
+
+        try {
+
 
         WebElement elementU = driver.findElement(By.linkText("Users"));
 
@@ -294,6 +347,12 @@ public class TestUser {
 
         TimeUnit.SECONDS.sleep(3);
         //Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
+
+            testCases.add(new TestCases("005","User Delete","Pass"));
+        } catch (Exception e) {
+            testCases.add(new TestCases("005","User Delete","Fail"));
+            e.printStackTrace();
+        }
 
     }
 

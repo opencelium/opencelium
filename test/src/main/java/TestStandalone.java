@@ -1,7 +1,8 @@
+import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
 
 public class TestStandalone {
-    public static void main(String[] args) throws MalformedURLException, InterruptedException {
+    public static void main(String[] args) throws MalformedURLException, InterruptedException, ParserConfigurationException {
 
 
         String testName = System.getProperty("test");
@@ -52,10 +53,10 @@ public class TestStandalone {
         testLogin.LoginTest();
     }
 
-    private static void UserTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
+    private static void UserTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException, ParserConfigurationException {
         TestUser testUser = new TestUser();
 
-        testUser.setUp(login,password,hubUrl,appUrl);
+        testUser.setUp();
 
         testUser.SimpleTest();
 

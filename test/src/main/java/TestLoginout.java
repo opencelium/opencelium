@@ -33,7 +33,7 @@ public class TestLoginout {
 
     TestResultXmlUtility testResultXmlUtility=new TestResultXmlUtility();
     //create a list object that will contain number of test cases
-    List<TestCases> testcases=new ArrayList<TestCases>();
+    List<TestCases> testCases =new ArrayList<TestCases>();
 
 
     @BeforeTest
@@ -68,10 +68,10 @@ public class TestLoginout {
             //assert that a window has been launched
             assertEquals(true, windowsHandle.length()>0);
             //add a test case to the testcases list as pass
-            testcases.add(new TestCases("001","Test Setup ","Pass"));
+            testCases.add(new TestCases("001","Login Setup ","Pass"));
         } catch (Exception e) {
             e.printStackTrace();
-            testcases.add(new TestCases("001","Login Setup ","Fail"));
+            testCases.add(new TestCases("001","Login Setup ","Fail"));
         }
 
 
@@ -93,12 +93,12 @@ public class TestLoginout {
             try {
                 assertNotNull(driver.findElement(By.linkText("Users")));
                 //add test case to the testcases list as pass
-                testcases.add(new TestCases("002","Login Test","Pass"));
+                testCases.add(new TestCases("002","Login Test","Pass"));
                 break;
             }
             catch (Exception e) {
                 //add test case to the testcases list as Fail
-                testcases.add(new TestCases("002","Login Test","Fail"));
+                testCases.add(new TestCases("002","Login Test","Fail"));
             }
         }
 
@@ -120,9 +120,10 @@ public class TestLoginout {
         WebElement element_login=driver.findElement (By.id("login_email"));
         Assert.assertNotNull(element_login);
 
-        testcases.add(new TestCases("003","Logout Test","Pass"));
+        testCases.add(new TestCases("003","Logout Test","Pass"));
+
         } catch (Exception e) {
-            testcases.add(new TestCases("003","Logout Test","Fail"));
+            testCases.add(new TestCases("003","Logout Test","Fail"));
             e.printStackTrace();
         }
 
@@ -132,7 +133,7 @@ public class TestLoginout {
     public void afterTest() throws ParserConfigurationException {
         driver.close();
         //write the test result to xml file with file name TestResult
-        testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testcases);
+        testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testCases);
         //quit the driver
         //driver.quit();
     }
