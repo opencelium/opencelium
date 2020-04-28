@@ -11,10 +11,16 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class TestLoginout {
 
@@ -24,6 +30,11 @@ public class TestLoginout {
     String mPassword;
     String mHubUrl;
     String mAppUrl;
+
+    TestResultXmlUtility testResultXmlUtility=new TestResultXmlUtility();
+    //create a list object that will contain number of test cases
+    List<TestCases> testcases=new ArrayList<TestCases>();
+
 
     @BeforeTest
     public void setUp() throws MalformedURLException {
@@ -46,11 +57,24 @@ public class TestLoginout {
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
 
-        driver = new RemoteWebDriver(new URL(mHubUrl),desiredCapabilities);
+        try {
+            driver = new RemoteWebDriver(new URL(mHubUrl),desiredCapabilities);
 
-        driver.navigate().to(mAppUrl +"login");
+            driver.navigate().to(mAppUrl +"login");
 
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+            String windowsHandle=driver.getWindowHandle();
+            //assert that a window has been launched
+            assertEquals(true, windowsHandle.length()>0);
+            //add a test case to the testcases list as pass
+            testcases.add(new TestCases("001","Test Setup ","Pass"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            testcases.add(new TestCases("001","Login Setup ","Fail"));
+        }
+
+
     }
 
     @Test(priority = 0)
@@ -63,26 +87,53 @@ public class TestLoginout {
 
         buttonConnect.click();
 
-        WebElement elementUsers=driver.findElement (By.linkText("Users"));
+        for (int second = 0;; second++) {
+            if (second >= 20) Assert.fail("timeout");
 
-        Assert.assertNotNull(elementUsers);
+            try {
+                assertNotNull(driver.findElement(By.linkText("Users")));
+                //add test case to the testcases list as pass
+                testcases.add(new TestCases("002","Login Test","Pass"));
+                break;
+            }
+            catch (Exception e) {
+                //add test case to the testcases list as Fail
+                testcases.add(new TestCases("002","Login Test","Fail"));
+            }
+        }
+
     }
 
     @Test(priority = 1)
     public void LogoutTest(){
+        try {
         WebElement buttonLogout=driver.findElement (By.id("menu_logout"));
+        Assert.assertNotNull(buttonLogout);
         buttonLogout.click();
 
+
         WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
+
+        Assert.assertNotNull(elementOk);
         elementOk.click();
 
         WebElement element_login=driver.findElement (By.id("login_email"));
-
         Assert.assertNotNull(element_login);
+
+        testcases.add(new TestCases("003","Logout Test","Pass"));
+        } catch (Exception e) {
+            testcases.add(new TestCases("003","Logout Test","Fail"));
+            e.printStackTrace();
+        }
+
     }
 
     @AfterTest
-    public void afterTest(){
-        driver.quit();
+    public void afterTest() throws ParserConfigurationException {
+        driver.close();
+        //write the test result to xml file with file name TestResult
+        testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testcases);
+        //quit the driver
+        //driver.quit();
     }
 }
