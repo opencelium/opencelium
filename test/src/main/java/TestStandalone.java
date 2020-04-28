@@ -46,19 +46,10 @@ public class TestStandalone {
 
     }
 
-
-    private static void GroupTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
-
-        TestGroup testGroup = new TestGroup();
-        testGroup.setUp(login,password,hubUrl,appUrl);
-
-        testGroup.SimpleTest();
-        testGroup.AddGroupTest();
-        testGroup.UpdateGroupTest();
-        testGroup.DeleteGroupTest();
-
-        testGroup.afterTest();
-
+    private static void LoginTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException {
+        TestLoginout testLogin = new TestLoginout();
+        testLogin.setUp();
+        testLogin.LoginTest();
     }
 
     private static void UserTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
@@ -78,4 +69,20 @@ public class TestStandalone {
 
         testUser.afterTest();
     }
+
+    private static void GroupTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
+
+        TestGroup testGroup = new TestGroup();
+        testGroup.setUp(login,password,hubUrl,appUrl);
+
+        testGroup.SimpleTest();
+        testGroup.AddGroupTest();
+        testGroup.UpdateGroupTest();
+        testGroup.DeleteGroupTest();
+
+        testGroup.afterTest();
+
+    }
+
+
 }

@@ -1,4 +1,5 @@
 import org.openqa.selenium.By;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -44,7 +45,7 @@ public class TestUser {
         //System.setProperty("webdriver.chrome.driver", "/home/selenium/Downloads/chromedriver");
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("firefox");
-
+        desiredCapabilities.setPlatform(Platform.LINUX);
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
 
