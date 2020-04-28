@@ -64,13 +64,6 @@ public class TestUser {
 
     }
 
-    @AfterTest
-    public void afterTest() throws ParserConfigurationException {
-        driver.close();
-        //write the test result to xml file with file name TestResult
-        testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testCases);
-    }
-
    @Test(priority = 0)
     public void SimpleTest(){
         try {
@@ -357,7 +350,12 @@ public class TestUser {
     }
 
 
-
+    @AfterTest
+    public void afterTest() throws ParserConfigurationException {
+        driver.close();
+        //write the test result to xml file with file name TestResult
+        testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testCases);
+    }
 
 
 }

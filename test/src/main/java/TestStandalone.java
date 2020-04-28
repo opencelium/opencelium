@@ -40,7 +40,7 @@ public class TestStandalone {
         }
         }
         else {
-            UserTest(testLogin,testPassword,testHubUrl,testAppUrl);
+            GroupTest(testLogin,testPassword,testHubUrl,testAppUrl);
         }
 
 
@@ -71,12 +71,13 @@ public class TestStandalone {
         testUser.afterTest();
     }
 
-    private static void GroupTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
+    private static void GroupTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException, ParserConfigurationException {
 
         TestGroup testGroup = new TestGroup();
-        testGroup.setUp(login,password,hubUrl,appUrl);
+        testGroup.setUp();
 
         testGroup.SimpleTest();
+        testGroup.LoginTest();
         testGroup.AddGroupTest();
         testGroup.UpdateGroupTest();
         testGroup.DeleteGroupTest();
