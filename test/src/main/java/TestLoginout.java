@@ -68,6 +68,18 @@ public class TestLoginout {
         Assert.assertNotNull(elementUsers);
     }
 
+    @Test(priority = 1)
+    public void LogoutTest(){
+        WebElement buttonLogout=driver.findElement (By.id("menu_logout"));
+        buttonLogout.click();
+
+        WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
+        elementOk.click();
+
+        WebElement element_login=driver.findElement (By.id("login_email"));
+
+        Assert.assertNotNull(element_login);
+    }
 
     @AfterTest
     public void afterTest(){
