@@ -1,3 +1,6 @@
+package tests;
+
+import constants.Constants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -12,6 +15,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import utility.TestCases;
+import utility.TestResultXmlUtility;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
@@ -127,7 +132,7 @@ public class TestGroup {
             addGroupButton.click();
 
             WebElement inputRole = driver.findElement(By.id("input_role"));
-            inputRole.sendKeys("TestGroup");
+            inputRole.sendKeys("tests.TestGroup");
 
             WebElement inputDescription = driver.findElement(By.id("input_description"));
             inputDescription.sendKeys("Filling Test Description");
@@ -159,7 +164,7 @@ public class TestGroup {
             TimeUnit.SECONDS.sleep(3);
 
             driver.navigate().to(mAppUrl+"usergroups");
-            Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='TestGroup']")));
+            Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='tests.TestGroup']")));
 
             testCases.add(new TestCases("011","Group Create","Pass"));
 
@@ -182,7 +187,7 @@ public class TestGroup {
 
         WebElement inputRole = driver.findElement(By.id("input_role"));
         inputRole.clear();
-        inputRole.sendKeys("TestGroup Edited");
+        inputRole.sendKeys("tests.TestGroup Edited");
 
         WebElement buttonNext = driver.findElement(By.id("navigation_next"));
         buttonNext.click();
@@ -209,7 +214,7 @@ public class TestGroup {
 
         TimeUnit.SECONDS.sleep(3);
 
-        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='TestGroup Edited']")));
+        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='tests.TestGroup Edited']")));
 
         TimeUnit.SECONDS.sleep(3);
 

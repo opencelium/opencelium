@@ -1,3 +1,5 @@
+package utility;
+
 import java.io.File;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +35,7 @@ public class TestResultXmlUtility {
             testReportElement.setAttribute("time", timeStamp.toString());
             doc.appendChild(testReportElement);
             //Test Cases Element
-            Element testCasesElement=doc.createElement("TestCases");
+            Element testCasesElement=doc.createElement("utility.TestCases");
             testReportElement.appendChild(testCasesElement);
             //For each test case object add a Test Case Element in the xml file
             for(TestCases a:items)

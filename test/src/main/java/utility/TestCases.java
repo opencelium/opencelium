@@ -1,3 +1,5 @@
+package utility;
+
 public class TestCases {
     //test case Id string
     private String testCaseId;

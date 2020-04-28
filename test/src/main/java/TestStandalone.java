@@ -1,3 +1,8 @@
+import constants.Constants;
+import tests.TestGroup;
+import tests.TestLoginout;
+import tests.TestUser;
+
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
 

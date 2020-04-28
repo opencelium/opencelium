@@ -1,3 +1,6 @@
+package tests;
+
+import constants.Constants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
@@ -11,6 +14,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import utility.TestCases;
+import utility.TestResultXmlUtility;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
@@ -142,7 +147,7 @@ public class TestUser {
        addUserButton.click();
 
 
-       //driver.navigate().to(Constants.BASE_URL+"users/add");
+       //driver.navigate().to(constants.Constants.BASE_URL+"users/add");
 
        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 

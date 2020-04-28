@@ -1,3 +1,5 @@
+package constants;
+
 public interface Constants {
 
     //Path constants
