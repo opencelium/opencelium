@@ -69,9 +69,9 @@ public class TestUser {
         try {
             driver.get(mAppUrl);
             Assert.assertEquals("OpenCelium", driver.getTitle());
-            testCases.add(new TestCases("001","User Test Setup ","Pass"));
+            testCases.add(new TestCases("004","User Test Setup ","Pass"));
         } catch (Exception e) {
-            testCases.add(new TestCases("001","User Test Setup ","Fail"));
+            testCases.add(new TestCases("004","User Test Setup ","Fail"));
             e.printStackTrace();
         }
 
@@ -112,12 +112,12 @@ public class TestUser {
            try {
                assertNotNull(driver.findElement(By.linkText("Users")));
                //add test case to the testcases list as pass
-               testCases.add(new TestCases("002","User Test Login","Pass"));
+               testCases.add(new TestCases("005","User Test Login","Pass"));
                break;
            }
            catch (Exception e) {
                //add test case to the testcases list as Fail
-               testCases.add(new TestCases("002","User Test Login","Fail"));
+               testCases.add(new TestCases("005","User Test Login","Fail"));
            }
        }
 
@@ -210,9 +210,9 @@ public class TestUser {
        WebElement elementUsers=driver.findElement (By.linkText("Users"));
 
        Assert.assertNotNull(elementUsers);
-       testCases.add(new TestCases("003","User Create","Pass"));
+       testCases.add(new TestCases("006","User Create","Pass"));
         } catch (Exception e) {
-            testCases.add(new TestCases("003","User Create","Fail"));
+            testCases.add(new TestCases("006","User Create","Fail"));
             e.printStackTrace();
         }
 
@@ -303,11 +303,11 @@ public class TestUser {
         //Check if succesfully modified
         Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
 
-        testCases.add(new TestCases("004","User Update","Pass"));
+        testCases.add(new TestCases("007","User Update","Pass"));
         TimeUnit.SECONDS.sleep(2);
 
         } catch (Exception e) {
-            testCases.add(new TestCases("004","User Update","Fail"));
+            testCases.add(new TestCases("007","User Update","Fail"));
             e.printStackTrace();
         }
 
@@ -341,9 +341,9 @@ public class TestUser {
         TimeUnit.SECONDS.sleep(3);
         //Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
 
-            testCases.add(new TestCases("005","User Delete","Pass"));
+            testCases.add(new TestCases("008","User Delete","Pass"));
         } catch (Exception e) {
-            testCases.add(new TestCases("005","User Delete","Fail"));
+            testCases.add(new TestCases("008","User Delete","Fail"));
             e.printStackTrace();
         }
 

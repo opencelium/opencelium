@@ -68,9 +68,9 @@ public class TestGroup {
         try {
             driver.get(mAppUrl);
             Assert.assertEquals("OpenCelium", driver.getTitle());
-            testCases.add(new TestCases("001","Group Test Setup ","Pass"));
+            testCases.add(new TestCases("009","Group Test Setup ","Pass"));
         } catch (Exception e) {
-            testCases.add(new TestCases("001","Group Test Setup ","Fail"));
+            testCases.add(new TestCases("009","Group Test Setup ","Fail"));
             e.printStackTrace();
         }
 
@@ -103,12 +103,12 @@ public class TestGroup {
             try {
                 assertNotNull(driver.findElement(By.linkText("Users")));
                 //add test case to the testcases list as pass
-                testCases.add(new TestCases("002","Group Test Login","Pass"));
+                testCases.add(new TestCases("010","Group Test Login","Pass"));
                 break;
             }
             catch (Exception e) {
                 //add test case to the testcases list as Fail
-                testCases.add(new TestCases("002","Group Test Login","Fail"));
+                testCases.add(new TestCases("010","Group Test Login","Fail"));
             }
         }
 
@@ -161,11 +161,11 @@ public class TestGroup {
             driver.navigate().to(mAppUrl+"usergroups");
             Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='TestGroup']")));
 
-            testCases.add(new TestCases("003","Group Create","Pass"));
+            testCases.add(new TestCases("011","Group Create","Pass"));
 
             TimeUnit.SECONDS.sleep(3);
         } catch (Exception e) {
-            testCases.add(new TestCases("003","Group Create","Fail"));
+            testCases.add(new TestCases("011","Group Create","Fail"));
             e.printStackTrace();
         }
 
@@ -213,9 +213,9 @@ public class TestGroup {
 
         TimeUnit.SECONDS.sleep(3);
 
-            testCases.add(new TestCases("004","Group Update","Pass"));
+            testCases.add(new TestCases("012","Group Update","Pass"));
         } catch (Exception e) {
-            testCases.add(new TestCases("004","Group Update","Fail"));
+            testCases.add(new TestCases("012","Group Update","Fail"));
             e.printStackTrace();
         }
     }
@@ -240,9 +240,9 @@ public class TestGroup {
         elementOk.click();
 
         TimeUnit.SECONDS.sleep(2);
-            testCases.add(new TestCases("005","Group Delete","Pass"));
+            testCases.add(new TestCases("013","Group Delete","Pass"));
         } catch (Exception e) {
-            testCases.add(new TestCases("005","Group Delete","Fail"));
+            testCases.add(new TestCases("013","Group Delete","Fail"));
             e.printStackTrace();
         }
 
