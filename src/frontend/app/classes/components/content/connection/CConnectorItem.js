@@ -74,6 +74,14 @@ export default class CConnectorItem{
         return invoker;
     }
 
+    getMethodByColor(color){
+        let method = this._methods.find(m => m.color === color);
+        if(method){
+            return method;
+        }
+        return null;
+    }
+
     checkConnectorType(connectorType){
         return connectorType === CONNECTOR_FROM || connectorType === CONNECTOR_TO;
     }
@@ -180,6 +188,55 @@ export default class CConnectorItem{
         this.toggleItems(METHOD_ITEM, item, value);
         this.toggleItems(OPERATOR_ITEM, item, value);
         this.reloadPagination();
+    }
+
+    filterByNameOrType(filterValue){
+        let filterValues = filterValue.split('>');
+        for(let i = 0; i < filterValues.length; i++) {
+            this.filterByNameOrTypeIteration(i, filterValues[i]);
+        }
+    }
+
+    filterByNameOrTypeIteration(step, filterValue){
+        let tmpOperators = [];
+        for(let i = 0; i < this._operators.length; i++){
+            let indexSplit = this._operators[i].index.split('_');
+            if(indexSplit.length > step) {
+                if (this._operators[i].type.toLowerCase().includes(filterValue.toLowerCase()) || filterValue === '') {
+                    tmpOperators.push(this._operators[i]);
+                    let operatorIndex = this._operators[i].index;
+                    let parentIndex = subArrayToString(operatorIndex.split('_'), '_', 0, operatorIndex.split('_').length - 1);
+                    let parent = this._operators.find(operator => operator.index === parentIndex);
+                    if(parent && step > 0){
+                        this._operators[i].isDisabled = parent.isDisabled;
+                    } else{
+                        this._operators[i].isDisabled = false;
+                    }
+                } else {
+                    this._operators[i].isDisabled = true;
+                }
+            }
+        }
+        for(let i = 0; i < this._methods.length; i++){
+            let indexSplit = this._methods[i].index.split('_');
+            if(indexSplit.length > step) {
+                if (this._methods[i].name.toLowerCase().includes(filterValue.toLowerCase())
+                    || filterValue === ''
+                    || tmpOperators.findIndex(operator => this._methods[i].index.indexOf(operator.index) === 0) !== -1
+                ) {
+                    let methodIndex = this._methods[i].index;
+                    let parentIndex = subArrayToString(methodIndex.split('_'), '_', 0, methodIndex.split('_').length - 1);
+                    let parent = this._operators.find(operator => operator.index === parentIndex);
+                    if(parent && step > 0){
+                        this._methods[i].isDisabled = parent.isDisabled;
+                    } else{
+                        this._methods[i].isDisabled = false;
+                    }
+                } else {
+                    this._methods[i].isDisabled = true;
+                }
+            }
+        }
     }
 
     hasItemChildren(item){

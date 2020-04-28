@@ -869,15 +869,25 @@
   cursor: pointer;
 }
 
+.history_label{
+  cursor: default;
+  position: absolute;
+  top: -50px;
+  .colon{
+    display: block;
+    float: right;
+    margin-right: 5px;
+  }
+}
 .operators_history{
   position: absolute;
-  top: -40px;
-  left: 2%;
+  top: -55px;
   padding: 3px;
   margin: 2px 0;
   white-space: nowrap;
   overflow-x: auto;
-  width: 96%;
+  width: 79%;
+  right: 10%;
   .history_element{
     cursor: pointer;
     display: inline-block;

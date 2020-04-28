@@ -29,10 +29,11 @@ import {setFocusById} from "../../../../utils/app";
 import {INPUTS} from "../../../../utils/constants/inputs";
 import OCTour from "../../../general/basic_components/OCTour";
 import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "../../../../utils/constants/tours";
-import CConnection from "../../../../classes/components/content/connection/CConnection";
+import CConnection, {ALL_COLORS} from "../../../../classes/components/content/connection/CConnection";
 import ChangeContent from "../../../general/change_component/ChangeContent";
 import {SingleComponent} from "../../../../decorators/SingleComponent";
 import {TEMPLATE_MODE} from "../../../../classes/components/content/connection/CTemplate";
+import InputHierarchy from "../../../general/basic_components/inputs/input_hierarchy/InputHierarchy";
 
 
 const connectionPrefixURL = '/connections';

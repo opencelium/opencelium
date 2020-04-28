@@ -40,6 +40,68 @@ function doAction(event, action){
     }
 }
 /**
+ * pressing ARROW_DOWN select next option in select
+ */
+let SelectArrowDownKeyNavigation = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keydown':
+                selectArrowDown(event, this.that);
+                break;
+        }
+
+    }
+};
+function selectArrowDown(e, that){
+    let key = e.keyCode;
+    switch (key) {
+        //arrow_down
+        case 40:
+            doAction(e, () => {
+                that.selectNextItem();
+            });
+            break;
+
+    }
+}
+function addSelectArrowDownKeyNavigation(that){
+    addNavigationListener(that, SelectArrowDownKeyNavigation);
+}
+function removeSelectArrowDownKeyNavigation(that){
+    removeNavigationListener(that, SelectArrowDownKeyNavigation);
+}
+/**
+ * pressing ARROW_UP select previous option in select
+ */
+let SelectArrowUpKeyNavigation = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keydown':
+                selectArrowUp(event, this.that);
+                break;
+        }
+
+    }
+};
+function selectArrowUp(e, that){
+    let key = e.keyCode;
+    switch (key) {
+        //arrow_up
+        case 38:
+            doAction(e, () => {
+                that.selectPrevItem();
+            });
+            break;
+
+    }
+}
+function addSelectArrowUpKeyNavigation(that){
+    addNavigationListener(that, SelectArrowUpKeyNavigation);
+}
+function removeSelectArrowUpKeyNavigation(that){
+    removeNavigationListener(that, SelectArrowUpKeyNavigation);
+}
+/**
  * pressing P open My Profile page
  */
 let MenuMyProfileKeyNavigation = {
@@ -861,6 +923,10 @@ function removeLoginKeyNavigation(that){
 
 export{
     switchUserListKeyNavigation,
+    addSelectArrowDownKeyNavigation,
+    removeSelectArrowDownKeyNavigation,
+    addSelectArrowUpKeyNavigation,
+    removeSelectArrowUpKeyNavigation,
     addMenuMyProfileKeyNavigation,
     removeMenuMyProfileKeyNavigation,
     addLoginKeyNavigation,
