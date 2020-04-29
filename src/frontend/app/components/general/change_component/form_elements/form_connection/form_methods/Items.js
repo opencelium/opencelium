@@ -179,9 +179,15 @@ class Items extends Component{
         const history = connector.operatorsHistory;
         return (
             <div className={styles.items}>
-                <InputHierarchy hierarchy={connector.getObject()} currentItem={connector.getCurrentItem()} onItemClick={::this.setCurrentItem} onAppear={::this.openHierarchy} onDisappear={::this.closeHierarchy}/>
+                <InputHierarchy
+                    hierarchy={connector.getObject()}
+                    currentItem={connector.getCurrentItem()}
+                    onItemClick={::this.setCurrentItem}
+                    onAppear={::this.openHierarchy}
+                    onDisappear={::this.closeHierarchy}
+                />
                 <div className={styles.history_label}>
-                    <TooltipFontIcon tooltip={'History'} value={'history'}/>
+                    <TooltipFontIcon tooltip={'History'} value={'history'} style={{color: history.length === 0 ? '#eee' : 'black'}} className={styles.icon}/>
                     {
                         history.length > 0
                         ?

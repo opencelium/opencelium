@@ -12,7 +12,7 @@ class HierarchyItem extends Component{
         super(props);
     }
 
-    toggleItem(value){
+    toggleItem(){
         const {item, toggleItem} = this.props;
         toggleItem(item, !item.isMinimized);
     }
@@ -49,7 +49,7 @@ class HierarchyItem extends Component{
             itemClassName += ` ${styles.disabled_item}`;
             nameStyles.background = '#8e7575';
         }
-        itemStyles.marginLeft = `${intend}px`;
+        itemStyles.paddingLeft = `${intend}px`;
         return(
             <div style={itemStyles} className={itemClassName}>
                 <div style={nameStyles} className={styles.name} onClick={::this.chooseItem}>{name}</div>

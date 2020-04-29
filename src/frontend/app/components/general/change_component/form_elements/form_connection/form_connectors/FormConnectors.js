@@ -24,7 +24,12 @@ import {FormElement} from "../../../../../../decorators/FormElement";
 import {Row, Col} from "react-grid-system";
 import {ArrowRight} from '../../../../basic_components/Arrows';
 
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../classes/components/content/connection/CConnectorItem";
+import {
+    CONNECTOR_DEPTH_LIMIT,
+    CONNECTOR_FROM,
+    CONNECTOR_TO,
+    METHOD_ITEM, OPERATOR_ITEM, OUTSIDE_ITEM
+} from "../../../../../../classes/components/content/connection/CConnectorItem";
 import FormOperations from "../../form_invoker/FormOperations";
 import InvokerButton from "./InvokerButton";
 
@@ -100,6 +105,34 @@ class FormConnectors extends Component{
         updateEntity(entity);
     }
 
+    addMethod(connectorType, methodType, operation){
+        const {entity, updateEntity} = this.props;
+        let item = {};
+        let connector = null;
+        switch(connectorType) {
+            case CONNECTOR_FROM:
+                connector = entity.fromConnector;
+                break;
+            case CONNECTOR_TO:
+                connector = entity.toConnector;
+                break;
+        }
+        if(operation !== null && connector !== null) {
+            item.name = operation.name;
+            item.request = operation.request.getObject();
+            item.response = operation.response.getObject();
+            switch (connector.getConnectorType()) {
+                case CONNECTOR_FROM:
+                    entity.addFromConnectorMethod(item, methodType);
+                    break;
+                case CONNECTOR_TO:
+                    entity.addToConnectorMethod(item, methodType);
+                    break;
+            }
+            updateEntity(entity);
+        }
+    }
+
     renderFromInvoker(){
         const {isFromInvokerOpened, fromWillDisappear} = this.state;
         if(!isFromInvokerOpened){
@@ -109,7 +142,7 @@ class FormConnectors extends Component{
         let invoker = entity.fromConnector.invoker;
         return(
             <div className={`${styles.form_connector_from_invoker} ${fromWillDisappear ? styles.form_connector_from_invoker_disappear : styles.form_connector_from_invoker_appear}`}>
-                <FormOperations entity={invoker} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true}/>
+                <FormOperations entity={invoker} connector={entity.fromConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={::this.addMethod}/>
             </div>
         );
     }
@@ -123,7 +156,7 @@ class FormConnectors extends Component{
         let invoker = entity.toConnector.invoker;
         return(
             <div className={`${styles.form_connector_to_invoker} ${toWillDisappear ? styles.form_connector_to_invoker_disappear : styles.form_connector_to_invoker_appear}`}>
-                <FormOperations entity={invoker} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true}/>
+                <FormOperations entity={invoker} connector={entity.toConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={::this.addMethod}/>
             </div>
         );
     }

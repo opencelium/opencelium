@@ -597,6 +597,37 @@
 .invoker_operation_header_for_connection:hover{
   background: #fffdfd;
 }
+.invoker_operation_add_icon{
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+}
+.invoker_operation_add_method_radio{
+  position: absolute;
+  right: 0;
+  padding: 2px 2px 0 0;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
+  .radio_field{
+    font-family: $FONT_FAMILY;
+    text-align: left !important;
+    margin-bottom: 1px !important;
+    height: 13px !important;
+  }
+  .radio_radio{
+    float: right;
+    font-family: $FONT_FAMILY;
+    width: 12px !important;
+    height: 12px !important;
+    border: 1px solid rgb(0, 0, 0);
+    background: white;
+  }
+  .radio_text{
+    float: right;
+    font-family: $FONT_FAMILY;
+    line-height: 12px !important;
+    margin-right: 2px !important;
+  }
+}
 
 .invoker_request_item_method{
   background: #eeeeee;
@@ -870,7 +901,10 @@
 }
 
 .history_label{
-  cursor: default;
+  .icon{
+    transition: all 0.7s;
+    cursor: default;
+  }
   position: absolute;
   top: -50px;
   .colon{
