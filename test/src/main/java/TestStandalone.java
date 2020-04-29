@@ -1,7 +1,13 @@
+import constants.Constants;
+import tests.TestGroup;
+import tests.TestLoginout;
+import tests.TestUser;
+
+import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
 
 public class TestStandalone {
-    public static void main(String[] args) throws MalformedURLException, InterruptedException {
+    public static void main(String[] args) throws MalformedURLException, InterruptedException, ParserConfigurationException {
 
 
         String testName = System.getProperty("test");
@@ -39,32 +45,23 @@ public class TestStandalone {
         }
         }
         else {
-            UserTest(testLogin,testPassword,testHubUrl,testAppUrl);
+            GroupTest(testLogin,testPassword,testHubUrl,testAppUrl);
         }
 
 
 
     }
 
-
-    private static void GroupTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
-
-        TestGroup testGroup = new TestGroup();
-        testGroup.setUp(login,password,hubUrl,appUrl);
-
-        testGroup.SimpleTest();
-        testGroup.AddGroupTest();
-        testGroup.UpdateGroupTest();
-        testGroup.DeleteGroupTest();
-
-        testGroup.afterTest();
-
+    private static void LoginTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException {
+        TestLoginout testLogin = new TestLoginout();
+        testLogin.setUp();
+        testLogin.LoginTest();
     }
 
-    private static void UserTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
+    private static void UserTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException, ParserConfigurationException {
         TestUser testUser = new TestUser();
 
-        testUser.setUp(login,password,hubUrl,appUrl);
+        testUser.setUp();
 
         testUser.SimpleTest();
 
@@ -78,4 +75,21 @@ public class TestStandalone {
 
         testUser.afterTest();
     }
+
+    private static void GroupTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException, ParserConfigurationException {
+
+        TestGroup testGroup = new TestGroup();
+        testGroup.setUp();
+
+        testGroup.SimpleTest();
+        testGroup.LoginTest();
+        testGroup.AddGroupTest();
+        testGroup.UpdateGroupTest();
+        testGroup.DeleteGroupTest();
+
+        testGroup.afterTest();
+
+    }
+
+
 }
