@@ -66,7 +66,7 @@ public class TestConnector {
     }
 
     @Test(priority = 0)
-    public void SimpleTest(){
+    public void SimpleTest() throws Exception{
         try {
             driver.get(mAppUrl);
             Assert.assertEquals("OpenCelium", driver.getTitle());
@@ -74,12 +74,13 @@ public class TestConnector {
         } catch (Exception e) {
             testCases.add(new TestCases("014","Connector Test Setup ","Fail"));
             e.printStackTrace();
+            throw e;
         }
 
     }
 
     @Test(priority = 1)
-    public void LoginTest() throws InterruptedException {
+    public void ConnectorLoginTest() throws Exception {
         //driver.get(baseUrl+"login");
 
         driver.navigate().to(mAppUrl +"login");
@@ -110,6 +111,7 @@ public class TestConnector {
             catch (Exception e) {
                 //add test case to the testcases list as Fail
                 testCases.add(new TestCases("015","Connector Test Login","Fail"));
+                throw e;
             }
         }
     }
@@ -119,6 +121,11 @@ public class TestConnector {
     public void AddConnectorTest() throws Exception {
         try {
             driver.findElement(By.linkText("Connectors")).click();
+
+            //Successfully get connections list
+            driver.findElement(By.xpath("//*[text()='Success']"));
+
+
             driver.findElement(By.id("button_add_connector")).click();
 
             driver.findElement(By.id("input_title")).sendKeys("TestOTRS");
@@ -141,6 +148,7 @@ public class TestConnector {
 
             TimeUnit.SECONDS.sleep(5);
 
+            //Connection successfully tested
             driver.findElement(By.xpath("//*[text()='Success']"));
             //http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem
 
@@ -155,6 +163,53 @@ public class TestConnector {
             throw e;
         }
     }
+
+    @Test(priority = 3)
+    public void UpdateConnectorTest() throws InterruptedException {
+        try {
+            driver.findElement(By.linkText("Connectors")).click();
+
+            //Successfully get connections list
+            driver.findElement(By.xpath("//*[text()='Success']"));
+
+
+            driver.findElement(By.id("button_update_0")).click();
+
+            //driver.findElement(By.id("input_title")).sendKeys("TestOTRS");
+            driver.findElement(By.id("input_description")).sendKeys(" Description Edited");
+
+            driver.findElement(By.id("input_invoker")).click();
+
+            //Choosing OTRS
+            //driver.findElement(By.id("react-select-2-option-2")).click();
+            TimeUnit.SECONDS.sleep(3);
+
+            driver.findElement(By.id("navigation_next")).click();
+
+           /* driver.findElement(By.id("input_otrs__url")).sendKeys("http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem");
+            driver.findElement(By.id("input_otrs__UserLogin")).sendKeys("root@localhost");
+            driver.findElement(By.id("input_otrs__Password")).sendKeys("init");
+            driver.findElement(By.id("input_otrs__WebService")).sendKeys("OC-Connector1");*/
+
+            driver.findElement(By.id("button_test")).click();
+
+            TimeUnit.SECONDS.sleep(5);
+
+            //Connection successfully tested
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            //http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem
+
+            //root@localhost
+            //init
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            testCases.add(new TestCases("017","Connector Upgrade","Pass"));
+        } catch (Exception e) {
+            testCases.add(new TestCases("017","Connector Upgrade","Fail"));
+            throw e;
+        }
+    }
+
+
 
     @AfterTest
     public void afterTest() throws ParserConfigurationException {
