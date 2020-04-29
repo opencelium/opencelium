@@ -209,6 +209,26 @@ public class TestConnector {
         }
     }
 
+    @Test(priority = 4)
+    public void DeleteConnectorTest() throws InterruptedException {
+        try {
+            driver.findElement(By.linkText("Connectors")).click();
+
+            //Successfully get connections list
+            driver.findElement(By.xpath("//*[text()='Success']"));
+
+            driver.findElement(By.id("button_delete_0")).click();
+
+            driver.findElement(By.id("confirmation_cancel")); //confirmation_ok
+            testCases.add(new TestCases("018","Connector Delete","Pass"));
+
+        } catch (Exception e) {
+            testCases.add(new TestCases("018","Connector Delete","Fail"));
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
 
 
     @AfterTest
