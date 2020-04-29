@@ -202,9 +202,9 @@ public class TestConnector {
             //root@localhost
             //init
             driver.findElement(By.xpath("//*[text()='Success']"));
-            testCases.add(new TestCases("017","Connector Upgrade","Pass"));
+            testCases.add(new TestCases("017","Connector Update","Pass"));
         } catch (Exception e) {
-            testCases.add(new TestCases("017","Connector Upgrade","Fail"));
+            testCases.add(new TestCases("017","Connector Update","Fail"));
             throw e;
         }
     }
