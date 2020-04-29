@@ -135,19 +135,38 @@ public class TestConnections {
 
             driver.findElement(By.id("input_connection_title")).sendKeys("TestConnection");
 
-            driver.findElement(By.id("from_connector")).click();
-            driver.findElement(By.id("react-select-2-option-2")).click();
+            driver.findElement(By.id("from_connector")).findElement(By.xpath("//*[text()='Connector']")).click();
+            driver.findElement(By.id("react-select-2-option-0")).click();
+            TimeUnit.SECONDS.sleep(2);
+
+            driver.findElement(By.id("to_connector")).findElement(By.xpath("//*[text()='Connector']")).click();
+            driver.findElement(By.id("react-select-3-option-1")).click();
+            TimeUnit.SECONDS.sleep(2);
+
+            driver.findElement(By.id("navigation_next")).click();
+
+            driver.findElement(By.id("navigation_next")).click();
+
+            driver.findElement(By.id("add_item_fromConnector")).click();
+            driver.findElement(By.id("items_menu_fromConnector")).click();
+            driver.findElement(By.id("react-select-4-option-0")).click();
+
+            driver.findElement(By.id("add_item_toConnector")).click();
+            driver.findElement(By.id("items_menu_toConnector")).click();
+            driver.findElement(By.id("react-select-5-option-1")).click();
+
+
+            TimeUnit.SECONDS.sleep(1);
+            driver.findElement(By.id("button_add")).click();
+            TimeUnit.SECONDS.sleep(2);
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            TimeUnit.SECONDS.sleep(3);
+
 
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
-       /* ;
-        ;
-        from_connector;
-        to_connector;
-        button_;
-        button_;*/
 
     }
 
