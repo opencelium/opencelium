@@ -1,10 +1,7 @@
 package tests;
 
 import constants.Constants;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
@@ -157,22 +154,79 @@ public class TestConnections {
 
 
             TimeUnit.SECONDS.sleep(1);
+
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
             driver.findElement(By.id("button_add")).click();
             TimeUnit.SECONDS.sleep(2);
             driver.findElement(By.xpath("//*[text()='Success']"));
             TimeUnit.SECONDS.sleep(3);
 
+            testCases.add(new TestCases("021","Create Connection Test","Pass"));
 
         } catch (Exception e) {
+            testCases.add(new TestCases("021","Create Connection Test","Fail"));
             e.printStackTrace();
             throw e;
         }
 
     }
 
+    @Test(priority = 3)
+    public void UpdateConnectionTest() throws Exception {
 
-    @AfterTest
-    public void afterTest() throws ParserConfigurationException {
+        try {
+            driver.findElement(By.linkText("Connections")).click();
+
+            //Successfully get connections list
+            driver.findElement(By.xpath("//*[text()='Success']"));
+
+            driver.findElement(By.id("button_update_0")).click();
+
+            driver.findElement(By.id("input_connection_title")).clear();
+            driver.findElement(By.id("input_connection_title")).sendKeys("TestConnection Edited");
+
+            driver.findElement(By.id("navigation_next")).click();
+
+            driver.findElement(By.id("button_update")).click();
+            TimeUnit.SECONDS.sleep(2);
+            driver.findElement(By.xpath("//*[text()='Success']"));
+
+            testCases.add(new TestCases("022","Update Connection Test","Pass"));
+
+        } catch (Exception e) {
+            testCases.add(new TestCases("022","Update Connection Test","Fail"));
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Test(priority = 4)
+    public void DeleteConnectionTest() throws InterruptedException {
+        try {
+            driver.findElement(By.linkText("Connections")).click();
+
+            //Successfully get connections list
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            TimeUnit.SECONDS.sleep(2);
+            driver.findElement(By.id("button_delete_0")).click();
+            TimeUnit.SECONDS.sleep(2);
+            driver.findElement(By.id("confirmation_ok")).click();; //confirmation_ok
+            TimeUnit.SECONDS.sleep(3);
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            testCases.add(new TestCases("023","Connection Delete","Pass"));
+
+        } catch (Exception e) {
+            testCases.add(new TestCases("023","Connection Delete","Fail"));
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+
+        @AfterTest
+        public void afterTest() throws ParserConfigurationException {
         driver.close();
         //write the test result to xml file with file name TestResult
         testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testCases);

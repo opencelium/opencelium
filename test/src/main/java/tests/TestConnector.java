@@ -219,7 +219,7 @@ public class TestConnector {
 
             driver.findElement(By.id("button_delete_0")).click();
 
-            driver.findElement(By.id("confirmation_cancel")); //confirmation_ok
+            driver.findElement(By.id("confirmation_cancel")).click(); //confirmation_ok
             testCases.add(new TestCases("018","Connector Delete","Pass"));
 
         } catch (Exception e) {
