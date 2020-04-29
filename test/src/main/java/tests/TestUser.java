@@ -78,6 +78,7 @@ public class TestUser {
         } catch (Exception e) {
             testCases.add(new TestCases("004","User Test Setup ","Fail"));
             e.printStackTrace();
+            throw e;
         }
 
     }
@@ -85,30 +86,18 @@ public class TestUser {
    @Test(priority = 1)
     public void LoginTest() throws InterruptedException {
         //driver.get(baseUrl+"login");
+       driver.navigate().to(mAppUrl +"login");
 
-        driver.navigate().to(mAppUrl +"login");
+       driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys(mLogin);
-        TimeUnit.SECONDS.sleep(2);
-
-        WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys(mPassword);
+       WebElement element_login=driver.findElement (By.id("login_email"));
+       element_login.sendKeys(mLogin);
        TimeUnit.SECONDS.sleep(2);
-        WebElement buttonConnect=driver.findElement(By.xpath("//button"));
-        buttonConnect.click();
-
-        /*Logs logs = driver.manage().logs();
-        LogEntries logEntries = logs.get(LogType.BROWSER);
-
-        System.out.println("LogEntry count: "+logEntries.getAll().size());
-        for (LogEntry logEntry : logEntries) {
-            System.out.println(logEntry.getMessage());
-        }*/
-
-
+       WebElement element_password=driver.findElement (By.id("login_password"));
+       element_password.sendKeys(mPassword);
+       TimeUnit.SECONDS.sleep(2);
+       WebElement buttonConnect=driver.findElement(By.xpath("//button"));
+       buttonConnect.click();
        TimeUnit.SECONDS.sleep(2);
 
        for (int second = 0;; second++) {
@@ -123,6 +112,7 @@ public class TestUser {
            catch (Exception e) {
                //add test case to the testcases list as Fail
                testCases.add(new TestCases("005","User Test Login","Fail"));
+               throw e;
            }
        }
 
@@ -133,92 +123,88 @@ public class TestUser {
    public void AddUserTest() throws InterruptedException {
 
         try {
+            WebElement elementU = driver.findElement(By.linkText("Users"));
+            elementU.click();
+            driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+            TimeUnit.SECONDS.sleep(2);
+            //PRESS Add User button
+           WebElement addUserButton = driver.findElement(By.id("button_add_user"));
+           addUserButton.click();
 
 
+           //driver.navigate().to(constants.Constants.BASE_URL+"users/add");
 
-       WebElement elementU = driver.findElement(By.linkText("Users"));
-        elementU.click();
+           driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+           WebElement emailField = driver.findElement(By.id("input_email"));
+           emailField.sendKeys("test@test.io");
+           TimeUnit.SECONDS.sleep(2);
 
-       TimeUnit.SECONDS.sleep(2);
-        //PRESS Add User button
-       WebElement addUserButton = driver.findElement(By.id("button_add_user"));
-       addUserButton.click();
+           WebElement passwordField = driver.findElement(By.id("input_password"));
+           passwordField.sendKeys("12345678");
 
+           WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
+           repeatField.sendKeys("12345678");
+           TimeUnit.SECONDS.sleep(2);
 
-       //driver.navigate().to(constants.Constants.BASE_URL+"users/add");
+           //PRESS -> button
+           WebElement nextArrow = driver.findElement(By.id("navigation_next"));
+           nextArrow.click();
 
-       driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+           WebElement nameField = driver.findElement(By.id("input_name"));
+           nameField.sendKeys("Selenium");
+           TimeUnit.SECONDS.sleep(1);
 
-       WebElement emailField = driver.findElement(By.id("input_email"));
-       emailField.sendKeys("test@test.io");
-       TimeUnit.SECONDS.sleep(2);
+           WebElement surnameField = driver.findElement(By.id("input_surname"));
+           surnameField.sendKeys("Tester");
+           TimeUnit.SECONDS.sleep(1);
 
-       WebElement passwordField = driver.findElement(By.id("input_password"));
-       passwordField.sendKeys("12345678");
+           WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
+           phoneField.sendKeys("+7777777");
+           TimeUnit.SECONDS.sleep(1);
 
-       WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
-       repeatField.sendKeys("12345678");
-       TimeUnit.SECONDS.sleep(2);
+           WebElement organisationField = driver.findElement(By.id("input_organisation"));
+           organisationField.sendKeys("Becon");
+           TimeUnit.SECONDS.sleep(1);
 
-       //PRESS -> button
-       WebElement nextArrow = driver.findElement(By.id("navigation_next"));
-       nextArrow.click();
+           WebElement departmentField = driver.findElement(By.id("input_department"));
+           departmentField.sendKeys("OpenCelium");
+           TimeUnit.SECONDS.sleep(1);
 
-       WebElement nameField = driver.findElement(By.id("input_name"));
-       nameField.sendKeys("Selenium");
-       TimeUnit.SECONDS.sleep(1);
+           //Select title
 
-       WebElement surnameField = driver.findElement(By.id("input_surname"));
-       surnameField.sendKeys("Tester");
-       TimeUnit.SECONDS.sleep(1);
+           //Press ->
+           WebElement nextArrow1 = driver.findElement(By.id("navigation_next"));
+           nextArrow1.click();
 
-       WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
-       phoneField.sendKeys("+7777777");
-       TimeUnit.SECONDS.sleep(1);
+           //Set user group
+           WebElement userGroup = driver.findElement(By.id("input_userGroup"));
 
-       WebElement organisationField = driver.findElement(By.id("input_organisation"));
-       organisationField.sendKeys("Becon");
-       TimeUnit.SECONDS.sleep(1);
+           Actions act = new Actions(driver);
 
-       WebElement departmentField = driver.findElement(By.id("input_department"));
-       departmentField.sendKeys("OpenCelium");
-       TimeUnit.SECONDS.sleep(1);
+           act.clickAndHold(userGroup);
 
-       //Select title
+           userGroup.click();
 
-       //Press ->
-       WebElement nextArrow1 = driver.findElement(By.id("navigation_next"));
-       nextArrow1.click();
-
-       //Set user group
-       WebElement userGroup = driver.findElement(By.id("input_userGroup"));
-
-       Actions act = new Actions(driver);
-
-       act.clickAndHold(userGroup);
-
-       userGroup.click();
-
-       WebElement userRole = driver.findElement(By.id("react-select-2-option-2"));
-       userRole.click();
-       TimeUnit.SECONDS.sleep(1);
-       //System.out.println("VALUE "+userGroup.getAttribute("value"));
+           WebElement userRole = driver.findElement(By.id("react-select-2-option-2"));
+           userRole.click();
+           TimeUnit.SECONDS.sleep(1);
+           //System.out.println("VALUE "+userGroup.getAttribute("value"));
 
 
-       //Press Add button
+           //Press Add button
 
-       WebElement buttonAdd = driver.findElement(By.id("button_add"));
-       buttonAdd.click();
-       TimeUnit.SECONDS.sleep(1);
-       WebElement elementUsers=driver.findElement (By.linkText("Users"));
+           WebElement buttonAdd = driver.findElement(By.id("button_add"));
+           buttonAdd.click();
+           TimeUnit.SECONDS.sleep(1);
+           WebElement elementUsers=driver.findElement (By.linkText("Users"));
 
-       Assert.assertNotNull(elementUsers);
-       testCases.add(new TestCases("006","User Create","Pass"));
+           Assert.assertNotNull(elementUsers);
+           testCases.add(new TestCases("006","User Create","Pass"));
         } catch (Exception e) {
             testCases.add(new TestCases("006","User Create","Fail"));
             e.printStackTrace();
+            throw e;
         }
 
        //Check if user added successfully
@@ -228,92 +214,91 @@ public class TestUser {
     public void UpdateUserTest() throws InterruptedException {
 
         try {
+            WebElement elementU = driver.findElement(By.linkText("Users"));
+
+            elementU.click();
+
+            driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+            //Find "Selenium Tester" user div
+            TimeUnit.SECONDS.sleep(2);
+            //Find update button for selected user
+            WebElement elementUpdate = driver.findElement(By.id("button_update_1"));
+            elementUpdate.click();
+
+            //Change Fields if needed
+            WebElement emailField = driver.findElement(By.id("input_email"));
+            emailField.clear();
+            emailField.sendKeys("test123@test.io");
+            TimeUnit.SECONDS.sleep(1);
+
+            WebElement passwordField = driver.findElement(By.id("input_password"));
+            passwordField.sendKeys("12345678");
 
 
-        WebElement elementU = driver.findElement(By.linkText("Users"));
+            WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
+            repeatField.sendKeys("12345678");
+            TimeUnit.SECONDS.sleep(1);
 
-        elementU.click();
+            //PRESS -> button
+            WebElement nextArrow = driver.findElement(By.id("navigation_next"));
+            nextArrow.click();
 
-        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+            WebElement nameField = driver.findElement(By.id("input_name"));
+            nameField.clear();
+            nameField.sendKeys("SeleniumEdited123");
+            TimeUnit.SECONDS.sleep(1);
 
-        //Find "Selenium Tester" user div
-        TimeUnit.SECONDS.sleep(2);
-        //Find update button for selected user
-        WebElement elementUpdate = driver.findElement(By.id("button_update_1"));
-        elementUpdate.click();
+            WebElement surnameField = driver.findElement(By.id("input_surname"));
+            surnameField.clear();
+            surnameField.sendKeys("Tester");
+            TimeUnit.SECONDS.sleep(1);
 
-        //Change Fields if needed
-        WebElement emailField = driver.findElement(By.id("input_email"));
-        emailField.clear();
-        emailField.sendKeys("test123@test.io");
-        TimeUnit.SECONDS.sleep(1);
+            WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
+            phoneField.clear();
+            phoneField.sendKeys("+999999999");
 
-        WebElement passwordField = driver.findElement(By.id("input_password"));
-        passwordField.sendKeys("12345678");
+            WebElement organisationField = driver.findElement(By.id("input_organisation"));
+            organisationField.clear();
+            organisationField.sendKeys("Becon Edited");
+            TimeUnit.SECONDS.sleep(1);
 
+            WebElement departmentField = driver.findElement(By.id("input_department"));
+            departmentField.clear();
+            departmentField.sendKeys("OpenCelium Edited");
+            TimeUnit.SECONDS.sleep(1);
 
-        WebElement repeatField = driver.findElement(By.id("input_repeatPassword"));
-        repeatField.sendKeys("12345678");
-        TimeUnit.SECONDS.sleep(1);
+            //PRESS -> button
+            WebElement nextArrowNext = driver.findElement(By.id("navigation_next"));
+            nextArrowNext.click();
 
-        //PRESS -> button
-        WebElement nextArrow = driver.findElement(By.id("navigation_next"));
-        nextArrow.click();
+            //Set User group
+            //Set user group
+            WebElement userGroup = driver.findElement(By.id("input_userGroup"));
 
-        WebElement nameField = driver.findElement(By.id("input_name"));
-        nameField.clear();
-        nameField.sendKeys("SeleniumEdited123");
-        TimeUnit.SECONDS.sleep(1);
+            Actions act = new Actions(driver);
 
-        WebElement surnameField = driver.findElement(By.id("input_surname"));
-        surnameField.clear();
-        surnameField.sendKeys("Tester");
-        TimeUnit.SECONDS.sleep(1);
+            act.clickAndHold(userGroup);
 
-        WebElement phoneField = driver.findElement(By.id("input_phoneNumber"));
-        phoneField.clear();
-        phoneField.sendKeys("+999999999");
+            userGroup.click();
 
-        WebElement organisationField = driver.findElement(By.id("input_organisation"));
-        organisationField.clear();
-        organisationField.sendKeys("Becon Edited");
-        TimeUnit.SECONDS.sleep(1);
+            //Change to Moderator
+            WebElement userRole = driver.findElement(By.id("react-select-3-option-1"));
+            userRole.click();
 
-        WebElement departmentField = driver.findElement(By.id("input_department"));
-        departmentField.clear();
-        departmentField.sendKeys("OpenCelium Edited");
-        TimeUnit.SECONDS.sleep(1);
+            //Press Update Button
+            WebElement buttonUpdate = driver.findElement(By.id("button_update"));
+            buttonUpdate.click();
+            //Check if succesfully modified
+            Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
 
-        //PRESS -> button
-        WebElement nextArrowNext = driver.findElement(By.id("navigation_next"));
-        nextArrowNext.click();
-
-        //Set User group
-        //Set user group
-        WebElement userGroup = driver.findElement(By.id("input_userGroup"));
-
-        Actions act = new Actions(driver);
-
-        act.clickAndHold(userGroup);
-
-        userGroup.click();
-
-        //Change to Moderator
-        WebElement userRole = driver.findElement(By.id("react-select-3-option-1"));
-        userRole.click();
-
-        //Press Update Button
-        WebElement buttonUpdate = driver.findElement(By.id("button_update"));
-        buttonUpdate.click();
-        //Check if succesfully modified
-        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='SeleniumEdited123 Tester']")));
-
-        testCases.add(new TestCases("007","User Update","Pass"));
-        TimeUnit.SECONDS.sleep(2);
+            testCases.add(new TestCases("007","User Update","Pass"));
+            TimeUnit.SECONDS.sleep(2);
 
         } catch (Exception e) {
             testCases.add(new TestCases("007","User Update","Fail"));
             e.printStackTrace();
+            throw e;
         }
 
     }
@@ -350,6 +335,8 @@ public class TestUser {
         } catch (Exception e) {
             testCases.add(new TestCases("008","User Delete","Fail"));
             e.printStackTrace();
+
+            throw e;
         }
 
     }

@@ -1,10 +1,7 @@
 package tests;
 
 import constants.Constants;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
@@ -105,7 +102,7 @@ public class TestConnector {
             if (second >= 5) Assert.fail("timeout");
 
             try {
-                assertNotNull(driver.findElement(By.linkText("Users")));
+                assertNotNull(driver.findElement(By.linkText("Connectors")));
                 //add test case to the testcases list as pass
                 testCases.add(new TestCases("015","Connector Test Login","Pass"));
                 break;
@@ -114,6 +111,48 @@ public class TestConnector {
                 //add test case to the testcases list as Fail
                 testCases.add(new TestCases("015","Connector Test Login","Fail"));
             }
+        }
+    }
+
+
+    @Test(priority = 2)
+    public void AddConnectorTest() throws Exception {
+        try {
+            driver.findElement(By.linkText("Connectors")).click();
+            driver.findElement(By.id("button_add_connector")).click();
+
+            driver.findElement(By.id("input_title")).sendKeys("TestOTRS");
+            driver.findElement(By.id("input_description")).sendKeys("TestOTRS Description");
+
+            driver.findElement(By.id("input_invoker")).click();
+
+            //Choosing OTRS
+            driver.findElement(By.id("react-select-2-option-2")).click();
+            TimeUnit.SECONDS.sleep(3);
+
+            driver.findElement(By.id("navigation_next")).click();
+
+            driver.findElement(By.id("input_otrs__url")).sendKeys("http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem");
+            driver.findElement(By.id("input_otrs__UserLogin")).sendKeys("root@localhost");
+            driver.findElement(By.id("input_otrs__Password")).sendKeys("init");
+            driver.findElement(By.id("input_otrs__WebService")).sendKeys("OC-Connector1");
+
+            driver.findElement(By.id("button_test")).click();
+
+            TimeUnit.SECONDS.sleep(5);
+
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            //http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem
+
+            //root@localhost
+            //init
+
+
+            testCases.add(new TestCases("016","Connector Create","Pass"));
+        } catch (Exception  e) {
+            testCases.add(new TestCases("016","Connector Create","Fail"));
+            e.printStackTrace();
+            throw e;
         }
     }
 

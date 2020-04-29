@@ -77,6 +77,7 @@ public class TestGroup {
         } catch (Exception e) {
             testCases.add(new TestCases("009","Group Test Setup ","Fail"));
             e.printStackTrace();
+            throw e;
         }
 
     }
@@ -106,7 +107,7 @@ public class TestGroup {
             if (second >= 5) Assert.fail("timeout");
 
             try {
-                assertNotNull(driver.findElement(By.linkText("Users")));
+                assertNotNull(driver.findElement(By.linkText("Groups")));
                 //add test case to the testcases list as pass
                 testCases.add(new TestCases("010","Group Test Login","Pass"));
                 break;
@@ -114,6 +115,7 @@ public class TestGroup {
             catch (Exception e) {
                 //add test case to the testcases list as Fail
                 testCases.add(new TestCases("010","Group Test Login","Fail"));
+                throw e;
             }
         }
 
@@ -125,8 +127,8 @@ public class TestGroup {
     @Test(priority = 2)
     public void AddGroupTest() throws InterruptedException {
         try {
-            WebElement elementU = driver.findElement(By.linkText("Groups"));
-            elementU.click();
+            WebElement elementG = driver.findElement(By.linkText("Groups"));
+            elementG.click();
 
             WebElement addGroupButton = driver.findElement(By.id("button_add_group"));
             addGroupButton.click();
@@ -172,6 +174,7 @@ public class TestGroup {
         } catch (Exception e) {
             testCases.add(new TestCases("011","Group Create","Fail"));
             e.printStackTrace();
+            throw e;
         }
 
     }
@@ -222,6 +225,7 @@ public class TestGroup {
         } catch (Exception e) {
             testCases.add(new TestCases("012","Group Update","Fail"));
             e.printStackTrace();
+            throw e;
         }
     }
 
@@ -249,6 +253,7 @@ public class TestGroup {
         } catch (Exception e) {
             testCases.add(new TestCases("013","Group Delete","Fail"));
             e.printStackTrace();
+            throw e;
         }
 
     }
