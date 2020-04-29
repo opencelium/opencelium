@@ -198,7 +198,9 @@ class DropdownMenu extends Component{
     }
 
     renderDropdown(isOperator){
+        const {connector} = this.props;
         const {dropdownValue, itemType} = this.state;
+        const connectorType = connector.getConnectorType();
         let source = this.getDropdownSource();
         let name = itemType === METHOD_ITEM ? 'Select method' : 'Select operator';
         let inputStyle = {float: 'left', width: '80%'};
@@ -209,6 +211,7 @@ class DropdownMenu extends Component{
             <div className={`${theme.input}`} style={inputStyle}>
                 <div className={`${theme.inputElement} ${theme.filled}`} style={{borderBottom: 'none'}}/>
                 <Select
+                    id={`items_menu_${connectorType}`}
                     name={name}
                     value={dropdownValue}
                     onChange={::this.onChange}
@@ -234,6 +237,7 @@ class DropdownMenu extends Component{
         const {itemType, showDropdown} = this.state;
         const {connector, authUser} = this.props;
         let currentItem = connector.getCurrentItem();
+        let connectorType = connector.getConnectorType();
         let dropdownMenuStyles = {};
         let isOperator = false;
         let inputMethodAddStyle = {width: '20%'};
@@ -254,7 +258,7 @@ class DropdownMenu extends Component{
         return (
             <div style={dropdownMenuStyles}>
                 <div style={{textAlign: 'center', marginBottom: '15px', marginTop: '15px'}}>
-                    <Button authUser={authUser} icon={showDropdown ? 'remove' : 'add'} onClick={::this.toggleDropdown}/>
+                    <Button authUser={authUser} icon={showDropdown ? 'remove' : 'add'} onClick={::this.toggleDropdown} id={`add_item_${connectorType}`}/>
                 </div>
                 <Dropdown showDropdown={showDropdown}>
                     <ItemsMenu
