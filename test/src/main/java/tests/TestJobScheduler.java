@@ -115,6 +115,55 @@ public class TestJobScheduler {
         }
     }
 
+    @Test(priority = 3)
+    public void StartJobTest() throws Exception {
+        try{
+            driver.findElement(By.id("input_check_0")).click();
+            TimeUnit.SECONDS.sleep(3);
+            driver.findElement(By.id("schedule_start_0")).click();
+            TimeUnit.SECONDS.sleep(3);
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            testCases.add(new TestCases("027","Start Job Test","Pass"));
+        } catch (Exception e) {
+            testCases.add(new TestCases("027","Start Job Test","Fail"));
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Test(priority = 4)
+    public void DisableJobTest() throws Exception {
+        try{
+            //driver.findElement(By.id("input_check_0")).click();
+            TimeUnit.SECONDS.sleep(3);
+            driver.findElement(By.id("button_disable")).click();
+            TimeUnit.SECONDS.sleep(3);
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            testCases.add(new TestCases("028","Disable Job Test","Pass"));
+        } catch (Exception e) {
+            testCases.add(new TestCases("028","Disable Job Test","Fail"));
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+
+    @Test(priority = 5)
+    public void DeleteJobTest() throws Exception {
+        try{
+            //driver.findElement(By.id("input_check_0")).click();
+            TimeUnit.SECONDS.sleep(3);
+            driver.findElement(By.id("button_delete")).click();
+            TimeUnit.SECONDS.sleep(3);
+            driver.findElement(By.xpath("//*[text()='Success']"));
+            testCases.add(new TestCases("029","Delete Job Test","Pass"));
+        } catch (Exception e) {
+            testCases.add(new TestCases("029","Delete Job Test","Fail"));
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
 
 
 
