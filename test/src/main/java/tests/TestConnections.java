@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import utility.CommonCaseUtility;
 import utility.TestCases;
 import utility.TestResultXmlUtility;
 
@@ -86,7 +87,7 @@ public class TestConnections {
     public void ConnectionLoginTest() throws Exception {
         //driver.get(baseUrl+"login");
 
-        driver.navigate().to(mAppUrl +"login");
+      /*  driver.navigate().to(mAppUrl +"login");
 
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
@@ -116,7 +117,8 @@ public class TestConnections {
                 testCases.add(new TestCases("020","Connections Test Login","Fail"));
                 throw e;
             }
-        }
+        }*/
+        CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"020","Connections Test Login");
     }
 
 
@@ -223,6 +225,7 @@ public class TestConnections {
             throw e;
         }
     }
+
 
 
         @AfterTest

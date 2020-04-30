@@ -14,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import utility.CommonCaseUtility;
 import utility.TestCases;
 import utility.TestResultXmlUtility;
 
@@ -85,38 +86,7 @@ public class TestUser {
 
    @Test(priority = 1)
     public void LoginTest() throws InterruptedException {
-        //driver.get(baseUrl+"login");
-       driver.navigate().to(mAppUrl +"login");
-
-       driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
-       WebElement element_login=driver.findElement (By.id("login_email"));
-       element_login.sendKeys(mLogin);
-       TimeUnit.SECONDS.sleep(2);
-       WebElement element_password=driver.findElement (By.id("login_password"));
-       element_password.sendKeys(mPassword);
-       TimeUnit.SECONDS.sleep(2);
-       WebElement buttonConnect=driver.findElement(By.xpath("//button"));
-       buttonConnect.click();
-       TimeUnit.SECONDS.sleep(2);
-
-       for (int second = 0;; second++) {
-           if (second >= 5) Assert.fail("timeout");
-
-           try {
-               assertNotNull(driver.findElement(By.linkText("Users")));
-               //add test case to the testcases list as pass
-               testCases.add(new TestCases("005","User Test Login","Pass"));
-               break;
-           }
-           catch (Exception e) {
-               //add test case to the testcases list as Fail
-               testCases.add(new TestCases("005","User Test Login","Fail"));
-               throw e;
-           }
-       }
-
-
+       CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"005","User Test Login");
     }
 
    @Test(priority = 2)

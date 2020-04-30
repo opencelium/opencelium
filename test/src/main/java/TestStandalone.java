@@ -52,7 +52,7 @@ public class TestStandalone {
 
     }
 
-    private static void LoginTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException {
+    private static void LoginTest(String login, String password, String hubUrl, String appUrl) throws MalformedURLException, InterruptedException {
         TestLoginout testLogin = new TestLoginout();
         testLogin.setUp();
         testLogin.LoginTest();
@@ -89,6 +89,10 @@ public class TestStandalone {
 
         testGroup.afterTest();
 
+    }
+
+    private static void ConnectorTest(){
+        
     }
 
 

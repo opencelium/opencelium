@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import utility.CommonCaseUtility;
 import utility.TestCases;
 import utility.TestResultXmlUtility;
 
@@ -81,7 +82,7 @@ public class TestConnector {
 
     @Test(priority = 1)
     public void ConnectorLoginTest() throws Exception {
-        //driver.get(baseUrl+"login");
+       /* //driver.get(baseUrl+"login");
 
         driver.navigate().to(mAppUrl +"login");
 
@@ -113,7 +114,8 @@ public class TestConnector {
                 testCases.add(new TestCases("015","Connector Test Login","Fail"));
                 throw e;
             }
-        }
+        }*/
+        CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"015","Connector Test Login");
     }
 
 
@@ -122,11 +124,13 @@ public class TestConnector {
         try {
             driver.findElement(By.linkText("Connectors")).click();
 
+            TimeUnit.SECONDS.sleep(3);
             //Successfully get connections list
             driver.findElement(By.xpath("//*[text()='Success']"));
 
 
             driver.findElement(By.id("button_add_connector")).click();
+            TimeUnit.SECONDS.sleep(3);
 
             driver.findElement(By.id("input_title")).sendKeys("TestOTRS");
             driver.findElement(By.id("input_description")).sendKeys("TestOTRS Description");
@@ -138,7 +142,7 @@ public class TestConnector {
             TimeUnit.SECONDS.sleep(3);
 
             driver.findElement(By.id("navigation_next")).click();
-
+            TimeUnit.SECONDS.sleep(3);
             driver.findElement(By.id("input_otrs__url")).sendKeys("http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem");
             driver.findElement(By.id("input_otrs__UserLogin")).sendKeys("root@localhost");
             driver.findElement(By.id("input_otrs__Password")).sendKeys("init");
@@ -168,12 +172,14 @@ public class TestConnector {
     public void UpdateConnectorTest() throws InterruptedException {
         try {
             driver.findElement(By.linkText("Connectors")).click();
-
+            TimeUnit.SECONDS.sleep(3);
             //Successfully get connections list
             driver.findElement(By.xpath("//*[text()='Success']"));
 
 
             driver.findElement(By.id("button_update_0")).click();
+
+            TimeUnit.SECONDS.sleep(3);
 
             //driver.findElement(By.id("input_title")).sendKeys("TestOTRS");
             driver.findElement(By.id("input_description")).sendKeys(" Description Edited");
@@ -214,6 +220,7 @@ public class TestConnector {
         try {
             driver.findElement(By.linkText("Connectors")).click();
 
+            TimeUnit.SECONDS.sleep(3);
             //Successfully get connections list
             driver.findElement(By.xpath("//*[text()='Success']"));
 
