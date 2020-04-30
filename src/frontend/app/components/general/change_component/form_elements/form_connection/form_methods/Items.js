@@ -180,6 +180,7 @@ class Items extends Component{
         return (
             <div className={styles.items}>
                 <InputHierarchy
+                    id={`input_hierarchy_${connector.getConnectorType()}`}
                     hierarchy={connector.getObject()}
                     currentItem={connector.getCurrentItem()}
                     onItemClick={::this.setCurrentItem}

@@ -290,6 +290,7 @@ class ConnectionAdd extends Component{
                     placeholders: [t('ADD.FORM.CHOSEN_CONNECTOR_FROM'), t('ADD.FORM.CHOSEN_CONNECTOR_TO')],
                     source: connectorMenuItems,
                     readOnly: true,
+                    hasAddMethod: true,
                 },
                 {
                     ...INPUTS.METHODS,

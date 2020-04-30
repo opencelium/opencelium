@@ -214,18 +214,18 @@ class FormMode extends Component{
         newTemplate.template = template.value;
         let templateContent = CConnection.createConnection(template.content);
         //fromConnector
-        templateContent.fromConnector.setCurrentItem(templateContent.fromConnector.methods[templateContent.fromConnector.methods.length - 1]);
         let connector = connectors.find(c => c.id === templateContent.fromConnector.id);
         templateContent.fromConnector.invoker = connector.invoker;
+        templateContent.fromConnector.setCurrentItem(templateContent.fromConnector.methods[templateContent.fromConnector.methods.length - 1]);
         templateContent.fromConnector.setConnectorType(CONNECTOR_FROM);
         templateContent.fromConnector.title = entity.fromConnector.title;
         entity.fromConnector = templateContent.fromConnector;
         //toConnector
-        templateContent.toConnector.setCurrentItem(templateContent.toConnector.methods[templateContent.toConnector.methods.length - 1]);
         connector = connectors.find(c => c.id === templateContent.toConnector.id);
         templateContent.toConnector.invoker = connector.invoker;
         templateContent.toConnector.setConnectorType(CONNECTOR_TO);
         templateContent.toConnector.title = entity.toConnector.title;
+        templateContent.toConnector.setCurrentItem(templateContent.toConnector.methods[templateContent.toConnector.methods.length - 1]);
         entity.toConnector = templateContent.toConnector;
         //fieldBinding
         entity.fieldBinding = templateContent.fieldBinding;

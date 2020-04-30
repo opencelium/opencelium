@@ -134,6 +134,7 @@ class FormConnectors extends Component{
     }
 
     renderFromInvoker(){
+        const {hasAddMethod} = this.props.data;
         const {isFromInvokerOpened, fromWillDisappear} = this.state;
         if(!isFromInvokerOpened){
             return null;
@@ -142,12 +143,13 @@ class FormConnectors extends Component{
         let invoker = entity.fromConnector.invoker;
         return(
             <div className={`${styles.form_connector_from_invoker} ${fromWillDisappear ? styles.form_connector_from_invoker_disappear : styles.form_connector_from_invoker_appear}`}>
-                <FormOperations entity={invoker} connector={entity.fromConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={::this.addMethod}/>
+                <FormOperations entity={invoker} connector={entity.fromConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={hasAddMethod === true ? ::this.addMethod : null}/>
             </div>
         );
     }
 
     renderToInvoker(){
+        const {hasAddMethod} = this.props.data;
         const {isToInvokerOpened, toWillDisappear} = this.state;
         if(!isToInvokerOpened){
             return null;
@@ -156,7 +158,7 @@ class FormConnectors extends Component{
         let invoker = entity.toConnector.invoker;
         return(
             <div className={`${styles.form_connector_to_invoker} ${toWillDisappear ? styles.form_connector_to_invoker_disappear : styles.form_connector_to_invoker_appear}`}>
-                <FormOperations entity={invoker} connector={entity.toConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={::this.addMethod}/>
+                <FormOperations entity={invoker} connector={entity.toConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={hasAddMethod === true ? ::this.addMethod : null}/>
             </div>
         );
     }

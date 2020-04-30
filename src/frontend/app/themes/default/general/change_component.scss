@@ -600,13 +600,10 @@
 .invoker_operation_add_icon{
   cursor: pointer;
   position: absolute;
-  right: 0;
 }
 .invoker_operation_add_method_radio{
   position: absolute;
-  right: 0;
   padding: 2px 2px 0 0;
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
   .radio_field{
     font-family: $FONT_FAMILY;
     text-align: left !important;
@@ -614,21 +611,47 @@
     height: 13px !important;
   }
   .radio_radio{
-    float: right;
     font-family: $FONT_FAMILY;
     width: 12px !important;
     height: 12px !important;
     border: 1px solid rgb(0, 0, 0);
     background: white;
   }
-  .radio_text{
+  .radio_radio_from_connector{
+    @extend .radio_radio;
     float: right;
+  }
+  .radio_radio_to_connector{
+    @extend .radio_radio;
+    float: left;
+  }
+  .radio_text{
     font-family: $FONT_FAMILY;
     line-height: 12px !important;
-    margin-right: 2px !important;
+  }
+  .radio_text_from_connector{
+    @extend .radio_text;
+    float: right;
+    padding: 0 0 0 10px !important;
+    margin: 0 2px 0 0 !important;
+  }
+  .radio_text_to_connector{
+    @extend .radio_text;
+    float: left;
+    padding: 0 10px 0 0 !important;
+    margin: 0 0 0 2px !important;
   }
 }
-
+.invoker_operation_add_method_radio_from_connector{
+  @extend .invoker_operation_add_method_radio;
+  right: 0;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
+}
+.invoker_operation_add_method_radio_to_connector{
+  @extend .invoker_operation_add_method_radio;
+  left: 0;
+  background-image: linear-gradient(to left, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
+}
 .invoker_request_item_method{
   background: #eeeeee;
   padding: 5px 20px;
@@ -663,7 +686,6 @@
 
 .invoker_item_method_for_connection{
   font-size: $FONT_SIZE_TINY;
-  float: left;
   padding: 1px;
   width: 50px;
   text-align: center;
@@ -698,7 +720,7 @@
   font-family: $FONT_FAMILY;
 }
 .invoker_item_name_for_connection{
-  margin-left: 5px;
+  margin: 0 5px;
   font-family: $FONT_FAMILY;
   text-overflow: ellipsis;
   white-space: nowrap;
