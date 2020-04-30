@@ -15,6 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import utility.CommonCaseUtility;
 import utility.TestCases;
 import utility.TestResultXmlUtility;
 
@@ -84,42 +85,7 @@ public class TestGroup {
 
     @Test(priority = 1)
     public void LoginTest() throws InterruptedException {
-        //driver.get(baseUrl+"login");
-
-        driver.navigate().to(mAppUrl +"login");
-
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys(mLogin);
-        TimeUnit.SECONDS.sleep(2);
-
-        WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys(mPassword);
-        TimeUnit.SECONDS.sleep(2);
-        WebElement buttonConnect=driver.findElement(By.xpath("//button"));
-        buttonConnect.click();
-
-
-        TimeUnit.SECONDS.sleep(2);
-
-        for (int second = 0;; second++) {
-            if (second >= 5) Assert.fail("timeout");
-
-            try {
-                assertNotNull(driver.findElement(By.linkText("Groups")));
-                //add test case to the testcases list as pass
-                testCases.add(new TestCases("010","Group Test Login","Pass"));
-                break;
-            }
-            catch (Exception e) {
-                //add test case to the testcases list as Fail
-                testCases.add(new TestCases("010","Group Test Login","Fail"));
-                throw e;
-            }
-        }
-
-
+        CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"010","Group Test Login");
     }
 
 
@@ -130,8 +96,15 @@ public class TestGroup {
             WebElement elementG = driver.findElement(By.linkText("Groups"));
             elementG.click();
 
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
+            TimeUnit.SECONDS.sleep(2);
+
             WebElement addGroupButton = driver.findElement(By.id("button_add_group"));
             addGroupButton.click();
+
+            TimeUnit.SECONDS.sleep(2);
 
             WebElement inputRole = driver.findElement(By.id("input_role"));
             inputRole.sendKeys("tests.TestGroup");
@@ -141,6 +114,8 @@ public class TestGroup {
 
             WebElement buttonNext = driver.findElement(By.id("navigation_next"));
             buttonNext.click();
+
+            TimeUnit.SECONDS.sleep(2);
 
             WebElement setRoles = driver.findElement(By.id("input_components"));
             setRoles.click();
@@ -156,6 +131,7 @@ public class TestGroup {
             WebElement buttonNext1 = driver.findElement(By.id("navigation_next"));
             buttonNext1.click();
 
+            TimeUnit.SECONDS.sleep(2);
             WebElement checkBoxAdmin = driver.findElement(By.id("input_admin"));
             JavascriptExecutor executor = (JavascriptExecutor)driver;
             executor.executeScript("arguments[0].click();", checkBoxAdmin);
@@ -166,6 +142,7 @@ public class TestGroup {
             TimeUnit.SECONDS.sleep(3);
 
             driver.navigate().to(mAppUrl+"usergroups");
+            TimeUnit.SECONDS.sleep(3);
             Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='tests.TestGroup']")));
 
             testCases.add(new TestCases("011","Group Create","Pass"));
@@ -183,43 +160,45 @@ public class TestGroup {
     public void UpdateGroupTest() throws InterruptedException {
 
         try {
+            WebElement buttonUpdate = driver.findElement(By.id("button_update_1"));
+            buttonUpdate.click();
+            TimeUnit.SECONDS.sleep(3);
 
+            WebElement inputRole = driver.findElement(By.id("input_role"));
+            inputRole.clear();
+            inputRole.sendKeys("tests.TestGroup Edited");
 
-        WebElement buttonUpdate = driver.findElement(By.id("button_update_1"));
-        buttonUpdate.click();
+            WebElement buttonNext = driver.findElement(By.id("navigation_next"));
+            buttonNext.click();
+            TimeUnit.SECONDS.sleep(3);
 
-        WebElement inputRole = driver.findElement(By.id("input_role"));
-        inputRole.clear();
-        inputRole.sendKeys("tests.TestGroup Edited");
+            WebElement setRoles = driver.findElement(By.id("input_components"));
+            Actions act = new Actions(driver);
 
-        WebElement buttonNext = driver.findElement(By.id("navigation_next"));
-        buttonNext.click();
+            act.clickAndHold(setRoles);
 
-        WebElement setRoles = driver.findElement(By.id("input_components"));
-        Actions act = new Actions(driver);
+            setRoles.click();
 
-        act.clickAndHold(setRoles);
+            WebElement groupPermDashboard = driver.findElement(By.id("react-select-2-option-6"));
+            groupPermDashboard.click();
 
-        setRoles.click();
+            WebElement buttonNext1 = driver.findElement(By.id("navigation_next"));
+            buttonNext1.click();
 
-        WebElement groupPermDashboard = driver.findElement(By.id("react-select-2-option-6"));
-        groupPermDashboard.click();
+            TimeUnit.SECONDS.sleep(3);
 
-        WebElement buttonNext1 = driver.findElement(By.id("navigation_next"));
-        buttonNext1.click();
+            WebElement checkBoxAdmin = driver.findElement(By.id("input_admin"));
+            JavascriptExecutor executor = (JavascriptExecutor)driver;
+            executor.executeScript("arguments[0].click();", checkBoxAdmin);
 
-        WebElement checkBoxAdmin = driver.findElement(By.id("input_admin"));
-        JavascriptExecutor executor = (JavascriptExecutor)driver;
-        executor.executeScript("arguments[0].click();", checkBoxAdmin);
+            WebElement buttonSave = driver.findElement(By.id("button_update"));
+            buttonSave.click();
 
-        WebElement buttonSave = driver.findElement(By.id("button_update"));
-        buttonSave.click();
+            TimeUnit.SECONDS.sleep(3);
 
-        TimeUnit.SECONDS.sleep(3);
+            Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='tests.TestGroup Edited']")));
 
-        Assert.assertNotNull(driver.findElement(By.xpath("//*[text()='tests.TestGroup Edited']")));
-
-        TimeUnit.SECONDS.sleep(3);
+            TimeUnit.SECONDS.sleep(3);
 
             testCases.add(new TestCases("012","Group Update","Pass"));
         } catch (Exception e) {

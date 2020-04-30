@@ -13,6 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import utility.CommonCaseUtility;
 import utility.TestCases;
 import utility.TestResultXmlUtility;
 
@@ -83,55 +84,13 @@ public class TestLoginout {
     }
 
     @Test(priority = 0)
-    public void LoginTest(){
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys(mLogin);
-        WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys(mPassword);
-        WebElement buttonConnect=driver.findElement(By.xpath("//button"));
-
-        buttonConnect.click();
-
-        for (int second = 0;; second++) {
-            if (second >= 20) Assert.fail("timeout");
-
-            try {
-                assertNotNull(driver.findElement(By.linkText("Users")));
-                //add test case to the testcases list as pass
-                testCases.add(new TestCases("002","Login Test","Pass"));
-                break;
-            }
-            catch (Exception e) {
-                //add test case to the testcases list as Fail
-                testCases.add(new TestCases("002","Login Test","Fail"));
-            }
-        }
-
+    public void LoginTest() throws InterruptedException {
+        CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"001","Login test");
     }
 
     @Test(priority = 1)
     public void LogoutTest(){
-        try {
-        WebElement buttonLogout=driver.findElement (By.id("menu_logout"));
-        Assert.assertNotNull(buttonLogout);
-        buttonLogout.click();
-
-
-        WebElement elementOk = driver.findElement(By.id("confirmation_ok"));
-
-        Assert.assertNotNull(elementOk);
-        elementOk.click();
-
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        Assert.assertNotNull(element_login);
-
-        testCases.add(new TestCases("003","Logout Test","Pass"));
-
-        } catch (Exception e) {
-            testCases.add(new TestCases("003","Logout Test","Fail"));
-            e.printStackTrace();
-        }
-
+        CommonCaseUtility.Logout(driver, testCases,"002","Logout test");
     }
 
     @AfterTest
