@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Render InvokerAdd Component it should show a subscription message 1`] = `
+<div
+  style={
+    Object {
+      "fontSize": "30px",
+      "marginTop": "150px",
+      "textAlign": "center",
+    }
+  }
+>
+  Sorry, you do not have a subscription to use this function
+</div>
+`;
