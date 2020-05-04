@@ -85,39 +85,7 @@ public class TestConnections {
 
     @Test(priority = 1)
     public void ConnectionLoginTest() throws Exception {
-        //driver.get(baseUrl+"login");
 
-      /*  driver.navigate().to(mAppUrl +"login");
-
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys(mLogin);
-        TimeUnit.SECONDS.sleep(2);
-
-        WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys(mPassword);
-        TimeUnit.SECONDS.sleep(2);
-        WebElement buttonConnect=driver.findElement(By.xpath("//button"));
-        buttonConnect.click();
-
-        TimeUnit.SECONDS.sleep(2);
-
-        for (int second = 0;; second++) {
-            if (second >= 5) Assert.fail("timeout");
-
-            try {
-                assertNotNull(driver.findElement(By.linkText("Connections")));
-                //add test case to the testcases list as pass
-                testCases.add(new TestCases("020","Connections Test Login","Pass"));
-                break;
-            }
-            catch (Exception e) {
-                //add test case to the testcases list as Fail
-                testCases.add(new TestCases("020","Connections Test Login","Fail"));
-                throw e;
-            }
-        }*/
         CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"020","Connections Test Login");
     }
 
@@ -129,9 +97,11 @@ public class TestConnections {
             driver.findElement(By.linkText("Connections")).click();
 
             //Successfully get connections list
+            TimeUnit.SECONDS.sleep(4);
             driver.findElement(By.xpath("//*[text()='Success']"));
             driver.findElement(By.id("button_add_connection")).click();
 
+            TimeUnit.SECONDS.sleep(2);
             driver.findElement(By.id("input_connection_title")).sendKeys("TestConnection");
 
             driver.findElement(By.id("from_connector")).findElement(By.xpath("//*[text()='Connector']")).click();
@@ -142,8 +112,12 @@ public class TestConnections {
             driver.findElement(By.id("react-select-3-option-1")).click();
             TimeUnit.SECONDS.sleep(2);
 
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
             driver.findElement(By.id("navigation_next")).click();
 
+            TimeUnit.SECONDS.sleep(3);
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
             driver.findElement(By.id("navigation_next")).click();
 
             driver.findElement(By.id("add_item_fromConnector")).click();
@@ -157,7 +131,7 @@ public class TestConnections {
 
             TimeUnit.SECONDS.sleep(1);
 
-            JavascriptExecutor js = (JavascriptExecutor) driver;
+            //JavascriptExecutor js = (JavascriptExecutor) driver;
             js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
             driver.findElement(By.id("button_add")).click();
@@ -181,18 +155,25 @@ public class TestConnections {
         try {
             driver.findElement(By.linkText("Connections")).click();
 
+            TimeUnit.SECONDS.sleep(7);
             //Successfully get connections list
-            driver.findElement(By.xpath("//*[text()='Success']"));
+            //driver.findElement(By.xpath("//*[text()='Success']"));
 
             driver.findElement(By.id("button_update_0")).click();
+
+            TimeUnit.SECONDS.sleep(3);
 
             driver.findElement(By.id("input_connection_title")).clear();
             driver.findElement(By.id("input_connection_title")).sendKeys("TestConnection Edited");
 
-            driver.findElement(By.id("navigation_next")).click();
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
 
+            driver.findElement(By.id("navigation_next")).click();
+            TimeUnit.SECONDS.sleep(3);
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
             driver.findElement(By.id("button_update")).click();
-            TimeUnit.SECONDS.sleep(2);
+            TimeUnit.SECONDS.sleep(3);
             driver.findElement(By.xpath("//*[text()='Success']"));
 
             testCases.add(new TestCases("022","Update Connection Test","Pass"));
@@ -208,9 +189,10 @@ public class TestConnections {
     public void DeleteConnectionTest() throws InterruptedException {
         try {
             driver.findElement(By.linkText("Connections")).click();
+            TimeUnit.SECONDS.sleep(5);
 
             //Successfully get connections list
-            driver.findElement(By.xpath("//*[text()='Success']"));
+            //driver.findElement(By.xpath("//*[text()='Success']"));
             TimeUnit.SECONDS.sleep(2);
             driver.findElement(By.id("button_delete_0")).click();
             TimeUnit.SECONDS.sleep(2);
