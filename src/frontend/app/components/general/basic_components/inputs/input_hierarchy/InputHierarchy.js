@@ -32,7 +32,7 @@ class InputHierarchy extends Component{
     }
 
     componentDidUpdate(prevProps){
-        if(prevProps.hierarchy.methods.length !== this.props.hierarchy.methods.length
+        if(!(this.state.currentItems instanceof CConnectorItem) || prevProps.hierarchy.methods.length !== this.props.hierarchy.methods.length
         || prevProps.hierarchy.operators.length !== this.props.hierarchy.operators.length) {
             const hierarchy = CConnectorItem.createConnectorItem(this.props.hierarchy);
             let items = this.sortItems(hierarchy);
@@ -64,6 +64,17 @@ class InputHierarchy extends Component{
             sortedItems.push(items.operators[i]);
         }
         return sortByIndex(sortedItems);
+    }
+
+    filterToggledItems(){
+        let items = this.sortItems();
+        let filteredItems = [];
+        for(let i = 0; i < items.length; i++){
+            if(!items[i].isToggled){
+                filteredItems.push(items[i]);
+            }
+        }
+        return filteredItems;
     }
 
     handleChange(searchValue){
@@ -113,7 +124,7 @@ class InputHierarchy extends Component{
 
     selectPrevItem(){
         const {selectedItemKey} = this.state;
-        let items = this.sortItems();
+        let items = this.filterToggledItems();
         if(selectedItemKey > 0) {
             this.setState({
                 selectedItemKey: selectedItemKey - 1,
@@ -124,7 +135,7 @@ class InputHierarchy extends Component{
 
     selectNextItem(){
         const {selectedItemKey} = this.state;
-        let items = this.sortItems();
+        let items = this.filterToggledItems();
         if(selectedItemKey < items.length - 1) {
             this.setState({
                 selectedItemKey: selectedItemKey + 1,
@@ -161,13 +172,14 @@ class InputHierarchy extends Component{
     }
 
     showSearch(){
+        const {id} = this.props;
         this.setState({inputClassName: styles.input_appear, searchClassName: styles.search_icon_disappear, hierarchyStyle: {zIndex: 100}});
-        setTimeout(() => {::this.showHierarchy(); setFocusById('input_hierarchy');}, 700);
+        setTimeout(() => {::this.showHierarchy(); setFocusById(id);}, 700);
     }
 
     render(){
         const {hierarchy, inputClassName, searchClassName, hierarchyStyle, searchValue, isVisibleHierarchy, searchLabel, selectedItem} = this.state;
-        const {currentItem} = this.props;
+        const {currentItem, id} = this.props;
         let isNotEmpty = hierarchy.methods.length !== 0 || hierarchy.operators.length !== 0;
         const searchDisable = hierarchy.operators.length === 0 && hierarchy.methods.length === 0;
         return(
@@ -175,8 +187,8 @@ class InputHierarchy extends Component{
                 <Input
                     onChange={::this.handleChange}
                     onKeyDown={::this.onKeyDown}
-                    name={'input_hierarchy'}
-                    id={'input_hierarchy'}
+                    name={id}
+                    id={id}
                     label={searchLabel}
                     type={'text'}
                     value={searchValue}
@@ -213,6 +225,7 @@ InputHierarchy.propTypes = {
 InputHierarchy.defaultProps = {
     onAppear: null,
     onDisappear: null,
+    id: '',
 };
 
 export default InputHierarchy;

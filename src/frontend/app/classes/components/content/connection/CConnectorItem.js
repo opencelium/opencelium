@@ -91,6 +91,7 @@ export default class CConnectorItem{
         this._operators = [];
         this._currentItem = null;
         this.reloadPagination();
+        this.reloadOperatorsHistory();
     }
 
     convertMethod(method){
