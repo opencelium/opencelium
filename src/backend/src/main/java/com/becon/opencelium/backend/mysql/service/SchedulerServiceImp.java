@@ -58,11 +58,16 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void save(Scheduler scheduler) {
-        schedulerRepository.save(scheduler);
+        if(quartzUtility.validateCronExpression(scheduler.getCronExp())) {
+            schedulerRepository.save(scheduler);
+        }
+        else{
+            throw new RuntimeException("BAD_CRON_EXPRESSION");
+        }
 
         try {
             quartzUtility.addJob(scheduler);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

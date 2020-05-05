@@ -193,6 +193,10 @@ public class QuartzUtility {
                         c -> c.getLongValue("connectionId")));
     }
 
+    public boolean validateCronExpression(String cronExpression){
+        return CronExpression.isValidExpression(cronExpression);
+    }
+
 
 // ======================================== private zone ============================================== //
 
