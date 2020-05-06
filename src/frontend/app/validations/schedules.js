@@ -38,3 +38,12 @@ export function validateAddSchedule(schedule){
     }
     return result;
 }
+
+/**
+ * @param notification
+ * to validate before add schedule notification
+ */
+export function validateAddScheduleNotification(notification){
+    let result = {success: true, message: ''};
+    return result;
+}

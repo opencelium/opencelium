@@ -55,6 +55,8 @@ import {
     startSchedulesEpic, enableSchedulesEpic, disableSchedulesEpic,
     updateScheduleStatusEpic, triggerScheduleEpic, triggerScheduleSuccessEpic,
     fetchCurrentSchedulesEpic, fetchSchedulesByIdsEpic,
+    fetchScheduleNotificationEpic, fetchScheduleNotificationsEpic,
+    addScheduleNotificationEpic, updateScheduleNotificationEpic, deleteScheduleNotificationEpic,
 } from '../epics/schedules';
 import {
     addWebHookEpic, updateWebHookEpic, deleteWebHookEpic,
@@ -121,6 +123,11 @@ export default combineEpics(
     fetchSchedulesEpic,
     fetchCurrentSchedulesEpic,
     fetchSchedulesByIdsEpic,
+    fetchScheduleNotificationEpic,
+    fetchScheduleNotificationsEpic,
+    addScheduleNotificationEpic,
+    updateScheduleNotificationEpic,
+    deleteScheduleNotificationEpic,
     addScheduleEpic,
     updateScheduleEpic,
     deleteScheduleEpic,

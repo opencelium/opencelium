@@ -29,6 +29,26 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
+const notifications = [
+    {
+        id: 1,
+        eventType: 'pre',
+        notificationType: 'email',
+        template: {id: 1, name: 'template name 1'},
+    },
+    {
+        id: 2,
+        eventType: 'post',
+        notificationType: 'email',
+        template: {id: 2, name: 'template name 2',},
+    },
+    {
+        id: 3,
+        eventType: 'pre',
+        notificationType: 'slack',
+        template: {id: 3, name: 'template name 3',},
+    }
+];
 
 /**
  * to format html id
@@ -595,6 +615,7 @@ function mapConnection(connection){
     return connection;
 }
 function mapSchedule(schedule){
+    schedule.notifications = notifications;
     return schedule;
 }
 function mapConnector(connector){

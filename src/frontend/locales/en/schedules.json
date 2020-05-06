@@ -3,6 +3,20 @@
     "TITLE": "Scheduler"
   },
   "HEADER": "Scheduler",
+  "NOTIFICATION": {
+    "EVENT_TYPE": "Event Type",
+    "NOTIFICATION_TYPE": "Notification Type",
+    "TEMPLATE": "Template",
+    "ACTION": "Action",
+    "EVENT_PRE": "Pre",
+    "EVENT_POST": "Post",
+    "UPDATE": "Update",
+    "DELETE": "Delete",
+    "TYPE": {
+      "EMAIL": "E-Mail",
+      "SLACK": "Slack"
+    }
+  },
   "LIST":{
     "EMPTY_LIST": "The list of Schedulers is empty",
     "EMPTY_CURRENT_LIST": "The list of current jobs is empty",
@@ -10,6 +24,7 @@
     "TOOLTIP_ENABLE_SWITCH_TRUE": "Enable",
     "TOOLTIP_ENABLE_SWITCH_FALSE": "Disable",
     "TOOLTIP_UPDATE_ICON": "Update",
+    "TOOLTIP_NOTIFICATION_ICON": "Notifications",
     "TOOLTIP_DELETE_ICON": "Delete",
     "STATUS_ON": "On",
     "STATUS_OFF": "Off",
