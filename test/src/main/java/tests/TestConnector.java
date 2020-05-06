@@ -132,27 +132,7 @@ public class TestConnector {
             driver.findElement(By.id("button_add_connector")).click();
             TimeUnit.SECONDS.sleep(3);
 
-            driver.findElement(By.id("input_title")).sendKeys("TestOTRS");
-            driver.findElement(By.id("input_description")).sendKeys("TestOTRS Description");
-
-            driver.findElement(By.id("input_invoker")).click();
-
-            //Choosing OTRS
-            driver.findElement(By.id("react-select-2-option-2")).click();
-            TimeUnit.SECONDS.sleep(3);
-
-            //Scrolling the page
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
-
-            driver.findElement(By.id("navigation_next")).click();
-            TimeUnit.SECONDS.sleep(3);
-            driver.findElement(By.id("input_otrs__url")).sendKeys("http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem");
-            driver.findElement(By.id("input_otrs__UserLogin")).sendKeys("root@localhost");
-            driver.findElement(By.id("input_otrs__Password")).sendKeys("init");
-            driver.findElement(By.id("input_otrs__WebService")).sendKeys("OC-Connector1");
-
-            driver.findElement(By.id("button_test")).click();
+            addIdoit();
 
             TimeUnit.SECONDS.sleep(5);
 
@@ -248,4 +228,151 @@ public class TestConnector {
         //write the test result to xml file with file name TestResult
         testResultXmlUtility.WriteTestResultToXml("TestResult.xml", testCases);
     }
+
+
+    private void addOtrs() throws InterruptedException {
+        driver.findElement(By.id("input_title")).sendKeys("TestOTRS");
+        driver.findElement(By.id("input_description")).sendKeys("TestOTRS Description");
+
+        driver.findElement(By.id("input_invoker")).click();
+
+        //Choosing OTRS
+        driver.findElement(By.id("react-select-2-option-2")).click();
+        TimeUnit.SECONDS.sleep(3);
+
+        //Scrolling the page
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
+        driver.findElement(By.id("navigation_next")).click();
+        TimeUnit.SECONDS.sleep(3);
+        driver.findElement(By.id("input_otrs__url")).sendKeys("http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem");
+        driver.findElement(By.id("input_otrs__UserLogin")).sendKeys("root@localhost");
+        driver.findElement(By.id("input_otrs__Password")).sendKeys("init");
+        driver.findElement(By.id("input_otrs__WebService")).sendKeys("OC-Connector1");
+
+        driver.findElement(By.id("button_test")).click();
+    }
+
+
+    private void addIcinga2() throws InterruptedException {
+        driver.findElement(By.id("input_title")).sendKeys("TestIcinga2");
+        driver.findElement(By.id("input_description")).sendKeys("TestIcinga2 Description");
+
+        driver.findElement(By.id("input_invoker")).click();
+
+        //Choosing icinga
+        driver.findElement(By.id("react-select-2-option-1")).click();
+        TimeUnit.SECONDS.sleep(3);
+
+        //Scrolling the page
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
+        driver.findElement(By.id("navigation_next")).click();
+        TimeUnit.SECONDS.sleep(3);
+        driver.findElement(By.id("input_icinga2__url")).sendKeys("http://icinga2.url");
+        driver.findElement(By.id("input_icinga2__username")).sendKeys("icinga2 username");
+        driver.findElement(By.id("input_icinga2__password")).sendKeys("icinga2 password");
+
+        driver.findElement(By.id("button_test")).click();
+    }
+
+    private void addZabbix() throws InterruptedException{
+        driver.findElement(By.id("input_title")).sendKeys("TestZabbix");
+        driver.findElement(By.id("input_description")).sendKeys("TestZabbix Description");
+
+        driver.findElement(By.id("input_invoker")).click();
+
+        //Choosing Zabbix
+        driver.findElement(By.id("react-select-2-option-3")).click();
+        TimeUnit.SECONDS.sleep(3);
+
+        //Scrolling the page
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
+        driver.findElement(By.id("navigation_next")).click();
+        TimeUnit.SECONDS.sleep(3);
+        driver.findElement(By.id("input_zabbix__url")).sendKeys("http://zabbix.url");
+        driver.findElement(By.id("input_zabbix__user")).sendKeys("zabbix username");
+        driver.findElement(By.id("input_zabbix__password")).sendKeys("zabbix password");
+
+        driver.findElement(By.id("button_test")).click();
+    }
+
+    private void addOpenNMS() throws InterruptedException{
+        driver.findElement(By.id("input_title")).sendKeys("Test OpenNMS");
+        driver.findElement(By.id("input_description")).sendKeys("Test OpenNMS Description");
+
+        driver.findElement(By.id("input_invoker")).click();
+
+        //Choosing openNMS
+        driver.findElement(By.id("react-select-2-option-4")).click();
+        TimeUnit.SECONDS.sleep(3);
+
+        //Scrolling the page
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
+        driver.findElement(By.id("navigation_next")).click();
+        TimeUnit.SECONDS.sleep(3);
+        driver.findElement(By.id("input_openNMS__url")).sendKeys("http://opennms.url");
+        driver.findElement(By.id("input_openNMS__username")).sendKeys("opennms username");
+        driver.findElement(By.id("input_openNMS__password")).sendKeys("opennms password");
+
+        driver.findElement(By.id("button_test")).click();
+    }
+
+    private void addSensu() throws InterruptedException{
+        driver.findElement(By.id("input_title")).sendKeys("Test Sensu");
+        driver.findElement(By.id("input_description")).sendKeys("Test Sensu Description");
+
+        driver.findElement(By.id("input_invoker")).click();
+
+        //Choosing sensu
+        driver.findElement(By.id("react-select-2-option-5")).click();
+        TimeUnit.SECONDS.sleep(3);
+
+        //Scrolling the page
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
+        driver.findElement(By.id("navigation_next")).click();
+        TimeUnit.SECONDS.sleep(3);
+        driver.findElement(By.id("input_sensu__url")).sendKeys("http://sensu.url");
+        driver.findElement(By.id("input_sensu__token")).sendKeys("sensu token");
+        driver.findElement(By.id("input_sensu__refresh_token")).sendKeys("sensu refresh token");
+        driver.findElement(By.id("input_sensu__expires_at")).sendKeys("Expiration date");
+
+
+        driver.findElement(By.id("button_test")).click();
+    }
+
+    private void addIdoit() throws InterruptedException{
+        driver.findElement(By.id("input_title")).sendKeys("Test iDoit");
+        driver.findElement(By.id("input_description")).sendKeys("Test iDoit Description");
+
+        driver.findElement(By.id("input_invoker")).click();
+
+        //Choosing idoit
+        driver.findElement(By.id("react-select-2-option-6")).click();
+        TimeUnit.SECONDS.sleep(3);
+
+        //Scrolling the page
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
+        driver.findElement(By.id("navigation_next")).click();
+        TimeUnit.SECONDS.sleep(3);
+        driver.findElement(By.id("input_i-doit__url")).sendKeys("http://idoit.url");
+        driver.findElement(By.id("input_i-doit__apikey")).sendKeys("idoit apikey");
+
+        driver.findElement(By.id("button_test")).click();
+    }
+
+
+
+
+
 }
