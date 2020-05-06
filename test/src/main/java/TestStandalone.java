@@ -1,5 +1,6 @@
 import constants.Constants;
 import tests.TestGroup;
+import tests.TestJobScheduler;
 import tests.TestLoginout;
 import tests.TestUser;
 
@@ -7,7 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
 
 public class TestStandalone {
-    public static void main(String[] args) throws MalformedURLException, InterruptedException, ParserConfigurationException {
+    public static void main(String[] args) throws Exception {
 
 
         String testName = System.getProperty("test");
@@ -42,10 +43,13 @@ public class TestStandalone {
             }
             else if(testName.contentEquals("group_test")){
                 GroupTest(testLogin,testPassword,testHubUrl,testAppUrl);
-        }
+            }
+            else if(testName.contentEquals("job_test")){
+                JobTest();
+            }
         }
         else {
-            GroupTest(testLogin,testPassword,testHubUrl,testAppUrl);
+            JobTest();
         }
 
 
@@ -80,19 +84,25 @@ public class TestStandalone {
 
         TestGroup testGroup = new TestGroup();
         testGroup.setUp();
-
         testGroup.SimpleTest();
         testGroup.LoginTest();
         testGroup.AddGroupTest();
         testGroup.UpdateGroupTest();
         testGroup.DeleteGroupTest();
-
         testGroup.afterTest();
 
     }
 
-    private static void ConnectorTest(){
-        
+    private static void JobTest() throws Exception {
+        TestJobScheduler test = new TestJobScheduler();
+
+        test.setUp();
+        test.SimpleTest();
+        test.JobLoginTest();
+        test.AddJobTest();
+        test.StartJobTest();
+        test.afterTest();
+
     }
 
 

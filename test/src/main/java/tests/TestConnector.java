@@ -141,6 +141,10 @@ public class TestConnector {
             driver.findElement(By.id("react-select-2-option-2")).click();
             TimeUnit.SECONDS.sleep(3);
 
+            //Scrolling the page
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+
             driver.findElement(By.id("navigation_next")).click();
             TimeUnit.SECONDS.sleep(3);
             driver.findElement(By.id("input_otrs__url")).sendKeys("http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem");
