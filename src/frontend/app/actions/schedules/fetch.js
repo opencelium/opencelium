@@ -262,6 +262,101 @@ const fetchSchedulesByIdsCanceled = (message) => {
     };
 };
 
+/**
+ * fetch schedule notification
+ * @param scheduleId
+ * @returns {{type: string}}
+ */
+const fetchScheduleNotification = (scheduleId) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATION,
+        payload: scheduleId,
+    };
+};
+/**
+ * fetch schedule notification fulfilled
+ * @param notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchScheduleNotificationFulfilled = (notification) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATION_FULFILLED,
+        payload: notification,
+    };
+};
+
+/**
+ * fetch schedule notification rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchScheduleNotificationRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATION_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch schedule notification canceled
+ * @param message
+ * @returns {promise}
+ */
+const fetchScheduleNotificationCanceled = (message) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATION_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch schedule notifications
+ * @param schedule
+ * @returns {{type: string}}
+ */
+const fetchScheduleNotifications = (schedule) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONS,
+        payload: schedule,
+    };
+};
+
+/**
+ * fetch schedule notifications fulfilled
+ * @param notifications
+ * @returns {{type: string, payload: []}}
+ */
+const fetchScheduleNotificationsFulfilled = (notifications) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONS_FULFILLED,
+        payload: notifications
+    };
+};
+
+/**
+ * fetch schedule notifications rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchScheduleNotificationsRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONS_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch schedule notifications canceled
+ * @param message
+ * @returns {{type: string, payload: []}}
+ */
+const fetchScheduleNotificationsCanceled = (message) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONS_CANCELED,
+        payload: message
+    };
+};
+
 
 export {
     fetchSchedules,
@@ -285,4 +380,12 @@ export {
     fetchSchedulesByIdsFulfilled,
     fetchSchedulesByIdsRejected,
     fetchSchedulesByIdsCanceled,
+    fetchScheduleNotification,
+    fetchScheduleNotificationFulfilled,
+    fetchScheduleNotificationRejected,
+    fetchScheduleNotificationCanceled,
+    fetchScheduleNotifications,
+    fetchScheduleNotificationsFulfilled,
+    fetchScheduleNotificationsRejected,
+    fetchScheduleNotificationsCanceled,
 };

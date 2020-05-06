@@ -15,33 +15,55 @@
 
 import {SchedulesAction} from '../utils/actions';
 import {
-    fetchScheduleFulfilled, fetchScheduleRejected,
-    fetchSchedulesFulfilled, fetchSchedulesRejected,
-    triggerScheduleFulfilled, triggerScheduleRejected,
-    triggerScheduleSuccessfullyFulfilled, fetchCurrentSchedules,
-    fetchCurrentSchedulesFulfilled, fetchCurrentSchedulesRejected,
-    fetchSchedulesByIdsFulfilled, fetchSchedulesByIdsRejected,
+    fetchScheduleFulfilled,
+    fetchScheduleRejected,
+    fetchSchedulesFulfilled,
+    fetchSchedulesRejected,
+    triggerScheduleFulfilled,
+    triggerScheduleRejected,
+    triggerScheduleSuccessfullyFulfilled,
+    fetchCurrentSchedules,
+    fetchCurrentSchedulesFulfilled,
+    fetchCurrentSchedulesRejected,
+    fetchSchedulesByIdsFulfilled,
+    fetchSchedulesByIdsRejected,
+    fetchScheduleNotificationsFulfilled,
+    fetchScheduleNotificationRejected, fetchScheduleNotificationFulfilled,
 } from '../actions/schedules/fetch';
 import {
-    addScheduleFulfilled ,addScheduleRejected,
+    addScheduleFulfilled, addScheduleNotificationFulfilled, addScheduleNotificationRejected, addScheduleRejected,
     addWebHookFulfilled, addWebHookRejected,
 } from '../actions/schedules/add';
 import {
-    updateScheduleFulfilled, updateScheduleRejected,
-    updateScheduleStatusFulfilled, updateScheduleStatusRejected,
-    startSchedulesFulfilled, startSchedulesRejected,
-    enableSchedulesFulfilled, enableSchedulesRejected,
-    disableSchedulesFulfilled, disableSchedulesRejected,
-    updateWebHookFulfilled, updateWebHookRejected, updateSchedule,
+    updateScheduleFulfilled,
+    updateScheduleRejected,
+    updateScheduleStatusFulfilled,
+    updateScheduleStatusRejected,
+    startSchedulesFulfilled,
+    startSchedulesRejected,
+    enableSchedulesFulfilled,
+    enableSchedulesRejected,
+    disableSchedulesFulfilled,
+    disableSchedulesRejected,
+    updateWebHookFulfilled,
+    updateWebHookRejected,
+    updateSchedule,
+    updateScheduleNotificationFulfilled,
+    updateScheduleNotificationRejected,
 } from '../actions/schedules/update';
 import {
-    deleteScheduleFulfilled, deleteScheduleRejected,
-    deleteSchedulesFulfilled,deleteSchedulesRejected,
-    deleteWebHookFulfilled, deleteWebHookRejected,
+    deleteScheduleFulfilled,
+    deleteScheduleNotificationFulfilled,
+    deleteScheduleNotificationRejected,
+    deleteScheduleRejected,
+    deleteSchedulesFulfilled,
+    deleteSchedulesRejected,
+    deleteWebHookFulfilled,
+    deleteWebHookRejected,
 } from '../actions/schedules/delete';
 import {doRequest} from "../utils/auth";
 
-import {validateAddSchedule, validateWebHook} from "../validations/schedules";
+import {validateAddSchedule, validateAddScheduleNotification, validateWebHook} from "../validations/schedules";
 import {periodic, fromPromise} from 'most';
 
 /**
@@ -136,6 +158,20 @@ const fetchScheduleEpic = (action$, store) => {
             });
         });
 };
+/**
+ * fetch schedule notification by schedule id
+ */
+const fetchScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.id}`;
+            return doRequest({url},{
+                success: fetchScheduleNotificationFulfilled,
+                reject: fetchScheduleNotificationRejected,
+            });
+        });
+};
 
 /**
  * fetch all schedules
@@ -149,6 +185,22 @@ const fetchSchedulesEpic = (action$, store) => {
                 success: fetchSchedulesFulfilled,
                 reject: fetchSchedulesRejected,
                 cancel: action$.ofType(SchedulesAction.FETCH_SCHEDULES_CANCELED)
+            });
+        });
+};
+
+/**
+ * fetch all schedule notification
+ */
+const fetchScheduleNotificationsEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            return doRequest({url},{
+                success: fetchScheduleNotificationsFulfilled,
+                reject: fetchScheduleNotificationRejected,
+                cancel: action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS_CANCELED)
             });
         });
 };
@@ -191,6 +243,28 @@ const addScheduleEpic = (action$, store) => {
 };
 
 /**
+ * add schedule notification
+ */
+const addScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.ADD_SCHEDULENOTIFICATION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            let validation = validateAddScheduleNotification(action.payload);
+            if(validation.success) {
+                return doRequest({url, method: 'post', data}, {
+                        success: addScheduleNotificationFulfilled,
+                        reject: addScheduleNotificationRejected,
+                    },
+                );
+            } else{
+                return addScheduleNotificationRejected({'message': validation.message, id: validation.id});
+            }
+        });
+};
+
+/**
  * update one schedule
  */
 const updateScheduleEpic = (action$, store) => {
@@ -203,6 +277,23 @@ const updateScheduleEpic = (action$, store) => {
             return doRequest({url, method: 'put', data},{
                 success: updateScheduleFulfilled,
                 reject: updateScheduleRejected,},
+            );
+        });
+};
+
+/**
+ * update schedule notification
+ */
+const updateScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.UPDATE_SCHEDULENOTIFICATION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.id}/title`;
+            let {connection, ...data} = action.payload;
+            data.connectionId = connection.id;
+            return doRequest({url, method: 'put', data},{
+                success: updateScheduleNotificationFulfilled,
+                reject: updateScheduleNotificationRejected,},
             );
         });
 };
@@ -236,6 +327,23 @@ const deleteScheduleEpic = (action$, store) => {
                     success: deleteScheduleFulfilled,
                     reject: deleteScheduleRejected,},
                 res => {return {...res.response, id: action.payload.id};}
+            );
+        });
+};
+
+/**
+ * delete schedule notification by schedule id
+ */
+const deleteScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.DELETE_SCHEDULENOTIFICATION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            let data = action.payload;
+            return doRequest({url, method: 'delete', data},{
+                    success: deleteScheduleNotificationFulfilled,
+                    reject: deleteScheduleNotificationRejected,},
+                res => {return {schedulerIds: data.schedulerIds};}
             );
         });
 };
@@ -311,12 +419,17 @@ const deleteSchedulesEpic = (action$, store) => {
 
 export {
     fetchScheduleEpic,
+    fetchScheduleNotificationEpic,
     fetchSchedulesEpic,
+    fetchScheduleNotificationsEpic,
     fetchCurrentSchedulesEpic,
     fetchSchedulesByIdsEpic,
     addScheduleEpic,
+    addScheduleNotificationEpic,
     updateScheduleEpic,
+    updateScheduleNotificationEpic,
     deleteScheduleEpic,
+    deleteScheduleNotificationEpic,
     startSchedulesEpic,
     enableSchedulesEpic,
     disableSchedulesEpic,

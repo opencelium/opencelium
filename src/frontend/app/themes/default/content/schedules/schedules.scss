@@ -307,6 +307,9 @@
   font-family: $FONT_FAMILY;
   cursor: pointer;
   color: #2e75b6;
+  :hover{
+    color: #3f51b5;
+  }
 }
 .webhook_loading{
   min-height: 0 !important;
@@ -366,4 +369,66 @@
   overflow: hidden;
   white-space: nowrap;
   max-width: 60px;
+}
+
+
+.notification_change_event_type{
+  .label{
+    border: none;
+    padding-bottom: 0;
+  }
+  .radio_group{
+    height: 25px;
+  }
+  .first_radio_button{
+    margin-right: 20px;
+  }
+  .radio_button{
+    float: left;
+    margin-bottom: 10px !important;
+  }
+}
+
+.notifications{
+  tr{
+    th{
+      text-align: center;
+    }
+    td{
+      padding: 0 !important;
+    }
+  }
+}
+.notification_add_button{
+  margin-top: 20px;
+}
+
+.notification_select_label{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  border: none !important;
+}
+
+.notification_select_focused{
+  color: rgb(63, 81, 181) !important;
+}
+.notification_select_focused>div{
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgb(63, 81, 181);
+  box-shadow: none;
+  box-sizing: content-box;
+}
+
+.notification_select>div{
+  color: black;
+  font-family: $FONT_FAMILY;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2121211f;
+  box-sizing: content-box;
+}
+
+.notification_dialog_body{
+  overflow-x: auto;
 }
