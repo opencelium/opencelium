@@ -46,6 +46,7 @@ import Checkbox from "../../../general/basic_components/inputs/Checkbox";
 import Input from "../../../general/basic_components/inputs/Input";
 import {APP_STATUS_DOWN, APP_STATUS_UP} from "../../../../utils/constants/url";
 import {API_REQUEST_STATE} from "../../../../utils/constants/app";
+import ScheduleNotification from "./notification/ScheduleNotification";
 
 export const EMPHASIZE_DURATION_ANIMATION = 900;
 
@@ -381,8 +382,9 @@ class ScheduleList extends Component{
                                             <ScheduleUpdate index={key} schedule={schedule}/>
                                         </div>
                                         <div>
-                                            <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
                                             <WebHookTools index={key} schedule={schedule} t={t}/>
+                                            <ScheduleNotification schedule={schedule} index={key}/>
+                                            <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
                                         </div>
                                     </div>
                                 </TableCell>

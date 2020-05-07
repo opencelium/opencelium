@@ -54,10 +54,49 @@ const addScheduleRejected = (error) => {
     });
 };
 
+/**
+ * create a new schedule notification
+ * @param notification
+ * @returns {{type: string, payload: {}}}
+ */
+const addScheduleNotification = (notification) => {
+    return {
+        type: SchedulesAction.ADD_SCHEDULENOTIFICATION,
+        payload: notification,
+    };
+};
+
+/**
+ * create a new schedule notification fulfilled
+ * @param notification
+ * @returns {{type: string, payload: {}}}
+ */
+const addScheduleNotificationFulfilled = (notification) => {
+    return {
+        type: SchedulesAction.ADD_SCHEDULENOTIFICATION_FULFILLED,
+        payload: notification,
+    };
+};
+
+/**
+ * create a new schedule notification rejected
+ * @param error
+ * @returns {promise}
+ */
+const addScheduleNotificationRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.ADD_SCHEDULENOTIFICATION_REJECTED,
+        payload: error
+    });
+};
+
 
 
 export{
     addSchedule,
     addScheduleFulfilled,
     addScheduleRejected,
+    addScheduleNotification,
+    addScheduleNotificationFulfilled,
+    addScheduleNotificationRejected,
 };

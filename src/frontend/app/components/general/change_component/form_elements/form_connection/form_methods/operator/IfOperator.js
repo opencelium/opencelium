@@ -265,25 +265,34 @@ class IfOperator extends Component{
         if(leftColor !== ''){
             return(
                 <div className={styles.if_placeholder} onClick={toggleIsVisibleMenuEdit}>
-                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor, maxWidth: hasValue ? '43%' : '80%'}} title={title}>{title}</div>
+                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor}} title={title}>{title}</div>
                     {
                         relationalOperator !== ''
                         ?
-                            <div className={styles.if_placeholder_relational_operator} style={{maxWidth: hasValue ? '14%' : '20%'}} title={relationalOperator}>{this.getOperatorLabel()}</div>
+                            <div className={styles.if_placeholder_relational_operator} title={relationalOperator}>{this.getOperatorLabel()}</div>
                         :
                             null
                     }
                     {
                         isOperatorHasThreeParams
                             ?
-                            <div className={styles.if_placeholder_right_property} style={{maxWidth: '20%'}} title={rightProperty}>{rightProperty}</div>
+                                <React.Fragment>
+                                    <div className={styles.if_placeholder_right_property} style={{backgroundColor: leftColor}} title={rightProperty}>{rightProperty}</div>
+                                    {
+                                        hasValue && rightField
+                                        ?
+                                            <div className={styles.if_placeholder_right_property_in}>in</div>
+                                        :
+                                            null
+                                    }
+                                </React.Fragment>
                             :
                             null
                     }
                     {
-                        hasValue
+                        hasValue && rightField
                         ?
-                            <div className={styles.if_placeholder_right_field} style={{backgroundColor: rightColor, maxWidth: isOperatorHasThreeParams ? '23%' : '43%'}} title={rightField}>{rightField}</div>
+                            <div className={styles.if_placeholder_right_field} style={{backgroundColor: rightColor}} title={rightField}>{rightField}</div>
                         :
                             null
                     }

@@ -738,6 +738,7 @@
   float: left;
   padding: 6px 5px;
   margin-left: 4px;
+  display: flex;
 }
 .if_placeholder:hover{
   box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
@@ -770,6 +771,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.if_placeholder_right_property_in{
+  cursor: pointer;
+  height: 26px;
+  padding: 7px 2px;
+  font-size: 12px;
+  min-width: 13px;
 }
 .if_placeholder_right_field{
   cursor: pointer;

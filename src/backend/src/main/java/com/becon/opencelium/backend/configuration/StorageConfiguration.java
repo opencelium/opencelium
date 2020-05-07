@@ -21,7 +21,6 @@ import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
-import com.becon.opencelium.backend.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import org.springframework.beans.factory.annotation.Autowired;

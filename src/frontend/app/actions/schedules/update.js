@@ -214,6 +214,44 @@ const disableSchedulesRejected = (error) => {
     });
 };
 
+/**
+ * update schedule notification
+ * @param notification
+ * @returns {{type: string, payload: {}}}
+ */
+const updateScheduleNotification = (notification, settings = {}) => {
+    return {
+        type: SchedulesAction.UPDATE_SCHEDULENOTIFICATION,
+        payload: notification,
+        settings,
+    };
+};
+
+/**
+ * update schedule notification fulfilled
+ * @param notification
+ * @returns {{type: string, payload: {}}}
+ */
+const updateScheduleNotificationFulfilled = (notification, settings = {}) => {
+    return{
+        type: SchedulesAction.UPDATE_SCHEDULENOTIFICATION_FULFILLED,
+        payload: notification,
+        settings,
+    };
+};
+
+/**
+ * update schedule notification rejected
+ * @param error
+ * @returns {promise}
+ */
+const updateScheduleNotificationRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.UPDATE_SCHEDULENOTIFICATION_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     updateScheduleInStore,
@@ -232,4 +270,7 @@ export{
     disableSchedules,
     disableSchedulesFulfilled,
     disableSchedulesRejected,
+    updateScheduleNotification,
+    updateScheduleNotificationFulfilled,
+    updateScheduleNotificationRejected,
 };

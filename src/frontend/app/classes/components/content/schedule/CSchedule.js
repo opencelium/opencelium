@@ -16,13 +16,14 @@
 import {consoleLog, isId} from "../../../../utils/app";
 import CLastExecution from "./CLastExecution";
 import CWebhook from "./CWebhook";
+import CNotification from "./CNotification";
 
 
 /**
  * Schedule class for Schedule module
  */
 export default class CSchedule{
-    constructor(id = 0, title = '', cronExp = '', status = false, timeZone = 0, connection, lastExecution = null, webhook = null){
+    constructor(id = 0, title = '', cronExp = '', status = false, timeZone = 0, connection, lastExecution = null, webhook = null, notifications = []){
         if(id !== 0){
             this._id = isId(id) ? id : 0;
         }
@@ -33,6 +34,7 @@ export default class CSchedule{
         this._connection = this.checkConnection(connection) ? connection : null;
         this._lastExecution = CLastExecution.createLastExecution(lastExecution);
         this._webhook = CWebhook.createWebhook(webhook);
+        this._notifications = this.convertNotifications(notifications);
     }
 
     static createSchedule(schedule){
@@ -44,7 +46,8 @@ export default class CSchedule{
         let connection = schedule && schedule.hasOwnProperty('connection') ? schedule.connection : null;
         let lastExecution = schedule && schedule.hasOwnProperty('lastExecution') ? schedule.lastExecution: null;
         let webhook = schedule && schedule.hasOwnProperty('webhook') ? schedule.webhook: null;
-        return new CSchedule(id, title, cronExp, status, timeZone, connection, lastExecution, webhook);
+        let notifications = schedule && schedule.hasOwnProperty('notifications') ? schedule.notifications: [];
+        return new CSchedule(id, title, cronExp, status, timeZone, connection, lastExecution, webhook, notifications);
     }
 
     checkTitle(title){
@@ -63,6 +66,20 @@ export default class CSchedule{
         }
         consoleLog(`Schedule with id=${this._id} does not have connection.connectionId or connection.title`);
         return false;
+    }
+
+    convertNotification(notification){
+        if(!(notification instanceof CNotification)){
+            return CNotification.createNotification(notification);
+        }
+        return notification;
+    }
+
+    convertNotifications(notifications){
+        for(let i = 0; i < notifications.length; i++){
+            notifications[i] = this.convertNotification(notifications[i]);
+        }
+        return notifications;
     }
 
     get id(){
@@ -177,6 +194,10 @@ export default class CSchedule{
 
     set webhook(webhook){
         this._webhook = webhook;
+    }
+
+    get notifications(){
+        return this._notifications;
     }
 
     getObject(){
