@@ -29,24 +29,38 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
-const notifications = [
+export let ALL_NOTIFICATIONS = [
     {
         id: 1,
+        name: 'my notification',
         eventType: 'pre',
         notificationType: 'email',
         template: {id: 1, name: 'template name 1'},
+        recipients: [{userId: 2, name: 'Kate', surname: 'Winslet'}],
     },
     {
         id: 2,
+        name: 'my notification 2my notification 2my notification 2',
         eventType: 'post',
         notificationType: 'email',
         template: {id: 2, name: 'template name 2',},
+        recipients: [{userId: 1, name: 'John', surname: 'Doe'}],
     },
     {
         id: 3,
+        name: 'my notification 3',
         eventType: 'pre',
         notificationType: 'slack',
         template: {id: 3, name: 'template name 3',},
+        recipients: [{userId: 2, name: 'Kate', surname: 'Winslet'},{userId: 3, name: 'Patric', surname: 'Sway'}],
+    },
+    {
+        id: 4,
+        name: 'my notification 4',
+        eventType: 'pre',
+        notificationType: 'slack',
+        template: {id: 3, name: 'template name 3',},
+        recipients: [{userId: 2, name: 'Kate', surname: 'Winslet'},{userId: 3, name: 'Patric', surname: 'Sway'}],
     }
 ];
 
@@ -615,7 +629,7 @@ function mapConnection(connection){
     return connection;
 }
 function mapSchedule(schedule){
-    schedule.notifications = notifications;
+    schedule.notifications = ALL_NOTIFICATIONS;
     return schedule;
 }
 function mapConnector(connector){

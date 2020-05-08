@@ -39,6 +39,31 @@ $ANIMATION_FADE_IN_DOWN: fadeInDown;
 $ANIMATION_FADE_OUT_LEFT: fadeOutLeft;
 $ANIMATION_FADE_OUT_RIGHT: fadeOutRight;
 $ANIMATION_FADE_OUT_UP: fadeOutUp;
+
+$ANIMATION_SCALE_APPEAR: AScaleAppear;
+$ANIMATION_SCALE_DISAPPEAR: AScaleDisappear;
+
+
+@keyframes AScaleAppear {
+  from {
+    transform: scale(0) translate3d(100%, -100%, 0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+@keyframes AScaleDisappear {
+  from {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0) translate3d(100%, -100%, 0);
+  }
+}
 @keyframes AFade {
   from {
     opacity: 0;
