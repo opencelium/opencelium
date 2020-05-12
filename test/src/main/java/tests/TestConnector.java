@@ -82,39 +82,6 @@ public class TestConnector {
 
     @Test(priority = 1)
     public void ConnectorLoginTest() throws Exception {
-       /* //driver.get(baseUrl+"login");
-
-        driver.navigate().to(mAppUrl +"login");
-
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
-        WebElement element_login=driver.findElement (By.id("login_email"));
-        element_login.sendKeys(mLogin);
-        TimeUnit.SECONDS.sleep(2);
-
-        WebElement element_password=driver.findElement (By.id("login_password"));
-        element_password.sendKeys(mPassword);
-        TimeUnit.SECONDS.sleep(2);
-        WebElement buttonConnect=driver.findElement(By.xpath("//button"));
-        buttonConnect.click();
-
-        TimeUnit.SECONDS.sleep(2);
-
-        for (int second = 0;; second++) {
-            if (second >= 5) Assert.fail("timeout");
-
-            try {
-                assertNotNull(driver.findElement(By.linkText("Connectors")));
-                //add test case to the testcases list as pass
-                testCases.add(new TestCases("015","Connector Test Login","Pass"));
-                break;
-            }
-            catch (Exception e) {
-                //add test case to the testcases list as Fail
-                testCases.add(new TestCases("015","Connector Test Login","Fail"));
-                throw e;
-            }
-        }*/
         CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"015","Connector Test Login");
     }
 
@@ -132,7 +99,7 @@ public class TestConnector {
             driver.findElement(By.id("button_add_connector")).click();
             TimeUnit.SECONDS.sleep(3);
 
-            addIdoit();
+            addOtrs();
 
             TimeUnit.SECONDS.sleep(5);
 
@@ -246,9 +213,9 @@ public class TestConnector {
 
         driver.findElement(By.id("navigation_next")).click();
         TimeUnit.SECONDS.sleep(3);
-        driver.findElement(By.id("input_otrs__url")).sendKeys("http://oc-otrs.westeurope.cloudapp.azure.com/otrs/index.pl?Action=AgentITSMConfigItem");
-        driver.findElement(By.id("input_otrs__UserLogin")).sendKeys("root@localhost");
-        driver.findElement(By.id("input_otrs__Password")).sendKeys("init");
+        driver.findElement(By.id("input_otrs__url")).sendKeys(Constants.OTRS_URL);
+        driver.findElement(By.id("input_otrs__UserLogin")).sendKeys(Constants.OTRS_LOGIN);
+        driver.findElement(By.id("input_otrs__Password")).sendKeys(Constants.OTRS_PWD);
         driver.findElement(By.id("input_otrs__WebService")).sendKeys("OC-Connector1");
 
         driver.findElement(By.id("button_test")).click();

@@ -1,11 +1,9 @@
 import constants.Constants;
-import tests.TestGroup;
-import tests.TestJobScheduler;
-import tests.TestLoginout;
-import tests.TestUser;
+import tests.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
 
 public class TestStandalone {
     public static void main(String[] args) throws Exception {
@@ -46,6 +44,9 @@ public class TestStandalone {
             }
             else if(testName.contentEquals("job_test")){
                 JobTest();
+            }
+            else if(testName.contentEquals("connector_test")){
+                ConnectorTest();
             }
         }
         else {
@@ -91,6 +92,14 @@ public class TestStandalone {
         testGroup.DeleteGroupTest();
         testGroup.afterTest();
 
+    }
+
+    private static void ConnectorTest() throws Exception{
+        TestConnector testConnector = new TestConnector();
+        testConnector.setUp();
+        testConnector.SimpleTest();
+        testConnector.ConnectorLoginTest();
+        testConnector.AddConnectorTest();
     }
 
     private static void JobTest() throws Exception {
