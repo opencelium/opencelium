@@ -24,6 +24,8 @@ import EventTypeInput from "./inputs/EventTypeInput";
 import NotificationTypeInput from "./inputs/NotificationTypeInput";
 import TemplateInput from "./inputs/TemplateInput";
 import {setFocusById} from "../../../../../utils/app";
+import NameInput from "./inputs/NameInput";
+import RecipientsInput from "./inputs/RecipientsInput";
 
 
 function mapStateToProps(state){
@@ -46,16 +48,18 @@ class NotificationChange extends Component{
     }
 
     componentDidMount(){
-        setFocusById('input_event_pre');
+        setFocusById('input_notification_name');
     }
 
     render(){
         const {notification, changeNotification} = this.props;
         return (
             <div>
+                <NameInput notification={notification}/>
                 <EventTypeInput notification={notification} changeNotification={changeNotification}/>
                 <NotificationTypeInput notification={notification} changeNotification={changeNotification}/>
                 <TemplateInput notification={notification} changeNotification={changeNotification}/>
+                <RecipientsInput notification={notification} changeNotification={changeNotification}/>
             </div>
         );
     }

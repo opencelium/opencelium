@@ -28,6 +28,7 @@ import Button from "../../../../general/basic_components/buttons/Button";
 import NotificationChange from "./NotificationChange";
 import CNotification from "../../../../../classes/components/content/schedule/CNotification";
 import {addScheduleNotification} from "../../../../../actions/schedules/add";
+import NotificationList2 from "./NotificationList2";
 
 
 function mapStateToProps(state){
@@ -52,7 +53,14 @@ class ScheduleNotification extends Component{
             newNotification: CNotification.createNotification(),
             showScheduleNotification: false,
             showAddDialog: false,
+            animationName: styles.AScaleAppear,
         };
+    }
+
+    closeNotificationList(){
+        let that = this;
+        this.setState({animationName: styles.AScaleDisappear});
+        setTimeout(() => {that.setState({showScheduleNotification: false});}, 250);
     }
 
     changeNewNotification(newNotification){
@@ -63,7 +71,12 @@ class ScheduleNotification extends Component{
      * to show/hide schedule notification
      */
     toggleScheduleNotification(){
-        this.setState({showScheduleNotification: !this.state.showScheduleNotification});
+        const {showScheduleNotification} = this.state;
+        if(showScheduleNotification){
+            this.closeNotificationList();
+        } else {
+            this.setState({animationName: styles.AScaleAppear, showScheduleNotification: true});
+        }
     }
 
     /**
@@ -111,6 +124,19 @@ class ScheduleNotification extends Component{
         );
     }
 
+    renderDialogScheduleNotification2(){
+        const {animationName, showScheduleNotification} = this.state;
+        const {schedule} = this.props;
+        if(showScheduleNotification) {
+            return <NotificationList2
+                schedule={schedule}
+                closeNotificationList={::this.closeNotificationList}
+                listStyles={{animation: `${animationName} 0.25s forwards`}}
+            />;
+        }
+        return null;
+    }
+
     render(){
         const {t, authUser, index} = this.props;
         let classNames = ['schedule_list_action'];
@@ -123,7 +149,7 @@ class ScheduleNotification extends Component{
                     tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
                     onClick={::this.toggleScheduleNotification}
                 />
-                {this.renderDialogScheduleNotification()}
+                {this.renderDialogScheduleNotification2()}
             </span>
         );
     }

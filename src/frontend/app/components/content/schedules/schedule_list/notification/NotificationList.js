@@ -131,9 +131,9 @@ class NotificationList extends Component{
             <React.Fragment>
                 <Table authUser={authUser} selectable={false} className={styles[classNames.notifications]}>
                     <TableHead>
+                        <TableCell><span>{t('NOTIFICATION.NAME')}</span></TableCell>
                         <TableCell><span>{t('NOTIFICATION.EVENT_TYPE')}</span></TableCell>
                         <TableCell><span>{t('NOTIFICATION.NOTIFICATION_TYPE')}</span></TableCell>
-                        <TableCell><span>{t('NOTIFICATION.TEMPLATE')}</span></TableCell>
                         <TableCell><span>{t('NOTIFICATION.ACTION')}</span></TableCell>
                     </TableHead>
                     {
@@ -141,13 +141,13 @@ class NotificationList extends Component{
                             return (
                                 <TableRow key={notification.id}>
                                     <TableCell>
+                                        <span title={notification.name}>{notification.name}</span>
+                                    </TableCell>
+                                    <TableCell>
                                         <span title={notification.eventType}>{notification.eventType}</span>
                                     </TableCell>
                                     <TableCell>
                                         <span title={notification.notificationType}>{notification.notificationType}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span title={notification.template.name}>{notification.template.name}</span>
                                     </TableCell>
                                     <TableCell>
                                         <span className={styles[classNames.schedule_list_action]}>

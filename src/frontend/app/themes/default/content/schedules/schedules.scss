@@ -59,6 +59,7 @@
 }
 
 .schedule_list_action{
+  position: relative;
   color: #2e75b6;
   cursor: pointer;
   transition: color;
@@ -431,4 +432,148 @@
 
 .notification_dialog_body{
   overflow-x: auto;
+}
+.notification_recipients{
+  margin-top: 2px;
+  margin-bottom: 0;
+  min-height: 100px;
+}
+@keyframes ARecipientDisappear {
+  from {
+    opacity: 1.0;
+  }
+  to {
+    opacity: 0.0;
+  }
+}
+@keyframes ARecipientAppear {
+  from {
+    opacity: 0.0;
+  }
+  to {
+    opacity: 1.0;
+  }
+}
+.notification_recipient{
+  list-style-type: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  .icon{
+    cursor: pointer;
+    color: #2e75b6;
+  }
+  .icon:hover{
+    color: #3f51b5;
+  }
+  .title{
+    vertical-align: text-bottom;
+    color: black;
+  }
+}
+
+.recipient_appear{
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+  animation-name: ARecipientAppear;
+}
+.recipient_disappear{
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+  animation-name: ARecipientDisappear;
+}
+.recipients_before{
+  position: absolute;
+  top: 60px;
+  left: 170px;
+}
+.recipients_after{
+  position: absolute;
+  bottom: -10px;
+  left: 170px;
+}
+.notification_recipients_alert_message{
+  font-style: $FONT_FAMILY;
+  min-height: 100px;
+}
+.notifications_arrows{
+  position: absolute;
+  top: 100px;
+}
+.notifications_arrow_disable{
+  cursor: default;
+  color: #eee;
+}
+.notifications_arrow_prev{
+  display: block;
+  cursor: pointer;
+}
+.notifications_arrow_next{
+  cursor: pointer;
+}
+.notification_list{
+  cursor: default;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+  position: absolute;
+  min-width: 200px;
+  background: white;
+  right: 23px;
+  top: -10px;
+  border: 1px solid #eee;
+  max-height: 83px;
+  .items{
+    margin-bottom: 2px;
+    border-bottom: 1px solid #eee;
+    overflow-y: auto;
+    max-height: 63px;
+    min-width: 200px;
+    max-width: 200px;
+  }
+  .item{
+    cursor: default;
+    font-family: $FONT_FAMILY;
+    color: black;
+    text-align: left;
+    padding: 1px 3px;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    float: left;
+  }
+  .action{
+    float: left;
+    position: relative;
+    color: #2e75b6;
+    cursor: pointer;
+    transition: color;
+    transition-duration: 0.3s;
+    height: 18px;
+    :hover{
+      color: #3f51b5;
+    }
+    span{
+      font-size: 18px !important;
+    }
+  }
+  .add_icon{
+    float: left;
+    font-size: 18px;
+    margin-top: -2px;
+    cursor: pointer;
+    color: #2e75b6;
+  }
+  .add_icon:hover{
+    color: #3f51b5;
+  }
+  .close_icon{
+    float: right;
+    font-size: 18px;
+    margin-top: -2px;
+    cursor: pointer;
+    color: #2e75b6;
+  }
+  .close_icon:hover{
+    color: #3f51b5;
+  }
 }

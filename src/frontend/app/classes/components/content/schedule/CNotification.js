@@ -30,23 +30,25 @@ const NOTIFICATION_TYPE = {
  * Notification class for Schedule module
  */
 export default class CNotification{
-    constructor(id = 0, eventType = EVENT_TYPE.PRE, notificationType = NOTIFICATION_TYPE.EMAIL, template = null, recipientList = []){
+    constructor(id = 0, name = '', eventType = EVENT_TYPE.PRE, notificationType = NOTIFICATION_TYPE.EMAIL, template = null, recipients = []){
         if(id !== 0){
             this._id = isId(id) ? id : 0;
         }
+        this._name = name;
         this._eventType = this.checkEventType(eventType) ? eventType : '';
         this._notificationType = this.checkNotificationType(notificationType) ? notificationType : '';
         this._template = this.convertTemplate(template);
-        this._recipientList = this.checkRecipientList(recipientList);
+        this._recipients = this.checkRecipients(recipients) ? recipients : [];
     }
 
     static createNotification(notification){
-        let id = notification && notification.hasOwnProperty('notificationId') ? notification.notificationId : 0;
+        let id = notification && notification.hasOwnProperty('id') ? notification.id : 0;
+        let name = notification && notification.hasOwnProperty('name') ? notification.name : '';
         let eventType = notification && notification.hasOwnProperty('eventType') ? notification.eventType : '';
         let notificationType = notification && notification.hasOwnProperty('notificationType') ? notification.notificationType : '';
         let template = notification && notification.hasOwnProperty('template') ? notification.template : null;
-        let recipientList = notification && notification.hasOwnProperty('recipientList') ? notification.recipientList : [];
-        return new CNotification(id, eventType, notificationType, template, recipientList);
+        let recipients = notification && notification.hasOwnProperty('recipients') ? notification.recipients : [];
+        return new CNotification(id, name, eventType, notificationType, template, recipients);
     }
 
     static duplicateNotification(notification){
@@ -104,8 +106,8 @@ export default class CNotification{
         return null;
     }
 
-    checkRecipientList(recipientList){
-        return isArray(recipientList);
+    checkRecipients(recipients){
+        return isArray(recipients);
     }
 
     get id(){
@@ -114,6 +116,14 @@ export default class CNotification{
         } else {
             return this._id;
         }
+    }
+
+    get name(){
+        return this._name;
+    }
+
+    set name(name){
+        this._name = name;
     }
 
     get eventType(){
@@ -163,8 +173,8 @@ export default class CNotification{
         this._template = this.convertTemplate({id: template.value, name: template.label});
     }
 
-    get recipientList(){
-        return this._recipientList;
+    get recipients(){
+        return this._recipients;
     }
 
     /*
@@ -172,10 +182,10 @@ export default class CNotification{
     *
     * @param recipient
     */
-    addRecipientList(recipient){
-        if(recipient && recipient.hasOwnProperty('id')) {
-            if (this._recipientList.findIndex(r => r.id === recipient.id) === -1) {
-                this._recipientList.push(recipient);
+    addRecipient(recipient){
+        if(recipient && recipient.hasOwnProperty('userId')) {
+            if (this._recipients.findIndex(r => r.userId === recipient.userId) === -1) {
+                this._recipients.push(recipient);
             }
         }
     }
@@ -185,19 +195,22 @@ export default class CNotification{
     *
     * @param recipient id
     */
-    deleteRecipientListById(id){
-        const index = this._recipientList.findIndex(r => r.id === id);
-        if (index !== -1) {
-            this._recipientList.splice(index, 1);
+    deleteRecipient(recipient){
+        if(recipient && recipient.hasOwnProperty('userId')) {
+            const index = this._recipients.findIndex(r => r.userId === recipient.userId);
+            if (index !== -1) {
+                this._recipients.splice(index, 1);
+            }
         }
     }
 
     getObject(){
         let obj = {
+            name: this._name,
             eventType: this._eventType,
             notificationType: this._notificationType,
             template: this._template.id,
-            recipientList: this._recipientList,
+            recipients: this._recipients,
         };
         if(this.hasOwnProperty('_id') && this._id !== 0){
             obj.id = this._id;
