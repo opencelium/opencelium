@@ -17,6 +17,8 @@ public class TestStandalone {
         String testHubUrl = System.getProperty("hub");
         String testAppUrl = System.getProperty("url");
 
+        String invokerName = System.getProperty("invoker");
+
 
         if(testLogin==null){
             testLogin = Constants.USERNAME;
@@ -46,7 +48,7 @@ public class TestStandalone {
                 JobTest();
             }
             else if(testName.contentEquals("connector_test")){
-                ConnectorTest();
+                ConnectorTest(invokerName);
             }
         }
         else {
@@ -94,7 +96,7 @@ public class TestStandalone {
 
     }
 
-    private static void ConnectorTest() throws Exception{
+    private static void ConnectorTest(String invokerName) throws Exception{
         TestConnector testConnector = new TestConnector();
         testConnector.setUp();
         testConnector.SimpleTest();
