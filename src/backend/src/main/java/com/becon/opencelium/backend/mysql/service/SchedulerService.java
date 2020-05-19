@@ -16,7 +16,9 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
+import com.becon.opencelium.backend.mysql.entity.Notification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
@@ -47,4 +49,9 @@ public interface SchedulerService {
     void disable(Scheduler scheduler) throws SchedulerException;
     void enable(Scheduler scheduler) throws SchedulerException;
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
+
+    List<NotificationResource> getAllNotifications(int id);
+    NotificationResource getNotification(int schedulerId, int notificationId);
+    Notification toNotificationEntity(NotificationResource resource);
+    NotificationResource toNotificationResource(Notification notification);
 }

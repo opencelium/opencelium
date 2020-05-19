@@ -31,6 +31,30 @@ public class NotificationHasRecipient {
         recipient.getNotifications().add(this);
     }
 
+    public NotificationHasRecipientId getId() {
+        return id;
+    }
+
+    public void setId(NotificationHasRecipientId id) {
+        this.id = id;
+    }
+
+    public Notification getNotification() {
+        return notification;
+    }
+
+    public void setNotification(Notification notification) {
+        this.notification = notification;
+    }
+
+    public Recipient getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(Recipient recipient) {
+        this.recipient = recipient;
+    }
+
 
     @Embeddable
     public static class NotificationHasRecipientId implements Serializable {

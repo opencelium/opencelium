@@ -17,9 +17,12 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.Connection;
+import com.becon.opencelium.backend.mysql.entity.Notification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.quartz.QuartzUtility;
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
@@ -55,6 +58,9 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Autowired
     private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public void save(Scheduler scheduler) {
@@ -215,4 +221,52 @@ public class SchedulerServiceImp implements SchedulerService {
         });
         return runningJobResources;
     }
+
+    @Override
+    public List<NotificationResource> getAllNotifications(int id){
+
+        List<NotificationResource> notificationResources  = new ArrayList<>();
+
+        notificationRepository.findBySchedulerId(id).forEach(notification -> notificationResources.add(new NotificationResource(notification)));
+
+        return notificationResources;
+    }
+
+    @Override
+    public NotificationResource getNotification(int schedulerId, int notificationId){
+        NotificationResource notificationResource = null;
+
+        List<NotificationResource> notificationResources  = new ArrayList<>();
+
+        notificationRepository.findBySchedulerId(schedulerId).forEach(notification -> notificationResources.add(new NotificationResource(notification)));
+
+        for(int i=0; i<notificationResources.size();i++){
+            if (notificationResources.get(i).getNotificationId()==notificationId){
+                notificationResource = notificationResources.get(i);
+            }
+        }
+
+        return notificationResource;
+    }
+
+    @Override
+    public Notification toNotificationEntity(NotificationResource resource) {
+        Notification notification = new Notification();
+        notification.setId(resource.getNotificationId());
+        notification.setName(resource.getNotificationName());
+        notification.setEventType(resource.getNotificationEventType());
+        notification.setApp(resource.getNotificationApp());
+        notification.setScheduler(schedulerRepository.getOne(resource.getSchedulerId()));
+
+        //TODO: need implement set recipients method
+        //notification.setRecipients(resource.getNotificationRecipients());
+        return null;
+    }
+
+    @Override
+    public NotificationResource toNotificationResource(Notification notification) {
+        return new NotificationResource(notification);
+    }
+
+
 }
