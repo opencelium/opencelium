@@ -22,15 +22,16 @@ public class Notification {
     @Column(name = "app")
     private String app;
 
-    @Column(name = "text")
-    private String text;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "scheduler_id")
     private Scheduler scheduler;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "message_id")
+    private Message message;
+
     @OneToMany(mappedBy = "notification", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<NotificationHasRecipient> recipients = new HashSet<NotificationHasRecipient>();
+    private Set<NotificationHasRecipient> notificationHasRecipients = new HashSet<NotificationHasRecipient>();
 
     public Notification() {
     }
@@ -67,14 +68,6 @@ public class Notification {
         this.app = app;
     }
 
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public Scheduler getScheduler() {
         return scheduler;
     }
@@ -83,12 +76,16 @@ public class Notification {
         this.scheduler = scheduler;
     }
 
-    public Set<NotificationHasRecipient> getRecipients() {
-        return recipients;
+    public Set<NotificationHasRecipient> getNotificationHasRecipients() {
+        return notificationHasRecipients;
     }
 
-    public void setRecipients(Set<NotificationHasRecipient> recipients) {
-        this.recipients = recipients;
+    public void setNotificationHasRecipients(Set<NotificationHasRecipient> notificationHasRecipients) {
+        this.notificationHasRecipients = notificationHasRecipients;
     }
+
+    public Message getMessage() { return message; }
+
+    public void setMessage(Message message) { this.message = message; }
 }
 

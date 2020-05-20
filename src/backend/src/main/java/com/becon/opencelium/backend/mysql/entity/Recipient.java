@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.mysql.entity;
 
+import com.becon.opencelium.backend.resource.notification.RecipientResource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
@@ -22,6 +23,11 @@ public class Recipient {
     private Set<NotificationHasRecipient> notifications = new HashSet<NotificationHasRecipient>();
 
     public Recipient() {
+    }
+
+    public Recipient(RecipientResource recipientResource) {
+        this.id = recipientResource.getRecipientId();
+        this.description = recipientResource.getRecipientDescription();
     }
 
     public int getId() {

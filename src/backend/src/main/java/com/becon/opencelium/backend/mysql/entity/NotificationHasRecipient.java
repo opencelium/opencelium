@@ -27,7 +27,7 @@ public class NotificationHasRecipient {
         this.notification = notification;
         this.recipient = recipient;
 
-        notification.getRecipients().add(this);
+        notification.getNotificationHasRecipients().add(this);
         recipient.getNotifications().add(this);
     }
 

@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.resource.notification;
 import com.becon.opencelium.backend.mysql.entity.Notification;
 import com.becon.opencelium.backend.mysql.entity.NotificationHasRecipient;
 import com.becon.opencelium.backend.mysql.entity.Recipient;
-import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import org.springframework.hateoas.ResourceSupport;
 
 import java.util.ArrayList;
@@ -16,10 +15,10 @@ public class NotificationResource extends ResourceSupport {
     private String notificationName;
     private String notificationEventType;
     private String notificationApp;
-    private String notificationText;
     private int schedulerId;
-    private List<String> notificationRecipients = new ArrayList<>();
-    //private List<RecipientResource> recipientResources = new ArrayList<>();
+    private int messageId;
+    //private List<String> notificationRecipients = new ArrayList<>();
+    private List<RecipientResource> recipientResources = new ArrayList<>();
 
     public NotificationResource(Notification notification){
 
@@ -27,18 +26,22 @@ public class NotificationResource extends ResourceSupport {
         this.notificationName = notification.getName();
         this.notificationEventType = notification.getEventType();
         this.notificationApp = notification.getApp();
-        this.notificationText = notification.getText();
         this.schedulerId = notification.getScheduler().getId();
+        this.messageId = notification.getMessage().getId();
 
-        this.notificationRecipients = notification.getRecipients().stream()
+        /*this.notificationRecipients = notification.getNotificationHasRecipients().stream()
                 .map(NotificationHasRecipient::getRecipient)
                 .collect(Collectors.toList()).stream().map(Recipient::getDescription)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
 
-        /*this.recipientResources = notification.getRecipients().stream()
+        this.recipientResources = notification.getNotificationHasRecipients().stream()
                 .map(NotificationHasRecipient::getRecipient)
                 .collect(Collectors.toList()).stream().map(RecipientResource::new)
-                .collect(Collectors.toList());*/
+                .collect(Collectors.toList());
+
+    }
+
+    public NotificationResource() {
 
     }
 
@@ -74,14 +77,6 @@ public class NotificationResource extends ResourceSupport {
         this.notificationApp = notificationApp;
     }
 
-    public String getNotificationText() {
-        return notificationText;
-    }
-
-    public void setNotificationText(String notificationText) {
-        this.notificationText = notificationText;
-    }
-
     public int getSchedulerId() {
         return schedulerId;
     }
@@ -90,11 +85,27 @@ public class NotificationResource extends ResourceSupport {
         this.schedulerId = schedulerId;
     }
 
-    public List<String> getNotificationRecipients() {
+/*    public List<String> getNotificationRecipients() {
         return notificationRecipients;
     }
 
     public void setNotificationRecipients(List<String> notificationRecipients) {
         this.notificationRecipients = notificationRecipients;
+    }*/
+
+    public int getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(int messageId) {
+        this.messageId = messageId;
+    }
+
+    public List<RecipientResource> getRecipientResources() {
+        return recipientResources;
+    }
+
+    public void setRecipientResources(List<RecipientResource> recipientResources) {
+        this.recipientResources = recipientResources;
     }
 }
