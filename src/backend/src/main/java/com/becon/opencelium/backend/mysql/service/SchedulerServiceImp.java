@@ -16,10 +16,12 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.mysql.entity.*;
+import com.becon.opencelium.backend.mysql.repository.NotificationRepository;
+import com.becon.opencelium.backend.mysql.repository.RecipientRepository;
 import com.becon.opencelium.backend.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.quartz.QuartzUtility;
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
@@ -27,10 +29,9 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class SchedulerServiceImp implements SchedulerService {
@@ -55,6 +56,12 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Autowired
     private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private RecipientRepository recipientRepository;
 
     @Override
     public void save(Scheduler scheduler) {
@@ -215,4 +222,59 @@ public class SchedulerServiceImp implements SchedulerService {
         });
         return runningJobResources;
     }
+
+    @Override
+    public List<NotificationResource> getAllNotifications(int schedulerId){
+
+        List<NotificationResource> notificationResources  = new ArrayList<>();
+
+        notificationRepository.findBySchedulerId(schedulerId).forEach(notification -> notificationResources.add(new NotificationResource(notification)));
+
+        return notificationResources;
+    }
+
+    @Override
+    public NotificationResource getNotification(int notificationId){
+        NotificationResource notificationResource = new NotificationResource( notificationRepository.findById(notificationId).orElseThrow(()->new RuntimeException("Notification not found")));
+
+        return notificationResource;
+    }
+
+    @Override
+    public Notification toNotificationEntity(NotificationResource resource) {
+        Notification notification = new Notification();
+        notification.setId(resource.getNotificationId());
+        notification.setName(resource.getName());
+        notification.setEventType(resource.getEventType());
+        notification.setApp(resource.getApp());
+        notification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
+
+        //TODO: need to check
+        Set<NotificationHasRecipient> notificationHasRecipients = new HashSet<NotificationHasRecipient>();
+        notificationHasRecipients = resource.getRecipients().stream()
+                .map(recipientResource -> new NotificationHasRecipient(notification,new Recipient(recipientResource))).
+                        collect(Collectors.toSet());
+
+        notification.setNotificationHasRecipients(notificationHasRecipients);
+        return notification;
+    }
+
+    @Override
+    public NotificationResource toNotificationResource(Notification notification) {
+        return new NotificationResource(notification);
+    }
+
+    @Override
+    public void saveNotification(Notification notification) {
+
+        notificationRepository.save(notification);
+        notification.getNotificationHasRecipients().forEach(notificationHasRecipient -> recipientRepository.save(notificationHasRecipient.getRecipient()));
+    }
+
+    @Override
+    public void deleteNotificationById(int id) {
+        notificationRepository.deleteById(id);
+    }
+
+
 }

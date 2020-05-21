@@ -19,7 +19,11 @@ package com.becon.opencelium.backend.resource.schedule;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.execution.LastExecutionResource;
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SchedulerResource {
 
@@ -30,6 +34,7 @@ public class SchedulerResource {
     private String cronExp;
     private LastExecutionResource lastExecution;
     private WebhookResource webhook;
+    private List<NotificationResource> notificationResourceList = new ArrayList<>();
 
     public int getSchedulerId() {
         return schedulerId;
@@ -86,4 +91,8 @@ public class SchedulerResource {
     public void setWebhook(WebhookResource webhook) {
         this.webhook = webhook;
     }
+
+    public List<NotificationResource> getNotificationResourceList() { return notificationResourceList; }
+
+    public void setNotificationResourceList(List<NotificationResource> notificationResourceList) { this.notificationResourceList = notificationResourceList; }
 }
