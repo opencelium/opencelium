@@ -136,7 +136,7 @@ public class JobExecutor extends QuartzJobBean {
         }catch (Exception e){
             e.printStackTrace();
             Date end_date= new Date();
-            if (schedulerId!= null){
+            if (schedulerId != null){
                 execution.setEndTime(end_date);
                 execution.setStatus("F");
                 executionServiceImp.save(execution);
