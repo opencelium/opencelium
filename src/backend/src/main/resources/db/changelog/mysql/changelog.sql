@@ -1,9 +1,9 @@
 --liquibase formatted sql
 
---changeset 1.1:1
+--changeset 1.1:1 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE connection DROP COLUMN IF EXISTS name1;
 
---changeset 1.1:2
+--changeset 1.1:2 stripComments:true splitStatements:true endDelimiter:;
 
 
 --
