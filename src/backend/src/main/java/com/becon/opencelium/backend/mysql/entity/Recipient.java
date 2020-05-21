@@ -4,8 +4,8 @@ import com.becon.opencelium.backend.resource.notification.RecipientResource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "recipient")
@@ -15,19 +15,23 @@ public class Recipient {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "destination")
+    private String destination;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "recipient", fetch = FetchType.EAGER)
-    private Set<NotificationHasRecipient> notifications = new HashSet<NotificationHasRecipient>();
+    @ManyToMany(mappedBy = "recipients")
+    private List<Notification> notifications = new ArrayList<>();
 
     public Recipient() {
     }
 
     public Recipient(RecipientResource recipientResource) {
         this.id = recipientResource.getRecipientId();
-        this.description = recipientResource.getDescription();
+        this.destination = recipientResource.getDescription();
+    }
+
+    public Recipient(String recipientResource) {
+        this.destination = recipientResource;
     }
 
     public int getId() {
@@ -38,19 +42,19 @@ public class Recipient {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
+    public String getDestination() {
+        return destination;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDestination(String destination) {
+        this.destination = destination;
     }
 
-    public Set<NotificationHasRecipient> getNotifications() {
+    public List<Notification> getNotifications() {
         return notifications;
     }
 
-    public void setNotifications(Set<NotificationHasRecipient> notifications) {
+    public void setNotifications(List<Notification> notifications) {
         this.notifications = notifications;
     }
 }

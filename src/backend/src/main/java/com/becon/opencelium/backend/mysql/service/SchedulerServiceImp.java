@@ -18,7 +18,6 @@ package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.NotificationRepository;
-import com.becon.opencelium.backend.mysql.repository.RecipientRepository;
 import com.becon.opencelium.backend.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.quartz.QuartzUtility;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
@@ -30,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +59,10 @@ public class SchedulerServiceImp implements SchedulerService {
     private NotificationRepository notificationRepository;
 
     @Autowired
-    private RecipientRepository recipientRepository;
+    private RecipientServiceImpl recipientService;
+
+    @Autowired
+    private MessageServiceImpl messageService;
 
     @Override
     public void save(Scheduler scheduler) {
@@ -150,6 +151,14 @@ public class SchedulerServiceImp implements SchedulerService {
         scheduler.setStatus(resource.isStatus());
         scheduler.setCronExp(resource.getCronExp());
         scheduler.setConnection(connection);
+
+        List<NotificationResource> notificationResources = resource.getNotificationResources();
+        List<Notification> notificationList = new ArrayList<>();
+
+        for (NotificationResource notificationResource:notificationResources) {
+            notificationList.add(toNotificationEntity(notificationResource));
+        }
+        scheduler.setNotifications(notificationList);
         return scheduler;
     }
 
@@ -168,6 +177,16 @@ public class SchedulerServiceImp implements SchedulerService {
         if (entity.getWebhook() != null){
             schedulerResource.setWebhook(webhookService.toResource(entity.getWebhook()));
         }
+        List<Notification> notificationList = entity.getNotifications();
+
+        List<NotificationResource> notificationResources = new ArrayList<>();
+
+        for (Notification notification : notificationList) {
+            notificationResources.add(new NotificationResource(notification));
+        }
+
+        schedulerResource.setNotification(notificationResources);
+
         return schedulerResource;
     }
 
@@ -246,16 +265,16 @@ public class SchedulerServiceImp implements SchedulerService {
         notification.setId(resource.getNotificationId());
         notification.setName(resource.getName());
         notification.setEventType(resource.getEventType());
-        notification.setApp(resource.getApp());
         notification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
 
         //TODO: need to check
-        Set<NotificationHasRecipient> notificationHasRecipients = new HashSet<NotificationHasRecipient>();
-        notificationHasRecipients = resource.getRecipients().stream()
-                .map(recipientResource -> new NotificationHasRecipient(notification,new Recipient(recipientResource))).
-                        collect(Collectors.toSet());
+        List<Recipient> notificationRecipients = new ArrayList<>();
+        notificationRecipients = resource.getRecipients().stream()
+                .map(Recipient::new).
+                        collect(Collectors.toList());
 
-        notification.setNotificationHasRecipients(notificationHasRecipients);
+        notification.setRecipients(notificationRecipients);
+        notification.setMessage(messageService.toEntity(resource.getTemplate()));
         return notification;
     }
 
@@ -268,7 +287,8 @@ public class SchedulerServiceImp implements SchedulerService {
     public void saveNotification(Notification notification) {
 
         notificationRepository.save(notification);
-        notification.getNotificationHasRecipients().forEach(notificationHasRecipient -> recipientRepository.save(notificationHasRecipient.getRecipient()));
+        notification.getRecipients().forEach(notificationRecipient -> recipientService.save(notificationRecipient));
+        messageService.save(notification.getMessage());
     }
 
     @Override

@@ -10,7 +10,7 @@ public class RecipientResource extends ResourceSupport {
 
     public RecipientResource(Recipient recipient){
         this.recipientId = recipient.getId();
-        this.description = recipient.getDescription();
+        this.description = recipient.getDestination();
     }
 
     public RecipientResource() {

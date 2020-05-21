@@ -38,7 +38,6 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public Content toEntity(ContentResource contentResource) {
         Content content = new Content();
-        content.setId(contentResource.getContentId());
         content.setSubject(contentResource.getSubject());
         content.setBody(contentResource.getBody());
         content.setLanguage(contentResource.getLanguage());

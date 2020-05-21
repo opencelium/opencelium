@@ -3,31 +3,38 @@ package com.becon.opencelium.backend.resource.notification;
 import com.becon.opencelium.backend.mysql.entity.Message;
 import org.springframework.hateoas.ResourceSupport;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class MessageResource extends ResourceSupport {
 
-    private int messageId;
+    private int templateId;
     private String name;
     private String type;
-    private int contentId;
+    private List<ContentResource> content = new ArrayList<>();
 
 
     public MessageResource(Message message){
-        this.messageId = message.getId();
+        this.templateId = message.getId();
         this.name = message.getName();
         this.type = message.getType();
-        this.contentId = message.getContent().getId();
+        this.content = message.getContents()
+                .stream()
+                .map(c->new ContentResource(c))
+                .collect(Collectors.toList());
     }
 
     public MessageResource() {
     }
 
 
-    public int getMessageId() {
-        return messageId;
+    public int getTemplateId() {
+        return templateId;
     }
 
-    public void setMessageId(int messageId) {
-        this.messageId = messageId;
+    public void setTemplateId(int templateId) {
+        this.templateId = templateId;
     }
 
     public String getName() {
@@ -46,11 +53,11 @@ public class MessageResource extends ResourceSupport {
         this.type = type;
     }
 
-    public int getContentId() {
-        return contentId;
+    public List<ContentResource> getContent() {
+        return content;
     }
 
-    public void setContentId(int contentId) {
-        this.contentId = contentId;
+    public void setContent(List<ContentResource> content) {
+        this.content = content;
     }
 }

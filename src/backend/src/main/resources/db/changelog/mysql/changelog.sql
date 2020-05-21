@@ -1,35 +1,10 @@
 --liquibase formatted sql
 
---changeset 1.1:1 stripComments:true splitStatements:true endDelimiter:;
+--changeset 1.1:1
 ALTER TABLE connection DROP COLUMN IF EXISTS name1;
 
---changeset 1.1:2 stripComments:true splitStatements:true endDelimiter:;
+--changeset 1.1:2
 
---
--- Table structure for table `content`
---
-
-DROP TABLE IF EXISTS `content`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `content` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `subject` varchar(128) NOT NULL,
-  `body` varchar(1024) DEFAULT NULL,
-  `language` varchar(128) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `content`
---
-
-LOCK TABLES `content` WRITE;
-/*!40000 ALTER TABLE `message` DISABLE KEYS */;
-/*!40000 ALTER TABLE `message` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `message`
@@ -42,11 +17,8 @@ CREATE TABLE `message` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL,
   `type` varchar(128) DEFAULT NULL,
-  `content_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`,`content_id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `fk_message_content1_idx` (`content_id`),
-  CONSTRAINT `fk_message_content1` FOREIGN KEY (`content_id`) REFERENCES `content` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -61,6 +33,35 @@ UNLOCK TABLES;
 
 
 --
+-- Table structure for table `content`
+--
+
+DROP TABLE IF EXISTS `content`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `content` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subject` varchar(128) NOT NULL,
+  `body` varchar(1024) DEFAULT NULL,
+  `language` varchar(128) NOT NULL,
+  `message_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`, `message_id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `fk_content_message1_idx` (`message_id`),
+  CONSTRAINT `fk_content_message1` FOREIGN KEY (`message_id`) REFERENCES `message` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `content`
+--
+
+LOCK TABLES `content` WRITE;
+/*!40000 ALTER TABLE `message` DISABLE KEYS */;
+/*!40000 ALTER TABLE `message` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `notification`
 --
 
@@ -72,7 +73,6 @@ CREATE TABLE `notification` (
   `scheduler_id` int(11) NOT NULL,
   `name` varchar(45) DEFAULT NULL,
   `event_type` varchar(45) DEFAULT NULL,
-  `app` varchar(127) DEFAULT NULL,
   `message_id` int(11) NOT NULL,
   PRIMARY KEY (`id`,`scheduler_id`,`message_id`),
   UNIQUE KEY `id_UNIQUE` (`id`),

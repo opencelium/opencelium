@@ -1,9 +1,11 @@
 
 package com.becon.opencelium.backend.mysql.entity;
 
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
+
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "notification")
@@ -19,9 +21,6 @@ public class Notification {
     @Column(name = "event_type")
     private String eventType;
 
-    @Column(name = "app")
-    private String app;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "scheduler_id")
     private Scheduler scheduler;
@@ -30,11 +29,17 @@ public class Notification {
     @JoinColumn(name = "message_id")
     private Message message;
 
-    @OneToMany(mappedBy = "notification", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<NotificationHasRecipient> notificationHasRecipients = new HashSet<NotificationHasRecipient>();
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "notification_has_recipient",
+            joinColumns = @JoinColumn(name = "notification_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "recipient_id", referencedColumnName = "id"))
+    private List<Recipient> recipients = new ArrayList<>();
 
     public Notification() {
     }
+
+
 
     public int getId() {
         return id;
@@ -60,14 +65,6 @@ public class Notification {
         this.eventType = eventType;
     }
 
-    public String getApp() {
-        return app;
-    }
-
-    public void setApp(String app) {
-        this.app = app;
-    }
-
     public Scheduler getScheduler() {
         return scheduler;
     }
@@ -76,12 +73,12 @@ public class Notification {
         this.scheduler = scheduler;
     }
 
-    public Set<NotificationHasRecipient> getNotificationHasRecipients() {
-        return notificationHasRecipients;
+    public List<Recipient> getRecipients() {
+        return recipients;
     }
 
-    public void setNotificationHasRecipients(Set<NotificationHasRecipient> notificationHasRecipients) {
-        this.notificationHasRecipients = notificationHasRecipients;
+    public void setRecipients(List<Recipient> recipients) {
+        this.recipients = recipients;
     }
 
     public Message getMessage() { return message; }

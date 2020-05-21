@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.mysql.service;
 
+import com.becon.opencelium.backend.mysql.entity.Content;
 import com.becon.opencelium.backend.mysql.entity.Message;
 import com.becon.opencelium.backend.mysql.repository.MessageRepository;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -21,6 +23,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void save(Message message) {
         messageRepository.save(message);
+        message.getContents().forEach(content -> contentService.save(content));
     }
 
     @Override
@@ -41,10 +44,15 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Message toEntity(MessageResource messageResource) {
         Message message = new Message();
-        message.setId(messageResource.getMessageId());
+        message.setId(messageResource.getTemplateId());
         message.setName(messageResource.getName());
         message.setType(messageResource.getType());
-        message.setContent(contentService.findById(messageResource.getContentId()).orElseThrow(()-> new RuntimeException("CONTENT_NOT_FOUND")));
+
+        List<Content> contents = messageResource.getContent()
+                .stream().map(Content::new).collect(Collectors.toList());
+
+        contents.forEach(content -> content.setMessage(message));
+        message.setContents(contents);
 
         return message;
     }

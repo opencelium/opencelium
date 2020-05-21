@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.mysql.entity;
 
+import com.becon.opencelium.backend.resource.notification.ContentResource;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -18,6 +21,21 @@ public class Content {
 
     @Column(name = "language")
     private String language;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "message_id")
+    private Message message;
+
+    public Content() {
+    }
+
+    public Content(ContentResource contentResource) {
+        this.id = contentResource.getContentId();
+        this.subject = contentResource.getSubject();
+        this.body = contentResource.getBody();
+        this.language = contentResource.getLanguage();
+    }
 
     public int getId() {
         return id;
@@ -49,5 +67,13 @@ public class Content {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public void setMessage(Message message) {
+        this.message = message;
     }
 }

@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.mysql.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "message")
@@ -16,9 +17,11 @@ public class Message {
     @Column(name = "type")
     private String type;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "content_id")
-    private Content content;
+    @OneToMany(mappedBy = "message", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<Content> contents;
+
+    public Message() {
+    }
 
 
     public int getId() {
@@ -45,11 +48,12 @@ public class Message {
         this.type = type;
     }
 
-    public Content getContent() {
-        return content;
+
+    public List<Content> getContents() {
+        return contents;
     }
 
-    public void setContent(Content content) {
-        this.content = content;
+    public void setContents(List<Content> contents) {
+        this.contents = contents;
     }
 }
