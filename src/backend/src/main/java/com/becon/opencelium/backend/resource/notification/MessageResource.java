@@ -6,16 +6,19 @@ import org.springframework.hateoas.ResourceSupport;
 public class MessageResource extends ResourceSupport {
 
     private int messageId;
-    private String templateName;
-    private String templateType;
+    private String name;
+    private String type;
     private int contentId;
 
 
     public MessageResource(Message message){
         this.messageId = message.getId();
-        this.templateName = message.getName();
-        this.templateType = message.getType();
+        this.name = message.getName();
+        this.type = message.getType();
         this.contentId = message.getContent().getId();
+    }
+
+    public MessageResource() {
     }
 
 
@@ -27,20 +30,20 @@ public class MessageResource extends ResourceSupport {
         this.messageId = messageId;
     }
 
-    public String getTemplateName() {
-        return templateName;
+    public String getName() {
+        return name;
     }
 
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTemplateType() {
-        return templateType;
+    public String getType() {
+        return type;
     }
 
-    public void setTemplateType(String templateType) {
-        this.templateType = templateType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public int getContentId() {

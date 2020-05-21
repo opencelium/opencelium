@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.Message;
-import com.becon.opencelium.backend.mysql.repository.ContentRepository;
 import com.becon.opencelium.backend.mysql.repository.MessageRepository;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<Message> findAll() {
-        return null;
+        return messageRepository.findAll();
     }
 
     @Override
@@ -43,8 +42,8 @@ public class MessageServiceImpl implements MessageService {
     public Message toEntity(MessageResource messageResource) {
         Message message = new Message();
         message.setId(messageResource.getMessageId());
-        message.setName(messageResource.getTemplateName());
-        message.setType(messageResource.getTemplateType());
+        message.setName(messageResource.getName());
+        message.setType(messageResource.getType());
         message.setContent(contentService.findById(messageResource.getContentId()).orElseThrow(()-> new RuntimeException("CONTENT_NOT_FOUND")));
 
         return message;

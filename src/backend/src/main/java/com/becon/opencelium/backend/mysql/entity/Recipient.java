@@ -27,7 +27,7 @@ public class Recipient {
 
     public Recipient(RecipientResource recipientResource) {
         this.id = recipientResource.getRecipientId();
-        this.description = recipientResource.getRecipientDescription();
+        this.description = recipientResource.getDescription();
     }
 
     public int getId() {

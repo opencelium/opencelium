@@ -39,9 +39,9 @@ public class ContentServiceImpl implements ContentService {
     public Content toEntity(ContentResource contentResource) {
         Content content = new Content();
         content.setId(contentResource.getContentId());
-        content.setSubject(contentResource.getContentSubject());
-        content.setBody(contentResource.getContentBody());
-        content.setLanguage(contentResource.getContentLanguage());
+        content.setSubject(contentResource.getSubject());
+        content.setBody(contentResource.getBody());
+        content.setLanguage(contentResource.getLanguage());
         return content;
     }
 

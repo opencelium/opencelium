@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -243,14 +244,14 @@ public class SchedulerServiceImp implements SchedulerService {
     public Notification toNotificationEntity(NotificationResource resource) {
         Notification notification = new Notification();
         notification.setId(resource.getNotificationId());
-        notification.setName(resource.getNotificationName());
-        notification.setEventType(resource.getNotificationEventType());
-        notification.setApp(resource.getNotificationApp());
+        notification.setName(resource.getName());
+        notification.setEventType(resource.getEventType());
+        notification.setApp(resource.getApp());
         notification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
 
         //TODO: need to check
         Set<NotificationHasRecipient> notificationHasRecipients = new HashSet<NotificationHasRecipient>();
-        notificationHasRecipients = resource.getRecipientResources().stream()
+        notificationHasRecipients = resource.getRecipients().stream()
                 .map(recipientResource -> new NotificationHasRecipient(notification,new Recipient(recipientResource))).
                         collect(Collectors.toSet());
 
@@ -265,6 +266,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void saveNotification(Notification notification) {
+
         notificationRepository.save(notification);
         notification.getNotificationHasRecipients().forEach(notificationHasRecipient -> recipientRepository.save(notificationHasRecipient.getRecipient()));
     }

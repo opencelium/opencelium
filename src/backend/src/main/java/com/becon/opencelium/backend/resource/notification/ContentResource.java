@@ -6,15 +6,18 @@ import org.springframework.hateoas.ResourceSupport;
 public class ContentResource extends ResourceSupport {
 
     private int contentId;
-    private String contentSubject;
-    private String contentBody;
-    private String contentLanguage;
+    private String subject;
+    private String body;
+    private String language;
 
     public ContentResource(Content content){
         this.contentId = content.getId();
-        this.contentSubject = content.getSubject();
-        this.contentBody = content.getBody();
-        this.contentLanguage = content.getLanguage();
+        this.subject = content.getSubject();
+        this.body = content.getBody();
+        this.language = content.getLanguage();
+    }
+
+    public ContentResource() {
     }
 
     public int getContentId() {
@@ -25,27 +28,27 @@ public class ContentResource extends ResourceSupport {
         this.contentId = contentId;
     }
 
-    public String getContentSubject() {
-        return contentSubject;
+    public String getSubject() {
+        return subject;
     }
 
-    public void setContentSubject(String contentSubject) {
-        this.contentSubject = contentSubject;
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
-    public String getContentBody() {
-        return contentBody;
+    public String getBody() {
+        return body;
     }
 
-    public void setContentBody(String contentBody) {
-        this.contentBody = contentBody;
+    public void setBody(String body) {
+        this.body = body;
     }
 
-    public String getContentLanguage() {
-        return contentLanguage;
+    public String getLanguage() {
+        return language;
     }
 
-    public void setContentLanguage(String contentLanguage) {
-        this.contentLanguage = contentLanguage;
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }
