@@ -146,6 +146,10 @@ export default class CNotificationTemplate{
         }
     }
 
+    static getTemplatesForSelect(templates){
+        return templates.map(template => {return {value: template.id, label: template.name};});
+    }
+
     getObject(){
         let content = [];
         for(let i = 0; i < this._content.length; i++){

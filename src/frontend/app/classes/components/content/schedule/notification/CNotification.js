@@ -25,7 +25,7 @@ const EVENT_TYPE = {
 
 export const NOTIFICATION_TYPE = {
     EMAIL: 'email',
-    SLACK: 'slack',
+    //SLACK: 'slack',
 };
 
 /**
@@ -236,7 +236,7 @@ export default class CNotification{
      * @param template - parameter that came from select input when u choose it
      */
     setTemplateFromSelect(template){
-        this._template = this.convertTemplate({id: template ? template.value : 0, name: template ? template.label : ''});
+        this._template = this.convertTemplate({templateId: template ? template.value : 0, name: template ? template.label : ''});
     }
 
     get targetGroup(){
@@ -263,8 +263,8 @@ export default class CNotification{
             name: this._name,
             eventType: this._eventType,
             notificationType: this._notificationType,
-            template: this._template.id,
-            recipients: this._targetGroup.getObject(),
+            template: {templateId: this._template.id,},
+            recipients: this._targetGroup.getObject().recipients,
         };
         if(this.hasOwnProperty('_id') && this._id !== 0){
             obj.notificationId = this._id;

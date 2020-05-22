@@ -34,7 +34,7 @@ import {
     fetchNotificationRecipientsFulfilled,
     fetchNotificationRecipientsRejected,
     fetchSlackChannelsFulfilled,
-    fetchSlackChannelsRejected,
+    fetchSlackChannelsRejected, fetchScheduleNotificationTemplatesRejected,
 } from '../actions/schedules/fetch';
 import {
     addScheduleFulfilled, addScheduleNotificationFulfilled, addScheduleNotificationRejected, addScheduleRejected,
@@ -171,7 +171,7 @@ const fetchScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.schedulerId}/notificaiton/${action.payload.notificationId}`;
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
             return doRequest({url},{
                 success: fetchScheduleNotificationFulfilled,
                 reject: fetchScheduleNotificationRejected,
@@ -218,7 +218,7 @@ const fetchScheduleNotificationTemplatesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/notificaiton/`;
+            let url = `message/all/${action.payload.notificationType}`;
             return doRequest({url},{
                 success: fetchScheduleNotificationTemplatesFulfilled,
                 reject: fetchScheduleNotificationTemplatesRejected,
@@ -301,7 +301,7 @@ const addScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.ADD_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}`;
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification`;
             let data = action.payload;
             return doRequest({url, method: 'post', data}, {
                     success: addScheduleNotificationFulfilled,
@@ -335,10 +335,8 @@ const updateScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.UPDATE_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/notification/${action.payload.id}`;
-            let {connection, ...data} = action.payload;
-            data.connectionId = connection.id;
-            return doRequest({url, method: 'put', data},{
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
+            return doRequest({url, method: 'put', data: action.payload},{
                 success: updateScheduleNotificationFulfilled,
                 reject: updateScheduleNotificationRejected,},
             );
@@ -385,12 +383,12 @@ const deleteScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.DELETE_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/all`;
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
             let data = action.payload;
             return doRequest({url, method: 'delete', data},{
                     success: deleteScheduleNotificationFulfilled,
                     reject: deleteScheduleNotificationRejected,},
-                res => {return {schedulerIds: data.schedulerIds};}
+                res => {return {...res.response, id: action.payload.notificationId};}
             );
         });
 };

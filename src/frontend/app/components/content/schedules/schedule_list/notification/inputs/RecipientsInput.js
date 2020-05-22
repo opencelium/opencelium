@@ -152,7 +152,7 @@ class RecipientsInput extends Component{
         } else {
             //using search
             for (let i = 0; i < recipients.length; i++) {
-                if (recipients[i].email.toLowerCase().includes(searchValue)) {
+                if (recipients[i].toLowerCase().includes(searchValue)) {
                     result.push(recipients[i]);
                 }
             }
@@ -176,18 +176,21 @@ class RecipientsInput extends Component{
      */
     getRestRecipients(){
         const {searchValueForRestRecipients} = this.state;
-        const {notification, allUsers} = this.props;
+        const {authUser, notification, allUsers} = this.props;
         const searchValue = searchValueForRestRecipients.toLowerCase();
         const allRecipients = notification.targetGroup.recipients;
-        const recipients = allRecipients.length !== 0 ? allUsers.filter(user => allRecipients.findIndex(recipient => recipient.userId === user.userId) === -1) : allUsers;
+        //except selected users
+        let recipients = allRecipients.length !== 0 ? allUsers.filter(user => allRecipients.findIndex(recipientEmail => recipientEmail === user.email) === -1) : allUsers;
+        //except current user
+        recipients = recipients.filter(user => user.userId !== authUser.userId);
         let result = [];
         if(searchValue === ''){
-            result = recipients;
+            result = recipients.map(r => r.email);
         } else {
             //using search
             for (let i = 0; i < recipients.length; i++) {
                 if (recipients[i].email.toLowerCase().includes(searchValue)) {
-                    result.push(recipients[i]);
+                    result.push(recipients[i].email);
                 }
             }
         }
@@ -222,7 +225,7 @@ class RecipientsInput extends Component{
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         if(recipients.length === 0){
-            let alertMessage = t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NO_SELECTED_RECIPIENTS');
+            let alertMessage = side === 'left' ? t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NO_SELECTED_RECIPIENTS') : t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NO_REST_RECIPIENTS');
             if(side === 'left' && searchValueForSelectedRecipients !== '' || side === 'right' && searchValueForRestRecipients !== ''){
                 alertMessage = t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NONE_FOUND');
             }
@@ -249,7 +252,7 @@ class RecipientsInput extends Component{
                     recipients.map(recipient => {
                         return (
                             <Recipient
-                                key={recipient.userId}
+                                key={recipient}
                                 recipient={recipient}
                                 icon={icon}
                                 tooltip={tooltip}

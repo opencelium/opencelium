@@ -32,6 +32,7 @@ import ValidationMessage from "../../../../general/change_component/ValidationMe
 import styles from "../../../../../themes/default/content/schedules/schedules.scss";
 import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
 import Loading from "../../../../general/app/Loading";
+import CSchedule from "../../../../../classes/components/content/schedule/CSchedule";
 
 
 function mapStateToProps(state){
@@ -131,9 +132,9 @@ class NotificationListItem extends Component{
      * to open open update dialog
      */
     fetchNotification(){
-        const {notification, fetchScheduleNotification} = this.props;
+        const {schedule, notification, fetchScheduleNotification} = this.props;
         this.setState({startFetchingNotification: true});
-        fetchScheduleNotification(notification);
+        fetchScheduleNotification({...notification.getObject(), schedulerId: schedule.id});
     }
 
     /**
@@ -141,11 +142,12 @@ class NotificationListItem extends Component{
      */
     updateNotification(){
         const {notification} = this.state;
-        const {t, updateScheduleNotification} = this.props;
-        const validateResult = validateChangeNotification(notification);
+        const {t, schedule, updateScheduleNotification} = this.props;
+        let pureNotification = notification.getObject();
+        const validateResult = validateChangeNotification(pureNotification);
         if(validateResult.success) {
             this.setState({startUpdatingNotification: true});
-            updateScheduleNotification(notification);
+            updateScheduleNotification({...pureNotification, schedulerId: schedule.id});
             this.toggleUpdateDialog();
         } else{
             setFocusById(validateResult.id);
@@ -160,9 +162,9 @@ class NotificationListItem extends Component{
      */
     deleteNotification(){
         const {notification} = this.state;
-        const {deleteScheduleNotification} = this.props;
+        const {schedule, deleteScheduleNotification} = this.props;
         this.setState({startDeletingNotification: true});
-        deleteScheduleNotification(notification);
+        deleteScheduleNotification({...notification.getObject(), schedulerId: schedule.id});
         this.toggleDeleteConfirmation();
     }
 
@@ -221,7 +223,7 @@ class NotificationListItem extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         let itemStyles = {};
         if(showActions){
-            itemStyles.width = '145px';
+            itemStyles.width = '80%';
             itemStyles.background = '#DEEBFF';
         } else{
             itemStyles.width = '100%';
@@ -276,6 +278,7 @@ class NotificationListItem extends Component{
 }
 
 NotificationListItem.propTypes = {
+    schedule: PropTypes.instanceOf(CSchedule).isRequired,
     notification: PropTypes.instanceOf(CNotification).isRequired,
     index: PropTypes.number.isRequired,
 };

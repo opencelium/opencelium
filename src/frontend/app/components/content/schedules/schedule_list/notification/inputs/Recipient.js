@@ -73,7 +73,7 @@ class Recipient extends Component{
             'title',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        const title = `${recipient.email}f`;
+        const title = `${recipient}`;
         return (
             <li className={`${styles[classNames.notification_recipient]} ${recipientClassName}`}>
                 <TooltipFontIcon className={styles[classNames.icon]} value={icon} tooltip={tooltip} onClick={() => ::this.onClick(recipient)}/>

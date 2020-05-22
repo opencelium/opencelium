@@ -37,7 +37,9 @@ function mapStateToProps(state){
     const notificationTemplates = state.get('notificationTemplates');
     return{
         authUser: auth.get('authUser'),
+        fetchingNotificationTemplate: notificationTemplates.get('fetchingNotificationTemplate'),
         updatingNotificationTemplate: notificationTemplates.get('updatingNotificationTemplate'),
+        notificationTemplate: notificationTemplates.get('notificationTemplate'),
         error: notificationTemplates.get('error'),
     };
 }
@@ -58,10 +60,10 @@ class NotificationTemplateUpdate extends Component{
     constructor(props){
         super(props);
 
-        const{authUser, notification} = this.props;
+        const{authUser, notificationTemplate} = this.props;
 
         this.state = {
-            notificationTemplate: CNotificationTemplate.createNotificationTemplate(notification),
+            notificationTemplate: CNotificationTemplate.createNotificationTemplate(notificationTemplate),
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
         };
@@ -189,7 +191,7 @@ class NotificationTemplateUpdate extends Component{
             inputs: [
                 {
                     ...INPUTS.NOTIFICATION_TEMPLATE_CONTENT,
-                    tourStep: NOTIFICATION_TEMPLATE_UPDATE_TOURS.page_2[0].selector,
+                    tourStep: NOTIFICATION_TEMPLATE_UPDATE_TOURS,
                     label: t('UPDATE.FORM.CONTENT'),
                     required: true,
                     check: (e, entity) => ::this.validateContent(e, entity),

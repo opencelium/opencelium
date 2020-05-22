@@ -14,7 +14,7 @@
  */
 
 
-import {isArray} from "../../../../../utils/app";
+import {isArray, isString} from "../../../../../utils/app";
 
 /**
  * Email class as notification type
@@ -28,7 +28,12 @@ export default class CEmail{
     }
 
     static createEmail(slack){
-        let recipients = slack && slack.hasOwnProperty('recipients') ? slack.recipients : [];
+        let recipients;
+        if(isArray(slack)){
+            recipients = slack;
+        } else {
+            recipients = slack && slack.hasOwnProperty('recipients') ? slack.recipients : [];
+        }
         let subject = slack && slack.hasOwnProperty('subject') ? slack.subject : '';
         let body = slack && slack.hasOwnProperty('body') ? slack.body : '';
         let language = slack && slack.hasOwnProperty('language') ? slack.language : '';
@@ -73,8 +78,8 @@ export default class CEmail{
     * @param recipient
     */
     addRecipient(recipient){
-        if(recipient && recipient.hasOwnProperty('userId')) {
-            if (this._recipients.findIndex(r => r.userId === recipient.userId) === -1) {
+        if(isString(recipient)) {
+            if (this._recipients.findIndex(r => r === recipient) === -1) {
                 this._recipients.push(recipient);
             }
         }
@@ -86,8 +91,8 @@ export default class CEmail{
     * @param recipient id
     */
     deleteRecipient(recipient){
-        if(recipient && recipient.hasOwnProperty('userId')) {
-            const index = this._recipients.findIndex(r => r.userId === recipient.userId);
+        if(isString(recipient)) {
+            const index = this._recipients.findIndex(r => r === recipient);
             if (index !== -1) {
                 this._recipients.splice(index, 1);
             }

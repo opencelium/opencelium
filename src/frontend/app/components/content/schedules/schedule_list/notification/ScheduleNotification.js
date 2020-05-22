@@ -28,6 +28,7 @@ import {fetchScheduleNotifications} from "../../../../../actions/schedules/fetch
 import styles from '../../../../../themes/default/content/schedules/schedules.scss';
 import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
 import Loading from "../../../../general/app/Loading";
+import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
 
 
 function mapStateToProps(state){
@@ -36,7 +37,7 @@ function mapStateToProps(state){
     return {
         authUser: auth.get('authUser'),
         fetchingScheduleNotifications: schedules.get('fetchingScheduleNotifications'),
-        notifications: schedules.get('notifications'),
+        notifications: schedules.get('notifications').toJS().map(notification => CNotification.createNotification(notification)),
     };
 }
 

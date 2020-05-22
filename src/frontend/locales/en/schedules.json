@@ -4,6 +4,7 @@
   },
   "HEADER": "Scheduler",
   "NOTIFICATION": {
+    "EMPTY": "No templates",
     "NAME": "Name",
     "EVENT_TYPE": "Event Type",
     "NOTIFICATION_TYPE": "Notification Type",

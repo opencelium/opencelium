@@ -522,6 +522,10 @@
   border: 1px solid #eee;
   max-height: 106px;
   z-index: 1;
+  .empty_list{
+    color: black;
+    cursor: default;
+  }
   .loading_add{
     margin-top: -3px;
     max-height: 10px;

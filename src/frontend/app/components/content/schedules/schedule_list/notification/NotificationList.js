@@ -31,6 +31,7 @@ import ValidationMessage from "../../../../general/change_component/ValidationMe
 import styles from '../../../../../themes/default/content/schedules/schedules.scss';
 import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
 import Loading from "../../../../general/app/Loading";
+import {schedules} from "../../../../../reducers/schedules";
 
 
 function mapStateToProps(state){
@@ -99,15 +100,16 @@ class NotificationList extends Component{
      */
     addNotification(){
         const {newNotification, showAddDialog} = this.state;
-        const {t, addScheduleNotification} = this.props;
-        const validateResult = validateChangeNotification(newNotification);
+        const {t, addScheduleNotification, schedule} = this.props;
+        let notification = newNotification.getObject();
+        const validateResult = validateChangeNotification(notification);
         if(validateResult.success) {
             this.setState({
                 startAddingNotification: true,
                 newNotification: CNotification.createNotification(),
                 showAddDialog: !showAddDialog,
             });
-            addScheduleNotification(newNotification);
+            addScheduleNotification({...notification, schedulerId: schedule.id});
         } else{
             setFocusById(validateResult.id);
             this.setState({
@@ -152,7 +154,10 @@ class NotificationList extends Component{
 
     renderSearchInput(){
         const {searchValue} = this.state;
-        const {authUser, t} = this.props;
+        const {authUser, t, notifications} = this.props;
+        if(notifications.length === 0){
+            return null;
+        }
         let classNames = [
             'search_input',
             'search_input_element',
@@ -179,10 +184,18 @@ class NotificationList extends Component{
     }
 
     renderNotifications(){
-        const notifications = this.getNotifications();
-        return notifications.map((notification, key) => {
+        const {authUser, t, notifications, schedule} = this.props;
+        let classNames = [
+            'empty_list',
+        ];
+        classNames = getThemeClass({classNames, authUser, styles});
+        if(notifications.length === 0){
+            return <span className={styles[classNames.empty_list]}>{t('schedules:NOTIFICATION.EMPTY')}</span>;
+        }
+        const filteredNotifications = this.getNotifications();
+        return filteredNotifications.map((notification, key) => {
             return (
-                <NotificationListItem notification={notification} index={key}/>
+                <NotificationListItem schedule={schedule} notification={notification} index={key}/>
             );
         });
     }

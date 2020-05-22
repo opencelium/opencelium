@@ -42,7 +42,7 @@
       "AT_LEAST_ONE_CONTENT_ITEM": "Template should be at least in one language"
     },
     "LIST_BUTTON": "Notification Templates",
-    "ADD_BUTTON": "Update",
+    "UPDATE_BUTTON": "Update",
     "HEADER": "Update Template"
   },
   "VIEW":{
