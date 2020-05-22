@@ -37,7 +37,7 @@ class FormBody extends Component{
     }
 
     render(){
-        const {readonly, required} = this.props.data;
+        const {readOnly, required} = this.props.data;
         const {contentItem} = this.props;
         let {tourStep} = this.props.data;
         let isReadonly = false;
@@ -46,7 +46,7 @@ class FormBody extends Component{
             inputStyle += ' ' + tourStep.page_2[1].selector.substr(1);
         }
         inputStyle += ' ' + styles.form_input_textarea;
-        if(readonly){
+        if(readOnly){
             isReadonly = true;
         }
         return (

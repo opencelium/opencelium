@@ -634,3 +634,13 @@
   width: 14px;
   height: 14px;
 }
+.notifications_loading{
+  min-height: 0 !important;
+  display: inline-block;
+  margin-top: 0 !important;
+}
+.notifications_loading>div{
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+}

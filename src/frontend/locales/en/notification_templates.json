@@ -44,5 +44,14 @@
     "LIST_BUTTON": "Notification Templates",
     "ADD_BUTTON": "Update",
     "HEADER": "Update Template"
+  },
+  "VIEW":{
+    "FORM":{
+      "NAME": "Name",
+      "TYPE": "Type",
+      "PAGE_1": "General Data"
+    },
+    "LIST_BUTTON": "Notification Templates",
+    "HEADER": "View Template"
   }
 }

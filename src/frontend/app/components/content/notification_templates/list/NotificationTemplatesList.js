@@ -85,13 +85,13 @@ class NotificationTemplatesList extends Component{
         let mapEntity = {};
         mapEntity.map = (notificationTemplate) => {
             let result = {};
-            result.id = notificationTemplate.name;
+            result.id = notificationTemplate.templateId;
             result.title = notificationTemplate.name;
             result.avatar = notificationTemplate.icon;
             return result;
         };
-        mapEntity.getViewLink = (notificationTemplate) => {return `${prefixUrl}/${notificationTemplate.name}/view`;};
-        mapEntity.getUpdateLink = (notificationTemplate) => {return `${prefixUrl}/${notificationTemplate.name}/update`;};
+        mapEntity.getViewLink = (notificationTemplate) => {return `${prefixUrl}/${notificationTemplate.templateId}/view`;};
+        mapEntity.getUpdateLink = (notificationTemplate) => {return `${prefixUrl}/${notificationTemplate.templateId}/update`;};
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteNotificationTemplate;
         return <List

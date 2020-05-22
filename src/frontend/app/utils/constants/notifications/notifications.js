@@ -19,7 +19,7 @@ import { Trans } from 'react-i18next';
 import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
     ConnectionsAction, SchedulesAction, TemplatesAction, WebHooksAction,
-    AppsAction, AdminCardsAction, InvokersAction,
+    AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
 } from '../../actions';
 
 
@@ -77,6 +77,10 @@ export const EntitiesWithNotification = [
     {name: AdminCardsAction.LOAD_ADMINCARD, types: ['REJECTED']},
     {name: InvokersAction.ADD_INVOKER, types: ['FULFILLED', 'REJECTED']},
     {name: InvokersAction.DELETE_INVOKER, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATES, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.ADD_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**

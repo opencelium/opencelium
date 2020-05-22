@@ -34,7 +34,8 @@ function mapStateToProps(state){
     const notificationTemplates = state.get('notificationTemplates');
     return{
         authUser: auth.get('authUser'),
-        updatingNotificationTemplate: notificationTemplates.get('updatingNotificationTemplate'),
+        fetchingNotificationTemplate: notificationTemplates.get('fetchingNotificationTemplate'),
+        notificationTemplate: notificationTemplates.get('notificationTemplate'),
         error: notificationTemplates.get('error'),
     };
 }
@@ -50,19 +51,10 @@ class NotificationTmeplateView extends Component{
 
     constructor(props){
         super(props);
-
-        const{authUser, notification} = this.props;
-
-        this.state = {
-            notificationTemplate: CNotificationTemplate.createNotificationTemplate(notification),
-            currentTour: 'page_1',
-            isTourOpen: automaticallyShowTour(authUser),
-        };
     }
 
     render(){
-        const {t, authUser} = this.props;
-        let {notificationTemplate} = this.state;
+        const {t, authUser, notificationTemplate} = this.props;
         let contentTranslations = {};
         contentTranslations.header = t('VIEW.HEADER');
         contentTranslations.list_button = t('VIEW.LIST_BUTTON');
@@ -92,7 +84,7 @@ class NotificationTmeplateView extends Component{
                     t,
                 },
             ],
-            hint: {text: t('VIEW.FORM.HINT_1'), openTour: ::this.openTour},
+            hint: {text: t('VIEW.FORM.HINT_1')},
         }];
         return (
             <Content
@@ -106,7 +98,7 @@ class NotificationTmeplateView extends Component{
                     contents={contents}
                     translations={changeContentTranslations}
                     authUser={authUser}
-                    entity={notificationTemplate}
+                    entity={CNotificationTemplate.createNotificationTemplate(notificationTemplate)}
                     action={null}
                     isActionInProcess={false}
                     noBreadcrumbs={true}

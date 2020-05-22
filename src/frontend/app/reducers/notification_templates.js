@@ -68,7 +68,7 @@ const reducer = (state = initialState, action) => {
             return state.set('updatingNotificationTemplate', API_REQUEST_STATE.START).set('error', null);
         case NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE_FULFILLED:
             index = notificationTemplates.findIndex(function (notificationTemplate) {
-                return notificationTemplate.id === action.payload.id;
+                return notificationTemplate.templateId === action.payload.id;
             });
             if(index >= 0) {
                 notificationTemplate = action.payload;
@@ -81,7 +81,7 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingNotificationTemplate', API_REQUEST_STATE.START).set('error', null);
         case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE_FULFILLED:
             index = notificationTemplates.findIndex(function (notificationTemplate) {
-                return notificationTemplate.name === action.payload.id;
+                return notificationTemplate.templateId === action.payload.id;
             });
             if(index >= 0) {
                 return state.set('deletingNotificationTemplate', API_REQUEST_STATE.FINISH).set('notificationTemplates', notificationTemplates.delete(index));

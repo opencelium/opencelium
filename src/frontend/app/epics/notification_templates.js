@@ -35,7 +35,7 @@ import {doRequest} from "../utils/auth";
 /**
  * main url for notification templates
  */
-const urlPrefix = 'notification_templates';
+const urlPrefix = 'message';
 
 
 /**
@@ -64,7 +64,7 @@ const fetchNotificationTemplateEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATE)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.templateId}`;
+            let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{
                 success: fetchNotificationTemplateFulfilled,
                 reject: fetchNotificationTemplateRejected,

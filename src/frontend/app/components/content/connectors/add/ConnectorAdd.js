@@ -365,7 +365,7 @@ class ConnectorAdd extends Component{
         },{
             inputs: authenticationInputs,
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
-            test: {isTested: this.state.isTested, callback: ::this.testConnector},
+            //test: {isTested: this.state.isTested, callback: ::this.testConnector},
         },
         ];
         let steps = this.filterSteps(authenticationInputs);

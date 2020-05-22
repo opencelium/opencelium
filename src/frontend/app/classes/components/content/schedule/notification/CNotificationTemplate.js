@@ -147,9 +147,14 @@ export default class CNotificationTemplate{
     }
 
     getObject(){
+        let content = [];
+        for(let i = 0; i < this._content.length; i++){
+            content.push(this._content[i].getObject());
+        }
         let obj = {
             name: this._name,
             type: this._type,
+            content,
         };
         if(this.hasOwnProperty('_id')){
             obj.templateId = this._id;

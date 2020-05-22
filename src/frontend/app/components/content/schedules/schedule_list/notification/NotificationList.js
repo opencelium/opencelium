@@ -143,11 +143,11 @@ class NotificationList extends Component{
      */
     getNotifications(){
         const searchValue = this.state.searchValue.toLowerCase();
-        const {schedule} = this.props;
+        const {notifications} = this.props;
         if(searchValue !== ''){
-            return schedule.notifications.filter(notification => notification.name.toLowerCase().includes(searchValue) || notification.eventType.includes(searchValue) || notification.notificationType.includes(searchValue));
+            return notifications.filter(notification => notification.name.toLowerCase().includes(searchValue) || notification.eventType.includes(searchValue) || notification.notificationType.includes(searchValue));
         }
-        return schedule.notifications;
+        return notifications;
     }
 
     renderSearchInput(){
@@ -243,6 +243,7 @@ class NotificationList extends Component{
 
 NotificationList.propTypes = {
     schedule: PropTypes.object.isRequired,
+    notifications: PropTypes.array.isRequired,
     closeNotificationList: PropTypes.func.isRequired,
     listStyles: PropTypes.object,
 };

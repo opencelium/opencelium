@@ -135,6 +135,27 @@ class NotificationTemplateAdd extends Component{
         return {value: true, message: ''};
     }
 
+    /**
+     * to validate content
+     */
+    validateContent(notificationTemplate){
+        const {t} = this.props;
+        if(notificationTemplate.content.length !== 0) {
+            if (notificationTemplate.content[0].subject === '') {
+                setFocusById('input_subject');
+                return {value: false, message: t('ADD.VALIDATION_MESSAGES.SUBJECT_REQUIRED')};
+            }
+            if (notificationTemplate.content[0].body === '') {
+                setFocusById('input_body');
+                return {value: false, message: t('ADD.VALIDATION_MESSAGES.BODY_REQUIRED')};
+            }
+        } else{
+            setFocusById('input_subject');
+            return {value: false, message: t('ADD.VALIDATION_MESSAGES.AT_LEAST_ONE_CONTENT_ITEM')};
+        }
+        return {value: true, message: ''};
+    }
+
     render(){
         const {t, authUser, addingNotificationTemplate, doAction} = this.props;
         let {notificationTemplate, currentTour, isTourOpen} = this.state;

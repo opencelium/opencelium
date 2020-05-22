@@ -23,21 +23,27 @@ import TooltipFontIcon from "../../../../general/basic_components/tooltips/Toolt
 import {getThemeClass} from "../../../../../utils/app";
 import NotificationList from "./NotificationList";
 import {addScheduleNotification} from "../../../../../actions/schedules/add";
+import {fetchScheduleNotifications} from "../../../../../actions/schedules/fetch";
 
 import styles from '../../../../../themes/default/content/schedules/schedules.scss';
+import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
+import Loading from "../../../../general/app/Loading";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const schedules = state.get('schedules');
     return {
         authUser: auth.get('authUser'),
+        fetchingScheduleNotifications: schedules.get('fetchingScheduleNotifications'),
+        notifications: schedules.get('notifications'),
     };
 }
 
 /**
  * Component to set Notifications for Schedule
  */
-@connect(mapStateToProps, {addScheduleNotification})
+@connect(mapStateToProps, {addScheduleNotification, fetchScheduleNotifications})
 @permission(SchedulePermissions.UPDATE, false)
 @withTranslation('schedules')
 class ScheduleNotification extends Component{
@@ -48,7 +54,20 @@ class ScheduleNotification extends Component{
         this.state = {
             showScheduleNotification: false,
             animationName: styles.AScaleAppear,
+            startFetchingScheduleNotifications: false,
         };
+    }
+
+    componentDidUpdate(){
+        const {startFetchingScheduleNotifications} = this.state;
+        const {fetchingScheduleNotifications} = this.props;
+        if(startFetchingScheduleNotifications && fetchingScheduleNotifications !== API_REQUEST_STATE.START) {
+            this.setState({
+                startFetchingScheduleNotifications: false,
+                animationName: styles.AScaleAppear,
+                showScheduleNotification: true,
+            });
+        }
     }
 
     /**
@@ -68,16 +87,25 @@ class ScheduleNotification extends Component{
         if(showScheduleNotification){
             this.closeNotificationList();
         } else {
-            this.setState({animationName: styles.AScaleAppear, showScheduleNotification: true});
+            this.fetchNotifications();
         }
+    }
+
+    fetchNotifications(){
+        const {schedule, fetchScheduleNotifications} = this.props;
+        fetchScheduleNotifications(schedule.getObject());
+        this.setState({
+            startFetchingScheduleNotifications: true,
+        });
     }
 
     renderDialogScheduleNotification(){
         const {animationName, showScheduleNotification} = this.state;
-        const {schedule} = this.props;
+        const {schedule, notifications} = this.props;
         if(showScheduleNotification) {
             return <NotificationList
                 schedule={schedule}
+                notifications={notifications}
                 closeNotificationList={::this.closeNotificationList}
                 listStyles={{animation: `${animationName} 0.25s forwards`}}
             />;
@@ -86,17 +114,24 @@ class ScheduleNotification extends Component{
     }
 
     render(){
+        const {startFetchingScheduleNotifications} = this.state;
         const {t, authUser, index} = this.props;
-        let classNames = ['schedule_list_action'];
+        let classNames = ['schedule_list_action', 'notifications_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <span className={styles[classNames.schedule_list_action]}>
-                <TooltipFontIcon
-                    id={`schedule_update_${index}`}
-                    value={'mail'}
-                    tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
-                    onClick={::this.toggleScheduleNotification}
-                />
+                {
+                    startFetchingScheduleNotifications
+                    ?
+                        <Loading className={styles[classNames.notifications_loading]}/>
+                    :
+                        <TooltipFontIcon
+                            id={`schedule_update_${index}`}
+                            value={'mail'}
+                            tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
+                            onClick={::this.toggleScheduleNotification}
+                        />
+                }
                 {this.renderDialogScheduleNotification()}
             </span>
         );

@@ -171,7 +171,7 @@ const fetchScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/notificaiton/${action.payload.notificationId}`;
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notificaiton/${action.payload.notificationId}`;
             return doRequest({url},{
                 success: fetchScheduleNotificationFulfilled,
                 reject: fetchScheduleNotificationRejected,
@@ -202,7 +202,7 @@ const fetchScheduleNotificationsEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/notifications/all`;
+            let url = `${urlPrefix}/${action.payload.id}/notifications/all`;
             return doRequest({url},{
                 success: fetchScheduleNotificationsFulfilled,
                 reject: fetchScheduleNotificationRejected,
