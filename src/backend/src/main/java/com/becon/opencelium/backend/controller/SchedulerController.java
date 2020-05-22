@@ -250,7 +250,7 @@ public class SchedulerController {
     }
 
 
-    @GetMapping("/{schedulerId}/notifications")
+    @GetMapping("/{schedulerId}/notification/all")
     public ResponseEntity<?> getAllNotifications(@PathVariable int schedulerId) throws Exception {
         List<NotificationResource> notificationResource = schedulerService.getAllNotifications(schedulerId);
         final Resources<NotificationResource> resources = new Resources<>(notificationResource);
@@ -280,6 +280,15 @@ public class SchedulerController {
     public ResponseEntity<?> deleteNotification(@PathVariable int schedulerId,@PathVariable int notificationId){
         schedulerService.deleteNotificationById(notificationId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{schedulerId}/notification/{notificationId}")
+    public ResponseEntity<?> updateNotification(@PathVariable int schedulerId,@PathVariable int notificationId,
+                                                @RequestBody NotificationResource notificationResource) throws Exception{
+        notificationResource.setNotificationId(notificationId);
+        EventNotification eventNotification = schedulerService.toNotificationEntity(notificationResource);
+        schedulerService.saveNotification(eventNotification);
+        return ResponseEntity.ok(schedulerService.toNotificationResource(eventNotification));
     }
 
 }

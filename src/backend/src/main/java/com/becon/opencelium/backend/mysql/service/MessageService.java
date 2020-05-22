@@ -12,6 +12,7 @@ public interface MessageService {
     void deleteById(int id);
     List<EventMessage>findAll();
     Optional<EventMessage> findById(int id);
+    List<EventMessage> findAllByType(String type);
 
     EventMessage toEntity(MessageResource messageResource);
     MessageResource toResource(EventMessage eventMessage);

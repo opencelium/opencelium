@@ -14,7 +14,9 @@ public class NotificationResource extends ResourceSupport {
     private int schedulerId;
     private String name;
     private String eventType;
-    private MessageResource template;
+    private String notificationType;
+    private TemplateMessageResource template;
+    //private MessageResource template;
     private List<String> recipients = new ArrayList<>();
 
     public NotificationResource(EventNotification eventNotification){
@@ -23,7 +25,9 @@ public class NotificationResource extends ResourceSupport {
         this.name = eventNotification.getName();
         this.eventType = eventNotification.getEventType();
         this.schedulerId = eventNotification.getScheduler().getId();
-        this.template = new MessageResource(eventNotification.getEventMessage());
+        this.notificationType = eventNotification.getEventMessage().getType();
+        this.template = new TemplateMessageResource(eventNotification.getEventMessage().getId(), eventNotification.getEventMessage().getName());
+        //this.template = new MessageResource(eventNotification.getEventMessage());
         this.recipients = eventNotification.getEventRecipients().stream()
                 .map(EventRecipient::getDestination)
                 .collect(Collectors.toList());
@@ -76,11 +80,43 @@ public class NotificationResource extends ResourceSupport {
     }
 
 
-    public MessageResource getTemplate() {
+    /*public MessageResource getTemplate() {
         return template;
     }
 
     public void setTemplate(MessageResource template) {
         this.template = template;
+    }*/
+
+    public String getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(String notificationType) {
+        this.notificationType = notificationType;
+    }
+
+   /* public int getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(int templateId) {
+        this.templateId = templateId;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }*/
+
+    public TemplateMessageResource getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(int id, String name) {
+        this.template = new TemplateMessageResource(id, name);
     }
 }
