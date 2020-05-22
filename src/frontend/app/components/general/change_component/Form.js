@@ -27,7 +27,7 @@ import styles from '../../../themes/default/general/change_component.scss';
 import FormSecretInput from "./form_elements/FormSecretInput";
 import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
 import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass, isString} from "../../../utils/app";
 import FormMode from "./form_elements/form_connection/FormMode";
 import FormConnectionTitle from "./form_elements/form_connection/FormTitle";
 import FormUserTitle from "./form_elements/FormUserTitle";
@@ -38,6 +38,9 @@ import FormInvokerIcon from './form_elements/form_invoker/FormIcon';
 import FormAuthentication from "./form_elements/form_invoker/FormAuthentication";
 import FormConnection from "./form_elements/form_invoker/FormConnection";
 import FormOperations from "./form_elements/form_invoker/FormOperations";
+import FormNotificationTemplateName from './form_elements/form_notification_template/FormName';
+import FormNotificationTemplateType from './form_elements/form_notification_template/FormType';
+import FormContent from "./form_elements/form_notification_template/FormContent";
 
 
 /**
@@ -196,6 +199,30 @@ class Form extends Component{
                     updateEntity={updateEntity}
                     data={data}
                 />;
+            case 'notification_template_name':
+                return <FormNotificationTemplateName
+                    key={key}
+                    entity={entity}
+                    updateEntity={updateEntity}
+                    data={data}
+                    clearValidationMessage={clearValidationMessage}
+                />;
+            case 'notification_template_type':
+                return <FormNotificationTemplateType
+                    key={key}
+                    entity={entity}
+                    updateEntity={updateEntity}
+                    data={data}
+                    clearValidationMessage={clearValidationMessage}
+                />;
+            case 'notification_template_content':
+                return <FormContent
+                    key={key}
+                    entity={entity}
+                    updateEntity={updateEntity}
+                    data={data}
+                    clearValidationMessage={clearValidationMessage}
+                />;
 
         }
         return null;
@@ -209,7 +236,7 @@ class Form extends Component{
         const {inputs, focusedInput, setFocusInput} = this.props;
         if(Array.isArray(inputs)) {
             result = inputs.map((data, key) => {
-                data['tourStep'] = data['tourStep'] ? data['tourStep'].substr(1) : '';
+                data['tourStep'] = data['tourStep'] && isString(data['tourStep']) ? data['tourStep'].substr(1) : data['tourStep'];
                 data['setFocusInput'] = setFocusInput;
                 data['focused'] = focusedInput !== '' && focusedInput === data.name;
                 data['visible'] = data.hasOwnProperty('visible') ? data.visible : true;

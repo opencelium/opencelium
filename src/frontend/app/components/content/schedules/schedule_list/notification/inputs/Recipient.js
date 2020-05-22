@@ -18,8 +18,9 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import TooltipFontIcon from "../../../../../general/basic_components/tooltips/TooltipFontIcon";
-import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
 import {getThemeClass} from "../../../../../../utils/app";
+
+import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
 
 
 function mapStateToProps(state){
@@ -30,7 +31,7 @@ function mapStateToProps(state){
 }
 
 /**
- * Name Input for Notification Change Component
+ * Recipient Item for Notification Change Component
  */
 @connect(mapStateToProps, {})
 @withTranslation('schedules')
@@ -48,6 +49,9 @@ class Recipient extends Component{
         };
     }
 
+    /**
+     * to click on recipient
+     */
     onClick(recipient){
         const {authUser, onClick} = this.props;
         let classNames = [
@@ -57,7 +61,7 @@ class Recipient extends Component{
         this.setState({
             recipientClassName: styles[classNames.recipient_disappear]
         });
-        setTimeout(() => onClick(recipient), 300);
+        setTimeout(() => onClick(recipient), 200);
     }
 
     render(){
@@ -69,7 +73,7 @@ class Recipient extends Component{
             'title',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        const title = `${recipient.name} ${recipient.surname}`;
+        const title = `${recipient.email}f`;
         return (
             <li className={`${styles[classNames.notification_recipient]} ${recipientClassName}`}>
                 <TooltipFontIcon className={styles[classNames.icon]} value={icon} tooltip={tooltip} onClick={() => ::this.onClick(recipient)}/>

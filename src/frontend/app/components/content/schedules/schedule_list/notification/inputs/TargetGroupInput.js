@@ -16,9 +16,9 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {withTranslation} from "react-i18next";
-import Input from "../../../../../general/basic_components/inputs/Input";
-import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
+import CNotification, {NOTIFICATION_TYPE} from "../../../../../../classes/components/content/schedule/notification/CNotification";
+import RecipientsInput from "./RecipientsInput";
+import SlackChannelInput from "./SlackChannelInput";
 
 
 function mapStateToProps(state){
@@ -32,43 +32,37 @@ function mapStateToProps(state){
  * Name Input for Notification Change Component
  */
 @connect(mapStateToProps, {})
-@withTranslation('schedules')
-class NameInput extends Component{
+class TargetGroupInput extends Component{
 
     constructor(props){
         super(props);
     }
 
-    /**
-     * to change name
-     */
-    onChangeInput(name){
-        let {notification} = this.props;
-        const {changeNotification} = this.props;
-        notification.name = name;
-        changeNotification(notification);
-    }
-
     render(){
-        const {t, notification} = this.props;
-        return (
-            <Input
-                onChange={::this.onChangeInput}
-                name={'input_notification_name'}
-                id={'input_notification_name'}
-                label={t('NOTIFICATION.NOTIFICATION_CHANGE.NAME_LABEL')}
-                type={'text'}
-                icon={'perm_identity'}
-                maxLength={256}
-                value={notification.name}
-            />
-        );
+        const {notification, changeNotification} = this.props;
+        switch(notification.notificationType){
+            case NOTIFICATION_TYPE.EMAIL:
+                return (
+                    <RecipientsInput
+                        notification={notification}
+                        changeNotification={changeNotification}
+                    />
+                );
+            case NOTIFICATION_TYPE.SLACK:
+                return (
+                    <SlackChannelInput
+                        notification={notification}
+                        changeNotification={changeNotification}
+                    />
+                );
+        }
+        return null;
     }
 }
 
-NameInput.propTypes = {
+TargetGroupInput.propTypes = {
     notification: PropTypes.instanceOf(CNotification).isRequired,
     changeNotification: PropTypes.func.isRequired,
 };
 
-export default NameInput;
+export default TargetGroupInput;

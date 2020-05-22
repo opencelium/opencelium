@@ -17,12 +17,13 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "../../../../../../utils/app";
-import theme from "react-toolbox/lib/input/theme.css";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 import FontIcon from "../../../../../general/basic_components/FontIcon";
-import CNotification from "../../../../../../classes/components/content/schedule/CNotification";
+import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
+import {getThemeClass} from "../../../../../../utils/app";
+
+import theme from "react-toolbox/lib/input/theme.css";
+import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
 
 
 function mapStateToProps(state){
@@ -41,8 +42,28 @@ class EventTypeInput extends Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            focused: false,
+        };
     }
 
+    /**
+     * to focus on radio button
+     */
+    focusEventTypeRadio(){
+        this.setState({focused: true});
+    }
+
+    /**
+     * to blur from radio button
+     */
+    blurEventTypeRadio(){
+        this.setState({focused: false});
+    }
+
+    /**
+     * to change event type radio
+     */
     onChangeEventType(eventType){
         let {notification} = this.props;
         const {changeNotification} = this.props;
@@ -51,6 +72,7 @@ class EventTypeInput extends Component{
     }
 
     render(){
+        const {focused} = this.state;
         const {t, authUser, notification} = this.props;
         let classNames = [
             'notification_change_event_type',
@@ -58,18 +80,22 @@ class EventTypeInput extends Component{
             'radio_group',
             'radio_button',
             'first_radio_button',
+            'notification_select_focused',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         return(
             <div className={`${theme.withIcon} ${theme.input} ${styles[classNames.notification_change_event_type]}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.label]}`}/>
                 <RadioGroup name='theme' value={notification.eventType} onChange={::this.onChangeEventType} className={`${styles[classNames.radio_group]}`}>
-                    <RadioButton id='input_event_pre' label={`${t('NOTIFICATION.EVENT_PRE')}`} value='pre' className={`${styles[classNames.radio_button]} ${styles[classNames.first_radio_button]}`}/>
-                    <RadioButton id='input_event_post' label={`${t('NOTIFICATION.EVENT_POST')}`} value='post' className={`${styles[classNames.radio_button]}`}/>
+                    <RadioButton id='input_event_pre' onFocus={::this.focusEventTypeRadio} onBlur={::this.blurEventTypeRadio} label={`${t('NOTIFICATION.EVENT_PRE')}`} value='pre' className={`${styles[classNames.radio_button]} ${styles[classNames.first_radio_button]}`}/>
+                    <RadioButton id='input_event_post' onFocus={::this.focusEventTypeRadio} onBlur={::this.blurEventTypeRadio} label={`${t('NOTIFICATION.EVENT_POST')}`} value='post' className={`${styles[classNames.radio_button]}`}/>
                 </RadioGroup>
-                <FontIcon value={'event'} className={theme.icon}/>
+                <FontIcon value={'event'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
                 <span className={theme.bar}/>
-                <label className={theme.label}>{'Event'}</label>
+                <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
+                    {t('NOTIFICATION.NOTIFICATION_CHANGE.EVENT_TYPE_LABEL')}
+                    <span className={theme.required}> *</span>
+                </label>
             </div>
         );
     }
@@ -77,6 +103,7 @@ class EventTypeInput extends Component{
 
 EventTypeInput.propTypes = {
     notification: PropTypes.instanceOf(CNotification).isRequired,
+    changeNotification: PropTypes.func.isRequired,
 };
 
 export default EventTypeInput;

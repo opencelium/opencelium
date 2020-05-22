@@ -264,13 +264,13 @@ const fetchSchedulesByIdsCanceled = (message) => {
 
 /**
  * fetch schedule notification
- * @param scheduleId
+ * @param notification
  * @returns {{type: string}}
  */
-const fetchScheduleNotification = (scheduleId) => {
+const fetchScheduleNotification = (notification) => {
     return {
         type: SchedulesAction.FETCH_SCHEDULENOTIFICATION,
-        payload: scheduleId,
+        payload: notification,
     };
 };
 /**
@@ -357,6 +357,149 @@ const fetchScheduleNotificationsCanceled = (message) => {
     };
 };
 
+/**
+ * fetch template of notifications in schedule
+ * @param notification
+ * @returns {{type: string}}
+ */
+const fetchScheduleNotificationTemplates = (notification) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES,
+        payload: notification,
+    };
+};
+
+/**
+ * fetch template of notifications in schedule fulfilled
+ * @param templates
+ * @returns {{type: string, payload: []}}
+ */
+const fetchScheduleNotificationTemplatesFulfilled = (templates) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES_FULFILLED,
+        payload: templates
+    };
+};
+
+/**
+ * fetch template of notifications in schedule rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchScheduleNotificationTemplatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch template of notifications in schedule canceled
+ * @param message
+ * @returns {{type: string, payload: []}}
+ */
+const fetchScheduleNotificationTemplatesCanceled = (message) => {
+    return{
+        type: SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch recipients for email notification
+ * @param notification
+ * @returns {{type: string}}
+ */
+const fetchNotificationRecipients = (notification) => {
+    return {
+        type: SchedulesAction.FETCH_NOTIFICATIONRECIPIENTS,
+        payload: notification,
+    };
+};
+
+/**
+ * fetch recipients for email notification fulfilled
+ * @param recipients
+ * @returns {{type: string, payload: []}}
+ */
+const fetchNotificationRecipientsFulfilled = (recipients) => {
+    return{
+        type: SchedulesAction.FETCH_NOTIFICATIONRECIPIENTS_FULFILLED,
+        payload: recipients
+    };
+};
+
+/**
+ * fetch recipients for email notification rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchNotificationRecipientsRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_NOTIFICATIONRECIPIENTS_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch recipients for email notification canceled
+ * @param message
+ * @returns {{type: string, payload: []}}
+ */
+const fetchNotificationRecipientsCanceled = (message) => {
+    return{
+        type: SchedulesAction.FETCH_NOTIFICATIONRECIPIENTS_CANCELED,
+        payload: message
+    };
+};
+/**
+ * fetch channels for slack notification
+ * @param notification
+ * @returns {{type: string}}
+ */
+const fetchSlackChannels = (notification) => {
+    return {
+        type: SchedulesAction.FETCH_SLACKCHANNELS,
+        payload: notification,
+    };
+};
+
+/**
+ * fetch channels for slack notification fulfilled
+ * @param channels
+ * @returns {{type: string, payload: []}}
+ */
+const fetchSlackChannelsFulfilled = (channels) => {
+    return{
+        type: SchedulesAction.FETCH_SLACKCHANNELS_FULFILLED,
+        payload: channels
+    };
+};
+
+/**
+ * fetch channels for slack notification rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchSlackChannelsRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.FETCH_SLACKCHANNELS_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch channels for slack notification canceled
+ * @param message
+ * @returns {{type: string, payload: []}}
+ */
+const fetchSlackChannelsCanceled = (message) => {
+    return{
+        type: SchedulesAction.FETCH_SLACKCHANNELS_CANCELED,
+        payload: message
+    };
+};
+
 
 export {
     fetchSchedules,
@@ -388,4 +531,16 @@ export {
     fetchScheduleNotificationsFulfilled,
     fetchScheduleNotificationsRejected,
     fetchScheduleNotificationsCanceled,
+    fetchScheduleNotificationTemplates,
+    fetchScheduleNotificationTemplatesFulfilled,
+    fetchScheduleNotificationTemplatesRejected,
+    fetchScheduleNotificationTemplatesCanceled,
+    fetchNotificationRecipients,
+    fetchNotificationRecipientsFulfilled,
+    fetchNotificationRecipientsRejected,
+    fetchNotificationRecipientsCanceled,
+    fetchSlackChannels,
+    fetchSlackChannelsFulfilled,
+    fetchSlackChannelsRejected,
+    fetchSlackChannelsCanceled,
 };

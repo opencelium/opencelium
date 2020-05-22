@@ -4,7 +4,6 @@ import FontIcon from "../../FontIcon";
 import COperatorItem from "../../../../../classes/components/content/connection/operator/COperatorItem";
 import styles from '../../../../../themes/default/general/basic_components.scss';
 import TooltipFontIcon from "../../tooltips/TooltipFontIcon";
-import keyboard from "swiper/src/components/keyboard/keyboard";
 
 
 class HierarchyItem extends Component{

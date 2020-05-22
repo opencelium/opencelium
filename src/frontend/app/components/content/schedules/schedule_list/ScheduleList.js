@@ -378,13 +378,13 @@ class ScheduleList extends Component{
                                 <TableCell style={{padding: '5px'}}>
                                     <div className={styles[classNames.schedule_list_actions]}>
                                         <div>
-                                            <ScheduleStart index={key} schedule={schedule}/>
-                                            <ScheduleUpdate index={key} schedule={schedule}/>
-                                        </div>
-                                        <div>
                                             <WebHookTools index={key} schedule={schedule} t={t}/>
                                             <ScheduleNotification schedule={schedule} index={key}/>
                                             <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
+                                        </div>
+                                        <div>
+                                            <ScheduleStart index={key} schedule={schedule}/>
+                                            <ScheduleUpdate index={key} schedule={schedule}/>
                                         </div>
                                     </div>
                                 </TableCell>

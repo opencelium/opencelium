@@ -31,6 +31,9 @@ class ValidationMessage extends Component{
 
     render(){
         const {message, authUser, classNames} = this.props;
+        if(message === ''){
+            return null;
+        }
         let defaultClassNames = ['validation_message', 'message'];
         defaultClassNames = getThemeClass({classNames: defaultClassNames, authUser, styles});
         let validationMessageClassName = `${styles[defaultClassNames.validation_message]}`;

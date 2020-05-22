@@ -19,13 +19,13 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import {permission} from "../../../../../decorators/permission";
 import {SchedulePermissions} from "../../../../../utils/constants/permissions";
-import CNotification from "../../../../../classes/components/content/schedule/CNotification";
+import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
 import EventTypeInput from "./inputs/EventTypeInput";
 import NotificationTypeInput from "./inputs/NotificationTypeInput";
 import TemplateInput from "./inputs/TemplateInput";
 import {setFocusById} from "../../../../../utils/app";
 import NameInput from "./inputs/NameInput";
-import RecipientsInput from "./inputs/RecipientsInput";
+import TargetGroupInput from "./inputs/TargetGroupInput";
 
 
 function mapStateToProps(state){
@@ -36,7 +36,7 @@ function mapStateToProps(state){
 }
 
 /**
- * Component to set notification for schedule
+ * Component to add or to update Notification
  */
 @connect(mapStateToProps, {})
 @permission(SchedulePermissions.UPDATE, false)
@@ -55,24 +55,19 @@ class NotificationChange extends Component{
         const {notification, changeNotification} = this.props;
         return (
             <div>
-                <NameInput notification={notification}/>
+                <NameInput notification={notification} changeNotification={changeNotification}/>
                 <EventTypeInput notification={notification} changeNotification={changeNotification}/>
                 <NotificationTypeInput notification={notification} changeNotification={changeNotification}/>
                 <TemplateInput notification={notification} changeNotification={changeNotification}/>
-                <RecipientsInput notification={notification} changeNotification={changeNotification}/>
+                <TargetGroupInput notification={notification} changeNotification={changeNotification}/>
             </div>
         );
     }
 }
 
 NotificationChange.propTypes = {
-    mode: PropTypes.string,
     changeNotification: PropTypes.func.isRequired,
     notification: PropTypes.instanceOf(CNotification).isRequired,
-};
-
-NotificationChange.defaultProps = {
-    mode: 'add',
 };
 
 export default NotificationChange;

@@ -90,11 +90,11 @@ class Notification extends Component{
                 break;
             case NotificationType.WARNING:
                 result.style = styles.warning;
-                result.icon =  <FontIcon value='warning'  style={{color: '#dddd19'}}/>;
+                result.icon =  <FontIcon value='warning' style={{color: '#dddd19'}}/>;
                 break;
             case NotificationType.NOTE:
                 result.style = styles.note;
-                result.icon =  <FontIcon value='note'  style={{color: 'gray'}}/>;
+                result.icon =  <FontIcon value='assignment' style={{color: 'gray'}}/>;
                 break;
         }
         result.systemTitle = t(`SYSTEMS.${systemTitle.toUpperCase()}`);
@@ -122,7 +122,18 @@ class Notification extends Component{
                 {this.renderCloseButton()}
                 <div className={styles.notification_header}>
                     <div className={styles.notification_icon}>{this.data.icon}</div>
-                    <div className={styles.notification_header_text}>{this.data.systemTitle}{`. `}<span>{this.data.header}</span></div>
+                        <div className={styles.notification_header_text}>
+                            <span>{this.data.systemTitle}</span>
+                            {
+                                this.data.header !== ''
+                                ?
+                                    <span>
+                                        {`. ${this.data.header}`}
+                                    </span>
+                                :
+                                    null
+                            }
+                        </div>
                 </div>
                 <div className={styles.notification_message}>{text}</div>
             </div>

@@ -230,6 +230,30 @@ const TemplateImport =  Loadable({
     loading: Loading,
 });
 
+/**
+ * Loadable Notification Template
+ */
+const NotificationTemplateLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'notification_template_layout' */ '../components/content/notification_templates/NotificationTemplateLayout'),
+    loading: Loading,
+});
+const NotificationTemplatesList = Loadable({
+    loader: () => import(/* webpackChunkName: 'notification_template_list' */ '../components/content/notification_templates/list/NotificationTemplatesList'),
+    loading: Loading,
+});
+const NotificationTemplateAdd =  Loadable({
+    loader: () => import(/* webpackChunkName: 'notification_template_add' */ '../components/content/notification_templates/add/NotificationTemplateAdd'),
+    loading: Loading,
+});
+const NotificationTemplateView =  Loadable({
+    loader: () => import(/* webpackChunkName: 'notification_template_view' */ '../components/content/notification_templates/view/NotificationTemplateView'),
+    loading: Loading,
+});
+const NotificationTemplateUpdate =  Loadable({
+    loader: () => import(/* webpackChunkName: 'notification_template_update' */ '../components/content/notification_templates/update/NotificationTemplateUpdate'),
+    loading: Loading,
+});
+
 export default {
     UserLayout,
     UserAdd,
@@ -271,4 +295,9 @@ export default {
     TemplateLayout,
     TemplatesList,
     TemplateImport,
+    NotificationTemplateLayout,
+    NotificationTemplateAdd,
+    NotificationTemplatesList,
+    NotificationTemplateView,
+    NotificationTemplateUpdate,
 };
