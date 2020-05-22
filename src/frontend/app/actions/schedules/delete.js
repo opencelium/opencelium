@@ -97,7 +97,7 @@ const deleteSchedulesRejected = (error) => {
  */
 const deleteScheduleNotification = (notification) => {
     return {
-        type: SchedulesAction.DELETE_SCHEDULE,
+        type: SchedulesAction.DELETE_SCHEDULENOTIFICATION,
         payload: notification,
     };
 };
@@ -109,7 +109,7 @@ const deleteScheduleNotification = (notification) => {
  */
 const deleteScheduleNotificationFulfilled = (status) => {
     return {
-        type: SchedulesAction.DELETE_SCHEDULE_FULFILLED,
+        type: SchedulesAction.DELETE_SCHEDULENOTIFICATION_FULFILLED,
         payload: status,
     };
 };
@@ -121,7 +121,7 @@ const deleteScheduleNotificationFulfilled = (status) => {
  */
 const deleteScheduleNotificationRejected = (error) => {
     return Rx.Observable.of({
-        type: SchedulesAction.DELETE_SCHEDULE_REJECTED,
+        type: SchedulesAction.DELETE_SCHEDULENOTIFICATION_REJECTED,
         payload: error
     });
 };

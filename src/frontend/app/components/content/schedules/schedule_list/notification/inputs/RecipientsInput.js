@@ -19,37 +19,35 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import { Row, Col } from "react-grid-system";
 import Input from "../../../../../general/basic_components/inputs/Input";
-import CNotification from "../../../../../../classes/components/content/schedule/CNotification";
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from "../../../../../../themes/default/content/schedules/schedules.scss";
+import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
 import FontIcon from "../../../../../general/basic_components/FontIcon";
 import {getThemeClass} from "../../../../../../utils/app";
 import Recipient from "./Recipient";
 import TooltipFontIcon from "../../../../../general/basic_components/tooltips/TooltipFontIcon";
+import {fetchNotificationRecipients} from "../../../../../../actions/schedules/fetch";
+import Loading from "../../../../../general/app/Loading";
+import {API_REQUEST_STATE} from "../../../../../../utils/constants/app";
 
-let ALL_USERS = [
-    {userId: 1, name: 'JohnJohnJohnJohnJohnJohnJohnJohnJohn', surname: 'Doe'},
-    {userId: 2, name: 'Kate', surname: 'Winslet'},
-    {userId: 3, name: 'Patric', surname: 'Sway'},
-    {userId: 4, name: 'Jack', surname: 'Doe'},
-    {userId: 5, name: 'Peter', surname: 'Winslet'},
-    {userId: 6, name: 'Sabrina', surname: 'Sway'},
-    {userId: 7, name: 'Susi', surname: 'Adler'},
-];
+import styles from "../../../../../../themes/default/content/schedules/schedules.scss";
+import theme from "react-toolbox/lib/input/theme.css";
+
 
 const RECIPIENTS_LIMIT = 3;
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const schedules = state.get('schedules');
     return {
         authUser: auth.get('authUser'),
+        allUsers: schedules.get('targetGroup').toJS(),
+        fetchingNotificationTargetGroup: schedules.get('fetchingNotificationTargetGroup'),
     };
 }
 
 /**
- * Recipients Input for Notification Change Component
+ * Recipients Input for TargetGroup Component
  */
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {fetchNotificationRecipients})
 @withTranslation('schedules')
 class RecipientsInput extends Component{
 
@@ -61,51 +59,100 @@ class RecipientsInput extends Component{
             searchValueForSelectedRecipients: '',
             restRecipientsIterator: 1,
             searchValueForRestRecipients: '',
+            focused: false,
+            startFetchingRecipients: true,
         };
     }
 
+    componentDidMount(){
+        this.props.fetchNotificationRecipients();
+    }
+
+    componentDidUpdate(){
+        if(this.state.startFetchingRecipients && this.props.fetchingNotificationTargetGroup !== API_REQUEST_STATE.START){
+            this.setState({
+                startFetchingRecipients: false,
+            });
+        }
+    }
+
+    /**
+     * to focus on search inputs
+     */
+    focusSearchInputs(){
+        this.setState({focused: true});
+    }
+
+    /**
+     * to blur from search inputs
+     */
+    blurSearchInputs(){
+        this.setState({focused: false});
+    }
+
+    /**
+     * to open next recipients
+     */
     increaseIterator(selectedRecipientsIterator){
         this.setState({[selectedRecipientsIterator]: this.state[selectedRecipientsIterator] + 1});
     }
 
+    /**
+     * to open previous recipients
+     */
     decreaseIterator(selectedRecipientsIterator){
         this.setState({[selectedRecipientsIterator]: this.state[selectedRecipientsIterator] - 1});
     }
 
+    /**
+     * to change search value for selected recipients
+     */
     onChangeSearchValueForSelectedRecipients(searchValueForSelectedRecipients){
         this.setState({searchValueForSelectedRecipients, selectedRecipientsIterator: 1});
     }
 
+    /**
+     * to change search value for rest recipients
+     */
     onChangeSearchValueForRestRecipients(searchValueForRestRecipients){
         this.setState({searchValueForRestRecipients, restRecipientsIterator: 1});
     }
 
+    /**
+     * to add recipient
+     */
     onAddRecipient(recipient){
         let {notification} = this.props;
         const {changeNotification} = this.props;
-        notification.addRecipient(recipient);
+        notification.targetGroup.addRecipient(recipient);
         changeNotification(notification);
     }
 
+    /**
+     * to remove recipient
+     */
     onRemoveRecipient(recipient){
         let {notification} = this.props;
         const {changeNotification} = this.props;
-        notification.deleteRecipient(recipient);
+        notification.targetGroup.deleteRecipient(recipient);
         changeNotification(notification);
     }
 
+    /**
+     * to get selected recipients
+     */
     getSelectedRecipients(){
-        const searchValue = this.state.searchValueForSelectedRecipients.toLowerCase();
-        const recipients = this.props.notification.recipients;
+        const {searchValueForSelectedRecipients} = this.state;
+        const {notification} = this.props;
+        const searchValue = searchValueForSelectedRecipients.toLowerCase();
+        const recipients = notification.targetGroup.recipients;
         let result = [];
         if(searchValue === ''){
             result = recipients;
         } else {
             //using search
             for (let i = 0; i < recipients.length; i++) {
-                const name = recipients[i].name.toLowerCase();
-                const surname = recipients[i].surname.toLowerCase();
-                if (name.includes(searchValue) || surname.includes(searchValue)) {
+                if (recipients[i].email.toLowerCase().includes(searchValue)) {
                     result.push(recipients[i]);
                 }
             }
@@ -113,6 +160,9 @@ class RecipientsInput extends Component{
         return result;
     }
 
+    /**
+     * to get current selected limited recipients
+     */
     getCurrentSelectedRecipients(recipients){
         const {selectedRecipientsIterator} = this.state;
         recipients = recipients.length === 0 ? this.getSelectedRecipients() : recipients;
@@ -121,20 +171,22 @@ class RecipientsInput extends Component{
         return recipients;
     }
 
+    /**
+     * to get rest recipients
+     */
     getRestRecipients(){
-        const {restRecipientsIterator} = this.state;
-        const {notification} = this.props;
-        const searchValue = this.state.searchValueForRestRecipients.toLowerCase();
-        const recipients = notification.recipients.length !== 0 ? ALL_USERS.filter(user => notification.recipients.findIndex(recipient => recipient.userId === user.userId) === -1) : ALL_USERS;
+        const {searchValueForRestRecipients} = this.state;
+        const {notification, allUsers} = this.props;
+        const searchValue = searchValueForRestRecipients.toLowerCase();
+        const allRecipients = notification.targetGroup.recipients;
+        const recipients = allRecipients.length !== 0 ? allUsers.filter(user => allRecipients.findIndex(recipient => recipient.userId === user.userId) === -1) : allUsers;
         let result = [];
         if(searchValue === ''){
             result = recipients;
         } else {
             //using search
             for (let i = 0; i < recipients.length; i++) {
-                const name = recipients[i].name.toLowerCase();
-                const surname = recipients[i].surname.toLowerCase();
-                if (name.includes(searchValue) || surname.includes(searchValue)) {
+                if (recipients[i].email.toLowerCase().includes(searchValue)) {
                     result.push(recipients[i]);
                 }
             }
@@ -142,6 +194,9 @@ class RecipientsInput extends Component{
         return result;
     }
 
+    /**
+     * to get current rest limited recipients
+     */
     getCurrentRestRecipients(recipients = []){
         const {restRecipientsIterator} = this.state;
         recipients = recipients.length === 0 ? this.getRestRecipients() : recipients;
@@ -151,57 +206,40 @@ class RecipientsInput extends Component{
     }
 
     renderSelectedRecipients(recipients){
-        const {t, authUser} = this.props;
-        let classNames = [
-            'notification_recipients_alert_message',
-        ];
-        classNames = getThemeClass({classNames, authUser, styles});
-        const {searchValueForSelectedRecipients} = this.state;
-        if(recipients.length === 0){
-            let alertMessage = 'There is no selected recipients';
-            if(searchValueForSelectedRecipients !== ''){
-                alertMessage = 'None recipients found';
-            }
-            return <div className={styles[classNames.notification_recipients_alert_message]}>{alertMessage}</div>;
-        }
         return this.renderRecipients(recipients, 'left');
     }
 
     renderRestRecipients(recipients){
-        const {t, authUser} = this.props;
-        let classNames = [
-            'notification_recipients_alert_message',
-        ];
-        classNames = getThemeClass({classNames, authUser, styles});
-        const {searchValueForRestRecipients} = this.state;
-        if(recipients.length === 0){
-            let alertMessage = 'There is no rest recipients';
-            if(searchValueForRestRecipients !== ''){
-                alertMessage = 'None recipients found';
-            }
-            return <div className={styles[classNames.notification_recipients_alert_message]}>{alertMessage}</div>;
-        }
         return this.renderRecipients(recipients, 'right');
     }
 
     renderRecipients(recipients, side){
+        const {searchValueForSelectedRecipients, searchValueForRestRecipients} = this.state;
         const {t, authUser} = this.props;
         let classNames = [
             'notification_recipients',
+            'notification_recipients_alert_message',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
+        if(recipients.length === 0){
+            let alertMessage = t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NO_SELECTED_RECIPIENTS');
+            if(side === 'left' && searchValueForSelectedRecipients !== '' || side === 'right' && searchValueForRestRecipients !== ''){
+                alertMessage = t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NONE_FOUND');
+            }
+            return <div className={styles[classNames.notification_recipients_alert_message]}>{alertMessage}</div>;
+        }
         let icon = '';
         let tooltip = '';
         let onClick = null;
         switch(side){
             case 'left':
                 icon = 'remove';
-                tooltip = 'Remove';
+                tooltip = t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.REMOVE_ICON_TOOLTIP');
                 onClick = ::this.onRemoveRecipient;
                 break;
             case 'right':
                 icon = 'add';
-                tooltip = 'Add';
+                tooltip = t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.ADD_ICON_TOOLTIP');
                 onClick = ::this.onAddRecipient;
                 break;
         }
@@ -210,7 +248,13 @@ class RecipientsInput extends Component{
                 {
                     recipients.map(recipient => {
                         return (
-                            <Recipient key={recipient.userId} recipient={recipient} icon={icon} tooltip={tooltip} onClick={onClick}/>
+                            <Recipient
+                                key={recipient.userId}
+                                recipient={recipient}
+                                icon={icon}
+                                tooltip={tooltip}
+                                onClick={onClick}
+                            />
                         );
                     })
                 }
@@ -223,6 +267,7 @@ class RecipientsInput extends Component{
             return null;
         }
         const {selectedRecipientsIterator, restRecipientsIterator} = this.state;
+        const {t, authUser} = this.props;
         let iterator = '';
         let iteratorName = '';
         switch (type) {
@@ -235,7 +280,6 @@ class RecipientsInput extends Component{
                 iteratorName = 'restRecipientsIterator';
                 break;
         }
-        const {t, authUser} = this.props;
         let classNames = [
             'notifications_arrows',
             'notifications_arrow_disable',
@@ -249,24 +293,26 @@ class RecipientsInput extends Component{
         const isNextDisable = iterator * RECIPIENTS_LIMIT >= recipients.length;
         return(
             <React.Fragment>
-                {isPrevDisable ? null : <div className={styles[classNames.recipients_before]} title={'More recipients'}>...</div>}
+                {isPrevDisable ? null : <div className={styles[classNames.recipients_before]} title={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.MORE_ICON_TOOLTIP')}>...</div>}
                 <div className={styles[classNames.notifications_arrows]}>
-                    <TooltipFontIcon tooltip={'Previous'} value={'keyboard_arrow_up'} onClick={isPrevDisable ? null : () => ::this.decreaseIterator(iteratorName)}
+                    <TooltipFontIcon tooltip={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.PREVIOUS_ICON_TOOLTIP')} value={'keyboard_arrow_up'} onClick={isPrevDisable ? null : () => ::this.decreaseIterator(iteratorName)}
                                      className={`${styles[classNames.notifications_arrow_prev]} ${isPrevDisable ? styles[classNames.notifications_arrow_disable] : ''}`}/>
-                    <TooltipFontIcon tooltip={'Next'} value={'keyboard_arrow_down'} onClick={isNextDisable ? null : () => ::this.increaseIterator(iteratorName)}
+                    <TooltipFontIcon tooltip={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NEXT_ICON_TOOLTIP')} value={'keyboard_arrow_down'} onClick={isNextDisable ? null : () => ::this.increaseIterator(iteratorName)}
                                      className={`${styles[classNames.notifications_arrow_next]} ${isNextDisable ? styles[classNames.notifications_arrow_disable] : ''}`}/>
                 </div>
-                {isNextDisable ? null : <div className={styles[classNames.recipients_after]} title={'More recipients'}>...</div>}
+                {isNextDisable ? null : <div className={styles[classNames.recipients_after]} title={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.MORE_ICON_TOOLTIP')}>...</div>}
             </React.Fragment>
         );
     }
 
     render(){
-        const {searchValueForSelectedRecipients, searchValueForRestRecipients} = this.state;
+        const {focused, searchValueForSelectedRecipients, searchValueForRestRecipients, startFetchingRecipients} = this.state;
         const {t, authUser} = this.props;
         let classNames = [
+            'notification_input_appear',
             'notification_change_event_type',
             'label',
+            'notification_select_focused',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         const selectedRecipients = this.getSelectedRecipients();
@@ -274,41 +320,54 @@ class RecipientsInput extends Component{
         const restRecipients = this.getRestRecipients();
         const currentRestRecipients = this.getCurrentRestRecipients(restRecipients);
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${styles[classNames.notification_change_event_type]}`}>
+            <div className={`${theme.withIcon} ${theme.input} ${styles[classNames.notification_change_event_type]} ${styles[classNames.notification_input_appear]}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.label]}`}/>
                 <Row>
+                    <Col md={6}>
+                        {this.renderNavigation('rest', restRecipients)}
+                        {
+                            startFetchingRecipients
+                            ?
+                                <Loading/>
+                            :
+                                <div>
+                                    <Input
+                                        name={'input_recipients_rest_search'}
+                                        id={'input_recipients_rest_search'}
+                                        label={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.REST_RECIPIENTS_SEARCH_LABEL')}
+                                        maxLength={256}
+                                        value={searchValueForRestRecipients}
+                                        onChange={::this.onChangeSearchValueForRestRecipients}
+                                        onFocus={::this.focusSearchInputs}
+                                        onBlur={::this.blurSearchInputs}
+                                    />
+                                    {this.renderRestRecipients(currentRestRecipients)}
+                                </div>
+                        }
+                    </Col>
                     <Col md={6}>
                         {this.renderNavigation('selected', selectedRecipients)}
                         <div>
                             <Input
                                 name={'input_recipients_selected_search'}
                                 id={'input_recipients_selected_search'}
-                                label={'Search in selected recipients...'}
+                                label={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.SELECTED_RECIPIENTS_SEARCH_LABEL')}
                                 maxLength={256}
                                 value={searchValueForSelectedRecipients}
                                 onChange={::this.onChangeSearchValueForSelectedRecipients}
+                                onFocus={::this.focusSearchInputs}
+                                onBlur={::this.blurSearchInputs}
                             />
                             {this.renderSelectedRecipients(currentSelectedRecipients)}
                         </div>
                     </Col>
-                    <Col md={6}>
-                        {this.renderNavigation('rest', restRecipients)}
-                        <div>
-                            <Input
-                                name={'input_recipients_rest_search'}
-                                id={'input_recipients_rest_search'}
-                                label={'Search in rest recipients...'}
-                                maxLength={256}
-                                value={searchValueForRestRecipients}
-                                onChange={::this.onChangeSearchValueForRestRecipients}
-                            />
-                            {this.renderRestRecipients(currentRestRecipients)}
-                        </div>
-                    </Col>
                 </Row>
-                <FontIcon value={'group'} className={theme.icon}/>
+                <FontIcon value={'group'}  className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
                 <span className={theme.bar}/>
-                <label className={theme.label}>{'Recipients'}</label>
+                <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
+                    {t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.LABEL')}
+                    <span className={theme.required}> *</span>
+                </label>
             </div>
         );
     }

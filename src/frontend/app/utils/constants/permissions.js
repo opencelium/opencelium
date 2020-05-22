@@ -122,3 +122,13 @@ export const TemplatePermissions = {
     UPDATE: {entity: 'INVOKER', permission: 'UPDATE'},
     DELETE: {entity: 'INVOKER', permission: 'DELETE'},
 };
+
+/**
+ * permission constants for notification template
+ */
+export const NotificationTemplatePermissions = {
+    CREATE: {entity: 'INVOKER', permission: 'CREATE'},
+    READ: {entity: 'INVOKER', permission: 'READ'},
+    UPDATE: {entity: 'INVOKER', permission: 'UPDATE'},
+    DELETE: {entity: 'INVOKER', permission: 'DELETE'},
+};

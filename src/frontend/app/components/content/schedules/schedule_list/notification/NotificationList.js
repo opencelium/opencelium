@@ -17,170 +17,238 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {permission} from "../../../../../decorators/permission";
-import {SchedulePermissions} from "../../../../../utils/constants/permissions";
 import TooltipFontIcon from "../../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "../../../../../utils/app";
-import styles from '../../../../../themes/default/content/schedules/schedules.scss';
+import {getThemeClass, setFocusById} from "../../../../../utils/app";
 import Dialog from "../../../../general/basic_components/Dialog";
-import {TableCell, TableHead, TableRow} from "react-toolbox/lib/table";
-import Table from "../../../../general/basic_components/table/Table";
 import NotificationChange from "./NotificationChange";
-import Confirmation from "../../../../general/app/Confirmation";
-import {updateScheduleNotification} from "../../../../../actions/schedules/update";
-import {deleteScheduleNotification} from "../../../../../actions/schedules/delete";
-import CNotification from "../../../../../classes/components/content/schedule/CNotification";
+import {addScheduleNotification} from "../../../../../actions/schedules/add";
+import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
+import NotificationListItem from "./NotificationListItem";
+import Input from "../../../../general/basic_components/inputs/Input";
+import {validateChangeNotification} from "../../../../../validations/schedules";
+import ValidationMessage from "../../../../general/change_component/ValidationMessage";
+
+import styles from '../../../../../themes/default/content/schedules/schedules.scss';
+import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
+import Loading from "../../../../general/app/Loading";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const schedules = state.get('schedules');
     return {
         authUser: auth.get('authUser'),
+        addingScheduleNotification: schedules.get('addingScheduleNotification'),
     };
 }
 
 /**
- * Component to set notification for schedule
+ * List of Notifications of Schedule
  */
-@connect(mapStateToProps, {updateScheduleNotification, deleteScheduleNotification})
-@permission(SchedulePermissions.UPDATE, false)
+@connect(mapStateToProps, {addScheduleNotification})
 @withTranslation(['schedules', 'app'])
 class NotificationList extends Component{
 
     constructor(props){
         super(props);
         this.state = {
-            notification: CNotification.createNotification(),
-            showUpdateDialog: false,
-            showDeleteConfirmation: false,
+            newNotification: CNotification.createNotification(),
+            showAddDialog: false,
+            searchValue: '',
+            validationMessage: '',
+            startAddingNotification: false,
         };
     }
 
-    changeNotification(notification){
-        this.setState({notification});
+    componentDidMount(){
+        setFocusById('notification_search_input', 300);
+    }
+
+    componentDidUpdate(){
+        const {addingScheduleNotification} = this.props;
+        const {startAddingNotification} = this.state;
+        if(startAddingNotification && addingScheduleNotification !== API_REQUEST_STATE.START) {
+            this.setState({
+                startAddingNotification: false,
+            });
+        }
     }
 
     /**
-     * to show/hide update notification dialog
+     * to change new notification
      */
-    toggleUpdateDialog(){
-        this.setState({showUpdateDialog: !this.state.showUpdateDialog});
-    }
-
-    /**
-     * to show/hide delete confirmation dialog
-     */
-    toggleDeleteConfirmation(){
-        this.setState({showDeleteConfirmation: !this.state.showDeleteConfirmation});
-    }
-
-    openUpdate(e, notification){
+    changeNewNotification(newNotification){
         this.setState({
-            notification: CNotification.duplicateNotification(notification),
-            showUpdateDialog: true,
+            newNotification,
+            validationMessage: '',
         });
     }
 
-    updateNotification(){
-        const {notification} = this.state;
-        const {updateScheduleNotification} = this.props;
-        updateScheduleNotification(notification);
+    /**
+     * to show/hide schedule add notification dialog
+     */
+    toggleAddDialog(){
+        this.setState({
+            newNotification: CNotification.createNotification(),
+            showAddDialog: !this.state.showAddDialog,
+        });
     }
 
-    deleteNotification(){
-        const {notification} = this.state;
-        const {deleteScheduleNotification} = this.props;
-        deleteScheduleNotification(notification);
+    /**
+     * to add new notification
+     */
+    addNotification(){
+        const {newNotification, showAddDialog} = this.state;
+        const {t, addScheduleNotification} = this.props;
+        const validateResult = validateChangeNotification(newNotification);
+        if(validateResult.success) {
+            this.setState({
+                startAddingNotification: true,
+                newNotification: CNotification.createNotification(),
+                showAddDialog: !showAddDialog,
+            });
+            addScheduleNotification(newNotification);
+        } else{
+            setFocusById(validateResult.id);
+            this.setState({
+                validationMessage: t(`schedules:NOTIFICATION.VALIDATION.${validateResult.message}`),
+            });
+        }
     }
 
-    renderDeleteConfirmationDialog(){
-        const {showDeleteConfirmation} = this.state;
-        const {t} = this.props;
+    /**
+     * to change value in search input
+     */
+    changeSearchValue(searchValue){
+        this.setState({
+            searchValue,
+        });
+    }
+
+    /**
+     * to press a key in search input
+     */
+    pressSearchValueKey(e) {
+        const {closeNotificationList} = this.props;
+        switch (e.keyCode) {
+            case 27:
+                e.preventDefault();
+                closeNotificationList();
+                break;
+        }
+    }
+
+    /**
+     * to get notifications applying search
+     */
+    getNotifications(){
+        const searchValue = this.state.searchValue.toLowerCase();
+        const {schedule} = this.props;
+        if(searchValue !== ''){
+            return schedule.notifications.filter(notification => notification.name.toLowerCase().includes(searchValue) || notification.eventType.includes(searchValue) || notification.notificationType.includes(searchValue));
+        }
+        return schedule.notifications;
+    }
+
+    renderSearchInput(){
+        const {searchValue} = this.state;
+        const {authUser, t} = this.props;
+        let classNames = [
+            'search_input',
+            'search_input_element',
+            'search_input_label',
+        ];
+        classNames = getThemeClass({classNames, authUser, styles});
         return(
-            <Confirmation
-                okClick={::this.deleteNotification}
-                cancelClick={::this.toggleDeleteConfirmation}
-                active={showDeleteConfirmation}
-                title={t('app:LIST.CARD.CONFIRMATION_TITLE')}
-                message={t('app:LIST.CARD.CONFIRMATION_MESSAGE')}
+            <Input
+                onChange={::this.changeSearchValue}
+                onKeyDown={::this.pressSearchValueKey}
+                name={'notification_search_input'}
+                id={'notification_search_input'}
+                placeholder={t('schedules:NOTIFICATION.SEARCH_PLACEHOLDER')}
+                label={''}
+                type={'text'}
+                value={searchValue}
+                theme={{
+                    input: `${styles[classNames.search_input]}`,
+                    inputElement: styles[classNames.search_input_element],
+                    label: styles[classNames.search_input_label],
+                }}
             />
         );
     }
 
-    renderUpdateDialog(){
-        const {showUpdateDialog, notification} = this.state;
-        return(
-            <Dialog
-                actions={[{label: 'Update', onClick: ::this.updateNotification, id: 'schedule_notification_add_ok'},{label: 'Cancel', onClick: ::this.toggleUpdateDialog, id: 'schedule_notification_add_cancel'}]}
-                active={showUpdateDialog}
-                onEscKeyDown={::this.toggleUpdateDialog}
-                onOverlayClick={::this.toggleUpdateDialog}
-                title={'Update Notification'}
-            >
-                <NotificationChange mode={'update'} notification={notification} changeNotification={::this.changeNotification}/>
-            </Dialog>
-        );
+    renderNotifications(){
+        const notifications = this.getNotifications();
+        return notifications.map((notification, key) => {
+            return (
+                <NotificationListItem notification={notification} index={key}/>
+            );
+        });
     }
 
     render(){
-        const {t, authUser, schedule} = this.props;
-        let classNames = ['schedule_list_action', 'notifications'];
+        const {showAddDialog, newNotification, validationMessage, startAddingNotification} = this.state;
+        const {authUser, t, closeNotificationList, listStyles} = this.props;
+        let classNames = [
+            'notification_list',
+            'notification_add_button',
+            'notification_dialog_body',
+            'items',
+            'add_icon',
+            'close_icon',
+            'loading_add',
+        ];
         classNames = getThemeClass({classNames, authUser, styles});
-        const {notifications} = schedule;
-        return (
-            <React.Fragment>
-                <Table authUser={authUser} selectable={false} className={styles[classNames.notifications]}>
-                    <TableHead>
-                        <TableCell><span>{t('NOTIFICATION.NAME')}</span></TableCell>
-                        <TableCell><span>{t('NOTIFICATION.EVENT_TYPE')}</span></TableCell>
-                        <TableCell><span>{t('NOTIFICATION.NOTIFICATION_TYPE')}</span></TableCell>
-                        <TableCell><span>{t('NOTIFICATION.ACTION')}</span></TableCell>
-                    </TableHead>
-                    {
-                        notifications.map((notification, key) => {
-                            return (
-                                <TableRow key={notification.id}>
-                                    <TableCell>
-                                        <span title={notification.name}>{notification.name}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span title={notification.eventType}>{notification.eventType}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span title={notification.notificationType}>{notification.notificationType}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className={styles[classNames.schedule_list_action]}>
-                                            <TooltipFontIcon
-                                                id={`schedule_notification_update_${key}`}
-                                                value={'edit'}
-                                                tooltip={t('NOTIFICATION.UPDATE')}
-                                                onClick={(e) => ::this.openUpdate(e, notification)}
-                                            />
-                                        </span>
-                                        <span className={styles[classNames.schedule_list_action]}>
-                                            <TooltipFontIcon
-                                                id={`schedule_notification_delete_${key}`}
-                                                value={'delete'}
-                                                tooltip={t('NOTIFICATION.DELETE')}
-                                                onClick={::this.toggleDeleteConfirmation}
-                                            />
-                                        </span>
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })
-                    }
-                </Table>
-                {::this.renderUpdateDialog()}
-                {::this.renderDeleteConfirmationDialog()}
-            </React.Fragment>
+        return(
+            <div className={styles[classNames.notification_list]} style={{...listStyles}}>
+                <div>
+                    {this.renderSearchInput()}
+                </div>
+                <div className={styles[classNames.items]}>
+                    {this.renderNotifications()}
+                </div>
+                {
+                    startAddingNotification
+                    ?
+                        <Loading className={styles[classNames.loading_add]}/>
+                    :
+                        <TooltipFontIcon
+                            tooltip={t('schedules:NOTIFICATION.ADD_ICON_TOOLTIP')}
+                            value={'add'}
+                            onClick={::this.toggleAddDialog}
+                            className={styles[classNames.add_icon]}
+                        />
+                }
+                <TooltipFontIcon
+                    tooltip={t('schedules:NOTIFICATION.CLOSE_ICON_TOOLTIP')}
+                    value={'close'}
+                    onClick={closeNotificationList}
+                    className={styles[classNames.close_icon]}
+                />
+                <Dialog
+                    actions={[{label: t('schedules:NOTIFICATION.ADD_DIALOG.ADD'), onClick: ::this.addNotification, id: 'schedule_notification_add_ok'},{label: t('schedules:NOTIFICATION.ADD_DIALOG.CANCEL'), onClick: ::this.toggleAddDialog, id: 'schedule_notification_add_cancel'}]}
+                    active={showAddDialog}
+                    onEscKeyDown={::this.toggleAddDialog}
+                    onOverlayClick={::this.toggleAddDialog}
+                    title={t('schedules:NOTIFICATION.ADD_DIALOG.TITLE')}
+                >
+                    <NotificationChange notification={newNotification} changeNotification={::this.changeNewNotification}/>
+                    <ValidationMessage message={validationMessage}/>
+                </Dialog>
+            </div>
         );
     }
 }
 
 NotificationList.propTypes = {
     schedule: PropTypes.object.isRequired,
+    closeNotificationList: PropTypes.func.isRequired,
+    listStyles: PropTypes.object,
+};
+
+NotificationList.defaultProps = {
+    listStyles: {},
 };
 
 export default NotificationList;

@@ -12,7 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+import Rx from 'rxjs/Rx';
 import {SchedulesAction} from '../utils/actions';
 import {
     fetchScheduleFulfilled,
@@ -28,7 +28,13 @@ import {
     fetchSchedulesByIdsFulfilled,
     fetchSchedulesByIdsRejected,
     fetchScheduleNotificationsFulfilled,
-    fetchScheduleNotificationRejected, fetchScheduleNotificationFulfilled,
+    fetchScheduleNotificationRejected,
+    fetchScheduleNotificationFulfilled,
+    fetchScheduleNotificationTemplatesFulfilled,
+    fetchNotificationRecipientsFulfilled,
+    fetchNotificationRecipientsRejected,
+    fetchSlackChannelsFulfilled,
+    fetchSlackChannelsRejected,
 } from '../actions/schedules/fetch';
 import {
     addScheduleFulfilled, addScheduleNotificationFulfilled, addScheduleNotificationRejected, addScheduleRejected,
@@ -64,7 +70,7 @@ import {
 import {doRequest} from "../utils/auth";
 
 import {validateAddSchedule, validateAddScheduleNotification, validateWebHook} from "../validations/schedules";
-import {periodic, fromPromise} from 'most';
+import {sleepApp} from "../utils/app";
 
 /**
  * main url for schedulers
@@ -117,13 +123,13 @@ const fetchCurrentSchedulesEpic = (action$, store) => {
              let url = `${urlPrefix}/running/all`;
              return doRequest({url},{
                  success: (data) => {
-                     setTimeout(() => {
+                     /*setTimeout(() => {
                          if(!isCanceledCurrentSchedules) {
                              store.dispatch(fetchCurrentSchedules());
                          } else{
                              isCanceledCurrentSchedules = false;
                          }
-                     }, INTERVAL_OF_GETTING_CURRENT_SCHEDULES);
+                     }, INTERVAL_OF_GETTING_CURRENT_SCHEDULES);*/
                      return fetchCurrentSchedulesFulfilled(data);
                  },
                  reject: (data) => {
@@ -162,10 +168,10 @@ const fetchScheduleEpic = (action$, store) => {
  * fetch schedule notification by schedule id
  */
 const fetchScheduleNotificationEpic = (action$, store) => {
-    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
+    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.id}`;
+            let url = `${urlPrefix}/notificaiton/${action.payload.notificationId}`;
             return doRequest({url},{
                 success: fetchScheduleNotificationFulfilled,
                 reject: fetchScheduleNotificationRejected,
@@ -196,12 +202,58 @@ const fetchScheduleNotificationsEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/all`;
+            let url = `${urlPrefix}/notifications/all`;
             return doRequest({url},{
                 success: fetchScheduleNotificationsFulfilled,
                 reject: fetchScheduleNotificationRejected,
                 cancel: action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS_CANCELED)
             });
+        });
+};
+
+/**
+ * fetch templates of notification in schedule by notification type
+ */
+const fetchScheduleNotificationTemplatesEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/notificaiton/`;
+            return doRequest({url},{
+                success: fetchScheduleNotificationTemplatesFulfilled,
+                reject: fetchScheduleNotificationTemplatesRejected,
+            });
+        });
+};
+
+/**
+ * fetch recipients for email notification
+ */
+const fetchNotificationRecipientsEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_NOTIFICATIONRECIPIENTS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `user/all`;
+            return doRequest({url},{
+                success: fetchNotificationRecipientsFulfilled,
+                reject: fetchNotificationRecipientsRejected,
+            });
+        });
+};
+/**
+ * fetch channels for slack notification
+ */
+const fetchSlackChannelsEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SLACKCHANNELS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            const testData = [{value: 1, label: 'Channel 1'}, {value: 2, label: 'Channel 2'}];
+            return Rx.Observable.of(fetchSlackChannelsFulfilled(testData));
+            //let url = `user/all`;
+            /*return doRequest({url},{
+                success: fetchSlackChannelsFulfilled,
+                reject: fetchSlackChannelsRejected,
+            });*/
         });
 };
 
@@ -251,16 +303,11 @@ const addScheduleNotificationEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
-            let validation = validateAddScheduleNotification(action.payload);
-            if(validation.success) {
-                return doRequest({url, method: 'post', data}, {
-                        success: addScheduleNotificationFulfilled,
-                        reject: addScheduleNotificationRejected,
-                    },
-                );
-            } else{
-                return addScheduleNotificationRejected({'message': validation.message, id: validation.id});
-            }
+            return doRequest({url, method: 'post', data}, {
+                    success: addScheduleNotificationFulfilled,
+                    reject: addScheduleNotificationRejected,
+                },
+            );
         });
 };
 
@@ -288,7 +335,7 @@ const updateScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.UPDATE_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.id}/title`;
+            let url = `${urlPrefix}/notification/${action.payload.id}`;
             let {connection, ...data} = action.payload;
             data.connectionId = connection.id;
             return doRequest({url, method: 'put', data},{
@@ -423,6 +470,9 @@ export {
     fetchSchedulesEpic,
     fetchScheduleNotificationsEpic,
     fetchCurrentSchedulesEpic,
+    fetchScheduleNotificationTemplatesEpic,
+    fetchNotificationRecipientsEpic,
+    fetchSlackChannelsEpic,
     fetchSchedulesByIdsEpic,
     addScheduleEpic,
     addScheduleNotificationEpic,

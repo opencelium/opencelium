@@ -473,12 +473,12 @@
 }
 
 .recipient_appear{
-  animation-duration: 0.3s;
+  animation-duration: 0.2s;
   animation-fill-mode: forwards;
   animation-name: ARecipientAppear;
 }
 .recipient_disappear{
-  animation-duration: 0.3s;
+  animation-duration: 0.2s;
   animation-fill-mode: forwards;
   animation-name: ARecipientDisappear;
 }
@@ -520,7 +520,39 @@
   right: 23px;
   top: -10px;
   border: 1px solid #eee;
-  max-height: 83px;
+  max-height: 106px;
+  z-index: 1;
+  .loading_add{
+    margin-top: -3px;
+    max-height: 10px;
+    min-height: 10px;
+    float: left;
+    margin-left: 3px;
+  }
+  .loading_add>div{
+    width: 12px;
+    height: 12px;
+  }
+
+  .search_input{
+    font-size: 12px;
+    padding: 0;
+  }
+  .search_input_element{
+    color: black;
+    padding: 2px 0;
+    font-size: 12px;
+  }
+  .search_input_label{
+    font-size: 12px;
+    top: 14px;
+  }
+  .search_input_label:focus{
+    top: 0 !important;
+  }
+  .search_input_element:placeholder-shown{
+    font-size: 12px;
+  }
   .items{
     margin-bottom: 2px;
     border-bottom: 1px solid #eee;
@@ -555,6 +587,15 @@
     span{
       font-size: 18px !important;
     }
+    .loading{
+      width: 18px;
+      height: 18px;
+      margin-top: 0;
+    }
+    .loading>div{
+      width: 12px;
+      height: 12px;
+    }
   }
   .add_icon{
     float: left;
@@ -576,4 +617,20 @@
   .close_icon:hover{
     color: #3f51b5;
   }
+}
+.notification_input_appear{
+  animation-name: $ANIMATION_FADE_IN_DOWN;
+  animation-duration: .3s;
+}
+.notification_input_loading{
+  width: 18px;
+  height: 18px;
+  margin-top: 0;
+  position: absolute;
+  left: -52px;
+  top: 25px;
+}
+.notification_input_loading>div{
+  width: 14px;
+  height: 14px;
 }

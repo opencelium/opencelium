@@ -46,6 +46,24 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: uname
+    password: password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: true
+  #        socketFactory:
+  #          port: 465
+  #          class: javax.net.ssl.SSLSocketFactory
+
 management:
   health:
     status:

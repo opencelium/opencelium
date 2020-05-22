@@ -47,3 +47,35 @@ export function validateAddScheduleNotification(notification){
     let result = {success: true, message: ''};
     return result;
 }
+
+/**
+ * @param notification - notification
+ * to validate before add/update schedule
+ */
+export function validateChangeNotification(notification){
+    let result = {success: true, message: ''};
+    if(notification.eventType === ''){
+        result.success = false;
+        result.message = 'EVENT_TYPE_EMPTY';
+        result.id = 'input_event_pre';
+        return result;
+    }
+    if(notification.notificationType === ''){
+        result.success = false;
+        result.message = 'NOTIFICATION_TYPE_EMPTY';
+        result.id = 'input_notification_type';
+        return result;
+    }
+    if(notification.template.name === ''){
+        result.success = false;
+        result.message = 'TEMPLATE_EMPTY';
+        result.id = 'input_template_type';
+        return result;
+    }
+    if(notification.recipients.length === 0){
+        result.success = false;
+        result.message = 'RECIPIENTS_EMPTY';
+        result.id = 'input_recipients_rest_search';
+    }
+    return result;
+}

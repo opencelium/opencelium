@@ -864,6 +864,9 @@
   transform-origin: center left;
   transform: rotate(90deg);
   left: 15px;
+  span{
+    transform: rotate(270deg);
+  }
 }
 
 .form_connector_invoker_button_to{
@@ -871,8 +874,8 @@
   transform-origin: center right;
   transform: rotate(270deg);
   right: 15px;
-  div{
-    transform: rotate(180deg);
+  span{
+    transform: rotate(90deg) scaleX(-1);
   }
 }
 
@@ -884,13 +887,16 @@
   @extend .form_connector_invoker_opened;
   transform: rotate(0deg);
   left: 0;
+  span{
+    transform: rotate(0deg);
+  }
 }
 .form_connector_invoker_opened_to{
   @extend .form_connector_invoker_opened;
   transform: rotate(360deg);
   right: 0;
-  div{
-    transform: rotate(0deg);
+  span{
+    transform: rotate(0deg) scaleX(-1);
   }
 }
 
@@ -980,4 +986,41 @@
 }
 .operators_history::-webkit-scrollbar-thumb:hover {
   background: #111;
+}
+
+
+.notification_select_label{
+  font-family: $FONT_FAMILY;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.notification_template_select_focused{
+  color: rgb(63, 81, 181) !important;
+}
+.notification_template_select_focused>div{
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgb(63, 81, 181);
+  box-shadow: none;
+  box-sizing: content-box;
+}
+
+.notification_template_select>div{
+  color: black;
+  font-family: $FONT_FAMILY;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2121211f;
+  box-sizing: content-box;
+}
+.notification_template_editor{
+  button {
+    padding: 3px 5px;
+    margin: 0;
+    line-height: 1;
+  }
+}
+.notification_template_editor_padding{
+  border-bottom-width: 0 !important;
 }

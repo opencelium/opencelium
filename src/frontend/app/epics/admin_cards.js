@@ -26,6 +26,7 @@ const adminCards = [
     {id: 1, name: 'App', link: '/apps'},
     {id: 2, name: 'Invokers', link: '/invokers'},
     {id: 3, name: 'Templates', link: '/templates'},
+    {id: 4, name: 'Notification Templates', link: '/notification_templates'},
 ];
 
 /**

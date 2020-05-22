@@ -15,27 +15,41 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from "../../../../../themes/default/content/schedules/schedules.scss";
-import TooltipFontIcon from "../../../../general/basic_components/tooltips/TooltipFontIcon";
-import CNotification from "../../../../../classes/components/content/schedule/CNotification";
-import {getThemeClass} from "../../../../../utils/app";
 import {connect} from "react-redux";
+import {withTranslation} from "react-i18next";
+import TooltipFontIcon from "../../../../general/basic_components/tooltips/TooltipFontIcon";
+import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
+import {getThemeClass, setFocusById} from "../../../../../utils/app";
+import {fetchScheduleNotification} from "../../../../../actions/schedules/fetch";
 import {updateScheduleNotification} from "../../../../../actions/schedules/update";
 import {deleteScheduleNotification} from "../../../../../actions/schedules/delete";
-import {withTranslation} from "react-i18next";
 import Dialog from "../../../../general/basic_components/Dialog";
 import NotificationChange from "./NotificationChange";
-import Table from "../../../../general/basic_components/table/Table";
 import Confirmation from "../../../../general/app/Confirmation";
+import {validateChangeNotification} from "../../../../../validations/schedules";
+import ValidationMessage from "../../../../general/change_component/ValidationMessage";
+
+import styles from "../../../../../themes/default/content/schedules/schedules.scss";
+import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
+import Loading from "../../../../general/app/Loading";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const schedules = state.get('schedules');
     return {
         authUser: auth.get('authUser'),
+        fetchingScheduleNotification: schedules.get('fetchingScheduleNotification'),
+        updatingScheduleNotification: schedules.get('updatingScheduleNotification'),
+        deletingScheduleNotification: schedules.get('deletingScheduleNotification'),
+        notificationDetails: schedules.get('notification'),
     };
 }
-@connect(mapStateToProps, {updateScheduleNotification, deleteScheduleNotification})
+
+/**
+ * List Item of Notification List
+ */
+@connect(mapStateToProps, {fetchScheduleNotification, updateScheduleNotification, deleteScheduleNotification})
 @withTranslation(['schedules', 'app'])
 class NotificationListItem extends Component{
 
@@ -46,17 +60,55 @@ class NotificationListItem extends Component{
             isMouseOverItem: false,
             showUpdateDialog: false,
             showDeleteConfirmation: false,
+            validationMessage: '',
+            startFetchingNotification: false,
+            startUpdatingNotification: false,
+            startDeletingNotification: false,
         };
     }
 
-    changeNotification(notification){
-        this.setState({notification});
+    componentDidUpdate(){
+        const {fetchingScheduleNotification, updatingScheduleNotification, deletingScheduleNotification, notificationDetails} = this.props;
+        const {startFetchingNotification, startUpdatingNotification, startDeletingNotification} = this.state;
+        if(startFetchingNotification && fetchingScheduleNotification !== API_REQUEST_STATE.START) {
+            this.setState({
+                notification: CNotification.duplicateNotification(notificationDetails),
+                showUpdateDialog: true,
+                startFetchingNotification: false,
+            });
+        }
+        if(startUpdatingNotification && updatingScheduleNotification !== API_REQUEST_STATE.START) {
+            this.setState({
+                startUpdatingNotification: false,
+            });
+        }
+        if(startDeletingNotification && deletingScheduleNotification !== API_REQUEST_STATE.START) {
+            this.setState({
+                startDeletingNotification: false,
+            });
+        }
     }
 
+    /**
+     * to change updating notification
+     */
+    changeNotification(notification){
+        this.setState({
+            notification,
+            validationMessage: '',
+        });
+    }
+
+    /**
+     * to show actions
+     */
     mouseOver(){
         this.setState({isMouseOverItem: true});
     }
 
+    /**
+     * to hide actions
+     */
     mouseLeave(){
         this.setState({isMouseOverItem: false});
     }
@@ -75,36 +127,66 @@ class NotificationListItem extends Component{
         this.setState({showDeleteConfirmation: !this.state.showDeleteConfirmation});
     }
 
-    openUpdate(e, notification){
-        this.setState({
-            notification: CNotification.duplicateNotification(notification),
-            showUpdateDialog: true,
-        });
+    /**
+     * to open open update dialog
+     */
+    fetchNotification(){
+        const {notification, fetchScheduleNotification} = this.props;
+        this.setState({startFetchingNotification: true});
+        fetchScheduleNotification(notification);
     }
 
+    /**
+     * to update notification
+     */
     updateNotification(){
         const {notification} = this.state;
-        const {updateScheduleNotification} = this.props;
-        updateScheduleNotification(notification);
+        const {t, updateScheduleNotification} = this.props;
+        const validateResult = validateChangeNotification(notification);
+        if(validateResult.success) {
+            this.setState({startUpdatingNotification: true});
+            updateScheduleNotification(notification);
+            this.toggleUpdateDialog();
+        } else{
+            setFocusById(validateResult.id);
+            this.setState({
+                validationMessage: t(`schedules:NOTIFICATION.VALIDATION.${validateResult.message}`),
+            });
+        }
     }
 
+    /**
+     * to delete notification
+     */
     deleteNotification(){
         const {notification} = this.state;
         const {deleteScheduleNotification} = this.props;
+        this.setState({startDeletingNotification: true});
         deleteScheduleNotification(notification);
+        this.toggleDeleteConfirmation();
     }
 
     renderUpdateDialog(){
-        const {showUpdateDialog, notification} = this.state;
+        const {showUpdateDialog, notification, validationMessage} = this.state;
+        const {t} = this.props;
         return(
             <Dialog
-                actions={[{label: 'Update', onClick: ::this.updateNotification, id: 'schedule_notification_add_ok'},{label: 'Cancel', onClick: ::this.toggleUpdateDialog, id: 'schedule_notification_add_cancel'}]}
+                actions={[{
+                    label: t('schedules:NOTIFICATION.UPDATE_DIALOG.UPDATE'),
+                    onClick: ::this.updateNotification,
+                    id: 'schedule_notification_add_ok'
+                },{
+                    label: t('schedules:NOTIFICATION.UPDATE_DIALOG.CANCEL'),
+                    onClick: ::this.toggleUpdateDialog,
+                    id: 'schedule_notification_add_cancel'
+                }]}
                 active={showUpdateDialog}
                 onEscKeyDown={::this.toggleUpdateDialog}
                 onOverlayClick={::this.toggleUpdateDialog}
-                title={'Update Notification'}
+                title={t('schedules:NOTIFICATION.UPDATE_DIALOG.TITLE')}
             >
-                <NotificationChange mode={'update'} notification={notification} changeNotification={::this.changeNotification}/>
+                <NotificationChange notification={notification} changeNotification={::this.changeNotification}/>
+                <ValidationMessage message={validationMessage}/>
             </Dialog>
         );
     }
@@ -124,12 +206,21 @@ class NotificationListItem extends Component{
     }
 
     render(){
-        const {isMouseOverItem} = this.state;
+        const {isMouseOverItem, startFetchingNotification, startUpdatingNotification, startDeletingNotification} = this.state;
         const {authUser, t, notification, index} = this.props;
-        let classNames = ['item', 'action'];
+        let classNames = ['item', 'action', 'loading'];
+        let title;
+        const eventTypeTitle = notification.getTranslatedEventType(t);
+        const notificationTypeTitle = notification.getTranslatedNotificationType(t);
+        const showActions = isMouseOverItem || startFetchingNotification || startUpdatingNotification || startDeletingNotification;
+        if(notification.name){
+            title = `${notification.name} (${eventTypeTitle}/${notificationTypeTitle})`;
+        } else{
+            title = `${eventTypeTitle}/${notificationTypeTitle}`;
+        }
         classNames = getThemeClass({classNames, authUser, styles});
         let itemStyles = {};
-        if(isMouseOverItem){
+        if(showActions){
             itemStyles.width = '145px';
             itemStyles.background = '#DEEBFF';
         } else{
@@ -138,28 +229,40 @@ class NotificationListItem extends Component{
         }
         return (
             <div onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
-                <div key={notification.id} style={itemStyles} className={styles[classNames.item]} title={notification.name}>
-                    {notification.name}
+                <div key={notification.id} style={itemStyles} className={styles[classNames.item]} title={title}>
+                    {title}
                 </div>
                 {
-                    isMouseOverItem
+                    showActions
                     ?
                         <React.Fragment>
                             <span className={styles[classNames.action]}>
-                                <TooltipFontIcon
-                                    id={`schedule_notification_update_${index}`}
-                                    value={'edit'}
-                                    tooltip={t('NOTIFICATION.UPDATE')}
-                                    onClick={(e) => ::this.openUpdate(e, notification)}
-                                />
+                                {
+                                    startFetchingNotification || startUpdatingNotification
+                                    ?
+                                        <Loading className={styles[classNames.loading]}/>
+                                    :
+                                        <TooltipFontIcon
+                                            id={`schedule_notification_update_${index}`}
+                                            value={'edit'}
+                                            tooltip={t('NOTIFICATION.UPDATE')}
+                                            onClick={::this.fetchNotification}
+                                        />
+                                }
                             </span>
                             <span className={styles[classNames.action]}>
-                                <TooltipFontIcon
-                                    id={`schedule_notification_delete_${index}`}
-                                    value={'delete'}
-                                    tooltip={t('NOTIFICATION.DELETE')}
-                                    onClick={::this.toggleDeleteConfirmation}
-                                />
+                                {
+                                    startDeletingNotification
+                                    ?
+                                        <Loading className={styles[classNames.loading]}/>
+                                    :
+                                        <TooltipFontIcon
+                                            id={`schedule_notification_delete_${index}`}
+                                            value={'delete'}
+                                            tooltip={t('NOTIFICATION.DELETE')}
+                                            onClick={::this.toggleDeleteConfirmation}
+                                        />
+                                }
                             </span>
                         </React.Fragment>
                     :
@@ -174,6 +277,7 @@ class NotificationListItem extends Component{
 
 NotificationListItem.propTypes = {
     notification: PropTypes.instanceOf(CNotification).isRequired,
+    index: PropTypes.number.isRequired,
 };
 
 export default NotificationListItem;
