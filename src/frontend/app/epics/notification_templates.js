@@ -50,8 +50,6 @@ const fetchNotificationTemplatesEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
-            const testData = [{id: 1, name: 'First Template', type: 'email'}, {id: 2, name: 'Second Template', type: 'slack'}];
-            return Rx.Observable.of(fetchNotificationTemplatesFulfilled(testData));
             return doRequest({url},{
                 success: fetchNotificationTemplatesFulfilled,
                 reject: fetchNotificationTemplatesRejected,
@@ -66,7 +64,7 @@ const fetchNotificationTemplateEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATE)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.id}`;
+            let url = `${urlPrefix}/${action.payload.templateId}`;
             return doRequest({url},{
                 success: fetchNotificationTemplateFulfilled,
                 reject: fetchNotificationTemplateRejected,

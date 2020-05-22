@@ -171,21 +171,11 @@ const fetchScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/notificaiton/${action.payload.id}`;
-            //replace this to next code snippet when backend is ready
-            let testData = {
-                id: 1,
-                name: 'my notification',
-                eventType: 'pre',
-                notificationType: 'email',
-                template: {id: 1, name: 'template name 1'},
-                recipients: [{userId: 2, name: 'Kate', surname: 'Winslet'}],
-            };
-            return Rx.Observable.of(fetchScheduleNotificationFulfilled(testData));
-            /*return doRequest({url},{
+            let url = `${urlPrefix}/notificaiton/${action.payload.notificationId}`;
+            return doRequest({url},{
                 success: fetchScheduleNotificationFulfilled,
                 reject: fetchScheduleNotificationRejected,
-            });*/
+            });
         });
 };
 
@@ -229,13 +219,10 @@ const fetchScheduleNotificationTemplatesEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/notificaiton/`;
-            //replace this to next code snippet when backend is ready
-            let testData = action.payload.notificationType === 'email' ? [{value: 1, label: 'template name 1'},{value: 2, label: 'template name 2'}] : [{value: 1, label: 'template name 3'},{value: 2, label: 'template name 4'}];
-            return Rx.Observable.of(fetchScheduleNotificationTemplatesFulfilled(testData));
-            /*return doRequest({url},{
+            return doRequest({url},{
                 success: fetchScheduleNotificationTemplatesFulfilled,
                 reject: fetchScheduleNotificationTemplatesRejected,
-            });*/
+            });
         });
 };
 
@@ -316,13 +303,11 @@ const addScheduleNotificationEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
-            //replace this to next code snippet when backend is ready
-            return Rx.Observable.of(addScheduleNotificationFulfilled({}));
-            /*return doRequest({url, method: 'post', data}, {
+            return doRequest({url, method: 'post', data}, {
                     success: addScheduleNotificationFulfilled,
                     reject: addScheduleNotificationRejected,
                 },
-            );*/
+            );
         });
 };
 
@@ -351,14 +336,12 @@ const updateScheduleNotificationEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/notification/${action.payload.id}`;
-            //replace this to next code snippet when backend is ready
-            return Rx.Observable.of(updateScheduleNotificationFulfilled({}));
-            /*let {connection, ...data} = action.payload;
+            let {connection, ...data} = action.payload;
             data.connectionId = connection.id;
             return doRequest({url, method: 'put', data},{
                 success: updateScheduleNotificationFulfilled,
                 reject: updateScheduleNotificationRejected,},
-            );*/
+            );
         });
 };
 
@@ -404,13 +387,11 @@ const deleteScheduleNotificationEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             let data = action.payload;
-            //replace this to next code snippet when backend is ready
-            return Rx.Observable.of(deleteScheduleNotificationFulfilled({}));
-            /*return doRequest({url, method: 'delete', data},{
+            return doRequest({url, method: 'delete', data},{
                     success: deleteScheduleNotificationFulfilled,
                     reject: deleteScheduleNotificationRejected,},
                 res => {return {schedulerIds: data.schedulerIds};}
-            );*/
+            );
         });
 };
 
