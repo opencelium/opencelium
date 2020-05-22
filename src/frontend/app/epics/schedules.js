@@ -202,7 +202,7 @@ const fetchScheduleNotificationsEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.id}/notifications/all`;
+            let url = `${urlPrefix}/${action.payload.id}/notification/all`;
             return doRequest({url},{
                 success: fetchScheduleNotificationsFulfilled,
                 reject: fetchScheduleNotificationRejected,
