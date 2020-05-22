@@ -23,7 +23,7 @@ public class EventNotification {
     @JoinColumn(name = "scheduler_id")
     private Scheduler scheduler;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_message_id")
     private EventMessage eventMessage;
 
