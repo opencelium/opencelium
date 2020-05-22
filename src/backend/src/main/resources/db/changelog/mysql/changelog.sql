@@ -1,16 +1,18 @@
 --liquibase formatted sql
 
 --changeset 1.1:1 stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE connection DROP COLUMN IF EXISTS name1;
-
---changeset 1.1:2 stripComments:true splitStatements:true endDelimiter:;
-
 
 --
 -- Table structure for table `message`
 --
 
+DROP TABLE IF EXISTS `notification_has_recipient`;
+DROP TABLE IF EXISTS `notification`;
 DROP TABLE IF EXISTS `message`;
+DROP TABLE IF EXISTS `content`;
+DROP TABLE IF EXISTS `recipient`;
+
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `message` (
@@ -36,7 +38,6 @@ UNLOCK TABLES;
 -- Table structure for table `content`
 --
 
-DROP TABLE IF EXISTS `content`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `content` (
@@ -65,7 +66,7 @@ UNLOCK TABLES;
 -- Table structure for table `notification`
 --
 
-DROP TABLE IF EXISTS `notification`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `notification` (
@@ -98,7 +99,7 @@ UNLOCK TABLES;
 -- Table structure for table `recipient`
 --
 
-DROP TABLE IF EXISTS `recipient`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `recipient` (
@@ -122,7 +123,6 @@ UNLOCK TABLES;
 -- Table structure for table `notification_has_recipient`
 --
 
-DROP TABLE IF EXISTS `notification_has_recipient`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `notification_has_recipient` (
