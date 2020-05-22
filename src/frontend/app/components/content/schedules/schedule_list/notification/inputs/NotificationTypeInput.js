@@ -17,12 +17,13 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "../../../../../../utils/app";
-import theme from "react-toolbox/lib/input/theme.css";
 import FontIcon from "../../../../../general/basic_components/FontIcon";
-import CNotification from "../../../../../../classes/components/content/schedule/CNotification";
+import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
 import OCSelect from "../../../../../general/basic_components/inputs/Select";
+import {getThemeClass} from "../../../../../../utils/app";
+
+import theme from "react-toolbox/lib/input/theme.css";
+import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
 
 
 function mapStateToProps(state){
@@ -49,17 +50,20 @@ class NotificationTypeInput extends Component{
     /**
      * to focus on select
      */
-    onFocus(e){
+    focusNotificationType(){
         this.setState({focused: true});
     }
 
     /**
      * to blur from select
      */
-    onBlur(e){
+    blurNotificationType(){
         this.setState({focused: false});
     }
 
+    /**
+     * to change select
+     */
     onChangeNotificationType(notificationType){
         let {notification} = this.props;
         const {changeNotification} = this.props;
@@ -82,16 +86,16 @@ class NotificationTypeInput extends Component{
                     name={'input_notification_type'}
                     value={value}
                     onChange={::this.onChangeNotificationType}
-                    onFocus={::this.onFocus}
-                    onBlur={::this.onBlur}
+                    onFocus={::this.focusNotificationType}
+                    onBlur={::this.blurNotificationType}
                     options={options}
-                    placeholder={'Choose type...'}
+                    placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_PLACEHOLDER')}
                     className={`${styles[classNames.notification_select]}`}
                 />
                 <FontIcon value={'add_alert'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
                 <span className={theme.bar}/>
                 <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
-                    {'Notification Type'}
+                    {t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_LABEL')}
                     <span className={theme.required}> *</span>
                 </label>
             </div>
@@ -101,6 +105,7 @@ class NotificationTypeInput extends Component{
 
 NotificationTypeInput.propTypes = {
     notification: PropTypes.instanceOf(CNotification).isRequired,
+    changeNotification: PropTypes.func.isRequired,
 };
 
 export default NotificationTypeInput;

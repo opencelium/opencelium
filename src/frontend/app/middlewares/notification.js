@@ -33,6 +33,7 @@ import Loading from "../components/general/app/Loading";
 export default function (store){
     return next => action => {
         let systemTitle = action.payload && action.payload.hasOwnProperty('systemTitle') ? action.payload.systemTitle : 'OC';
+        let notificationType = action.payload && action.payload.hasOwnProperty('notificationType') ? action.payload.notificationType : '';
         let shortMessage = action.payload && action.payload.hasOwnProperty('shortMessage') ? action.payload.shortMessage : '';
         let data = {type: '', message: '', systemTitle, shortMessage};
         const dividedState = divideState(action.type);
@@ -81,6 +82,9 @@ export default function (store){
             const newDiv = document.createElement("div");
             notification.appendChild(newDiv);
             let domElem = notification.children[notification.children.length - 1];
+            if(notificationType !== ''){
+                data.type = notificationType;
+            }
             ReactDOM.render(
                 <Suspense fallback={(<Loading/>)}>
                     <Notification data={data} id={idName} params={action.payload}/>

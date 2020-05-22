@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import styles from '../../../../../../themes/default/general/change_component.scss';
+import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
 
 
 
@@ -26,19 +27,25 @@ class InvokerButton extends Component{
         const {isMouseOver} = this.state;
         const {tooltip, onClick, position, isOpened} = this.props;
         let className = '';
+        let tooltipPosition = 'top';
         switch (position){
             case 'left':
                 className = styles.form_connector_invoker_button_from;
                 if(isOpened){
                     className += ` ${styles.form_connector_invoker_opened_from}`;
                 }
+                tooltipPosition = 'right';
                 break;
             case 'right':
                 className = styles.form_connector_invoker_button_to;
                 if(isOpened){
                     className += ` ${styles.form_connector_invoker_opened_to}`;
                 }
+                tooltipPosition = 'left';
                 break;
+        }
+        if(isOpened){
+            tooltipPosition = 'top';
         }
         return(
             <div
@@ -47,7 +54,7 @@ class InvokerButton extends Component{
                 onMouseOver={::this.onMouseOver}
                 onMouseLeave={::this.onMouseLeave}
             >
-                <div>{(isMouseOver || isOpened) && !(isMouseOver && isOpened) ? tooltip : 'Docs'}</div>
+                <TooltipFontIcon tooltip={`${tooltip} API Docs`} value={'library_books'} tooltipPosition={tooltipPosition}/>
             </div>
         );
     }

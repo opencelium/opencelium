@@ -57,6 +57,7 @@ import {
     fetchCurrentSchedulesEpic, fetchSchedulesByIdsEpic,
     fetchScheduleNotificationEpic, fetchScheduleNotificationsEpic,
     addScheduleNotificationEpic, updateScheduleNotificationEpic, deleteScheduleNotificationEpic,
+    fetchScheduleNotificationTemplatesEpic, fetchNotificationRecipientsEpic, fetchSlackChannelsEpic,
 } from '../epics/schedules';
 import {
     addWebHookEpic, updateWebHookEpic, deleteWebHookEpic,
@@ -70,6 +71,10 @@ import {
 import {
     addErrorTicketEpic,
 } from "../epics/app";
+import {
+    fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
+    updateNotificationTemplateEpic, deleteNotificationTemplateEpic,
+} from '../epics/notification_templates';
 
 
 /**
@@ -125,6 +130,9 @@ export default combineEpics(
     fetchSchedulesByIdsEpic,
     fetchScheduleNotificationEpic,
     fetchScheduleNotificationsEpic,
+    fetchScheduleNotificationTemplatesEpic,
+    fetchNotificationRecipientsEpic,
+    fetchSlackChannelsEpic,
     addScheduleNotificationEpic,
     updateScheduleNotificationEpic,
     deleteScheduleNotificationEpic,
@@ -154,4 +162,9 @@ export default combineEpics(
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,
+    fetchNotificationTemplatesEpic,
+    fetchNotificationTemplateEpic,
+    addNotificationTemplateEpic,
+    updateNotificationTemplateEpic,
+    deleteNotificationTemplateEpic,
 );

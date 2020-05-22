@@ -16,7 +16,7 @@
 import {consoleLog, isId} from "../../../../utils/app";
 import CLastExecution from "./CLastExecution";
 import CWebhook from "./CWebhook";
-import CNotification from "./CNotification";
+import CNotification from "./notification/CNotification";
 
 
 /**

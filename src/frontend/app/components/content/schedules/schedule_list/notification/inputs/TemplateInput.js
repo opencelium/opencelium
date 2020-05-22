@@ -21,25 +21,27 @@ import styles from '../../../../../../themes/default/content/schedules/schedules
 import {getThemeClass} from "../../../../../../utils/app";
 import theme from "react-toolbox/lib/input/theme.css";
 import FontIcon from "../../../../../general/basic_components/FontIcon";
-import CNotification from "../../../../../../classes/components/content/schedule/CNotification";
+import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
 import OCSelect from "../../../../../general/basic_components/inputs/Select";
+import {fetchScheduleNotificationTemplates} from "../../../../../../actions/schedules/fetch";
+import {API_REQUEST_STATE} from "../../../../../../utils/constants/app";
+import Loading from "../../../../../general/app/Loading";
 
-
-const templates = [
-    {value: 1, label: 'template name 1'},{value: 2, label: 'template name 2'}
-];
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const schedules = state.get('schedules');
     return {
         authUser: auth.get('authUser'),
+        templates: schedules.get('templates'),
+        fetchingScheduleNotificationTemplates: schedules.get('fetchingScheduleNotificationTemplates'),
     };
 }
 
 /**
  * Template Input for Notification Change Component
  */
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {fetchScheduleNotificationTemplates})
 @withTranslation('schedules')
 class TemplateInput extends Component{
 
@@ -47,23 +49,51 @@ class TemplateInput extends Component{
         super(props);
         this.state = {
             focused: false,
+            startFetchingTemplates: false,
+            notificationType: props.notification.notificationType,
         };
+    }
+
+    componentDidMount(){
+        if(this.props.notification.notificationType !== ''){
+            this.fetchTemplates();
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        const {startFetchingTemplates} = this.state;
+        const {notification, fetchingScheduleNotificationTemplates} = this.props;
+        if(!startFetchingTemplates && prevState.notificationType !== notification.notificationType){
+            this.onChangeTemplate(null);
+            this.fetchTemplates();
+            this.setState({
+                notificationType: notification.notificationType,
+            });
+        }
+        if(startFetchingTemplates && fetchingScheduleNotificationTemplates !== API_REQUEST_STATE.START){
+            this.setState({
+                startFetchingTemplates: false,
+            });
+        }
     }
 
     /**
      * to focus on select
      */
-    onFocus(e){
+    focusNotificationType(){
         this.setState({focused: true});
     }
 
     /**
      * to blur from select
      */
-    onBlur(e){
+    blurNotificationType(){
         this.setState({focused: false});
     }
 
+    /**
+     * to change template
+     */
     onChangeTemplate(template){
         let {notification} = this.props;
         const {changeNotification} = this.props;
@@ -71,30 +101,50 @@ class TemplateInput extends Component{
         changeNotification(notification);
     }
 
+    /**
+     * to fetch all templates
+     */
+    fetchTemplates(){
+        const {fetchScheduleNotificationTemplates, notification} = this.props;
+        this.setState({
+            startFetchingTemplates: true,
+        });
+        fetchScheduleNotificationTemplates(notification);
+    }
+
     render(){
-        const {focused} = this.state;
-        const {authUser, notification} = this.props;
-        let classNames = ['notification_select', 'notification_select_label', 'notification_select_focused'];
+        const {focused, startFetchingTemplates} = this.state;
+        const {t, authUser, notification, templates} = this.props;
+        if(notification.notificationType === ''){
+            return null;
+        }
+        let classNames = ['notification_input_appear', 'notification_select', 'notification_select_label', 'notification_select_focused', 'notification_input_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
         const value = CNotification.getTemplateForSelect(templates, notification.template.id);
         return(
-            <div className={`${theme.withIcon} ${theme.input}`}>
+            <div className={`${styles[classNames.notification_input_appear]} ${theme.withIcon} ${theme.input}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.notification_select_label]}`}/>
                 <OCSelect
                     id={'input_template_type'}
                     name={'input_template_type'}
                     value={value}
                     onChange={::this.onChangeTemplate}
-                    onFocus={::this.onFocus}
-                    onBlur={::this.onBlur}
+                    onFocus={::this.focusNotificationType}
+                    onBlur={::this.blurNotificationType}
                     options={templates}
-                    placeholder={'Choose template...'}
+                    placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.TEMPLATE_PLACEHOLDER')}
                     className={styles[classNames.notification_select]}
                 />
-                <FontIcon value={'library_books'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
+                {
+                    startFetchingTemplates
+                    ?
+                        <Loading className={styles[classNames.notification_input_loading]}/>
+                    :
+                        <FontIcon value={'library_books'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
+                }
                 <span className={theme.bar}/>
                 <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
-                    {'Template'}
+                    {t('NOTIFICATION.NOTIFICATION_CHANGE.TEMPLATE_LABEL')}
                     <span className={theme.required}> *</span>
                 </label>
             </div>
@@ -104,6 +154,7 @@ class TemplateInput extends Component{
 
 TemplateInput.propTypes = {
     notification: PropTypes.instanceOf(CNotification).isRequired,
+    changeNotification: PropTypes.func.isRequired,
 };
 
 export default TemplateInput;

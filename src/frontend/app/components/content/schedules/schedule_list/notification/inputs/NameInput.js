@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import Input from "../../../../../general/basic_components/inputs/Input";
-import CNotification from "../../../../../../classes/components/content/schedule/CNotification";
+import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
 
 
 function mapStateToProps(state){
@@ -39,6 +39,9 @@ class NameInput extends Component{
         super(props);
     }
 
+    /**
+     * to change name
+     */
     onChangeInput(name){
         let {notification} = this.props;
         const {changeNotification} = this.props;
@@ -47,18 +50,17 @@ class NameInput extends Component{
     }
 
     render(){
-        const {notification} = this.props;
+        const {t, notification} = this.props;
         return (
             <Input
                 onChange={::this.onChangeInput}
                 name={'input_notification_name'}
                 id={'input_notification_name'}
-                label={'Name'}
+                label={t('NOTIFICATION.NOTIFICATION_CHANGE.NAME_LABEL')}
                 type={'text'}
                 icon={'perm_identity'}
                 maxLength={256}
                 value={notification.name}
-                required={true}
             />
         );
     }
@@ -66,6 +68,7 @@ class NameInput extends Component{
 
 NameInput.propTypes = {
     notification: PropTypes.instanceOf(CNotification).isRequired,
+    changeNotification: PropTypes.func.isRequired,
 };
 
 export default NameInput;

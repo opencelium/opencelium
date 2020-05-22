@@ -48,7 +48,7 @@ export let ALL_NOTIFICATIONS = [
     },
     {
         id: 3,
-        name: 'my notification 3',
+        name: '',
         eventType: 'pre',
         notificationType: 'slack',
         template: {id: 3, name: 'template name 3',},
@@ -132,6 +132,14 @@ export function searchByNameFunction(element, searchValue){
     return elementValue.indexOf(searchValue.toUpperCase()) !== -1;
 }
 
+export function sleepApp(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+        currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+}
+
 /**
  * a callback to sort by name
  */
@@ -213,7 +221,7 @@ export function shuffle(array) {
  *
  * @param id - id of the html element
  */
-export function setFocusById(id){
+export function setFocusById(id, timeout = 100){
     let element = document.getElementById(id);
     const inputs = ['input', 'select', 'button', 'textarea'];
     if (element) {
@@ -224,11 +232,11 @@ export function setFocusById(id){
         if(inputElement) {
             setTimeout(() => {
                 inputElement.focus();
-            }, 100);
+            }, timeout);
         } else{
             setTimeout(() => {
                 element.focus();
-            }, 100);
+            }, timeout);
         }
     }
 }
