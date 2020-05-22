@@ -16,8 +16,10 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
@@ -246,4 +248,38 @@ public class SchedulerController {
         final Resources<SchedulerResource> resources = new Resources<>(scheduleList);
         return ResponseEntity.ok(resources);
     }
+
+
+    @GetMapping("/{schedulerId}/notifications")
+    public ResponseEntity<?> getAllNotifications(@PathVariable int schedulerId) throws Exception {
+        List<NotificationResource> notificationResource = schedulerService.getAllNotifications(schedulerId);
+        final Resources<NotificationResource> resources = new Resources<>(notificationResource);
+        return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/{schedulerId}/notification/{notificationId}")
+    public ResponseEntity<?> getNotification(@PathVariable int schedulerId,
+                                             @PathVariable int notificationId) throws Exception{
+        NotificationResource notificationResource = schedulerService.getNotification(notificationId);
+
+        final Resource<NotificationResource> resource = new Resource<>(notificationResource);
+        return ResponseEntity.ok(resource);
+    }
+
+    @PostMapping("/{schedulerId}/notification")
+    public ResponseEntity<?> createNotification(@PathVariable int schedulerId,
+                                                @RequestBody NotificationResource notificationResource) throws Exception{
+
+        notificationResource.setSchedulerId(schedulerId);
+        EventNotification eventNotification = schedulerService.toNotificationEntity(notificationResource);
+        schedulerService.saveNotification(eventNotification);
+        return ResponseEntity.ok(schedulerService.toNotificationResource(eventNotification));
+    }
+
+    @DeleteMapping("/{schedulerId}/notification/{notificationId}")
+    public ResponseEntity<?> deleteNotification(@PathVariable int schedulerId,@PathVariable int notificationId){
+        schedulerService.deleteNotificationById(notificationId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

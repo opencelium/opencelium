@@ -16,10 +16,11 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.mysql.entity.*;
+import com.becon.opencelium.backend.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.quartz.QuartzUtility;
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
@@ -27,10 +28,8 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SchedulerServiceImp implements SchedulerService {
@@ -55,6 +54,15 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Autowired
     private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private RecipientServiceImpl recipientService;
+
+    @Autowired
+    private MessageServiceImpl messageService;
 
     @Override
     public void save(Scheduler scheduler) {
@@ -143,6 +151,14 @@ public class SchedulerServiceImp implements SchedulerService {
         scheduler.setStatus(resource.isStatus());
         scheduler.setCronExp(resource.getCronExp());
         scheduler.setConnection(connection);
+
+        List<NotificationResource> notificationResources = resource.getNotificationResources();
+        List<EventNotification> eventNotificationList = new ArrayList<>();
+
+        for (NotificationResource notificationResource:notificationResources) {
+            eventNotificationList.add(toNotificationEntity(notificationResource));
+        }
+        scheduler.setEventNotifications(eventNotificationList);
         return scheduler;
     }
 
@@ -161,6 +177,16 @@ public class SchedulerServiceImp implements SchedulerService {
         if (entity.getWebhook() != null){
             schedulerResource.setWebhook(webhookService.toResource(entity.getWebhook()));
         }
+        List<EventNotification> eventNotificationList = entity.getEventNotifications();
+
+        List<NotificationResource> notificationResources = new ArrayList<>();
+
+        for (EventNotification eventNotification : eventNotificationList) {
+            notificationResources.add(new NotificationResource(eventNotification));
+        }
+
+        schedulerResource.setNotification(notificationResources);
+
         return schedulerResource;
     }
 
@@ -215,4 +241,60 @@ public class SchedulerServiceImp implements SchedulerService {
         });
         return runningJobResources;
     }
+
+    @Override
+    public List<NotificationResource> getAllNotifications(int schedulerId){
+
+        List<NotificationResource> notificationResources  = new ArrayList<>();
+
+        notificationRepository.findBySchedulerId(schedulerId).forEach(notification -> notificationResources.add(new NotificationResource(notification)));
+
+        return notificationResources;
+    }
+
+    @Override
+    public NotificationResource getNotification(int notificationId){
+        NotificationResource notificationResource = new NotificationResource( notificationRepository.findById(notificationId).orElseThrow(()->new RuntimeException("Notification not found")));
+
+        return notificationResource;
+    }
+
+    @Override
+    public EventNotification toNotificationEntity(NotificationResource resource) {
+        EventNotification eventNotification = new EventNotification();
+        eventNotification.setId(resource.getNotificationId());
+        eventNotification.setName(resource.getName());
+        eventNotification.setEventType(resource.getEventType());
+        eventNotification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
+
+        //TODO: need to check
+        List<EventRecipient> notificationEventRecipients = new ArrayList<>();
+        notificationEventRecipients = resource.getRecipients().stream()
+                .map(EventRecipient::new).
+                        collect(Collectors.toList());
+
+        eventNotification.setEventRecipients(notificationEventRecipients);
+        eventNotification.setEventMessage(messageService.toEntity(resource.getTemplate()));
+        return eventNotification;
+    }
+
+    @Override
+    public NotificationResource toNotificationResource(EventNotification eventNotification) {
+        return new NotificationResource(eventNotification);
+    }
+
+    @Override
+    public void saveNotification(EventNotification eventNotification) {
+
+        notificationRepository.save(eventNotification);
+        eventNotification.getEventRecipients().forEach(notificationRecipient -> recipientService.save(notificationRecipient));
+        messageService.save(eventNotification.getEventMessage());
+    }
+
+    @Override
+    public void deleteNotificationById(int id) {
+        notificationRepository.deleteById(id);
+    }
+
+
 }
