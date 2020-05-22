@@ -259,7 +259,8 @@ public class SchedulerController {
     }
 
     @GetMapping("/{schedulerId}/notification/{notificationId}")
-    public ResponseEntity<?> getNotification(@PathVariable int schedulerId,@PathVariable int notificationId) throws Exception{
+    public ResponseEntity<?> getNotification(@PathVariable int schedulerId,
+                                             @PathVariable int notificationId) throws Exception{
         NotificationResource notificationResource = schedulerService.getNotification(notificationId);
 
         final Resource<NotificationResource> resource = new Resource<>(notificationResource);
@@ -267,7 +268,8 @@ public class SchedulerController {
     }
 
     @PostMapping("/{schedulerId}/notification")
-    public ResponseEntity<?> createNotification(@PathVariable int schedulerId, @RequestBody NotificationResource notificationResource) throws Exception{
+    public ResponseEntity<?> createNotification(@PathVariable int schedulerId,
+                                                @RequestBody NotificationResource notificationResource) throws Exception{
 
         notificationResource.setSchedulerId(schedulerId);
         Notification notification = schedulerService.toNotificationEntity(notificationResource);
