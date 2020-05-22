@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.Content;
-import com.becon.opencelium.backend.mysql.entity.Message;
+import com.becon.opencelium.backend.mysql.entity.EventContent;
+import com.becon.opencelium.backend.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
 import com.becon.opencelium.backend.mysql.service.MessageServiceImpl;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.hateoas.Resources;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping(value = "/api/message", produces = "application/hal+json", consumes = {"application/json"})
@@ -27,9 +26,9 @@ public class MessageController {
 
     @GetMapping("/all")
     public ResponseEntity<?> getAll() throws Exception{
-        List<Message> messageList = messageService.findAll();
+        List<EventMessage> eventMessageList = messageService.findAll();
 
-        List<MessageResource> messageResources = messageList.stream()
+        List<MessageResource> messageResources = eventMessageList.stream()
                 .map(message -> messageService.toResource(message))
                 .collect(Collectors.toList());
         final Resources<MessageResource> resources = new Resources<>(messageResources);
@@ -38,23 +37,23 @@ public class MessageController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable int id) throws Exception{
-        Message message = messageService.findById(id).orElseThrow(()->new RuntimeException("MESSAGE_TEMPLATE_NOT_FOUND"));
-        MessageResource messageResource = new MessageResource(message);
+        EventMessage eventMessage = messageService.findById(id).orElseThrow(()->new RuntimeException("MESSAGE_TEMPLATE_NOT_FOUND"));
+        MessageResource messageResource = new MessageResource(eventMessage);
         final Resource<MessageResource> resource = new Resource<>(messageResource);
         return ResponseEntity.ok(resource);
     }
 
     @PostMapping
     public ResponseEntity<?> createMessage(@RequestBody MessageResource messageResource) throws Exception{
-        Message message = messageService.toEntity(messageResource);
-        messageService.save(message);
+        EventMessage eventMessage = messageService.toEntity(messageResource);
+        messageService.save(eventMessage);
 
-        List<Content> contents = message.getContents();
-        for (int i = 0; i < contents.size(); i++) {
-            contentService.save(contents.get(i));
+        List<EventContent> eventContents = eventMessage.getEventContents();
+        for (int i = 0; i < eventContents.size(); i++) {
+            contentService.save(eventContents.get(i));
         }
 
-        final Resource<MessageResource> resource = new Resource<>(messageService.toResource(message));
+        final Resource<MessageResource> resource = new Resource<>(messageService.toResource(eventMessage));
         return ResponseEntity.ok(resource);
     }
 

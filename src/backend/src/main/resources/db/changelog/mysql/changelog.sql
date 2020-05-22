@@ -3,19 +3,23 @@
 --changeset 1.1:1 stripComments:true splitStatements:true endDelimiter:;
 
 --
--- Table structure for table `message`
+-- Table structure for table `event_message`
 --
 
 DROP TABLE IF EXISTS `notification_has_recipient`;
 DROP TABLE IF EXISTS `notification`;
-DROP TABLE IF EXISTS `message`;
 DROP TABLE IF EXISTS `content`;
+DROP TABLE IF EXISTS `message`;
 DROP TABLE IF EXISTS `recipient`;
-
+DROP TABLE IF EXISTS `event_notification_has_event_recipient`;
+DROP TABLE IF EXISTS `event_notification`;
+DROP TABLE IF EXISTS `event_content`;
+DROP TABLE IF EXISTS `event_message`;
+DROP TABLE IF EXISTS `event_recipient`;
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `message` (
+CREATE TABLE `event_message` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL,
   `type` varchar(128) DEFAULT NULL,
@@ -25,84 +29,84 @@ CREATE TABLE `message` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `message`
+-- Dumping data for table `event_message`
 --
 
-LOCK TABLES `message` WRITE;
-/*!40000 ALTER TABLE `message` DISABLE KEYS */;
-/*!40000 ALTER TABLE `message` ENABLE KEYS */;
+LOCK TABLES `event_message` WRITE;
+/*!40000 ALTER TABLE `event_message` DISABLE KEYS */;
+/*!40000 ALTER TABLE `event_message` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
 --
--- Table structure for table `content`
+-- Table structure for table `event_content`
 --
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `content` (
+CREATE TABLE `event_content` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `subject` varchar(128) NOT NULL,
   `body` varchar(1024) DEFAULT NULL,
   `language` varchar(128) NOT NULL,
-  `message_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`, `message_id`),
+  `event_message_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`, `event_message_id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `fk_content_message1_idx` (`message_id`),
-  CONSTRAINT `fk_content_message1` FOREIGN KEY (`message_id`) REFERENCES `message` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `fk_event_content_event_message1_idx` (`event_message_id`),
+  CONSTRAINT `fk_event_content_event_message1` FOREIGN KEY (`event_message_id`) REFERENCES `event_message` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `content`
+-- Dumping data for table `event_content`
 --
 
-LOCK TABLES `content` WRITE;
-/*!40000 ALTER TABLE `message` DISABLE KEYS */;
-/*!40000 ALTER TABLE `message` ENABLE KEYS */;
+LOCK TABLES `event_content` WRITE;
+/*!40000 ALTER TABLE `event_message` DISABLE KEYS */;
+/*!40000 ALTER TABLE `event_event_message` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `notification`
+-- Table structure for table `event_notification`
 --
 
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `notification` (
+CREATE TABLE `event_notification` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `scheduler_id` int(11) NOT NULL,
   `name` varchar(45) DEFAULT NULL,
   `event_type` varchar(45) DEFAULT NULL,
-  `message_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`,`scheduler_id`,`message_id`),
+  `event_message_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`,`scheduler_id`,`event_message_id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `fk_notification_scheduler1_idx` (`scheduler_id`),
-  KEY `fk_notification_message1_idx` (`message_id`),
-  CONSTRAINT `fk_notification_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_notification_message1` FOREIGN KEY (`message_id`) REFERENCES `message` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `fk_event_notification_scheduler1_idx` (`scheduler_id`),
+  KEY `fk_event_notification_event_message1_idx` (`event_message_id`),
+  CONSTRAINT `fk_event_notification_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_event_notification_event_message1` FOREIGN KEY (`event_message_id`) REFERENCES `event_message` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
 
 --
--- Dumping data for table `notification`
+-- Dumping data for table `event_notification`
 --
 
-LOCK TABLES `notification` WRITE;
-/*!40000 ALTER TABLE `notification` DISABLE KEYS */;
-/*!40000 ALTER TABLE `notification` ENABLE KEYS */;
+LOCK TABLES `event_notification` WRITE;
+/*!40000 ALTER TABLE `event_notification` DISABLE KEYS */;
+/*!40000 ALTER TABLE `event_notification` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `recipient`
+-- Table structure for table `event_recipient`
 --
 
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `recipient` (
+CREATE TABLE `event_recipient` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `destination` varchar(128) NOT NULL,
   PRIMARY KEY (`id`),
@@ -111,38 +115,38 @@ CREATE TABLE `recipient` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `recipient`
+-- Dumping data for table `event_recipient`
 --
 
-LOCK TABLES `recipient` WRITE;
-/*!40000 ALTER TABLE `recipient` DISABLE KEYS */;
-/*!40000 ALTER TABLE `recipient` ENABLE KEYS */;
+LOCK TABLES `event_recipient` WRITE;
+/*!40000 ALTER TABLE `event_recipient` DISABLE KEYS */;
+/*!40000 ALTER TABLE `event_recipient` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `notification_has_recipient`
+-- Table structure for table `event_notification_has_event_recipient`
 --
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `notification_has_recipient` (
-  `notification_id` int(11) NOT NULL,
-  `recipient_id` int(11) NOT NULL,
-  PRIMARY KEY (`notification_id`,`recipient_id`),
-  KEY `fk_notification_has_recipient_notification1_idx` (`notification_id`),
-  KEY `fk_notification_has_recipient_recipient1_idx` (`recipient_id`),
-  CONSTRAINT `fk_notification_has_recipient_notification1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_notification_has_recipient_recipient1` FOREIGN KEY (`recipient_id`) REFERENCES `recipient` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+CREATE TABLE `event_notification_has_event_recipient` (
+  `event_notification_id` int(11) NOT NULL,
+  `event_recipient_id` int(11) NOT NULL,
+  PRIMARY KEY (`event_notification_id`,`event_recipient_id`),
+  KEY `fk_notification_has_recipient_notification1_idx` (`event_notification_id`),
+  KEY `fk_notification_has_recipient_recipient1_idx` (`event_recipient_id`),
+  CONSTRAINT `fk_notification_has_recipient_notification1` FOREIGN KEY (`event_notification_id`) REFERENCES `event_notification` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_notification_has_recipient_recipient1` FOREIGN KEY (`event_recipient_id`) REFERENCES `event_recipient` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `notification_has_recipient`
+-- Dumping data for table `event_notification_has_event_recipient`
 --
 
-LOCK TABLES `notification_has_recipient` WRITE;
-/*!40000 ALTER TABLE `notification_has_recipient` DISABLE KEYS */;
-/*!40000 ALTER TABLE `notification_has_recipient` ENABLE KEYS */;
+LOCK TABLES `event_notification_has_event_recipient` WRITE;
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` DISABLE KEYS */;
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` ENABLE KEYS */;
 UNLOCK TABLES;
 
 

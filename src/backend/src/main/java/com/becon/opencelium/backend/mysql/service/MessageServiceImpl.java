@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Content;
-import com.becon.opencelium.backend.mysql.entity.Message;
+import com.becon.opencelium.backend.mysql.entity.EventContent;
+import com.becon.opencelium.backend.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.mysql.repository.MessageRepository;
 import com.becon.opencelium.backend.resource.notification.MessageResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,9 @@ public class MessageServiceImpl implements MessageService {
     ContentServiceImpl contentService;
 
     @Override
-    public void save(Message message) {
-        messageRepository.save(message);
-        message.getContents().forEach(content -> contentService.save(content));
+    public void save(EventMessage eventMessage) {
+        messageRepository.save(eventMessage);
+        eventMessage.getEventContents().forEach(content -> contentService.save(content));
     }
 
     @Override
@@ -32,33 +32,33 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Message> findAll() {
+    public List<EventMessage> findAll() {
         return messageRepository.findAll();
     }
 
     @Override
-    public Optional<Message> findById(int id) {
+    public Optional<EventMessage> findById(int id) {
         return messageRepository.findById(id);
     }
 
     @Override
-    public Message toEntity(MessageResource messageResource) {
-        Message message = new Message();
-        message.setId(messageResource.getTemplateId());
-        message.setName(messageResource.getName());
-        message.setType(messageResource.getType());
+    public EventMessage toEntity(MessageResource messageResource) {
+        EventMessage eventMessage = new EventMessage();
+        eventMessage.setId(messageResource.getTemplateId());
+        eventMessage.setName(messageResource.getName());
+        eventMessage.setType(messageResource.getType());
 
-        List<Content> contents = messageResource.getContent()
-                .stream().map(Content::new).collect(Collectors.toList());
+        List<EventContent> eventContents = messageResource.getContent()
+                .stream().map(EventContent::new).collect(Collectors.toList());
 
-        contents.forEach(content -> content.setMessage(message));
-        message.setContents(contents);
+        eventContents.forEach(content -> content.setEventMessage(eventMessage));
+        eventMessage.setEventContents(eventContents);
 
-        return message;
+        return eventMessage;
     }
 
     @Override
-    public MessageResource toResource(Message message) {
-        return new MessageResource(message);
+    public MessageResource toResource(EventMessage eventMessage) {
+        return new MessageResource(eventMessage);
     }
 }

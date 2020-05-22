@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Content;
+import com.becon.opencelium.backend.mysql.entity.EventContent;
 import com.becon.opencelium.backend.mysql.repository.ContentRepository;
 import com.becon.opencelium.backend.resource.notification.ContentResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +16,8 @@ public class ContentServiceImpl implements ContentService {
     ContentRepository contentRepository;
 
     @Override
-    public void save(Content content) {
-        contentRepository.save(content);
+    public void save(EventContent eventContent) {
+        contentRepository.save(eventContent);
     }
 
     @Override
@@ -26,26 +26,26 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<Content> findAll() {
+    public List<EventContent> findAll() {
         return contentRepository.findAll();
     }
 
     @Override
-    public Optional<Content> findById(int id) {
+    public Optional<EventContent> findById(int id) {
         return contentRepository.findById(id);
     }
 
     @Override
-    public Content toEntity(ContentResource contentResource) {
-        Content content = new Content();
-        content.setSubject(contentResource.getSubject());
-        content.setBody(contentResource.getBody());
-        content.setLanguage(contentResource.getLanguage());
-        return content;
+    public EventContent toEntity(ContentResource contentResource) {
+        EventContent eventContent = new EventContent();
+        eventContent.setSubject(contentResource.getSubject());
+        eventContent.setBody(contentResource.getBody());
+        eventContent.setLanguage(contentResource.getLanguage());
+        return eventContent;
     }
 
     @Override
-    public ContentResource toResource(Content content) {
-        return new ContentResource(content);
+    public ContentResource toResource(EventContent eventContent) {
+        return new ContentResource(eventContent);
     }
 }

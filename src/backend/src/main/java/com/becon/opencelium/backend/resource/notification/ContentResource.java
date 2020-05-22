@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.notification;
 
-import com.becon.opencelium.backend.mysql.entity.Content;
+import com.becon.opencelium.backend.mysql.entity.EventContent;
 import org.springframework.hateoas.ResourceSupport;
 
 public class ContentResource extends ResourceSupport {
@@ -10,11 +10,11 @@ public class ContentResource extends ResourceSupport {
     private String body;
     private String language;
 
-    public ContentResource(Content content){
-        this.contentId = content.getId();
-        this.subject = content.getSubject();
-        this.body = content.getBody();
-        this.language = content.getLanguage();
+    public ContentResource(EventContent eventContent){
+        this.contentId = eventContent.getId();
+        this.subject = eventContent.getSubject();
+        this.body = eventContent.getBody();
+        this.language = eventContent.getLanguage();
     }
 
     public ContentResource() {

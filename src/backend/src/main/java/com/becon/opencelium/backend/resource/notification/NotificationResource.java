@@ -1,8 +1,7 @@
 package com.becon.opencelium.backend.resource.notification;
 
-import com.becon.opencelium.backend.mysql.entity.Message;
-import com.becon.opencelium.backend.mysql.entity.Notification;
-import com.becon.opencelium.backend.mysql.entity.Recipient;
+import com.becon.opencelium.backend.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.mysql.entity.EventRecipient;
 import org.springframework.hateoas.ResourceSupport;
 
 import java.util.ArrayList;
@@ -18,15 +17,15 @@ public class NotificationResource extends ResourceSupport {
     private MessageResource template;
     private List<String> recipients = new ArrayList<>();
 
-    public NotificationResource(Notification notification){
+    public NotificationResource(EventNotification eventNotification){
 
-        this.notificationId = notification.getId();
-        this.name = notification.getName();
-        this.eventType = notification.getEventType();
-        this.schedulerId = notification.getScheduler().getId();
-        this.template = new MessageResource(notification.getMessage());
-        this.recipients = notification.getRecipients().stream()
-                .map(Recipient::getDestination)
+        this.notificationId = eventNotification.getId();
+        this.name = eventNotification.getName();
+        this.eventType = eventNotification.getEventType();
+        this.schedulerId = eventNotification.getScheduler().getId();
+        this.template = new MessageResource(eventNotification.getEventMessage());
+        this.recipients = eventNotification.getEventRecipients().stream()
+                .map(EventRecipient::getDestination)
                 .collect(Collectors.toList());
 
     }

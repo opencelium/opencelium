@@ -79,7 +79,7 @@ public class Scheduler {
     private List<Execution> executions;
 
     @OneToMany(mappedBy = "scheduler", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private List<Notification> notifications;
+    private List<EventNotification> eventNotifications;
 
 
     public int getId() {
@@ -182,7 +182,7 @@ public class Scheduler {
         this.executions = executions;
     }
 
-    public List<Notification> getNotifications() { return notifications; }
+    public List<EventNotification> getEventNotifications() { return eventNotifications; }
 
-    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
+    public void setEventNotifications(List<EventNotification> eventNotifications) { this.eventNotifications = eventNotifications; }
 }

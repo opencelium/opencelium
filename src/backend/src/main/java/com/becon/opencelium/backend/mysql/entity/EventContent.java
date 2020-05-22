@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "content")
-public class Content {
+@Table(name = "event_content")
+public class EventContent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,13 +24,13 @@ public class Content {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_id")
-    private Message message;
+    @JoinColumn(name = "event_message_id")
+    private EventMessage eventMessage;
 
-    public Content() {
+    public EventContent() {
     }
 
-    public Content(ContentResource contentResource) {
+    public EventContent(ContentResource contentResource) {
         this.id = contentResource.getContentId();
         this.subject = contentResource.getSubject();
         this.body = contentResource.getBody();
@@ -69,11 +69,11 @@ public class Content {
         this.language = language;
     }
 
-    public Message getMessage() {
-        return message;
+    public EventMessage getEventMessage() {
+        return eventMessage;
     }
 
-    public void setMessage(Message message) {
-        this.message = message;
+    public void setEventMessage(EventMessage eventMessage) {
+        this.eventMessage = eventMessage;
     }
 }

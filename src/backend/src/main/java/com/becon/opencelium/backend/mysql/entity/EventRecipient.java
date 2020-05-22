@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "recipient")
-public class Recipient {
+@Table(name = "event_recipient")
+public class EventRecipient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,18 +19,18 @@ public class Recipient {
     private String destination;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "recipients")
-    private List<Notification> notifications = new ArrayList<>();
+    @ManyToMany(mappedBy = "eventRecipients")
+    private List<EventNotification> eventNotifications = new ArrayList<>();
 
-    public Recipient() {
+    public EventRecipient() {
     }
 
-    public Recipient(RecipientResource recipientResource) {
+    public EventRecipient(RecipientResource recipientResource) {
         this.id = recipientResource.getRecipientId();
         this.destination = recipientResource.getDescription();
     }
 
-    public Recipient(String recipientResource) {
+    public EventRecipient(String recipientResource) {
         this.destination = recipientResource;
     }
 
@@ -50,11 +50,11 @@ public class Recipient {
         this.destination = destination;
     }
 
-    public List<Notification> getNotifications() {
-        return notifications;
+    public List<EventNotification> getEventNotifications() {
+        return eventNotifications;
     }
 
-    public void setNotifications(List<Notification> notifications) {
-        this.notifications = notifications;
+    public void setEventNotifications(List<EventNotification> eventNotifications) {
+        this.eventNotifications = eventNotifications;
     }
 }

@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.Notification;
+import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
@@ -35,7 +35,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -272,9 +271,9 @@ public class SchedulerController {
                                                 @RequestBody NotificationResource notificationResource) throws Exception{
 
         notificationResource.setSchedulerId(schedulerId);
-        Notification notification = schedulerService.toNotificationEntity(notificationResource);
-        schedulerService.saveNotification(notification);
-        return ResponseEntity.ok(schedulerService.toNotificationResource(notification));
+        EventNotification eventNotification = schedulerService.toNotificationEntity(notificationResource);
+        schedulerService.saveNotification(eventNotification);
+        return ResponseEntity.ok(schedulerService.toNotificationResource(eventNotification));
     }
 
     @DeleteMapping("/{schedulerId}/notification/{notificationId}")

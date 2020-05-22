@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.notification;
 
-import com.becon.opencelium.backend.mysql.entity.Message;
+import com.becon.opencelium.backend.mysql.entity.EventMessage;
 import org.springframework.hateoas.ResourceSupport;
 
 import java.util.ArrayList;
@@ -15,11 +15,11 @@ public class MessageResource extends ResourceSupport {
     private List<ContentResource> content = new ArrayList<>();
 
 
-    public MessageResource(Message message){
-        this.templateId = message.getId();
-        this.name = message.getName();
-        this.type = message.getType();
-        this.content = message.getContents()
+    public MessageResource(EventMessage eventMessage){
+        this.templateId = eventMessage.getId();
+        this.name = eventMessage.getName();
+        this.type = eventMessage.getType();
+        this.content = eventMessage.getEventContents()
                 .stream()
                 .map(c->new ContentResource(c))
                 .collect(Collectors.toList());

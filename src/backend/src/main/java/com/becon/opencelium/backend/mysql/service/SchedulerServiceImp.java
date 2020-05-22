@@ -153,12 +153,12 @@ public class SchedulerServiceImp implements SchedulerService {
         scheduler.setConnection(connection);
 
         List<NotificationResource> notificationResources = resource.getNotificationResources();
-        List<Notification> notificationList = new ArrayList<>();
+        List<EventNotification> eventNotificationList = new ArrayList<>();
 
         for (NotificationResource notificationResource:notificationResources) {
-            notificationList.add(toNotificationEntity(notificationResource));
+            eventNotificationList.add(toNotificationEntity(notificationResource));
         }
-        scheduler.setNotifications(notificationList);
+        scheduler.setEventNotifications(eventNotificationList);
         return scheduler;
     }
 
@@ -177,12 +177,12 @@ public class SchedulerServiceImp implements SchedulerService {
         if (entity.getWebhook() != null){
             schedulerResource.setWebhook(webhookService.toResource(entity.getWebhook()));
         }
-        List<Notification> notificationList = entity.getNotifications();
+        List<EventNotification> eventNotificationList = entity.getEventNotifications();
 
         List<NotificationResource> notificationResources = new ArrayList<>();
 
-        for (Notification notification : notificationList) {
-            notificationResources.add(new NotificationResource(notification));
+        for (EventNotification eventNotification : eventNotificationList) {
+            notificationResources.add(new NotificationResource(eventNotification));
         }
 
         schedulerResource.setNotification(notificationResources);
@@ -260,35 +260,35 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public Notification toNotificationEntity(NotificationResource resource) {
-        Notification notification = new Notification();
-        notification.setId(resource.getNotificationId());
-        notification.setName(resource.getName());
-        notification.setEventType(resource.getEventType());
-        notification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
+    public EventNotification toNotificationEntity(NotificationResource resource) {
+        EventNotification eventNotification = new EventNotification();
+        eventNotification.setId(resource.getNotificationId());
+        eventNotification.setName(resource.getName());
+        eventNotification.setEventType(resource.getEventType());
+        eventNotification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
 
         //TODO: need to check
-        List<Recipient> notificationRecipients = new ArrayList<>();
-        notificationRecipients = resource.getRecipients().stream()
-                .map(Recipient::new).
+        List<EventRecipient> notificationEventRecipients = new ArrayList<>();
+        notificationEventRecipients = resource.getRecipients().stream()
+                .map(EventRecipient::new).
                         collect(Collectors.toList());
 
-        notification.setRecipients(notificationRecipients);
-        notification.setMessage(messageService.toEntity(resource.getTemplate()));
-        return notification;
+        eventNotification.setEventRecipients(notificationEventRecipients);
+        eventNotification.setEventMessage(messageService.toEntity(resource.getTemplate()));
+        return eventNotification;
     }
 
     @Override
-    public NotificationResource toNotificationResource(Notification notification) {
-        return new NotificationResource(notification);
+    public NotificationResource toNotificationResource(EventNotification eventNotification) {
+        return new NotificationResource(eventNotification);
     }
 
     @Override
-    public void saveNotification(Notification notification) {
+    public void saveNotification(EventNotification eventNotification) {
 
-        notificationRepository.save(notification);
-        notification.getRecipients().forEach(notificationRecipient -> recipientService.save(notificationRecipient));
-        messageService.save(notification.getMessage());
+        notificationRepository.save(eventNotification);
+        eventNotification.getEventRecipients().forEach(notificationRecipient -> recipientService.save(notificationRecipient));
+        messageService.save(eventNotification.getEventMessage());
     }
 
     @Override

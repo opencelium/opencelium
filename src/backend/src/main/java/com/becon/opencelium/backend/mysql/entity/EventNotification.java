@@ -1,15 +1,13 @@
 
 package com.becon.opencelium.backend.mysql.entity;
 
-import com.becon.opencelium.backend.resource.notification.NotificationResource;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "notification")
-public class Notification {
+@Table(name = "event_notification")
+public class EventNotification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,20 +24,17 @@ public class Notification {
     private Scheduler scheduler;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "message_id")
-    private Message message;
-
+    @JoinColumn(name = "event_message_id")
+    private EventMessage eventMessage;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "notification_has_recipient",
-            joinColumns = @JoinColumn(name = "notification_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "recipient_id", referencedColumnName = "id"))
-    private List<Recipient> recipients = new ArrayList<>();
+    @JoinTable(name = "event_notification_has_event_recipient",
+            joinColumns = @JoinColumn(name = "event_notification_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "event_recipient_id", referencedColumnName = "id"))
+    private List<EventRecipient> eventRecipients = new ArrayList<>();
 
-    public Notification() {
+    public EventNotification() {
     }
-
-
 
     public int getId() {
         return id;
@@ -73,16 +68,16 @@ public class Notification {
         this.scheduler = scheduler;
     }
 
-    public List<Recipient> getRecipients() {
-        return recipients;
+    public List<EventRecipient> getEventRecipients() {
+        return eventRecipients;
     }
 
-    public void setRecipients(List<Recipient> recipients) {
-        this.recipients = recipients;
+    public void setEventRecipients(List<EventRecipient> eventRecipients) {
+        this.eventRecipients = eventRecipients;
     }
 
-    public Message getMessage() { return message; }
+    public EventMessage getEventMessage() { return eventMessage; }
 
-    public void setMessage(Message message) { this.message = message; }
+    public void setEventMessage(EventMessage eventMessage) { this.eventMessage = eventMessage; }
 }
 

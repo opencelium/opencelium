@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.resource.notification;
 
-import com.becon.opencelium.backend.mysql.entity.Recipient;
+import com.becon.opencelium.backend.mysql.entity.EventRecipient;
 import org.springframework.hateoas.ResourceSupport;
 
 public class RecipientResource extends ResourceSupport {
@@ -8,9 +8,9 @@ public class RecipientResource extends ResourceSupport {
     private int recipientId;
     private String description;
 
-    public RecipientResource(Recipient recipient){
-        this.recipientId = recipient.getId();
-        this.description = recipient.getDestination();
+    public RecipientResource(EventRecipient eventRecipient){
+        this.recipientId = eventRecipient.getId();
+        this.description = eventRecipient.getDestination();
     }
 
     public RecipientResource() {

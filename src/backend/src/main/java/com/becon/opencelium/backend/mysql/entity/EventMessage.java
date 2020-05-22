@@ -4,8 +4,8 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "message")
-public class Message {
+@Table(name = "event_message")
+public class EventMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -17,10 +17,10 @@ public class Message {
     @Column(name = "type")
     private String type;
 
-    @OneToMany(mappedBy = "message", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    private List<Content> contents;
+    @OneToMany(mappedBy = "eventMessage", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<EventContent> eventContents;
 
-    public Message() {
+    public EventMessage() {
     }
 
 
@@ -49,11 +49,11 @@ public class Message {
     }
 
 
-    public List<Content> getContents() {
-        return contents;
+    public List<EventContent> getEventContents() {
+        return eventContents;
     }
 
-    public void setContents(List<Content> contents) {
-        this.contents = contents;
+    public void setEventContents(List<EventContent> eventContents) {
+        this.eventContents = eventContents;
     }
 }

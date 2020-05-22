@@ -1,10 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.mysql.entity.Content;
-import com.becon.opencelium.backend.mysql.entity.Content;
+import com.becon.opencelium.backend.mysql.entity.EventContent;
 import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
-import com.becon.opencelium.backend.mysql.service.ContentServiceImpl;
-import com.becon.opencelium.backend.resource.notification.ContentResource;
 import com.becon.opencelium.backend.resource.notification.ContentResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
@@ -24,9 +21,9 @@ public class ContentController {
 
     @GetMapping("/all")
     ResponseEntity<?> getAll() throws Exception{
-        List<Content> contentList = contentService.findAll();
+        List<EventContent> eventContentList = contentService.findAll();
 
-        List<ContentResource> contentResources = contentList.stream()
+        List<ContentResource> contentResources = eventContentList.stream()
                 .map(content -> contentService.toResource(content))
                 .collect(Collectors.toList());
         final Resources<ContentResource> resources = new Resources<>(contentResources);
@@ -35,17 +32,17 @@ public class ContentController {
 
     @GetMapping("/{id}")
     ResponseEntity<?> get(@PathVariable int id) throws Exception{
-        Content content = contentService.findById(id).orElseThrow(()->new RuntimeException("CONTENT_NOT_FOUND"));
-        ContentResource contentResource = new ContentResource(content);
+        EventContent eventContent = contentService.findById(id).orElseThrow(()->new RuntimeException("CONTENT_NOT_FOUND"));
+        ContentResource contentResource = new ContentResource(eventContent);
         final Resource<ContentResource> resource = new Resource<>(contentResource);
         return ResponseEntity.ok(resource);
     }
 
     @PostMapping
     ResponseEntity<?> createContent(@RequestBody ContentResource contentResource) throws Exception{
-        Content content = contentService.toEntity(contentResource);
-        contentService.save(content);
-        final Resource<ContentResource> resource = new Resource<>(contentService.toResource(content));
+        EventContent eventContent = contentService.toEntity(contentResource);
+        contentService.save(eventContent);
+        final Resource<ContentResource> resource = new Resource<>(contentService.toResource(eventContent));
         return ResponseEntity.ok(resource);
     }
 }
