@@ -62,4 +62,31 @@ public class MessageController {
         messageService.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateMessage(@PathVariable int id, @RequestBody MessageResource messageResource) throws Exception{
+        messageResource.setTemplateId(id);
+        EventMessage eventMessage = messageService.toEntity(messageResource);
+        eventMessage.setId(id);
+        messageService.save(eventMessage);
+
+        List<EventContent> eventContents = eventMessage.getEventContents();
+        for (int i = 0; i < eventContents.size(); i++) {
+            contentService.save(eventContents.get(i));
+        }
+
+        final Resource<MessageResource> resource = new Resource<>(messageService.toResource(eventMessage));
+        return ResponseEntity.ok(resource);
+    }
+
+    @GetMapping("/all/{type}")
+    public ResponseEntity<?> getAllTemplatesByNotificationType(@PathVariable String type) throws Exception{
+        List<EventMessage> eventMessageList = messageService.findAllByType(type);
+        List<MessageResource> messageResources = eventMessageList.stream()
+                .map(message -> messageService.toResource(message))
+                .collect(Collectors.toList());
+        final Resources<MessageResource> resources = new Resources<>(messageResources);
+        return ResponseEntity.ok(resources);
+    }
+
 }

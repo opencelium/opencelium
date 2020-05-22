@@ -19,11 +19,11 @@ public class EventNotification {
     @Column(name = "event_type")
     private String eventType;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scheduler_id")
     private Scheduler scheduler;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "event_message_id")
     private EventMessage eventMessage;
 

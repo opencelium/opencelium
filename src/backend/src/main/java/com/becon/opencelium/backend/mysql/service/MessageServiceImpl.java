@@ -28,6 +28,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void deleteById(int id) {
+        findById(id).orElseThrow(()->new RuntimeException("TEMPLATE_NOT_FOUND"));
         messageRepository.deleteById(id);
     }
 
@@ -39,6 +40,11 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Optional<EventMessage> findById(int id) {
         return messageRepository.findById(id);
+    }
+
+    @Override
+    public List<EventMessage> findAllByType(String type) {
+        return messageRepository.findAllByType(type);
     }
 
     @Override

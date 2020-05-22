@@ -274,7 +274,7 @@ public class SchedulerServiceImp implements SchedulerService {
                         collect(Collectors.toList());
 
         eventNotification.setEventRecipients(notificationEventRecipients);
-        eventNotification.setEventMessage(messageService.toEntity(resource.getTemplate()));
+        eventNotification.setEventMessage(messageService.findById(resource.getTemplate().getTemplateId()).orElseThrow(()->new RuntimeException("TEMPLATE_NOT_FOUND")));
         return eventNotification;
     }
 
