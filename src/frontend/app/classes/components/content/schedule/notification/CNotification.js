@@ -90,6 +90,9 @@ export default class CNotification{
      * @param notificationType
      */
     static checkNotificationType(notificationType){
+        if(notificationType === ''){
+            return true;
+        }
         for(const key in NOTIFICATION_TYPE) {
             if(notificationType === NOTIFICATION_TYPE[key]){
                 return true;

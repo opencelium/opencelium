@@ -122,6 +122,13 @@ const reducer = (state = initialState, action) => {
         case SchedulesAction.FETCH_SCHEDULES_CANCELED:
             return state.set('fetchingSchedules', API_REQUEST_STATE.PAUSE).set('isCanceled', true).set('message', action.payload);
         case SchedulesAction.FETCH_SCHEDULENOTIFICATIONS:
+            index = schedules.findIndex(function (schedule) {
+                return schedule.schedulerId === action.payload.id;
+            });
+            if(index >= 0) {
+                schedule = schedules.get(index);
+                return state.set('fetchingScheduleNotifications', API_REQUEST_STATE.START).set('schedule', schedule).set('isRejected', false).set('isCanceled', false).set('error', null);
+            }
             return state.set('fetchingScheduleNotifications', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.FETCH_SCHEDULENOTIFICATIONS_FULFILLED:
             if(isArray(action.payload)){

@@ -36,6 +36,7 @@ function mapStateToProps(state){
     const schedules = state.get('schedules');
     return {
         authUser: auth.get('authUser'),
+        stateSchedule: schedules.get('schedule'),
         fetchingScheduleNotifications: schedules.get('fetchingScheduleNotifications'),
         notifications: schedules.get('notifications').toJS().map(notification => CNotification.createNotification(notification)),
     };
@@ -53,21 +54,24 @@ class ScheduleNotification extends Component{
         super(props);
 
         this.state = {
-            showScheduleNotification: false,
+            showScheduleNotifications: false,
             animationName: styles.AScaleAppear,
             startFetchingScheduleNotifications: false,
         };
     }
 
     componentDidUpdate(){
-        const {startFetchingScheduleNotifications} = this.state;
-        const {fetchingScheduleNotifications} = this.props;
+        const {startFetchingScheduleNotifications, showScheduleNotifications, animationName} = this.state;
+        const {fetchingScheduleNotifications, stateSchedule, schedule} = this.props;
         if(startFetchingScheduleNotifications && fetchingScheduleNotifications !== API_REQUEST_STATE.START) {
             this.setState({
                 startFetchingScheduleNotifications: false,
                 animationName: styles.AScaleAppear,
-                showScheduleNotification: true,
+                showScheduleNotifications: true,
             });
+        }
+        if(showScheduleNotifications && animationName === styles.AScaleAppear && stateSchedule && stateSchedule.schedulerId !== schedule.id){
+            this.closeNotificationList();
         }
     }
 
@@ -77,15 +81,15 @@ class ScheduleNotification extends Component{
     closeNotificationList(){
         let that = this;
         this.setState({animationName: styles.AScaleDisappear});
-        setTimeout(() => {that.setState({showScheduleNotification: false});}, 250);
+        setTimeout(() => {that.setState({showScheduleNotifications: false});}, 250);
     }
 
     /**
      * to show/hide notification list
      */
     toggleScheduleNotification(){
-        const {showScheduleNotification} = this.state;
-        if(showScheduleNotification){
+        const {showScheduleNotifications} = this.state;
+        if(showScheduleNotifications){
             this.closeNotificationList();
         } else {
             this.fetchNotifications();
@@ -101,9 +105,9 @@ class ScheduleNotification extends Component{
     }
 
     renderDialogScheduleNotification(){
-        const {animationName, showScheduleNotification} = this.state;
+        const {animationName, showScheduleNotifications} = this.state;
         const {schedule, notifications} = this.props;
-        if(showScheduleNotification) {
+        if(showScheduleNotifications) {
             return <NotificationList
                 schedule={schedule}
                 notifications={notifications}
