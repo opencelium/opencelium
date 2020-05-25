@@ -105,6 +105,10 @@ export default class CRequest{
         return this._method;
     }
 
+    getMethodForSelect(){
+        return METHOD_TYPES.find(m => m.value === this._method);
+    }
+
     set method(method){
         this._method = method;
     }
