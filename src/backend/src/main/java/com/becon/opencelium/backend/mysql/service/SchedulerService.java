@@ -49,11 +49,10 @@ public interface SchedulerService {
     void enable(Scheduler scheduler) throws SchedulerException;
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
 
-    List<NotificationResource> getAllNotifications(int schedulerId);
-    NotificationResource getNotification(int notificationId);
+    List<EventNotification> getAllNotifications(int schedulerId);
+    Optional<EventNotification> getNotification(int notificationId);
     EventNotification toNotificationEntity(NotificationResource resource);
     NotificationResource toNotificationResource(EventNotification eventNotification);
     void saveNotification(EventNotification eventNotification);
     void deleteNotificationById(int id);
-
 }

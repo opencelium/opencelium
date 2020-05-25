@@ -243,20 +243,13 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public List<NotificationResource> getAllNotifications(int schedulerId){
-
-        List<NotificationResource> notificationResources  = new ArrayList<>();
-
-        notificationRepository.findBySchedulerId(schedulerId).forEach(notification -> notificationResources.add(new NotificationResource(notification)));
-
-        return notificationResources;
+    public List<EventNotification> getAllNotifications(int schedulerId){
+        return notificationRepository.findBySchedulerId(schedulerId);
     }
 
     @Override
-    public NotificationResource getNotification(int notificationId){
-        NotificationResource notificationResource = new NotificationResource( notificationRepository.findById(notificationId).orElseThrow(()->new RuntimeException("Notification not found")));
-
-        return notificationResource;
+    public Optional<EventNotification> getNotification(int notificationId){
+        return notificationRepository.findById(notificationId);
     }
 
     @Override

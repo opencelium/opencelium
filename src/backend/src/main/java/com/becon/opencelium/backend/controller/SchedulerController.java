@@ -252,7 +252,8 @@ public class SchedulerController {
 
     @GetMapping("/{schedulerId}/notification/all")
     public ResponseEntity<?> getAllNotifications(@PathVariable int schedulerId) throws Exception {
-        List<NotificationResource> notificationResource = schedulerService.getAllNotifications(schedulerId);
+        List<NotificationResource> notificationResource = schedulerService.getAllNotifications(schedulerId)
+                .stream().map(e -> schedulerService.toNotificationResource(e)).collect(Collectors.toList());
         final Resources<NotificationResource> resources = new Resources<>(notificationResource);
         return ResponseEntity.ok(resources);
     }
@@ -260,7 +261,9 @@ public class SchedulerController {
     @GetMapping("/{schedulerId}/notification/{notificationId}")
     public ResponseEntity<?> getNotification(@PathVariable int schedulerId,
                                              @PathVariable int notificationId) throws Exception{
-        NotificationResource notificationResource = schedulerService.getNotification(notificationId);
+        EventNotification en = schedulerService.getNotification(notificationId)
+                .orElseThrow(()->new RuntimeException("Notification not found"));
+        NotificationResource notificationResource = schedulerService.toNotificationResource(en);
 
         final Resource<NotificationResource> resource = new Resource<>(notificationResource);
         return ResponseEntity.ok(resource);
