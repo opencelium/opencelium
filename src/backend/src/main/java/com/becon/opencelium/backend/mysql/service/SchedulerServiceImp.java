@@ -260,7 +260,7 @@ public class SchedulerServiceImp implements SchedulerService {
         eventNotification.setEventType(resource.getEventType());
         eventNotification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->
                 new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
-        
+
         List<EventRecipient> notificationEventRecipients = new ArrayList<>();
         notificationEventRecipients = resource.getRecipients().stream()
                 .map(EventRecipient::new).
