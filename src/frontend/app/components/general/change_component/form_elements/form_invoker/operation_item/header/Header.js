@@ -288,20 +288,24 @@ class Header extends Component{
     }
 
     render(){
-        const {entity, data, forConnection, mode} = this.props;
+        const {entity, data, forConnection, mode, noIcon, hasHeightLimits} = this.props;
         const {readOnly} = data;
         let items = entity.header;
         if(items.length === 0 && mode !== 'add'){
             return null;
         }
+        let inputsStyle = {display: 'grid'};
+        if(hasHeightLimits){
+            inputsStyle.maxHeight = '200px';
+        }
         return(
-            <div className={`${forConnection ? '' : theme.withIcon} ${theme.input}`} style={forConnection ? {paddingBottom: 0} : null}>
+            <div className={`${forConnection || noIcon ? '' : theme.withIcon} ${theme.input}`} style={forConnection ? {paddingBottom: 0} : null}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={forConnection ? {padding: 0} : null}/>
-                <div style={{display: 'grid'}}>
+                <div style={inputsStyle}>
                     {this.renderInputs()}
                     {readOnly || forConnection ? null : this.renderAddItem()}
                 </div>
-                {forConnection ? null : <FontIcon value={'public'} className={theme.icon}/>}
+                {forConnection || noIcon ? null : <FontIcon value={'public'} className={theme.icon}/>}
                 <span className={theme.bar}/>
                 {this.renderLabel()}
             </div>
@@ -311,13 +315,17 @@ class Header extends Component{
 
 Header.propTypes = {
     entity: PropTypes.object.isRequired,
+    updateEntity: PropTypes.func,
     data: PropTypes.object.isRequired,
     mode: PropTypes.string,
 };
 
 Header.defaultProps = {
     forConnection: false,
-    mode: 'existed'
+    mode: 'existed',
+    index: 0,
+    noIcon: false,
+    hasHeightLimits: false,
 };
 
 
