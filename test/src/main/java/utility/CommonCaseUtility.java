@@ -142,7 +142,7 @@ public class CommonCaseUtility {
             TimeUnit.SECONDS.sleep(3);
             driver.findElement(By.id("input_i-doit__url")).sendKeys(Constants.IDOIT_URL);
             driver.findElement(By.id("input_i-doit__apikey")).sendKeys(Constants.IDOIT_KEY);
-            driver.findElement(By.id("button_test")).click();
+            driver.findElement(By.id("button_add")).click();
         }catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -164,7 +164,7 @@ public class CommonCaseUtility {
         driver.findElement(By.id("input_sensu__token")).sendKeys(Constants.SENSU_TOKEN);
         driver.findElement(By.id("input_sensu__refresh_token")).sendKeys(Constants.SENSU_REFRESH_TOKEN);
         driver.findElement(By.id("input_sensu__expires_at")).sendKeys(Constants.SENSU_EXP);
-        driver.findElement(By.id("button_test")).click();
+        driver.findElement(By.id("button_add")).click();
     }
 
     public static void AddZabbix(WebDriver driver) throws InterruptedException{
@@ -185,7 +185,7 @@ public class CommonCaseUtility {
         driver.findElement(By.id("input_zabbix__url")).sendKeys(Constants.ZABBIX_URL);
         driver.findElement(By.id("input_zabbix__user")).sendKeys(Constants.ZABBIX_LOGIN);
         driver.findElement(By.id("input_zabbix__password")).sendKeys(Constants.ZABBIX_PWD);
-        driver.findElement(By.id("button_test")).click();
+        driver.findElement(By.id("button_add")).click();
     }
 
     public static void AddIcinga2(WebDriver driver) throws InterruptedException {
@@ -205,7 +205,7 @@ public class CommonCaseUtility {
         driver.findElement(By.id("input_icinga2__url")).sendKeys(Constants.ICINGA2_URL);
         driver.findElement(By.id("input_icinga2__username")).sendKeys(Constants.ICINGA2_LOGIN);
         driver.findElement(By.id("input_icinga2__password")).sendKeys(Constants.ICINGA2_PWD);
-        driver.findElement(By.id("button_test")).click();
+        driver.findElement(By.id("button_add")).click();
     }
 
     public static void AddOpenNMS(WebDriver driver) throws InterruptedException{
@@ -225,7 +225,7 @@ public class CommonCaseUtility {
         driver.findElement(By.id("input_openNMS__url")).sendKeys(Constants.OPENNMS_URL);
         driver.findElement(By.id("input_openNMS__username")).sendKeys(Constants.OPENNMS_LOGIN);
         driver.findElement(By.id("input_openNMS__password")).sendKeys(Constants.OPENNMS_PWD);
-        driver.findElement(By.id("button_test")).click();
+        driver.findElement(By.id("button_add")).click();
     }
 
 }

@@ -128,7 +128,7 @@ public class TestConnector {
             TimeUnit.SECONDS.sleep(5);
 
             //Connection successfully tested
-            driver.findElement(By.xpath("//*[text()='TestOTRS']"));
+            driver.findElement(By.id("button_update_0"));
             testCases.add(new TestCases("016","Connector Create","Pass"));
 
 
