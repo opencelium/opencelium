@@ -120,7 +120,8 @@ public class CommonCaseUtility {
             driver.findElement(By.id("input_otrs__UserLogin")).sendKeys(Constants.OTRS_LOGIN);
             driver.findElement(By.id("input_otrs__Password")).sendKeys(Constants.OTRS_PWD);
             driver.findElement(By.id("input_otrs__WebService")).sendKeys(Constants.OTRS_WEBSERVICE);
-            driver.findElement(By.id("button_test")).click();
+            js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+            driver.findElement(By.id("button_add")).click();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
