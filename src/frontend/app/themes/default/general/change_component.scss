@@ -503,7 +503,9 @@
   line-height:80px;
   width: 5%;
 }
-
+.invoker_item_add_button:hover{
+  color: black;
+}
 .invoker_item_delete_button{
   cursor: pointer;
   position: absolute;
@@ -511,7 +513,9 @@
   right: 0;
   top: 10px;
 }
-
+.invoker_item_delete_button:hover{
+  color: black;
+}
 
 
 .invoker_authentication_item_key{
@@ -567,6 +571,9 @@
   cursor: pointer;
   left: 230px;
 }
+.input_import_json_button:hover{
+  color: black;
+}
 
 .input_textarea_import_json{
   textarea{
@@ -600,6 +607,9 @@
 .invoker_operation_add_icon{
   cursor: pointer;
   position: absolute;
+}
+.invoker_operation_add_icon:hover{
+  color: black;
 }
 .invoker_operation_add_method_radio{
   position: absolute;
@@ -1023,4 +1033,55 @@
 }
 .notification_template_editor_padding{
   border-bottom-width: 0 !important;
+}
+.connection_request_icon_left{
+  position: absolute;
+  right: 3px;
+  top: 3px;
+}
+.connection_request_icon_right{
+  position: absolute;
+  left: 3px;
+  top: 3px;
+}
+.connection_request_tabs{
+  margin-top: 20px;
+}
+.connection_request_button_loading{
+  margin-top: 5px;
+  max-height: 10px;
+  min-height: 10px;
+  float: left;
+  margin-left: 40%;
+}
+.connection_request_tab_loading{
+  margin-top: 0;
+  max-height: 10px;
+  min-height: 10px;
+  float: left;
+  margin-left: 20px;
+}
+.connection_request_loading>div{
+  width: 12px;
+  height: 12px;
+}
+.url_field{
+  display: flex;
+  .method{
+    width: 20%;
+    color: black;
+  }
+  .url{
+    width: 65%;
+    .input{
+      padding: 0 5px;
+    }
+  }
+  .action{
+    width: 15%;
+    .send_button{
+      width: 100%;
+      padding: 8px 12px;
+    }
+  }
 }

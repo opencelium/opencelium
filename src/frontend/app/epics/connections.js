@@ -20,7 +20,7 @@ import {
     fetchConnections, fetchConnectionsFulfilled, fetchConnectionsRejected,
     checkConnectionTitleFulfilled, checkConnectionTitleRejected,
     validateConnectionFormMethodsFulfilled, validateConnectionFormMethodsRejected,
-    checkNeo4j, checkNeo4jFulfilled, checkNeo4jRejected,
+    checkNeo4j, checkNeo4jFulfilled, checkNeo4jRejected, sendOperationRequestFulfilled, sendOperationRequestRejected,
 } from '../actions/connections/fetch';
 import {
     addConnectionFulfilled ,addConnectionRejected,
@@ -208,6 +208,23 @@ const deleteConnectionEpic = (action$, store) => {
         });
 };
 
+/**
+ * send operation request
+ */
+const sendOperationRequestEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.SEND_OPERATIONREQUEST)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            return Rx.Observable.of(sendOperationRequestFulfilled({}));
+            return doRequest({url, method: 'post', data},{
+                success: sendOperationRequestFulfilled,
+                reject: sendOperationRequestRejected,},
+            );
+        });
+};
+
 
 export {
     fetchConnectionEpic,
@@ -219,4 +236,5 @@ export {
     validateConnectionFormMethodsEpic,
     checkNeo4jEpic,
     checkNeo4jFulfilledEpic,
+    sendOperationRequestEpic,
 };
