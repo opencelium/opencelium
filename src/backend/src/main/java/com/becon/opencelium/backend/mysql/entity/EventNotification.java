@@ -3,7 +3,9 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "event_notification")
@@ -23,15 +25,15 @@ public class EventNotification {
     @JoinColumn(name = "scheduler_id")
     private Scheduler scheduler;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_message_id")
     private EventMessage eventMessage;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "event_notification_has_event_recipient",
             joinColumns = @JoinColumn(name = "event_notification_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "event_recipient_id", referencedColumnName = "id"))
-    private List<EventRecipient> eventRecipients = new ArrayList<>();
+    private Set<EventRecipient> eventRecipients = new HashSet<>();
 
     public EventNotification() {
     }
@@ -68,11 +70,11 @@ public class EventNotification {
         this.scheduler = scheduler;
     }
 
-    public List<EventRecipient> getEventRecipients() {
+    public Set<EventRecipient> getEventRecipients() {
         return eventRecipients;
     }
 
-    public void setEventRecipients(List<EventRecipient> eventRecipients) {
+    public void setEventRecipients(Set<EventRecipient> eventRecipients) {
         this.eventRecipients = eventRecipients;
     }
 

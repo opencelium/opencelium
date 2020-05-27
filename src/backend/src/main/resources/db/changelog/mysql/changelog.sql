@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset 1.1:1 stripComments:true splitStatements:true endDelimiter:;
+--changeset 1.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 
 --
 -- Table structure for table `event_message`
@@ -150,3 +150,6 @@ LOCK TABLES `event_notification_has_event_recipient` WRITE;
 UNLOCK TABLES;
 
 
+--changeset 1.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+
+alter table detail add column if not exists lang varchar(3) not null default 'eng';
