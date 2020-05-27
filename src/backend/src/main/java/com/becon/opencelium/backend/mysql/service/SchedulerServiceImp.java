@@ -261,10 +261,8 @@ public class SchedulerServiceImp implements SchedulerService {
         eventNotification.setScheduler(schedulerRepository.findById(resource.getSchedulerId()).orElseThrow(()->
                 new RuntimeException("Scheduler "+resource.getSchedulerId()+" not found")));
 
-        List<EventRecipient> notificationEventRecipients = new ArrayList<>();
-        notificationEventRecipients = resource.getRecipients().stream()
-                .map(EventRecipient::new).
-                        collect(Collectors.toList());
+        Set<EventRecipient> notificationEventRecipients = resource.getRecipients().stream()
+                .map(EventRecipient::new).collect(Collectors.toSet());
 
         eventNotification.setEventRecipients(notificationEventRecipients);
         eventNotification.setEventMessage(messageService.findById(resource.getTemplate().getTemplateId()).orElseThrow(()->
