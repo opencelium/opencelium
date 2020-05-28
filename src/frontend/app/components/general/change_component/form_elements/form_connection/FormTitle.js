@@ -74,7 +74,7 @@ class FormTitle extends Component{
                 readOnly={isReadonly}
                 className={inputStyle}
                 required={required}
-                theme={{label: styles.form_input_label}}
+                theme={{label: styles.form_input_label, input: isReadonly ? styles.form_input_readonly_input : ''}}
             />
         );
     }

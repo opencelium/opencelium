@@ -45,6 +45,7 @@ export default class CConnectorItem{
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
         this._pagination = this.setConnectorPagination();
+        this._currentProgress = this.setCurrentProgress();
         this._operatorsHistory = [];
     }
 
@@ -130,12 +131,37 @@ export default class CConnectorItem{
         return CConnectorPagination.createConnectorPagination(this);
     }
 
+    setCurrentProgress(){
+        let result = 0;
+        let currentIndex = 0;
+        let allItems = [];
+        if(this._currentItem){
+            currentIndex = this._currentItem.index;
+            if(this._pagination.allItems){
+                allItems = this._pagination.allItems;
+            }
+            for(let i = 0; i < allItems.length; i++){
+                if(allItems[i].index === currentIndex){
+                    if(i === allItems.length - 1){
+                        result = 100;
+                    } else {
+                        result = Math.ceil((i * 100) / allItems.length);
+                    }
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     loadPage(number){
         this._pagination.setCurrentPageNumber(number);
+        this._currentProgress = this.setCurrentProgress();
     }
 
     reloadPagination(settings){
         this._pagination.reload(this, settings);
+        this._currentProgress = this.setCurrentProgress();
     }
 
     reloadOperatorsHistory(){
@@ -641,6 +667,10 @@ export default class CConnectorItem{
 
     getPrefixForMethodOption(){
         return this.getConnectorType() === CONNECTOR_FROM ? 'f_': 't_';
+    }
+
+    get currentProgress(){
+        return this._currentProgress;
     }
 
     getAllPrevMethods(item, isKeyConsidered = true, exceptCurrent = true){

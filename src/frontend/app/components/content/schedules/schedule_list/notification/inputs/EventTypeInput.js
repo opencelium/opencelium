@@ -19,7 +19,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 import FontIcon from "@basic_components/FontIcon";
-import CNotification from "@classes/components/content/schedule/notification/CNotification";
+import CNotification, {EVENT_TYPE} from "@classes/components/content/schedule/notification/CNotification";
 import {getThemeClass} from "@utils/app";
 
 import theme from "react-toolbox/lib/input/theme.css";
@@ -71,6 +71,30 @@ class EventTypeInput extends Component{
         changeNotification(notification);
     }
 
+    renderRadioButtons(){
+        const {t, authUser} = this.props;
+        let classNames = [
+            'radio_button',
+            'radio_text',
+        ];
+        classNames = getThemeClass({classNames, authUser, styles});
+        let radioButtons = [];
+        for(let key in EVENT_TYPE){
+            radioButtons.push(
+                <RadioButton
+                    key={key}
+                    id={`input_event_${EVENT_TYPE[key]}`}
+                    onFocus={::this.focusEventTypeRadio}
+                    onBlur={::this.blurEventTypeRadio}
+                    label={`${t(`NOTIFICATION.EVENT_${key}`)}`}
+                    value={EVENT_TYPE[key]}
+                    className={`${styles[classNames.radio_button]}`}
+                    theme={{text: styles[classNames.radio_text]}}/>
+            );
+        }
+        return radioButtons;
+    }
+
     render(){
         const {focused} = this.state;
         const {t, authUser, notification} = this.props;
@@ -78,7 +102,6 @@ class EventTypeInput extends Component{
             'notification_change_event_type',
             'label',
             'radio_group',
-            'radio_button',
             'first_radio_button',
             'notification_select_focused',
         ];
@@ -87,8 +110,7 @@ class EventTypeInput extends Component{
             <div className={`${theme.withIcon} ${theme.input} ${styles[classNames.notification_change_event_type]}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.label]}`}/>
                 <RadioGroup name='theme' value={notification.eventType} onChange={::this.onChangeEventType} className={`${styles[classNames.radio_group]}`}>
-                    <RadioButton id='input_event_pre' onFocus={::this.focusEventTypeRadio} onBlur={::this.blurEventTypeRadio} label={`${t('NOTIFICATION.EVENT_PRE')}`} value='pre' className={`${styles[classNames.radio_button]} ${styles[classNames.first_radio_button]}`}/>
-                    <RadioButton id='input_event_post' onFocus={::this.focusEventTypeRadio} onBlur={::this.blurEventTypeRadio} label={`${t('NOTIFICATION.EVENT_POST')}`} value='post' className={`${styles[classNames.radio_button]}`}/>
+                    {this.renderRadioButtons()}
                 </RadioGroup>
                 <FontIcon value={'event'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
                 <span className={theme.bar}/>

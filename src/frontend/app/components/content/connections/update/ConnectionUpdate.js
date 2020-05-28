@@ -134,33 +134,6 @@ class ConnectionUpdate extends Component{
     }
 
     /**
-     * to set methods state
-     */
-    setMethods(value, connectorType){
-        if(value !== '' && connectorType) {
-            let {methods} = this.state;
-            let {connectors} = this.props;
-            let connector = connectors.find(c => c.id === value.value);
-            if(connector) {
-                let invokerName = connector.hasOwnProperty('invoker') ? connector.invoker.name : '';
-                if (invokerName !== '') {
-                    switch (connectorType) {
-                        case 'fromConnector':
-                            methods.connectorList[0].connectorId = value.value;
-                            methods.connectorList[0].name = invokerName;
-                            break;
-                        case 'toConnector':
-                            methods.connectorList[1].connectorId = value.value;
-                            methods.connectorList[1].name = invokerName;
-                            break;
-                    }
-                    this.setState({methods});
-                }
-            }
-        }
-    }
-
-    /**
      * to validate title
      */
     validateTitle(connection){
@@ -174,22 +147,6 @@ class ConnectionUpdate extends Component{
                 this.props.checkConnectionTitle(connection.getObject());
                 return {value: false, message: ''};
             }
-        }
-        return {value: true, message: ''};
-    }
-
-    /**
-     * to validate connector
-     */
-    validateConnectors(connection){
-        const {t} = this.props;
-        if(connection.fromConnector.id === 0){
-            setFocusById('from_connector');
-            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED')};
-        }
-        if(connection.toConnector.id === 0){
-            setFocusById('to_connector');
-            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED')};
         }
         return {value: true, message: ''};
     }

@@ -98,8 +98,20 @@ const plugins = () => {
         new CopyWebpackPlugin({
             patterns:[
                 {
-                    from: path.resolve(__dirname, 'img/fav_icon.png'),
+                    from: path.resolve(__dirname, 'styles'),
+                    to: path.resolve(__dirname, 'dist/styles')
+                },
+                {
+                    from: path.resolve(__dirname, 'jira_integration.js'),
                     to: path.resolve(__dirname, 'dist')
+                },
+                {
+                    from: path.resolve(__dirname, 'locales'),
+                    to: path.resolve(__dirname, 'dist/locales')
+                },
+                {
+                    from: path.resolve(__dirname, 'img'),
+                    to: path.resolve(__dirname, 'dist/img')
                 }
             ]
         }),
@@ -124,12 +136,6 @@ const plugins = () => {
     return plugins;
 };
 const output = () => {
-    if(NodeParams.IS_PROD){
-        return{
-            filename: filename('js'),
-            path: path.resolve(__dirname, 'dist')
-        }
-    }
     return {
         publicPath: '/',
         filename: "[name].js"
@@ -170,7 +176,7 @@ module.exports = {
         }
     },
     optimization: optimization(),
-    devtool: NodeParams.IS_DEV ? '#cheap-module-source-map' : '',
+    devtool: NodeParams.IS_DEV ? '#cheap-module-source-map' : 'source-map',
     plugins: plugins(),
     node: {
         net: 'empty',

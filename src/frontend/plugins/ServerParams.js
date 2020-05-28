@@ -49,11 +49,13 @@ module.exports = {
             proxy: {
                 target: `http://localhost:${proxyPort}/`,
                 ws: true
-            },
-            browser: ["google chrome", "firefox"]
+            }
         },
         PLUGIN_OPTIONS: {
             reload: false
         }
+    },
+    PRODUCTION_SERVER: {
+        PORT: 5000
     }
 };

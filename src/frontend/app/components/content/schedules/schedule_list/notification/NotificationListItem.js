@@ -161,8 +161,7 @@ class NotificationListItem extends Component{
      * to delete notification
      */
     deleteNotification(){
-        const {notification} = this.state;
-        const {schedule, deleteScheduleNotification} = this.props;
+        const {schedule, notification, deleteScheduleNotification} = this.props;
         this.setState({startDeletingNotification: true});
         deleteScheduleNotification({...notification.getObject(), schedulerId: schedule.id});
         this.toggleDeleteConfirmation();

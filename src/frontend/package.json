@@ -10,6 +10,7 @@
     "chroma-js": "^2.0.2",
     "clean-webpack-plugin": "^3.0.0",
     "eslint-loader": "^4.0.2",
+    "express": "^4.17.1",
     "fine-uploader": "^5.14.5",
     "fine-uploader-wrappers": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
@@ -156,12 +157,13 @@
     "webpack-stream": "5.2.1"
   },
   "scripts": {
-    "start_dev": "cross-env NODE_ENV=development NODE_HMR=true NODE_SOCKET=true node server.js --mode development",
-    "start_dev_bsync": "cross-env NODE_ENV=development NODE_HMR=true NODE_SOCKET=true NODE_BSYNC=true node server.js --mode development",
-    "start_prod": "cross-env NODE_ENV=production NODE_SOCKET=true node server.js --mode production",
-
+    "start_dev": "cross-env NODE_ENV=development NODE_HMR=true NODE_SOCKET=true NODE_BSYNC=true node dev_server.js --mode development",
+    "start_dev_bsync": "cross-env NODE_ENV=development NODE_HMR=true NODE_SOCKET=true NODE_BSYNC=true node dev_server.js --mode development",
+    "start_prod": "cross-env NODE_ENV=production NODE_SOCKET=true node dev_server.js --mode production",
     "build_dev": "cross-env NODE_ENV=development webpack --mode development",
     "build_prod": "cross-env NODE_ENV=production webpack --mode production",
+    "start_prod_server": "node prod_server.js",
+
     "start_mock": "node json-server.js",
     "watch:test": "node_modules/.bin/jest --watch --no-watchman",
     "test": "node_modules/.bin/jest"
