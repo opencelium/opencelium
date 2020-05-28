@@ -17,7 +17,7 @@ public class EventMessage {
     @Column(name = "type")
     private String type;
 
-    @OneToMany(mappedBy = "eventMessage", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "eventMessage", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<EventContent> eventContents;
 
     @OneToMany(mappedBy = "eventMessage", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

@@ -43,4 +43,5 @@ public interface Constants {
     public static String OPENNMS_LOGIN = "opennmslogin";
     public static String OPENNMS_PWD = "opennmspwd";
 
+
 }
