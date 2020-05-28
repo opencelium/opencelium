@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import { withRouter } from 'react-router';
 import Pagination from 'react-bootstrap/Pagination';
 
-import styles from '../../../../themes/default/general/pagination.scss';
+import styles from '@themes/default/general/pagination.scss';
 
 
 /**

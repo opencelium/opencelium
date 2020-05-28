@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {EXCHANGE_TYPE_REQUEST, EXCHANGE_TYPE_RESPONSE, WRONG_EXCHANGE_TYPE} from '../../../../../utils/constants/data_types';
+import {EXCHANGE_TYPE_REQUEST, EXCHANGE_TYPE_RESPONSE, WRONG_EXCHANGE_TYPE} from '@utils/constants/data_types';
 
 
 /**

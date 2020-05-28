@@ -15,7 +15,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {FormElement} from "../../../../../decorators/FormElement";
+import {FormElement} from "@decorators/FormElement";
 import OperationItem from "./operation_item/OperationItem";
 
 

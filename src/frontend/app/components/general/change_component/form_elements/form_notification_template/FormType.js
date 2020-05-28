@@ -15,14 +15,14 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
-import styles from '../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../decorators/FormElement";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
 import theme from "react-toolbox/lib/input/theme.css";
-import OCSelect from "../../../basic_components/inputs/Select";
-import FontIcon from "../../../basic_components/FontIcon";
-import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
+import OCSelect from "@basic_components/inputs/Select";
+import FontIcon from "@basic_components/FontIcon";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
 
 /**
  * Component for Form Input

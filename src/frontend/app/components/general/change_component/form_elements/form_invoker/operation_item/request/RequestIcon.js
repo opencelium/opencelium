@@ -1,20 +1,20 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import Dialog from "../../../../../basic_components/Dialog";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import Dialog from "@basic_components/Dialog";
 import UrlField from "./UrlField";
 import ResponseField from "./ResponseField";
-import CRequest from "../../../../../../../classes/components/content/invoker/request/CRequest";
-import styles from "../../../../../../../themes/default/general/change_component.scss";
-import {sendOperationRequest} from "../../../../../../../actions/connections/fetch";
-import {CONNECTOR_FROM} from "../../../../../../../classes/components/content/connection/CConnectorItem";
+import CRequest from "@classes/components/content/invoker/request/CRequest";
+import styles from "@themes/default/general/change_component.scss";
+import {sendOperationRequest} from "@actions/connections/fetch";
+import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import TabItem from "./TabItem";
-import CSuccess from "../../../../../../../classes/components/content/invoker/response/CSuccess";
-import CFail from "../../../../../../../classes/components/content/invoker/response/CFail";
-import {API_REQUEST_STATE} from "../../../../../../../utils/constants/app";
-import Loading from "../../../../../app/Loading";
+import CSuccess from "@classes/components/content/invoker/response/CSuccess";
+import CFail from "@classes/components/content/invoker/response/CFail";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import Loading from "@loading";
 
 
 function mapStateToProps(state){

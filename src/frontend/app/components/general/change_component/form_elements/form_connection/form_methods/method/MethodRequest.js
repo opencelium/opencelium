@@ -15,26 +15,26 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {consoleLog, isString} from "../../../../../../../utils/app";
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
+import styles from '@themes/default/general/form_methods.scss';
+import {consoleLog, isString} from "@utils/app";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 
 import theme from "react-toolbox/lib/input/theme.css";
 import {
     STATEMENT_REQUEST,
     STATEMENT_RESPONSE
-} from "../../../../../../../classes/components/content/connection/operator/CStatement";
+} from "@classes/components/content/connection/operator/CStatement";
 import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
-} from "../../../../../../../classes/components/content/invoker/response/CResponse";
-import {CONNECTOR_TO} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CBindingItem from "../../../../../../../classes/components/content/connection/field_binding/CBindingItem";
-import CardText from "../../../../../basic_components/card/CardText";
+} from "@classes/components/content/invoker/response/CResponse";
+import {CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import CBindingItem from "@classes/components/content/connection/field_binding/CBindingItem";
+import CardText from "@basic_components/card/CardText";
 import Endpoint from "./Endpoint";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import {convertFieldNameForBackend} from "../utils";
+import CConnection from "@classes/components/content/connection/CConnection";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import {convertFieldNameForBackend} from "../help";
 import Body from "./Body";
 
 

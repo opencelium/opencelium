@@ -18,17 +18,17 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import { Row, Col } from "react-grid-system";
-import Input from "../../../../../general/basic_components/inputs/Input";
-import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
-import FontIcon from "../../../../../general/basic_components/FontIcon";
-import {getThemeClass} from "../../../../../../utils/app";
+import Input from "@basic_components/inputs/Input";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
+import FontIcon from "@basic_components/FontIcon";
+import {getThemeClass} from "@utils/app";
 import Recipient from "./Recipient";
-import TooltipFontIcon from "../../../../../general/basic_components/tooltips/TooltipFontIcon";
-import {fetchNotificationRecipients} from "../../../../../../actions/schedules/fetch";
-import Loading from "../../../../../general/app/Loading";
-import {API_REQUEST_STATE} from "../../../../../../utils/constants/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {fetchNotificationRecipients} from "@actions/schedules/fetch";
+import Loading from "@loading";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
-import styles from "../../../../../../themes/default/content/schedules/schedules.scss";
+import styles from "@themes/default/content/schedules/schedules.scss";
 import theme from "react-toolbox/lib/input/theme.css";
 
 

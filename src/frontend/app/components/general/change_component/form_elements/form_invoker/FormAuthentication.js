@@ -19,10 +19,10 @@ import { RadioGroup, RadioButton } from 'react-toolbox/lib/radio';
 
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../decorators/FormElement";
-import FontIcon from "../../../basic_components/FontIcon";
-import Input from "../../../basic_components/inputs/Input";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
+import FontIcon from "@basic_components/FontIcon";
+import Input from "@basic_components/inputs/Input";
 
 const types = [
     {value: 'apikey',                label: 'API Key'},

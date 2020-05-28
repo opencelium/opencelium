@@ -14,7 +14,7 @@
  */
 
 
-import {isArray, isString} from "../../../../../utils/app";
+import {isArray, isString} from "@utils/app";
 
 /**
  * Email class as notification type

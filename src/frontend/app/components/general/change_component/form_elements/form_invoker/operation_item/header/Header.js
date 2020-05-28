@@ -15,15 +15,15 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/change_component.scss';
+import styles from '@themes/default/general/change_component.scss';
 import FormSelect from "../../../FormSelect";
-import {isString} from "../../../../../../../utils/app";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import FontIcon from "../../../../../basic_components/FontIcon";
-import {HTTPRequestHeaders} from "../../../../../../../utils/constants/HTTPRequestHeaders";
+import {isString} from "@utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
+import {HTTPRequestHeaders} from "@utils/constants/HTTPRequestHeaders";
 import HeaderValue from "./HeaderValue";
 import HeaderKey from "./HeaderKey";
 

@@ -18,10 +18,10 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import { Row, Visible, Hidden } from "react-grid-system";
 
-import styles from '../../../themes/default/content/my_profile/my_profile.scss';
+import styles from '@themes/default/content/my_profile/my_profile.scss';
 import AvatarArea from "./AvatarArea";
 import TextAreas from "./TextAreas";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

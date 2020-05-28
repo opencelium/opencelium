@@ -19,17 +19,17 @@ import MethodItem from "./method/MethodItem";
 import OperatorItem from "./operator/OperatorItem";
 import CConnectorItem, {
     CONNECTOR_FROM,
-} from "../../../../../../classes/components/content/connection/CConnectorItem";
-import CConnection from "../../../../../../classes/components/content/connection/CConnection";
-import FontIcon from "../../../../basic_components/FontIcon";
-import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
-import CMethodItem from "../../../../../../classes/components/content/connection/method/CMethodItem";
-import COperatorItem from "../../../../../../classes/components/content/connection/operator/COperatorItem";
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import {DEFAULT_COLOR} from "../../../../../../classes/components/content/connection/operator/CStatement";
+} from "@classes/components/content/connection/CConnectorItem";
+import CConnection from "@classes/components/content/connection/CConnection";
+import FontIcon from "@basic_components/FontIcon";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import styles from '@themes/default/general/change_component.scss';
+import {DEFAULT_COLOR} from "@classes/components/content/connection/operator/CStatement";
 
 import Tooltip from 'react-toolbox/lib/tooltip';
-import InputHierarchy from "../../../../basic_components/inputs/input_hierarchy/InputHierarchy";
+import InputHierarchy from "@basic_components/inputs/input_hierarchy/InputHierarchy";
 
 const HistoryColor = (props) => {
     const {color, children, ...restProps} = props;

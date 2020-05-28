@@ -14,7 +14,7 @@
  */
 
 
-import {isEmptyObject, isString} from "../../../../utils/app";
+import {isEmptyObject, isString} from "@utils/app";
 
 export default class CXmlReParent{
     constructor(reElement){

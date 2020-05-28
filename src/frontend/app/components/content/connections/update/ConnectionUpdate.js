@@ -17,21 +17,21 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {checkConnectionTitle} from '../../../../actions/connections/fetch';
-import {fetchConnection} from "../../../../actions/connections/fetch";
-import {updateConnection} from "../../../../actions/connections/update";
-import {addTemplate} from "../../../../actions/templates/add";
-import {fetchConnectors} from '../../../../actions/connectors/fetch';
-import {ConnectionPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import OCTour from "../../../general/basic_components/OCTour";
-import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "../../../../utils/constants/tours";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import CConnection from "../../../../classes/components/content/connection/CConnection";
-import {setFocusById} from "../../../../utils/app";
+import {checkConnectionTitle} from '@actions/connections/fetch';
+import {fetchConnection} from "@actions/connections/fetch";
+import {updateConnection} from "@actions/connections/update";
+import {addTemplate} from "@actions/templates/add";
+import {fetchConnectors} from '@actions/connectors/fetch';
+import {ConnectionPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {INPUTS} from "@utils/constants/inputs";
+import OCTour from "@basic_components/OCTour";
+import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "@utils/constants/tours";
+import {SingleComponent} from "@decorators/SingleComponent";
+import CConnection from "@classes/components/content/connection/CConnection";
+import {setFocusById} from "@utils/app";
 
 
 const connectionPrefixURL = '/connections';

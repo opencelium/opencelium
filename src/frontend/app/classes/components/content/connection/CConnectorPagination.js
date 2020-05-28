@@ -14,7 +14,7 @@
  */
 
 import CConnectorItem from "./CConnectorItem";
-import {isNumber, sortByIndex} from "../../../../utils/app";
+import {isNumber, sortByIndex} from "@utils/app";
 
 const DEFAULT_PAGE_LIMIT = 5;
 /**

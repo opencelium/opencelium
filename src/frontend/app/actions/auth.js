@@ -15,8 +15,8 @@
 
 import Rx from 'rxjs/Rx';
 
-import { AuthAction } from '../utils/actions';
-import {removeAllLS, setLS} from '../utils/LocalStorage';
+import { AuthAction } from '@utils/actions';
+import {removeAllLS, setLS} from '@utils/LocalStorage';
 
 
 /**

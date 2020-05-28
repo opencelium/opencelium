@@ -20,7 +20,7 @@ import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
     ConnectionsAction, SchedulesAction, TemplatesAction, WebHooksAction,
     AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
-} from '../../actions';
+} from '@utils/actions';
 
 
 /**

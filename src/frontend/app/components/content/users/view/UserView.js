@@ -16,13 +16,13 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchUser} from '../../../../actions/users/fetch';
+import {fetchUser} from '@actions/users/fetch';
 import Content from "../../../general/content/Content";
 import UserDetails from "./UserDetails";
 import UserGroup from "./UserGroup";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {permission} from "../../../../decorators/permission";
-import {UserPermissions} from "../../../../utils/constants/permissions";
+import {SingleComponent} from "@decorators/SingleComponent";
+import {permission} from "@decorators/permission";
+import {UserPermissions} from "@utils/constants/permissions";
 
 
 

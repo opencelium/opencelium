@@ -19,14 +19,14 @@ import {withTranslation} from 'react-i18next';
 import Content from "../../general/content/Content";
 import ScheduleAdd from "./ScheduleAdd";
 import ScheduleList from "./schedule_list/ScheduleList";
-import {fetchSchedules, fetchSchedulesCanceled} from '../../../actions/schedules/fetch';
-import {updateScheduleInStore} from '../../../actions/schedules/update';
+import {fetchSchedules, fetchSchedulesCanceled} from '@actions/schedules/fetch';
+import {updateScheduleInStore} from '@actions/schedules/update';
 
-import {permission} from "../../../decorators/permission";
-import {SchedulePermissions} from "../../../utils/constants/permissions";
-import {SCHEDULE_TOURS} from "../../../utils/constants/tours";
-import {tour} from "../../../decorators/tour";
-import {ListComponent} from "../../../decorators/ListComponent";
+import {permission} from "@decorators/permission";
+import {SchedulePermissions} from "@utils/constants/permissions";
+import {SCHEDULE_TOURS} from "@utils/constants/tours";
+import {tour} from "@decorators/tour";
+import {ListComponent} from "@decorators/ListComponent";
 import CurrentSchedules from "./current_schedules/CurrentSchedules";
 
 

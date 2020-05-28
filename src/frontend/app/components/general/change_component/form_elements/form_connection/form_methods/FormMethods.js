@@ -19,14 +19,13 @@ import {connect} from 'react-redux';
 import {Row, Col} from "react-grid-system";
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../../decorators/FormElement";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
 import DropdownMenu from "./dropdown_menu/DropdownMenu";
 import Items from "./Items";
 import Mapping from "./mapping/Mapping";
 
 import AddTemplate from "./AddTemplate";
-import CInvoker from "../../../../../../classes/components/content/invoker/CInvoker";
 
 
 function mapStateToProps(state){

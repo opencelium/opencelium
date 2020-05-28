@@ -15,12 +15,12 @@
 
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
-import Loading from "../components/general/app/Loading";
+import Loading from "@components/general/app/Loading";
 
-import {API_REQUEST_STATE} from "../utils/constants/app";
-import {history} from "../components/App";
-import {checkOCConnection} from "../actions/auth";
-import {logoutUserFulfilled} from "../actions/auth";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {history} from "@components/App";
+import {checkOCConnection} from "@actions/auth";
+import {logoutUserFulfilled} from "@actions/auth";
 
 
 function mapStateToProps(state){

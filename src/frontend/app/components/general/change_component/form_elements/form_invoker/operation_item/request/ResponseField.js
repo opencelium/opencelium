@@ -15,8 +15,8 @@
 
 import React, {Component} from 'react';
 import Body from "../Body";
-import CSuccess from "../../../../../../../classes/components/content/invoker/response/CSuccess";
-import CFail from "../../../../../../../classes/components/content/invoker/response/CFail";
+import CSuccess from "@classes/components/content/invoker/response/CSuccess";
+import CFail from "@classes/components/content/invoker/response/CFail";
 
 
 /**

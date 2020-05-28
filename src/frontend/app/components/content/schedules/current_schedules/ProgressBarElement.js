@@ -15,10 +15,10 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "../../../../utils/app";
-import {shuffle} from "../../../../utils/app";
-import ProgressBar from "../../../general/basic_components/ProgressBar";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import {getThemeClass} from "@utils/app";
+import {shuffle} from "@utils/app";
+import ProgressBar from "@basic_components/ProgressBar";
 
 
 /**

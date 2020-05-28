@@ -18,7 +18,7 @@ import { withRouter } from 'react-router';
 import {Pagination as BootPagination} from 'react-bootstrap';
 
 import { Row } from "react-grid-system";
-import styles from '../../../../themes/default/general/pagination.scss';
+import styles from '@themes/default/general/pagination.scss';
 import PrevPage from "./PrevPage";
 import Pages from "./Pages";
 import NextPage from "./NextPage";

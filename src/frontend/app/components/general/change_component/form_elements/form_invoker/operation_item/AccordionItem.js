@@ -1,18 +1,18 @@
 import React, {Component} from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import Card from "react-bootstrap/Card";
-import {METHOD_TYPE_TEST} from "../../../../../../classes/components/content/invoker/COperation";
+import {METHOD_TYPE_TEST} from "@classes/components/content/invoker/COperation";
 import OperationItem from "./OperationItem";
 
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import formMethodStyles from '../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/change_component.scss';
+import formMethodStyles from '@themes/default/general/form_methods.scss';
 import {
     CONNECTOR_FROM, CONNECTOR_TO,
     INSIDE_ITEM,
     OUTSIDE_ITEM
-} from "../../../../../../classes/components/content/connection/CConnectorItem";
-import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
-import COperatorItem from "../../../../../../classes/components/content/connection/operator/COperatorItem";
+} from "@classes/components/content/connection/CConnectorItem";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 import RequestIcon from "./request/RequestIcon";
 

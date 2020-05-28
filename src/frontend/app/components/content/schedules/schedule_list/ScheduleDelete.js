@@ -16,15 +16,15 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {permission} from "../../../../decorators/permission";
-import {deleteSchedule} from '../../../../actions/schedules/delete';
-import {SchedulePermissions} from "../../../../utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {deleteSchedule} from '@actions/schedules/delete';
+import {SchedulePermissions} from "@utils/constants/permissions";
 import {withTranslation} from "react-i18next";
-import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Confirmation from "../../../general/app/Confirmation";
-import {getThemeClass} from "../../../../utils/app";
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import Loading from "../../../general/app/Loading";
+import {getThemeClass} from "@utils/app";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import Loading from "@loading";
 
 
 function mapStateToProps(state){

@@ -19,7 +19,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import Form from "./Form";
 import Hint from "./Hint";
 import Navigation from "./Navigation";
-import {isNumber, setFocusById} from "../../../utils/app";
+import {isNumber, setFocusById} from "@utils/app";
 import ValidationMessage from "./ValidationMessage";
 import {
     addChangeContentActionNavigation, addFocusDocumentNavigation,
@@ -27,10 +27,10 @@ import {
     addPrevPageChangeEntityKeyNavigation, removeChangeContentActionNavigation, removeFocusDocumentNavigation,
     removeNextPageChangeEntityKeyNavigation,
     removePrevPageChangeEntityKeyNavigation
-} from "../../../utils/key_navigation";
+} from "@utils/key_navigation";
 
-import {isEmptyObject} from '../../../utils/app';
-import {API_REQUEST_STATE} from "../../../utils/constants/app";
+import {isEmptyObject} from '@utils/app';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 /**

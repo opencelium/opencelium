@@ -16,15 +16,15 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchApps, fetchAppsCanceled, checkApp} from '../../../../actions/apps/fetch';
+import {fetchApps, fetchAppsCanceled, checkApp} from '@actions/apps/fetch';
 
 import List from '../../../general/list_of_components/List';
-import {ListComponent} from "../../../../decorators/ListComponent";
-import {AppPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {APP_TOURS} from "../../../../utils/constants/tours";
-import {tour} from "../../../../decorators/tour";
-import {APP_STATUS_DOWN, APP_STATUS_UP} from "../../../../utils/constants/url";
+import {ListComponent} from "@decorators/ListComponent";
+import {AppPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {APP_TOURS} from "@utils/constants/tours";
+import {tour} from "@decorators/tour";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
 
 
 const prefixUrl = '/apps';

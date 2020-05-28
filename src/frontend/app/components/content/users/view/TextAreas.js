@@ -19,10 +19,10 @@ import {withTranslation} from 'react-i18next';
 import SubHeader from "../../../general/view_component/SubHeader";
 import { Row, Col } from "react-grid-system";
 
-import styles from '../../../../themes/default/content/users/view.scss';
+import styles from '@themes/default/content/users/view.scss';
 
 import {connect} from "react-redux";
-import {getThemeClass} from "../../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -71,7 +71,7 @@ class TextAreas extends Component{
                             <Col xs={6} md={6}>{elem.lang}</Col>
                             <Col xs={6} md={6} className={styles[classNames.user_details_value]}>{elem.value || '-'}</Col>
                         </Row>
-                    )
+                    );
                 })}
             </Col>
         );

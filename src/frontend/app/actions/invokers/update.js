@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { InvokersAction } from '../../utils/actions';
+import { InvokersAction } from '@utils/actions';
 
 
 /**

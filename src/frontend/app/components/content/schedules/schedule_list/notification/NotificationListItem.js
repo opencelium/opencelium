@@ -17,22 +17,22 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
-import TooltipFontIcon from "../../../../general/basic_components/tooltips/TooltipFontIcon";
-import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
-import {getThemeClass, setFocusById} from "../../../../../utils/app";
-import {fetchScheduleNotification} from "../../../../../actions/schedules/fetch";
-import {updateScheduleNotification} from "../../../../../actions/schedules/update";
-import {deleteScheduleNotification} from "../../../../../actions/schedules/delete";
-import Dialog from "../../../../general/basic_components/Dialog";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
+import {getThemeClass, setFocusById} from "@utils/app";
+import {fetchScheduleNotification} from "@actions/schedules/fetch";
+import {updateScheduleNotification} from "@actions/schedules/update";
+import {deleteScheduleNotification} from "@actions/schedules/delete";
+import Dialog from "@basic_components/Dialog";
 import NotificationChange from "./NotificationChange";
 import Confirmation from "../../../../general/app/Confirmation";
-import {validateChangeNotification} from "../../../../../validations/schedules";
-import ValidationMessage from "../../../../general/change_component/ValidationMessage";
+import {validateChangeNotification} from "@validations/schedules";
+import ValidationMessage from "@change_component/ValidationMessage";
 
-import styles from "../../../../../themes/default/content/schedules/schedules.scss";
-import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
-import Loading from "../../../../general/app/Loading";
-import CSchedule from "../../../../../classes/components/content/schedule/CSchedule";
+import styles from "@themes/default/content/schedules/schedules.scss";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import Loading from "@loading";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
 
 
 function mapStateToProps(state){

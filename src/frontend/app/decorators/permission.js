@@ -15,8 +15,8 @@
 
 import React, { Component } from 'react';
 
-import NoPermissions from '../components/general/app/NoPermission';
-import {ErrorPermissions} from "../utils/constants/errors";
+import NoPermissions from '@components/general/app/NoPermission';
+import {ErrorPermissions} from "@utils/constants/errors";
 
 /**
  * check the component on the permission

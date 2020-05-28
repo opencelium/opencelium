@@ -16,15 +16,15 @@
 import React, {Suspense} from 'react';
 import ReactDOM from 'react-dom';
 
-import Notification from '../components/general/app/Notification';
+import Notification from '@components/general/app/Notification';
 import {EntitiesWithNotification, NotificationType} from '../utils/constants/notifications/notifications';
 import i18n from "../utils/i18n";
-import {sessionExpired} from "../actions/auth";
+import {sessionExpired} from "@actions/auth";
 import {AuthAction} from "../utils/actions";
 
-import {history} from '../components/App';
+import {history} from '@components/App';
 import {TOKEN_EXPIRED_MESSAGES} from "../utils/app";
-import Loading from "../components/general/app/Loading";
+import Loading from "@components/general/app/Loading";
 
 
 /**

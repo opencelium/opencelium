@@ -16,8 +16,8 @@
 import React, {Component} from 'react';
 import { withRouter } from 'react-router';
 import Pagination from 'react-bootstrap/Pagination';
-import {addNextPageKeyNavigation, removeNextPageKeyNavigation} from '../../../../utils/key_navigation';
-import styles from '../../../../themes/default/general/pagination.scss';
+import {addNextPageKeyNavigation, removeNextPageKeyNavigation} from '@utils/key_navigation';
+import styles from '@themes/default/general/pagination.scss';
 import FontIcon from "../FontIcon";
 
 

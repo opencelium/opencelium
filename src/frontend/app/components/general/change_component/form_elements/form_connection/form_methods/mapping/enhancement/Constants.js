@@ -15,12 +15,12 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 import {Row, Col} from "react-grid-system";
 
-import {isNumber, consoleLog} from '../../../../../../../../utils/app';
+import {isNumber, consoleLog} from '@utils/app';
 
-import styles from '../../../../../../../../themes/default/general/enhancement.scss';
+import styles from '@themes/default/general/enhancement.scss';
 
 
 /**

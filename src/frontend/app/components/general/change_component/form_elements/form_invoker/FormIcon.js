@@ -17,10 +17,10 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../decorators/FormElement";
-import FontIcon from "../../../basic_components/FontIcon";
-import BrowseButton from "../../../basic_components/buttons/BrowseButton";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
+import FontIcon from "@basic_components/FontIcon";
+import BrowseButton from "@basic_components/buttons/BrowseButton";
 
 
 /**

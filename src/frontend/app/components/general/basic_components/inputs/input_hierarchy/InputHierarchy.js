@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 
 import Input from "../Input";
 import Hierarchy from "./Hierarchy";
-import styles from '../../../../../themes/default/general/basic_components.scss';
-import CConnectorItem from "../../../../../classes/components/content/connection/CConnectorItem";
-import {setFocusById, sortByIndex} from "../../../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import {setFocusById, sortByIndex} from "@utils/app";
 import TooltipFontIcon from "../../tooltips/TooltipFontIcon";
-import COperatorItem from "../../../../../classes/components/content/connection/operator/COperatorItem";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 
 
 

@@ -17,19 +17,17 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {addNotificationTemplate} from '../../../../actions/notification_templates/add';
-import {NotificationTemplatePermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {automaticallyShowTour, NOTIFICATION_TEMPLATE_ADD_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
-import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import CNotificationTemplate from "../../../../classes/components/content/schedule/notification/CNotificationTemplate";
-import {setFocusById} from "../../../../utils/app";
-import {NOTIFICATION_TYPE} from "../../../../classes/components/content/schedule/notification/CNotification";
+import {addNotificationTemplate} from '@actions/notification_templates/add';
+import {NotificationTemplatePermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {INPUTS} from "@utils/constants/inputs";
+import {automaticallyShowTour, NOTIFICATION_TEMPLATE_ADD_TOURS} from "@utils/constants/tours";
+import OCTour from "@basic_components/OCTour";
+import {SingleComponent} from "@decorators/SingleComponent";
+import CNotificationTemplate from "@classes/components/content/schedule/notification/CNotificationTemplate";
+import {setFocusById} from "@utils/app";
 
 const notificationTemplatePrefixURL = '/notification_templates';
 

@@ -18,9 +18,9 @@ import PropTypes from 'prop-types';
 import {withTranslation} from "react-i18next";
 import {history} from "../../App";
 
-import {ERROR_TYPE} from "../../../utils/constants/app";
+import {ERROR_TYPE} from "@utils/constants/app";
 import ComponentError from "./ComponentError";
-import {TOKEN_EXPIRED_MESSAGES} from "../../../utils/app";
+import {TOKEN_EXPIRED_MESSAGES} from "@utils/app";
 
 
 /**

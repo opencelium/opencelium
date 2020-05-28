@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, isString} from "../../../../../utils/app";
+import {consoleLog, isId, isString} from "@utils/app";
 
 
 /**

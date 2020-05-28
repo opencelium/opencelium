@@ -17,8 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import theme from "react-toolbox/lib/tooltip/theme.css";
-import {getThemeClass} from "../../../../utils/app";
-import styles from '../../../../themes/default/general/basic_components.scss';
+import {getThemeClass} from "@utils/app";
+import styles from '@themes/default/general/basic_components.scss';
 
 
 /**

@@ -23,12 +23,12 @@ import Header from "./header/Header";
 import Body from "./Body";
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import CInvoker from "../../../../../../classes/components/content/invoker/CInvoker";
-import COperation from "../../../../../../classes/components/content/invoker/COperation";
+import CInvoker from "@classes/components/content/invoker/CInvoker";
+import COperation from "@classes/components/content/invoker/COperation";
 import Status from "./Status";
 
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import {METHOD_TYPES} from "../../../../../../classes/components/content/invoker/request/CRequest";
+import styles from '@themes/default/general/change_component.scss';
+import {METHOD_TYPES} from "@classes/components/content/invoker/request/CRequest";
 
 class OperationItem extends Component{
 

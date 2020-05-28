@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, sortByIndex, subArrayToString} from "../../../../utils/app";
+import {consoleLog, isId, sortByIndex, subArrayToString} from "@utils/app";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";

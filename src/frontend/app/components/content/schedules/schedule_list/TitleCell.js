@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {TableCell} from 'react-toolbox/lib/table';
 import WebHook from "./WebHook";
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
+import styles from '@themes/default/content/schedules/schedules.scss';
 import {EMPHASIZE_DURATION_ANIMATION} from "./ScheduleList";
 
 

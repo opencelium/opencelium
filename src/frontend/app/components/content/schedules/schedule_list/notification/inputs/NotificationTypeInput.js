@@ -17,13 +17,13 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import FontIcon from "../../../../../general/basic_components/FontIcon";
-import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
-import OCSelect from "../../../../../general/basic_components/inputs/Select";
-import {getThemeClass} from "../../../../../../utils/app";
+import FontIcon from "@basic_components/FontIcon";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
+import OCSelect from "@basic_components/inputs/Select";
+import {getThemeClass} from "@utils/app";
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
+import styles from '@themes/default/content/schedules/schedules.scss';
 
 
 function mapStateToProps(state){

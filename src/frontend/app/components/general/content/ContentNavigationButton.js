@@ -20,12 +20,12 @@ import { withRouter } from 'react-router';
 
 import {Row, Col} from 'react-grid-system';
 
-import styles from '../../../themes/default/general/content.scss';
-import {permission} from "../../../decorators/permission";
-import {formatHtmlId, getThemeClass, isString} from "../../../utils/app";
-import Button from "../basic_components/buttons/Button";
-import {generateLabel} from "../../../utils/app";
-import FontIcon from "../basic_components/FontIcon";
+import styles from '@themes/default/general/content.scss';
+import {permission} from "@decorators/permission";
+import {formatHtmlId, getThemeClass, isString} from "@utils/app";
+import Button from "@basic_components/buttons/Button";
+import {generateLabel} from "@utils/app";
+import FontIcon from "@basic_components/FontIcon";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

@@ -13,26 +13,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import { BrowseButton as ToolboxBrowseButton } from "react-toolbox/lib/button";
-import {formatHtmlId} from "@utils/app";
-
+const hasHMR = process.env.NODE_HMR === 'true';
+const hasSocket = process.env.NODE_SOCKET === 'true';
+const hasBrowserSync = process.env.NODE_BSYNC === 'true';
+const isDev = process.env.NODE_ENV === 'development';
+const isProd = process.env.NODE_ENV === 'production';
 
 /**
- * BrowseButton Component
+ * params from package.json scripts
  */
-class BrowseButton extends Component{
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        const {name, label} = this.props;
-        return (
-            <ToolboxBrowseButton {...this.props} id={formatHtmlId(`button_${name ? name : label}`)}/>
-        );
-    }
-}
-
-export default BrowseButton;
+module.exports = {
+    HAS_HMR: hasHMR,
+    HAS_SOCKET: hasSocket,
+    HAS_BROWSER_SYNC: hasBrowserSync,
+    IS_PROD: isProd,
+    IS_DEV: isDev,
+};

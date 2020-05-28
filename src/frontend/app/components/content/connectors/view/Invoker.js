@@ -19,9 +19,9 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import { Row, Col } from "react-grid-system";
 
-import styles from '../../../../themes/default/content/connectors/view.scss';
+import styles from '@themes/default/content/connectors/view.scss';
 import ConnectorIcon from "../../../icons/ConnectorIcon";
-import {getThemeClass} from "../../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

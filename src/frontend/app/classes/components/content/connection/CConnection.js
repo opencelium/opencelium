@@ -13,11 +13,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId} from "../../../../utils/app";
+import {consoleLog, isId} from "@utils/app";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "./CConnectorItem";
 import CFieldBinding from "./field_binding/CFieldBinding";
 import CTemplate from "./CTemplate";
-import CEnhancement from "./field_binding/CEnhancement";
 import CBindingItem from "./field_binding/CBindingItem";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";

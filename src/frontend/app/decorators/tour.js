@@ -15,11 +15,11 @@
 
 import React, { Component } from 'react';
 
-import OCTour from "../components/general/basic_components/OCTour";
+import OCTour from "@components/general/basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
-import {automaticallyShowTour} from "../utils/constants/tours";
-import {toggleAppTour} from './../actions/auth';
-import store from '../utils/store';
+import {automaticallyShowTour} from "@utils/constants/tours";
+import {toggleAppTour} from '@actions/auth';
+import store from '@utils/store';
 
 
 /**

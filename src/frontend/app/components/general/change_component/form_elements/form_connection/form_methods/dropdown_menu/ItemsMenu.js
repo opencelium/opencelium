@@ -15,11 +15,11 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 import CConnectorItem, {
     CONNECTOR_DEPTH_LIMIT,
     CONNECTOR_TO
-} from "../../../../../../../classes/components/content/connection/CConnectorItem";
+} from "@classes/components/content/connection/CConnectorItem";
 
 
 /**

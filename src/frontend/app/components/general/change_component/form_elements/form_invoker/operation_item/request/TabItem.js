@@ -15,10 +15,10 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import CRequest from "../../../../../../../classes/components/content/invoker/request/CRequest";
+import CRequest from "@classes/components/content/invoker/request/CRequest";
 import Body from "../Body";
 import Header from "../header/Header";
-import CResponse from "../../../../../../../classes/components/content/invoker/response/CResponse";
+import CResponse from "@classes/components/content/invoker/response/CResponse";
 
 
 /**

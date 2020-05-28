@@ -17,18 +17,18 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {updateUserGroup} from '../../../../actions/usergroups/update';
-import {fetchUserGroup} from '../../../../actions/usergroups/fetch';
-import {fetchComponents} from '../../../../actions/components/fetch';
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {permission} from "../../../../decorators/permission";
-import {UserGroupPermissions} from "../../../../utils/constants/permissions";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {USERGROUP_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
-import {isEmptyObject, setFocusById} from "../../../../utils/app";
+import {updateUserGroup} from '@actions/usergroups/update';
+import {fetchUserGroup} from '@actions/usergroups/fetch';
+import {fetchComponents} from '@actions/components/fetch';
+import {SingleComponent} from "@decorators/SingleComponent";
+import {permission} from "@decorators/permission";
+import {UserGroupPermissions} from "@utils/constants/permissions";
+import {INPUTS} from "@utils/constants/inputs";
+import {USERGROUP_TOURS} from "@utils/constants/tours";
+import OCTour from "@basic_components/OCTour";
+import {isEmptyObject, setFocusById} from "@utils/app";
 
 const userGroupPrefixURL = '/usergroups';
 

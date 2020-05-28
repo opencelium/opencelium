@@ -14,7 +14,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import {AuthAction} from '../utils/actions';
+import {AuthAction} from '@utils/actions';
 import {
     loginUserFulfilled, loginUserRejected,
     logoutUserFulfilled,
@@ -22,10 +22,10 @@ import {
     updateDashboardSettingsFulfilled,
     updateThemeFulfilled, toggleAppTourFulfilled, toggleAppTourRejected, updateThemeRejected,
     checkOCConnectionFulfilled, checkOCConnectionRejected,
-} from '../actions/auth';
+} from '@actions/auth';
 
-import {doRequest} from '../utils/auth';
-import {setLS} from "../utils/LocalStorage";
+import {doRequest} from '@utils/auth';
+import {setLS} from "@utils/LocalStorage";
 
 
 /**

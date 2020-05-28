@@ -13,22 +13,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {WebHooksAction} from '../utils/actions';
+import {WebHooksAction} from '@utils/actions';
 
 import {
     addWebHookFulfilled, addWebHookRejected,
-} from '../actions/webhooks/add';
+} from '@actions/webhooks/add';
 import {
     updateWebHookFulfilled, updateWebHookRejected,
-} from '../actions/webhooks/update';
+} from '@actions/webhooks/update';
 import {
     deleteWebHookFulfilled, deleteWebHookRejected,
-} from '../actions/webhooks/delete';
-import {doRequest} from "../utils/auth";
+} from '@actions/webhooks/delete';
+import {doRequest} from "@utils/auth";
 
 import {
     validateAddWebHook, validateUpdateWebHook, validateDeleteWebHook,
-} from "../validations/webhooks";
+} from "@validations/webhooks";
 
 
 /**

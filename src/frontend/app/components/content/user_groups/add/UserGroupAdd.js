@@ -17,20 +17,20 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {addUserGroup} from '../../../../actions/usergroups/add';
-import {fetchComponents} from '../../../../actions/components/fetch';
-import Loading from "../../../general/app/Loading";
-import {permission} from "../../../../decorators/permission";
-import {UserGroupPermissions} from "../../../../utils/constants/permissions";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {automaticallyShowTour, USERGROUP_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
+import {addUserGroup} from '@actions/usergroups/add';
+import {fetchComponents} from '@actions/components/fetch';
+import Loading from "@loading";
+import {permission} from "@decorators/permission";
+import {UserGroupPermissions} from "@utils/constants/permissions";
+import {INPUTS} from "@utils/constants/inputs";
+import {automaticallyShowTour, USERGROUP_TOURS} from "@utils/constants/tours";
+import OCTour from "@basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
-import {API_REQUEST_STATE} from "../../../../utils/constants/app";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {setFocusById, isEmptyObject} from "../../../../utils/app";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {SingleComponent} from "@decorators/SingleComponent";
+import {setFocusById, isEmptyObject} from "@utils/app";
 
 const userGroupPrefixURL = '/usergroups';
 

@@ -13,11 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AppAction} from '../utils/actions';
+import {AppAction} from '@utils/actions';
 import {
     addErrorTicketFulfilled, addErrorTicketRejected
-} from '../actions/app';
-import {doRequest} from "../utils/auth";
+} from '@actions/app';
+import {doRequest} from "@utils/auth";
 
 
 /**

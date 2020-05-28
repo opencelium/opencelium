@@ -15,12 +15,12 @@
 
 import React, { Component }  from 'react';
 
-import styles from '../../../themes/default/general/app.scss';
-import CancelLoadingButton from "../basic_components/CancelLoadingButton";
-import {consoleError, getThemeClass} from "../../../utils/app";
-import {LoadingComponentError} from "../../../utils/constants/errors";
+import styles from '@themes/default/general/app.scss';
+import CancelLoadingButton from "@basic_components/CancelLoadingButton";
+import {consoleError, getThemeClass} from "@utils/app";
+import {LoadingComponentError} from "@utils/constants/errors";
 import ComponentError from "./ComponentError";
-import {ERROR_TYPE} from "../../../utils/constants/app";
+import {ERROR_TYPE} from "@utils/constants/app";
 import {Spinner} from "reactstrap";
 
 

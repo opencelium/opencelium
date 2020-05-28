@@ -13,11 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {isEmptyObject, isString, isArray, isObject} from "../../../../../utils/app";
+import {isEmptyObject, isString, isArray, isObject} from "@utils/app";
 import {
     convertHeaderFormatToObject,
     parseHeader
-} from "../../../../../components/general/change_component/form_elements/form_connection/form_methods/utils";
+} from "@change_component/form_elements/form_connection/form_methods/help";
 export const METHOD_TYPES = [
     {value: 'POST', label: 'POST'},
     {value: 'GET', label: 'GET'},

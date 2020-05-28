@@ -14,12 +14,12 @@
  */
 
 import React, { Component } from 'react';
-import RejectedRequest from "../components/general/app/RejectedRequest";
-import Loading from "../components/general/app/Loading";
-import PageNotFound from "../components/general/app/PageNotFound";
+import RejectedRequest from "@components/general/app/RejectedRequest";
+import Loading from "@components/general/app/Loading";
+import PageNotFound from "@components/general/app/PageNotFound";
 
-import {capitalize, consoleLog, isEmptyObject} from '../utils/app';
-import {API_REQUEST_STATE} from "../utils/constants/app";
+import {capitalize, consoleLog, isEmptyObject} from '@utils/app';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 /**

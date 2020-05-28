@@ -18,12 +18,12 @@ import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import { Row, Col } from "react-grid-system";
 
-import styles from '../../../../themes/default/content/users/view.scss';
+import styles from '@themes/default/content/users/view.scss';
 import UserPhotoIcon from "../../../icons/UserPhotoIcon";
 
 import {connect} from "react-redux";
-import {getThemeClass} from "../../../../utils/app";
-import FontIcon from "../../../general/basic_components/FontIcon";
+import {getThemeClass} from "@utils/app";
+import FontIcon from "@basic_components/FontIcon";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

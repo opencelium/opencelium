@@ -15,10 +15,10 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {history} from '../../../components/App';
+import {history} from '@components/App';
 
-import styles from '../../../themes/default/general/content.scss';
-import {getThemeClass} from "../../../utils/app";
+import styles from '@themes/default/general/content.scss';
+import {getThemeClass} from "@utils/app";
 import HelpIcon from "../app/HelpIcon";
 
 
