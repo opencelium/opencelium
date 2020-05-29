@@ -1,14 +1,16 @@
 {
-  "name": "connection",
-  "version": "0.1.0",
-  "description": "",
-  "main": "app/index.js",
+  "name": "opencelium",
+  "version": "1.1.0",
+  "description": "OpenSource API-Hub",
+  "private": true,
   "dependencies": {
     "autoprefixer": "^9.6.1",
     "body-scroll-lock": "^2.6.1",
     "bootstrap": "^4.3.1",
     "chroma-js": "^2.0.2",
-    "clean-webpack-plugin": "^1.0.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "eslint-loader": "^4.0.2",
+    "express": "^4.17.1",
     "fine-uploader": "^5.14.5",
     "fine-uploader-wrappers": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
@@ -30,7 +32,7 @@
     "react-ace": "^6.4.0",
     "react-bootstrap": "^1.0.0-beta.11",
     "react-contenteditable": "^3.3.2",
-    "react-dom": "^16.8.3",
+    "react-dom": "npm:@hot-loader/react-dom",
     "react-favicon": "^0.0.18",
     "react-grid-system": "^4.4.2",
     "react-i18next": "v10.0.0",
@@ -108,7 +110,8 @@
     "babel-register": "^6.18.0",
     "browser-sync": "^2.26.3",
     "browser-sync-webpack-plugin": "^2.2.2",
-    "cross-env": "^5.2.0",
+    "copy-webpack-plugin": "^6.0.1",
+    "cross-env": "^7.0.2",
     "css-loader": "2.1.0",
     "css-modules-require-hook": "^4.0.5",
     "enzyme": "^2.7.1",
@@ -133,7 +136,7 @@
     "postcss-reporter": "^3.0.0",
     "postcss-scss": "^2.0.0",
     "react-css-modules": "^3.7.10",
-    "react-hot-loader": "^4.7.1",
+    "react-hot-loader": "^4.12.21",
     "react-style-proptype": "^2.0.1",
     "react-test-renderer": "^16.13.1",
     "redux-devtools": "^3.5.0",
@@ -144,6 +147,7 @@
     "resolve-url-loader": "^1.6.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.1",
+    "terser-webpack-plugin": "^3.0.2",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3",
     "webpack-dev-middleware": "^3.7.0",
@@ -153,12 +157,16 @@
     "webpack-stream": "5.2.1"
   },
   "scripts": {
-    "start": "node server.production.js --env.production",
-    "start_dev": "node server.development.js --env.development",
+    "start_dev": "cross-env NODE_ENV=development NODE_HMR=true NODE_SOCKET=true NODE_BSYNC=true node dev_server.js --mode development",
+    "start_dev_bsync": "cross-env NODE_ENV=development NODE_HMR=true NODE_SOCKET=true NODE_BSYNC=true node dev_server.js --mode development",
+    "start_prod": "cross-env NODE_ENV=production NODE_SOCKET=true node dev_server.js --mode production",
+    "build_dev": "cross-env NODE_ENV=development webpack --mode development",
+    "build_prod": "cross-env NODE_ENV=production webpack --mode production",
+    "start_prod_server": "node prod_server.js",
+
     "start_mock": "node json-server.js",
     "watch:test": "node_modules/.bin/jest --watch --no-watchman",
-    "test": "node_modules/.bin/jest",
-    "build": "webpack --config webpack.config.build.js --entry ./app/index.js"
+    "test": "node_modules/.bin/jest"
   },
   "jest": {
     "moduleNameMapper": {
@@ -170,8 +178,8 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://bitbucket.org/becon_gmbh/opencelium/src/prod/"
   },
-  "author": "becon",
+  "author": "becon GmbH",
   "license": "becon"
 }

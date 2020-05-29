@@ -14,7 +14,7 @@
  */
 
 import CConnectorItem from "./CConnectorItem";
-import {isNumber, sortByIndex} from "../../../../utils/app";
+import {isNumber, sortByIndex} from "@utils/app";
 
 const DEFAULT_PAGE_LIMIT = 5;
 /**
@@ -29,9 +29,9 @@ export default class CConnectorPagination{
         this._allItems = [];
         this._pageAmount = 1;
         this._currentItems = [];
-        this.load();
         this._currentPageNumber = 0;
         this._limit = DEFAULT_PAGE_LIMIT;
+        this.load();
     }
 
     load(settings = {}){
@@ -182,5 +182,9 @@ export default class CConnectorPagination{
 
     get currentItems(){
         return this._currentItems;
+    }
+
+    get allItems(){
+        return this._allItems;
     }
 }

@@ -15,17 +15,16 @@
 
 
 
-import {isArray, isObject, isString} from "../../../../../../utils/app";
+import {isArray, isObject, isString} from "@utils/app";
+import {
+    FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
+    FIELD_TYPE_STRING
+} from "@classes/components/content/connection/method/CMethodItem";
 
 /**
  * constants from backend
  */
 export const ARRAY_SIGN = '[]';
-export const FIELD_TYPE_RESPONSE = 'response';
-export const FIELD_TYPE_REQUEST = 'request';
-export const FIELD_TYPE_ARRAY = 'array';
-export const FIELD_TYPE_OBJECT = 'object';
-export const FIELD_TYPE_STRING = 'string';
 
 
 /**
@@ -55,13 +54,6 @@ export function markFieldNameAsArray(fieldType, name){
     } else{
         return name;
     }
-}
-
-/**
- * to check param is array
- */
-export function checkIfParamIsArray(param){
-    return param.name.slice(-2) === ARRAY_SIGN;
 }
 
 export function convertFieldNameForBackend(invokerBody, fieldName, arrayCanBeEmpty = false){

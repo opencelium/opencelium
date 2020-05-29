@@ -16,10 +16,10 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../decorators/FormElement";
-import OCSelect from "../../basic_components/inputs/Select";
-import FontIcon from "../../basic_components/FontIcon";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
+import OCSelect from "@basic_components/inputs/Select";
+import FontIcon from "@basic_components/FontIcon";
 
 
 /**

@@ -16,8 +16,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {permission} from "../../../decorators/permission";
-import {formatHtmlId} from "../../../utils/app";
+import {permission} from "@decorators/permission";
+import {formatHtmlId} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

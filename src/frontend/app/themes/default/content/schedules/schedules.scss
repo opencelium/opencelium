@@ -381,12 +381,13 @@
   .radio_group{
     height: 25px;
   }
-  .first_radio_button{
-    margin-right: 20px;
-  }
   .radio_button{
     float: left;
     margin-bottom: 10px !important;
+    margin-right: 20px;
+  }
+  .radio_text{
+    padding-left: 5px;
   }
 }
 

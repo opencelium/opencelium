@@ -17,24 +17,24 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 import ItemsMenu from "./ItemsMenu";
 import Select from 'react-select';
 import theme from "react-toolbox/lib/input/theme.css";
-import Button from "../../../../../basic_components/buttons/Button";
+import Button from "@basic_components/buttons/Button";
 import Dropdown from "./Dropdown";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
+import CConnection from "@classes/components/content/connection/CConnection";
 import CConnectorItem, {
     CONNECTOR_DEPTH_LIMIT,
     CONNECTOR_FROM, CONNECTOR_TO,
     INSIDE_ITEM, METHOD_ITEM, OPERATOR_ITEM,
     OUTSIDE_ITEM
-} from "../../../../../../../classes/components/content/connection/CConnectorItem";
+} from "@classes/components/content/connection/CConnectorItem";
 import {
     IF_OPERATOR,
     LOOP_OPERATOR
-} from "../../../../../../../classes/components/content/connection/operator/COperatorItem";
-import FontIcon from "../../../../../basic_components/FontIcon";
+} from "@classes/components/content/connection/operator/COperatorItem";
+import FontIcon from "@basic_components/FontIcon";
 
 
 function mapStateToProps(state){

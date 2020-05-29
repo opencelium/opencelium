@@ -16,12 +16,12 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '../../../themes/default/general/change_component.scss';
-import {getThemeClass} from "../../../utils/app";
-import Button from "../basic_components/buttons/Button";
-import Loading from "../app/Loading";
-import {API_REQUEST_STATE} from "../../../utils/constants/app";
-import FontIcon from "../basic_components/FontIcon";
+import styles from '@themes/default/general/change_component.scss';
+import {getThemeClass} from "@utils/app";
+import Button from "@basic_components/buttons/Button";
+import Loading from "@loading";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import FontIcon from "@basic_components/FontIcon";
 
 
 /**

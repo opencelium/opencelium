@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import CMethodItem from "../../../../../classes/components/content/connection/method/CMethodItem";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 import FontIcon from "../../FontIcon";
-import COperatorItem from "../../../../../classes/components/content/connection/operator/COperatorItem";
-import styles from '../../../../../themes/default/general/basic_components.scss';
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import styles from '@themes/default/general/basic_components.scss';
 import TooltipFontIcon from "../../tooltips/TooltipFontIcon";
 
 

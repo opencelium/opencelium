@@ -15,19 +15,19 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 
 import Confirmation from "../../../../../app/Confirmation";
 import chroma from 'chroma-js';
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
+import CConnection from "@classes/components/content/connection/CConnection";
 import CConnectorItem, {
     CONNECTOR_FROM,
     CONNECTOR_TO
-} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
-import FontIcon from "../../../../../basic_components/FontIcon";
-import CardTitle from "../../../../../basic_components/card/CardTitle";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
+} from "@classes/components/content/connection/CConnectorItem";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+import FontIcon from "@basic_components/FontIcon";
+import CardTitle from "@basic_components/card/CardTitle";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 /**

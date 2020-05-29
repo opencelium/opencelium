@@ -16,8 +16,8 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {Input as ToolboxInput} from "react-toolbox/lib/input";
-import styles from '../../../../themes/default/general/basic_components.scss';
-import {formatHtmlId, getThemeClass} from "../../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {formatHtmlId, getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

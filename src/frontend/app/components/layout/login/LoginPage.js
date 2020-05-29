@@ -16,10 +16,10 @@
 import React, {Component, Suspense} from 'react';
 import {connect} from 'react-redux';
 
-import Loading from '../../general/app/Loading';
+import Loading from '@loading';
 import Login from "./Login";
 
-import styles from '../../../themes/default/layout/login.scss';
+import styles from '@themes/default/layout/login.scss';
 
 
 function mapStateToProps(state){

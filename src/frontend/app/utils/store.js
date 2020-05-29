@@ -25,7 +25,7 @@ import { combinedReducers } from './reducers';
 import epics from './epics';
 
 import {responsiveStoreEnhancer} from 'redux-responsive';
-import {AppSettings} from "./constants/app";
+import {AppSettings, hasHMR} from "./constants/app";
 
 
 const initialEnhancers  = [responsiveStoreEnhancer];
@@ -55,7 +55,6 @@ let initialMiddleware = [];
  */
 const epicMiddleware = createEpicMiddleware(epics);
 let middleware = [errorHandlingMiddleware, notificationMiddleware, resourceMappingMiddleware, frontBackMappingMiddleware, epicMiddleware];
-
 if (AppSettings.reduxHasLogs){
     initialMiddleware = [createLogger(loggerOptions)];
 }
@@ -73,5 +72,8 @@ const store = createStore(
         ...enhancers
     )
 );
+if (hasHMR && module.hot) {
+    module.hot.accept('./reducers', () => store.replaceReducer(combinedReducers))
+}
 
 export default store;

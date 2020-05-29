@@ -14,22 +14,22 @@
  */
 
 import Rx from 'rxjs/Rx';
-import {NotificationTemplatesAction} from '../utils/actions';
+import {NotificationTemplatesAction} from '@utils/actions';
 import {
     fetchNotificationTemplatesFulfilled,fetchNotificationTemplatesRejected,
     fetchNotificationTemplateFulfilled, fetchNotificationTemplateRejected,
-} from '../actions/notification_templates/fetch';
+} from '@actions/notification_templates/fetch';
 import {
     addNotificationTemplateFulfilled, addNotificationTemplateRejected,
-} from '../actions/notification_templates/add';
+} from '@actions/notification_templates/add';
 import {
     updateNotificationTemplateFulfilled, updateNotificationTemplateRejected,
-} from '../actions/notification_templates/update';
+} from '@actions/notification_templates/update';
 import {
     deleteNotificationTemplateFulfilled, deleteNotificationTemplateRejected,
-} from '../actions/notification_templates/delete';
+} from '@actions/notification_templates/delete';
 
-import {doRequest} from "../utils/auth";
+import {doRequest} from "@utils/auth";
 
 
 /**

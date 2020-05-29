@@ -19,10 +19,10 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import { Row, Col } from "react-grid-system";
 
-import styles from '../../../themes/default/content/my_profile/my_profile.scss';
+import styles from '@themes/default/content/my_profile/my_profile.scss';
 import UserPhotoIcon from "../../icons/UserPhotoIcon";
-import {getThemeClass} from "../../../utils/app";
-import FontIcon from "../../general/basic_components/FontIcon";
+import {getThemeClass} from "@utils/app";
+import FontIcon from "@basic_components/FontIcon";
 
 
 function mapStateToProps(state){

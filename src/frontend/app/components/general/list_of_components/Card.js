@@ -18,16 +18,16 @@ import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import { withRouter } from 'react-router';
 
-import {formatHtmlId, generateLabel} from "../../../utils/app";
-import {switchUserListKeyNavigation} from "../../../utils/key_navigation";
+import {formatHtmlId, generateLabel} from "@utils/app";
+import {switchUserListKeyNavigation} from "@utils/key_navigation";
 import Confirmation from "../app/Confirmation";
 import CardButton from "./CardButton";
-import {getThemeClass} from "../../../utils/app";
-import Loading from "../app/Loading";
+import {getThemeClass} from "@utils/app";
+import Loading from "@loading";
 import CardIcon from "../../icons/CardIcon";
 
-import styles from '../../../themes/default/general/list_of_components.scss';
-import {API_REQUEST_STATE} from "../../../utils/constants/app";
+import styles from '@themes/default/general/list_of_components.scss';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 /**

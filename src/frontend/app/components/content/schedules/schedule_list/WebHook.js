@@ -15,14 +15,14 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {getThemeClass, copyStringToClipboard} from "../../../../utils/app";
+import {getThemeClass, copyStringToClipboard} from "@utils/app";
 
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import TooltipText from "../../../general/basic_components/tooltips/TooltipText";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import TooltipText from "@basic_components/tooltips/TooltipText";
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
-import {copyToClipboardWebHookFulfilled} from "../../../../actions/webhooks/fetch";
-import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
+import {copyToClipboardWebHookFulfilled} from "@actions/webhooks/fetch";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){

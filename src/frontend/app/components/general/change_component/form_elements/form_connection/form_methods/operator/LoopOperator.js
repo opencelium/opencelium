@@ -19,23 +19,21 @@ import Select from 'react-select';
 import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {dotColor} from "../utils";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../../classes/components/content/connection/CConnectorItem";
+import styles from '@themes/default/general/form_methods.scss';
 import {
     DEFAULT_COLOR,
-} from "../../../../../../../classes/components/content/connection/operator/CStatement";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import COperatorItem from "../../../../../../../classes/components/content/connection/operator/COperatorItem";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import SelectSearch from "../../../../../basic_components/inputs/SelectSearch";
+} from "@classes/components/content/connection/operator/CStatement";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import CConnection from "@classes/components/content/connection/CConnection";
+import SelectSearch from "@basic_components/inputs/SelectSearch";
 import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
-} from "../../../../../../../classes/components/content/invoker/response/CResponse";
-import Input from "../../../../../basic_components/inputs/Input";
-import FontIcon from "../../../../../basic_components/FontIcon";
+} from "@classes/components/content/invoker/response/CResponse";
+import Input from "@basic_components/inputs/Input";
+import {dotColor} from "../help";
 
 
 /**

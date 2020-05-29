@@ -13,17 +13,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {TemplatesAction} from '../utils/actions';
+import {TemplatesAction} from '@utils/actions';
 import {
     fetchTemplatesFulfilled, fetchTemplatesRejected,
     exportTemplateFulfilled, exportTemplateRejected,
-} from '../actions/templates/fetch';
+} from '@actions/templates/fetch';
 import {
     addTemplateFulfilled, addTemplateRejected,
     importTemplateFulfilled, importTemplateRejected,
-} from '../actions/templates/add';
-import {deleteTemplateFulfilled, deleteTemplateRejected} from '../actions/templates/delete';
-import {doRequest} from "../utils/auth";
+} from '@actions/templates/add';
+import {deleteTemplateFulfilled, deleteTemplateRejected} from '@actions/templates/delete';
+import {doRequest} from "@utils/auth";
 
 
 /*

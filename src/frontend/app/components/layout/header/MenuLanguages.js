@@ -17,13 +17,13 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
-import {changeLanguage} from "../../../actions/app";
-import {languages} from "../../../utils/constants/languages";
-import {updateAuthUserLanguage} from "../../../actions/auth";
+import {changeLanguage} from "@actions/app";
+import {languages} from "@utils/constants/languages";
+import {updateAuthUserLanguage} from "@actions/auth";
 
-import styles from '../../../themes/default/layout/header.scss';
-import MenuItem from "../../general/basic_components/MenuItem";
-import IconMenu from "../../general/basic_components/IconMenu";
+import styles from '@themes/default/layout/header.scss';
+import MenuItem from "@basic_components/MenuItem";
+import IconMenu from "@basic_components/IconMenu";
 
 function mapStateToProps(state){
     const app = state.get('app');

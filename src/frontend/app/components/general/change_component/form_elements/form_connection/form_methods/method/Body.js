@@ -1,17 +1,17 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ReactJson from 'react-json-view';
-import {isArray, isJsonString, isString, setFocusById, subArrayToString} from "../../../../../../../utils/app";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
+import {isArray, isJsonString, isString, setFocusById, subArrayToString} from "@utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ParamGenerator from "./ParamGenerator";
-import Input from "../../../../../basic_components/inputs/Input";
-import Dialog from "../../../../../basic_components/Dialog";
+import Input from "@basic_components/inputs/Input";
+import Dialog from "@basic_components/Dialog";
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
-import CConnectorItem, {CONNECTOR_FROM} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
+import styles from '@themes/default/general/form_methods.scss';
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+import CConnectorItem, {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
+import CConnection from "@classes/components/content/connection/CConnection";
 import Enhancement from "../mapping/enhancement/Enhancement";
 
 class Body extends Component{

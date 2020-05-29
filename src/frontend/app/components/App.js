@@ -13,18 +13,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'react-hot-loader';
 import React, {Suspense} from 'react';
 import {Provider} from 'react-redux';
 
 import {Router, browserHistory} from 'react-router';
 import {syncHistoryWithStore } from 'react-router-redux';
 
-import {setAuthSettings} from '../utils/auth';
-import store from '../utils/store';
-import i18n from '../utils/i18n';
-import {createRoutes} from '../utils/routes';
-import Loading from "./general/app/Loading";
+import {setAuthSettings} from '@utils/auth';
+import store from '@utils/store';
+import i18n from '@utils/i18n';
+import {createRoutes} from '@utils/routes';
+import Loading from "@loading";
 
 
 /**

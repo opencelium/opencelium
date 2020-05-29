@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
+import styles from '@themes/default/general/change_component.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 

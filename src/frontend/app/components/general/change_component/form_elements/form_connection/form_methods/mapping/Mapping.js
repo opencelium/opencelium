@@ -24,16 +24,17 @@ import {
     DiagramWidget,
 } from "storm-react-diagrams";
 
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {isArray, setFocusById} from "../../../../../../../utils/app";
+import styles from '@themes/default/general/form_methods.scss';
+import {isArray, setFocusById} from "@utils/app";
 import Enhancement from "./enhancement/Enhancement";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import CConnection from "@classes/components/content/connection/CConnection";
+import CBindingItem from "@classes/components/content/connection/field_binding/CBindingItem";
+import Dialog from "@basic_components/Dialog";
 import {
-    FIELD_TYPE_REQUEST, FIELD_TYPE_RESPONSE,
-} from "../utils";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import CBindingItem from "../../../../../../../classes/components/content/connection/field_binding/CBindingItem";
-import Dialog from "../../../../../basic_components/Dialog";
+    STATEMENT_REQUEST,
+    STATEMENT_RESPONSE
+} from "@classes/components/content/connection/operator/CStatement";
 
 
 /**
@@ -95,9 +96,9 @@ class Mapping extends Component{
         let links = port !== null && port.hasOwnProperty('links') ? port.links : [];
         for(let link in links){
             let source = links[link].sourcePort.parent;
-            bindings.push({from: {color: source.color, field: source.name, type: FIELD_TYPE_RESPONSE}, enhancement: null, to: {color: node.color, field: node.name, type: FIELD_TYPE_REQUEST}});
+            bindings.push({from: {color: source.color, field: source.name, type: STATEMENT_RESPONSE}, enhancement: null, to: {color: node.color, field: node.name, type: STATEMENT_REQUEST}});
         }
-        connection.setCurrentFieldBindingTo(CBindingItem.createBindingItem({color: node.color, field: node.name, type: FIELD_TYPE_REQUEST}));
+        connection.setCurrentFieldBindingTo(CBindingItem.createBindingItem({color: node.color, field: node.name, type: STATEMENT_REQUEST}));
         let currentEnhancement = connection.getEnhancementByTo();
         this.setState({
             showEnhancement: !this.state.showEnhancement,

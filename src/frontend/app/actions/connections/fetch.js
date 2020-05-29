@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { ConnectionsAction } from '../../utils/actions';
+import { ConnectionsAction } from '@utils/actions';
 
 
 

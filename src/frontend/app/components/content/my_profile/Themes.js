@@ -18,10 +18,10 @@ import {connect} from 'react-redux';
 import { Row, Col } from "react-grid-system";
 import { RadioGroup, RadioButton } from 'react-toolbox/lib/radio';
 
-import {updateTheme} from './../../../actions/auth';
-import styles from '../../../themes/default/content/my_profile/my_profile.scss';
+import {updateTheme} from '@actions/auth';
+import styles from '@themes/default/content/my_profile/my_profile.scss';
 import SubHeader from "../../general/view_component/SubHeader";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
 
 function mapStateToProps(state){

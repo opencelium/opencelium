@@ -16,10 +16,10 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {TableCell} from 'react-toolbox/lib/table';
-import {convertTimeForSchedulerList, isNumber} from "../../../../utils/app";
-import {NO_DATA} from "../../../../utils/constants/app";
+import {convertTimeForSchedulerList, isNumber} from "@utils/app";
+import {NO_DATA} from "@utils/constants/app";
 
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
+import styles from '@themes/default/content/schedules/schedules.scss';
 import {EMPHASIZE_DURATION_ANIMATION} from "./ScheduleList";
 
 /**

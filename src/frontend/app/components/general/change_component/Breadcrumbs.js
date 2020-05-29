@@ -16,9 +16,9 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '../../../themes/default/general/change_component.scss';
-import {formatHtmlId, getThemeClass} from "../../../utils/app";
-import FontIcon from "../basic_components/FontIcon";
+import styles from '@themes/default/general/change_component.scss';
+import {formatHtmlId, getThemeClass} from "@utils/app";
+import FontIcon from "@basic_components/FontIcon";
 
 
 /**

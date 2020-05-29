@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import HierarchyItem from "./HierarchyItem";
-import styles from '../../../../../themes/default/general/basic_components.scss';
+import styles from '@themes/default/general/basic_components.scss';
 import TooltipFontIcon from "../../tooltips/TooltipFontIcon";
 import {
     addSelectArrowDownKeyNavigation,
     addSelectArrowUpKeyNavigation,
     removeSelectArrowDownKeyNavigation, removeSelectArrowUpKeyNavigation
-} from "../../../../../utils/key_navigation";
+} from "@utils/key_navigation";
 
 
 class Hierarchy extends Component{

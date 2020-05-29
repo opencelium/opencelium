@@ -16,21 +16,21 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchTemplates, exportTemplate} from '../../../../actions/templates/fetch';
-import {deleteTemplate} from '../../../../actions/templates/delete';
+import {fetchTemplates, exportTemplate} from '@actions/templates/fetch';
+import {deleteTemplate} from '@actions/templates/delete';
 
 import List from '../../../general/list_of_components/List';
-import {ListComponent} from "../../../../decorators/ListComponent";
-import {TemplatePermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {tour} from "../../../../decorators/tour";
-import {LIST_TOURS} from "../../../../utils/constants/tours";
+import {ListComponent} from "@decorators/ListComponent";
+import {TemplatePermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {tour} from "@decorators/tour";
+import {LIST_TOURS} from "@utils/constants/tours";
 import TemplateImport from "../import/TemplateImport";
-import styles from '../../../../themes/default/content/templates/list.scss';
-import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
-import Loading from "../../../general/app/Loading";
-import {API_REQUEST_STATE} from "../../../../utils/constants/app";
-import FontIcon from "../../../general/basic_components/FontIcon";
+import styles from '@themes/default/content/templates/list.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import Loading from "@loading";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import FontIcon from "@basic_components/FontIcon";
 
 const prefixUrl = '/templates';
 

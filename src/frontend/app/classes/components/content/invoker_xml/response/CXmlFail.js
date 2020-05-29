@@ -14,8 +14,6 @@
  */
 
 
-import {isArray, isString} from "../../../../../utils/app";
-import {FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT, FIELD_TYPE_STRING} from "../../connection/method/CMethodItem";
 import CXmlReParent from "../CXmlReParent";
 import CFail from "../../invoker/response/CFail";
 

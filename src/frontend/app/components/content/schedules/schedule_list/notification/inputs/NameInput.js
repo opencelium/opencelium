@@ -17,8 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import Input from "../../../../../general/basic_components/inputs/Input";
-import CNotification from "../../../../../../classes/components/content/schedule/notification/CNotification";
+import Input from "@basic_components/inputs/Input";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
 
 
 function mapStateToProps(state){

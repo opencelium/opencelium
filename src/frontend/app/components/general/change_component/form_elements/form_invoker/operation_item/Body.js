@@ -16,15 +16,14 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ReactJson from 'react-json-view';
-import Input from '../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import {isString, isJsonString, setFocusById} from "../../../../../../utils/app";
-import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
-import FontIcon from "../../../../basic_components/FontIcon";
-import Dialog from "../../../../basic_components/Dialog";
-import Header from "./header/Header";
+import styles from '@themes/default/general/change_component.scss';
+import {isString, isJsonString, setFocusById} from "@utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
+import Dialog from "@basic_components/Dialog";
 
 /**
  * Component for Body in Invoker.RequestItem

@@ -14,7 +14,7 @@
  */
 
 import React, {Component} from 'react';
-import {Request} from "../../../utils/constants/app";
+import {Request} from "@utils/constants/app";
 
 
 /**

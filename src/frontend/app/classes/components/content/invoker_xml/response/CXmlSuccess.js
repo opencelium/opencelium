@@ -13,9 +13,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-import {isString, isArray} from "../../../../../utils/app";
-import {FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT, FIELD_TYPE_STRING} from "../../connection/method/CMethodItem";
 import CSuccess from "../../invoker/response/CSuccess";
 import CXmlReParent from "../CXmlReParent";
 

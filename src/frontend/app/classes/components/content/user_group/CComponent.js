@@ -14,7 +14,7 @@
  */
 
 
-import {consoleLog, isId} from "../../../../utils/app";
+import {consoleLog, isId} from "@utils/app";
 
 /**
  * (not used)

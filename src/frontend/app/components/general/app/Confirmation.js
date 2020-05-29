@@ -17,8 +17,8 @@ import React, { Component }  from 'react';
 import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 
-import styles from '../../../themes/default/general/app.scss';
-import Dialog from "../basic_components/Dialog";
+import styles from '@themes/default/general/app.scss';
+import Dialog from "@basic_components/Dialog";
 
 
 /**

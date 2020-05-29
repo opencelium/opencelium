@@ -16,18 +16,18 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import FormInput from "./form_elements/FormInput";
-import ChipList from "../basic_components/ChipList";
+import ChipList from "@basic_components/ChipList";
 import FormSelect from "./form_elements/FormSelect";
 import FormInputFile from "./form_elements/FormInputFile";
 import FormSelectDescription from "./form_elements/FormSelectDescription";
 import FormMultiSelect from "./form_elements/FormMultiSelect";
 import FormPermissionTable from "./form_elements/FormPermissionTable";
 
-import styles from '../../../themes/default/general/change_component.scss';
+import styles from '@themes/default/general/change_component.scss';
 import FormSecretInput from "./form_elements/FormSecretInput";
 import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
 import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
-import {getThemeClass, isString} from "../../../utils/app";
+import {getThemeClass, isString} from "@utils/app";
 import FormMode from "./form_elements/form_connection/FormMode";
 import FormConnectionTitle from "./form_elements/form_connection/FormTitle";
 import FormUserTitle from "./form_elements/FormUserTitle";

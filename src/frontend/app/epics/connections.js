@@ -14,22 +14,22 @@
  */
 
 import Rx from 'rxjs/Rx';
-import {ConnectionsAction} from '../utils/actions';
+import {ConnectionsAction} from '@utils/actions';
 import {
     fetchConnection, fetchConnectionFulfilled, fetchConnectionRejected,
     fetchConnections, fetchConnectionsFulfilled, fetchConnectionsRejected,
     checkConnectionTitleFulfilled, checkConnectionTitleRejected,
     validateConnectionFormMethodsFulfilled, validateConnectionFormMethodsRejected,
     checkNeo4j, checkNeo4jFulfilled, checkNeo4jRejected, sendOperationRequestFulfilled, sendOperationRequestRejected,
-} from '../actions/connections/fetch';
+} from '@actions/connections/fetch';
 import {
     addConnectionFulfilled ,addConnectionRejected,
-} from '../actions/connections/add';
+} from '@actions/connections/add';
 import {updateConnectionFulfilled, updateConnectionRejected,
-} from '../actions/connections/update';
-import {deleteConnectionFulfilled, deleteConnectionRejected} from '../actions/connections/delete';
-import {doRequest} from "../utils/auth";
-import {APP_STATUS_DOWN, APP_STATUS_UP} from "../utils/constants/url";
+} from '@actions/connections/update';
+import {deleteConnectionFulfilled, deleteConnectionRejected} from '@actions/connections/delete';
+import {doRequest} from "@utils/auth";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
 
 
 /**

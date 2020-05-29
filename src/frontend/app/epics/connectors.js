@@ -13,23 +13,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ConnectorsAction} from '../utils/actions';
+import {ConnectorsAction} from '@utils/actions';
 import {
     fetchConnectorFulfilled, fetchConnectorRejected,
     fetchConnectorsFulfilled, fetchConnectorsRejected,
-} from '../actions/connectors/fetch';
+} from '@actions/connectors/fetch';
 import {
     addConnectorFulfilled ,addConnectorRejected,
     addConnectorIcon, addConnectorIconFulfilled, addConnectorIconRejected,
-} from '../actions/connectors/add';
-import {testConnectorFulfilled, testConnectorRejected} from '../actions/connectors/test';
+} from '@actions/connectors/add';
+import {testConnectorFulfilled, testConnectorRejected} from '@actions/connectors/test';
 import {
     updateConnectorFulfilled, updateConnectorRejected,
     updateConnectorIcon, updateConnectorIconFulfilled, updateConnectorIconRejected,
-} from '../actions/connectors/update';
-import {deleteConnectorFulfilled, deleteConnectorRejected} from '../actions/connectors/delete';
-import {doRequest} from "../utils/auth";
-import {addProfilePicture, addUserFulfilled, addUserRejected} from "../actions/users/add";
+} from '@actions/connectors/update';
+import {deleteConnectorFulfilled, deleteConnectorRejected} from '@actions/connectors/delete';
+import {doRequest} from "@utils/auth";
+import {addProfilePicture, addUserFulfilled, addUserRejected} from "@actions/users/add";
 
 
 /**

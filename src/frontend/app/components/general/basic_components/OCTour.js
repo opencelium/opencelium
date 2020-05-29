@@ -19,8 +19,8 @@ import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {connect} from 'react-redux';
 import Tour from 'reactour';
 
-import styles from '../../../themes/default/general/basic_components.scss';
-import {getThemeClass} from "../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

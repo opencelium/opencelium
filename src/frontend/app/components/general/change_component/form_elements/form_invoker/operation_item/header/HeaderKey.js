@@ -2,8 +2,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import FormSelect from "../../../FormSelect";
 
-import styles from '../../../../../../../themes/default/general/change_component.scss';
-import Input from "../../../../../basic_components/inputs/Input";
+import styles from '@themes/default/general/change_component.scss';
+import Input from "@basic_components/inputs/Input";
 
 
 class HeaderKey extends Component{

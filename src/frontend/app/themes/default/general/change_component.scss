@@ -162,6 +162,9 @@
 .form_input_label{
   font-family: $FONT_FAMILY;
 }
+.form_input_readonly_input{
+  margin: 0 65px;
+}
 .form_input_label_for_connection{
   font-family: $FONT_FAMILY;
   top: 0 !important;
@@ -924,7 +927,18 @@
 .items_arrows{
   position: absolute;
   left: -30px;
-  top: 50%;
+  top: 40%;
+}
+.items_navigation_bar{
+  margin: 0 2px;
+  background: #eee;
+  height: 25px;
+  width: 20px;
+}
+.items_navigation_current{
+  transition: height 0.3s;
+  width: 100%;
+  background: #3f51b5;
 }
 .item_arrow_disable{
   cursor: default;

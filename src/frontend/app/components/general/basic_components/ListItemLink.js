@@ -14,8 +14,8 @@
  */
 
 import React from 'react';
-import {generateLabel} from '../../../utils/app';
-import styles from '../../../themes/default/general/basic_components.scss';
+import {generateLabel} from '@utils/app';
+import styles from '@themes/default/general/basic_components.scss';
 
 import { Link } from 'react-router';
 import {NavItem, NavLink} from "reactstrap";

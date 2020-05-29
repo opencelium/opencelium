@@ -17,21 +17,20 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import TooltipFontIcon from "../../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass, setFocusById} from "../../../../../utils/app";
-import Dialog from "../../../../general/basic_components/Dialog";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {getThemeClass, setFocusById} from "@utils/app";
+import Dialog from "@basic_components/Dialog";
 import NotificationChange from "./NotificationChange";
-import {addScheduleNotification} from "../../../../../actions/schedules/add";
-import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
+import {addScheduleNotification} from "@actions/schedules/add";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
 import NotificationListItem from "./NotificationListItem";
-import Input from "../../../../general/basic_components/inputs/Input";
-import {validateChangeNotification} from "../../../../../validations/schedules";
-import ValidationMessage from "../../../../general/change_component/ValidationMessage";
+import Input from "@basic_components/inputs/Input";
+import {validateChangeNotification} from "@validations/schedules";
+import ValidationMessage from "@change_component/ValidationMessage";
 
-import styles from '../../../../../themes/default/content/schedules/schedules.scss';
-import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
-import Loading from "../../../../general/app/Loading";
-import {schedules} from "../../../../../reducers/schedules";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import Loading from "@loading";
 
 
 function mapStateToProps(state){

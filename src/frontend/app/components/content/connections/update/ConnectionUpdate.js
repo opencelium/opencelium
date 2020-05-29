@@ -17,21 +17,21 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {checkConnectionTitle} from '../../../../actions/connections/fetch';
-import {fetchConnection} from "../../../../actions/connections/fetch";
-import {updateConnection} from "../../../../actions/connections/update";
-import {addTemplate} from "../../../../actions/templates/add";
-import {fetchConnectors} from '../../../../actions/connectors/fetch';
-import {ConnectionPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import OCTour from "../../../general/basic_components/OCTour";
-import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "../../../../utils/constants/tours";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import CConnection from "../../../../classes/components/content/connection/CConnection";
-import {setFocusById} from "../../../../utils/app";
+import {checkConnectionTitle} from '@actions/connections/fetch';
+import {fetchConnection} from "@actions/connections/fetch";
+import {updateConnection} from "@actions/connections/update";
+import {addTemplate} from "@actions/templates/add";
+import {fetchConnectors} from '@actions/connectors/fetch';
+import {ConnectionPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {INPUTS} from "@utils/constants/inputs";
+import OCTour from "@basic_components/OCTour";
+import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "@utils/constants/tours";
+import {SingleComponent} from "@decorators/SingleComponent";
+import CConnection from "@classes/components/content/connection/CConnection";
+import {setFocusById} from "@utils/app";
 
 
 const connectionPrefixURL = '/connections';
@@ -134,33 +134,6 @@ class ConnectionUpdate extends Component{
     }
 
     /**
-     * to set methods state
-     */
-    setMethods(value, connectorType){
-        if(value !== '' && connectorType) {
-            let {methods} = this.state;
-            let {connectors} = this.props;
-            let connector = connectors.find(c => c.id === value.value);
-            if(connector) {
-                let invokerName = connector.hasOwnProperty('invoker') ? connector.invoker.name : '';
-                if (invokerName !== '') {
-                    switch (connectorType) {
-                        case 'fromConnector':
-                            methods.connectorList[0].connectorId = value.value;
-                            methods.connectorList[0].name = invokerName;
-                            break;
-                        case 'toConnector':
-                            methods.connectorList[1].connectorId = value.value;
-                            methods.connectorList[1].name = invokerName;
-                            break;
-                    }
-                    this.setState({methods});
-                }
-            }
-        }
-    }
-
-    /**
      * to validate title
      */
     validateTitle(connection){
@@ -174,22 +147,6 @@ class ConnectionUpdate extends Component{
                 this.props.checkConnectionTitle(connection.getObject());
                 return {value: false, message: ''};
             }
-        }
-        return {value: true, message: ''};
-    }
-
-    /**
-     * to validate connector
-     */
-    validateConnectors(connection){
-        const {t} = this.props;
-        if(connection.fromConnector.id === 0){
-            setFocusById('from_connector');
-            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED')};
-        }
-        if(connection.toConnector.id === 0){
-            setFocusById('to_connector');
-            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED')};
         }
         return {value: true, message: ''};
     }

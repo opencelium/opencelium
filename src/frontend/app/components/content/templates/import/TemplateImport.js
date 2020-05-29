@@ -17,13 +17,13 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import Dialog from "react-toolbox/lib/dialog";
 import ContentNavigationButton from "../../../general/content/ContentNavigationButton";
-import FontIcon from "../../../general/basic_components/FontIcon";
-import BrowseButton from "../../../general/basic_components/buttons/BrowseButton";
-import {TemplatePermissions} from "../../../../utils/constants/permissions";
-import {importTemplate} from "../../../../actions/templates/add";
+import FontIcon from "@basic_components/FontIcon";
+import BrowseButton from "@basic_components/buttons/BrowseButton";
+import {TemplatePermissions} from "@utils/constants/permissions";
+import {importTemplate} from "@actions/templates/add";
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../themes/default/content/templates/list.scss';
+import styles from '@themes/default/content/templates/list.scss';
 
 
 function mapStateToProps(state){

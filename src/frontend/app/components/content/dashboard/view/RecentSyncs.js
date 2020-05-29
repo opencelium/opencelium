@@ -17,11 +17,11 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
-import Table from '../../../general/basic_components/table/Table';
+import Table from '@basic_components/table/Table';
 import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
-import styles from '../../../../themes/default/content/dashboard/dashboard.scss';
+import styles from '@themes/default/content/dashboard/dashboard.scss';
 import SubHeader from "../../../general/view_component/SubHeader";
-import {getThemeClass} from "../../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

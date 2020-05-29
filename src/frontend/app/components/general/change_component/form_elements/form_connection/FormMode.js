@@ -18,22 +18,22 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../themes/default/general/form_methods.scss';
-import {FormElement} from "../../../../../decorators/FormElement";
-import Button from "../../../basic_components/buttons/Button";
-import Select from "../../../basic_components/inputs/Select";
+import styles from '@themes/default/general/form_methods.scss';
+import {FormElement} from "@decorators/FormElement";
+import Button from "@basic_components/buttons/Button";
+import Select from "@basic_components/inputs/Select";
 import Confirmation from "../../../app/Confirmation";
-import {fetchTemplates} from "../../../../../actions/templates/fetch";
-import {deleteTemplate} from '../../../../../actions/templates/delete';
-import Loading from "../../../app/Loading";
-import {EXPERT_MODE, TEMPLATE_MODE} from "../../../../../classes/components/content/connection/CTemplate";
-import CConnection from "../../../../../classes/components/content/connection/CConnection";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../classes/components/content/connection/CConnectorItem";
-import FontIcon from "../../../basic_components/FontIcon";
-import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
-import Input from "../../../basic_components/inputs/Input";
+import {fetchTemplates} from "@actions/templates/fetch";
+import {deleteTemplate} from '@actions/templates/delete';
+import Loading from "@loading";
+import {EXPERT_MODE, TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
+import CConnection from "@classes/components/content/connection/CConnection";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import FontIcon from "@basic_components/FontIcon";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import Input from "@basic_components/inputs/Input";
 
-import {isString} from "../../../../../utils/app";
+import {isString} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

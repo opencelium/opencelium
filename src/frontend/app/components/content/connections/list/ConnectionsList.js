@@ -16,15 +16,15 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchConnections, fetchConnectionsCanceled} from '../../../../actions/connections/fetch';
-import {deleteConnection} from '../../../../actions/connections/delete';
+import {fetchConnections, fetchConnectionsCanceled} from '@actions/connections/fetch';
+import {deleteConnection} from '@actions/connections/delete';
 
 import List from '../../../general/list_of_components/List';
-import {ListComponent} from "../../../../decorators/ListComponent";
-import {ConnectionPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {LIST_TOURS} from "../../../../utils/constants/tours";
-import {tour} from "../../../../decorators/tour";
+import {ListComponent} from "@decorators/ListComponent";
+import {ConnectionPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {LIST_TOURS} from "@utils/constants/tours";
+import {tour} from "@decorators/tour";
 
 
 const prefixUrl = '/connections';

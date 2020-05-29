@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog} from "../../../../utils/app";
+import {consoleLog} from "@utils/app";
 
 export const EXPERT_MODE = 'expert';
 export const TEMPLATE_MODE = 'template';

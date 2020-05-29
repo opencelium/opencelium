@@ -17,18 +17,18 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {permission} from "../../../../../decorators/permission";
-import {SchedulePermissions} from "../../../../../utils/constants/permissions";
-import TooltipFontIcon from "../../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "../../../../../utils/app";
+import {permission} from "@decorators/permission";
+import {SchedulePermissions} from "@utils/constants/permissions";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {getThemeClass} from "@utils/app";
 import NotificationList from "./NotificationList";
-import {addScheduleNotification} from "../../../../../actions/schedules/add";
-import {fetchScheduleNotifications} from "../../../../../actions/schedules/fetch";
+import {addScheduleNotification} from "@actions/schedules/add";
+import {fetchScheduleNotifications} from "@actions/schedules/fetch";
 
-import styles from '../../../../../themes/default/content/schedules/schedules.scss';
-import {API_REQUEST_STATE} from "../../../../../utils/constants/app";
-import Loading from "../../../../general/app/Loading";
-import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import Loading from "@loading";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
 
 
 function mapStateToProps(state){
@@ -96,6 +96,9 @@ class ScheduleNotification extends Component{
         }
     }
 
+    /**
+     * to fetch all notifications of schedule
+     */
     fetchNotifications(){
         const {schedule, fetchScheduleNotifications} = this.props;
         fetchScheduleNotifications(schedule.getObject());

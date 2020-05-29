@@ -16,8 +16,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '../../../themes/default/general/change_component.scss';
-import {getThemeClass, isString} from "../../../utils/app";
+import styles from '@themes/default/general/change_component.scss';
+import {getThemeClass, isString} from "@utils/app";
 import HelpIcon from "../app/HelpIcon";
 
 

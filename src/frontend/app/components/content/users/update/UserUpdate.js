@@ -17,18 +17,18 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {fetchUser, checkUserEmail} from '../../../../actions/users/fetch';
-import {updateUser} from '../../../../actions/users/update';
-import {fetchUserGroups} from '../../../../actions/usergroups/fetch';
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {permission} from "../../../../decorators/permission";
-import {UserPermissions} from "../../../../utils/constants/permissions";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {USER_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
-import {setFocusById} from "../../../../utils/app";
+import {fetchUser, checkUserEmail} from '@actions/users/fetch';
+import {updateUser} from '@actions/users/update';
+import {fetchUserGroups} from '@actions/usergroups/fetch';
+import {SingleComponent} from "@decorators/SingleComponent";
+import {permission} from "@decorators/permission";
+import {UserPermissions} from "@utils/constants/permissions";
+import {INPUTS} from "@utils/constants/inputs";
+import {USER_TOURS} from "@utils/constants/tours";
+import OCTour from "@basic_components/OCTour";
+import {setFocusById} from "@utils/app";
 
 
 const prefixUrl = '/users';
