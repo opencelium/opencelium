@@ -88,7 +88,6 @@ class UrlField extends Component{
                             <Button
                                 className={styles.send_button}
                                 title={'Send'}
-                                icon={'send'}
                                 onClick={sendRequest}
                             />
                     }

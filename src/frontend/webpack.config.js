@@ -40,14 +40,14 @@ const cssLoaders = extra => {
         importLoaders: 2,
         camelCase: true,
     };
-    if(NodeParams.IS_DEV){
+    //if(NodeParams.IS_DEV){
         cssLoaderOptions.localIdentName = '[path][name]__[local]--[hash:base64:5]';
-    }
+    /*}
     if(NodeParams.IS_PROD){
         cssLoaderOptions.getLocalIdent = (context, localIdentName, localName) => (
             getScopedName(localName, context.resourcePath)
         );
-    }
+    }*/
     const loaders = [
         {
             loader: 'style-loader'
@@ -154,7 +154,6 @@ const entry = () => {
 };
 
 module.exports = {
-    //context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: entry(),
     output: output(),
