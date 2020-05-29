@@ -56,6 +56,6 @@ module.exports = {
         }
     },
     PRODUCTION_SERVER: {
-        PORT: 5000
+        PORT: 8888
     }
 };
