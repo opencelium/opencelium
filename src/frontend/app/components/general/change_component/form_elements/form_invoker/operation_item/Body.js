@@ -134,7 +134,7 @@ class Body extends Component{
             reactJsonStyle.width = '100%';
         }
         return (
-            <div className={`${forConnection || noIcon ? '' : theme.withIcon} ${theme.input}`}>
+            <div className={`${forConnection || noIcon ? '' : theme.withIcon} ${theme.input}`} style={{paddingBottom: 0}}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <ReactJson
                     name={'body'}

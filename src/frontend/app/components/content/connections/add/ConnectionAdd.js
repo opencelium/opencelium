@@ -255,7 +255,7 @@ class ConnectionAdd extends Component{
                     required: true,
                     source: connectorMenuItems,
                     callback: ::this.setMethods,
-                    connectors: connectors,
+                    connectors,
                     check: (e, entity) => ::this.validateConnectors(e, entity),
                 },
             ],
@@ -267,6 +267,7 @@ class ConnectionAdd extends Component{
                     label: t('ADD.FORM.CONNECTORS'),
                     placeholders: [t('ADD.FORM.CHOSEN_CONNECTOR_FROM'), t('ADD.FORM.CHOSEN_CONNECTOR_TO')],
                     source: connectorMenuItems,
+                    connectors,
                     readOnly: true,
                 },{
                     ...INPUTS.MODE,

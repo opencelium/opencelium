@@ -32,7 +32,7 @@ class RequestIcon extends Component{
 
         this.state = {
             showRequestDialog: false,
-            request: CRequest.createRequest(props.request),
+            request: CRequest.createRequest(this.getRequest()),
             activeTab: 'request',
             startSendingRequest: false,
         };
@@ -50,7 +50,7 @@ class RequestIcon extends Component{
     toggleShowRequestDialog(){
         this.setState({
             showRequestDialog: !this.state.showRequestDialog,
-            request: CRequest.createRequest(this.props.request),
+            request: CRequest.createRequest(this.getRequest()),
         });
     }
 
@@ -72,10 +72,25 @@ class RequestIcon extends Component{
         });
         sendOperationRequest(request.getObject());
     }
+
+    getRequest(){
+        const {request, requestData} = this.props;
+        let endpoint = request.endpoint;
+        let body = JSON.stringify(request.body);
+        if(requestData){
+            for(let param in requestData){
+                endpoint = endpoint.split(`{${param}}`).join(requestData[param]);
+                body = body.split(`{${param}}`).join(requestData[param]);
+            }
+        }
+        request.endpoint = endpoint;
+        request.body = JSON.parse(body);
+        return request;
+    }
     
     render(){
         const {showRequestDialog, request, activeTab, startSendingRequest} = this.state;
-        const {isVisible, response, connectorType} = this.props;
+        const {isVisible, response, connectorType, requestData} = this.props;
         const responseEntity = response.success ? CSuccess.createSuccess(response) : CFail.createFail(response);
         return(
             <div className={connectorType === CONNECTOR_FROM ? styles.connection_request_icon_left : styles.connection_request_icon_right}>
@@ -87,7 +102,7 @@ class RequestIcon extends Component{
                     onOverlayClick={::this.toggleShowRequestDialog}
                     title={'Request'}
                 >
-                    <UrlField request={request} update={::this.updateRequest} sendRequest={::this.sendRequest} isLoading={startSendingRequest}/>
+                    <UrlField requestData={requestData} request={request} update={::this.updateRequest} sendRequest={::this.sendRequest} isLoading={startSendingRequest}/>
                     <Tabs activeKey={activeTab} onSelect={::this.handleTabChange} className={styles.connection_request_tabs}>
                         <Tab title='Request' eventKey={'request'}>
                             <TabItem entity={request} update={::this.updateRequest}/>
