@@ -76,9 +76,12 @@ public class ConnectorExecutor {
         this.statementNodeService = statementNodeService;
     }
 
-    public void start(ConnectorNode connectorNode, Connector connector){
-        this.invoker = invokerService.findByName(connector.getInvoker());
-        List<RequestData> requestData = connectorService.buildRequestData(connector);
+    public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector, String conn){
+        this.invoker = invokerService.findByName(currentConnector.getInvoker());
+        List<RequestData> requestData = connectorService.buildRequestData(currentConnector);
+        List<RequestData> supportRequestData = connectorService.buildRequestData(supportConnector);
+        executionContainer.setConn(conn);
+        executionContainer.setSupportRequestData(supportRequestData);
         executionContainer.setRequestData(requestData);
         executionContainer.setLoopIndex(new HashMap<>());
         executeMethod(connectorNode.getStartMethod());
@@ -296,30 +299,13 @@ public class ConnectorExecutor {
     public String buildUrl(MethodNode methodNode){
         String endpoint = methodNode.getRequestNode().getEndpoint();
 
-        // replace from request data
-        for (RequestData data : executionContainer.getRequestData()) {
-            String field = "{" + data.getField() + "}";// TODO: should be regular expression
-            if (endpoint.contains(field)){
-                endpoint = endpoint.replace(field,data.getValue());
-            }
-        }
-
-        String refRegex = "\\{%(.*?)%\\}";
+        String requiredField;
+        String refRegex = "\\{(.*?)\\}";
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(endpoint);
-
-        List<String> refParts = new ArrayList<>();
-        while (matcher.find()){
-            refParts.add(matcher.group());
+        if(matcher.find()) {
+            endpoint = replaceRefValue(endpoint);
         }
-
-        for (String part : refParts) {
-            String ref = part.replace("{%", "").replace("%}", "");
-            String value = (String) executionContainer.getValueFromResponseData(ref);
-            endpoint = endpoint.replace(part, value);
-         }
-
-//        endpoint = endpoint.replace(" ", "%20"); // In OpenMS url could name with whitespace
         return endpoint;
     }
 
@@ -343,28 +329,46 @@ public class ConnectorExecutor {
         final Map<String, String> header = functionInvoker.getRequest().getHeader();
         Map<String, String> headerItem = new HashMap<>();
 
+
         header.forEach((k,v) -> {
-            String requiredField;
-            if (v.contains("{") && v.contains("}")){
-                String curlyValue = "";
-                for (RequestData data : executionContainer.getRequestData()) {
-                    String field = "{" + data.getField() + "}";// TODO: should be regular expression
-                    curlyValue = v;
-                    if (v.contains(field)){
-                        curlyValue = curlyValue.replace(field,data.getValue());
-                    }
-                }
-                requiredField = curlyValue;
-//                String value = executionContainer.getRequestData().stream()
-//                        .filter(r -> r.getField().equals(requiredField))
-//                        .map(RequestData::getValue).findFirst().get();
-                headerItem.put(k, requiredField);
+            String refRegex = "\\{(.*?)\\}";
+            Pattern pattern = Pattern.compile(refRegex);
+            Matcher matcher = pattern.matcher(v);
+            if(matcher.find()) {
+                String exp = replaceRefValue(v);
+                headerItem.put(k, exp);
                 return;
             }
             headerItem.put(k, v);
         });
         httpHeaders.setAll(headerItem);
         return httpHeaders;
+    }
+
+    private String replaceRefValue(String exp) {
+        String result = exp;
+        String refRegex = "\\{(.*?)\\}";
+        String refResRegex = "\\{%(.*?)%\\}";
+        Pattern pattern = Pattern.compile(refRegex);
+        Matcher matcher = pattern.matcher(exp);
+        List<String> refParts = new ArrayList<>();
+        while (matcher.find()){
+            refParts.add(matcher.group());
+        }
+
+        for (String pointer : refParts) {
+            if (pointer.matches(refResRegex)) {
+                String ref = pointer.replace("{%", "").replace("%}", "");
+                String value = (String) executionContainer.getValueFromResponseData(ref);
+                result = result.replace(pointer, value);
+            } else {
+                // replace from request data
+                String v = executionContainer.getValueFromRequestData(pointer);
+                result = result.replace(pointer, v);
+            }
+        }
+
+        return result;
     }
 
     private boolean responseHasError(ResponseEntity<String> responseEntity){
@@ -384,6 +388,7 @@ public class ConnectorExecutor {
 
             // replace from request_data
             if ((f.getValue() != null) && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
+
                 item.put (f.getName(), executionContainer.getValueFromRequestData(f.getValue()));
                 return;
             }
