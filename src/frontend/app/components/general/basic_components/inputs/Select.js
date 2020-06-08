@@ -63,6 +63,11 @@ class OCSelect extends Component{
                             padding: '2px 0',
                         };
                     },
+                    menu: (provided) => ({
+                        ...provided,
+                        zIndex: 999,
+                        color: 'black'
+                    })
                 }}
             />
         );

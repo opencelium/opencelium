@@ -196,6 +196,7 @@ class ConnectionUpdate extends Component{
                     label: t('UPDATE.FORM.CONNECTORS'),
                     placeholders: [t('UPDATE.FORM.CHOSEN_CONNECTOR_FROM'), t('UPDATE.FORM.CHOSEN_CONNECTOR_TO')],
                     source: connectorMenuItems,
+                    connectors,
                     readOnly: true,
                 },
             ],
@@ -207,6 +208,7 @@ class ConnectionUpdate extends Component{
                     label: t('UPDATE.FORM.CONNECTORS'),
                     placeholders: [t('UPDATE.FORM.CHOSEN_CONNECTOR_FROM'), t('UPDATE.FORM.CHOSEN_CONNECTOR_TO')],
                     source: connectorMenuItems,
+                    connectors,
                     readOnly: true,
                 },
                 {
