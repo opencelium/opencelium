@@ -163,7 +163,7 @@ public class ExecutionContainer {
             return "";
         }
         List<RequestData> request = new ArrayList<>();
-        String conn = exp.substring(1, 6);
+//        String conn = exp.substring(1, 6);
         if ((exp.contains("CONN1.") && !conn.equals("CONN1")) || (exp.contains("CONN2.") && !conn.equals("CONN1"))){
             request = supportRequestData;
         } else {
