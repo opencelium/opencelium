@@ -42,7 +42,7 @@ class MethodItem extends Component{
             showConfirm: false,
             onDeleteButtonOver: false,
             showParams: false,
-            methodClassName: styles.item_toggle_in,
+            methodClassName: '',
             isHidden: false,
             deletingMethod: false,
         };
@@ -72,19 +72,10 @@ class MethodItem extends Component{
             methodClassName = styles.item_toggle_in;
             isHidden = false;
         }
-        if(showParams !== prevState.showParams || methodClassName !== prevState.methodClassName) {
-            if(methodClassName === styles.item_toggle_in){
+        if(showParams !== prevState.showParams) {
                 this.setState({
-                    methodClassName,
-                    showParams,
-                    isHidden,
-                });
-            } else {
-                this.setState({
-                    methodClassName,
                     showParams,
                 });
-            }
         }
         if(isHidden !== prevState.isHidden){
             let that = this;
@@ -124,50 +115,57 @@ class MethodItem extends Component{
         }
         const {connection, connector, method, readOnly, index, firstItemIndex} = this.props;
         const {showParams} = this.state;
-        let methodStyles = {position: 'relative', transition: 'all 0.3s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
+        let methodStyles = {position: 'relative', transition: 'width 0.5s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
         let methodTitleStyles = {backgroundColor: method.color};
         let isCurrentItem = connector.getCurrentItem().index === method.index;
         if(isCurrentItem){
             methodTitleStyles.borderBottomStyle = 'none';
             methodStyles.boxShadow = `0 0 0 0 rgba(0, 0, 0, .14), 0px 1px 7px 1px  ${chroma(`${method.color}c2`).darken(3)}, 0 1px 1px 0 rgba(0, 0, 0, .22)`;
-            methodStyles.borderRadius = '3px';
+            methodStyles.borderBottomLeftRadius = '3px';
+            methodStyles.borderBottomRightRadius = '3px';
+            methodStyles.borderTopLeftRadius = '3px';
+            methodStyles.borderTopRightRadius = '3px';
         }
         if(method.error.hasError){
             methodStyles.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
-            methodStyles.border = 'border: 1px solid #d14b4b';
+            methodStyles.border = '1px solid #d14b4b';
         }
-        methodStyles.marginLeft = method.intend * 20 + 'px';
+        const intend = method.intend * 20 + 'px';
+        methodStyles.width = `calc(100% - ${intend})`;
         return (
             <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName} style={{zIndex: 99 - index, position: 'relative'}}>
-                <Card
-                    theme={{card: styles.item}}
-                    style={methodStyles}
-                >
-                    <MethodTitle
-                        connection={connection}
-                        connector={connector}
-                        method={method}
-                        updateEntity={::this.updateEntity}
-                        toggleShowParams={::this.toggleShowParams}
-                        showParams={showParams}
-                        readOnly={readOnly}
-                        toggleDeleteMethod={::this.toggleDeleteMethod}
-                    />
-                    {
-                        showParams
-                        ?
-                            <MethodRequest
-                                id={`params_${connector.getConnectorType()}_${method.index}`}
-                                readOnly={readOnly}
-                                connection={connection}
-                                connector={connector}
-                                method={method}
-                                updateEntity={::this.updateEntity}
-                            />
-                        :
-                            null
-                    }
-                </Card>
+                <div style={{display: 'flex'}}>
+                    <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
+                    <Card
+                        theme={{card: styles.item}}
+                        style={methodStyles}
+                    >
+                        <MethodTitle
+                            connection={connection}
+                            connector={connector}
+                            method={method}
+                            updateEntity={::this.updateEntity}
+                            toggleShowParams={::this.toggleShowParams}
+                            showParams={showParams}
+                            readOnly={readOnly}
+                            toggleDeleteMethod={::this.toggleDeleteMethod}
+                        />
+                        {
+                            showParams
+                            ?
+                                <MethodRequest
+                                    id={`params_${connector.getConnectorType()}_${method.index}`}
+                                    readOnly={readOnly}
+                                    connection={connection}
+                                    connector={connector}
+                                    method={method}
+                                    updateEntity={::this.updateEntity}
+                                />
+                            :
+                                null
+                        }
+                    </Card>
+                </div>
             </div>
         );
     }

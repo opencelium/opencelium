@@ -16,7 +16,7 @@
 import CConnectorItem from "./CConnectorItem";
 import {isNumber, sortByIndex} from "@utils/app";
 
-const DEFAULT_PAGE_LIMIT = 5;
+export const DEFAULT_PAGE_LIMIT = 5;
 /**
  * ConnectorPagination class for displaying methods and operators
  * separated by pages
@@ -29,16 +29,22 @@ export default class CConnectorPagination{
         this._allItems = [];
         this._pageAmount = 1;
         this._currentItems = [];
+        this._closurePreviousItems = [];
+        this._closureNextItems = [];
         this._currentPageNumber = 0;
         this._limit = DEFAULT_PAGE_LIMIT;
-        this.load();
+        this._allItems = this.setAllItems();
+        this._pageAmount = this.calculatePageAmount();
+        this.setCurrentItems();
+        this._animationDirection = '';
+        this._isAnimating = false;
     }
 
     load(settings = {}){
         this._allItems = this.setAllItems();
         this._pageAmount = this.calculatePageAmount();
         this.updateCurrentPageNumber();
-        this._currentItems = this.findCurrentItems();
+        this.setCurrentItems();
         if(settings.hasOwnProperty('newItem')){
             if(this._currentItems.findIndex(item => item.index === settings.newItem.index) === -1){
                 this.setCurrentPageNumber(this._currentPageNumber + 1);
@@ -95,6 +101,7 @@ export default class CConnectorPagination{
         if(allItems.length > 1){
             allItems = sortByIndex(allItems);
         }
+        //allItems = this.setIntendForItems(allItems);
         return allItems;
     }
 
@@ -106,7 +113,7 @@ export default class CConnectorPagination{
         return parseInt(pageAmount);
     }
 
-    findCurrentItems(){
+    setCurrentItems(){
         let items = [];
         let firstItemPointer = this._allItems.length > 0 ? this._allItems[0] : null;
         if(this._pageAmount > 1){
@@ -134,8 +141,35 @@ export default class CConnectorPagination{
                 items.push(this._allItems[i]);
             }
         }
-        items = this.setIntendForItems(items);
-        return items;
+        this._currentItems = this.setIntendForItems(items);
+        let closurePrevItems = [];
+        if(this._currentItems.length > 0){
+            let index = this._allItems.findIndex(item => item.index === this._currentItems[0].index);
+            if(index !== -1){
+                for(let i = 0; i < DEFAULT_PAGE_LIMIT; i++){
+                    let prevIndex = index - DEFAULT_PAGE_LIMIT + i;
+                    if(prevIndex >= 0) {
+                        closurePrevItems.push(this._allItems[prevIndex])
+                    }
+                }
+            }
+        }
+        closurePrevItems = this.setIntendForItems(closurePrevItems);
+        this._closurePreviousItems = closurePrevItems.length > 0 ? [...closurePrevItems, ...this._currentItems] : [];
+        let closureNextItems = [];
+        if(this._currentItems.length > 0){
+            let index = this._allItems.findIndex(item => item.index === this._currentItems[this._currentItems.length - 1].index);
+            if(index !== -1){
+                for(let i = 0; i < DEFAULT_PAGE_LIMIT; i++){
+                    let nextIndex = index + 1 + i;
+                    if(nextIndex < this._allItems.length) {
+                        closureNextItems.push(this._allItems[nextIndex])
+                    }
+                }
+            }
+        }
+        closureNextItems = this.setIntendForItems(closureNextItems);
+        this._closureNextItems = closureNextItems.length > 0 ? [...this._currentItems, ...closureNextItems] : [];
     }
 
     setIntendForItems(items){
@@ -158,7 +192,7 @@ export default class CConnectorPagination{
     setCurrentPageNumber(number){
         if(isNumber(number) && number < this._pageAmount && number >= 0){
             this._currentPageNumber = parseInt(number);
-            this._currentItems = this.findCurrentItems();
+            this.setCurrentItems();
             let currentItem = this._connector.methods.find(m => m.index === this._currentItems[0].index);
             if(!currentItem){
                 currentItem = this._connector.operators.find(o => o.index === this._currentItems[0].index);
@@ -186,5 +220,29 @@ export default class CConnectorPagination{
 
     get allItems(){
         return this._allItems;
+    }
+
+    get closurePreviousItems(){
+        return this._closurePreviousItems;
+    }
+
+    get closureNextItems(){
+        return this._closureNextItems;
+    }
+
+    get animationDirection(){
+        return this._animationDirection;
+    }
+
+    set animationDirection(animationDirection){
+        this._animationDirection = animationDirection;
+    }
+
+    get isAnimating(){
+        return this._isAnimating;
+    }
+
+    set isAnimating(isAnimating){
+        this._isAnimating = isAnimating;
     }
 }

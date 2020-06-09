@@ -58,7 +58,6 @@ class ChangeContent extends Component{
                 }
             }
         }
-        this.doExit = false;
         this.state = {
             entity,
             page: 0,

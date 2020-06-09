@@ -288,14 +288,14 @@ class LoopOperator extends Component{
     }
 
     render(){
-        const {connector, tooltip, operator, isVisibleMenuEdit, renderCloseMenuEditButton, marginLeft} = this.props;
+        const {connector, tooltip, operator, isVisibleMenuEdit, renderCloseMenuEditButton, intend} = this.props;
         let classNames = styles.operator_icon;
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : null;
         let operatorStyle = {
-            height: '50px',
-            marginLeft,
+            height: '57.6px',
+            width: `calc(100% - ${intend})`,
             padding: '5px',
-            transition: 'all 0.3s ease 0s',
+            transition: 'width 0.5s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',
         };
         if(isCurrentItem){
@@ -304,28 +304,31 @@ class LoopOperator extends Component{
             classNames += ` ${styles.selected_item}`;
         }
         return (
-            <div style={operatorStyle} onClick={::this.setCurrentItem}>
-                <div style={{float: 'left', width: '10%', marginTop: '5px'}}>
-                    <TooltipFontIcon
-                        className={classNames}
-                        tooltip={tooltip}
-                        value={'loop'}
-                        onClick={::this.setCurrentItem}
-                        tooltipPosition={'top'}
-                    />
-                </div>
+            <div style={{display: 'flex'}}>
+                <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
+                <div style={operatorStyle} onClick={::this.setCurrentItem}>
+                    <div style={{float: 'left', width: '10%', marginTop: '10px'}}>
+                        <TooltipFontIcon
+                            className={classNames}
+                            tooltip={tooltip}
+                            value={'loop'}
+                            onClick={::this.setCurrentItem}
+                            tooltipPosition={'top'}
+                        />
+                    </div>
 
-                {
-                    isVisibleMenuEdit
-                    ?
-                        <div className={styles.menu_edit} onClick={::this.setCurrentItem}>
-                            {this.renderMethodSelect()}
-                            {this.renderParamInput()}
-                            {renderCloseMenuEditButton()}
-                        </div>
-                    :
-                        this.renderPlaceholder()
-                }
+                    {
+                        isVisibleMenuEdit
+                        ?
+                            <div className={styles.menu_edit} onClick={::this.setCurrentItem}>
+                                {this.renderMethodSelect()}
+                                {this.renderParamInput()}
+                                {renderCloseMenuEditButton()}
+                            </div>
+                        :
+                            this.renderPlaceholder()
+                    }
+                </div>
             </div>
 
         );
