@@ -16,22 +16,22 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import i18n from '../../../../utils/i18n';
+import i18n from '@utils/i18n';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {addConnector} from '../../../../actions/connectors/add';
-import {testConnector} from '../../../../actions/connectors/test';
-import {fetchInvokers} from '../../../../actions/invokers/fetch';
-import {ConnectorPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
+import {addConnector} from '@actions/connectors/add';
+import {testConnector} from '@actions/connectors/test';
+import {fetchInvokers} from '@actions/invokers/fetch';
+import {ConnectorPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {SingleComponent} from "@decorators/SingleComponent";
 import { AuthenticationTypes, DefaultAuthenticationType } from '../AuthenticationTypes';
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {automaticallyShowTour, CONNECTOR_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
-import {API_REQUEST_STATE} from "../../../../utils/constants/app";
-import {capitalize, setFocusById} from "../../../../utils/app";
+import {INPUTS} from "@utils/constants/inputs";
+import {automaticallyShowTour, CONNECTOR_TOURS} from "@utils/constants/tours";
+import OCTour from "@basic_components/OCTour";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {capitalize, setFocusById} from "@utils/app";
 
 
 const connectorPrefixURL = '/connectors';
@@ -365,7 +365,7 @@ class ConnectorAdd extends Component{
         },{
             inputs: authenticationInputs,
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
-            //test: {isTested: this.state.isTested, callback: ::this.testConnector},
+            test: {isTested: this.state.isTested, callback: ::this.testConnector},
         },
         ];
         let steps = this.filterSteps(authenticationInputs);

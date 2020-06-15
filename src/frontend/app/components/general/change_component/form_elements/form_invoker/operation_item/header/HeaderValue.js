@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import Input from '../../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
-import styles from '../../../../../../../themes/default/general/change_component.scss';
+import styles from '@themes/default/general/change_component.scss';
 
 
 class HeaderValue extends Component{

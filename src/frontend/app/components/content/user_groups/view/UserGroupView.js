@@ -16,17 +16,17 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchUserGroup} from '../../../../actions/usergroups/fetch';
+import {fetchUserGroup} from '@actions/usergroups/fetch';
 import Content from "../../../general/content/Content";
 import { Row, Col, Visible, Hidden } from "react-grid-system";
 import {Table, TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {Permissions} from '../../../../utils/constants/app';
-import styles from '../../../../themes/default/content/user_groups/view.scss';
-import {UserGroupPermissions} from '../../../../utils/constants/permissions';
+import {SingleComponent} from "@decorators/SingleComponent";
+import {Permissions} from '@utils/constants/app';
+import styles from '@themes/default/content/user_groups/view.scss';
+import {UserGroupPermissions} from '@utils/constants/permissions';
 import UserGroupIcon from "../../../icons/UserGroupIcon";
-import {permission} from "../../../../decorators/permission";
-import {getThemeClass} from "../../../../utils/app";
+import {permission} from "@decorators/permission";
+import {getThemeClass} from "@utils/app";
 
 
 const prefixUrl = '/usergroups';

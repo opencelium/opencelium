@@ -16,13 +16,13 @@
 import React, {Component} from 'react';
 import {withTranslation} from "react-i18next";
 
-import {NotificationType} from '../../../utils/constants/notifications/notifications';
-import NotificationMessage from '../../../utils/constants/notifications/NotificationMessage';
-import {ErrorNotification} from '../../../utils/constants/errors';
+import {NotificationType} from '@utils/constants/notifications/notifications';
+import NotificationMessage from '@utils/constants/notifications/NotificationMessage';
+import {ErrorNotification} from '@utils/constants/errors';
 
-import styles from '../../../themes/default/general/app.scss';
-import FontIcon from "../basic_components/FontIcon";
-import TooltipFontIcon from "../basic_components/tooltips/TooltipFontIcon";
+import styles from '@themes/default/general/app.scss';
+import FontIcon from "@basic_components/FontIcon";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 /**

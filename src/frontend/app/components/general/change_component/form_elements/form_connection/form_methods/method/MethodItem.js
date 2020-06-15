@@ -15,16 +15,16 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 
 import chroma from 'chroma-js';
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
+import CConnection from "@classes/components/content/connection/CConnection";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 import MethodRequest from "./MethodRequest";
 import MethodTitle from "./MethodTitle";
-import Card from "../../../../../basic_components/card/Card";
-import {consoleLog} from "../../../../../../../utils/app";
+import Card from "@basic_components/card/Card";
+import {consoleLog} from "@utils/app";
 
 
 /**

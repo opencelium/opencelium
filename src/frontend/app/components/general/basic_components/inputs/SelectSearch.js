@@ -16,13 +16,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import styles from '../../../../themes/default/general/basic_components.scss';
-import {getThemeClass, isArray} from "../../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {getThemeClass, isArray} from "@utils/app";
 import TooltipFontIcon from "../tooltips/TooltipFontIcon";
 import {
     FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
     FIELD_TYPE_STRING
-} from "../../../../classes/components/content/connection/method/CMethodItem";
+} from "@classes/components/content/connection/method/CMethodItem";
 import Input from "./Input";
 
 const PARAM_DELIMITER = '.';

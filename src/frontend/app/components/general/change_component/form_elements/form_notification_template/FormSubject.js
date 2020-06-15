@@ -15,11 +15,11 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
-import styles from '../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../decorators/FormElement";
-import {setFocusById} from "../../../../../utils/app";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
+import {setFocusById} from "@utils/app";
 
 /**
  * Component for Subject

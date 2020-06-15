@@ -17,14 +17,14 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {permission} from "../../../../decorators/permission";
-import {SchedulePermissions} from "../../../../utils/constants/permissions";
-import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass, setFocusById} from "../../../../utils/app";
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import Input from "../../../general/basic_components/inputs/Input";
-import {updateSchedule} from '../../../../actions/schedules/update';
-import Dialog from "../../../general/basic_components/Dialog";
+import {permission} from "@decorators/permission";
+import {SchedulePermissions} from "@utils/constants/permissions";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {getThemeClass, setFocusById} from "@utils/app";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import Input from "@basic_components/inputs/Input";
+import {updateSchedule} from '@actions/schedules/update';
+import Dialog from "@basic_components/Dialog";
 
 
 function mapStateToProps(state){

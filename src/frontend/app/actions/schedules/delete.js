@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { SchedulesAction } from '../../utils/actions';
+import { SchedulesAction } from '@utils/actions';
 
 
 /**

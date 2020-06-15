@@ -16,14 +16,14 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchAdminCards, loadAdminCardsLink} from '../../../../actions/admin_cards/fetch';
+import {fetchAdminCards, loadAdminCardsLink} from '@actions/admin_cards/fetch';
 
 import List from '../../../general/list_of_components/List';
-import {ListComponent} from "../../../../decorators/ListComponent";
-import {AppPermissions, AdminCardPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {ADMINCARD_TOURS} from "../../../../utils/constants/tours";
-import {tour} from "../../../../decorators/tour";
+import {ListComponent} from "@decorators/ListComponent";
+import {AppPermissions, AdminCardPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {ADMINCARD_TOURS} from "@utils/constants/tours";
+import {tour} from "@decorators/tour";
 
 
 const prefixUrl = '/admin';

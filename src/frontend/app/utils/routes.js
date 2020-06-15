@@ -18,8 +18,8 @@ import {Route, IndexRoute, DefaultRoute} from 'react-router';
 
 import isAuth from '../hocs/isAuth';
 import isNotAuth from '../hocs/isNotAuth';
-import Layout from '../components/layout/Layout';
-import PageNotFound from "../components/general/app/PageNotFound";
+import Layout from '@components/layout/Layout';
+import PageNotFound from "@components/general/app/PageNotFound";
 import LoadableRouteComponents from './LoadableRouteComponents';
 
 

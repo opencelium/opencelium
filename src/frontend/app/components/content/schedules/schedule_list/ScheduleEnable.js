@@ -17,12 +17,12 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {permission} from "../../../../decorators/permission";
-import {updateScheduleStatus} from '../../../../actions/schedules/update';
-import {SchedulePermissions} from "../../../../utils/constants/permissions";
-import {getThemeClass} from "../../../../utils/app";
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import TooltipSwitch from "../../../general/basic_components/tooltips/TooltipSwitch";
+import {permission} from "@decorators/permission";
+import {updateScheduleStatus} from '@actions/schedules/update';
+import {SchedulePermissions} from "@utils/constants/permissions";
+import {getThemeClass} from "@utils/app";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
 
 
 function mapStateToProps(state){

@@ -14,15 +14,15 @@
  */
 
 import Rx from 'rxjs/Rx';
-import {AppsAction} from '../utils/actions';
+import {AppsAction} from '@utils/actions';
 import {
     fetchAppsFulfilled, fetchAppsRejected,
     checkAppFulfilled, checkAppRejected,
-} from '../actions/apps/fetch';
-import {doRequest} from "../utils/auth";
-import {APP_STATUS_DOWN, APP_STATUS_UP, kibanaUrl, neo4jUrl} from "../utils/constants/url";
-import i18n from '../utils/i18n';
-import {NotificationType} from "../utils/constants/notifications/notifications";
+} from '@actions/apps/fetch';
+import {doRequest} from "@utils/auth";
+import {APP_STATUS_DOWN, APP_STATUS_UP, kibanaUrl, neo4jUrl} from "@utils/constants/url";
+import i18n from '@utils/i18n';
+import {NotificationType} from "@utils/constants/notifications/notifications";
 
 const apps = [
     {id: 1, name: 'Kibana', icon: '../../img/apps/kibana.png', link: kibanaUrl, value: 'elasticsearch'},

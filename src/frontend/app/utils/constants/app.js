@@ -13,10 +13,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  * application constants
  */
+export const isProd = process.env.NODE_ENV === 'production';
+export const isDev = process.env.NODE_ENV === 'development';
+export const hasHMR = process.env.NODE_HMR === 'true';
+const nodeEnv = process.env.NODE_ENV;
 export const Roles = {
     USER: 'ROLE_USER',
     ADMIN: 'ROLE_ADMIN'
@@ -28,8 +31,8 @@ export const Request = {
 };
 export const Permissions = ['CREATE', 'READ', 'UPDATE', 'DELETE'];
 export const AppSettings = {
-    i18nDebug: !__PRODUCTION__,
-    reduxHasLogs: !__PRODUCTION__,
+    i18nDebug: isDev,
+    reduxHasLogs: isDev,
 };
 
 export const ERROR_TYPE = {

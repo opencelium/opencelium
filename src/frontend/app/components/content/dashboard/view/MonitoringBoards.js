@@ -17,12 +17,12 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import SubHeader from "../../../general/view_component/SubHeader";
 import Iframe from 'react-iframe';
-import {updateDashboardSettings} from '../../../../actions/auth';
+import {updateDashboardSettings} from '@actions/auth';
 
-import styles from '../../../../themes/default/content/dashboard/dashboard.scss';
-import {getThemeClass} from "../../../../utils/app";
-import {hostname, protocol} from '../../../../utils/constants/url';
-import Loading from "../../../general/app/Loading";
+import styles from '@themes/default/content/dashboard/dashboard.scss';
+import {getThemeClass} from "@utils/app";
+import {hostname, protocol} from '@utils/constants/url';
+import Loading from "@loading";
 
 
 function mapStateToProps(state){

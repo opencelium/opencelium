@@ -15,21 +15,21 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 
 import DeleteIcon from "./DeleteIcon";
 import CConnectorItem, {
     CONNECTOR_FROM,
     CONNECTOR_TO
-} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
+} from "@classes/components/content/connection/CConnectorItem";
+import CConnection from "@classes/components/content/connection/CConnection";
 import COperatorItem, {
     IF_OPERATOR,
     LOOP_OPERATOR
-} from "../../../../../../../classes/components/content/connection/operator/COperatorItem";
+} from "@classes/components/content/connection/operator/COperatorItem";
 import IfOperator from "./IfOperator";
 import LoopOperator from "./LoopOperator";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 /**

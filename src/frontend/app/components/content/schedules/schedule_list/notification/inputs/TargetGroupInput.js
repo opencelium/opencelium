@@ -16,7 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import CNotification, {NOTIFICATION_TYPE} from "../../../../../../classes/components/content/schedule/notification/CNotification";
+import CNotification, {NOTIFICATION_TYPE} from "@classes/components/content/schedule/notification/CNotification";
 import RecipientsInput from "./RecipientsInput";
 import SlackChannelInput from "./SlackChannelInput";
 

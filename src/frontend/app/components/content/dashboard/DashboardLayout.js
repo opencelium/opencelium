@@ -16,13 +16,13 @@
 import React, {Component, Suspense} from 'react';
 import {Container} from 'react-grid-system';
 
-import Loading from '../../general/app/Loading';
+import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "../../../utils/constants/app";
+import {ERROR_TYPE} from "@utils/constants/app";
 import DashboardView from "./view/DashboardView";
-import {OC_TOURS} from "../../../utils/constants/tours";
-import {tour} from "../../../decorators/tour";
-import {checkConnection} from "../../../decorators/checkConnection";
+import {OC_TOURS} from "@utils/constants/tours";
+import {tour} from "@decorators/tour";
+import {checkConnection} from "@decorators/checkConnection";
 
 
 function filterOCSteps(tourSteps){

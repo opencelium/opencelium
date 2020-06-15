@@ -18,16 +18,16 @@ import {withTranslation} from "react-i18next";
 import {connect} from "react-redux";
 import {Button} from "react-toolbox/lib/button";
 
-import {generateLabel, onEnter, setFocusById} from "../../../utils/app";
-import {loginUser} from '../../../actions/auth';
-import Input from "../../general/basic_components/inputs/Input";
-import styles from '../../../themes/default/layout/login.scss';
+import {generateLabel, onEnter, setFocusById} from "@utils/app";
+import {loginUser} from '@actions/auth';
+import Input from "@basic_components/inputs/Input";
+import styles from '@themes/default/layout/login.scss';
 import {
     addFocusDocumentNavigation, addLoginKeyNavigation,
     removeFocusDocumentNavigation,
     removeLoginKeyNavigation
-} from "../../../utils/key_navigation";
-import ValidationMessage from "../../general/change_component/ValidationMessage";
+} from "@utils/key_navigation";
+import ValidationMessage from "@change_component/ValidationMessage";
 
 
 /**

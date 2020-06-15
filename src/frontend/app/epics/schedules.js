@@ -13,33 +13,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import Rx from 'rxjs/Rx';
-import {SchedulesAction} from '../utils/actions';
+import {SchedulesAction} from '@utils/actions';
 import {
-    fetchScheduleFulfilled,
-    fetchScheduleRejected,
-    fetchSchedulesFulfilled,
-    fetchSchedulesRejected,
-    triggerScheduleFulfilled,
-    triggerScheduleRejected,
+    fetchScheduleFulfilled, fetchScheduleRejected,
+    fetchSchedulesFulfilled, fetchSchedulesRejected,
+    triggerScheduleFulfilled, triggerScheduleRejected,
     triggerScheduleSuccessfullyFulfilled,
-    fetchCurrentSchedules,
-    fetchCurrentSchedulesFulfilled,
-    fetchCurrentSchedulesRejected,
-    fetchSchedulesByIdsFulfilled,
-    fetchSchedulesByIdsRejected,
+    fetchCurrentSchedules, fetchCurrentSchedulesFulfilled, fetchCurrentSchedulesRejected,
+    fetchSchedulesByIdsFulfilled, fetchSchedulesByIdsRejected,
     fetchScheduleNotificationsFulfilled,
-    fetchScheduleNotificationRejected,
-    fetchScheduleNotificationFulfilled,
-    fetchScheduleNotificationTemplatesFulfilled,
-    fetchNotificationRecipientsFulfilled,
-    fetchNotificationRecipientsRejected,
+    fetchScheduleNotificationFulfilled, fetchScheduleNotificationRejected,
+    fetchScheduleNotificationTemplatesFulfilled, fetchScheduleNotificationTemplatesRejected,
+    fetchNotificationRecipientsFulfilled, fetchNotificationRecipientsRejected,
     fetchSlackChannelsFulfilled,
-    fetchSlackChannelsRejected, fetchScheduleNotificationTemplatesRejected,
-} from '../actions/schedules/fetch';
+} from '@actions/schedules/fetch';
 import {
-    addScheduleFulfilled, addScheduleNotificationFulfilled, addScheduleNotificationRejected, addScheduleRejected,
-    addWebHookFulfilled, addWebHookRejected,
-} from '../actions/schedules/add';
+    addScheduleFulfilled, addScheduleRejected,
+    addScheduleNotificationFulfilled, addScheduleNotificationRejected,
+} from '@actions/schedules/add';
 import {
     updateScheduleFulfilled,
     updateScheduleRejected,
@@ -51,12 +42,9 @@ import {
     enableSchedulesRejected,
     disableSchedulesFulfilled,
     disableSchedulesRejected,
-    updateWebHookFulfilled,
-    updateWebHookRejected,
-    updateSchedule,
     updateScheduleNotificationFulfilled,
     updateScheduleNotificationRejected,
-} from '../actions/schedules/update';
+} from '@actions/schedules/update';
 import {
     deleteScheduleFulfilled,
     deleteScheduleNotificationFulfilled,
@@ -64,13 +52,10 @@ import {
     deleteScheduleRejected,
     deleteSchedulesFulfilled,
     deleteSchedulesRejected,
-    deleteWebHookFulfilled,
-    deleteWebHookRejected,
-} from '../actions/schedules/delete';
-import {doRequest} from "../utils/auth";
+} from '@actions/schedules/delete';
+import {doRequest} from "@utils/auth";
 
-import {validateAddSchedule, validateAddScheduleNotification, validateWebHook} from "../validations/schedules";
-import {sleepApp} from "../utils/app";
+import {validateAddSchedule} from "@validations/schedules";
 
 /**
  * main url for schedulers

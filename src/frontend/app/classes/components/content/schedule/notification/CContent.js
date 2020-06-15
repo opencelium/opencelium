@@ -15,7 +15,7 @@
 
 
 
-import {isId} from "../../../../../utils/app";
+import {isId} from "@utils/app";
 
 /**
  * Content class

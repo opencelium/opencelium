@@ -15,13 +15,13 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
-import {addWebHook} from "../../../../actions/webhooks/add";
-import {deleteWebHook} from "../../../../actions/webhooks/delete";
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {formatHtmlId, getThemeClass} from "../../../../utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {addWebHook} from "@actions/webhooks/add";
+import {deleteWebHook} from "@actions/webhooks/delete";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import {formatHtmlId, getThemeClass} from "@utils/app";
 import {connect} from "react-redux";
-import Loading from "../../../general/app/Loading";
+import Loading from "@loading";
 
 
 function mapStateToProps(state){

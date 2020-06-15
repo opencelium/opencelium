@@ -19,9 +19,9 @@ import { Container, Row, Col } from "react-grid-system";
 import ViewHeader from '../view_component/Header';
 import ListButton from "../view_component/ListButton";
 
-import styles from '../../../themes/default/general/view_component.scss';
+import styles from '@themes/default/general/view_component.scss';
 import UpdateButton from "../list_of_components/UpdateButton";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass} from "@utils/app";
 import EmptyButton from "../view_component/EmptyButton";
 
 

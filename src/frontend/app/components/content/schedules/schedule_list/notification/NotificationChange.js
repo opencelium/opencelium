@@ -17,13 +17,13 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {permission} from "../../../../../decorators/permission";
-import {SchedulePermissions} from "../../../../../utils/constants/permissions";
-import CNotification from "../../../../../classes/components/content/schedule/notification/CNotification";
+import {permission} from "@decorators/permission";
+import {SchedulePermissions} from "@utils/constants/permissions";
+import CNotification from "@classes/components/content/schedule/notification/CNotification";
 import EventTypeInput from "./inputs/EventTypeInput";
 import NotificationTypeInput from "./inputs/NotificationTypeInput";
 import TemplateInput from "./inputs/TemplateInput";
-import {setFocusById} from "../../../../../utils/app";
+import {setFocusById} from "@utils/app";
 import NameInput from "./inputs/NameInput";
 import TargetGroupInput from "./inputs/TargetGroupInput";
 

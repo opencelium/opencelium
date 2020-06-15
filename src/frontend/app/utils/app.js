@@ -14,8 +14,8 @@
  */
 
 import React from 'react';
-import CUserGroup from "../classes/components/content/user_group/CUserGroup";
-import CComponent from "../classes/components/content/user_group/CComponent";
+import CUserGroup from "@classes/components/content/user_group/CUserGroup";
+import CComponent from "@classes/components/content/user_group/CComponent";
 
 
 /**

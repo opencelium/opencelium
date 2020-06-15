@@ -17,15 +17,15 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {fetchNotificationTemplate} from '../../../../actions/notification_templates/fetch';
-import {NotificationTemplatePermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {automaticallyShowTour} from "../../../../utils/constants/tours";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import CNotificationTemplate from "../../../../classes/components/content/schedule/notification/CNotificationTemplate";
+import {fetchNotificationTemplate} from '@actions/notification_templates/fetch';
+import {NotificationTemplatePermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {INPUTS} from "@utils/constants/inputs";
+import {automaticallyShowTour} from "@utils/constants/tours";
+import {SingleComponent} from "@decorators/SingleComponent";
+import CNotificationTemplate from "@classes/components/content/schedule/notification/CNotificationTemplate";
 
 const notificationTemplatePrefixURL = '/notification_templates';
 

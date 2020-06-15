@@ -14,7 +14,7 @@
  */
 
 import React, {Component} from 'react';
-import styles from '../../themes/default/general/app.scss';
+import styles from '@themes/default/general/app.scss';
 import {withTranslation} from "react-i18next";
 
 

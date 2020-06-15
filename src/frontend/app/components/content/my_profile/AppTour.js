@@ -17,12 +17,12 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import { Row, Col } from "react-grid-system";
 
-import {toggleAppTour} from './../../../actions/auth';
-import styles from '../../../themes/default/content/my_profile/my_profile.scss';
+import {toggleAppTour} from '@actions/auth';
+import styles from '@themes/default/content/my_profile/my_profile.scss';
 import SubHeader from "../../general/view_component/SubHeader";
 import {withTranslation} from "react-i18next";
-import {getThemeClass} from "../../../utils/app";
-import TooltipSwitch from "../../general/basic_components/tooltips/TooltipSwitch";
+import {getThemeClass} from "@utils/app";
+import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

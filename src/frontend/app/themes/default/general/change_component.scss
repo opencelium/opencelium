@@ -162,6 +162,9 @@
 .form_input_label{
   font-family: $FONT_FAMILY;
 }
+.form_input_readonly_input{
+  margin: 0 65px;
+}
 .form_input_label_for_connection{
   font-family: $FONT_FAMILY;
   top: 0 !important;
@@ -916,6 +919,23 @@
     font-size: $FONT_SIZE_14;
   }
 }
+.items_top_limit{
+  top: -25px;
+  position: absolute;
+  width: 310px;
+  background: white;
+  z-index: 100;
+  left: 0;
+}
+
+.items_bottom_limit{
+  position: absolute;
+  width: 310px;
+  background: white;
+  z-index: 100;
+  bottom: 90px;
+  left: 8px;
+}
 
 .items{
   position: relative;
@@ -924,7 +944,18 @@
 .items_arrows{
   position: absolute;
   left: -30px;
-  top: 50%;
+  top: 50px;
+}
+.items_navigation_bar{
+  margin: 0 2px;
+  background: #eee;
+  height: 25px;
+  width: 20px;
+}
+.items_navigation_current{
+  transition: height 0.3s;
+  width: 100%;
+  background: #3f51b5;
 }
 .item_arrow_disable{
   cursor: default;
@@ -1084,4 +1115,24 @@
       padding: 8px 12px;
     }
   }
+}
+.operation_item_header_arrow{
+  position: absolute;
+  top: 100px;
+  left: -15px;
+}
+.operation_item_header_arrow_prev{
+  display: block;
+  cursor: pointer;
+}
+.operation_item_header_arrow_next{
+  cursor: pointer;
+}
+.operation_item_header_arrow_disable{
+  cursor: default;
+  color: #eee;
+}
+.operation_item_header_appear{
+  animation-name: $ANIMATION_FADE_IN_DOWN;
+  animation-duration: .3s;
 }

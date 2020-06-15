@@ -13,22 +13,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {UserGroupsAction} from '../utils/actions';
+import {UserGroupsAction} from '@utils/actions';
 import {
     fetchUserGroupFulfilled, fetchUserGroupRejected,
     fetchUserGroupsFulfilled, fetchUserGroupsRejected,
-} from '../actions/usergroups/fetch';
+} from '@actions/usergroups/fetch';
 import {
     addUserGroupFulfilled, addUserGroupRejected,
     addGroupIcon, addGroupIconFulfilled, addGroupIconRejected,
-} from '../actions/usergroups/add';
+} from '@actions/usergroups/add';
 import {
     updateUserGroupFulfilled, updateUserGroupRejected,
     updateGroupIcon, updateGroupIconFulfilled, updateGroupIconRejected,
-} from '../actions/usergroups/update';
-import {deleteUserGroupFulfilled, deleteUserGroupRejected} from '../actions/usergroups/delete';
-import {doRequest} from "../utils/auth";
-import {isString} from "../utils/app";
+} from '@actions/usergroups/update';
+import {deleteUserGroupFulfilled, deleteUserGroupRejected} from '@actions/usergroups/delete';
+import {doRequest} from "@utils/auth";
+import {isString} from "@utils/app";
 
 
 /**

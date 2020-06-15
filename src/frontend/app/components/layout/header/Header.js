@@ -21,7 +21,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import LoadingHeader from './LoadingHeader';
 import LogoutMenuItem from './LogoutMenuItem';
-import {Roles} from '../../../utils/constants/app';
+import {Roles} from '@utils/constants/app';
 import UsersMenuItem from "./UsersMenuItem";
 import UserGroupsMenuItem from "./UserGroupsMenuItem";
 import ConnectorsMenuItem from "./ConnectorsMenuItem";
@@ -30,9 +30,9 @@ import MyProfileMenuItem from "./MyProfileMenuItem";
 import SchedulesMenuItem from "./SchedulesMenuItem";
 
 import AdminCardsMenuItem from "./AdminCardsMenuItem";
-import TooltipFontIcon from "../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "../../../utils/app";
-import styles from '../../../themes/default/layout/header.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {getThemeClass} from "@utils/app";
+import styles from '@themes/default/layout/header.scss';
 import LogoMenuItem from "./LogoMenuItem";
 
 

@@ -13,14 +13,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId} from "../../../../../utils/app";
+import {consoleLog, isId} from "@utils/app";
 import CNotificationTemplate from "./CNotificationTemplate";
 import CSlack from "./CSlack";
 import CEmail from "./CEmail";
 
-const EVENT_TYPE = {
+export const EVENT_TYPE = {
     PRE: 'pre',
     POST: 'post',
+    ALERT: 'alert',
 };
 
 export const NOTIFICATION_TYPE = {
@@ -257,8 +258,9 @@ export default class CNotification{
                 return CSlack.createSlack(targetGroup);
             case NOTIFICATION_TYPE.EMAIL:
                 return CEmail.createEmail(targetGroup);
+            default:
+                return CEmail.createEmail(targetGroup);
         }
-        return targetGroup;
     }
 
     getObject(){
@@ -266,7 +268,7 @@ export default class CNotification{
             name: this._name,
             eventType: this._eventType,
             notificationType: this._notificationType,
-            template: {templateId: this._template.id,},
+            template: {templateId: this._template.id, name: this._template.name},
             recipients: this._targetGroup.getObject().recipients,
         };
         if(this.hasOwnProperty('_id') && this._id !== 0){

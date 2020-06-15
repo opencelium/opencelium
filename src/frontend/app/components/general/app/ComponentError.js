@@ -18,8 +18,8 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 
-import styles from '../../../themes/default/general/app.scss';
-import {ERROR_TYPE} from "../../../utils/constants/app";
+import styles from '@themes/default/general/app.scss';
+import {ERROR_TYPE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
@@ -65,8 +65,8 @@ class ComponentError extends Component{
                         <br/>
                         <br/>
                         <h3>
-                            <div className={styles.support_action} id={'support_action'} about={`type: ${entity.type}; name: ${entity.name}`}>
-                                {t(`ERROR.LINK`)}
+                            <div className={styles.support_action}>
+                                <span id={'support_action'} about={`type: ${entity.type}; name: ${entity.name}`}>{t(`ERROR.LINK`)}</span>
                             </div>
                         </h3>
                     </div>
@@ -78,8 +78,8 @@ class ComponentError extends Component{
                         <br/>
                         <br/>
                         <h3>
-                            <div className={styles.support_action} id={'support_action'}>
-                                {t(`ERROR.LINK`)}
+                            <div className={styles.support_action}>
+                                <span id={'support_action'}>{t(`ERROR.LINK`)}</span>
                             </div>
                         </h3>
                     </div>

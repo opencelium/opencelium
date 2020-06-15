@@ -17,13 +17,13 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {permission} from "../../../../decorators/permission";
-import {triggerSchedule, triggerScheduleSuccessfully} from '../../../../actions/schedules/fetch';
-import {SchedulePermissions} from "../../../../utils/constants/permissions";
-import TooltipFontIcon from "../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "../../../../utils/app";
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import Loading from "../../../general/app/Loading";
+import {permission} from "@decorators/permission";
+import {triggerSchedule, triggerScheduleSuccessfully} from '@actions/schedules/fetch';
+import {SchedulePermissions} from "@utils/constants/permissions";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {getThemeClass} from "@utils/app";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import Loading from "@loading";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

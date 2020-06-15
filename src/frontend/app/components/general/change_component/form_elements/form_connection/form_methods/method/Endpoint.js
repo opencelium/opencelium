@@ -18,10 +18,10 @@ import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import ContentEditable from 'react-contenteditable';
 
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 import theme from "react-toolbox/lib/input/theme.css";
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
-import TooltipText from "../../../../../basic_components/tooltips/TooltipText";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+import TooltipText from "@basic_components/tooltips/TooltipText";
 import ParamGenerator from "./ParamGenerator";
 
 

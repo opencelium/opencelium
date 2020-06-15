@@ -16,7 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '../../../../../../../../themes/default/general/enhancement.scss';
+import styles from '@themes/default/general/enhancement.scss';
 
 
 /**

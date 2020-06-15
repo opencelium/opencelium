@@ -14,10 +14,10 @@
  */
 
 import React, {Component} from 'react';
-import styles from '../../themes/default/general/app.scss';
+import styles from '@themes/default/general/app.scss';
 import {connect} from "react-redux";
-import {toggleAppTour} from "../../actions/auth";
-import Checkbox from "../../components/general/basic_components/inputs/Checkbox";
+import {toggleAppTour} from "@actions/auth";
+import Checkbox from "@basic_components/inputs/Checkbox";
 
 
 function mapStateToProps(state){

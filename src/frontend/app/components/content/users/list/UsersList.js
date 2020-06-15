@@ -16,15 +16,15 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchUsers, fetchUsersCanceled} from '../../../../actions/users/fetch';
-import {deleteUser} from '../../../../actions/users/delete';
+import {fetchUsers, fetchUsersCanceled} from '@actions/users/fetch';
+import {deleteUser} from '@actions/users/delete';
 
 import List from '../../../general/list_of_components/List';
-import {ListComponent} from "../../../../decorators/ListComponent";
-import {permission} from "../../../../decorators/permission";
-import {UserPermissions} from "../../../../utils/constants/permissions";
-import {tour} from "../../../../decorators/tour";
-import {LIST_TOURS} from "../../../../utils/constants/tours";
+import {ListComponent} from "@decorators/ListComponent";
+import {permission} from "@decorators/permission";
+import {UserPermissions} from "@utils/constants/permissions";
+import {tour} from "@decorators/tour";
+import {LIST_TOURS} from "@utils/constants/tours";
 
 
 const prefixUrl = '/users';

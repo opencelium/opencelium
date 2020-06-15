@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { TemplatesAction } from '../../utils/actions';
+import { TemplatesAction } from '@utils/actions';
 
 
 /**

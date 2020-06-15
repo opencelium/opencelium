@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { WebHooksAction } from '../../utils/actions';
+import { WebHooksAction } from '@utils/actions';
 
 
 /**

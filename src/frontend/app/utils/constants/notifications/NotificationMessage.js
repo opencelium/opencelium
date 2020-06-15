@@ -19,7 +19,7 @@ import i18n from '../../i18n';
 
 import {NotificationMessageHandlers} from './notifications';
 import {parseConnectionPointer} from "../../app";
-import Dialog from "../../../components/general/basic_components/Dialog";
+import Dialog from "@basic_components/Dialog";
 
 
 /**

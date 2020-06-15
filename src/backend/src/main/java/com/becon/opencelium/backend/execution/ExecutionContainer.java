@@ -45,9 +45,11 @@ public class ExecutionContainer {
 
     private Invoker invoker;
     private List<RequestData> requestData = new LinkedList<>();
+    private List<RequestData> supportRequestData = new LinkedList<>();
     private ArrayList<MessageContainer> responseData = new ArrayList<>();
     private Map<String, Integer> loopIndex = new HashMap<>();
     private String taId;
+    private String conn;
     private int order;
 
     private EnhancementServiceImp enhancementService;
@@ -157,13 +159,29 @@ public class ExecutionContainer {
     }
 
     public String getValueFromRequestData(String exp) {
+        if (exp == null || exp.isEmpty()) {
+            return "";
+        }
+        List<RequestData> request = new ArrayList<>();
+//        String conn = exp.substring(1, 6);
+        if ((exp.contains("CONN1.") && !conn.equals("CONN1")) || (exp.contains("CONN2.") && !conn.equals("CONN1"))){
+            request = supportRequestData;
+        } else {
+            request = requestData;
+        }
+
         String result = exp;
-        for (RequestData data : requestData) {
-            String field = "{" + data.getField() + "}";
-            if (!result.contains(field)){
+        for (RequestData data : request) {
+            String pointer = "{" + data.getField() + "}";
+            if (exp.contains("CONN1.")){
+                pointer = "{" + "CONN1." + data.getField() + "}";
+            } else if (exp.contains("CONN2.")) {
+                pointer = "{" + "CONN2." + data.getField() + "}";
+            }
+            if (!result.contains(pointer)){
                 continue;
             }
-            result = result.replace(field, data.getValue());
+            result = result.replace(pointer, data.getValue());
         }
         return result;
     }
@@ -190,6 +208,22 @@ public class ExecutionContainer {
 
     public ArrayList<MessageContainer> getResponseData() {
         return responseData;
+    }
+
+    public List<RequestData> getSupportRequestData() {
+        return supportRequestData;
+    }
+
+    public void setSupportRequestData(List<RequestData> supportRequestData) {
+        this.supportRequestData = supportRequestData;
+    }
+
+    public String getConn() {
+        return conn;
+    }
+
+    public void setConn(String conn) {
+        this.conn = conn;
     }
 
     public void setResponseData(ArrayList<MessageContainer> responseData) {

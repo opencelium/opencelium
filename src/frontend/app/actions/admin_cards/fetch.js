@@ -14,7 +14,7 @@
  */
 import Rx from 'rxjs/Rx';
 
-import { AdminCardsAction } from '../../utils/actions';
+import { AdminCardsAction } from '@utils/actions';
 
 
 /**

@@ -18,13 +18,13 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
 
-import {fetchConnection} from '../../../../actions/connections/fetch';
-import {ConnectionPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
+import {fetchConnection} from '@actions/connections/fetch';
+import {ConnectionPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {SingleComponent} from "@decorators/SingleComponent";
 import ReactSVG from 'react-svg';
-import styles from '../../../../themes/default/content/connections/graph.scss';
-import {getThemeClass} from "../../../../utils/app";
+import styles from '@themes/default/content/connections/graph.scss';
+import {getThemeClass} from "@utils/app";
 
 import {GRAPH_TEMPLATE} from "../../../../templates/GraphTemplate";
 

@@ -17,10 +17,10 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import TooltipFontIcon from "../../../../../general/basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "../../../../../../utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {getThemeClass} from "@utils/app";
 
-import styles from '../../../../../../themes/default/content/schedules/schedules.scss';
+import styles from '@themes/default/content/schedules/schedules.scss';
 
 
 function mapStateToProps(state){

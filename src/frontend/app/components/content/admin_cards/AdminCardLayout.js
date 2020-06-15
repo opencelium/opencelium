@@ -16,10 +16,10 @@
 import React, {Component, Suspense} from 'react';
 import {Container} from 'react-grid-system';
 
-import Loading from '../../general/app/Loading';
+import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "../../../utils/constants/app";
-import {checkConnection} from "../../../decorators/checkConnection";
+import {ERROR_TYPE} from "@utils/constants/app";
+import {checkConnection} from "@decorators/checkConnection";
 
 
 

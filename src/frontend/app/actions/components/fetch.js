@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { ComponentsAction } from '../../utils/actions';
+import { ComponentsAction } from '@utils/actions';
 
 
 /**

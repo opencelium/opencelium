@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import {NotificationTemplatesAction} from '../../utils/actions';
+import {NotificationTemplatesAction} from '@utils/actions';
 
 
 /**

@@ -17,10 +17,10 @@ import React, {Component} from 'react';
 import { connect } from 'react-redux';
 import ProgressBarElement from "./ProgressBarElement";
 import SubHeader from "../../../general/view_component/SubHeader";
-import {fetchCurrentSchedules, cancelFetchCurrentSchedules, fetchSchedulesByIds} from '../../../../actions/schedules/fetch';
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "../../../../utils/app";
-import {cancelCurrentSchedule} from "../../../../epics/schedules";
+import {fetchCurrentSchedules, cancelFetchCurrentSchedules, fetchSchedulesByIds} from '@actions/schedules/fetch';
+import styles from '@themes/default/content/schedules/schedules.scss';
+import {getThemeClass} from "@utils/app";
+import {cancelCurrentSchedule} from "@epics/schedules";
 import {withTranslation} from "react-i18next";
 
 

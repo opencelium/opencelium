@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import {UserGroupsAction} from '../../utils/actions';
+import {UserGroupsAction} from '@utils/actions';
 
 
 /**

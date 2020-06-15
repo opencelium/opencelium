@@ -19,7 +19,7 @@ import FormSubject from "./FormSubject";
 import Accordion from "react-bootstrap/Accordion";
 import Card from "react-bootstrap/Card";
 import FormBody from "./FormBody";
-import CContent from "../../../../../classes/components/content/schedule/notification/CContent";
+import CContent from "@classes/components/content/schedule/notification/CContent";
 
 
 function mapStateToProps(state){

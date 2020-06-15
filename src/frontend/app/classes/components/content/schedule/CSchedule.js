@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId} from "../../../../utils/app";
+import {consoleLog, isId} from "@utils/app";
 import CLastExecution from "./CLastExecution";
 import CWebhook from "./CWebhook";
 import CNotification from "./notification/CNotification";

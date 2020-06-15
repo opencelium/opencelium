@@ -14,8 +14,8 @@
  */
 
 import React, {Component} from 'react';
-import FontIcon from "../general/basic_components/FontIcon";
-import {checkImage} from "../../utils/app";
+import FontIcon from "@basic_components/FontIcon";
+import {checkImage} from "@utils/app";
 
 
 /**

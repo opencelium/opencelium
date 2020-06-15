@@ -16,9 +16,9 @@
 import React, { Component }  from 'react';
 import {Col, Container, Row} from "react-grid-system";
 
-import styles from '../../../themes/default/general/app.scss';
+import styles from '@themes/default/general/app.scss';
 import {connect} from "react-redux";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

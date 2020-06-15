@@ -17,23 +17,23 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 import Select from 'react-select';
-import Input from '../../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {dotColor} from "../utils";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import {DEFAULT_COLOR} from "../../../../../../../classes/components/content/connection/operator/CStatement";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import COperatorItem from "../../../../../../../classes/components/content/connection/operator/COperatorItem";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import {FUNCTIONAL_OPERATORS} from "../../../../../../../classes/components/content/connection/operator/CCondition";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import SelectSearch from "../../../../../basic_components/inputs/SelectSearch";
+import styles from '@themes/default/general/form_methods.scss';
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import {DEFAULT_COLOR} from "@classes/components/content/connection/operator/CStatement";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import {FUNCTIONAL_OPERATORS} from "@classes/components/content/connection/operator/CCondition";
+import CConnection from "@classes/components/content/connection/CConnection";
+import SelectSearch from "@basic_components/inputs/SelectSearch";
 import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
-} from "../../../../../../../classes/components/content/invoker/response/CResponse";
+} from "@classes/components/content/invoker/response/CResponse";
+import {dotColor} from "../help";
 
 
 /**

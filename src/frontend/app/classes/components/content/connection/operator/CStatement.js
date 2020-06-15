@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isString} from "../../../../../utils/app";
+import {consoleLog, isString} from "@utils/app";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../../invoker/response/CResponse";
 
 export const STATEMENT_REQUEST = 'request';

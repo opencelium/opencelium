@@ -17,17 +17,17 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {fetchInvoker} from '../../../../actions/invokers/fetch';
-import {InvokerPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {INVOKER_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
+import {fetchInvoker} from '@actions/invokers/fetch';
+import {InvokerPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {INPUTS} from "@utils/constants/inputs";
+import {INVOKER_TOURS} from "@utils/constants/tours";
+import OCTour from "@basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import CInvoker from "../../../../classes/components/content/invoker/CInvoker";
+import {SingleComponent} from "@decorators/SingleComponent";
+import CInvoker from "@classes/components/content/invoker/CInvoker";
 
 const invokerPrefixURL = '/invokers';
 

@@ -17,14 +17,14 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import {Table, TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
-import {Permissions} from '../../../../utils/constants/app';
+import {Permissions} from '@utils/constants/app';
 import theme from "react-toolbox/lib/input/theme.css";
 
-import styles from '../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../decorators/FormElement";
-import FontIcon from "../../basic_components/FontIcon";
-import Checkbox from "../../basic_components/inputs/Checkbox";
-import {formatHtmlId} from "../../../../utils/app";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
+import FontIcon from "@basic_components/FontIcon";
+import Checkbox from "@basic_components/inputs/Checkbox";
+import {formatHtmlId} from "@utils/app";
 
 
 /**

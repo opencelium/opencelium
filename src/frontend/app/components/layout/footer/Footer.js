@@ -17,8 +17,8 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 
-import {getThemeClass} from "../../../utils/app";
-import styles from '../../../themes/default/layout/footer.scss';
+import {getThemeClass} from "@utils/app";
+import styles from '@themes/default/layout/footer.scss';
 
 
 function mapStateToProps(state){

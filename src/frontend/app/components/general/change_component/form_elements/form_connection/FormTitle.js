@@ -15,10 +15,10 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
-import styles from '../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../decorators/FormElement";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
 
 /**
  * Component for Form Input
@@ -74,7 +74,7 @@ class FormTitle extends Component{
                 readOnly={isReadonly}
                 className={inputStyle}
                 required={required}
-                theme={{label: styles.form_input_label}}
+                theme={{label: styles.form_input_label, input: isReadonly ? styles.form_input_readonly_input : ''}}
             />
         );
     }

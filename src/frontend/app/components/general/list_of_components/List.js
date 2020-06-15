@@ -19,7 +19,7 @@ import { Container, Row, Col } from "react-grid-system";
 
 import ListHeader from './Header';
 import Card from './Card';
-import Pagination, {ENTITIES_PRO_PAGE} from "../../general/basic_components/pagination/Pagination";
+import Pagination, {ENTITIES_PRO_PAGE} from "@basic_components/pagination/Pagination";
 import CardError from "./CardError";
 import AddButton from "./AddButton";
 import {
@@ -28,10 +28,10 @@ import {
     addViewCardKeyNavigation, removeAddEntityKeyNavigation, removeDeleteCardKeyNavigation,
     removeSelectCardKeyNavigation, removeGraphCardKeyNavigation, addEnterKeyNavigation, removeEnterKeyNavigation,
     removeUpdateCardKeyNavigation, removeViewCardKeyNavigation, switchUserListKeyNavigation,
-} from "../../../utils/key_navigation";
-import {getThemeClass, isString, searchByNameFunction, sortByNameFunction} from "../../../utils/app";
-import styles from '../../../themes/default/general/list_of_components.scss';
-import Input from "../basic_components/inputs/Input";
+} from "@utils/key_navigation";
+import {getThemeClass, isString, searchByNameFunction, sortByNameFunction} from "@utils/app";
+import styles from '@themes/default/general/list_of_components.scss';
+import Input from "@basic_components/inputs/Input";
 
 
 /**

@@ -17,8 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Confirmation from "../../../../../app/Confirmation";
 
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
+import styles from '@themes/default/general/form_methods.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 /**

@@ -16,15 +16,15 @@
 import Rx from 'rxjs/Rx';
 import jwt from 'jsonwebtoken';
 
-import store from '../utils/store';
-import {loginUserFulfilled, sessionExpired} from '../actions/auth';
-import {doRequestRejected} from '../actions/app';
-import {updateMenu} from '../actions/app';
+import store from '@utils/store';
+import {loginUserFulfilled, sessionExpired} from '@actions/auth';
+import {doRequestRejected} from '@actions/app';
+import {updateMenu} from '@actions/app';
 
-import {setLS, getLS} from '../utils/LocalStorage';
-import {baseUrl, baseUrlApi} from '../utils/constants/url';
-import {history} from '../components/App';
-import {AuthAction} from "./actions";
+import {setLS, getLS} from '@utils/LocalStorage';
+import {baseUrl, baseUrlApi} from '@utils/constants/url';
+import {history} from '@components/App';
+import {AuthAction} from "@utils/actions";
 
 const {ajax} = Rx.Observable;
 

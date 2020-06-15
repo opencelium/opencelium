@@ -17,17 +17,17 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import { Row, Col, Visible, Hidden } from "react-grid-system";
-import Table from '../../general/basic_components/table/Table';
+import Table from '@basic_components/table/Table';
 import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 
 import SubHeader from "../../general/view_component/SubHeader";
 
-import styles from '../../../themes/default/content/my_profile/my_profile.scss';
+import styles from '@themes/default/content/my_profile/my_profile.scss';
 
-import {Permissions} from '../../../utils/constants/app';
+import {Permissions} from '@utils/constants/app';
 import UserGroupIcon from "../../icons/UserGroupIcon";
 import {connect} from "react-redux";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

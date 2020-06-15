@@ -15,11 +15,11 @@
 
 import React, { Component }  from 'react';
 import {Col, Container, Row} from "react-grid-system";
-import styles from '../../../themes/default/content/app/app.scss';
+import styles from '@themes/default/content/app/app.scss';
 
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

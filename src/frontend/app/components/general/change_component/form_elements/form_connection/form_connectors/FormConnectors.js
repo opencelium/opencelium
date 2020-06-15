@@ -16,20 +16,20 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import Input from '../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../../../decorators/FormElement";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
 import {Row, Col} from "react-grid-system";
-import {ArrowRight} from '../../../../basic_components/Arrows';
+import {ArrowRight} from '@basic_components/Arrows';
 
 import {
     CONNECTOR_DEPTH_LIMIT,
     CONNECTOR_FROM,
     CONNECTOR_TO,
     METHOD_ITEM, OPERATOR_ITEM, OUTSIDE_ITEM
-} from "../../../../../../classes/components/content/connection/CConnectorItem";
+} from "@classes/components/content/connection/CConnectorItem";
 import FormOperations from "../../form_invoker/FormOperations";
 import InvokerButton from "./InvokerButton";
 
@@ -85,24 +85,26 @@ class FormConnectors extends Component{
     handleChange(value, connectorType){
         let {entity, updateEntity, data} = this.props;
         let {connectors} = data;
-        let connector = connectors.find(c => c.id === value.value);
-        let invoker = connector.invoker;
-        switch(connectorType){
-            case 'fromConnector':
-                entity.fromConnector.id = value.value;
-                entity.fromConnector.title = value.label;
-                entity.fromConnector.invoker = invoker;
-                entity.fromConnector.setConnectorType(CONNECTOR_FROM);
-                break;
-            case 'toConnector':
-                entity.toConnector.id = value.value;
-                entity.toConnector.title = value.label;
-                entity.toConnector.invoker = invoker;
-                entity.toConnector.setConnectorType(CONNECTOR_TO);
-                break;
+        let connector = connectors ? connectors.find(c => c.id === value.value) : null;
+        if(connector) {
+            let invoker = connector.invoker;
+            switch (connectorType) {
+                case 'fromConnector':
+                    entity.fromConnector.id = value.value;
+                    entity.fromConnector.title = value.label;
+                    entity.fromConnector.invoker = invoker;
+                    entity.fromConnector.setConnectorType(CONNECTOR_FROM);
+                    break;
+                case 'toConnector':
+                    entity.toConnector.id = value.value;
+                    entity.toConnector.title = value.label;
+                    entity.toConnector.invoker = invoker;
+                    entity.toConnector.setConnectorType(CONNECTOR_TO);
+                    break;
+            }
+            entity.resetToEmptyTemplate();
+            updateEntity(entity);
         }
-        entity.resetToEmptyTemplate();
-        updateEntity(entity);
     }
 
     addMethod(connectorType, methodType, operation){
@@ -134,7 +136,7 @@ class FormConnectors extends Component{
     }
 
     renderFromInvoker(){
-        const {hasAddMethod} = this.props.data;
+        const {hasAddMethod, connectors} = this.props.data;
         const {isFromInvokerOpened, fromWillDisappear} = this.state;
         if(!isFromInvokerOpened){
             return null;
@@ -143,13 +145,13 @@ class FormConnectors extends Component{
         let invoker = entity.fromConnector.invoker;
         return(
             <div className={`${styles.form_connector_from_invoker} ${fromWillDisappear ? styles.form_connector_from_invoker_disappear : styles.form_connector_from_invoker_appear}`}>
-                <FormOperations entity={invoker} connector={entity.fromConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={hasAddMethod === true ? ::this.addMethod : null}/>
+                <FormOperations entity={invoker} connector={entity.fromConnector} data={{readOnly: true, visible: true, canAddMethods: false, connectors,}} forConnection={true} addMethod={hasAddMethod === true ? ::this.addMethod : null}/>
             </div>
         );
     }
 
     renderToInvoker(){
-        const {hasAddMethod} = this.props.data;
+        const {hasAddMethod, connectors} = this.props.data;
         const {isToInvokerOpened, toWillDisappear} = this.state;
         if(!isToInvokerOpened){
             return null;
@@ -158,7 +160,7 @@ class FormConnectors extends Component{
         let invoker = entity.toConnector.invoker;
         return(
             <div className={`${styles.form_connector_to_invoker} ${toWillDisappear ? styles.form_connector_to_invoker_disappear : styles.form_connector_to_invoker_appear}`}>
-                <FormOperations entity={invoker} connector={entity.toConnector} data={{readOnly: true, visible: true, canAddMethods: false,}} forConnection={true} addMethod={hasAddMethod === true ? ::this.addMethod : null}/>
+                <FormOperations entity={invoker} connector={entity.toConnector} data={{readOnly: true, visible: true, canAddMethods: false, connectors,}} forConnection={true} addMethod={hasAddMethod === true ? ::this.addMethod : null}/>
             </div>
         );
     }
@@ -204,12 +206,14 @@ class FormConnectors extends Component{
     renderConnectors(){
         const {source, placeholders} = this.props.data;
         const {entity} = this.props;
-        let fromConnectorValue = entity.fromConnector ? source.find(s => s.value === entity.fromConnector.id) : {label: 'Please, select connector', value: 0};
-        let toConnectorValue = entity.toConnector ? source.find(s => s.value === entity.toConnector.id) : {label: 'Please, select connector', value: 0};
+        let fromConnectorValue = entity.fromConnector ? source && source.find(s => s.value === entity.fromConnector.id) : {label: 'Please, select connector', value: 0};
+        let toConnectorValue = entity.toConnector ? source && source.find(s => s.value === entity.toConnector.id) : {label: 'Please, select connector', value: 0};
+        const fromPlaceholder = placeholders && placeholders.length > 0 ? placeholders[0] : '';
+        const toPlaceholder = placeholders && placeholders.length > 1 ? placeholders[1] : '';
         return(
             <Row>
                 <Col md={5} className={`${styles.form_select_connector}`}>
-                    <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{placeholders[0]}</div>
+                    <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{fromPlaceholder}</div>
                     <Select
                         id={'from_connector'}
                         value={fromConnectorValue}
@@ -225,7 +229,7 @@ class FormConnectors extends Component{
                     <ArrowRight style={{marginTop: '32px'}} className={styles.input_direction_arrow_readonly}/>
                 </Col>
                 <Col md={5} className={`${styles.form_select_connector}`}>
-                    <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{placeholders[1]}</div>
+                    <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{toPlaceholder}</div>
                     <Select
                         id={'to_connector'}
                         value={toConnectorValue}

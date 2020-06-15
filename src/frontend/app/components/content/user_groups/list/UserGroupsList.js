@@ -16,15 +16,15 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchUserGroups, fetchUserGroupsCanceled} from '../../../../actions/usergroups/fetch';
-import {deleteUserGroup} from '../../../../actions/usergroups/delete';
+import {fetchUserGroups, fetchUserGroupsCanceled} from '@actions/usergroups/fetch';
+import {deleteUserGroup} from '@actions/usergroups/delete';
 
 import List from '../../../general/list_of_components/List';
-import {ListComponent} from "../../../../decorators/ListComponent";
-import {permission} from "../../../../decorators/permission";
-import {UserGroupPermissions} from "../../../../utils/constants/permissions";
-import {LIST_TOURS} from "../../../../utils/constants/tours";
-import {tour} from "../../../../decorators/tour";
+import {ListComponent} from "@decorators/ListComponent";
+import {permission} from "@decorators/permission";
+import {UserGroupPermissions} from "@utils/constants/permissions";
+import {LIST_TOURS} from "@utils/constants/tours";
+import {tour} from "@decorators/tour";
 
 
 const prefixUrl = '/usergroups';

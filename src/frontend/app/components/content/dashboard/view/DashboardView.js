@@ -18,8 +18,8 @@ import {connect} from "react-redux";
 import {withTranslation} from 'react-i18next';
 import MonitoringBoards from "./MonitoringBoards";
 import Content from "../../../general/content/Content";
-import styles from '../../../../themes/default/content/dashboard/dashboard.scss';
-import {getThemeClass} from "../../../../utils/app";
+import styles from '@themes/default/content/dashboard/dashboard.scss';
+import {getThemeClass} from "@utils/app";
 
 
 function mapStateToProps(state){

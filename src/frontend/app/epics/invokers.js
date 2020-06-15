@@ -13,22 +13,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {InvokersAction} from '../utils/actions';
+import {InvokersAction} from '@utils/actions';
 import {
     fetchInvokersFulfilled,fetchInvokersRejected,
     fetchInvokerFulfilled, fetchInvokerRejected,
-} from '../actions/invokers/fetch';
+} from '@actions/invokers/fetch';
 import {
     addInvokerFulfilled, addInvokerRejected,
-} from '../actions/invokers/add';
+} from '@actions/invokers/add';
 import {
     updateInvokerFulfilled, updateInvokerRejected,
-} from '../actions/invokers/update';
+} from '@actions/invokers/update';
 import {
     deleteInvokerFulfilled, deleteInvokerRejected,
-} from '../actions/invokers/delete';
+} from '@actions/invokers/delete';
 
-import {doRequest} from "../utils/auth";
+import {doRequest} from "@utils/auth";
 
 
 /**
