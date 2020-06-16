@@ -116,8 +116,8 @@ public class TestConnections {
     public void ConnectionLoginTest() throws Exception {
 
         CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"020","Connections Test Login");
-        Har har = proxy.getHar();
-        System.console().printf("HAR "+ har.getLog());
+        //Har har = proxy.getHar();
+        //System.console().printf("HAR "+ har.getLog());
     }
 
 
