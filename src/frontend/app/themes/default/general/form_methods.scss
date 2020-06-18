@@ -704,6 +704,7 @@
 }
 
 .body_label{
+  display: block;
   font-size: $FONT_SIZE_TINY;
   position: initial;
   font-family: $FONT_FAMILY;
@@ -863,7 +864,6 @@
   position: absolute;
   max-height: 500px;
   overflow: hidden auto;
-  left: -20px;
 }
 
 .method_body_placeholder{

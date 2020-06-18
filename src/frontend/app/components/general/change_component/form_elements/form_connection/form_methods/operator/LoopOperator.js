@@ -342,13 +342,11 @@ LoopOperator.propTypes = {
     operator: PropTypes.instanceOf(COperatorItem).isRequired,
     updateEntity: PropTypes.func.isRequired,
     styles: PropTypes.object,
-    marginLeft: PropTypes.string,
 };
 
 LoopOperator.defaultProps = {
     styles: {},
     tooltip: '',
-    marginLeft: '0',
 };
 
 export default LoopOperator;

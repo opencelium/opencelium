@@ -51,15 +51,6 @@ class ScheduleUpdate extends Component{
         };
     }
 
-    componentDidUpdate(prevProps){
-        if(this.state.showUpdateSchedule){
-            setFocusById('input_title');
-        }
-        if(prevProps.schedule.title !== this.props.schedule.title){
-            this.setState({scheduleTitle: this.props.schedule.title});
-        }
-    }
-
     /**
      * to update schedule
      */
@@ -104,6 +95,7 @@ class ScheduleUpdate extends Component{
                     onChange={::this.setScheduleTitle}
                     value={this.state.scheduleTitle}
                     label={'title'}
+                    hasFocus={true}
                 />
             </Dialog>
         );

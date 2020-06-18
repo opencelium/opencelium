@@ -303,6 +303,7 @@ class ConnectionAdd extends Component{
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
+            extraAction: 'CHECK_CONNECTION',
         },
         ];
         return (

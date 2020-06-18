@@ -30,6 +30,7 @@ import {updateConnectionFulfilled, updateConnectionRejected,
 import {deleteConnectionFulfilled, deleteConnectionRejected} from '@actions/connections/delete';
 import {doRequest} from "@utils/auth";
 import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
+import {checkConnectionFulfilled, checkConnectionRejected} from "@actions/connections/check";
 
 
 /**
@@ -225,6 +226,23 @@ const sendOperationRequestEpic = (action$, store) => {
         });
 };
 
+/**
+ * check one connection
+ */
+const checkConnectionEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.CHECK_CONNECTION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/check`;
+            let data = action.payload;
+            return Rx.Observable.of(checkConnectionFulfilled({}));
+            return doRequest({url, method: 'post', data},{
+                success: checkConnectionFulfilled,
+                reject: checkConnectionRejected,},
+            );
+        });
+};
+
 
 export {
     fetchConnectionEpic,
@@ -237,4 +255,5 @@ export {
     checkNeo4jEpic,
     checkNeo4jFulfilledEpic,
     sendOperationRequestEpic,
+    checkConnectionEpic,
 };

@@ -787,7 +787,6 @@ class IfOperator extends Component{
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : false;
         let operatorStyle = {
             height: '57.6px',
-            //marginLeft,
             width: `calc(100% - ${intend})`,
             padding: '5px',
             transition: 'width 0.5s ease 0s',
@@ -845,11 +844,6 @@ IfOperator.propTypes = {
     operator: PropTypes.instanceOf(COperatorItem).isRequired,
     updateEntity: PropTypes.func.isRequired,
     firstItemIndex: PropTypes.string,
-    marginLeft: PropTypes.string,
-};
-
-IfOperator.defaultProps = {
-    marginLeft: 0,
 };
 
 export default IfOperator;

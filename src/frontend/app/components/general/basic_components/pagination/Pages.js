@@ -31,10 +31,10 @@ class Pages extends Component{
 
     openPage(pageNumber){
         const {router, link, loadPage, current} = this.props;
-        if(!loadPage) {
+        if(typeof loadPage !== 'function') {
             router.push(`${link}${pageNumber}`);
         } else{
-            loadPage(current);
+            loadPage(pageNumber);
         }
     }
 

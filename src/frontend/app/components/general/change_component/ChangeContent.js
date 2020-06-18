@@ -341,6 +341,8 @@ class ChangeContent extends Component{
     render(){
         const {breadcrumbsItems, contents, translations, type, isActionInProcess, noBreadcrumbs, noHint, noNavigation, authUser} = this.props;
         const {page, focusedInput, contentsLength} = this.state;
+        const inputs = contents[page].inputs;
+        const {extraAction} = contents[page];
         let navigationPage = {
             page,
             lastPage: contentsLength - 1,
@@ -360,7 +362,7 @@ class ChangeContent extends Component{
                 }
                 <Form
                     clearValidationMessage={::this.clearValidationMessage}
-                    inputs={contents[page].inputs}
+                    inputs={inputs}
                     entity={this.state.entity}
                     updateEntity={::this.updateEntity}
                     focusedInput={focusedInput.name}
@@ -383,6 +385,7 @@ class ChangeContent extends Component{
                             entity={this.state.entity}
                             authUser={authUser}
                             makingRequest={this.state.makingRequest}
+                            extraAction={extraAction}
                         />
                 }
             </div>
@@ -414,6 +417,7 @@ ChangeContent.defaultProps = {
     noNavigation: false,
     noHint: false,
     noBreadcrumbs: false,
+    extraAction: '',
 };
 
 export default ChangeContent;

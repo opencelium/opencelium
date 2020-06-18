@@ -108,13 +108,13 @@ const fetchCurrentSchedulesEpic = (action$, store) => {
              let url = `${urlPrefix}/running/all`;
              return doRequest({url},{
                  success: (data) => {
-                     /*setTimeout(() => {
+                     setTimeout(() => {
                          if(!isCanceledCurrentSchedules) {
                              store.dispatch(fetchCurrentSchedules());
                          } else{
                              isCanceledCurrentSchedules = false;
                          }
-                     }, INTERVAL_OF_GETTING_CURRENT_SCHEDULES);*/
+                     }, INTERVAL_OF_GETTING_CURRENT_SCHEDULES);
                      return fetchCurrentSchedulesFulfilled(data);
                  },
                  reject: (data) => {

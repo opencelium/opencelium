@@ -145,6 +145,20 @@
   height: 25px;
 }
 
+.navigation_extra_action_loading{
+  min-height: 34px;
+  margin: 0 14px 0 0;
+  right: 0;
+  width: 32px;
+  float: right;
+  line-height: 34px;
+}
+
+.navigation_extra_action_loading>div{
+  width: 16px;
+  height: 16px;
+}
+
 .form_select_description_textarea{
   textarea{
     height: auto !important;
@@ -1134,4 +1148,92 @@
 .operation_item_header_appear{
   animation-name: $ANIMATION_FADE_IN_DOWN;
   animation-duration: .3s;
+}
+.from_connector_button{
+  margin-bottom: 20px;
+}
+.to_connector_button{
+  float: right;
+  margin-bottom: 20px;
+}
+.check_connection{
+  table-layout: fixed;
+  .method_name{
+    padding: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 100%;
+  }
+  .fields{
+    max-height: 105px;
+    overflow-y: auto;
+    padding: 15px 10px 0;
+    .field{
+      padding-right:20px;
+      float: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .value{
+      min-height: 29px;
+      float: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dependencies{
+      float: left;
+      margin-top: -5px;
+      .dependency{
+        max-width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding: 2px;
+        border-radius: 3px;
+        margin: 3px 3px;
+        display: inline-block;
+        cursor: default;
+      }
+    }
+  }
+  .expand{
+    padding: 2px 2px;
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .expand:hover{
+    padding: 2px 2px;
+    box-shadow: #9f9f9f 0 1px 3px 0;
+  }
+  .loop_navigation{
+    text-align: center;
+    position: absolute;
+    width: 45px;
+    max-height: 48px;
+    transition: all 0.3s;
+    .previous{
+      font-size: 18px;
+      cursor: pointer;
+      display: block;
+    }
+    .current_index{
+      font-size: 14px;
+      padding: 0 5px;
+      display: block;
+      color: #179221;
+    }
+    .next{
+      font-size: 18px;
+      cursor: pointer;
+      display: block;
+    }
+    .disabled{
+      cursor: default;
+      color: #eee;
+    }
+  }
 }

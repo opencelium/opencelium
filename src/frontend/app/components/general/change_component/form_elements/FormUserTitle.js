@@ -24,10 +24,10 @@ import {FormElement} from "@decorators/FormElement";
 import theme from "react-toolbox/lib/input/theme.css";
 
 /**
- * Component for Form Input
+ * Component for Form User Title
  */
-@FormElement()
 @withTranslation('users')
+@FormElement()
 class FormUserTitle extends Component{
 
     constructor(props){

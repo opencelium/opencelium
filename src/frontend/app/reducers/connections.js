@@ -27,6 +27,7 @@ const initialState = fromJS({
     fetchingConnections: API_REQUEST_STATE.INITIAL,
     deletingConnection: API_REQUEST_STATE.INITIAL,
     testingConnection: API_REQUEST_STATE.INITIAL,
+    checkingConnection: API_REQUEST_STATE.INITIAL,
     sendingOperationRequest: API_REQUEST_STATE.INITIAL,
     checkingNeo4j: false,
     checkingConnectionTitle: false,
@@ -40,6 +41,7 @@ const initialState = fromJS({
     error: null,
     message: {},
     notificationData: {},
+    checkConnectionResult: {},
 });
 
 let connections = [];
@@ -131,6 +133,12 @@ const reducer = (state = initialState, action) => {
             return state.set('sendingOperationRequest', API_REQUEST_STATE.FINISH).set('operationResponse', {success: true});
         case ConnectionsAction.SEND_OPERATIONREQUEST_REJECTED:
             return state.set('sendingOperationRequest', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
+        case ConnectionsAction.CHECK_CONNECTION:
+            return state.set('checkingConnection', API_REQUEST_STATE.START).set('error', null);
+        case ConnectionsAction.CHECK_CONNECTION_FULFILLED:
+            return state.set('checkingConnection', API_REQUEST_STATE.FINISH).set('checkConnectionResult', action.payload);
+        case ConnectionsAction.CHECK_CONNECTION_REJECTED:
+            return state.set('checkingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
         default:
             return state;
     }

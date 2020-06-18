@@ -60,7 +60,7 @@ class PrevPage extends Component{
     render(){
         const {link, isFirst} = this.props;
         let className = styles.prev_page;
-        if(link === -1){
+        if(link === -1 || link === ''){
             className += ' ' + styles.disable_arrow;
         }
         return(

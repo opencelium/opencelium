@@ -25,6 +25,7 @@ import {AuthAction} from "../utils/actions";
 import {history} from '@components/App';
 import {TOKEN_EXPIRED_MESSAGES} from "../utils/app";
 import Loading from "@components/general/app/Loading";
+import styles from "@themes/default/general/app";
 
 
 /**
@@ -37,6 +38,24 @@ export default function (store){
         let shortMessage = action.payload && action.payload.hasOwnProperty('shortMessage') ? action.payload.shortMessage : '';
         let data = {type: '', message: '', systemTitle, shortMessage};
         const dividedState = divideState(action.type);
+        const notification = document.getElementById('notification');
+        for(let i = notification.children.length - 1; i >= 0; i--){
+            let child = notification.children[i];
+            if(child.innerHTML === ''){
+                child.remove();
+            } else{
+                if(action.type === '@@router/LOCATION_CHANGE'){
+                    if(child && child.children.length > 0) {
+                        let note = child.children[0];
+                        if(note.querySelector('#notification_close')){
+                            note.classList.remove(styles['notification_show']);
+                            note.classList.add(styles['notification_hide']);
+                            setTimeout(() => {if(note){note.remove();}}, 1500);
+                        }
+                    }
+                }
+            }
+        }
         if(hasNotification(dividedState) && isNotBackground(action)) {
             data.message = dividedState.prefix;
             switch (dividedState.postfix) {
@@ -63,13 +82,6 @@ export default function (store){
                 case 'STORE':
                     data.type = NotificationType.NOTE;
                     break;
-            }
-            const notification = document.getElementById('notification');
-            for(let i = notification.children.length - 1; i >= 0; i--){
-                let child = notification.children[i];
-                if(child.innerHTML === ''){
-                    child.remove();
-                }
             }
             let idName = 'note_';
             if(notification.children.length === 0 || typeof notification.children[notification.children.length - 1].children[0] === 'undefined') {
