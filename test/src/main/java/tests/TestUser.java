@@ -10,6 +10,8 @@ import org.openqa.selenium.logging.*;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -93,6 +95,8 @@ public class TestUser {
    public void AddUserTest() throws InterruptedException {
 
         try {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+
             WebElement elementU = driver.findElement(By.linkText("Users"));
             elementU.click();
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
@@ -104,7 +108,7 @@ public class TestUser {
 
            //driver.navigate().to(constants.Constants.BASE_URL+"users/add");
 
-           driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("input_email")));
 
            WebElement emailField = driver.findElement(By.id("input_email"));
            emailField.sendKeys("test@test.io");
@@ -121,6 +125,8 @@ public class TestUser {
            WebElement nextArrow = driver.findElement(By.id("navigation_next"));
            nextArrow.click();
 
+
+           wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("input_name")));
            WebElement nameField = driver.findElement(By.id("input_name"));
            nameField.sendKeys("Selenium");
            TimeUnit.SECONDS.sleep(1);
@@ -147,6 +153,7 @@ public class TestUser {
            WebElement nextArrow1 = driver.findElement(By.id("navigation_next"));
            nextArrow1.click();
 
+           wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("input_userGroup")));
            //Set user group
            WebElement userGroup = driver.findElement(By.id("input_userGroup"));
 

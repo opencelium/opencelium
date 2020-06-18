@@ -11,6 +11,8 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -93,6 +95,8 @@ public class TestGroup {
     @Test(priority = 2)
     public void AddGroupTest() throws InterruptedException {
         try {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Groups")));
             WebElement elementG = driver.findElement(By.linkText("Groups"));
             elementG.click();
 
