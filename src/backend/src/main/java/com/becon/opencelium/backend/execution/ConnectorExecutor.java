@@ -16,9 +16,10 @@
 
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.constant.InvokerRegEx;
 import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
-import com.becon.opencelium.backend.factory.OperatorFactory;
+import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
@@ -26,21 +27,17 @@ import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.*;
-import com.becon.opencelium.backend.neo4j.service.BodyNodeServiceImp;
+import com.becon.opencelium.backend.neo4j.service.FieldNodeService;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.StatementNodeServiceImp;
-import com.becon.opencelium.backend.operator.Operator;
-import com.becon.opencelium.backend.utility.ConditionUtility;
+import com.becon.opencelium.backend.execution.statement.operator.Operator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
-import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -233,10 +230,9 @@ public class ConnectorExecutor {
         }
 
         // TODO: works only for CheckMk. Should be deleted in future.
-//        if (invoker.getName().equals("CheckMK")){
-//            formData.add("request", body);
-//            data = formData;
-//        }
+        if (invoker.getName().equals("CheckMK")){
+            data = "request=" + body;
+        }
 
         // TODO: Changed string to object in httpEntity;
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
@@ -347,8 +343,8 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String exp) {
         String result = exp;
-        String refRegex = "\\{(.*?)\\}";
-        String refResRegex = "\\{%(.*?)%\\}";
+        String refRegex = InvokerRegEx.requiredData;
+        String refResRegex = InvokerRegEx.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(exp);
         List<String> refParts = new ArrayList<>();
@@ -397,13 +393,12 @@ public class ConnectorExecutor {
             if (fieldNodeService.hasEnhancement(f.getId())){
                 MethodNode methodNode = methodNodeServiceImp.getByFieldNodeId(f.getId())
                         .orElseThrow(() -> new RuntimeException("Method not found for field: " + f.getId()));
-                String path = fieldNodeService.getPath(methodNode, f);
                 item.put(f.getName(), executionContainer.getValueFromEnhancementData(f));
                 return;
             }
 
             // from response data;
-            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasReference(f.getValue())){
+            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && FieldNodeService.hasReference(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
                 return;
             }
@@ -488,7 +483,7 @@ public class ConnectorExecutor {
             String ref = statementNodeService.convertToRef(statementNode);
             String rightPropertyValueRef = leftStatement + "." + statementNode.getRightPropertyValue();
             Object value;
-            if (fieldNodeService.hasReference(ref)){
+            if (FieldNodeService.hasReference(ref)){
                 value = executionContainer.getValueFromResponseData(ref);
                 result.add(value);
             } else {
@@ -501,7 +496,7 @@ public class ConnectorExecutor {
         }
 
         String ref = statementNodeService.convertToRef(statementNode);
-        if (!fieldNodeService.hasReference(ref)){
+        if (!FieldNodeService.hasReference(ref)){
             return statementNode.getFiled();
         }
         return executionContainer.getValueFromResponseData(ref);
