@@ -22,7 +22,7 @@ import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 import Pagination from 'react-bootstrap/Pagination';
 
 import styles from '@themes/default/content/schedules/schedules.scss';
-import {getThemeClass, sortByIdFunction} from "@utils/app";
+import {getThemeClass, setFocusById, sortByIdFunction} from "@utils/app";
 import {deleteSchedules} from '@actions/schedules/delete';
 import {startSchedules, enableSchedules, disableSchedules} from '@actions/schedules/update';
 import {checkApp, checkAppCanceled} from "@actions/apps/fetch";
@@ -85,6 +85,7 @@ class ScheduleList extends Component{
     }
 
     componentDidMount(){
+        setFocusById('filter_title');
         this.checkElasticSearch();
     }
 
@@ -306,7 +307,7 @@ class ScheduleList extends Component{
             <Input
                 id={'filter_title'}
                 name={'filter_title'}
-                placeholder={t('ADD.FILTER_PLACEHOLDER')}
+                label={t('ADD.FILTER_PLACEHOLDER')}
                 type={'text'}
                 onChange={::this.onChangeFilterTitle}
                 value={filterTitle}

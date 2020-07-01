@@ -91,7 +91,7 @@ public class UserDetail {
         this.profilePicture = StringUtility.findImageFromUrl(userDetailResource.getProfilePicture());
         this.tutorial = userDetailResource.isAppTour();
         this.theme = userDetailResource.getTheme();
-        this.theme = userDetailResource.getLang();
+        this.lang = userDetailResource.getLang();
     }
 
 

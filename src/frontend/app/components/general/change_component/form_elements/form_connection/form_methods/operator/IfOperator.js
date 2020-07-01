@@ -781,15 +781,15 @@ class IfOperator extends Component{
     }
 
     render(){
-        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton, marginLeft} = this.props;
+        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton, intend} = this.props;
         let classNames = styles.operator_icon;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : false;
         let operatorStyle = {
-            height: '50px',
-            marginLeft,
+            height: '57.6px',
+            width: `calc(100% - ${intend})`,
             padding: '5px',
-            transition: 'all 0.3s ease 0s',
+            transition: 'width 0.5s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',
         };
         if(isCurrentItem){
@@ -807,31 +807,33 @@ class IfOperator extends Component{
             menuEditStyles.left = '-17px';
         }
         return (
-            <div style={operatorStyle}>
-                <div style={{float: 'left', width: '10%', marginTop: '5px'}}>
-                    <TooltipFontIcon
-                        className={classNames}
-                        style={{transform: "rotate(180deg)"}}
-                        tooltip={tooltip}
-                        value={'call_split'}
-                        onClick={::this.setCurrentItem}
-                        tooltipPosition={'top'}
-                    />
+            <div style={{display: 'flex'}}>
+                <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
+                <div style={operatorStyle}>
+                    <div style={{float: 'left', width: '10%', marginTop: '10px'}}>
+                        <TooltipFontIcon
+                            className={classNames}
+                            style={{transform: "rotate(180deg)"}}
+                            tooltip={tooltip}
+                            value={'call_split'}
+                            onClick={::this.setCurrentItem}
+                            tooltipPosition={'top'}
+                        />
+                    </div>
+                    {
+                        isVisibleMenuEdit
+                        ?
+                            <div className={styles.menu_edit} style={menuEditStyles} onClick={::this.setCurrentItem}>
+                                {this.renderLeftStatement()}
+                                {this.renderOperatorInput()}
+                                {this.renderRightStatement()}
+                                {renderCloseMenuEditButton()}
+                            </div>
+                        :
+                            this.renderPlaceholder()
+                    }
                 </div>
-                {
-                    isVisibleMenuEdit
-                    ?
-                        <div className={styles.menu_edit} style={menuEditStyles} onClick={::this.setCurrentItem}>
-                            {this.renderLeftStatement()}
-                            {this.renderOperatorInput()}
-                            {this.renderRightStatement()}
-                            {renderCloseMenuEditButton()}
-                        </div>
-                    :
-                        this.renderPlaceholder()
-                }
             </div>
-
         );
     }
 }
@@ -842,11 +844,6 @@ IfOperator.propTypes = {
     operator: PropTypes.instanceOf(COperatorItem).isRequired,
     updateEntity: PropTypes.func.isRequired,
     firstItemIndex: PropTypes.string,
-    marginLeft: PropTypes.string,
-};
-
-IfOperator.defaultProps = {
-    marginLeft: 0,
 };
 
 export default IfOperator;

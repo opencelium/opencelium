@@ -1,6 +1,11 @@
 package tests;
 
 import constants.Constants;
+import net.lightbody.bmp.BrowserMobProxy;
+import net.lightbody.bmp.BrowserMobProxyServer;
+import net.lightbody.bmp.client.ClientUtil;
+import net.lightbody.bmp.core.har.Har;
+import net.lightbody.bmp.proxy.CaptureType;
 import org.openqa.selenium.*;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
@@ -28,6 +33,7 @@ import static org.testng.Assert.assertNotNull;
 public class TestConnections {
 
     WebDriver driver;
+    BrowserMobProxy proxy;
 
     String mLogin;
     String mPassword;
@@ -56,11 +62,34 @@ public class TestConnections {
         logs.enable(LogType.PROFILER, Level.ALL);
 
 
+
+        // start the proxy
+        proxy = new BrowserMobProxyServer();
+        proxy.start(0);
+
+        // get the Selenium proxy object
+        Proxy seleniumProxy = ClientUtil.createSeleniumProxy(proxy);
+
+        // configure it as a desired capability
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        capabilities.setCapability(CapabilityType.PROXY, seleniumProxy);
+
+        capabilities.setBrowserName("firefox");
+        capabilities.setPlatform(Platform.LINUX);
+
+
         //System.setProperty("webdriver.chrome.driver", "/home/selenium/Downloads/chromedriver");
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("firefox");
         desiredCapabilities.setPlatform(Platform.LINUX);
         desiredCapabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
+
+        // enable more detailed HAR capture, if desired (see CaptureType for the complete list)
+        proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
+
+        // create a new HAR with the label "yahoo.com"
+        proxy.newHar(mHubUrl);
+
 
 
         driver = new RemoteWebDriver(new URL(mHubUrl),desiredCapabilities);
@@ -87,6 +116,8 @@ public class TestConnections {
     public void ConnectionLoginTest() throws Exception {
 
         CommonCaseUtility.Login(driver,testCases,mLogin,mPassword,"020","Connections Test Login");
+        //Har har = proxy.getHar();
+        //System.console().printf("HAR "+ har.getLog());
     }
 
 
@@ -98,7 +129,7 @@ public class TestConnections {
 
             //Successfully get connections list
             TimeUnit.SECONDS.sleep(4);
-            driver.findElement(By.xpath("//*[text()='Success']"));
+            //driver.findElement(By.xpath("//*[text()='Success']"));
             driver.findElement(By.id("button_add_connection")).click();
 
             TimeUnit.SECONDS.sleep(2);

@@ -45,7 +45,7 @@ export default class CConnectorItem{
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
         this._pagination = this.setConnectorPagination();
-        this._currentProgress = this.setCurrentProgress();
+        this._currentProgress = this.getCurrentProgress();
         this._operatorsHistory = [];
     }
 
@@ -131,12 +131,15 @@ export default class CConnectorItem{
         return CConnectorPagination.createConnectorPagination(this);
     }
 
-    setCurrentProgress(){
+    getCurrentProgress(item = null){
+        if(item === null){
+            item = this._currentItem;
+        }
         let result = 0;
         let currentIndex = 0;
         let allItems = [];
-        if(this._currentItem){
-            currentIndex = this._currentItem.index;
+        if(item){
+            currentIndex = item.index;
             if(this._pagination.allItems){
                 allItems = this._pagination.allItems;
             }
@@ -156,12 +159,12 @@ export default class CConnectorItem{
 
     loadPage(number){
         this._pagination.setCurrentPageNumber(number);
-        this._currentProgress = this.setCurrentProgress();
+        this._currentProgress = this.getCurrentProgress();
     }
 
     reloadPagination(settings){
         this._pagination.reload(this, settings);
-        this._currentProgress = this.setCurrentProgress();
+        this._currentProgress = this.getCurrentProgress();
     }
 
     reloadOperatorsHistory(){

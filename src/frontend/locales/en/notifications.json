@@ -19,6 +19,7 @@
     "FETCH_CONNECTORS": "Connectors were successfully fetched",
     "UPDATE_CONNECTOR": "The connector was successfully updated",
     "DELETE_CONNECTOR": "The connector was successfully removed",
+    "CHECK_CONNECTION": "The connection was successfully checked",
     "ADD_CONNECTION": "The connection was successfully added",
     "FETCH_CONNECTIONS": "Connections were successfully fetched",
     "UPDATE_CONNECTION": "The connection was successfully updated",
@@ -82,9 +83,15 @@
       "CONNECTOR_EXISTS": "This connector with this name already exists",
       "__DEFAULT__": "The connector was not updated"
     },
+    "UPDATE_CONNECTORICON": {
+      "__DEFAULT__": "The icon was not updated"
+    },
     "DELETE_CONNECTOR": {
       "EXIST_IN_CONNECTION": "This connector is used in connections",
       "__DEFAULT__": "The connector was not removed"
+    },
+    "CHECK_CONNECTION": {
+      "__DEFAULT__": "The connection was not checked"
     },
     "ADD_CONNECTION": {
       "CONNECTION_EXISTS": "This connection with this name already exists",

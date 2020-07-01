@@ -127,6 +127,9 @@ class Body extends Component{
     renderEnhancement(){
         const {showEnhancement, currentEnhancement} = this.state;
         const {readOnly, connection, method} = this.props;
+        if(!(connection instanceof CConnection)){
+            return null;
+        }
         let bindingItem = connection.fieldBinding.find(item => item.to.findIndex(elem => elem.color === method.color) !== -1);
         if(!bindingItem){
             return null;
@@ -183,15 +186,15 @@ class Body extends Component{
     renderPlaceholder(){
         const {method} = this.props;
         let hasError = false;
-        if(method.error.hasError){
+        if(method.error && method.error.hasError){
             if(method.error.location === 'body'){
                 hasError = true;
             }
         }
         return(
             <React.Fragment>
-                <br/>
                 <span className={styles.method_body_placeholder}
+                      title={'more details'}
                       style={hasError ? {color: 'red'} : {}}
                       onClick={::this.openBodyEdit}>{`{ ... }`}</span>
             </React.Fragment>
@@ -211,12 +214,16 @@ class Body extends Component{
 
     render(){
         const {isBodyEditOpened} = this.state;
-        const {id, readOnly, method, connector, connection, updateBody, setCurrentItem} = this.props;
+        const {id, readOnly, method, connector, connection, updateBody, setCurrentItem, bodyStyles} = this.props;
         if(!isBodyEditOpened){
             return this.renderPlaceholder();
         }
+        let ownBodyStyles = {left: '-20px'};
+        if(bodyStyles){
+            ownBodyStyles = bodyStyles;
+        }
         return(
-            <div className={`${theme.input} ${styles.method_body}`}>
+            <div className={`${theme.input} ${styles.method_body}`} style={ownBodyStyles}>
                 {::this.renderCloseMenuEditButton()}
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <div style={{display: 'none'}} id={`${id}_reference_component`}/>
@@ -268,15 +275,15 @@ class Body extends Component{
 Body.propTypes = {
     id: PropTypes.string.isRequired,
     readOnly: PropTypes.bool,
-    method: PropTypes.instanceOf(CMethodItem).isRequired,
-    connection: PropTypes.instanceOf(CConnection).isRequired,
-    connector: PropTypes.instanceOf(CConnectorItem).isRequired,
-    updateBody: PropTypes.func.isRequired,
-    setCurrentItem: PropTypes.func.isRequired,
+    connection: PropTypes.instanceOf(CConnection),
+    connector: PropTypes.instanceOf(CConnectorItem),
+    updateBody: PropTypes.func,
+    setCurrentItem: PropTypes.func,
 };
 
 Body.defaultProps = {
     readOnly: false,
+    bodyStyles: {},
 };
 
 export default Body;

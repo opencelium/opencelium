@@ -57,7 +57,7 @@ class NextPage extends Component{
     render(){
         const {link, isLast} = this.props;
         let className = styles.next_page;
-        if(link === -1){
+        if(link === -1 || link === ''){
             className += ' ' + styles.disable_arrow;
         }
         return(

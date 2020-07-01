@@ -22,6 +22,7 @@ import Button from "@basic_components/buttons/Button";
 import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import FontIcon from "@basic_components/FontIcon";
+import CheckConnection from "@change_component/extra_actions/check_connection/CheckConnection";
 
 
 /**
@@ -45,7 +46,7 @@ class Navigation extends Component{
     }
 
     renderNextButton(){
-        const {action, translations, isTested, authUser, makingRequest, isActionInProcess} = this.props;
+        const {action, translations, isTested, authUser, makingRequest, isActionInProcess, extraAction, entity} = this.props;
         let classNames = [
             'navigation_action_icon',
             'navigation_icon_text',
@@ -61,6 +62,7 @@ class Navigation extends Component{
         }
         let {type} = this.props;
         const {page, lastPage, nextPage} = this.props.navigationPage;
+        let extraButton = null;
         let isLastPage = false;
         let icon = 'arrow_forward';
         if(page === lastPage){
@@ -84,14 +86,24 @@ class Navigation extends Component{
             if(icon === ''){
                 return null;
             }
+            if(extraAction){
+                switch (extraAction) {
+                    case 'CHECK_CONNECTION':
+                        extraButton = <CheckConnection currentConnection={entity}/>;
+                        break;
+                }
+            }
             return (
-                <Button
-                    authUser={authUser}
-                    title={translations[type + 'Button']}
-                    icon={icon}
-                    onClick={action}
-                    className={styles[classNames.navigation_action_icon]}
-                />
+                <React.Fragment>
+                    <Button
+                        authUser={authUser}
+                        title={translations[type + 'Button']}
+                        icon={icon}
+                        onClick={action}
+                        className={styles[classNames.navigation_action_icon]}
+                    />
+                    {extraButton}
+                </React.Fragment>
             );
         }
         return <FontIcon className={styles[classNames.navigation_next_icon]} value={icon} onClick={nextPage} id={'navigation_next'}/>;
@@ -128,6 +140,7 @@ Navigation.defaultProps = {
     prevPage: null,
     type: 'add',
     isTested: 1,
+    extraAction: '',
 };
 
 

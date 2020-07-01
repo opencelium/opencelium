@@ -44,7 +44,7 @@ class OperatorItem extends Component{
             hasDeleteButton: false,
             isVisibleMenuEdit: false,
             isToggled: false,
-            operatorClassName: styles.item_toggle_in,
+            operatorClassName: '',
             isHidden: false,
             deletingOperator: false,
         };
@@ -70,14 +70,10 @@ class OperatorItem extends Component{
             isHidden = false;
         }
         if(operatorClassName !== prevState.operatorClassName) {
-            if(operatorClassName === styles.item_toggle_in && isHidden !== prevState.isHidden){
+            if(isHidden !== prevState.isHidden){
                 this.setState({
-                    operatorClassName,
+                    //operatorClassName,
                     isHidden,
-                });
-            } else {
-                this.setState({
-                    operatorClassName,
                 });
             }
         }
@@ -196,7 +192,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
-                    marginLeft={`${operator.intend * 20}px`}
+                    intend={`${operator.intend * 20}px`}
                 />;
             case LOOP_OPERATOR:
                 return <LoopOperator
@@ -209,7 +205,7 @@ class OperatorItem extends Component{
                     isVisibleMenuEdit={isVisibleMenuEdit}
                     toggleIsVisibleMenuEdit={::this.toggleIsVisibleMenuEdit}
                     renderCloseMenuEditButton={::this.renderCloseMenuEditButton}
-                    marginLeft={`${operator.intend * 20}px`}
+                    intend={`${operator.intend * 20}px`}
                 />;
         }
         return null;
@@ -248,11 +244,11 @@ class OperatorItem extends Component{
             return null;
         }
         let togglePanelStyles = {};
-        togglePanelStyles.marginLeft = `${operator.intend * 20}px`;
+        const intend = `${operator.intend * 20}px`;
+        togglePanelStyles.marginLeft = intend;
         if(operator.isMinimized && !deletingOperator) {
-            togglePanelStyles.height = '15px';
-            togglePanelStyles.marginTop = '10px';
-            togglePanelStyles.marginBottom = '10px';
+            togglePanelStyles.left = `calc(50% - ${intend})`;
+            togglePanelStyles.bottom = '-26px';
         }
         return(
             <div className={styles.toggle_panel} style={togglePanelStyles}>

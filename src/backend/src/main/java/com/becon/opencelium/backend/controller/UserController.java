@@ -25,6 +25,7 @@ import com.becon.opencelium.backend.mysql.service.ActivityServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
+import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,12 @@ public class UserController {
             throw new RoleNotFoundException(userRequestResource.getUserGroup());
         }
 
+        UserDetailResource userDetailResource = userRequestResource.getUserDetail();
+        if(userDetailResource.getLang() == null || userDetailResource.getLang() == ""){
+            userDetailResource.setLang("en");
+            userRequestResource.setUserDetail(userDetailResource);
+        }
+
         User user = userService.requestToEntity(userRequestResource);
         Activity activity = new Activity();
         activity.setUser(user);
@@ -119,6 +126,12 @@ public class UserController {
             throw new UserNotFoundException(id);
         }
         userRequestResource.setUserId(id);
+        UserDetailResource userDetailResource = userRequestResource.getUserDetail();
+        if(userDetailResource.getLang() == null || userDetailResource.getLang() == ""){
+            userDetailResource.setLang("en");
+            userRequestResource.setUserDetail(userDetailResource);
+        }
+
         User user = userService.requestToEntity(userRequestResource);
         userService.save(user);
 

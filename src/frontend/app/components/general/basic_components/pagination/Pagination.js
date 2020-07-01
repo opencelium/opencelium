@@ -46,28 +46,34 @@ class Pagination extends Component{
      */
     setPageSettings(props){
         const {setTotalPages} = this.props;
-        const {pageNumber, entitiesLength, link} = props.page;
-        if(typeof pageNumber !== 'undefined') {
-            this.page.current = pageNumber ? parseInt(pageNumber) : 1;
+        if(typeof setTotalPages === 'function') {
+            const {pageNumber, entitiesLength, link} = props.page;
+            if (typeof pageNumber !== 'undefined') {
+                this.page.current = pageNumber ? parseInt(pageNumber) : 1;
+            }
+            this.page.total = Math.ceil(entitiesLength / ENTITIES_PRO_PAGE);
+            if (this.page.total <= 0) {
+                this.page.total = 1;
+            }
+            this.page.link = link;
+            setTotalPages(this.page.total);
         }
-        this.page.total = Math.ceil(entitiesLength / ENTITIES_PRO_PAGE);
-        if(this.page.total <= 0){
-            this.page.total = 1;
-        }
-        this.page.link = link;
-        setTotalPages(this.page.total);
     }
 
     renderNext(){
         const{loadPage} = this.props;
         const {total, link} = this.page;
         let {current} = this.page;
+        let isLast = false;
         let next = -1;
+        if(current === total){
+            isLast = true;
+        }
         if(current + 1 <= total) {
             current++;
             next = link + parseInt(current);
         }
-        return <NextPage link={next} current={current} isLast={current === total} loadPage={loadPage}/>;
+        return <NextPage link={next} current={current} isLast={isLast} loadPage={loadPage}/>;
     }
 
     renderPrev(){
@@ -75,11 +81,15 @@ class Pagination extends Component{
         const {link} = this.page;
         let {current} = this.page;
         let prev = -1;
+        let isFirst = false;
+        if(current === 1){
+            isFirst = true;
+        }
         if(current - 1 >= 1){
             current--;
             prev = link + parseInt(current);
         }
-        return <PrevPage link={prev} current={current} isFirst={current === 1} loadPage={loadPage}/>;
+        return <PrevPage link={prev} current={current} isFirst={isFirst} loadPage={loadPage}/>;
     }
 
     render(){

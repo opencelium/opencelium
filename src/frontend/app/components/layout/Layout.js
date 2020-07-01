@@ -64,7 +64,7 @@ class Layout extends Component{
     componentDidMount(){
         const {addUserInStore} = this.props;
         addUserListener(addUserInStore);
-        setInterval(::this.checkOCConnection, 15000);
+        setInterval(::this.checkOCConnection, 15000000);
     }
 
     componentDidUpdate(){

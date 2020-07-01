@@ -44,7 +44,7 @@ import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
     updateConnectionEpic, deleteConnectionEpic, checkConnectionTitleEpic,
     validateConnectionFormMethodsEpic, checkNeo4jEpic, checkNeo4jFulfilledEpic,
-    sendOperationRequestEpic,
+    sendOperationRequestEpic, checkConnectionEpic,
 } from '@epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
@@ -169,4 +169,5 @@ export default combineEpics(
     addNotificationTemplateEpic,
     updateNotificationTemplateEpic,
     deleteNotificationTemplateEpic,
+    checkConnectionEpic,
 );

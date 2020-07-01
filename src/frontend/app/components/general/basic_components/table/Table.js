@@ -45,10 +45,6 @@ class Table extends Component{
     }
 }
 
-Table.propTypes = {
-    authUser: PropTypes.object.isRequired,
-};
-
 Table.defaultProps = {
     className: '',
 };

@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +16,8 @@ public class CommonCaseUtility {
 
     public static void Login(WebDriver driver, List<TestCases> testCases, String mLogin, String mPassword, String testID, String testName) throws InterruptedException {
 
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login_email")));
         WebElement element_login=driver.findElement (By.id("login_email"));
         element_login.sendKeys(mLogin);
         TimeUnit.SECONDS.sleep(2);
@@ -43,6 +47,8 @@ public class CommonCaseUtility {
 
     public static void Logout(WebDriver driver, List<TestCases> testCases,String testID, String testName){
         try {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("menu_logout")));
             WebElement buttonLogout=driver.findElement (By.id("menu_logout"));
             Assert.assertNotNull(buttonLogout);
             buttonLogout.click();
@@ -60,12 +66,15 @@ public class CommonCaseUtility {
 
     public static void CreateConnection(WebDriver driver, List<TestCases> testCases,String testID, String testName){
         try {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
             driver.findElement(By.linkText("Connections")).click();
             //Successfully get connections list
-            TimeUnit.SECONDS.sleep(4);
-            driver.findElement(By.xpath("//*[text()='Success']"));
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Success']")));
+            //driver.findElement(By.xpath("//*[text()='Success']"));
             driver.findElement(By.id("button_add_connection")).click();
-            TimeUnit.SECONDS.sleep(2);
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("input_connection_title")));
+
             driver.findElement(By.id("input_connection_title")).sendKeys("TestConnection"+ Math.random());
             driver.findElement(By.id("from_connector")).findElement(By.xpath("//*[text()='Connector']")).click();
             driver.findElement(By.id("react-select-2-option-0")).click();
@@ -81,6 +90,8 @@ public class CommonCaseUtility {
             js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
             driver.findElement(By.id("navigation_next")).click();
 
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("add_item_fromConnector")));
+
             driver.findElement(By.id("add_item_fromConnector")).click();
             driver.findElement(By.id("items_menu_fromConnector")).click();
             driver.findElement(By.id("react-select-4-option-0")).click();
@@ -93,7 +104,8 @@ public class CommonCaseUtility {
             js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
             driver.findElement(By.id("button_add")).click();
             TimeUnit.SECONDS.sleep(2);
-            driver.findElement(By.xpath("//*[text()='Success']"));
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Success']")));
             TimeUnit.SECONDS.sleep(3);
             testCases.add(new TestCases(testID,testName,"Pass"));
         } catch (Exception e) {

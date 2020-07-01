@@ -29,7 +29,7 @@ import {
     removeSelectCardKeyNavigation, removeGraphCardKeyNavigation, addEnterKeyNavigation, removeEnterKeyNavigation,
     removeUpdateCardKeyNavigation, removeViewCardKeyNavigation, switchUserListKeyNavigation,
 } from "@utils/key_navigation";
-import {getThemeClass, isString, searchByNameFunction, sortByNameFunction} from "@utils/app";
+import {getThemeClass, isString, searchByNameFunction, setFocusById, sortByNameFunction} from "@utils/app";
 import styles from '@themes/default/general/list_of_components.scss';
 import Input from "@basic_components/inputs/Input";
 
@@ -71,6 +71,7 @@ class List extends Component{
         if(mapEntity.hasOwnProperty('getAddLink')) {
             addAddEntityKeyNavigation(this);
         }
+        setFocusById('search_field');
         setTimeout(function(){
             const app_list = document.getElementById("app_list");
             if(app_list !== null) {
@@ -227,7 +228,7 @@ class List extends Component{
                             entities.length > 0 && !noSearchField
                             ?
                                 <div className={'tour-step-search-1'}>
-                                    <Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'}/>
+                                    <Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'} id={'search_field'}/>
                                 </div>
                             :
                                 null

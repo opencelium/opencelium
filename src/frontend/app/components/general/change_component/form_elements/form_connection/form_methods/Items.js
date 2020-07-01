@@ -30,6 +30,9 @@ import {DEFAULT_COLOR} from "@classes/components/content/connection/operator/CSt
 
 import Tooltip from 'react-toolbox/lib/tooltip';
 import InputHierarchy from "@basic_components/inputs/input_hierarchy/InputHierarchy";
+import Slider from "react-slick";
+import {DEFAULT_PAGE_LIMIT} from "@classes/components/content/connection/CConnectorPagination";
+import MethodPlaceholder from "@change_component/form_elements/form_connection/form_methods/method/MethodPlaceholder";
 
 const HistoryColor = (props) => {
     const {color, children, ...restProps} = props;
@@ -47,7 +50,7 @@ class Items extends Component{
         super(props);
 
         this.state = {
-            pointerTop: 30,
+            pointerTop: 35,
             isHierarchyOpened: false,
         };
     }
@@ -57,11 +60,13 @@ class Items extends Component{
         let {connector} = this.props;
         let connectorType = connector.getConnectorType();
         let currentItem = connector.getCurrentItem();
-        if(currentItem) {
+        const isAnimating = connector.pagination.isAnimating;
+        if(currentItem && !isAnimating) {
             let child = document.getElementById(`${currentItem.index}__${connectorType}`);
             if (child) {
-                if(pointerTop !== child.offsetTop + 18) {
-                    this.setState({pointerTop: child.offsetTop + 18});
+                let nextTop = child.offsetTop + 18 < 35 ? 35 : child.offsetTop + 18;
+                if(pointerTop !== nextTop) {
+                    this.setState({pointerTop: nextTop});
                 }
             }
         }
@@ -69,14 +74,34 @@ class Items extends Component{
 
     loadPrevPage(){
         const {connector, updateEntity} = this.props;
-        connector.loadPage(connector.pagination.currentPageNumber - 1);
+        connector.pagination.isAnimating = true;
+        connector.pagination.animationDirection = 'down';
         updateEntity();
+        setTimeout(() => {
+            this.slider.slickPrev();
+            setTimeout(() => {
+                connector.pagination.isAnimating = false;
+                connector.pagination.animationDirection = '';
+                connector.loadPage(connector.pagination.currentPageNumber - 1);
+                updateEntity();
+            }, 1000);
+        }, 300);
     }
 
     loadNextPage(){
         const {connector, updateEntity} = this.props;
-        connector.loadPage(connector.pagination.currentPageNumber + 1);
+        connector.pagination.isAnimating = true;
+        connector.pagination.animationDirection = 'up';
         updateEntity();
+        setTimeout(() => {
+            this.slider.slickNext();
+            setTimeout(() => {
+                connector.pagination.isAnimating = false;
+                connector.pagination.animationDirection = '';
+                connector.loadPage(connector.pagination.currentPageNumber + 1);
+                updateEntity();
+            }, 1000);
+        }, 300);
     }
 
     setCurrentItem(e, item){
@@ -130,16 +155,34 @@ class Items extends Component{
 
     renderNavigation(){
         const {connector} = this.props;
+        const animationDirection = connector.pagination.animationDirection;
+        const isAnimating = connector.pagination.isAnimating;
         if(connector.pagination.pageAmount > 1) {
-            let isUpDisable = connector.pagination.currentPageNumber === 0;
-            let isDownDisable = connector.pagination.currentPageNumber === connector.pagination.pageAmount - 1;
-            let currentProgressHeight = Math.ceil((connector.currentProgress * 25) / 100);
+            let isUpDisable = connector.pagination.currentPageNumber === 0 || isAnimating;
+            let isDownDisable = connector.pagination.currentPageNumber === connector.pagination.pageAmount - 1 || isAnimating;
+            let currentProgress = connector.currentProgress;
+            let currentItem = connector.getCurrentItem();
+            let closureNextItems = connector.pagination.closureNextItems;
+            let closurePreviousItems = connector.pagination.closurePreviousItems;
+            if(isAnimating && currentItem){
+                switch (animationDirection) {
+                    case 'up':
+                        currentItem = closureNextItems.length > 0 && closureNextItems[DEFAULT_PAGE_LIMIT] ? closureNextItems[DEFAULT_PAGE_LIMIT] : currentItem;
+                        break;
+                    case 'down':
+                        currentItem = closurePreviousItems.length > 0 ? closurePreviousItems[0] : currentItem;
+                        break;
+                }
+                currentProgress = connector.getCurrentProgress(currentItem);
+            }
+            let currentProgressHeight = Math.ceil((currentProgress * 25) / 100);
+            let transitionProperty = isAnimating ? 'height 1s linear 0.3s' : 'height 0.3s linear 0s';
             return (
                 <div className={styles.items_arrows}>
                     <TooltipFontIcon tooltip={'Up'} value={'keyboard_arrow_up'} onClick={isUpDisable ? null : ::this.loadPrevPage}
                                      className={`${styles.items_arrow_up} ${isUpDisable ? styles.item_arrow_disable : ''}`}/>
                      <div className={styles.items_navigation_bar}>
-                         <div style={{height: currentProgressHeight}} className={styles.items_navigation_current}/>
+                         <div style={{height: currentProgressHeight, transition: transitionProperty}} className={styles.items_navigation_current}/>
                      </div>
                     <TooltipFontIcon tooltip={'Down'} value={'keyboard_arrow_down'} onClick={isDownDisable ? null : ::this.loadNextPage}
                                      className={`${styles.items_arrow_down} ${isDownDisable ? styles.item_arrow_disable : ''}`}/>
@@ -150,7 +193,9 @@ class Items extends Component{
 
     renderItems() {
         const {connection, connector, updateEntity, readOnly} = this.props;
-        let allItems = connector.pagination.currentItems;
+        const animationDirection = connector.pagination.animationDirection;
+        const isAnimating = connector.pagination.isAnimating;
+        let allItems = isAnimating ? animationDirection === 'down' ? connector.pagination.closurePreviousItems : connector.pagination.closureNextItems : connector.pagination.currentItems;
         let allComponents = [];
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
@@ -158,6 +203,12 @@ class Items extends Component{
             }
             if(allItems[i] instanceof  COperatorItem){
                 allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
+            }
+        }
+        let placeholders = DEFAULT_PAGE_LIMIT - allItems.length % DEFAULT_PAGE_LIMIT;
+        if(isAnimating) {
+            for (let i = 0; i < placeholders; i++) {
+                allComponents.push(<MethodPlaceholder key={`placeholder_${i}`}/>);
             }
         }
         return allComponents;
@@ -181,6 +232,18 @@ class Items extends Component{
         const {isHierarchyOpened} = this.state;
         const {connector} = this.props;
         const history = connector.operatorsHistory;
+        const isAnimating = connector.pagination.isAnimating;
+        const animationDirection = connector.pagination.animationDirection;
+        const sliderSettings = {
+            vertical: true,
+            slidesToShow: DEFAULT_PAGE_LIMIT,
+            slidesToScroll: DEFAULT_PAGE_LIMIT,
+            infinite: false,
+            dots: false,
+            speed: 1000,
+            arrows: false,
+            initialSlide: animationDirection === 'down' && isAnimating ? DEFAULT_PAGE_LIMIT : 0
+        };
         return (
             <div className={styles.items}>
                 <InputHierarchy
@@ -204,7 +267,19 @@ class Items extends Component{
                 {::this.renderHistory()}
                 <div style={{opacity: isHierarchyOpened ? 0.5 : 1}}>
                     {::this.renderNavigation()}
-                    {::this.renderItems()}
+                    {
+                        isAnimating ?
+
+                            <Slider ref={c => (this.slider = c)}  {...sliderSettings}>
+                                {
+                                    ::this.renderItems()
+                                }
+                            </Slider>
+                            :
+                            <div style={{padding: '2px 1px'}}>
+                                {::this.renderItems()}
+                            </div>
+                    }
                     {::this.renderPointer()}
                 </div>
             </div>
