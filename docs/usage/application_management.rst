@@ -40,6 +40,9 @@ to view, to update, to graph or to delete the item. For example, ***U***
 to update the element. To undo the selection, just press **Esc** or
 **5** on the keyboard.
 
+Each Last has also a possibility to search elements, mostly by names
+or titles.
+
 View Element
 =========
 

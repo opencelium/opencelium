@@ -33,6 +33,7 @@ This documentation is organized into a couple of sections:
    :maxdepth: 2
 
    usecases/manage_templates
+   usecases/manage_notification_templates
    usecases/manage_invokers
 
 .. toctree::
