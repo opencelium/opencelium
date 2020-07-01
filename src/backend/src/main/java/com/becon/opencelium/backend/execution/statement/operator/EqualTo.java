@@ -14,20 +14,13 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.operator;
+package com.becon.opencelium.backend.execution.statement.operator;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class IsNotEmpty implements Operator{
+public class EqualTo implements Operator{
 
 
     @Override
     public <T, S> boolean compare(T val1, S val2) {
-        if ( !(val1 instanceof List) ) {
-            throw new RuntimeException("isNotEmpty() would be used with an Array");
-        }
-        ArrayList<T> arrayList = new ArrayList<T>((ArrayList)val1);
-        return !arrayList.isEmpty();
+        return val1.equals(val2);
     }
 }

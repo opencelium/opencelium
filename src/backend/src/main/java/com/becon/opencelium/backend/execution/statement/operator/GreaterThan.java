@@ -14,7 +14,7 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.operator;
+package com.becon.opencelium.backend.execution.statement.operator;
 
 import com.becon.opencelium.backend.utility.ConditionUtility;
 

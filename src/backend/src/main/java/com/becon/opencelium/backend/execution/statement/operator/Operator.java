@@ -14,16 +14,8 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.operator;
+package com.becon.opencelium.backend.execution.statement.operator;
 
-import com.becon.opencelium.backend.utility.ConditionUtility;
-
-public class LessThanOrEqualTo implements Operator {
-
-    @Override
-    public <T, S> boolean compare(T val1, S val2) {
-        double v1 = ConditionUtility.convertToDouble(val1);
-        double v2 = ConditionUtility.convertToDouble(val2);
-        return v1 <= v2;
-    }
+public interface Operator {
+    <T, S> boolean compare(T val1, S val2);
 }

@@ -14,9 +14,9 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.factory;
+package com.becon.opencelium.backend.execution.statement.operator.factory;
 
-import com.becon.opencelium.backend.operator.*;
+import com.becon.opencelium.backend.execution.statement.operator.*;
 
 public class OperatorFactory {
 

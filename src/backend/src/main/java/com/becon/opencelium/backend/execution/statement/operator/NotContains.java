@@ -14,13 +14,23 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.operator;
+package com.becon.opencelium.backend.execution.statement.operator;
 
-public class IsNull implements Operator {
+import java.util.ArrayList;
+import java.util.List;
 
-
+public class NotContains implements Operator {
     @Override
     public <T, S> boolean compare(T val1, S val2) {
-        return val1 == null;
+        ArrayList arrayList = new ArrayList<>();
+        if (val2 instanceof List){
+            arrayList = (ArrayList) val2;
+            ArrayList values = (ArrayList) arrayList.get(1);
+            Object value = arrayList.get(0);
+            return !values.contains(value);
+        } else {
+            arrayList = (ArrayList) val1;
+            return !arrayList.contains(val2);
+        }
     }
 }
