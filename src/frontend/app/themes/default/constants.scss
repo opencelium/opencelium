@@ -43,7 +43,14 @@ $ANIMATION_FADE_OUT_UP: fadeOutUp;
 $ANIMATION_SCALE_APPEAR: AScaleAppear;
 $ANIMATION_SCALE_DISAPPEAR: AScaleDisappear;
 
+$ANIMATION_EMPHASIZE: AEmphasize;
 
+
+@keyframes AEmphasize {
+  0%   {background-color: unset;}
+  50%  {background-color: #7aced2;}
+  100% {background-color: unset;}
+}
 @keyframes AScaleAppear {
   from {
     transform: scale(0) translate3d(100%, -100%, 0);

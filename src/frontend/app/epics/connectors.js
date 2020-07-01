@@ -147,7 +147,7 @@ const updateConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = updateConnectorFulfilled;
-            if(data.icon !== null){
+            if(data.icon){
                 successResponse = updateConnectorIcon;
             }
             delete data.icon;

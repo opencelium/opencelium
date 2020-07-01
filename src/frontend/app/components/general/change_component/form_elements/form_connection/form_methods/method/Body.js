@@ -23,7 +23,7 @@ class Body extends Component{
         this.state = {
             showImportJson: false,
             isBodyEditOpened: false,
-            importJsonBody: {},
+            importJsonBody: JSON.stringify(props.method.request.body),
             showEnhancement: false,
             currentEnhancement: null,
         };

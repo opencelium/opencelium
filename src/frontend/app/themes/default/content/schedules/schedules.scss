@@ -15,11 +15,6 @@
 
 @import '../../constants';
 
-@keyframes AEmphasize {
-  0%   {background-color: unset;}
-  50%  {background-color: #7aced2;}
-  100% {background-color: unset;}
-}
 .last_success_cell{
   transition: all 1s;
 }
@@ -29,7 +24,7 @@
 }
 
 .emphasize_cell{
-  animation-name: AEmphasize;
+  animation-name: $ANIMATION_EMPHASIZE;
   animation-duration: 2s;
 }
 

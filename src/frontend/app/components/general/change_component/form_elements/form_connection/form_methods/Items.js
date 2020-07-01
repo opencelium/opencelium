@@ -271,9 +271,9 @@ class Items extends Component{
                         isAnimating ?
 
                             <Slider ref={c => (this.slider = c)}  {...sliderSettings}>
-                                {
-                                    ::this.renderItems()
-                                }
+                            {
+                                ::this.renderItems()
+                            }
                             </Slider>
                             :
                             <div style={{padding: '2px 1px'}}>

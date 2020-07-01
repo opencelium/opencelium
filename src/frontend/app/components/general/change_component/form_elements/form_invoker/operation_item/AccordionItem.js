@@ -69,7 +69,7 @@ class AccordionItem extends Component{
     getRequestData(){
         const {connector, data} = this.props;
         const {connectors} = data;
-        const findConnector = connectors.find(c => c.id === connector.id);
+        const findConnector = connectors ? connectors.find(c => c.id === connector.id) : null;
         return findConnector ? findConnector.requestData : null;
     }
 
