@@ -153,6 +153,7 @@ just toggle it clicking on the title.
    :align: middle
 .. |image22| image:: ../img/connection/22.png
 .. |image23| image:: ../img/connection/23.png
+   :align: middle
 .. |image24| image:: ../img/connection/24.png
    :align: middle
 .. |image80| image:: ../img/connection/0.png
