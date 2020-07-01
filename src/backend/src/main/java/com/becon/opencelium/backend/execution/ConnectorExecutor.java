@@ -398,7 +398,7 @@ public class ConnectorExecutor {
             }
 
             // from response data;
-            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && FieldNodeService.hasReference(f.getValue())){
+            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasReference(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
                 return;
             }
