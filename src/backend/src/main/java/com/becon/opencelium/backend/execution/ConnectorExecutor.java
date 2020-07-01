@@ -483,7 +483,7 @@ public class ConnectorExecutor {
             String ref = statementNodeService.convertToRef(statementNode);
             String rightPropertyValueRef = leftStatement + "." + statementNode.getRightPropertyValue();
             Object value;
-            if (FieldNodeService.hasReference(ref)){
+            if (fieldNodeService.hasReference(ref)){
                 value = executionContainer.getValueFromResponseData(ref);
                 result.add(value);
             } else {
@@ -496,7 +496,7 @@ public class ConnectorExecutor {
         }
 
         String ref = statementNodeService.convertToRef(statementNode);
-        if (!FieldNodeService.hasReference(ref)){
+        if (!fieldNodeService.hasReference(ref)){
             return statementNode.getFiled();
         }
         return executionContainer.getValueFromResponseData(ref);
