@@ -48,15 +48,21 @@ Choosing type you need to select template of that type and recipients who gets a
 
 
 
-.. |image0| image:: ../img/schedule/image0.png
-.. |image1| image:: ../img/schedule/image1.png
-.. |image2| image:: ../img/schedule/image2.png
-.. |image3| image:: ../img/schedule/image3.png
-.. |image4| image:: ../img/schedule/image4.png
-.. |image5| image:: ../img/schedule/image5.png
-.. |image6| image:: ../img/schedule/image6.png
-.. |image7| image:: ../img/schedule/image7.png
-.. |image8| image:: ../img/schedule/image8.png
-.. |image9| image:: ../img/schedule/image9.png
-.. |image10| image:: ../img/schedule/image10.png
-.. |image11| image:: ../img/schedule/image11.png
+.. |image0| image:: ../img/schedule/0.png
+   :align: middle
+.. |image1| image:: ../img/schedule/1.png
+   :align: middle
+.. |image2| image:: ../img/schedule/2.png
+.. |image3| image:: ../img/schedule/3.png
+.. |image4| image:: ../img/schedule/4.png
+.. |image5| image:: ../img/schedule/5.png
+.. |image6| image:: ../img/schedule/6.png
+.. |image7| image:: ../img/schedule/7.png
+.. |image8| image:: ../img/schedule/8.png
+   :align: middle
+.. |image9| image:: ../img/schedule/9.png
+   :align: middle
+.. |image10| image:: ../img/schedule/10.png
+   :align: middle
+.. |image11| image:: ../img/schedule/11.png
+   :align: middle

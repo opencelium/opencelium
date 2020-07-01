@@ -118,32 +118,44 @@ just toggle it clicking on the title.
 
 
 
-.. |image0| image:: ../img/connection/image0.png
-.. |image1| image:: ../img/connection/image1.png
-.. |image2| image:: ../img/connection/image2.png
-.. |image3| image:: ../img/connection/image3.png
-.. |image4| image:: ../img/connection/image4.png
-.. |image5| image:: ../img/connection/image5.png
-.. |image6| image:: ../img/connection/image6.png
-.. |image7| image:: ../img/connection/image7.png
-.. |image8| image:: ../img/connection/image8.png
-.. |image9| image:: ../img/connection/image9.png
-.. |image10| image:: ../img/connection/image10.png
-.. |image11| image:: ../img/connection/image11.png
-.. |image12| image:: ../img/connection/image12.png
-.. |image13| image:: ../img/connection/image13.png
-.. |image14| image:: ../img/connection/image14.png
-.. |image15| image:: ../img/connection/image15.png
-.. |image16| image:: ../img/connection/image16.png
-.. |image17| image:: ../img/connection/image17.png
-.. |image18| image:: ../img/connection/image18.png
-.. |image19| image:: ../img/connection/image19.png
-.. |image20| image:: ../img/connection/image20.png
-.. |image21| image:: ../img/connection/image21.png
-.. |image22| image:: ../img/connection/image22.png
-.. |image23| image:: ../img/connection/image23.png
-.. |image24| image:: ../img/connection/image24.png
-.. |image80| image:: ../img/connection/image0.png
+.. |image0| image:: ../img/connection/0.png
+   :align: middle
+.. |image1| image:: ../img/connection/1.png
+   :align: middle
+.. |image2| image:: ../img/connection/2.png
+   :align: middle
+.. |image3| image:: ../img/connection/3.png
+.. |image4| image:: ../img/connection/4.png
+.. |image5| image:: ../img/connection/5.png
+.. |image6| image:: ../img/connection/6.png
+   :align: middle
+.. |image7| image:: ../img/connection/7.png
+.. |image8| image:: ../img/connection/8.png
+   :align: middle
+.. |image9| image:: ../img/connection/9.png
+   :align: middle
+.. |image10| image:: ../img/connection/10.png
+.. |image11| image:: ../img/connection/11.png
+.. |image12| image:: ../img/connection/12.png
+.. |image13| image:: ../img/connection/13.png
+.. |image14| image:: ../img/connection/14.png
+   :align: middle
+.. |image15| image:: ../img/connection/15.png
+   :align: middle
+.. |image16| image:: ../img/connection/16.png
+.. |image17| image:: ../img/connection/17.png
+.. |image18| image:: ../img/connection/18.png
+.. |image19| image:: ../img/connection/19.png
+   :align: middle
+.. |image20| image:: ../img/connection/20.png
+   :align: middle
+.. |image21| image:: ../img/connection/21.png
+   :align: middle
+.. |image22| image:: ../img/connection/22.png
+.. |image23| image:: ../img/connection/23.png
+.. |image24| image:: ../img/connection/24.png
+   :align: middle
+.. |image80| image:: ../img/connection/0.png
    :width: 6.27083in
    :height: 4.22222in
    :align: middle
