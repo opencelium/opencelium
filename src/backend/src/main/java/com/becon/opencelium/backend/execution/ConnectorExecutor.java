@@ -230,7 +230,7 @@ public class ConnectorExecutor {
         }
 
         // TODO: works only for CheckMk. Should be deleted in future.
-        if (invoker.getName().equals("CheckMK")){
+        if (invoker.getName().equals("CheckMK") && body != null && !body.isEmpty()){
             data = "request=" + body;
         }
 
