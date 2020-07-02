@@ -34,7 +34,7 @@ const {ajax} = Rx.Observable;
  */
 export function getRequestSettings(params){
     let settings = {};
-    let {url, method, data, isApi, contentType, fullUrl, isIframeUrl, hasAuthHeader} = params;
+    let {url, method, data, isApi, contentType, fullUrl, isIframeUrl, hasAuthHeader, headers} = params;
     if(typeof hasAuthHeader === 'undefined'){
         hasAuthHeader = false;
     }
@@ -54,7 +54,7 @@ export function getRequestSettings(params){
     settings.url = url;
     settings.method = method;
     settings.crossDomain = true;
-    settings.headers = {};
+    settings.headers = headers ? {...headers} : {};
     if(typeof contentType === 'string'){
         if(contentType !== 'multipart/form-data'){
             settings.headers = {'Content-Type': contentType};

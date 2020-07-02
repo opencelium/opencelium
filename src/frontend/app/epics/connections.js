@@ -216,10 +216,12 @@ const sendOperationRequestEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.SEND_OPERATIONREQUEST)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}`;
-            let data = action.payload;
-            return Rx.Observable.of(sendOperationRequestFulfilled({}));
-            return doRequest({url, method: 'post', data},{
+            const data = action.payload.body;
+            const url = action.payload.endpoint;
+            const method = action.payload.method;
+            const headers = action.payload.header;
+            //return Rx.Observable.of(sendOperationRequestFulfilled({}));
+            return doRequest({fullUrl: true, url, method, data, headers, isApi: false},{
                 success: sendOperationRequestFulfilled,
                 reject: sendOperationRequestRejected,},
             );
