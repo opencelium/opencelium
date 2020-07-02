@@ -232,6 +232,7 @@ public class ConnectorExecutor {
         // TODO: works only for CheckMk. Should be deleted in future.
         if (invoker.getName().equals("CheckMK") && body != null && !body.isEmpty()){
             data = "request=" + body;
+            System.out.println("Inside CheckMK body: " + data);
         }
 
         // TODO: Changed string to object in httpEntity;
