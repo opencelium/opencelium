@@ -231,7 +231,12 @@ public class ConnectorExecutor {
 
         // TODO: works only for CheckMk. Should be deleted in future.
         if (invoker.getName().equals("CheckMK") && body != null && !body.isEmpty()){
-            data = "request=" + body;
+            if (contentType.equals("application/x-www-form-urlencoded")) {
+                formData.add("request", body);
+                data = formData;
+            } else {
+                data = body;
+            }
             System.out.println("Inside CheckMK body: " + data);
         }
 
