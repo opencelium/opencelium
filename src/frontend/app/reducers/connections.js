@@ -127,10 +127,7 @@ const reducer = (state = initialState, action) => {
         case ConnectionsAction.SEND_OPERATIONREQUEST:
             return state.set('sendingOperationRequest', API_REQUEST_STATE.START).set('error', null);
         case ConnectionsAction.SEND_OPERATIONREQUEST_FULFILLED:
-            /*
-            TODO: replace to real data (action.payload)
-             */
-            return state.set('sendingOperationRequest', API_REQUEST_STATE.FINISH).set('operationResponse', {success: true});
+            return state.set('sendingOperationRequest', API_REQUEST_STATE.FINISH).set('operationResponse', {status: action.payload.statusCodeValue, body: JSON.parse(action.payload.body)});
         case ConnectionsAction.SEND_OPERATIONREQUEST_REJECTED:
             return state.set('sendingOperationRequest', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
         case ConnectionsAction.CHECK_CONNECTION:

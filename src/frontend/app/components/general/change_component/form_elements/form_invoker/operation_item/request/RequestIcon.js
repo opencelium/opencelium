@@ -91,7 +91,8 @@ class RequestIcon extends Component{
     render(){
         const {showRequestDialog, request, activeTab, startSendingRequest} = this.state;
         const {isVisible, response, connectorType, requestData} = this.props;
-        const responseEntity = response.success ? CSuccess.createSuccess(response) : CFail.createFail(response);
+        //const responseEntity = response.success ? CSuccess.createSuccess(response) : CFail.createFail(response);
+        const responseEntity = CSuccess.createSuccess(response);
         return(
             <div className={connectorType === CONNECTOR_FROM ? styles.connection_request_icon_left : styles.connection_request_icon_right}>
                 {isVisible ? <TooltipFontIcon tooltip={'API Request'} value={'cloud_upload'} onClick={::this.toggleShowRequestDialog}/> : null}
