@@ -216,12 +216,9 @@ const sendOperationRequestEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.SEND_OPERATIONREQUEST)
         .debounceTime(500)
         .mergeMap((action) => {
-            const data = action.payload.body;
-            const url = action.payload.endpoint;
-            const method = action.payload.method;
-            const headers = action.payload.header;
-            //return Rx.Observable.of(sendOperationRequestFulfilled({}));
-            return doRequest({fullUrl: true, url, method, data, headers, isApi: false},{
+            const data = action.payload;
+            const url = `${urlPrefix}/remoteapi/test`;
+            return doRequest({url, method: 'post', data: {url: data.endpoint, header: data.header, method: data.method, body: data.body}},{
                 success: sendOperationRequestFulfilled,
                 reject: sendOperationRequestRejected,},
             );
