@@ -32,7 +32,9 @@ module.exports = {
             hot: NodeParams.HAS_HMR,
             inline: NodeParams.HAS_HMR,
             liveReload: false,
-            headers: { "Access-Control-Allow-Origin": "*" },
+            headers: {
+                "Access-Control-Allow-Origin": "*"
+            },
             historyApiFallback: true,
             watchContentBase: true
         }
