@@ -19,10 +19,12 @@ spring:
     hebirnate:
       dll-auto: update
 
-  datasource:
-    url: jdbc:mysql://localhost:3306/opencelium?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Berlin
-    username: root
-    password: root
+datasource:
+  url: jdbc:mariadb://localhost:3306/opencelium?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Berlin
+  username: root
+  password: root
+  initialization-mode: always
+  driver-class-name: org.mariadb.jdbc.Driver
 
   servlet:
     multipart:
