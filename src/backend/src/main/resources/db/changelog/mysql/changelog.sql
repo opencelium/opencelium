@@ -154,6 +154,6 @@ UNLOCK TABLES;
 
 alter table detail add column if not exists lang varchar(3) not null default 'eng';
 
---changeset 1.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+--changeset 1.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 
 alter table connector add column if not exists icon varchar(128);
