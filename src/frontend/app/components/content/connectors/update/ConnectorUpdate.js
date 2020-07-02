@@ -389,7 +389,7 @@ class ConnectorUpdate extends Component{
         },{
             inputs: authenticationInputs,
             hint: {text: t('UPDATE.FORM.HINT_2'), openTour: ::this.openTour},
-            //test: {isTested: this.state.isTested, callback: ::this.testConnector},
+            test: {isTested: this.state.isTested, callback: ::this.testConnector},
         },
         ];
         let steps = this.filterSteps(authenticationInputs);
