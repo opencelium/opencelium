@@ -62,8 +62,6 @@ public class ConnectionExecutor {
         Connector toConnector = connectorService.findById(connection.getToConnector())
                 .orElseThrow(() -> new ConnectorNotFoundException(connection.getFromConnector()));
 
-
-
         connectorExecutor.start(connectionNode.getFromConnector(), fromConnector, toConnector, Constant.CONN_FROM);
         connectorExecutor.start(connectionNode.getToConnector(), toConnector, fromConnector, Constant.CONN_TO);
     }
