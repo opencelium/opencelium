@@ -5,6 +5,8 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {isString} from "@utils/app";
 import Body from "@change_component/form_elements/form_connection/form_methods/method/Body";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import CFields from "@classes/components/general/change_component/extra_actions/CFields";
+import Counter from "@change_component/extra_actions/check_connection/Counter";
 
 
 class Fields extends Component{
@@ -17,6 +19,19 @@ class Fields extends Component{
         };
     }
 
+    componentDidMount(){
+        const {selectedField} = this.props;
+        if(selectedField){
+            this.setState({
+                currentIndex: selectedField.currentIndex,
+                isExpanded: true,
+            });
+        }
+    }
+
+    /**
+     * to toggle all fields
+     */
     toggleExpanded(){
         this.setState({
             isExpanded: !this.state.isExpanded,
@@ -24,17 +39,70 @@ class Fields extends Component{
         });
     }
 
+    /**
+     * to show next fields
+     */
     increaseCurrentIndex(){
         this.setState({currentIndex: this.state.currentIndex + 1});
     }
 
+    /**
+     * to show previous fields
+     */
     decreaseCurrentIndex(){
         this.setState({currentIndex: this.state.currentIndex - 1});
     }
 
+    /**
+     * to show specific fields
+     */
+    setCurrentIndex(currentIndex){
+        this.setState({currentIndex});
+    }
+
+    /**
+     * to move to dependency in from connector
+     */
+    openDependency(data){
+        this.props.selectFieldByDependency(data);
+    }
+
+    /**
+     * to get value for counter
+     */
+    getCounterValue(){
+        let {currentIndex, isExpanded} = this.state;
+        let {loopLength} = this.props;
+        if(!isExpanded || loopLength.length <= 1){
+            return null;
+        }
+        let counterValue = CFields.getLoopLength(currentIndex, loopLength);
+        const splitCounterValue = counterValue.split('|');
+        return(
+            <div className={styles.counter}>
+                {
+                    splitCounterValue.map((value, index) => {
+                        return(
+                            <React.Fragment key={`${index}_${value}`}>
+                                <Counter index={index} value={value} setCurrentIndex={::this.setCurrentIndex} completeValue={splitCounterValue} loopLength={loopLength}/>
+                                {
+                                    index !== splitCounterValue.length - 1
+                                    ?
+                                        <span className={styles.splitter}>|</span>
+                                    :
+                                        null
+                                }
+                            </React.Fragment>
+                        )
+                    })
+                }
+            </div>
+        )
+    }
+
     render(){
         const {isExpanded, currentIndex} = this.state;
-        let {fields, currentTable} = this.props;
+        let {fields, currentTable, selectedField} = this.props;
         if(fields.length === 0){
             return null;
         }
@@ -46,9 +114,8 @@ class Fields extends Component{
         if(currentTable === CONNECTOR_FROM){
             loopNavigationStyle.left = '43%';
         } else{
-            loopNavigationStyle.left = '27%';
+            loopNavigationStyle.left = '28%';
         }
-
         fields = !isExpanded ? [fields[0]] : fields;
         return(
             <>
@@ -69,16 +136,18 @@ class Fields extends Component{
                         :
                         null
                 }
+                {this.getCounterValue()}
                 <div className={styles.fields} style={{minHeight: hasLoopNavigation ? '64px' : ''}}>
                     {
                         fields.map((field, index) => {
-                            let value = currentTable === CONNECTOR_FROM ? field.values[currentIndex] : field.enhancements[currentIndex];
+                            let value = field.values[currentIndex];
                             const isStringValue = isString(value);
                             const valueStyle = {paddingLeft: fields.length > 3 ? '8px' : 0};
                             const nameStyle = {};
                             const dependenciesStyle = {};
+                            let isSelected = false;
                             if(!isStringValue){
-                                valueStyle.paddingBottom = '5px';
+                                valueStyle.padding = '5px';
                                 valueStyle.marginLeft = '-5px';
                             }
                             if(currentTable === CONNECTOR_FROM){
@@ -86,20 +155,25 @@ class Fields extends Component{
                                 nameStyle.width = '50%';
                             } else{
                                 valueStyle.width = '33%';
-                                nameStyle.width = '33%';
-                                dependenciesStyle.width = '34%';
+                                nameStyle.width = '34%';
+                                dependenciesStyle.width = '33%';
+                            }
+                            if(selectedField && selectedField.name === field.name){
+                                isSelected = true;
                             }
                             return(
                                 <React.Fragment key={field.name}>
-                                    <div key={field.name} className={styles.field} style={nameStyle} title={field.name}>{field.name}</div>
+                                    <div key={field.name} className={`${styles.field}`} style={nameStyle} title={field.name}>
+                                        <span className={`${isSelected ? styles.selected_field: ''}`}>{field.name}</span>
+                                    </div>
                                     <div
-                                        className={styles.value}
+                                        className={`${styles.value}`}
                                         style={valueStyle}>
                                         {
 
                                             isStringValue
                                             ?
-                                                <span title={value}>{value}</span>
+                                                <span title={value} style={{padding: '0 5px'}}>{value}</span>
                                             :
                                                 <Body bodyStyles={{top: 0}} readOnly={true} method={{request: {body: value}}} id={'key'}/>
                                         }
@@ -111,8 +185,19 @@ class Fields extends Component{
                                                 {
                                                     field.dependencies.map(dependency => {
                                                         return(
-                                                            <span key={`${dependency.color}_${dependency.name}`} title={`${dependency.name}`} className={styles.dependency} style={{background: dependency.color}}>
-                                                                {dependency.values[currentIndex]}
+                                                            <span key={`${dependency.color}_${dependency.name}`} className={styles.dependency}>
+                                                                {
+
+                                                                    isString(dependency.values[currentIndex])
+                                                                        ?
+                                                                        <span className={styles.dependency_value} title={dependency.name} onClick={() => this.openDependency({...dependency, currentIndex})} style={{background: dependency.color}}>{dependency.values[currentIndex]}</span>
+                                                                        :
+                                                                        <span title={dependency.name}>
+                                                                            <span className={styles.dependency_value} onClick={() => this.openDependency({...dependency, currentIndex})} style={{ background: dependency.color}}>{dependency.name}</span>
+                                                                            <span className={styles.delimiter}>:</span>
+                                                                            <Body bodyStyles={{top: 0, right: 0}} readOnly={true} method={{request: {body: dependency.values[currentIndex]}}} id={'key'}/>
+                                                                        </span>
+                                                                }
                                                             </span>
                                                         )
                                                     })

@@ -59,7 +59,7 @@ TabItem.propTypes = {
         PropTypes.instanceOf(CResponse),
         PropTypes.instanceOf(CRequest)
     ]).isRequired,
-    update: PropTypes.func.isRequired,
+    update: PropTypes.func,
     readOnly: PropTypes.bool,
 };
 

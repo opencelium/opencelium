@@ -45,13 +45,16 @@ class Pagination extends Component{
      * to set settings for pagination
      */
     setPageSettings(props){
-        const {setTotalPages} = this.props;
+        let {setTotalPages, entitiesProPage} = this.props;
+        if(!entitiesProPage){
+            entitiesProPage = ENTITIES_PRO_PAGE;
+        }
         if(typeof setTotalPages === 'function') {
             const {pageNumber, entitiesLength, link} = props.page;
             if (typeof pageNumber !== 'undefined') {
                 this.page.current = pageNumber ? parseInt(pageNumber) : 1;
             }
-            this.page.total = Math.ceil(entitiesLength / ENTITIES_PRO_PAGE);
+            this.page.total = Math.ceil(entitiesLength / entitiesProPage);
             if (this.page.total <= 0) {
                 this.page.total = 1;
             }

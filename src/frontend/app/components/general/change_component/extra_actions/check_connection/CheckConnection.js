@@ -19,64 +19,58 @@ const TEST_DATA = {
         "name": "idoit",
         "methods": [
             {
-                "name":"cmdb.objects.readcmdb.objects.read",
+                "name":"cmdb.objects.read",
                 "color": "#FFCFB5",
+                "loopLength" : [2, 5, 3],
                 "fields": [
                     {
-                        "name": "result.titleresult.titleresult.titlesult.titlesult.title",
-                        "values": [{'test': '123'}, "345345345345345345345345345345345345345345345345345345345345", "678"]
+                        "name": "result.title",
+                        "values": ['title 1','title 2','title 3','title 4','title 5','title 6','title 7','title 8','title 9','title 10','title 11','title 12','title 13','title 14','title 15','title 16','title 17','title 18','title 19','title 20','title 21','title 22','title 23','title 24','title 25','title 26','title 27','title 28','title 29','title 30',]
                     },
                     {
-                        "name": "result.status",
-                        "values": [{'text': 'in operative'}, {'test': '345'}, "nnn"]
-                    },
-                    {
-                        "name": "plan",
-                        "values": [{'b': 'c'}, "B", [{"test": "test"}]]
-                    },
-                    {
-                        "name": "q",
-                        "values": ["z", "x", [{"c": "v"}]]
-                    },
+                        "name": 'result.cmdb_status_title',
+                        "values": ['in operative 1','in operative 2','in operative 3','in operative 4','in operative 5','in operative 6','in operative 7','in operative 8','in operative 9','in operative 10','in operative 11','in operative 12','in operative 13','in operative 14','in operative 15','in operative 16','in operative 17','in operative 18','in operative 19','in operative 20','in operative 21','in operative 22','in operative 23','in operative 24','in operative 25','in operative 26','in operative 27','in operative 28','in operative 29','in operative 30',]
+                    }
                 ]
             },
             {
                 "name":"cmdb.category.read",
                 "color": "#C77E7E",
+                "loopLength" : [2],
                 "fields": [
                     {
-                        "name": "result.title",
-                        "values": ["123"]
+                        "name": "result",
+                        "values": [[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}]]
                     }
                 ]
             },
             {
-                "name":"cmdb.read",
-                "color": "#177E7E",
+                "name":"cmdb.objects.read2",
+                "color": "#2FCFB5",
+                "loopLength" : [2],
                 "fields": [
                     {
                         "name": "result.title",
-                        "values": ["123", "2"]
+                        "values": ['title 1','title 2'],
+                    },
+                    {
+                        "name": 'result.cmdb_status_title',
+                        "values": ['in operative', 'in operative'],
                     }
                 ]
             },
             {
-                "name":"cmdb.category.read",
-                "color": "#C74E7E",
+                "name":"cmdb.objects.read3",
+                "color": "#A3CFB5",
+                "loopLength" : [2],
                 "fields": [
                     {
                         "name": "result.title",
-                        "values": ["123"]
-                    }
-                ]
-            },
-            {
-                "name":"cmdb.read",
-                "color": "#172E7E",
-                "fields": [
+                        "values": ['title 1','title 2'],
+                    },
                     {
-                        "name": "result.title",
-                        "values": ["123", "2"]
+                        "name": 'result.cmdb_status_title',
+                        "values": ['in operative', 'in operative'],
                     }
                 ]
             },
@@ -86,51 +80,38 @@ const TEST_DATA = {
         "name": "otrs",
         "methods":[
             {
-                "name":"ConfigItemSearch",
+                "name":"ConfigItemCreate",
                 "color": "#6477AB",
+                "loopLength" : [2, 5, 3],
                 "fields": [
                     {
-                        "name": "result.titleresult.titleresult.titleresult.title",
-                        "values": [
-                            "prev_title_1prev_title_1prev_title_1prev_title_1",
-                            "prev_title_2",
-                        ],
-                        "enhancements": [
-                            "next_title_1next_title_1next_title_1",
-                            "next_title_2next_title_2next_title_2next_title_2next_title_2"
-                        ],
+                        "name": "ConfigItem.Name",
+                        "values": ['title 1','title 2','title 3','title 4','title 5','title 6','title 7','title 8','title 9','title 10','title 11','title 12','title 13','title 14','title 15','title 16','title 17','title 18','title 19','title 20','title 21','title 22','title 23','title 24','title 25','title 26','title 27','title 28','title 29','title 30',],
                         "dependencies": [
                             {
                                 "color": "#FFCFB5",
-                                "name": "result.titleresult.titleresult.titleresult.title",
-                                "values": ["first_titlefirst_titlefirst_titlefirst_title", "second_title"]
-                            },
-                            {
-                                "color": "#FFCFB5",
-                                "name": "port",
-                                "values": ["0000", "8888"]
+                                "name": "result.title",
+                                "values": ['title 1','title 2','title 3','title 4','title 5','title 6','title 7','title 8','title 9','title 10','title 11','title 12','title 13','title 14','title 15','title 16','title 17','title 18','title 19','title 20','title 21','title 22','title 23','title 24','title 25','title 26','title 27','title 28','title 29','title 30',]
                             }
                         ]
                     },{
-                        "name": "result.status",
-                        "values": [
-                            "prev_status_1",
-                            "prev_status_2",
-                        ],
-                        "enhancements": [
-                            "next_status_1",
-                            "next_status_2"
-                        ],
+                        "name": "ConfigItem.CIXMLData.Vendor",
+                        "values": ["Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP","Canon","XP",],
                         "dependencies": [
                             {
                                 "color": "#C77E7E",
-                                "name": "result.cmdb_status",
-                                "values": ["in operation", "opened"]
-                            },
+                                "name": "result",
+                                "values": [[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],[{manufacturer: {title: 'canon'}}], [{manufacturer: {title: 'hp'}}],]
+                            }
+                        ]
+                    },{
+                        "name": "ConfigItem.InciState",
+                        "values": ["Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational","Operational","Not Operational",],
+                        "dependencies": [
                             {
-                                "color": "#FFCFB5",
-                                "name": "title",
-                                "values": ["title_1", "title_2"]
+                                "color": "#A3CFB5",
+                                "name": "result.cmdb_status_title",
+                                "values": ["in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative","in operative", "in operative",]
                             }
                         ]
                     },
@@ -160,6 +141,7 @@ class CheckConnection extends Component{
             showResult: false,
             currentPage: 1,
             currentTable: CONNECTOR_FROM,
+            selectedField: null,
         };
         this.buttonWidth = '';
     }
@@ -174,18 +156,54 @@ class CheckConnection extends Component{
         }
     }
 
+    /**
+     * to select field when clicked on dependency
+     */
+    selectFieldByDependency(dependency){
+        if(dependency) {
+            const methods = TEST_DATA.fromConnector.methods;
+            const methodIndex = methods.findIndex(m => m.color === dependency.color);
+            if (methodIndex !== -1) {
+                const method = methods[methodIndex];
+                const fieldIndex = method.fields.findIndex(f => f.name === dependency.name);
+                const field = method.fields[fieldIndex];
+                this.setState({
+                    currentTable: CONNECTOR_FROM,
+                    selectedField: {...field, currentIndex: dependency.currentIndex, color: method.color},
+                    currentPage: parseInt(methodIndex / METHODS_PER_PAGE) + 1,
+                });
+            }
+        } else{
+            this.setState({
+                selectedField: null,
+            });
+        }
+    }
+
+    /**
+     * to show from or to connector table
+     */
     setCurrentTable(currentTable){
-        this.setState({currentTable, currentPage: 1});
+        this.setState({currentTable, currentPage: 1, selectedField: null});
     }
 
+    /**
+     * to open page
+     */
     setCurrentPage(currentPage){
-        this.setState({currentPage});
+        this.setState({currentPage, selectedField: null});
     }
 
+    /**
+     * to toggle result of checking connection
+     */
     toggleResult(){
         this.setState({showResult: !this.state.showResult});
     }
 
+    /**
+     * to check connection
+     */
     check(){
         this.props.checkConnection();
         this.setState({startCheckingConnection: true, showResult: true});
@@ -197,24 +215,23 @@ class CheckConnection extends Component{
             return(
                 <tr>
                     <th style={{width: '20%'}}>Method</th>
-                    <th style={{width: '30%', paddingLeft: '22px'}}>Field</th>
-                    <th style={{width: '30%', paddingLeft: '0'}}>Value</th>
+                    <th style={{width: '30%', paddingLeft: '27px'}}>Field</th>
+                    <th style={{width: '30%', paddingLeft: '6px'}}>Value</th>
                 </tr>
             );
         }
         return(
             <tr>
                 <th style={{width: '25%'}}>Method</th>
-                <th style={{width: '25%', paddingLeft: '22px'}}>Field</th>
-                <th style={{width: '25%', paddingLeft: '22px'}}>Value</th>
+                <th style={{width: '25%', paddingLeft: '27px'}}>Field</th>
+                <th style={{width: '25%', paddingLeft: '10px'}}>Value</th>
                 <th style={{width: '25%', paddingLeft: '0'}}>Dependencies</th>
             </tr>
         );
     }
 
     renderTableBody(){
-        const {currentTable} = this.state;
-        const {currentPage} = this.state;
+        const {currentTable, selectedField, currentPage} = this.state;
         const {checkConnectionResult} = this.props;
         const data = currentTable === CONNECTOR_FROM ? TEST_DATA.fromConnector : TEST_DATA.toConnector;
         return data.methods.map((method, key) => {
@@ -223,9 +240,9 @@ class CheckConnection extends Component{
             if(key >= startIndex && key < lastIndex) {
                 return (
                     <tr key={method.color}>
-                        <td style={{width: '20%', paddingTop: '15px'}}><span className={styles.method_name} style={{background: method.color}} title={method.name}>{method.name}</span></td>
+                        <td style={{width: '20%', paddingTop: '11px'}}><span className={styles.method_name} style={{background: method.color}} title={method.name}>{method.name}</span></td>
                         <td style={{width: '80%', paddingTop: 0, position: 'relative'}} colSpan={currentTable === CONNECTOR_FROM ? 2 : 3}>
-                            <Fields fields={method.fields} currentTable={currentTable}/>
+                            <Fields fields={method.fields} loopLength={method.loopLength} currentTable={currentTable} selectFieldByDependency={::this.selectFieldByDependency} selectedField={selectedField && selectedField.color === method.color ? selectedField : null}/>
                         </td>
                     </tr>
                 );
@@ -252,7 +269,7 @@ class CheckConnection extends Component{
                         {this.renderTableBody()}
                     </tbody>
                 </Table>
-                <Pagination loadPage={::this.setCurrentPage} page={page} setTotalPages={() => {}}/>
+                <Pagination loadPage={::this.setCurrentPage} page={page} setTotalPages={() => {}} entitiesProPage={METHODS_PER_PAGE}/>
             </React.Fragment>
         )
     }

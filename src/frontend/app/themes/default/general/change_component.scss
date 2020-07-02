@@ -1159,6 +1159,7 @@
 .check_connection{
   table-layout: fixed;
   .method_name{
+    cursor: default;
     padding: 5px;
     border-radius: 3px;
     overflow: hidden;
@@ -1166,18 +1167,68 @@
     display: inline-block;
     max-width: 100%;
   }
+  .counter{
+    position: absolute;
+    right: 32px;
+    top: 2px;
+    font-size: 12px;
+    padding: 0 4px;
+    background: white;
+    .splitter{
+      padding: 0 2px;
+      font-size: 13px;
+      vertical-align: super;
+    }
+    .counter_value{
+      display: inline-block;
+      position: relative;
+      min-width: 20px;
+      text-align: center;
+      background: #eee;
+    }
+    .counter_arrows{
+      position: absolute;
+      cursor: pointer;
+      font-size: 20px;
+      right: 0;
+      left: 0;
+    }
+    .disabled_arrow{
+      cursor: default;
+      color: #eee;
+    }
+    .counter_up{
+      top: -15px;
+      @extend .counter_arrows;
+    }
+    .counter_down{
+      top: 14px;
+      @extend .counter_arrows;
+    }
+  }
   .fields{
     max-height: 105px;
     overflow-y: auto;
     padding: 15px 10px 0;
     .field{
-      padding-right:20px;
+      min-height: 35px;
+      line-height: 35px;
+      padding-right: 20px;
       float: left;
       overflow: hidden;
       text-overflow: ellipsis;
+      span{
+        padding: 5px;
+      }
+    }
+    .selected_field{
+      animation-name: $ANIMATION_EMPHASIZE;
+      animation-duration: 3.5s;
+      border-radius: 3px;
     }
     .value{
-      min-height: 29px;
+      min-height: 35px;
+      line-height: 35px;
       float: left;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1186,14 +1237,26 @@
       float: left;
       margin-top: -5px;
       .dependency{
+        min-height: 35px;
         max-width: 100%;
         text-overflow: ellipsis;
         overflow: hidden;
-        padding: 2px;
+        padding: 3px;
         border-radius: 3px;
         margin: 3px 3px;
         display: inline-block;
         cursor: default;
+        .dependency_value{
+          padding: 2px;
+          border-radius: 3px;
+        }
+        .dependency_value:hover{
+          box-shadow: #9f9f9f 0 1px 3px 0;
+          cursor: pointer;
+        }
+        .delimiter{
+          padding: 2px 0;
+        }
       }
     }
   }
