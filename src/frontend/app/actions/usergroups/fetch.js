@@ -19,26 +19,62 @@ import {UserGroupsAction} from '@utils/actions';
 
 
 /**
- * fetch user group
- * @param user
+ * check uniqueness of the name
+ * @param userGroup
  * @returns {{type: string, payload: {}}}
  */
-const fetchUserGroup = (user) => {
+const checkUserGroupName = (userGroup) => {
+    return {
+        type: UserGroupsAction.CHECK_USERGROUPNAME,
+        payload: userGroup,
+    };
+};
+
+/**
+ * check uniqueness of the name fulfilled
+ * @param userGroup
+ * @returns {{type: string, payload: {}}}
+ */
+const checkUserGroupNameFulfilled = (userGroup) => {
+    return {
+        type: UserGroupsAction.CHECK_USERGROUPNAME_FULFILLED,
+        payload: userGroup,
+    };
+};
+
+/**
+ * check uniqueness of the name rejected
+ * @param error
+ * @returns {promise}
+ */
+const checkUserGroupNameRejected = (error) => {
+    return Rx.Observable.of({
+        type: UserGroupsAction.CHECK_USERGROUPNAME_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch user group
+ * @param userGroup
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchUserGroup = (userGroup) => {
     return {
         type: UserGroupsAction.FETCH_USERGROUP,
-        payload: user,
+        payload: userGroup,
     };
 };
 
 /**
  * fetch user group fulfilled
- * @param user
+ * @param userGroup
  * @returns {{type: string, payload: {}}}
  */
-const fetchUserGroupFulfilled = (user) => {
+const fetchUserGroupFulfilled = (userGroup) => {
     return {
         type: UserGroupsAction.FETCH_USERGROUP_FULFILLED,
-        payload: user,
+        payload: userGroup,
     };
 };
 
@@ -119,6 +155,9 @@ const fetchUserGroupsCanceled = (message) => {
 };
 
 export {
+    checkUserGroupName,
+    checkUserGroupNameFulfilled,
+    checkUserGroupNameRejected,
     fetchUserGroups,
     fetchUserGroupsFulfilled,
     fetchUserGroupsCanceled,

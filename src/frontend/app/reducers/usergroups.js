@@ -23,6 +23,8 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
 
 
 const initialState = fromJS({
+    checkingUserGroupName: false,
+    checkNameResult: null,
     fetchingUserGroup: API_REQUEST_STATE.INITIAL,
     addingUserGroup: API_REQUEST_STATE.INITIAL,
     addingGroupIcon: API_REQUEST_STATE.INITIAL,
@@ -47,6 +49,12 @@ let index = 0;
 const reducer = (state = initialState, action) => {
     userGroups = state.get('userGroups');
     switch (action.type) {
+        case UserGroupsAction.CHECK_USERGROUPNAME:
+            return state.set('checkingUserGroupName', true).set('checkNameResult', null).set('error', null);
+        case UserGroupsAction.CHECK_USERGROUPNAME_FULFILLED:
+            return state.set('checkingUserGroupName', false).set('checkNameResult', action.payload);
+        case UserGroupsAction.CHECK_USERGROUPNAME_REJECTED:
+            return state.set('checkingUserGroupName', false).set('error', null).set('checkNameResult', action.payload);
         case UserGroupsAction.FETCH_USERGROUP:
             return state.set('fetchingUserGroup', API_REQUEST_STATE.START).set('error', null);
         case UserGroupsAction.FETCH_USERGROUP_FULFILLED:
