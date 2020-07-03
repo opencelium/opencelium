@@ -67,12 +67,20 @@ class SelectSearch extends Component{
      * to handle press on Enter, Arrow Up and Arrow Down
      */
     onKeyDown(e){
+        const {submitEdit} = this.props;
         const {currentItem, currentItems} = this.state;
         switch(e.keyCode){
             case 13:
                 e.preventDefault();
-                if(currentItems.length > 0){
-                    this.onSelectItem(e, currentItems[currentItem].value);
+
+                if(!e.ctrlKey) {
+                    if (currentItems.length > 0) {
+                        this.onSelectItem(e, currentItems[currentItem].value);
+                    }
+                } else{
+                    if(typeof submitEdit === 'function') {
+                        submitEdit();
+                    }
                 }
                 break;
             case 38:
@@ -210,7 +218,7 @@ class SelectSearch extends Component{
     }
 
     render(){
-        const {authUser, items, onInputChange, inputValue, doAction, icon, predicator, ...props} = this.props;
+        const {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, ...props} = this.props;
         let {theme, className, disabled, placeholder} = this.props;
         let classNames = [
             'input_input_element',

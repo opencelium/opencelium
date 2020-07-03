@@ -246,7 +246,7 @@ class ParamGenerator extends Component {
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method, isVisible} = this.props;
+        let {method, isVisible, submitEdit} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
         let divStyles = {float: 'left', width: isVisible ? '75%' : '130px'};
@@ -273,6 +273,8 @@ class ParamGenerator extends Component {
                         doAction={::this.onChangeField}
                         onInputChange={::this.onChangeField}
                         inputValue={field}
+                        submitEdit={submitEdit}
+                        autoFocus
                     />
                 </Input>
             </div>
