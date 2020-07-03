@@ -174,7 +174,7 @@ button and the response will appear in the *Response* tab.
 .. |image26| image:: ../img/connection/26.png
    :align: middle
 .. |image27| image:: ../img/connection/27.png
-.. |image28| image:: ../img/connection/27.png
-.. |image29| image:: ../img/connection/27.png
-.. |image30| image:: ../img/connection/27.png
+.. |image28| image:: ../img/connection/28.png
+.. |image29| image:: ../img/connection/29.png
+.. |image30| image:: ../img/connection/30.png
    :align: middle
