@@ -116,6 +116,20 @@ just toggle it clicking on the title.
 
 |image24|
 
+Moreover, you can test the request clicking on |image25|. Then you see a popup window where
+you already have predefined method, request and body.
+
+|image26|
+
+You can change the method, add headers or update body. To add a header type his key and value.
+After click on the |image27| icon. If you have more than two headers just click on |image28|
+and |image29| arrows to navigate between them. After you prepared the request, press **Send**
+button and the response will appear in the *Response* tab.
+
+|image30|
+
+
+
 
 
 .. |image0| image:: ../img/connection/0.png
@@ -156,7 +170,11 @@ just toggle it clicking on the title.
    :align: middle
 .. |image24| image:: ../img/connection/24.png
    :align: middle
-.. |image80| image:: ../img/connection/0.png
-   :width: 6.27083in
-   :height: 4.22222in
+.. |image25| image:: ../img/connection/25.png
+.. |image26| image:: ../img/connection/26.png
+   :align: middle
+.. |image27| image:: ../img/connection/27.png
+.. |image28| image:: ../img/connection/27.png
+.. |image29| image:: ../img/connection/27.png
+.. |image30| image:: ../img/connection/27.png
    :align: middle
