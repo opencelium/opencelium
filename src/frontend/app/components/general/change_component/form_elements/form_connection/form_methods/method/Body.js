@@ -238,16 +238,21 @@ class Body extends Component{
                     onSelect={setCurrentItem}
                     style={{wordBreak: 'break-word', padding: '8px 0', width: '80%', display: 'inline-block', position: 'relative'}}
                     ReferenceComponent={{
-                        component: <ParamGenerator
-                            ref={this.paramGenerator}
-                            connection={connection}
-                            connector={connector}
-                            method={method}
-                            readOnly={readOnly}
-                            addParam={updateBody}
-                            isVisible={true}
-                            id={`${id}_reference_component`}
-                        />,
+                        getComponent: (params) => {
+                            const {submitEdit} = params;
+                            return (
+                                <ParamGenerator
+                                    ref={this.paramGenerator}
+                                    connection={connection}
+                                    connector={connector}
+                                    method={method}
+                                    readOnly={readOnly}
+                                    addParam={updateBody}
+                                    isVisible={true}
+                                    submitEdit={submitEdit}
+                                    id={`${id}_reference_component`}
+                                />
+                            );},
                         id: `${id}_reference_component`,
                         self: this.paramGenerator,
                     }}

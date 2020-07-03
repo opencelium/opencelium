@@ -97,6 +97,7 @@ class Input extends Component{
                                 theme={popupInputTheme}
                                 onChange={onChange}
                                 onBlur={::this.onBlur}
+                                onKeyDown={::this.onKeyDown}
                                 autoFocus
                             >{null}</ToolboxInput>
                         :
@@ -137,6 +138,7 @@ class Input extends Component{
                     className={className}
                     theme={theme}
                     onClick={::this.showPopupInput}
+                    onFocus={::this.showPopupInput}
                     onChange={null}
                     onBlur={null}>{null}</ToolboxInput>
                 {this.renderPopupElement()}
