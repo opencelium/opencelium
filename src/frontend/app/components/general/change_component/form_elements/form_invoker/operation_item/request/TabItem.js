@@ -32,6 +32,10 @@ class TabItem extends Component{
 
     render(){
         const {entity, update, readOnly} = this.props;
+        let mode = '';
+        if(entity instanceof CRequest){
+            mode = 'add';
+        }
         return (
             <>
                 <div style={{marginTop: '20px'}}>
@@ -41,6 +45,7 @@ class TabItem extends Component{
                         data={{readOnly}}
                         noIcon={true}
                         hasHeightLimits={true}
+                        mode={mode}
                     />
                 </div>
                 <Body
