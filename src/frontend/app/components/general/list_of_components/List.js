@@ -24,10 +24,22 @@ import CardError from "./CardError";
 import AddButton from "./AddButton";
 import {
     addAddEntityKeyNavigation,
-    addDeleteCardKeyNavigation, addSelectCardKeyNavigation, addUpdateCardKeyNavigation, addGraphCardKeyNavigation,
-    addViewCardKeyNavigation, removeAddEntityKeyNavigation, removeDeleteCardKeyNavigation,
-    removeSelectCardKeyNavigation, removeGraphCardKeyNavigation, addEnterKeyNavigation, removeEnterKeyNavigation,
-    removeUpdateCardKeyNavigation, removeViewCardKeyNavigation, switchUserListKeyNavigation,
+    addDeleteCardKeyNavigation,
+    addSelectCardKeyNavigation,
+    addUpdateCardKeyNavigation,
+    addGraphCardKeyNavigation,
+    addViewCardKeyNavigation,
+    removeAddEntityKeyNavigation,
+    removeDeleteCardKeyNavigation,
+    removeSelectCardKeyNavigation,
+    removeGraphCardKeyNavigation,
+    addEnterKeyNavigation,
+    removeEnterKeyNavigation,
+    removeUpdateCardKeyNavigation,
+    removeViewCardKeyNavigation,
+    switchUserListKeyNavigation,
+    addFocusDocumentNavigation,
+    removeFocusDocumentNavigation,
 } from "@utils/key_navigation";
 import {getThemeClass, isString, searchByNameFunction, setFocusById, sortByNameFunction} from "@utils/app";
 import styles from '@themes/default/general/list_of_components.scss';
@@ -71,6 +83,7 @@ class List extends Component{
         if(mapEntity.hasOwnProperty('getAddLink')) {
             addAddEntityKeyNavigation(this);
         }
+        addFocusDocumentNavigation(this);
         setFocusById('search_field');
         setTimeout(function(){
             const app_list = document.getElementById("app_list");
@@ -101,6 +114,7 @@ class List extends Component{
         if(mapEntity.hasOwnProperty('getAddLink')) {
             removeAddEntityKeyNavigation(this);
         }
+        removeFocusDocumentNavigation(this);
         switchUserListKeyNavigation(false);
     }
 
