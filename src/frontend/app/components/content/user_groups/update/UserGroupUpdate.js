@@ -28,7 +28,7 @@ import {UserGroupPermissions} from "@utils/constants/permissions";
 import {INPUTS} from "@utils/constants/inputs";
 import {USERGROUP_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
-import {isEmptyObject, setFocusById} from "@utils/app";
+import {setFocusById} from "@utils/app";
 
 const userGroupPrefixURL = '/usergroups';
 
@@ -64,7 +64,7 @@ function mapUserGroup(userGroup){
 /**
  * Component to Update UserGroup
  */
-@connect(mapStateToProps, {fetchUserGroup, fetchComponents, updateUserGroup})
+@connect(mapStateToProps, {fetchUserGroup, fetchComponents, updateUserGroup, checkUserGroupName})
 @permission(UserGroupPermissions.UPDATE, true)
 @withTranslation(['userGroups', 'app'])
 @SingleComponent('userGroup', 'updating', ['components'], mapUserGroup)
