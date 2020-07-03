@@ -81,7 +81,7 @@ const addUserGroupEpic = (action$, store) => {
             let url = `${urlPrefix}`;
             let data = {...action.payload};
             let successResponse = addUserGroupFulfilled;
-            if(data.icon !== null){
+            if(data.icon !== null && data.icon !== ''){
                 successResponse = addGroupIcon;
             }
             delete data.icon;
