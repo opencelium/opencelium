@@ -20,15 +20,13 @@ import Content from "../../../general/content/Content";
 import ChangeContent from "@change_component/ChangeContent";
 
 import {addUserGroup} from '@actions/usergroups/add';
+import {checkUserGroupName} from "@actions/usergroups/fetch";
 import {fetchComponents} from '@actions/components/fetch';
-import Loading from "@loading";
 import {permission} from "@decorators/permission";
 import {UserGroupPermissions} from "@utils/constants/permissions";
 import {INPUTS} from "@utils/constants/inputs";
 import {automaticallyShowTour, USERGROUP_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
-import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
-import {API_REQUEST_STATE} from "@utils/constants/app";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {setFocusById, isEmptyObject} from "@utils/app";
 
@@ -57,6 +55,8 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         addingUserGroup: userGroups.get('addingUserGroup'),
         error: userGroups.get('error'),
+        checkingUserGroupName: userGroups.get('checkingUserGroupName'),
+        checkNameResult: userGroups.get('checkNameResult'),
         fetchingComponents: components.get('fetchingComponents'),
         components: components.get('components').toJS(),
     };
@@ -65,7 +65,7 @@ function mapStateToProps(state){
 /**
  * Component to Add User Group
  */
-@connect(mapStateToProps, {addUserGroup, fetchComponents})
+@connect(mapStateToProps, {addUserGroup, fetchComponents, checkUserGroupName})
 @permission(UserGroupPermissions.CREATE, true)
 @withTranslation(['userGroups', 'app'])
 @SingleComponent('userGroup', 'adding', ['components'], mapUserGroup)
@@ -75,6 +75,7 @@ class UserGroupAdd extends Component{
         super(props);
 
         const {authUser} = this.props;
+        this.startCheckingName = false;
         this.state = {
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
@@ -90,6 +91,7 @@ class UserGroupAdd extends Component{
      */
     setCurrentTour(pageNumber){
         const {authUser} = this.props;
+        this.startCheckingName = false;
         this.setState({
             currentTour: `page_${pageNumber}`,
             isTourOpen: automaticallyShowTour(authUser),
@@ -135,12 +137,15 @@ class UserGroupAdd extends Component{
      * to validate role name if empty
      */
     validateRole(entity){
-        const {t} = this.props;
+        const {t, checkUserGroupName} = this.props;
         if(entity.role === ''){
             setFocusById('input_role');
             return {value: false, message: t('ADD.VALIDATION_MESSAGES.ROLE_REQUIRED')};
+        } else{
+            this.startCheckingName = true;
+            checkUserGroupName(entity);
+            return {value: false, message: ''};
         }
-        return {value: true, message: ''};
     }
 
     /**
@@ -175,7 +180,7 @@ class UserGroupAdd extends Component{
     }
 
     render(){
-        const {t, authUser, addingUserGroup, doAction} = this.props;
+        const {t, authUser, addingUserGroup, doAction, checkingUserGroupName, checkNameResult} = this.props;
         let mappedComponents = this.mapComponents();
         let contentTranslations = {};
         contentTranslations.header = t('ADD.HEADER');
@@ -192,6 +197,12 @@ class UserGroupAdd extends Component{
                     defaultValue: '',
                     required: true,
                     check: (e, entity) => ::this.validateRole(e, entity),
+                    request: {
+                        inProcess: checkingUserGroupName,
+                        status: this.startCheckingName && !checkingUserGroupName,
+                        result: checkNameResult,
+                        notSuccessMessage: t('ADD.VALIDATION_MESSAGES.ROLE_EXIST'),
+                    },
                 },
                 {...INPUTS.DESCRIPTION, label: t('ADD.FORM.DESCRIPTION'), defaultValue: ''},
                 {...INPUTS.ICON, label: t('ADD.FORM.USER_GROUP_PICTURE'), browseTitle: t('ADD.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
