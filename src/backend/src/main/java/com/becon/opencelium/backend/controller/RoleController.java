@@ -144,7 +144,7 @@ public class RoleController {
     }
 
     @GetMapping("/exists/{role}")
-    public ResponseEntity<?> emailExists(@PathVariable("role") String role) throws IOException{
+    public ResponseEntity<?> roleExists(@PathVariable("role") String role) throws IOException{
         if (userRoleService.existsByRole(role)){
             throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
         } else {
