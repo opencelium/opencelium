@@ -17,17 +17,12 @@
 package com.becon.opencelium.backend.aspect;
 
 
-import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
-import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
-import com.becon.opencelium.backend.neo4j.entity.BodyNode;
 import com.becon.opencelium.backend.quartz.JobExecutor;
-import org.aopalliance.intercept.Joinpoint;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
