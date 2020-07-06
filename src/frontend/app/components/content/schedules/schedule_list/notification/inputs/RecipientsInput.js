@@ -122,20 +122,40 @@ class RecipientsInput extends Component{
      * to add recipient
      */
     onAddRecipient(recipient){
+        let {restRecipientsIterator} = this.state;
         let {notification} = this.props;
         const {changeNotification} = this.props;
         notification.targetGroup.addRecipient(recipient);
         changeNotification(notification);
+
+        const restRecipients = this.getRestRecipients();
+        const currentRestRecipients = this.getCurrentRestRecipients(restRecipients);
+        if(currentRestRecipients.length === 0 && restRecipientsIterator > 1){
+            restRecipientsIterator--;
+        }
+        this.setState({
+            restRecipientsIterator,
+        })
     }
 
     /**
      * to remove recipient
      */
     onRemoveRecipient(recipient){
+        let {selectedRecipientsIterator} = this.state;
         let {notification} = this.props;
         const {changeNotification} = this.props;
         notification.targetGroup.deleteRecipient(recipient);
         changeNotification(notification);
+
+        const selectedRecipients = this.getSelectedRecipients();
+        const currentSelectedRecipients = this.getCurrentSelectedRecipients(selectedRecipients);
+        if(currentSelectedRecipients.length === 0 && selectedRecipientsIterator > 1){
+            selectedRecipientsIterator--;
+        }
+        this.setState({
+            selectedRecipientsIterator,
+        })
     }
 
     /**
@@ -182,7 +202,7 @@ class RecipientsInput extends Component{
         //except selected users
         let recipients = allRecipients.length !== 0 ? allUsers.filter(user => allRecipients.findIndex(recipientEmail => recipientEmail === user.email) === -1) : allUsers;
         //except current user
-        recipients = recipients.filter(user => user.userId !== authUser.userId);
+        //recipients = recipients.filter(user => user.userId !== authUser.userId);
         let result = [];
         if(searchValue === ''){
             result = recipients.map(r => r.email);
