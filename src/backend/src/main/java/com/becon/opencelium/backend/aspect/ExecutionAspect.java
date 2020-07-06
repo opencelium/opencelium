@@ -117,20 +117,20 @@ public class ExecutionAspect {
         List<String> constants = getConstants(text);
         Map<String, String> cValues = getConstantValues(constants, user, ex, en);
         if (cValues == null || cValues.isEmpty()) {
-            return null;
+            return result;
         }
         for (Map.Entry<String, String> entry : cValues.entrySet()) {
             String constant = entry.getKey();
             String value = entry.getValue();
             String s = "{" + constant + "}";
-            result = result.replaceAll(s, value);
+            result = result.replace(s, value);
         }
         return result;
     }
 
     private List<String> getConstants(String text) {
         ArrayList<String> constants = new ArrayList<>();
-        Pattern p = Pattern.compile("\\[(.*?)\\]");
+        Pattern p = Pattern.compile("\\{(.*?)\\}");
         Matcher m = p.matcher(text);
 
         while (m.find()){
@@ -140,7 +140,7 @@ public class ExecutionAspect {
     }
 
     @Autowired
-    private ConnectionServiceImp connectionServiceImp = new ConnectionServiceImp();
+    private ConnectionServiceImp connectionServiceImp;
     private Map<String, String> getConstantValues(List<String> constants, User user, Exception ex, EventNotification en) {
         if (constants == null || constants.isEmpty()) {
             return null;
