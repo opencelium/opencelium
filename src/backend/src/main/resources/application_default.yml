@@ -66,6 +66,9 @@ spring:
   #          port: 465
   #          class: javax.net.ssl.SSLSocketFactory
 
+server:
+  port: 9090
+
 management:
   health:
     status:
@@ -80,6 +83,11 @@ elasticsearch:
   clustername: open_celium
   host: localhost
   port: 9300
+
+opencelium:
+  mail:
+    from: OC_Application
+
 
 #  ldap:
 #    embedded:
