@@ -307,7 +307,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         return result;
     }
 
-    public boolean hasReference(String fieldValue) {
+    public static boolean hasReference(String fieldValue) {
         String regex = "#(([a-zA-Z0-9]+).\\(response\\)|([a-zA-Z0-9]+).\\(request\\))";
         Pattern pattern = Pattern.compile(regex);
 

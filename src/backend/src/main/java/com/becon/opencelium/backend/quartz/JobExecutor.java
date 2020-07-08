@@ -21,12 +21,10 @@ import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Execution;
 import com.becon.opencelium.backend.mysql.entity.LastExecution;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.*;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.service.*;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -39,7 +37,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 
 @Component
@@ -97,6 +94,10 @@ public class JobExecutor extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        execution(context);
+    }
+
+    private void execution(JobExecutionContext context) {
         ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
         logger.info("Executing Job with key {}", context.getJobDetail().getKey());
         logger.info("Firing  Trigger with key {}", context.getTrigger().getKey());
@@ -128,10 +129,10 @@ public class JobExecutor extends QuartzJobBean {
 
         try {
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, restTemplate, executionContainer,
-                                                                        fieldNodeServiceImp, methodNodeServiceImp,
-                                                                        connectorService, logMessageService, statementNodeService);
+                    fieldNodeServiceImp, methodNodeServiceImp,
+                    connectorService, logMessageService, statementNodeService);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
-                                                                           executionContainer, connectorExecutor);
+                    executionContainer, connectorExecutor);
             connectionExecutor.start(scheduler);
         }catch (Exception e){
             e.printStackTrace();

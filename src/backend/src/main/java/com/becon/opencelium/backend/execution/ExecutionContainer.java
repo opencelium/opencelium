@@ -147,8 +147,6 @@ public class ExecutionContainer {
     }
 
     public Object getValueFromResponseData(String ref){
-        String k = ConditionUtility.getPathToValue(ref);
-        String v = ConditionUtility.getRefValue(ref);
         String color = ConditionUtility.getMethodKey(ref);
 
         MessageContainer messageContainer = responseData

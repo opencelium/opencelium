@@ -16,8 +16,10 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,4 +32,6 @@ public interface EnhancementNodeService {
     Optional<EnhancementNode> findByFieldId(Long fieldId);
 
     List<EnhancementNode> findAllByConnectionId(Long connectionId);
+
+    EnhancementNode toNode(FieldBindingResource fieldBindingResource, ConnectionNode connectionNode);
 }
