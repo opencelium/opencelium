@@ -23,6 +23,10 @@ On the second step you enter subject and body of the template.
 
 |image3|
 
+.. note::
+	You can use next references inside the body: USER_NAME, USER_SURNAME, USER_TITLE, USER_DEPARTMENT, CONNECTION_ID, CONNECTION_NAME,, SCHEDULER_ID, SCHEDULER_TITLE.
+    Just embrace it in curly brackets, for example: {CONNECTION_ID}
+
 .. |image0| image:: ../img/usecases/notification_templates/0.png
    :align: middle
 .. |image1| image:: ../img/usecases/notification_templates/1.png
