@@ -2,9 +2,8 @@
 Updating
 ##################
 
-Updating OC
+From OC 1 or earlier
 """""""""""""""""
-**From OC 1 or earlier:**
 
 .. code-block:: sh
 	:linenos:
@@ -13,4 +12,5 @@ Updating OC
 	root@shell> cd /opt/src/backend
 	root@shell> gradle build
 	root@shell> cd /opt/src/frontend
+	root@shell> yarn
 	root@shell> yarn upgrade
