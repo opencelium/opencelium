@@ -36,7 +36,11 @@ public interface FieldNodeService {
     boolean hasEnhancement(Long fieldId);
     List<FieldNode> findIncoming(Long outgoingId);
     String getFieldValue(FieldNode fieldNode);
-    boolean hasReference(String fieldValue);
+
+    static boolean hasReference(String fieldValue) {
+        return false;
+    }
+
     boolean existsInInvokerMethod(String invoker, String method, String path);
     Map<String, Object> deleteEmptyFields(Map<String, Object> body);
     boolean valueIsJSON(String value);
