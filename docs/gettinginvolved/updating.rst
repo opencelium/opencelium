@@ -4,7 +4,7 @@ Updating
 
 Updating OC
 """""""""""""""""
-**Updating from OC 1 or earlier:**
+**From OC 1 or earlier:**
 
 .. code-block:: sh
 	:linenos:
