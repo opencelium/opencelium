@@ -5,9 +5,9 @@ OC Changelog
 --------------------------------------------------------------------------------
 [Feature]					Send method test calls in connection view 
 [Feature]					Managing notifications for a job (PRE/POST/ALERT)
-[Connector]			                JIRA
-[Connector]			                BITBUCKET
-[Connector]			                TRELLO
+[Connector]			                Jira
+[Connector]			                Bitbucket
+[Connector]			                Trello
 [Connector]			                PRTG Network Monitor
 [Connector]			                Aruba Clearpass
 [Connector]			                CSV2API (Microsoft SQL Server)
@@ -22,7 +22,7 @@ OC Changelog
 [Bug][OC-241]					Update from v1.0 to v1.1
 [Bug][OC-250]					Scheduler saving
 [Bug][OC-251]					Backend creates job even crontab entered wrong
-[Bug][OC-258]					Fix bug when updating connector with null value of image property
+[Bug][OC-258]  				  	Fix bug when updating connector with null value of image property
 
 1.1
 --------------------------------------------------------------------------------
