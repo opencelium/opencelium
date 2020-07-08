@@ -13,6 +13,7 @@ This documentation is organized into a couple of sections:
    gettinginvolved/introduction
    gettinginvolved/requirements
    gettinginvolved/installation
+   gettinginvolved/updating
    gettinginvolved/administration
 
 .. toctree::
