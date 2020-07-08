@@ -17,18 +17,18 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {updateUserGroup} from '../../../../actions/usergroups/update';
-import {fetchUserGroup} from '../../../../actions/usergroups/fetch';
-import {fetchComponents} from '../../../../actions/components/fetch';
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {permission} from "../../../../decorators/permission";
-import {UserGroupPermissions} from "../../../../utils/constants/permissions";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {USERGROUP_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
-import {isEmptyObject, setFocusById} from "../../../../utils/app";
+import {updateUserGroup} from '@actions/usergroups/update';
+import {fetchUserGroup, checkUserGroupName} from '@actions/usergroups/fetch';
+import {fetchComponents} from '@actions/components/fetch';
+import {SingleComponent} from "@decorators/SingleComponent";
+import {permission} from "@decorators/permission";
+import {UserGroupPermissions} from "@utils/constants/permissions";
+import {INPUTS} from "@utils/constants/inputs";
+import {USERGROUP_TOURS} from "@utils/constants/tours";
+import OCTour from "@basic_components/OCTour";
+import {setFocusById} from "@utils/app";
 
 const userGroupPrefixURL = '/usergroups';
 
@@ -42,6 +42,8 @@ function mapStateToProps(state){
         error: userGroups.get('error'),
         fetchingUserGroup: userGroups.get('fetchingUserGroup'),
         updatingUserGroup: userGroups.get('updatingUserGroup'),
+        checkingUserGroupName: userGroups.get('checkingUserGroupName'),
+        checkNameResult: userGroups.get('checkNameResult'),
         fetchingComponents: components.get('fetchingComponents'),
         components: components.get('components').toJS(),
     };
@@ -62,7 +64,7 @@ function mapUserGroup(userGroup){
 /**
  * Component to Update UserGroup
  */
-@connect(mapStateToProps, {fetchUserGroup, fetchComponents, updateUserGroup})
+@connect(mapStateToProps, {fetchUserGroup, fetchComponents, updateUserGroup, checkUserGroupName})
 @permission(UserGroupPermissions.UPDATE, true)
 @withTranslation(['userGroups', 'app'])
 @SingleComponent('userGroup', 'updating', ['components'], mapUserGroup)
@@ -71,6 +73,7 @@ class UserGroupUpdate extends Component{
     constructor(props){
         super(props);
 
+        this.startCheckingName = false;
         this.state = {
             currentTour: 'page_1',
             isTourOpen: false,
@@ -85,6 +88,7 @@ class UserGroupUpdate extends Component{
      * to set appropriate Tour
      */
     setCurrentTour(pageNumber){
+        this.startCheckingName = false;
         this.setState({
             currentTour: `page_${pageNumber}`,
         });
@@ -148,10 +152,16 @@ class UserGroupUpdate extends Component{
      * to validate role name if empty
      */
     validateRole(entity){
-        const {t} = this.props;
+        const {t, userGroup, checkUserGroupName} = this.props;
         if(entity.role === ''){
             setFocusById('input_role');
-            return {value: false, message: t('ADD.VALIDATION_MESSAGES.ROLE_REQUIRED')};
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.ROLE_REQUIRED')};
+        } else{
+            if(entity.role !== userGroup.role) {
+                this.startCheckingName = true;
+                checkUserGroupName(entity);
+                return {value: false, message: ''};
+            }
         }
         return {value: true, message: ''};
     }
@@ -163,7 +173,7 @@ class UserGroupUpdate extends Component{
         const {t} = this.props;
         if(entity.components.length === 0){
             setFocusById('input_components');
-            return {value: false, message: t('ADD.VALIDATION_MESSAGES.COMPONENTS_REQUIRED')};
+            return {value: false, message: t('UPDATE.VALIDATION_MESSAGES.COMPONENTS_REQUIRED')};
         }
         return {value: true, message: ''};
     }
@@ -188,7 +198,7 @@ class UserGroupUpdate extends Component{
     }
 
     render(){
-        const {t, authUser, updatingUserGroup, doAction} = this.props;
+        const {t, authUser, updatingUserGroup, doAction, checkingUserGroupName, checkNameResult} = this.props;
         let components = this.getComponents();
         let parsedEntity = this.parseEntity();
         let getListLink = `${userGroupPrefixURL}`;
@@ -205,6 +215,12 @@ class UserGroupUpdate extends Component{
                     label: t('UPDATE.FORM.ROLE'),
                     required: true,
                     check: (e, entity) => ::this.validateRole(e, entity),
+                    request: {
+                        inProcess: checkingUserGroupName,
+                        status: this.startCheckingName && !checkingUserGroupName,
+                        result: checkNameResult,
+                        notSuccessMessage: t('UPDATE.VALIDATION_MESSAGES.ROLE_EXIST'),
+                    }
                 },
                 {...INPUTS.DESCRIPTION, label: t('UPDATE.FORM.DESCRIPTION')},
                 {...INPUTS.ICON, label: t('UPDATE.FORM.USER_GROUP_PICTURE'), browseTitle: t('UPDATE.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},

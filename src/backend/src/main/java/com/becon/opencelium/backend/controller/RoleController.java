@@ -25,8 +25,10 @@ import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
@@ -139,6 +141,15 @@ public class RoleController {
                 .buildAndExpand(role.getId()).toUri();
 
         return ResponseEntity.created(uri).body(resource);
+    }
+
+    @GetMapping("/exists/{role}")
+    public ResponseEntity<?> roleExists(@PathVariable("role") String role) throws IOException{
+        if (userRoleService.existsByRole(role)){
+            throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
+        } else {
+            throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
+        }
     }
 
     @DeleteMapping("/{id}")

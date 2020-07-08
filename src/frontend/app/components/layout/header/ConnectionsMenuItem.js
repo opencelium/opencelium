@@ -17,11 +17,11 @@ import React, { Component }  from 'react';
 import {withRouter} from 'react-router';
 import {connect} from "react-redux";
 import {withTranslation} from 'react-i18next';
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import ListItemLink from "@basic_components/ListItemLink";
 
-import {addMenuConnectionsKeyNavigation, removeMenuConnectionsKeyNavigation} from "../../../utils/key_navigation";
-import {permission} from "../../../decorators/permission";
-import {ConnectionPermissions} from "../../../utils/constants/permissions";
+import {addMenuConnectionsKeyNavigation, removeMenuConnectionsKeyNavigation} from "@utils/key_navigation";
+import {permission} from "@decorators/permission";
+import {ConnectionPermissions} from "@utils/constants/permissions";
 
 
 function mapStateToProps(state){

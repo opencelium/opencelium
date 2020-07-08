@@ -17,8 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Confirmation from "../../../../../app/Confirmation";
 
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
+import styles from '@themes/default/general/form_methods.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 /**
@@ -60,9 +60,14 @@ class DeleteIcon extends Component{
      * to remove operator
      */
     removeOperator(){
-        const {removeOperator} = this.props;
-        removeOperator();
+        let that = this;
         this.toggleConfirm();
+        setTimeout(() => {
+            that.props.toggleDeleteOperator();
+            setTimeout(() => {
+                that.props.removeOperator();
+            }, 300);
+        }, 200);
     }
 
     render(){
@@ -92,6 +97,7 @@ class DeleteIcon extends Component{
 DeleteIcon.propTypes = {
     removeOperator: PropTypes.func.isRequired,
     disableMouseForOperator: PropTypes.func.isRequired,
+    toggleDeleteOperator: PropTypes.func.isRequired,
 };
 
 export default DeleteIcon;

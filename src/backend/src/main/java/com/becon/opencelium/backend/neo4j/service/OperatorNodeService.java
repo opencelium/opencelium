@@ -22,5 +22,5 @@ import java.util.List;
 
 public interface OperatorNodeService {
 
-    List<OperatorNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
+    List<OperatorNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer connectorId);
 }

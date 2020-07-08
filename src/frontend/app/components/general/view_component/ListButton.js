@@ -17,8 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ContentNavigationButton from '../content/ContentNavigationButton';
 
-import styles from '../../../themes/default/general/view_component.scss';
-import {getThemeClass} from "../../../utils/app";
+import styles from '@themes/default/general/view_component.scss';
+import {getThemeClass} from "@utils/app";
 
 
 /**

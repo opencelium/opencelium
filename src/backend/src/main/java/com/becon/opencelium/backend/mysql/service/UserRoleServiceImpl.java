@@ -62,7 +62,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public boolean existsByRole(String role) {
-        return false;
+        return userRoleRepository.existsByName(role);
     }
 
     @Override

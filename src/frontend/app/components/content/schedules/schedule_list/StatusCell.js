@@ -16,16 +16,16 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import {updateScheduleStatus} from '../../../../actions/schedules/update';
+import {updateScheduleStatus} from '@actions/schedules/update';
 import {TableCell} from 'react-toolbox/lib/table';
-import Loading from "../../../general/app/Loading";
+import Loading from "@loading";
 import {connect} from "react-redux";
 
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "../../../../utils/app";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
-import TooltipSwitch from "../../../general/basic_components/tooltips/TooltipSwitch";
-import {NO_DATA} from "../../../../utils/constants/app";
+import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
+import {NO_DATA} from "@utils/constants/app";
 
 
 function mapStateToProps(state){

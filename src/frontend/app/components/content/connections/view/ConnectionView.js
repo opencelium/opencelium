@@ -17,14 +17,14 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {fetchConnection} from '../../../../actions/connections/fetch';
-import {ConnectionPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import CConnection from "../../../../classes/components/content/connection/CConnection";
+import {fetchConnection} from '@actions/connections/fetch';
+import {ConnectionPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {SingleComponent} from "@decorators/SingleComponent";
+import {INPUTS} from "@utils/constants/inputs";
+import CConnection from "@classes/components/content/connection/CConnection";
 
 
 const connectionPrefixURL = '/connections';

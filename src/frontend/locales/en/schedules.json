@@ -3,6 +3,65 @@
     "TITLE": "Scheduler"
   },
   "HEADER": "Scheduler",
+  "NOTIFICATION": {
+    "EMPTY": "No entry",
+    "NAME": "Name",
+    "EVENT_TYPE": "Event Type",
+    "NOTIFICATION_TYPE": "Notification Type",
+    "TEMPLATE": "Template",
+    "ACTION": "Action",
+    "EVENT_PRE": "Pre",
+    "EVENT_POST": "Post",
+    "EVENT_ALERT": "Alert",
+    "UPDATE": "Update",
+    "DELETE": "Delete",
+    "TYPE": {
+      "EMAIL": "E-Mail",
+      "SLACK": "Slack"
+    },
+    "SEARCH_PLACEHOLDER": "Search ...",
+    "VALIDATION": {
+      "EVENT_TYPE_EMPTY": "Event is a required field",
+      "NOTIFICATION_TYPE_EMPTY": "Notification Type is a required field",
+      "TEMPLATE_EMPTY": "Template is a required field",
+      "RECIPIENTS_EMPTY": "There should be at least one selected recipient"
+    },
+    "ADD_ICON_TOOLTIP": "Add Notification",
+    "CLOSE_ICON_TOOLTIP": "Close",
+    "ADD_DIALOG":{
+      "ADD": "Add",
+      "CANCEL": "Cancel",
+      "TITLE": "Add Notification"
+    },
+    "UPDATE_DIALOG":{
+      "UPDATE": "Update",
+      "CANCEL": "Cancel",
+      "TITLE": "Update Notification"
+    },
+    "NOTIFICATION_CHANGE": {
+      "NAME_LABEL": "Name",
+      "EVENT_TYPE_LABEL": "Event",
+      "NOTIFICATION_TYPE_LABEL": "Notification Type",
+      "NOTIFICATION_TYPE_PLACEHOLDER": "Choose type...",
+      "SLACK_CHANNEL_LABEL": "Channel",
+      "SLACK_CHANNEL_PLACEHOLDER": "Choose channel...",
+      "TEMPLATE_LABEL": "Template",
+      "TEMPLATE_PLACEHOLDER": "Choose template...",
+      "RECIPIENTS": {
+        "LABEL": "Recipients",
+        "NO_SELECTED_RECIPIENTS": "There is no selected recipients'",
+        "NO_REST_RECIPIENTS": "There is no rest recipients'",
+        "NONE_FOUND": "None recipients found",
+        "ADD_ICON_TOOLTIP": "Add",
+        "REMOVE_ICON_TOOLTIP": "Remove",
+        "PREVIOUS_ICON_TOOLTIP": "Previous",
+        "NEXT_ICON_TOOLTIP": "Next",
+        "MORE_ICON_TOOLTIP": "more recipients",
+        "REST_RECIPIENTS_SEARCH_LABEL": "Search in rest recipients...",
+        "SELECTED_RECIPIENTS_SEARCH_LABEL": "Search in selected recipients..."
+      }
+    }
+  },
   "LIST":{
     "EMPTY_LIST": "The list of Schedulers is empty",
     "EMPTY_CURRENT_LIST": "The list of current jobs is empty",
@@ -10,6 +69,7 @@
     "TOOLTIP_ENABLE_SWITCH_TRUE": "Enable",
     "TOOLTIP_ENABLE_SWITCH_FALSE": "Disable",
     "TOOLTIP_UPDATE_ICON": "Update",
+    "TOOLTIP_NOTIFICATION_ICON": "Notifications",
     "TOOLTIP_DELETE_ICON": "Delete",
     "STATUS_ON": "On",
     "STATUS_OFF": "Off",

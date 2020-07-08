@@ -18,19 +18,18 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {Container} from "react-grid-system";
 
-import {fetchUser} from '../../../actions/users/fetch';
+import {fetchUser} from '@actions/users/fetch';
 import Content from "../../general/content/Content";
 import UserDetails from "./UserDetails";
 import UserGroup from "./UserGroup";
-import {SingleComponent} from "../../../decorators/SingleComponent";
-import {permission} from "../../../decorators/permission";
-import {MyProfilePermissions} from "../../../utils/constants/permissions";
+import {SingleComponent} from "@decorators/SingleComponent";
+import {permission} from "@decorators/permission";
+import {MyProfilePermissions} from "@utils/constants/permissions";
 import Themes from "./Themes";
 import AppTour from "./AppTour";
-import Loading from "../../general/app/Loading";
+import Loading from "@loading";
 import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "../../../utils/constants/app";
-import checkConnection from "../../../decorators/checkConnection";
+import {ERROR_TYPE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){

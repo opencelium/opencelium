@@ -18,10 +18,10 @@ import {withRouter} from 'react-router';
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import ListItemLink from "@basic_components/ListItemLink";
 import {
     addMenuDashboardKeyNavigation, removeMenuDashboardKeyNavigation,
-} from "../../../utils/key_navigation";
+} from "@utils/key_navigation";
 
 
 function mapStateToProps(state){

@@ -16,12 +16,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '../../../themes/default/general/change_component.scss';
-import {getThemeClass} from "../../../utils/app";
-import Button from "../basic_components/buttons/Button";
-import Loading from "../app/Loading";
-import {API_REQUEST_STATE} from "../../../utils/constants/app";
-import FontIcon from "../basic_components/FontIcon";
+import styles from '@themes/default/general/change_component.scss';
+import {getThemeClass} from "@utils/app";
+import Button from "@basic_components/buttons/Button";
+import Loading from "@loading";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import FontIcon from "@basic_components/FontIcon";
+import CheckConnection from "@change_component/extra_actions/check_connection/CheckConnection";
 
 
 /**
@@ -44,18 +45,8 @@ class Navigation extends Component{
         return <FontIcon className={styles[classNames.navigation_prev_icon]} value={'arrow_back'} onClick={prevPage} id={'navigation_back'}/>;
     }
 
-    /**
-     * to test Connector
-     */
-    test(){
-        const {test, entity} = this.props;
-        if(test.isTested === -1 || test.isTested === 0){
-            test.callback(entity);
-        }
-    }
-
     renderNextButton(){
-        const {action, translations, test, authUser, makingRequest, isActionInProcess} = this.props;
+        const {action, translations, isTested, authUser, makingRequest, isActionInProcess, extraAction, entity} = this.props;
         let classNames = [
             'navigation_action_icon',
             'navigation_icon_text',
@@ -71,6 +62,7 @@ class Navigation extends Component{
         }
         let {type} = this.props;
         const {page, lastPage, nextPage} = this.props.navigationPage;
+        let extraButton = null;
         let isLastPage = false;
         let icon = 'arrow_forward';
         if(page === lastPage){
@@ -87,25 +79,31 @@ class Navigation extends Component{
                 case 'view':
                     icon = '';
             }
-            let onClickAction = null;
-            if(test.isTested === -1 || test.isTested === 0){
+            if(isTested === -1 || isTested === 0){
                 icon = 'donut_large';
                 type = 'test';
-                onClickAction = ::this.test;
-            } else {
-                onClickAction = action;
             }
             if(icon === ''){
                 return null;
             }
+            if(extraAction){
+                switch (extraAction) {
+                    case 'CHECK_CONNECTION':
+                        extraButton = <CheckConnection currentConnection={entity}/>;
+                        break;
+                }
+            }
             return (
-                <Button
-                    authUser={authUser}
-                    title={translations[type + 'Button']}
-                    icon={icon}
-                    onClick={onClickAction}
-                    className={styles[classNames.navigation_action_icon]}
-                />
+                <React.Fragment>
+                    <Button
+                        authUser={authUser}
+                        title={translations[type + 'Button']}
+                        icon={icon}
+                        onClick={action}
+                        className={styles[classNames.navigation_action_icon]}
+                    />
+                    {extraButton}
+                </React.Fragment>
             );
         }
         return <FontIcon className={styles[classNames.navigation_next_icon]} value={icon} onClick={nextPage} id={'navigation_next'}/>;
@@ -132,7 +130,7 @@ Navigation.propTypes = {
     action: PropTypes.func.isRequired,
     translations: PropTypes.object.isRequired,
     add: PropTypes.string,
-    test: PropTypes.object,
+    isTested: PropTypes.number,
     entity: PropTypes.object.isRequired,
 };
 
@@ -141,7 +139,8 @@ Navigation.defaultProps = {
     nextPage: null,
     prevPage: null,
     type: 'add',
-    test: {isTested: 1, callback: null},
+    isTested: 1,
+    extraAction: '',
 };
 
 

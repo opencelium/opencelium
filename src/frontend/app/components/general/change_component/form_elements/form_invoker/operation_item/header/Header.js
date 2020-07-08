@@ -15,18 +15,19 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '../../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/change_component.scss';
+import styles from '@themes/default/general/change_component.scss';
 import FormSelect from "../../../FormSelect";
-import {isString} from "../../../../../../../utils/app";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import FontIcon from "../../../../../basic_components/FontIcon";
-import {HTTPRequestHeaders} from "../../../../../../../utils/constants/HTTPRequestHeaders";
+import {isString} from "@utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
+import {HTTPRequestHeaders} from "@utils/constants/HTTPRequestHeaders";
 import HeaderValue from "./HeaderValue";
 import HeaderKey from "./HeaderKey";
 
+const HEADER_LIMIT = 2;
 
 /**
  * Component for Header in Invoker.RequestItem
@@ -42,6 +43,7 @@ class Header extends Component{
             hasDeleteButton: false,
             currentKey: -1,
             focused: false,
+            iterator: 1,
         };
 
         this.commonSource = this.filterItems();
@@ -56,6 +58,19 @@ class Header extends Component{
 
     componentDidUpdate(){
         this.commonSource = this.filterItems();
+    }
+    /**
+     * to open next headers
+     */
+    increaseIterator(){
+        this.setState({iterator: this.state.iterator + 1});
+    }
+
+    /**
+     * to open previous headers
+     */
+    decreaseIterator(){
+        this.setState({iterator: this.state.iterator - 1});
     }
 
     changeHeaderProp(value){
@@ -146,13 +161,13 @@ class Header extends Component{
 
     renderInputs(){
         const {onDeleteButtonOver, hasDeleteButton, currentKey} = this.state;
-        const {entity, data, forConnection} = this.props;
+        const {entity, data, forConnection, hasHeightLimits} = this.props;
         const {readOnly} = data;
         let isReadonly = false;
         if(readOnly){
             isReadonly = true;
         }
-        let items = entity.header;
+        let items = hasHeightLimits ? this.getCurrentHeaders() : entity.header;
         return items.map((item, key) => {
             let itemValue = this.findValueInHeaderSource(item.name);
             if(itemValue) {
@@ -160,9 +175,10 @@ class Header extends Component{
                 return (
                     <div
                         style={{position: 'relative'}}
-                        key={key}
+                        key={itemValue.value}
                         onMouseEnter={(e) => ::this.showDeleteButton(e, key)}
-                        onMouseLeave={::this.hideDeleteButton}>
+                        onMouseLeave={::this.hideDeleteButton}
+                        className={hasHeightLimits ? styles.operation_item_header_appear : ''}>
                         <HeaderKey
                             forConnection={forConnection}
                             isReadonly={isReadonly}
@@ -242,6 +258,12 @@ class Header extends Component{
         });
     }
 
+    getCurrentHeaders(){
+        const {iterator} = this.state;
+        const {entity} = this.props;
+        return entity.header.slice((iterator - 1) * HEADER_LIMIT, (iterator - 1) * HEADER_LIMIT + HEADER_LIMIT);
+    }
+
     renderAddItem(){
         const {tourStep, index, headerType, forConnection} = this.props;
         if(this.commonSource.length === 0)
@@ -249,7 +271,17 @@ class Header extends Component{
         return (
             <div>
                 <FormSelect
-                    data={{tourStepHint: tourStep ? tourStep : '', icon: forConnection ? '' : 'label_outline', selectClassName: `${styles.invoker_item_prop_add}`, source: this.commonSource, name: 'header_prop', placeholder: 'Key', label: 'Key', required: false, visible: true}}
+                    data={{
+                        tourStepHint: tourStep ? tourStep : '',
+                        icon: forConnection ? '' : 'label_outline',
+                        selectClassName: `${styles.invoker_item_prop_add}`,
+                        source: this.commonSource,
+                        name: 'header_prop',
+                        placeholder: 'Key',
+                        label: 'Key',
+                        required: false,
+                        visible: true
+                    }}
                     value={this.state.header_prop}
                     id={`header_prop_${headerType}_${index}`}
                     handleChange={::this.changeHeaderProp}
@@ -287,21 +319,47 @@ class Header extends Component{
         return <label className={labelStyle}>{label}</label>;
     }
 
+    renderNavigation(){
+        const {iterator} = this.state;
+        const {hasHeightLimits, entity} = this.props;
+        if(!hasHeightLimits || entity.header.length <= HEADER_LIMIT){
+            return null;
+        }
+        const isPrevDisable = (iterator - 1) * HEADER_LIMIT <= 0;
+        const isNextDisable = iterator * HEADER_LIMIT >= entity.header.length;
+        return(
+            <React.Fragment>
+                <div className={styles.operation_item_header_arrow}>
+                    <TooltipFontIcon tooltip={'Previous'} value={'keyboard_arrow_up'} onClick={isPrevDisable ? null : ::this.decreaseIterator}
+                                     className={`${styles.operation_item_header_arrow_prev} ${isPrevDisable ? styles.operation_item_header_arrow_disable : ''}`}/>
+                    <TooltipFontIcon tooltip={'Next'} value={'keyboard_arrow_down'} onClick={isNextDisable ? null : ::this.increaseIterator}
+                                     className={`${styles.operation_item_header_arrow_next} ${isNextDisable ? styles.operation_item_header_arrow_disable : ''}`}/>
+                </div>
+            </React.Fragment>
+        );
+    }
+
     render(){
-        const {entity, data, forConnection, mode} = this.props;
+        const {entity, data, forConnection, mode, noIcon, hasHeightLimits} = this.props;
         const {readOnly} = data;
         let items = entity.header;
         if(items.length === 0 && mode !== 'add'){
             return null;
         }
+        let inputsStyle = {display: 'grid'};
+        if(hasHeightLimits){
+            inputsStyle.maxHeight = '200px';
+        }
         return(
-            <div className={`${forConnection ? '' : theme.withIcon} ${theme.input}`} style={forConnection ? {paddingBottom: 0} : null}>
+            <div className={`${forConnection || noIcon ? '' : theme.withIcon} ${theme.input}`} style={forConnection ? {paddingBottom: 0} : null}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={forConnection ? {padding: 0} : null}/>
-                <div style={{display: 'grid'}}>
+
+                {this.renderNavigation()}
+                <div style={inputsStyle}>
                     {this.renderInputs()}
                     {readOnly || forConnection ? null : this.renderAddItem()}
                 </div>
-                {forConnection ? null : <FontIcon value={'public'} className={theme.icon}/>}
+                {forConnection || noIcon ? null : <FontIcon value={'public'} className={theme.icon}/>}
                 <span className={theme.bar}/>
                 {this.renderLabel()}
             </div>
@@ -311,13 +369,17 @@ class Header extends Component{
 
 Header.propTypes = {
     entity: PropTypes.object.isRequired,
+    updateEntity: PropTypes.func,
     data: PropTypes.object.isRequired,
     mode: PropTypes.string,
 };
 
 Header.defaultProps = {
     forConnection: false,
-    mode: 'existed'
+    mode: 'existed',
+    index: 0,
+    noIcon: false,
+    hasHeightLimits: false,
 };
 
 

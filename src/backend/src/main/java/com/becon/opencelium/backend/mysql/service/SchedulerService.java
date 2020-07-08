@@ -16,13 +16,14 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
+import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import org.quartz.SchedulerException;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,4 +48,11 @@ public interface SchedulerService {
     void disable(Scheduler scheduler) throws SchedulerException;
     void enable(Scheduler scheduler) throws SchedulerException;
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
+
+    List<EventNotification> getAllNotifications(int schedulerId);
+    Optional<EventNotification> getNotification(int notificationId);
+    EventNotification toNotificationEntity(NotificationResource resource);
+    NotificationResource toNotificationResource(EventNotification eventNotification);
+    void saveNotification(EventNotification eventNotification);
+    void deleteNotificationById(int id);
 }

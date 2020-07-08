@@ -13,19 +13,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AdminCardsAction} from '../utils/actions';
+import {AdminCardsAction} from '@utils/actions';
 import {
     fetchAdminCardsFulfilled, fetchAdminCardsRejected,
     loadAdminCardsLinkFulfilled, loadAdminCardsLinkRejected,
-} from '../actions/admin_cards/fetch';
-import {doRequest} from "../utils/auth";
-import {invokerUrl, appUrl} from "../utils/constants/url";
+} from '@actions/admin_cards/fetch';
+import {doRequest} from "@utils/auth";
+import {invokerUrl, appUrl} from "@utils/constants/url";
 
 
 const adminCards = [
     {id: 1, name: 'App', link: '/apps'},
     {id: 2, name: 'Invokers', link: '/invokers'},
     {id: 3, name: 'Templates', link: '/templates'},
+    {id: 4, name: 'Notification Templates', link: '/notification_templates'},
 ];
 
 /**

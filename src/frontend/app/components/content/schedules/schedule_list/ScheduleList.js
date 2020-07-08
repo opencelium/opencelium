@@ -17,35 +17,36 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from'react-redux';
 import { Row, Col } from "react-grid-system";
-import Table from '../../../general/basic_components/table/Table';
+import Table from '@basic_components/table/Table';
 import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 import Pagination from 'react-bootstrap/Pagination';
 
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import {getThemeClass, sortByIdFunction} from "../../../../utils/app";
-import {deleteSchedules} from '../../../../actions/schedules/delete';
-import {startSchedules, enableSchedules, disableSchedules} from '../../../../actions/schedules/update';
-import {checkApp, checkAppCanceled} from "../../../../actions/apps/fetch";
-import {copyToClipboardWebHookFulfilled} from '../../../../actions/webhooks/fetch';
+import styles from '@themes/default/content/schedules/schedules.scss';
+import {getThemeClass, setFocusById, sortByIdFunction} from "@utils/app";
+import {deleteSchedules} from '@actions/schedules/delete';
+import {startSchedules, enableSchedules, disableSchedules} from '@actions/schedules/update';
+import {checkApp, checkAppCanceled} from "@actions/apps/fetch";
+import {copyToClipboardWebHookFulfilled} from '@actions/webhooks/fetch';
 import StatusCell from "./StatusCell";
 import {withTranslation} from "react-i18next";
-import {SchedulePermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
+import {SchedulePermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
 import ScheduleUpdate from "./ScheduleUpdate";
 import ScheduleDelete from "./ScheduleDelete";
 import ScheduleStart from "./ScheduleStart";
-import CSchedule from "../../../../classes/components/content/schedule/CSchedule";
-import Button from "../../../general/basic_components/buttons/Button";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
+import Button from "@basic_components/buttons/Button";
 import WebHookTools from "./WebHookTools";
 import TitleCell from "./TitleCell";
 import CronCell from "./CronCell";
 import LastSuccessCell from "./LastSuccessCell";
 import LastFailureCell from "./LastFailureCell";
 import LastDurationCell from "./LastDurationCell";
-import Checkbox from "../../../general/basic_components/inputs/Checkbox";
-import Input from "../../../general/basic_components/inputs/Input";
-import {APP_STATUS_DOWN, APP_STATUS_UP} from "../../../../utils/constants/url";
-import {API_REQUEST_STATE} from "../../../../utils/constants/app";
+import Checkbox from "@basic_components/inputs/Checkbox";
+import Input from "@basic_components/inputs/Input";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import ScheduleNotification from "./notification/ScheduleNotification";
 
 export const EMPHASIZE_DURATION_ANIMATION = 900;
 
@@ -84,6 +85,7 @@ class ScheduleList extends Component{
     }
 
     componentDidMount(){
+        setFocusById('filter_title');
         this.checkElasticSearch();
     }
 
@@ -305,7 +307,7 @@ class ScheduleList extends Component{
             <Input
                 id={'filter_title'}
                 name={'filter_title'}
-                placeholder={t('ADD.FILTER_PLACEHOLDER')}
+                label={t('ADD.FILTER_PLACEHOLDER')}
                 type={'text'}
                 onChange={::this.onChangeFilterTitle}
                 value={filterTitle}
@@ -377,12 +379,13 @@ class ScheduleList extends Component{
                                 <TableCell style={{padding: '5px'}}>
                                     <div className={styles[classNames.schedule_list_actions]}>
                                         <div>
-                                            <ScheduleStart index={key} schedule={schedule}/>
-                                            <ScheduleUpdate index={key} schedule={schedule}/>
+                                            <WebHookTools index={key} schedule={schedule} t={t}/>
+                                            <ScheduleNotification schedule={schedule} index={key}/>
+                                            <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
                                         </div>
                                         <div>
-                                            <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
-                                            <WebHookTools index={key} schedule={schedule} t={t}/>
+                                            <ScheduleStart index={key} schedule={schedule}/>
+                                            <ScheduleUpdate index={key} schedule={schedule}/>
                                         </div>
                                     </div>
                                 </TableCell>

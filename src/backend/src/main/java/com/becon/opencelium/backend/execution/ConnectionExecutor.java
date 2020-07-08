@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -61,9 +62,7 @@ public class ConnectionExecutor {
         Connector toConnector = connectorService.findById(connection.getToConnector())
                 .orElseThrow(() -> new ConnectorNotFoundException(connection.getFromConnector()));
 
-
-
-        connectorExecutor.start(connectionNode.getFromConnector(), fromConnector);
-        connectorExecutor.start(connectionNode.getToConnector(), toConnector);
+        connectorExecutor.start(connectionNode.getFromConnector(), fromConnector, toConnector, Constant.CONN_FROM);
+        connectorExecutor.start(connectionNode.getToConnector(), toConnector, fromConnector, Constant.CONN_TO);
     }
 }

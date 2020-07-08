@@ -17,9 +17,9 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 
-import styles from '../../../themes/default/general/basic_components.scss';
-import {addCancelKeyNavigation, removeCancelKeyNavigation} from "../../../utils/key_navigation";
-import {getThemeClass} from "../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {addCancelKeyNavigation, removeCancelKeyNavigation} from "@utils/key_navigation";
+import {getThemeClass} from "@utils/app";
 import FontIcon from "./FontIcon";
 
 

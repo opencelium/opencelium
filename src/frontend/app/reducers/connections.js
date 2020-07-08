@@ -27,6 +27,8 @@ const initialState = fromJS({
     fetchingConnections: API_REQUEST_STATE.INITIAL,
     deletingConnection: API_REQUEST_STATE.INITIAL,
     testingConnection: API_REQUEST_STATE.INITIAL,
+    checkingConnection: API_REQUEST_STATE.INITIAL,
+    sendingOperationRequest: API_REQUEST_STATE.INITIAL,
     checkingNeo4j: false,
     checkingConnectionTitle: false,
     checkTitleResult: null,
@@ -34,10 +36,12 @@ const initialState = fromJS({
     validateFormMethodsResult: null,
     connection: null,
     testResult: {},
+    operationResponse: {},
     connections: List(),
     error: null,
     message: {},
     notificationData: {},
+    checkConnectionResult: {},
 });
 
 let connections = [];
@@ -120,6 +124,18 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingConnection', API_REQUEST_STATE.FINISH);
         case ConnectionsAction.DELETE_CONNECTION_REJECTED:
             return state.set('deletingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case ConnectionsAction.SEND_OPERATIONREQUEST:
+            return state.set('sendingOperationRequest', API_REQUEST_STATE.START).set('error', null);
+        case ConnectionsAction.SEND_OPERATIONREQUEST_FULFILLED:
+            return state.set('sendingOperationRequest', API_REQUEST_STATE.FINISH).set('operationResponse', {status: action.payload.statusCodeValue, body: JSON.parse(action.payload.body)});
+        case ConnectionsAction.SEND_OPERATIONREQUEST_REJECTED:
+            return state.set('sendingOperationRequest', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
+        case ConnectionsAction.CHECK_CONNECTION:
+            return state.set('checkingConnection', API_REQUEST_STATE.START).set('error', null);
+        case ConnectionsAction.CHECK_CONNECTION_FULFILLED:
+            return state.set('checkingConnection', API_REQUEST_STATE.FINISH).set('checkConnectionResult', action.payload);
+        case ConnectionsAction.CHECK_CONNECTION_REJECTED:
+            return state.set('checkingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
         default:
             return state;
     }

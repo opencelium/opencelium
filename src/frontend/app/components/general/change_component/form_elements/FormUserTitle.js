@@ -17,17 +17,17 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {withTranslation} from "react-i18next";
 import { RadioGroup, RadioButton } from 'react-toolbox/lib/radio';
-import FontIcon from "../../basic_components/FontIcon";
+import FontIcon from "@basic_components/FontIcon";
 
-import styles from '../../../../themes/default/general/change_component.scss';
-import {FormElement} from "../../../../decorators/FormElement";
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
 import theme from "react-toolbox/lib/input/theme.css";
 
 /**
- * Component for Form Input
+ * Component for Form User Title
  */
-@FormElement()
 @withTranslation('users')
+@FormElement()
 class FormUserTitle extends Component{
 
     constructor(props){

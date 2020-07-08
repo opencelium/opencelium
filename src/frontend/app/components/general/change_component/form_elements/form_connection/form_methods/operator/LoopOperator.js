@@ -19,23 +19,21 @@ import Select from 'react-select';
 import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {dotColor} from "../utils";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../../classes/components/content/connection/CConnectorItem";
+import styles from '@themes/default/general/form_methods.scss';
 import {
     DEFAULT_COLOR,
-} from "../../../../../../../classes/components/content/connection/operator/CStatement";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import COperatorItem from "../../../../../../../classes/components/content/connection/operator/COperatorItem";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import SelectSearch from "../../../../../basic_components/inputs/SelectSearch";
+} from "@classes/components/content/connection/operator/CStatement";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import CConnection from "@classes/components/content/connection/CConnection";
+import SelectSearch from "@basic_components/inputs/SelectSearch";
 import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
-} from "../../../../../../../classes/components/content/invoker/response/CResponse";
-import Input from "../../../../../basic_components/inputs/Input";
-import FontIcon from "../../../../../basic_components/FontIcon";
+} from "@classes/components/content/invoker/response/CResponse";
+import Input from "@basic_components/inputs/Input";
+import {dotColor} from "../help";
 
 
 /**
@@ -290,14 +288,14 @@ class LoopOperator extends Component{
     }
 
     render(){
-        const {connector, tooltip, operator, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
+        const {connector, tooltip, operator, isVisibleMenuEdit, renderCloseMenuEditButton, intend} = this.props;
         let classNames = styles.operator_icon;
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : null;
         let operatorStyle = {
-            height: '50px',
-            marginLeft: `${operator.getDepth() * 20}px`,
+            height: '57.6px',
+            width: `calc(100% - ${intend})`,
             padding: '5px',
-            transition: 'all 0.3s ease 0s',
+            transition: 'width 0.5s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',
         };
         if(isCurrentItem){
@@ -306,28 +304,31 @@ class LoopOperator extends Component{
             classNames += ` ${styles.selected_item}`;
         }
         return (
-            <div style={operatorStyle} onClick={::this.setCurrentItem}>
-                <div style={{float: 'left', width: '10%', marginTop: '5px'}}>
-                    <TooltipFontIcon
-                        className={classNames}
-                        tooltip={tooltip}
-                        value={'loop'}
-                        onClick={::this.setCurrentItem}
-                        tooltipPosition={'top'}
-                    />
-                </div>
+            <div style={{display: 'flex'}}>
+                <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
+                <div style={operatorStyle} onClick={::this.setCurrentItem}>
+                    <div style={{float: 'left', width: '10%', marginTop: '10px'}}>
+                        <TooltipFontIcon
+                            className={classNames}
+                            tooltip={tooltip}
+                            value={'loop'}
+                            onClick={::this.setCurrentItem}
+                            tooltipPosition={'top'}
+                        />
+                    </div>
 
-                {
-                    isVisibleMenuEdit
-                    ?
-                        <div className={styles.menu_edit} onClick={::this.setCurrentItem}>
-                            {this.renderMethodSelect()}
-                            {this.renderParamInput()}
-                            {renderCloseMenuEditButton()}
-                        </div>
-                    :
-                        this.renderPlaceholder()
-                }
+                    {
+                        isVisibleMenuEdit
+                        ?
+                            <div className={styles.menu_edit} onClick={::this.setCurrentItem}>
+                                {this.renderMethodSelect()}
+                                {this.renderParamInput()}
+                                {renderCloseMenuEditButton()}
+                            </div>
+                        :
+                            this.renderPlaceholder()
+                    }
+                </div>
             </div>
 
         );

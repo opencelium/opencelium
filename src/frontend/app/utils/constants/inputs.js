@@ -101,6 +101,17 @@ const IINVOKER = {
     INVOKER_OPERATIONS,
 };
 
+//NOTIFICATION TEMPLATE
+const NOTIFICATION_TEMPLATE_NAME = {name: 'name', type: 'notification_template_name', maxLength: 256, icon: 'text_fields'};
+const NOTIFICATION_TEMPLATE_TYPE = {name: 'type', type: 'notification_template_type', maxLength: 256, icon: 'mail'};
+const NOTIFICATION_TEMPLATE_CONTENT = {name: 'content', type: 'notification_template_content',};
+
+const INOTIFICATION_TEMPLATE = {
+    NOTIFICATION_TEMPLATE_NAME,
+    NOTIFICATION_TEMPLATE_TYPE,
+    NOTIFICATION_TEMPLATE_CONTENT,
+};
+
 export const INPUTS = {
     ...ICOMMON,
     ...ICONNECTION,
@@ -108,4 +119,5 @@ export const INPUTS = {
     ...IUSER_GROUP,
     ...IUSER,
     ...IINVOKER,
+    ...INOTIFICATION_TEMPLATE,
 };

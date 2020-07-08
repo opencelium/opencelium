@@ -23,6 +23,7 @@
     },
     "VALIDATION_MESSAGES": {
       "ROLE_REQUIRED": "Name is a required field",
+      "ROLE_EXIST": "Role with such name already exist",
       "COMPONENTS_REQUIRED": "Components are required",
       "PERMISSIONS_REQUIRED": "Permissions are required"
     }
@@ -48,6 +49,7 @@
     },
     "VALIDATION_MESSAGES": {
       "ROLE_REQUIRED": "Name is a required field",
+      "ROLE_EXIST": "Role with such name already exist",
       "COMPONENTS_REQUIRED": "Components are required",
       "PERMISSIONS_REQUIRED": "Permissions are required"
     }

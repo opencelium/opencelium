@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { SchedulesAction } from '../../utils/actions';
+import { SchedulesAction } from '@utils/actions';
 
 
 /**
@@ -90,6 +90,42 @@ const deleteSchedulesRejected = (error) => {
     });
 };
 
+/**
+ * delete notification notification
+ * @param notification
+ * @returns {{type: string, payload: *}}
+ */
+const deleteScheduleNotification = (notification) => {
+    return {
+        type: SchedulesAction.DELETE_SCHEDULENOTIFICATION,
+        payload: notification,
+    };
+};
+
+/**
+ * delete schedule notification fulfilled
+ * @param status
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteScheduleNotificationFulfilled = (status) => {
+    return {
+        type: SchedulesAction.DELETE_SCHEDULENOTIFICATION_FULFILLED,
+        payload: status,
+    };
+};
+
+/**
+ * delete schedule notification rejected
+ * @param error
+ * @returns {promise}
+ */
+const deleteScheduleNotificationRejected = (error) => {
+    return Rx.Observable.of({
+        type: SchedulesAction.DELETE_SCHEDULENOTIFICATION_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteSchedule,
@@ -98,4 +134,7 @@ export{
     deleteSchedules,
     deleteSchedulesFulfilled,
     deleteSchedulesRejected,
+    deleteScheduleNotification,
+    deleteScheduleNotificationFulfilled,
+    deleteScheduleNotificationRejected,
 };

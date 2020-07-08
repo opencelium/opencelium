@@ -14,14 +14,15 @@
  */
 
 import Rx from 'rxjs/Rx';
-import {AppsAction} from '../utils/actions';
+import {AppsAction} from '@utils/actions';
 import {
     fetchAppsFulfilled, fetchAppsRejected,
     checkAppFulfilled, checkAppRejected,
-} from '../actions/apps/fetch';
-import {doRequest} from "../utils/auth";
-import {APP_STATUS_DOWN, APP_STATUS_UP, kibanaUrl, neo4jUrl} from "../utils/constants/url";
-import i18n from '../utils/i18n';
+} from '@actions/apps/fetch';
+import {doRequest} from "@utils/auth";
+import {APP_STATUS_DOWN, APP_STATUS_UP, kibanaUrl, neo4jUrl} from "@utils/constants/url";
+import i18n from '@utils/i18n';
+import {NotificationType} from "@utils/constants/notifications/notifications";
 
 const apps = [
     {id: 1, name: 'Kibana', icon: '../../img/apps/kibana.png', link: kibanaUrl, value: 'elasticsearch'},
@@ -72,7 +73,7 @@ const checkAppEpic = (action$, store) => {
                         if(message.length > 50){
                             shortMessage = `${i18n.t(`notifications:SYSTEMS.${action.payload.value.toUpperCase()}`)} ${i18n.t('notifications:ERROR.CHECK_APP.DOWN')}`;
                         }
-                        return checkAppRejected({message, systemTitle: action.payload.value, shortMessage});
+                        return checkAppRejected({notificationType: NotificationType.NOTE, message, systemTitle: action.payload.value, shortMessage});
                     }
                     return checkAppFulfilled({...data, link: action.payload.link});
                 }),

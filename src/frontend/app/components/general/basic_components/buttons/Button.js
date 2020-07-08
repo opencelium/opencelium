@@ -15,8 +15,8 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../themes/default/general/basic_components.scss';
-import {getThemeClass, formatHtmlId} from "../../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {getThemeClass, formatHtmlId} from "@utils/app";
 import FontIcon from "../FontIcon";
 
 
@@ -31,7 +31,7 @@ class Button extends Component{
 
     render(){
         const {authUser, title, icon, disabled, onClick, isActive, ...props} = this.props;
-        let {className} = this.props;
+        let {className, id} = this.props;
         let classNames = [
             'button',
             'active_button',
@@ -41,7 +41,7 @@ class Button extends Component{
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         className = `${className} ${disabled ? styles[classNames.button_disable] : isActive ? styles[classNames.active_button] : styles[classNames.button]}`;
-        let id = formatHtmlId(`button_${title}`);
+        id = id !== '' ? id : formatHtmlId(`button_${title}`);
         return (
             <button {...props} className={className} onClick={disabled || isActive ? null : onClick} id={id}>
                 {
@@ -72,6 +72,7 @@ Button.defaultProps = {
     disabled: false,
     title: '',
     isActive: false,
+    id: '',
 };
 
 export default Button;

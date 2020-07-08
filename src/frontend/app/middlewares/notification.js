@@ -16,15 +16,16 @@
 import React, {Suspense} from 'react';
 import ReactDOM from 'react-dom';
 
-import Notification from '../components/general/app/Notification';
+import Notification from '@components/general/app/Notification';
 import {EntitiesWithNotification, NotificationType} from '../utils/constants/notifications/notifications';
 import i18n from "../utils/i18n";
-import {sessionExpired} from "../actions/auth";
+import {sessionExpired} from "@actions/auth";
 import {AuthAction} from "../utils/actions";
 
-import {history} from '../components/App';
+import {history} from '@components/App';
 import {TOKEN_EXPIRED_MESSAGES} from "../utils/app";
-import Loading from "../components/general/app/Loading";
+import Loading from "@components/general/app/Loading";
+import styles from "@themes/default/general/app";
 
 
 /**
@@ -33,9 +34,28 @@ import Loading from "../components/general/app/Loading";
 export default function (store){
     return next => action => {
         let systemTitle = action.payload && action.payload.hasOwnProperty('systemTitle') ? action.payload.systemTitle : 'OC';
+        let notificationType = action.payload && action.payload.hasOwnProperty('notificationType') ? action.payload.notificationType : '';
         let shortMessage = action.payload && action.payload.hasOwnProperty('shortMessage') ? action.payload.shortMessage : '';
         let data = {type: '', message: '', systemTitle, shortMessage};
         const dividedState = divideState(action.type);
+        const notification = document.getElementById('notification');
+        for(let i = notification.children.length - 1; i >= 0; i--){
+            let child = notification.children[i];
+            if(child.innerHTML === ''){
+                child.remove();
+            } else{
+                if(action.type === '@@router/LOCATION_CHANGE'){
+                    if(child && child.children.length > 0) {
+                        let note = child.children[0];
+                        if(note.querySelector('#notification_close')){
+                            note.classList.remove(styles['notification_show']);
+                            note.classList.add(styles['notification_hide']);
+                            setTimeout(() => {if(note){note.remove();}}, 1500);
+                        }
+                    }
+                }
+            }
+        }
         if(hasNotification(dividedState) && isNotBackground(action)) {
             data.message = dividedState.prefix;
             switch (dividedState.postfix) {
@@ -63,13 +83,6 @@ export default function (store){
                     data.type = NotificationType.NOTE;
                     break;
             }
-            const notification = document.getElementById('notification');
-            for(let i = notification.children.length - 1; i >= 0; i--){
-                let child = notification.children[i];
-                if(child.innerHTML === ''){
-                    child.remove();
-                }
-            }
             let idName = 'note_';
             if(notification.children.length === 0 || typeof notification.children[notification.children.length - 1].children[0] === 'undefined') {
                 idName += 1;
@@ -81,6 +94,9 @@ export default function (store){
             const newDiv = document.createElement("div");
             notification.appendChild(newDiv);
             let domElem = notification.children[notification.children.length - 1];
+            if(notificationType !== ''){
+                data.type = notificationType;
+            }
             ReactDOM.render(
                 <Suspense fallback={(<Loading/>)}>
                     <Notification data={data} id={idName} params={action.payload}/>

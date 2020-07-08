@@ -13,22 +13,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {UserGroupsAction} from '../utils/actions';
+import {UserGroupsAction} from '@utils/actions';
 import {
     fetchUserGroupFulfilled, fetchUserGroupRejected,
     fetchUserGroupsFulfilled, fetchUserGroupsRejected,
-} from '../actions/usergroups/fetch';
+    checkUserGroupNameFulfilled, checkUserGroupNameRejected,
+} from '@actions/usergroups/fetch';
 import {
     addUserGroupFulfilled, addUserGroupRejected,
     addGroupIcon, addGroupIconFulfilled, addGroupIconRejected,
-} from '../actions/usergroups/add';
+} from '@actions/usergroups/add';
 import {
     updateUserGroupFulfilled, updateUserGroupRejected,
     updateGroupIcon, updateGroupIconFulfilled, updateGroupIconRejected,
-} from '../actions/usergroups/update';
-import {deleteUserGroupFulfilled, deleteUserGroupRejected} from '../actions/usergroups/delete';
-import {doRequest} from "../utils/auth";
-import {isString} from "../utils/app";
+} from '@actions/usergroups/update';
+import {deleteUserGroupFulfilled, deleteUserGroupRejected} from '@actions/usergroups/delete';
+import {doRequest} from "@utils/auth";
+import {isString} from "@utils/app";
 
 
 /**
@@ -72,6 +73,20 @@ const fetchUserGroupsEpic = (action$, store) => {
 };
 
 /**
+ * check userGroup's name on existing
+ */
+const checkUserGroupNameEpic = (action$, store) => {
+    return action$.ofType(UserGroupsAction.CHECK_USERGROUPNAME)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/exists/${action.payload.role}`;
+            return doRequest({url},{
+                success: checkUserGroupNameFulfilled,
+                reject: checkUserGroupNameRejected,
+            });
+        });
+};
+/**
  * add one usergroup
  */
 const addUserGroupEpic = (action$, store) => {
@@ -81,7 +96,7 @@ const addUserGroupEpic = (action$, store) => {
             let url = `${urlPrefix}`;
             let data = {...action.payload};
             let successResponse = addUserGroupFulfilled;
-            if(data.icon !== null){
+            if(data.icon !== null && data.icon !== ''){
                 successResponse = addGroupIcon;
             }
             delete data.icon;
@@ -173,6 +188,7 @@ const deleteUserGroupEpic = (action$, store) => {
 export {
     fetchUserGroupEpic,
     fetchUserGroupsEpic,
+    checkUserGroupNameEpic,
     addUserGroupEpic,
     updateUserGroupEpic,
     deleteUserGroupEpic,

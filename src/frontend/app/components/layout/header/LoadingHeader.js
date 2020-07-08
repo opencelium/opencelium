@@ -15,8 +15,8 @@
 
 import React, { Component }  from 'react';
 
-import styles from '../../../themes/default/layout/header.scss';
-import Navigation from "../../general/basic_components/Navigation";
+import styles from '@themes/default/layout/header.scss';
+import Navigation from "@basic_components/Navigation";
 
 
 /**

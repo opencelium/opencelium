@@ -13,17 +13,31 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Suspense} from 'react';
+import {hot} from 'react-hot-loader/root';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './components/App';
+import App from '@components/App';
 import Favicon from "react-favicon";
+import {hasHMR} from "@utils/constants/app";
 
+const HotApp = hot(App);
 
+const getApp = () => {
+    return hasHMR ? <HotApp/> : <App/>;
+};
 /**
  * root enter of the app
  */
-ReactDOM.render(
-    <React.Fragment>
-        <Favicon url="../fav_icon.png" />
-        <App/>
-    </React.Fragment>, document.getElementById('app'));
+const renderApp = () =>
+    ReactDOM.render(
+        <React.Fragment>
+            <Favicon url="../fav_icon.png" />
+            {getApp()}
+        </React.Fragment>, document.getElementById('app')
+    );
+
+if (hasHMR && module.hot) {
+    module.hot.accept('@components/App', renderApp)
+}
+
+renderApp();

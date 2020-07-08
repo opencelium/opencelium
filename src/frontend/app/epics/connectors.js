@@ -13,23 +13,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ConnectorsAction} from '../utils/actions';
+import {ConnectorsAction} from '@utils/actions';
 import {
     fetchConnectorFulfilled, fetchConnectorRejected,
     fetchConnectorsFulfilled, fetchConnectorsRejected,
-} from '../actions/connectors/fetch';
+} from '@actions/connectors/fetch';
 import {
     addConnectorFulfilled ,addConnectorRejected,
     addConnectorIcon, addConnectorIconFulfilled, addConnectorIconRejected,
-} from '../actions/connectors/add';
-import {testConnectorFulfilled, testConnectorRejected} from '../actions/connectors/test';
+} from '@actions/connectors/add';
+import {testConnectorFulfilled, testConnectorRejected} from '@actions/connectors/test';
 import {
     updateConnectorFulfilled, updateConnectorRejected,
     updateConnectorIcon, updateConnectorIconFulfilled, updateConnectorIconRejected,
-} from '../actions/connectors/update';
-import {deleteConnectorFulfilled, deleteConnectorRejected} from '../actions/connectors/delete';
-import {doRequest} from "../utils/auth";
-import {addProfilePicture, addUserFulfilled, addUserRejected} from "../actions/users/add";
+} from '@actions/connectors/update';
+import {deleteConnectorFulfilled, deleteConnectorRejected} from '@actions/connectors/delete';
+import {doRequest} from "@utils/auth";
+import {addProfilePicture, addUserFulfilled, addUserRejected} from "@actions/users/add";
 
 
 /**
@@ -50,6 +50,9 @@ const testConnectorEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/check`;
             let data = action.payload;
+            if(data.hasOwnProperty('icon')) {
+                delete data.icon;
+            }
             return doRequest({url, method: 'post', data},{
                     success: testConnectorFulfilled,
                     reject: testConnectorRejected,},
@@ -99,12 +102,10 @@ const addConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = addConnectorFulfilled;
-            /*
-            TODO: #214
             if(data.icon !== null){
                 successResponse = addConnectorIcon;
             }
-            delete data.icon;*/
+            delete data.icon;
             return doRequest({url, method: 'post', data: {...data}},{
                     success: successResponse,
                     reject: addConnectorRejected,},
@@ -122,7 +123,7 @@ const addConnectorIconEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.ADD_CONNECTORICON)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `storage/groupIcon`;
+            let url = `storage/connector`;
             let data = new FormData();
             data.append('connectorId', action.payload.connectorId);
             data.append('file', action.payload.icon);
@@ -146,12 +147,10 @@ const updateConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = updateConnectorFulfilled;
-            /*
-            TODO: #214
-            if(data.icon !== null){
+            if(data.icon){
                 successResponse = updateConnectorIcon;
             }
-            delete data.icon;*/
+            delete data.icon;
             return doRequest({url, method: 'put', data: {...data}},{
                     success: successResponse,
                     reject: updateConnectorRejected,},
@@ -170,7 +169,7 @@ const updateConnectorIconEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.UPDATE_CONNECTORICON)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `storage/groupIcon`;
+            let url = `storage/connector`;
             let data = new FormData();
             data.append('connectorId', action.payload.connectorId);
             data.append('file', action.payload.icon);

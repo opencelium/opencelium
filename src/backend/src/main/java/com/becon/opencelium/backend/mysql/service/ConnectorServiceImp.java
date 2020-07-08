@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.authentication.AuthenticationType;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.factory.AuthenticationFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -39,7 +40,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -109,6 +112,7 @@ public class ConnectorServiceImp implements ConnectorService{
         Connector connector = new Connector();
         connector.setId(resource.getConnectorId());
         connector.setTitle(resource.getTitle());
+        connector.setIcon(resource.getIcon());
         connector.setDescription(resource.getDescription());
         connector.setInvoker(resource.getInvoker().getName());
 
@@ -139,10 +143,13 @@ public class ConnectorServiceImp implements ConnectorService{
 
     @Override
     public ConnectorResource toResource(Connector entity) {
+        final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+        final String path = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
         ConnectorResource connectorResource = new ConnectorResource();
         connectorResource.setConnectorId(entity.getId());
         connectorResource.setTitle(entity.getTitle());
         connectorResource.setDescription(entity.getTitle());
+        connectorResource.setIcon(path + entity.getIcon());
 
         Invoker invoker = invokerServiceImp.findByName(entity.getInvoker());
         connectorResource.setInvoker(invokerServiceImp.toResource(invoker));
@@ -151,7 +158,7 @@ public class ConnectorServiceImp implements ConnectorService{
     }
 
     @Override
-    public ConnectorNodeResource toNodeResource(Connector entity, Long connectionId) {
+    public ConnectorNodeResource toNodeResource(Connector entity, Long connectionId, String direction) {
         ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
 
         connectorNodeResource.setConnectorId(entity.getId());
@@ -159,14 +166,14 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorNodeResource.setInvoker(invokerResource);
         connectorNodeResource.setTitle(entity.getTitle());
         List<MethodResource> methodResources = methodNodeService
-                .findMethodsByConnectionIdAndConnectorId(connectionId, entity.getId()).stream()
+                .findMethodsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
                 .map(m -> {
                     MethodNode methodNode = methodNodeService.findById(m.getId()).get();
                     return MethodNodeServiceImp.toResource(methodNode);
                 }).collect(Collectors.toList());
 
         List<OperatorResource> operatorResources = operatorNodeService
-                .findOperatorsByConnectionIdAndConnectorId(connectionId, entity.getId()).stream()
+                .findOperatorsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
                 .map(OperatorNodeServiceImp::toResource).collect(Collectors.toList());
         connectorNodeResource.setMethods(methodResources);
         connectorNodeResource.setOperators(operatorResources);

@@ -12,37 +12,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-import {SchedulesAction} from '../utils/actions';
+import Rx from 'rxjs/Rx';
+import {SchedulesAction} from '@utils/actions';
 import {
     fetchScheduleFulfilled, fetchScheduleRejected,
     fetchSchedulesFulfilled, fetchSchedulesRejected,
     triggerScheduleFulfilled, triggerScheduleRejected,
-    triggerScheduleSuccessfullyFulfilled, fetchCurrentSchedules,
-    fetchCurrentSchedulesFulfilled, fetchCurrentSchedulesRejected,
+    triggerScheduleSuccessfullyFulfilled,
+    fetchCurrentSchedules, fetchCurrentSchedulesFulfilled, fetchCurrentSchedulesRejected,
     fetchSchedulesByIdsFulfilled, fetchSchedulesByIdsRejected,
-} from '../actions/schedules/fetch';
+    fetchScheduleNotificationsFulfilled,
+    fetchScheduleNotificationFulfilled, fetchScheduleNotificationRejected,
+    fetchScheduleNotificationTemplatesFulfilled, fetchScheduleNotificationTemplatesRejected,
+    fetchNotificationRecipientsFulfilled, fetchNotificationRecipientsRejected,
+    fetchSlackChannelsFulfilled,
+} from '@actions/schedules/fetch';
 import {
-    addScheduleFulfilled ,addScheduleRejected,
-    addWebHookFulfilled, addWebHookRejected,
-} from '../actions/schedules/add';
+    addScheduleFulfilled, addScheduleRejected,
+    addScheduleNotificationFulfilled, addScheduleNotificationRejected,
+} from '@actions/schedules/add';
 import {
-    updateScheduleFulfilled, updateScheduleRejected,
-    updateScheduleStatusFulfilled, updateScheduleStatusRejected,
-    startSchedulesFulfilled, startSchedulesRejected,
-    enableSchedulesFulfilled, enableSchedulesRejected,
-    disableSchedulesFulfilled, disableSchedulesRejected,
-    updateWebHookFulfilled, updateWebHookRejected, updateSchedule,
-} from '../actions/schedules/update';
+    updateScheduleFulfilled,
+    updateScheduleRejected,
+    updateScheduleStatusFulfilled,
+    updateScheduleStatusRejected,
+    startSchedulesFulfilled,
+    startSchedulesRejected,
+    enableSchedulesFulfilled,
+    enableSchedulesRejected,
+    disableSchedulesFulfilled,
+    disableSchedulesRejected,
+    updateScheduleNotificationFulfilled,
+    updateScheduleNotificationRejected,
+} from '@actions/schedules/update';
 import {
-    deleteScheduleFulfilled, deleteScheduleRejected,
-    deleteSchedulesFulfilled,deleteSchedulesRejected,
-    deleteWebHookFulfilled, deleteWebHookRejected,
-} from '../actions/schedules/delete';
-import {doRequest} from "../utils/auth";
+    deleteScheduleFulfilled,
+    deleteScheduleNotificationFulfilled,
+    deleteScheduleNotificationRejected,
+    deleteScheduleRejected,
+    deleteSchedulesFulfilled,
+    deleteSchedulesRejected,
+} from '@actions/schedules/delete';
+import {doRequest} from "@utils/auth";
 
-import {validateAddSchedule, validateWebHook} from "../validations/schedules";
-import {periodic, fromPromise} from 'most';
+import {validateAddSchedule} from "@validations/schedules";
 
 /**
  * main url for schedulers
@@ -136,6 +149,20 @@ const fetchScheduleEpic = (action$, store) => {
             });
         });
 };
+/**
+ * fetch schedule notification by schedule id
+ */
+const fetchScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
+            return doRequest({url},{
+                success: fetchScheduleNotificationFulfilled,
+                reject: fetchScheduleNotificationRejected,
+            });
+        });
+};
 
 /**
  * fetch all schedules
@@ -150,6 +177,68 @@ const fetchSchedulesEpic = (action$, store) => {
                 reject: fetchSchedulesRejected,
                 cancel: action$.ofType(SchedulesAction.FETCH_SCHEDULES_CANCELED)
             });
+        });
+};
+
+/**
+ * fetch all schedule notification
+ */
+const fetchScheduleNotificationsEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.id}/notification/all`;
+            return doRequest({url},{
+                success: fetchScheduleNotificationsFulfilled,
+                reject: fetchScheduleNotificationRejected,
+                cancel: action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS_CANCELED)
+            });
+        });
+};
+
+/**
+ * fetch templates of notification in schedule by notification type
+ */
+const fetchScheduleNotificationTemplatesEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `message/all/${action.payload.notificationType}`;
+            return doRequest({url},{
+                success: fetchScheduleNotificationTemplatesFulfilled,
+                reject: fetchScheduleNotificationTemplatesRejected,
+            });
+        });
+};
+
+/**
+ * fetch recipients for email notification
+ */
+const fetchNotificationRecipientsEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_NOTIFICATIONRECIPIENTS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `user/all`;
+            return doRequest({url},{
+                success: fetchNotificationRecipientsFulfilled,
+                reject: fetchNotificationRecipientsRejected,
+            });
+        });
+};
+/**
+ * fetch channels for slack notification
+ */
+const fetchSlackChannelsEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.FETCH_SLACKCHANNELS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            const testData = [{value: 1, label: 'Channel 1'}, {value: 2, label: 'Channel 2'}];
+            return Rx.Observable.of(fetchSlackChannelsFulfilled(testData));
+            //let url = `user/all`;
+            /*return doRequest({url},{
+                success: fetchSlackChannelsFulfilled,
+                reject: fetchSlackChannelsRejected,
+            });*/
         });
 };
 
@@ -191,6 +280,23 @@ const addScheduleEpic = (action$, store) => {
 };
 
 /**
+ * add schedule notification
+ */
+const addScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.ADD_SCHEDULENOTIFICATION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification`;
+            let data = action.payload;
+            return doRequest({url, method: 'post', data}, {
+                    success: addScheduleNotificationFulfilled,
+                    reject: addScheduleNotificationRejected,
+                },
+            );
+        });
+};
+
+/**
  * update one schedule
  */
 const updateScheduleEpic = (action$, store) => {
@@ -203,6 +309,21 @@ const updateScheduleEpic = (action$, store) => {
             return doRequest({url, method: 'put', data},{
                 success: updateScheduleFulfilled,
                 reject: updateScheduleRejected,},
+            );
+        });
+};
+
+/**
+ * update schedule notification
+ */
+const updateScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.UPDATE_SCHEDULENOTIFICATION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
+            return doRequest({url, method: 'put', data: action.payload},{
+                success: updateScheduleNotificationFulfilled,
+                reject: updateScheduleNotificationRejected,},
             );
         });
 };
@@ -236,6 +357,23 @@ const deleteScheduleEpic = (action$, store) => {
                     success: deleteScheduleFulfilled,
                     reject: deleteScheduleRejected,},
                 res => {return {...res.response, id: action.payload.id};}
+            );
+        });
+};
+
+/**
+ * delete schedule notification by schedule id
+ */
+const deleteScheduleNotificationEpic = (action$, store) => {
+    return action$.ofType(SchedulesAction.DELETE_SCHEDULENOTIFICATION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
+            let data = action.payload;
+            return doRequest({url, method: 'delete', data},{
+                    success: deleteScheduleNotificationFulfilled,
+                    reject: deleteScheduleNotificationRejected,},
+                res => {return {...res.response, id: action.payload.notificationId};}
             );
         });
 };
@@ -311,12 +449,20 @@ const deleteSchedulesEpic = (action$, store) => {
 
 export {
     fetchScheduleEpic,
+    fetchScheduleNotificationEpic,
     fetchSchedulesEpic,
+    fetchScheduleNotificationsEpic,
     fetchCurrentSchedulesEpic,
+    fetchScheduleNotificationTemplatesEpic,
+    fetchNotificationRecipientsEpic,
+    fetchSlackChannelsEpic,
     fetchSchedulesByIdsEpic,
     addScheduleEpic,
+    addScheduleNotificationEpic,
     updateScheduleEpic,
+    updateScheduleNotificationEpic,
     deleteScheduleEpic,
+    deleteScheduleNotificationEpic,
     startSchedulesEpic,
     enableSchedulesEpic,
     disableSchedulesEpic,

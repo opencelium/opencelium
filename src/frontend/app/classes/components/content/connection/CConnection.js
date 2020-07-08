@@ -13,18 +13,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId} from "../../../../utils/app";
+import {consoleLog, isId} from "@utils/app";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "./CConnectorItem";
 import CFieldBinding from "./field_binding/CFieldBinding";
 import CTemplate from "./CTemplate";
-import CEnhancement from "./field_binding/CEnhancement";
 import CBindingItem from "./field_binding/CBindingItem";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
 
 const DEFAULT_COLOR = '#ffffff';
 
-const ALL_COLORS = [
+export const ALL_COLORS = [
     '#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7',
     '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2',
     '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6',
@@ -53,7 +52,11 @@ export default class CConnection{
         this._fieldBinding = this.convertFieldBindingItems(fieldBindingItems);
         this._template = this.convertTemplate(template);
         this._allTemplates = [];
-        this._colors = ['#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7', '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2', '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6'];
+        this._colors = [
+            '#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7',
+            '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2',
+            '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6',
+            '#5FC798', '#5F3798', '#A6E6EA', '#E1C798',];
         for(let i = 0; i < this._fromConnector.methods.length; i++){
             this.removeRestColor(this._fromConnector.methods[i].color);
         }
@@ -141,7 +144,11 @@ export default class CConnection{
     resetToEmptyTemplate(){
         this._fromConnector.resetItems();
         this._toConnector.resetItems();
-        this._colors = ['#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7', '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2', '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6'];
+        this._colors = [
+            '#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7',
+            '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2',
+            '#B3CDE0', '#F0E4E4', '#FE8A71', '#E7EFF6',
+            '#5FC798', '#5F3798', '#A6E6EA', '#E1C798',];
         this._fieldBinding = [];
         this._allTemplates = [];
     }

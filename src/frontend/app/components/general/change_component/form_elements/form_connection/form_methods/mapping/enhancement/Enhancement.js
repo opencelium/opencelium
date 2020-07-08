@@ -22,9 +22,9 @@ import 'brace/theme/tomorrow';
 
 import {Row, Col} from "react-grid-system";
 
-import Input from '../../../../../../basic_components/inputs/Input';
-import CEnhancement from "../../../../../../../../classes/components/content/connection/field_binding/CEnhancement";
-import {setFocusById} from "../../../../../../../../utils/app";
+import Input from '@basic_components/inputs/Input';
+import CEnhancement from "@classes/components/content/connection/field_binding/CEnhancement";
+import {setFocusById} from "@utils/app";
 
 
 /**

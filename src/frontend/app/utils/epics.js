@@ -20,54 +20,62 @@ import {
     fetchUserEpic, fetchUsersEpic, addUserEpic, addProfilePictureEpic,
     updateUserEpic, updateProfilePictureEpic, updateUserDetailEpic, deleteUserEpic,
     checkUserEmailEpic,
-} from '../epics/users';
+} from '@epics/users';
 import {
     addUserGroupEpic, addGroupIconEpic, deleteUserGroupEpic, fetchUserGroupEpic,
-    fetchUserGroupsEpic, updateUserGroupEpic, updateGroupIconEpic,
-} from '../epics/usergroups';
+    fetchUserGroupsEpic, updateUserGroupEpic, updateGroupIconEpic, checkUserGroupNameEpic,
+} from '@epics/usergroups';
 import {
     loginUserEpic, logoutUserEpic, updateAuthUserLanguageEpic, updateDashboardSettingsEpic,
     updateThemeEpic, toggleAppTourEpic, checkOCConnectionEpic,
-} from '../epics/auth';
+} from '@epics/auth';
 import {
     fetchComponentsEpic,
-} from '../epics/components';
+} from '@epics/components';
 import {
     fetchConnectorEpic, fetchConnectorsEpic, addConnectorEpic, addConnectorIconEpic,
     updateConnectorEpic, updateConnectorIconEpic, deleteConnectorEpic, testConnectorEpic,
-} from '../epics/connectors';
+} from '@epics/connectors';
 import {
     fetchInvokersEpic, fetchInvokerEpic, addInvokerEpic,
     updateInvokerEpic, deleteInvokerEpic,
-} from '../epics/invokers';
+} from '@epics/invokers';
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
     updateConnectionEpic, deleteConnectionEpic, checkConnectionTitleEpic,
     validateConnectionFormMethodsEpic, checkNeo4jEpic, checkNeo4jFulfilledEpic,
-} from '../epics/connections';
+    sendOperationRequestEpic, checkConnectionEpic,
+} from '@epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
     importTemplateEpic, exportTemplateEpic,
-} from '../epics/templates';
+} from '@epics/templates';
 import {
     fetchScheduleEpic, fetchSchedulesEpic, addScheduleEpic,
     updateScheduleEpic, deleteScheduleEpic, deleteSchedulesEpic,
     startSchedulesEpic, enableSchedulesEpic, disableSchedulesEpic,
     updateScheduleStatusEpic, triggerScheduleEpic, triggerScheduleSuccessEpic,
     fetchCurrentSchedulesEpic, fetchSchedulesByIdsEpic,
-} from '../epics/schedules';
+    fetchScheduleNotificationEpic, fetchScheduleNotificationsEpic,
+    addScheduleNotificationEpic, updateScheduleNotificationEpic, deleteScheduleNotificationEpic,
+    fetchScheduleNotificationTemplatesEpic, fetchNotificationRecipientsEpic, fetchSlackChannelsEpic,
+} from '@epics/schedules';
 import {
     addWebHookEpic, updateWebHookEpic, deleteWebHookEpic,
-} from '../epics/webhooks';
+} from '@epics/webhooks';
 import {
     fetchAppsEpic, checkAppEpic
-} from "../epics/apps";
+} from "@epics/apps";
 import {
     fetchAdminCardsEpic, loadAdminCardsLinkEpic,
-} from "../epics/admin_cards";
+} from "@epics/admin_cards";
 import {
     addErrorTicketEpic,
-} from "../epics/app";
+} from "@epics/app";
+import {
+    fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
+    updateNotificationTemplateEpic, deleteNotificationTemplateEpic,
+} from '@epics/notification_templates';
 
 
 /**
@@ -88,6 +96,7 @@ export default combineEpics(
     updateUserDetailEpic,
     addUserGroupEpic,
     addGroupIconEpic,
+    checkUserGroupNameEpic,
     updateProfilePictureEpic,
     deleteUserGroupEpic,
     fetchUserGroupEpic,
@@ -114,6 +123,7 @@ export default combineEpics(
     validateConnectionFormMethodsEpic,
     checkNeo4jEpic,
     checkNeo4jFulfilledEpic,
+    sendOperationRequestEpic,
     addConnectionEpic,
     updateConnectionEpic,
     deleteConnectionEpic,
@@ -121,6 +131,14 @@ export default combineEpics(
     fetchSchedulesEpic,
     fetchCurrentSchedulesEpic,
     fetchSchedulesByIdsEpic,
+    fetchScheduleNotificationEpic,
+    fetchScheduleNotificationsEpic,
+    fetchScheduleNotificationTemplatesEpic,
+    fetchNotificationRecipientsEpic,
+    fetchSlackChannelsEpic,
+    addScheduleNotificationEpic,
+    updateScheduleNotificationEpic,
+    deleteScheduleNotificationEpic,
     addScheduleEpic,
     updateScheduleEpic,
     deleteScheduleEpic,
@@ -147,4 +165,10 @@ export default combineEpics(
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,
+    fetchNotificationTemplatesEpic,
+    fetchNotificationTemplateEpic,
+    addNotificationTemplateEpic,
+    updateNotificationTemplateEpic,
+    deleteNotificationTemplateEpic,
+    checkConnectionEpic,
 );

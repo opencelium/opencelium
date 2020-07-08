@@ -16,15 +16,15 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchConnectors, fetchConnectorsCanceled} from '../../../../actions/connectors/fetch';
-import {deleteConnector} from '../../../../actions/connectors/delete';
+import {fetchConnectors, fetchConnectorsCanceled} from '@actions/connectors/fetch';
+import {deleteConnector} from '@actions/connectors/delete';
 
 import List from '../../../general/list_of_components/List';
-import {ListComponent} from "../../../../decorators/ListComponent";
-import {ConnectorPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {tour} from "../../../../decorators/tour";
-import {LIST_TOURS} from "../../../../utils/constants/tours";
+import {ListComponent} from "@decorators/ListComponent";
+import {ConnectorPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {tour} from "@decorators/tour";
+import {LIST_TOURS} from "@utils/constants/tours";
 
 
 const prefixUrl = '/connectors';
@@ -88,7 +88,7 @@ class ConnectorsList extends Component{
             let result = {};
             result.id = connector.id;
             result.title = connector.name;
-            result.avatar = connector.invoker.icon;
+            result.avatar = connector.icon;
             return result;
         };
         mapEntity.getViewLink = (connector) => {return `${prefixUrl}/${connector.id}/view`;};

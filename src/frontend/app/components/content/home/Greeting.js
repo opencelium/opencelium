@@ -17,8 +17,8 @@ import React, { Component }  from 'react';
 import {connect} from "react-redux";
 
 import { Container, Row, Col } from "react-grid-system";
-import {tour} from "../../../decorators/tour";
-import {OC_TOURS} from "../../../utils/constants/tours";
+import {tour} from "@decorators/tour";
+import {OC_TOURS} from "@utils/constants/tours";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

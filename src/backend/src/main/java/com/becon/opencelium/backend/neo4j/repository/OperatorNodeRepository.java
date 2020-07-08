@@ -26,7 +26,11 @@ import java.util.List;
 @Repository
 public interface OperatorNodeRepository extends Neo4jRepository<OperatorNode, Long> {
 
-    @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector|:from_connector]->(:Connector{connectorId:{1}})-[*]->(m:Operator) " +
+    @Query("MATCH (:Connection{connectionId:{0}})-[:from_connector]->(c:Connector{connectorId:{1}})-[*]->(m:Operator) " +
            "MATCH p=((m)-[:left|:right]->(:Statement)) RETURN p")
-    List<OperatorNode> findOperatorByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
+    List<OperatorNode> findFromOperatorByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
+
+    @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector]->(c:Connector{connectorId:{1}})-[*]->(m:Operator) " +
+            "MATCH p=((m)-[:left|:right]->(:Statement)) RETURN p")
+    List<OperatorNode> findToOperatorByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
 }

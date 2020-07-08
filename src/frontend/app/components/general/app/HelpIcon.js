@@ -15,8 +15,8 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import TooltipFontIcon from "../basic_components/tooltips/TooltipFontIcon";
-import {formatHtmlId} from "../../../utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {formatHtmlId} from "@utils/app";
 
 /**
  * Component for displaying Help Icon in Content, List

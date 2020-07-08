@@ -16,8 +16,8 @@
 
 package com.becon.opencelium.backend.controller;
 
+
 import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
@@ -26,20 +26,22 @@ import com.becon.opencelium.backend.neo4j.entity.relation.LinkRelation;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
+import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
 import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
-import com.becon.opencelium.backend.validation.connection.entity.ErrorMessageData;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -64,11 +66,19 @@ public class ConnectionController {
     @Autowired
     private ValidationContext validationContext;
 
+//    @Autowired
+//    private TConnectionServiceImp tConnectionServiceImp;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
         List<Connection> connections = connectionService.findAll();
         List<ConnectionResource> connectionResources = connections.stream()
-                .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
+                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
+//        List<ConnectionResource> connectionResources = connections.stream()
+//                .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
         return ResponseEntity.ok().body(connectionResources);
     }
 
@@ -115,7 +125,7 @@ public class ConnectionController {
             final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
             validationContext.remove(connection.getName());
             return ResponseEntity.ok().body(resource);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.deleteById(connectionId);
@@ -140,7 +150,6 @@ public class ConnectionController {
         Long connectionId = 0L;
         try {
             connectionNodeService.toEntity(connectionResource);
-
             return ResponseEntity.ok().build();
         } catch (Exception e){
             ErrorMessageDataResource errorMessageDataResource =
@@ -206,5 +215,70 @@ public class ConnectionController {
         } else {
             throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
         }
+    }
+
+//    @PutMapping("/test")
+//    public ResponseEntity<?> test(@RequestBody ConnectionResource connectionResource) throws Exception {
+//        final ConnectionNode connectionNode = tConnectionServiceImp
+//                .fillTemporaryIds(connectionNodeService.toEntity(connectionResource));
+//
+//        List<EnhancementNode> enhancementNodes = connectionResource.getFieldBinding()
+//                .stream()
+//                .map(fb -> enhancementNodeService.toNode(fb, connectionNode))
+//                .collect(Collectors.toList());
+//
+//        List<Enhancement> enhancements = connectionResource.getFieldBinding()
+//                .stream()
+//                .map(fb -> enhancementService.toEntity(fb.getEnhancement()))
+//                .collect(Collectors.toList());
+//
+////        TConnectionServiceImp tConnectionServiceImp = new TConnectionServiceImp();
+//        TConnection tConnection = tConnectionServiceImp.run(connectionNode, enhancementNodes, enhancements);
+//        final Resource<TestConnectionResource> resource = new Resource<>(tConnectionServiceImp.toResource(tConnection));
+//        return ResponseEntity.ok().body(resource);
+//    }
+
+
+    @PostMapping("/remoteapi/test")
+    public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) throws Exception {
+
+        String url = apiDataResource.getUrl();
+        HttpMethod method = getMethod(apiDataResource.getMethod());
+        String body = new ObjectMapper().writeValueAsString(apiDataResource.getBody());
+        HttpHeaders header = buildHeader(apiDataResource.getHeader());
+        HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, header);
+        if (body.equals("null")){
+            httpEntity = new HttpEntity <Object> (header);
+        }
+
+        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+        return ResponseEntity.ok().body(response);
+    }
+
+    private HttpMethod getMethod(String method){
+        HttpMethod httpMethodType;
+        switch (method){
+            case "POST":
+                httpMethodType = HttpMethod.POST;
+                break;
+            case "DELETE":
+                httpMethodType = HttpMethod.DELETE;
+                break;
+            case "PUT":
+                httpMethodType = HttpMethod.PUT;
+                break;
+            case "GET":
+                httpMethodType = HttpMethod.GET;
+                break;
+            default:
+                throw new RuntimeException("Http method not found");
+        }
+        return httpMethodType;
+    }
+
+    public HttpHeaders buildHeader(Map<String, String> header){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setAll(header);
+        return httpHeaders;
     }
 }

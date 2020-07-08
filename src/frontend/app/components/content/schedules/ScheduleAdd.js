@@ -18,19 +18,19 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import { Row, Col, Visible } from "react-grid-system";
 import theme from "react-toolbox/lib/input/theme.css";
-import {addSchedule} from '../../../actions/schedules/add';
-import {fetchConnections} from '../../../actions/connections/fetch';
+import {addSchedule} from '@actions/schedules/add';
+import {fetchConnections} from '@actions/connections/fetch';
 
-import styles from '../../../themes/default/content/schedules/schedules.scss';
-import Input from '../../general/basic_components/inputs/Input';
-import Select from '../../general/basic_components/inputs/Select';
-import {getThemeClass} from "../../../utils/app";
-import {SchedulePermissions} from "../../../utils/constants/permissions";
-import {permission} from "../../../decorators/permission";
-import Button from "../../general/basic_components/buttons/Button";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import Input from '@basic_components/inputs/Input';
+import Select from '@basic_components/inputs/Select';
+import {getThemeClass} from "@utils/app";
+import {SchedulePermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import Button from "@basic_components/buttons/Button";
 import {withTranslation} from "react-i18next";
-import Loading from "../../general/app/Loading";
-import {API_REQUEST_STATE} from "../../../utils/constants/app";
+import Loading from "@loading";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){

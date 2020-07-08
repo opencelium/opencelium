@@ -14,8 +14,8 @@
  */
 
 import React from 'react';
-import CUserGroup from "../classes/components/content/user_group/CUserGroup";
-import CComponent from "../classes/components/content/user_group/CComponent";
+import CUserGroup from "@classes/components/content/user_group/CUserGroup";
+import CComponent from "@classes/components/content/user_group/CComponent";
 
 
 /**
@@ -28,7 +28,6 @@ export const DEBUGGER_ERRORS = true;
  * messages from backend if token was expired
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
-
 
 /**
  * to format html id
@@ -66,11 +65,19 @@ export function parseConnectionPointer(connectionPointer){
     return result;
 }
 
+export function sortByIndex(array){
+    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+    return array.sort(sortByIndexFunction, collator);
+}
+
 /**
  * a callback to sort by index
  */
 export function sortByIndexFunction(a, b){
-    if(a.index < b.index){return -1;} if(a.index > b.index){return 1;} return 0;
+    return a.index.localeCompare(b.index, undefined, {
+        numeric: true,
+        sensitivity: 'base'
+    });
 }
 
 /**
@@ -88,6 +95,14 @@ export function searchByNameFunction(element, searchValue){
         }
     }
     return elementValue.indexOf(searchValue.toUpperCase()) !== -1;
+}
+
+export function sleepApp(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+        currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
 }
 
 /**
@@ -171,7 +186,7 @@ export function shuffle(array) {
  *
  * @param id - id of the html element
  */
-export function setFocusById(id){
+export function setFocusById(id, timeout = 100){
     let element = document.getElementById(id);
     const inputs = ['input', 'select', 'button', 'textarea'];
     if (element) {
@@ -182,11 +197,11 @@ export function setFocusById(id){
         if(inputElement) {
             setTimeout(() => {
                 inputElement.focus();
-            }, 100);
+            }, timeout);
         } else{
             setTimeout(() => {
                 element.focus();
-            }, 100);
+            }, timeout);
         }
     }
 }
@@ -607,6 +622,9 @@ function mapConnector(connector){
         }
         if(connector.hasOwnProperty('invoker')) {
             result.invoker = mapInvoker(connector.invoker);
+        }
+        if(connector.hasOwnProperty('icon')) {
+            result.icon = mapInvoker(connector.icon);
         }
     }
     return result;

@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { ConnectionsAction } from '../../utils/actions';
+import { ConnectionsAction } from '@utils/actions';
 
 
 
@@ -228,6 +228,59 @@ const fetchConnectionsCanceled = (message) => {
     };
 };
 
+/**
+ * send operation request
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, settings: {}}}
+ */
+const sendOperationRequest = (request, settings = {}) => {
+    return {
+        type: ConnectionsAction.SEND_OPERATIONREQUEST,
+        payload: request,
+        settings,
+    };
+};
+
+
+/**
+ * send operation request fulfilled
+ * @param response
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: [], settings: {}}}
+ */
+const sendOperationRequestFulfilled = (response, settings = {}) => {
+    return{
+        type: ConnectionsAction.SEND_OPERATIONREQUEST_FULFILLED,
+        payload: response,
+        settings,
+    };
+};
+
+/**
+ * send operation request rejected
+ * @param error
+ * @returns {*}
+ */
+const sendOperationRequestRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectionsAction.SEND_OPERATIONREQUEST_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * cancel operation request
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const sendOperationRequestCanceled = (message) => {
+    return {
+        type: ConnectionsAction.SEND_OPERATIONREQUEST_CANCELED,
+        payload: message
+    };
+};
 
 export {
     fetchConnection,
@@ -247,4 +300,8 @@ export {
     checkNeo4j,
     checkNeo4jFulfilled,
     checkNeo4jRejected,
+    sendOperationRequest,
+    sendOperationRequestCanceled,
+    sendOperationRequestFulfilled,
+    sendOperationRequestRejected,
 };

@@ -18,9 +18,9 @@ import { withRouter } from 'react-router';
 import Pagination from 'react-bootstrap/Pagination';
 
 
-import {addPrevPageKeyNavigation, removePrevPageKeyNavigation} from '../../../../utils/key_navigation';
+import {addPrevPageKeyNavigation, removePrevPageKeyNavigation} from '@utils/key_navigation';
 
-import styles from '../../../../themes/default/general/pagination.scss';
+import styles from '@themes/default/general/pagination.scss';
 import FontIcon from "../FontIcon";
 
 
@@ -47,27 +47,30 @@ class PrevPage extends Component{
      * to open previous page
      */
     openPrevPage(){
-        const {link, router} = this.props;
-        if(link !== '' && link !== -1) {
-            router.push(link);
+        const {link, router, loadPage, current} = this.props;
+        if(!loadPage) {
+            if (link !== '' && link !== -1) {
+                router.push(link);
+            }
+        } else{
+            loadPage(current);
         }
     }
 
     render(){
         const {link, isFirst} = this.props;
         let className = styles.prev_page;
-        if(link === -1){
+        if(link === -1 || link === ''){
             className += ' ' + styles.disable_arrow;
         }
         return(
             <Pagination.Prev onClick={this.openPrevPage} disabled={isFirst}/>
         );
-        return (
-            <span className={className} onClick={this.openPrevPage}>
-                <FontIcon value={'arrow_left'}/>
-            </span>
-        );
     }
 }
+
+PrevPage.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(PrevPage);

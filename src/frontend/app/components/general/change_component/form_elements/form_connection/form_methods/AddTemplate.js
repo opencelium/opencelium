@@ -16,10 +16,10 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import Input from "../../../../basic_components/inputs/Input";
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import Button from "../../../../basic_components/buttons/Button";
-import Dialog from "../../../../basic_components/Dialog";
+import Input from "@basic_components/inputs/Input";
+import styles from '@themes/default/general/change_component.scss';
+import Button from "@basic_components/buttons/Button";
+import Dialog from "@basic_components/Dialog";
 
 
 /**

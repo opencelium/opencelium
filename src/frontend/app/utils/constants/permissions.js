@@ -117,8 +117,18 @@ export const AdminCardPermissions = {
  * permission constants for connector
  */
 export const TemplatePermissions = {
-    CREATE: {entity: 'INVOKER', permission: 'CREATE'},
-    READ: {entity: 'INVOKER', permission: 'READ'},
-    UPDATE: {entity: 'INVOKER', permission: 'UPDATE'},
-    DELETE: {entity: 'INVOKER', permission: 'DELETE'},
+    CREATE: {entity: 'SCHEDULE', permission: 'CREATE'},
+    READ: {entity: 'SCHEDULE', permission: 'READ'},
+    UPDATE: {entity: 'SCHEDULE', permission: 'UPDATE'},
+    DELETE: {entity: 'SCHEDULE', permission: 'DELETE'},
+};
+
+/**
+ * permission constants for notification template
+ */
+export const NotificationTemplatePermissions = {
+    CREATE: {entity: 'SCHEDULE', permission: 'CREATE'},
+    READ: {entity: 'SCHEDULE', permission: 'READ'},
+    UPDATE: {entity: 'SCHEDULE', permission: 'UPDATE'},
+    DELETE: {entity: 'SCHEDULE', permission: 'DELETE'},
 };

@@ -13,8 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, isNumber, isString} from "../../../../utils/app";
-import {NO_DATA} from "../../../../utils/constants/app";
+import {consoleLog, isId, isNumber, isString} from "@utils/app";
+import {NO_DATA} from "@utils/constants/app";
 
 const TAID_SEPARATOR = '-';
 

@@ -15,10 +15,10 @@
 
 import React, {Component} from 'react';
 import { withRouter } from 'react-router';
-import {Pagination as BootPagionation} from 'react-bootstrap';
+import {Pagination as BootPagination} from 'react-bootstrap';
 
 import { Row } from "react-grid-system";
-import styles from '../../../../themes/default/general/pagination.scss';
+import styles from '@themes/default/general/pagination.scss';
 import PrevPage from "./PrevPage";
 import Pages from "./Pages";
 import NextPage from "./NextPage";
@@ -45,35 +45,54 @@ class Pagination extends Component{
      * to set settings for pagination
      */
     setPageSettings(props){
-        const {setTotalPages} = this.props;
-        const {pageNumber, entitiesLength, link} = props.page;
-        if(typeof pageNumber !== 'undefined') {
-            this.page.current = pageNumber ? parseInt(pageNumber) : 1;
+        let {setTotalPages, entitiesProPage} = this.props;
+        if(!entitiesProPage){
+            entitiesProPage = ENTITIES_PRO_PAGE;
         }
-        this.page.total = Math.ceil(entitiesLength / ENTITIES_PRO_PAGE);
-        if(this.page.total <= 0){
-            this.page.total = 1;
+        if(typeof setTotalPages === 'function') {
+            const {pageNumber, entitiesLength, link} = props.page;
+            if (typeof pageNumber !== 'undefined') {
+                this.page.current = pageNumber ? parseInt(pageNumber) : 1;
+            }
+            this.page.total = Math.ceil(entitiesLength / entitiesProPage);
+            if (this.page.total <= 0) {
+                this.page.total = 1;
+            }
+            this.page.link = link;
+            setTotalPages(this.page.total);
         }
-        this.page.link = link;
-        setTotalPages(this.page.total);
     }
 
     renderNext(){
-        const {current, total, link} = this.page;
+        const{loadPage} = this.props;
+        const {total, link} = this.page;
+        let {current} = this.page;
+        let isLast = false;
         let next = -1;
-        if(current + 1 <= total) {
-            next = link + parseInt(current + 1);
+        if(current === total){
+            isLast = true;
         }
-        return <NextPage link={next} isLast={current === total}/>;
+        if(current + 1 <= total) {
+            current++;
+            next = link + parseInt(current);
+        }
+        return <NextPage link={next} current={current} isLast={isLast} loadPage={loadPage}/>;
     }
 
     renderPrev(){
-        const {current, link} = this.page;
+        const{loadPage} = this.props;
+        const {link} = this.page;
+        let {current} = this.page;
         let prev = -1;
-        if(current - 1 >= 1){
-            prev = link + parseInt(current - 1);
+        let isFirst = false;
+        if(current === 1){
+            isFirst = true;
         }
-        return <PrevPage link={prev} current={current} isFirst={current === 1}/>;
+        if(current - 1 >= 1){
+            current--;
+            prev = link + parseInt(current);
+        }
+        return <PrevPage link={prev} current={current} isFirst={isFirst} loadPage={loadPage}/>;
     }
 
     render(){
@@ -87,6 +106,7 @@ class Pagination extends Component{
                 }
             }
         }
+        const {loadPage} = this.props;
         const {current, total, link} = this.page;
         if(total === 1){
             return null;
@@ -94,17 +114,21 @@ class Pagination extends Component{
         return (
             <Row className={styles.row}>
                 <div className={styles.container}>
-                    <BootPagionation className='justify-content-center'>
+                    <BootPagination className='justify-content-center'>
                         {this.renderPrev()}
                             {/*<span className={styles.pagination}>*/}
-                                <Pages current={current} total={total} link={link}/>
+                                <Pages current={current} total={total} link={link} loadPage={loadPage}/>
                             {/*</span>*/}
                         {this.renderNext()}
-                    </BootPagionation>
+                    </BootPagination>
                 </div>
             </Row>
         );
     }
 }
+
+Pagination.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(Pagination);

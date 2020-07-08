@@ -17,8 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import theme from "react-toolbox/lib/tooltip/theme.css";
-import {getThemeClass} from "../../../../utils/app";
-import styles from '../../../../themes/default/general/basic_components.scss';
+import {getThemeClass} from "@utils/app";
+import styles from '@themes/default/general/basic_components.scss';
 
 
 /**
@@ -46,7 +46,7 @@ class TooltipText extends Component{
     }
 
     render(){
-        const {authUser, tooltip, text, className, onClick, tooltipPosition, style} = this.props;
+        const {authUser, tooltip, text, className, onClick, tooltipPosition, style, tooltipStyle} = this.props;
         let classNames = [
             'tooltip_switch',
             'tooltip',
@@ -63,7 +63,7 @@ class TooltipText extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <span className={`${styles[classNames.tooltip_switch]} ${className}`} onMouseOver={::this.activate} onMouseLeave={::this.deactivate} onClick={onClick} style={style}>
-                <span className={`${theme.tooltip} ${tooltipPositionClassname} ${ this.state.isActive ? `${theme.tooltipActive}` : ''} ${styles[classNames.tooltip]}`}>
+                <span className={`${theme.tooltip} ${tooltipPositionClassname} ${ this.state.isActive ? `${theme.tooltipActive}` : ''} ${styles[classNames.tooltip]}`} style={tooltipStyle}>
                     <span className={`${theme.tooltipInner}`}>{tooltip}</span>
                 </span>
                 <span>{text}</span>
@@ -80,6 +80,7 @@ TooltipText.propTypes = {
 TooltipText.defaultProps = {
     className: '',
     style: {},
+    tooltipStyle: {},
 };
 
 export default TooltipText;

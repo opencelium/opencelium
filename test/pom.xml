@@ -6,6 +6,7 @@
 
     <groupId>becontest</groupId>
     <artifactId>Selenium</artifactId>
+    <packaging>pom</packaging>
     <version>1.0.0</version>
     <build>
         <plugins>
@@ -31,6 +32,8 @@
                     </archive>
                 </configuration>
             </plugin>
+
+
         </plugins>
     </build>
 
@@ -62,6 +65,11 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>net.lightbody.bmp</groupId>
+            <artifactId>browsermob-core</artifactId>
+            <version>2.1.5</version>
+        </dependency>
 
     </dependencies>
 

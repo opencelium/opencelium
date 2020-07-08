@@ -16,9 +16,9 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {TableCell} from 'react-toolbox/lib/table';
-import {convertCronExpForSchedulerlist,} from "../../../../utils/app";
-import styles from '../../../../themes/default/content/schedules/schedules.scss';
-import PopupText from "../../../general/basic_components/PopupText";
+import {convertCronExpForSchedulerlist,} from "@utils/app";
+import styles from '@themes/default/content/schedules/schedules.scss';
+import PopupText from "@basic_components/PopupText";
 
 
 /**

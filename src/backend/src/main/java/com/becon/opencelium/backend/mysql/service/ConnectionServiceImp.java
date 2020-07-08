@@ -20,9 +20,7 @@ import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.repository.ConnectionRepository;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
-import com.becon.opencelium.backend.quartz.QuartzUtility;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,13 +89,11 @@ public class ConnectionServiceImp implements ConnectionService{
 
     @Override
     public void execute(Long connectionId, int schedulerId) {
-        Connection connection = findById(connectionId)
-                .orElseThrow(() -> new RuntimeException("Connection - " + connectionId + " not found."));
 
-        ConnectionNode connectionNode = connectionNodeService.findByConnectionId(connectionId)
-                .orElseThrow(() -> new RuntimeException("Connection - " + connectionId + " not found."));
-
-        connectionNode.getToConnector();
+//        ConnectionNode connectionNode = connectionNodeService.findByConnectionId(connectionId)
+//                .orElseThrow(() -> new RuntimeException("Connection - " + connectionId + " not found."));
+//
+//        connectionNode.getToConnector();
     }
 
     @Override
@@ -136,8 +132,8 @@ public class ConnectionServiceImp implements ConnectionService{
         Connector to = connectorService.findById(connection.getToConnector())
                 .orElseThrow(() -> new RuntimeException("Connector - " + connection.getToConnector() + " not found"));
 
-        connectionResource.setFromConnector(connectorService.toNodeResource(from, connection.getId()));
-        connectionResource.setToConnector(connectorService.toNodeResource(to, connection.getId()));
+        connectionResource.setFromConnector(connectorService.toNodeResource(from, connection.getId(), "from_connector"));
+        connectionResource.setToConnector(connectorService.toNodeResource(to, connection.getId(), "to_connector"));
         return connectionResource;
     }
 

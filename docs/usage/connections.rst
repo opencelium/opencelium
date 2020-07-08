@@ -9,251 +9,172 @@ title.
 
 |image0|
 
-On the right top corner you can see |image1| or |image2| icon. Clicking
-on it the application creates a webhook for the specific connection.
-
-|image3|
-
-Due to it the user can trigger this connection using only url. To get
-this url, just click on the word *WEBHOOK*. The url is stored in the
-buffer. Now you can paste it where you need.
-
-|image4|
-
 Adding/updating connection consist of three steps: direction, mode, and
 methods. There is an explanation tour for creating connection. The
 direction page has two fields: *title* and *connectors*.They are both
 required. The *title* must be unique, it is checking before going to the
-next page. The *connectors* are two: from connector and to connector.
+next page. The *connectors* are two: *from connector* and *to connector*.
 
-|image5|
+|image1|
 
 The mode step has one required field - *mode*. It can be *expert* or
 *template.* If *template* is chosen, their will be appeared a select
-field, where you can select a template that you need or delete it.
+field, where you can select a template that you need or you cat delete
+it.
 
-|image6|
+|image2|
 
 if you come back to this step from the next step, choosing another mode
 will affect on the adding, that is why you need to confirm your choice.
 
 The methods step has two areas: *methods* and *mapping fields*. There is
 also a possibility to add this connection to the *templates*. Clicking
-on the **Add Template** button appears a window where should be provided
+on the |image3| button appears a window where should be provided
 a name.
-
-|image7|
 
 The *methods* area is divided into two parts: left and right. On the
 left side you see elements belongs to *from connector* and on the right
-to *to connector.* There are two types of elements: method and
-operation.
+to *to connector*.
 
 Method represents the request to the connector with defined parameters.
-Each method has his own color that generates automatically. Parameter
-can be a simple *text*, a *pointer* or an *object*. The pointer is value
-that refers to the result of the method above. To be able to make a
-pointer, just type **$** sign in input field. To go back to a simple
-text field, remove this **$** sign. The pointer is a field with three
-data: *pointer sign* **$**, *method* value and *param* value. *Method*
-value is a select box which values generates from created methods above.
-Selecting it, the corresponded color appears in the pointer.
+There are two types of elements: method and operator. Clicking on
+the |image4| button you can create the element. The element will be located
+after the current element, that is pointed with an arrow |image5|.
+Each method has his own color that generates automatically. To remove the
+method just click on the recycle icon.
 
-|image8|
+The method consists of *Query* and *Body*.
 
-The *param* value is a simple text. Clicking on it, you will see the
-popup input field wider.
+|image6|
 
-|image9|
+*Query* is a URL that can be modified during the request. It has a prefix,
+that is defined in invoker xml file. Mouseover here |image7| you can see it.
+There is a possibility to add a parameter into the *Query* (except the first
+method in *from connector*). This parameter is a reference to the response of
+the  previously created method.
 
-The *object* field is for json data. They can be typed by hand or
-imported.
+|image8| |image9|
 
-|image10|
+You choose method, fill out the parameter and click plus button. The parameter
+comes from the invoker. If it exists there, you will see it after typing the
+third symbol in the input field as a select popup block.
 
-If you want to import, just click on the **Import** button and insert
-data into textarea.
+*Body* has an icon |image10|. Clicking on it popup a block of request that you
+send using this method. It can be modified using |image11| icon or directly change
+each parameter. There is also a possibility here to add a parameter from the response
+of the previous methods. Type **#** as the first character and you will see another
+popup |image12|. You can handle with that in the same principe as for the *Query*.
+When you finish with editing click on the apply icon |image13|.
 
-|image11|
+When you create an operator there are two options: *if* and *loop*. *if* operator
+does a condition before performance. You should define here also a reference, choose
+a condition operation and set with what are you doing to compare.
 
-All parameters can be hidden pressing on the title of the method or on
-the arrow. Clicking on this |image12| icon you can delete a method.
+|image14|
 
-Operation can be *loop* - |image13| or *if* - |image14|. *Loop* has two
-parameters: *method* and *param*. Method is a select field. Values come
-from the selected methods with according colors. *Param* is a text
-field. *Loop* operation goes through the array. It means, the *param*
-value should be an array with **[]** in the end.
+*loop* operator makes request in the loop under conditions that you define.
 
 |image15|
 
-The *if* operation checks if the statement is true then fulfill the
-instructions inside. It has three parameters: *method, param, relational
-operator,* and *compare statement.* The *relational operator* can be
-**>=, >, <=, <, ==, !=**.
-
-|image16|
-
-Values for *Method* for *To Connector* come not only from selected
-methods in *To Connector*, but also from *From Connector*.
-
-|image17|
-
-To add a new method or operation, click on this button\ |image18|. There
-will be a menu. **M** means method and **O** means operation. Click one
-of it and select item. If you are inside operation than you can create
-**in** or **out** of the instructions.
+As you can mention, all items under the operators are shifted on the right to see the
+scope of their influence. There can be a lot of items, that means can be shifted quite
+well on the right. We have limited the overview and brought history here. Both
+*from connector* and *to connector* can have 5 elements. If you have more than five, appears
+a navigator on the left side with progress bar |image16|. Clicking up or down you can
+navigate throw the elements and see how deep you are, just looking on the progress bar.
+Moreover, there is a history on the top |image17|. This history displays you all operators
+that are participating to fulfill the current item. Clicking on the search icon |image18|
+you see the whole structure of the connector.
 
 |image19|
 
-The *mapping* area display the mapping between the *From* and *To
-Connectors* through the parameters. First of all you add a new *From
-Connector* parameter. You can do it it two ways: typing the name in
-**Type Param** field or clicking on |image20|\ icon. In **Type Param**
-fields appearing values as you type in. If you type a dot **.** after,
-it shows you a list of subparameters inside the property.
+Press arrows up and down to navigate there or left and right arrows to minimize or maximize
+accordingly the operators. Clicking on the item here you go directly to that element and it
+will selected as the current one.
+
+*Mapping Fields* displays the relationship between the fields of the methods.
+
+|image20|
+
+They are created immediately after setting references in *Body*. The relationship can be one
+to one or many to one. Moreover, you can add an enhancement between fields. Clicking on the
+enhancement title you will see a popup window where you set a description and an enhancement
+itself.
 
 |image21|
 
-Clicking on |image22| you add it.
+There are predefined variables to relate with the fields. *VAR_[i]* are coming parameters
+and *RESULT_VAR* is the final value for *to connector* field.
+
+Documentation about APIs of the connectors are available on this page. Clicking on the icon
+|image22| you will see the appropriate documentation.
 
 |image23|
 
-Clicking on plus icon comes a dialog box with two parameters: *field
-type* and *name*.
+There are method and title of the request. If you want to read the specific request in details
+just toggle it clicking on the title.
 
 |image24|
 
-After creating a param, you can choose this param in *To Connector*
-method items clicking on the multiselect field.
-
-|image25|
-
-Immediately after there is a new connection between chosen parameter and
-param where it was selected.
+Moreover, you can test the request clicking on |image25|. Then you see a popup window where
+you already have predefined method, request and body.
 
 |image26|
 
-Each rectangle on the right side has an **Enhancement**. The goal of it
-to provide some functionality during the mapping. Clicking it opens a
-dialog box with next data: *name, description, mode (simple* or
-*expert)* and *code.* *Simple* mode provide more data: *variables,
-constants* and *operators.*\ Clicking twice on the element it appears in
-the code. Though, you can write very simple code expresion.
+You can change the method, add headers or update body. To add a header type his key and value.
+After click on the |image27| icon. If you have more than two headers just click on |image28|
+and |image29| arrows to navigate between them. After you prepared the request, press **Send**
+button and the response will appear in the *Response* tab.
 
-|image27|
+|image30|
 
-*Expert* mode has just a textarea where are comments in the beginning.
-These comments explains you what variables are assigned to which params.
-Use it in the code.
 
-|image28|
 
-.. |image0| image:: ../img/connection/image9.png
-   :width: 6.27083in
-   :height: 4.22222in
+
+
+.. |image0| image:: ../img/connection/0.png
    :align: middle
-.. |image1| image:: ../img/connection/image14.png
-   :width: 0.41667in
-   :height: 0.25000in
-.. |image2| image:: ../img/connection/image17.png
-   :width: 0.34852in
-   :height: 0.27202in
-.. |image3| image:: ../img/connection/image16.png
-   :width: 2.89545in
-   :height: 0.76563in
+.. |image1| image:: ../img/connection/1.png
    :align: middle
-.. |image4| image:: ../img/connection/image3.png
-   :width: 6.27083in
-   :height: 1.47222in
+.. |image2| image:: ../img/connection/2.png
    :align: middle
-.. |image5| image:: ../img/connection/image10.png
-   :width: 6.27083in
-   :height: 3.19444in
+.. |image3| image:: ../img/connection/3.png
+.. |image4| image:: ../img/connection/4.png
+.. |image5| image:: ../img/connection/5.png
+.. |image6| image:: ../img/connection/6.png
    :align: middle
-.. |image6| image:: ../img/connection/image22.png
-   :width: 6.27083in
-   :height: 3.63889in
+.. |image7| image:: ../img/connection/7.png
+.. |image8| image:: ../img/connection/8.png
    :align: middle
-.. |image7| image:: ../img/connection/image13.png
-   :width: 6.27083in
-   :height: 2.18056in
+.. |image9| image:: ../img/connection/9.png
    :align: middle
-.. |image8| image:: ../img/connection/image8.png
-   :width: 5.06250in
-   :height: 1.43750in
+.. |image10| image:: ../img/connection/10.png
+.. |image11| image:: ../img/connection/11.png
+.. |image12| image:: ../img/connection/12.png
+.. |image13| image:: ../img/connection/13.png
+.. |image14| image:: ../img/connection/14.png
    :align: middle
-.. |image9| image:: ../img/connection/image15.png
-   :width: 6.03125in
-   :height: 1.42708in
+.. |image15| image:: ../img/connection/15.png
    :align: middle
-.. |image10| image:: ../img/connection/image25.png
-   :width: 3.54167in
-   :height: 3.78125in
+.. |image16| image:: ../img/connection/16.png
+.. |image17| image:: ../img/connection/17.png
+.. |image18| image:: ../img/connection/18.png
+.. |image19| image:: ../img/connection/19.png
    :align: middle
-.. |image11| image:: ../img/connection/image18.png
-   :width: 6.27083in
-   :height: 2.02778in
+.. |image20| image:: ../img/connection/20.png
    :align: middle
-.. |image12| image:: ../img/connection/image11.png
-   :width: 0.29022in
-   :height: 0.24284in
-.. |image13| image:: ../img/connection/image29.png
-   :width: 0.35417in
-   :height: 0.38542in
-.. |image14| image:: ../img/connection/image28.png
-   :width: 0.40625in
-   :height: 0.38542in
-.. |image15| image:: ../img/connection/image7.png
-   :width: 4.77083in
-   :height: 0.80208in
+.. |image21| image:: ../img/connection/21.png
    :align: middle
-.. |image16| image:: ../img/connection/image5.png
-   :width: 4.41667in
-   :height: 0.79167in
+.. |image22| image:: ../img/connection/22.png
+.. |image23| image:: ../img/connection/23.png
    :align: middle
-.. |image17| image:: ../img/connection/image6.png
-   :width: 2.82292in
-   :height: 2.78125in
+.. |image24| image:: ../img/connection/24.png
    :align: middle
-.. |image18| image:: ../img/connection/image23.png
-   :width: 0.35448in
-   :height: 0.29688in
-.. |image19| image:: ../img/connection/image19.png
-   :width: 4.83333in
-   :height: 2.69792in
+.. |image25| image:: ../img/connection/25.png
+.. |image26| image:: ../img/connection/26.png
    :align: middle
-.. |image20| image:: ../img/connection/image20.png
-   :width: 0.34544in
-   :height: 0.28646in
-.. |image21| image:: ../img/connection/image21.png
-   :width: 3.85417in
-   :height: 3.28125in
-   :align: middle
-.. |image22| image:: ../img/connection/image27.png
-   :width: 0.32813in
-   :height: 0.32813in
-.. |image23| image:: ../img/connection/image2.png
-   :width: 2.70833in
-   :height: 1.06250in
-   :align: middle
-.. |image24| image:: ../img/connection/image24.png
-   :width: 6.27083in
-   :height: 2.61111in
-   :align: middle
-.. |image25| image:: ../img/connection/image4.png
-   :width: 3.85417in
-   :height: 2.16667in
-   :align: middle
-.. |image26| image:: ../img/connection/image1.png
-   :width: 6.27083in
-   :height: 2.16667in
-   :align: middle
-.. |image27| image:: ../img/connection/image26.png
-   :width: 6.27083in
-   :height: 6.33333in
-   :align: middle
-.. |image28| image:: ../img/connection/image12.png
-   :width: 6.27083in
-   :height: 6.20833in
+.. |image27| image:: ../img/connection/27.png
+.. |image28| image:: ../img/connection/28.png
+.. |image29| image:: ../img/connection/29.png
+.. |image30| image:: ../img/connection/30.png
    :align: middle

@@ -18,20 +18,20 @@ import {withTranslation} from "react-i18next";
 import {connect} from "react-redux";
 import Header from "./header/Header";
 import Footer from "./footer/Footer";
-import {changeLanguage} from "../../actions/app";
-import {defaultLanguage} from "../../utils/constants/languages";
-import store from '../../utils/store';
-import {addUserInStore} from '../../actions/users/add';
+import {changeLanguage} from "@actions/app";
+import {defaultLanguage} from "@utils/constants/languages";
+import store from '@utils/store';
+import {addUserInStore} from '@actions/users/add';
 
 import { addUserListener,
-} from '../../utils/socket/users';
+} from '@utils/socket/users';
 import LayoutError from "./LayoutError";
-import styles from '../../themes/default/layout/layout.scss';
+import styles from '@themes/default/layout/layout.scss';
 import Notification from "../general/app/Notification";
-import {NotificationType} from "../../utils/constants/notifications/notifications";
-import {checkOCConnection, logoutUserFulfilled} from "../../actions/auth";
-import {API_REQUEST_STATE} from "../../utils/constants/app";
-import {removeAllLS} from "../../utils/LocalStorage";
+import {NotificationType} from "@utils/constants/notifications/notifications";
+import {checkOCConnection, logoutUserFulfilled} from "@actions/auth";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {removeAllLS} from "@utils/LocalStorage";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -64,7 +64,7 @@ class Layout extends Component{
     componentDidMount(){
         const {addUserInStore} = this.props;
         addUserListener(addUserInStore);
-        setInterval(::this.checkOCConnection, 15000);
+        setInterval(::this.checkOCConnection, 15000000);
     }
 
     componentDidUpdate(){

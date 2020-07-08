@@ -16,8 +16,8 @@
 import React, {Component} from 'react';
 import { withRouter } from 'react-router';
 import Pagination from 'react-bootstrap/Pagination';
-import {addNextPageKeyNavigation, removeNextPageKeyNavigation} from '../../../../utils/key_navigation';
-import styles from '../../../../themes/default/general/pagination.scss';
+import {addNextPageKeyNavigation, removeNextPageKeyNavigation} from '@utils/key_navigation';
+import styles from '@themes/default/general/pagination.scss';
 import FontIcon from "../FontIcon";
 
 
@@ -44,27 +44,30 @@ class NextPage extends Component{
      * to open next page
      */
     openNextPage() {
-        const {link, router} = this.props;
-        if (link !== '' && link !== -1) {
-            router.push(link);
+        const {link, router, loadPage, current} = this.props;
+        if(!loadPage) {
+            if (link !== '' && link !== -1) {
+                router.push(link);
+            }
+        } else{
+            loadPage(current);
         }
     }
     
     render(){
         const {link, isLast} = this.props;
         let className = styles.next_page;
-        if(link === -1){
+        if(link === -1 || link === ''){
             className += ' ' + styles.disable_arrow;
         }
         return(
             <Pagination.Next onClick={this.openNextPage} disabled={isLast}/>
         );
-        return (
-            <span className={className} onClick={this.openNextPage}>
-                <FontIcon value={'arrow_right'}/>
-            </span>
-        );
     }
 }
+
+NextPage.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(NextPage);

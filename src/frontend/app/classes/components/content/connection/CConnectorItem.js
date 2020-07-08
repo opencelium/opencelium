@@ -13,10 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, sortByIndexFunction, subArrayToString} from "../../../../utils/app";
+import {consoleLog, isId, sortByIndex, subArrayToString} from "@utils/app";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
+import CConnectorPagination from "./CConnectorPagination";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -43,6 +44,9 @@ export default class CConnectorItem{
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._pagination = this.setConnectorPagination();
+        this._currentProgress = this.getCurrentProgress();
+        this._operatorsHistory = [];
     }
 
     static createConnectorItem(connectorItem){
@@ -71,17 +75,24 @@ export default class CConnectorItem{
         return invoker;
     }
 
-    checkConnectorType(connectorType){
-        if(connectorType === CONNECTOR_FROM || connectorType === CONNECTOR_TO){
-            return true;
+    getMethodByColor(color){
+        let method = this._methods.find(m => m.color === color);
+        if(method){
+            return method;
         }
-        return false;
+        return null;
+    }
+
+    checkConnectorType(connectorType){
+        return connectorType === CONNECTOR_FROM || connectorType === CONNECTOR_TO;
     }
 
     resetItems(){
         this._methods = [];
         this._operators = [];
         this._currentItem = null;
+        this.reloadPagination();
+        this.reloadOperatorsHistory();
     }
 
     convertMethod(method){
@@ -96,7 +107,7 @@ export default class CConnectorItem{
         for(let i = 0; i < methods.length; i++){
             result.push(this.convertMethod(methods[i]));
         }
-        result.sort(sortByIndexFunction);
+        result = sortByIndex(result);
         return result;
     }
 
@@ -112,14 +123,156 @@ export default class CConnectorItem{
         for(let i = 0; i < operators.length; i++){
             result.push(this.convertOperator(operators[i]));
         }
-        result.sort(sortByIndexFunction);
+        result = sortByIndex(result);
         return result;
+    }
+
+    setConnectorPagination(){
+        return CConnectorPagination.createConnectorPagination(this);
+    }
+
+    getCurrentProgress(item = null){
+        if(item === null){
+            item = this._currentItem;
+        }
+        let result = 0;
+        let currentIndex = 0;
+        let allItems = [];
+        if(item){
+            currentIndex = item.index;
+            if(this._pagination.allItems){
+                allItems = this._pagination.allItems;
+            }
+            for(let i = 0; i < allItems.length; i++){
+                if(allItems[i].index === currentIndex){
+                    if(i === allItems.length - 1){
+                        result = 100;
+                    } else {
+                        result = Math.ceil((i * 100) / allItems.length);
+                    }
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    loadPage(number){
+        this._pagination.setCurrentPageNumber(number);
+        this._currentProgress = this.getCurrentProgress();
+    }
+
+    reloadPagination(settings){
+        this._pagination.reload(this, settings);
+        this._currentProgress = this.getCurrentProgress();
+    }
+
+    reloadOperatorsHistory(){
+        this._operatorsHistory = [];
+        if(this._currentItem !== null) {
+            let indexSplitted = this._currentItem.index.split('_');
+            if(indexSplitted.length > 1) {
+                let operatorIndex = indexSplitted[0];
+                for (let i = 1; i < indexSplitted.length; i++) {
+                    let operator = this._operators.find(o => o.index === operatorIndex);
+                    if(operator) {
+                        this._operatorsHistory.push(operator);
+                    }
+                    operatorIndex += `_${indexSplitted[i]}`;
+                }
+            }
+            this.reloadPagination();
+        }
     }
 
     updateInvokerForMethods(){
         for(let i = 0; i < this._methods.length; i++){
             this._methods[i].invoker = this._invoker;
         }
+    }
+
+    toggleItems(itemType, item, value){
+        let items = [];
+        switch (itemType) {
+            case METHOD_ITEM:
+                items = this.methods;
+                break;
+            case OPERATOR_ITEM:
+                items = this.operators;
+                break;
+        }
+        for(let i = 0; i < items.length; i++){
+            if(items[i].index !== item.index && items[i].index.indexOf(item.index) === 0){
+                items[i].isToggled = value;
+                if(itemType === OPERATOR_ITEM){
+                    items[i].isMinimized = value;
+                }
+            }
+            if(itemType === OPERATOR_ITEM && items[i].index === item.index){
+                items[i].isMinimized = value;
+            }
+        }
+    }
+
+    toggleByItem(item, value){
+        this.toggleItems(METHOD_ITEM, item, value);
+        this.toggleItems(OPERATOR_ITEM, item, value);
+        this.reloadPagination();
+    }
+
+    filterByNameOrType(filterValue){
+        let filterValues = filterValue.split('>');
+        for(let i = 0; i < filterValues.length; i++) {
+            this.filterByNameOrTypeIteration(i, filterValues[i]);
+        }
+    }
+
+    filterByNameOrTypeIteration(step, filterValue){
+        let tmpOperators = [];
+        for(let i = 0; i < this._operators.length; i++){
+            let indexSplit = this._operators[i].index.split('_');
+            if(indexSplit.length > step) {
+                if (this._operators[i].type.toLowerCase().includes(filterValue.toLowerCase()) || filterValue === '') {
+                    tmpOperators.push(this._operators[i]);
+                    let operatorIndex = this._operators[i].index;
+                    let parentIndex = subArrayToString(operatorIndex.split('_'), '_', 0, operatorIndex.split('_').length - 1);
+                    let parent = this._operators.find(operator => operator.index === parentIndex);
+                    if(parent && step > 0){
+                        this._operators[i].isDisabled = parent.isDisabled;
+                    } else{
+                        this._operators[i].isDisabled = false;
+                    }
+                } else {
+                    this._operators[i].isDisabled = true;
+                }
+            }
+        }
+        for(let i = 0; i < this._methods.length; i++){
+            let indexSplit = this._methods[i].index.split('_');
+            if(indexSplit.length > step) {
+                if (this._methods[i].name.toLowerCase().includes(filterValue.toLowerCase())
+                    || filterValue === ''
+                    || tmpOperators.findIndex(operator => this._methods[i].index.indexOf(operator.index) === 0) !== -1
+                ) {
+                    let methodIndex = this._methods[i].index;
+                    let parentIndex = subArrayToString(methodIndex.split('_'), '_', 0, methodIndex.split('_').length - 1);
+                    let parent = this._operators.find(operator => operator.index === parentIndex);
+                    if(parent && step > 0){
+                        this._methods[i].isDisabled = parent.isDisabled;
+                    } else{
+                        this._methods[i].isDisabled = false;
+                    }
+                } else {
+                    this._methods[i].isDisabled = true;
+                }
+            }
+        }
+    }
+
+    hasItemChildren(item){
+        let result = false;
+        result = this.methods.findIndex(m => m.index !== item.index && m.index.indexOf(item.index) === 0) !== -1;
+        return result || this.operators.findIndex(o => o.index !== item.index && o.index.indexOf(item.index) === 0) !== -1;
     }
 
     get id(){
@@ -169,6 +322,14 @@ export default class CConnectorItem{
         this._operators = this.convertOperators(operators);
     }
 
+    get pagination(){
+        return this._pagination;
+    }
+
+    get operatorsHistory(){
+        return this._operatorsHistory;
+    }
+
     getCurrentItem(){
         if(this._currentItem === null){
             if(this._methods.length !== 0){
@@ -180,6 +341,7 @@ export default class CConnectorItem{
 
     setCurrentItem(item){
         this._currentItem = item;
+        this.reloadOperatorsHistory();
     }
 
     refactorIndex(item, refactorMode, index){
@@ -210,14 +372,14 @@ export default class CConnectorItem{
         let newIndexSplitted = newIndex.split('_');
         let result = {result: false, index: 0};
         if(newIndexSplitted.length === 1){
-            if(itemIndexSplitted[0] >= newIndexSplitted[0]){
+            if(parseInt(itemIndexSplitted[0]) >= parseInt(newIndexSplitted[0])){
                 result.result = true;
                 result.index = 0;
             }
         } else {
             for(let i = 0; i < newIndexSplitted.length; i++){
                 if(i < itemIndexSplitted.length) {
-                    if (newIndexSplitted[i] < itemIndexSplitted[i]
+                    if (parseInt(newIndexSplitted[i]) < parseInt(itemIndexSplitted[i])
                         && itemIndexSplitted.length >= newIndexSplitted.length
                     ) {
                         if(itemIndex.indexOf(subArrayToString(newIndexSplitted, '_', 0, newIndexSplitted.length - 1)) === 0){
@@ -226,7 +388,7 @@ export default class CConnectorItem{
                         }
                         break;
                     }
-                    if (newIndexSplitted[i] > itemIndexSplitted[i]) {
+                    if (parseInt(newIndexSplitted[i]) > parseInt(itemIndexSplitted[i])) {
                         break;
                     }
                     if (i === newIndexSplitted.length - 1) {
@@ -333,10 +495,10 @@ export default class CConnectorItem{
             let newItemIndexSplit = newItem.index.split('_');
             let maxIndex = keySplit.length > newItemIndexSplit.length ? keySplit : newItemIndexSplit;
             for (let i = 0; i < maxIndex.length; i++) {
-                if (newItemIndexSplit[i] < keySplit[i]) {
+                if (parseInt(newItemIndexSplit[i]) < parseInt(keySplit[i])) {
                     return false;
                 }
-                if (newItemIndexSplit[i] > keySplit[i]) {
+                if (parseInt(newItemIndexSplit[i]) > parseInt(keySplit[i])) {
                     return true;
                 }
             }
@@ -358,7 +520,7 @@ export default class CConnectorItem{
                 } else {
                     this._methods.splice(this.checkIfTheSpliceIndexCorrect(itemType, key, newItem) ? key + 1 : key, 0, newItem);
                 }
-                this._methods.sort(sortByIndexFunction);
+                this._methods = sortByIndex(this._methods);
                 break;
             case OPERATOR_ITEM:
                 if (this._operators.length === 0) {
@@ -366,10 +528,11 @@ export default class CConnectorItem{
                 } else {
                     this._operators.splice(this.checkIfTheSpliceIndexCorrect(itemType, key, newItem) ? key + 1 : key, 0, newItem);
                 }
-                this._operators.sort(sortByIndexFunction);
+                this._operators = sortByIndex(this._operators);
                 break;
         }
         this.setCurrentItem(newItem);
+        this.reloadPagination({newItem});
     }
 
     addMethod(method, mode = OUTSIDE_ITEM){
@@ -419,41 +582,15 @@ export default class CConnectorItem{
 
     isLastItemInTheTree(index){
         let splitIndex = index.split('_');
-        let lastMethod = this._methods.length !== 0 ? this._methods[this._methods.length - 1] : null;
-        let lastOperator = this._operators.length !== 0 ? this._operators[this._operators.length - 1] : null;
-        let isLastMethod = false;
-        let isLastOperator = false;
-        if(lastMethod !== null){
-            if(lastMethod.index === index){
-                isLastMethod = true;
-            }
+        let increasedLastIndex = parseInt(splitIndex[splitIndex.length - 1]) + 1;
+        splitIndex[splitIndex.length - 1] = increasedLastIndex;
+        let nextIndex = splitIndex.join('_');
+        let isExistNextIndexInMethods = this._methods.findIndex(m => m.index === nextIndex) !== -1;
+        if(!isExistNextIndexInMethods){
+            let isExistNextIndexInOperators = this._operators.findIndex(o => o.index === nextIndex) !== -1;
+            return !isExistNextIndexInOperators;
         }
-        if(lastOperator !== null){
-            if(lastOperator.index === index){
-                isLastOperator = true;
-            }
-        }
-        if(isLastMethod){
-            if(lastOperator !== null) {
-                let splitLastOperatorIndex = lastOperator.index.split('_');
-                for (let i = 0; i < splitLastOperatorIndex.length; i++) {
-                    if (splitLastOperatorIndex[i] > splitIndex[i]) {
-                        return false;
-                    }
-                }
-            }
-        }
-        if(isLastOperator){
-            if(lastMethod !== null) {
-                let splitLastMethodIndex = lastMethod.index.split('_');
-                for (let i = 0; i < splitLastMethodIndex.length; i++) {
-                    if (splitLastMethodIndex[i] > splitIndex[i]) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return !(!isLastMethod && !isLastOperator);
+        return !isExistNextIndexInMethods;
     }
 
 
@@ -466,11 +603,13 @@ export default class CConnectorItem{
                 this.refactorIndexes(index, REFACTOR_REMOVE, 'method', methodIndex);
             }
             this._methods.splice(key, 1);
-            this._methods.sort(sortByIndexFunction);
+
+            this._methods = sortByIndex(this._methods);
             if(withRefactorIndexes) {
                 this.setCurrentItem(this.getCloserItem(methodIndex));
             }
         }
+        this.reloadPagination();
     }
 
     addOperator(operator, mode = OUTSIDE_ITEM){
@@ -489,11 +628,12 @@ export default class CConnectorItem{
                 this.refactorIndexes(index, REFACTOR_REMOVE, 'operator', operatorIndex);
             }
             this._operators.splice(key, 1);
-            this._operators.sort(sortByIndexFunction);
+            this._operators = sortByIndex(this._operators);
             if(withRefactorIndexes) {
                 this.setCurrentItem(this.getCloserItem(operatorIndex));
             }
         }
+        this.reloadPagination();
     }
 
     generateNextIndex(mode){
@@ -532,6 +672,10 @@ export default class CConnectorItem{
         return this.getConnectorType() === CONNECTOR_FROM ? 'f_': 't_';
     }
 
+    get currentProgress(){
+        return this._currentProgress;
+    }
+
     getAllPrevMethods(item, isKeyConsidered = true, exceptCurrent = true){
         let methods = [];
         let itemIndexSplitter = item.index.split('_');
@@ -545,10 +689,10 @@ export default class CConnectorItem{
             let method = null;
             if(isKeyConsidered) {
                 for (let j = 0; j < methodIndexSplitter.length; j++) {
-                    if ((methodIndexSplitter[j] <= itemIndexSplitter[j] && j === methodIndexSplitter.length - 1)) {
+                    if ((parseInt(methodIndexSplitter[j]) <= parseInt(itemIndexSplitter[j]) && j === methodIndexSplitter.length - 1)) {
                         method = this._methods[i];
                     }
-                    if (methodIndexSplitter[j] > itemIndexSplitter[j]) {
+                    if (parseInt(methodIndexSplitter[j]) > parseInt(itemIndexSplitter[j])) {
                         shouldStop = true;
                         break;
                     }

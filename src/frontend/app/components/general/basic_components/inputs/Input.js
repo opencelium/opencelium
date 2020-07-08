@@ -16,8 +16,8 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {Input as ToolboxInput} from "react-toolbox/lib/input";
-import styles from '../../../../themes/default/general/basic_components.scss';
-import {formatHtmlId, getThemeClass} from "../../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {formatHtmlId, getThemeClass, setFocusById} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -38,6 +38,14 @@ class Input extends Component{
         this.state = {
             isVisiblePopupInput: false,
         };
+    }
+
+    componentDidMount(){
+        let {id, name, label, hasFocus} = this.props;
+        if(hasFocus) {
+            id = id ? id : `input_${formatHtmlId(name ? name : label)}`;
+            setFocusById(id);
+        }
     }
 
     /**
@@ -89,6 +97,7 @@ class Input extends Component{
                                 theme={popupInputTheme}
                                 onChange={onChange}
                                 onBlur={::this.onBlur}
+                                onKeyDown={::this.onKeyDown}
                                 autoFocus
                             >{null}</ToolboxInput>
                         :
@@ -99,7 +108,7 @@ class Input extends Component{
     }
 
     render(){
-        let {authUser, onChange, onBlur, isPopupInput, id, ...props} = this.props;
+        let {authUser, onChange, onBlur, isPopupInput, id, hasFocus, ...props} = this.props;
         props.id = id ? id : `input_${formatHtmlId(props.name ? props.name : props.label)}`;
         let {theme, className} = this.props;
         let classNames = [
@@ -129,6 +138,7 @@ class Input extends Component{
                     className={className}
                     theme={theme}
                     onClick={::this.showPopupInput}
+                    onFocus={::this.showPopupInput}
                     onChange={null}
                     onBlur={null}>{null}</ToolboxInput>
                 {this.renderPopupElement()}
@@ -143,6 +153,7 @@ Input.defaultProps = {
     onBlur: null,
     isPopupInput: false,
     theme: null,
+    hasFocus: false,
 };
 
 export default Input;

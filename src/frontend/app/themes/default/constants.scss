@@ -32,20 +32,73 @@ $ANIMATION_BOUNCE_IN_LEFT: bounceInLeft;
 $ANIMATION_BOUNCE_OUT_LEFT: bounceOutLeft;
 $ANIMATION_BOUNCE_OUT_RIGHT: bounceOutRight;
 
+$ANIMATION_FADE: AFade;
 $ANIMATION_FADE_IN_RIGHT: fadeInRight;
 $ANIMATION_FADE_IN_LEFT: fadeInLeft;
 $ANIMATION_FADE_IN_DOWN: fadeInDown;
 $ANIMATION_FADE_OUT_LEFT: fadeOutLeft;
 $ANIMATION_FADE_OUT_RIGHT: fadeOutRight;
+$ANIMATION_FADE_OUT_UP: fadeOutUp;
+
+$ANIMATION_SCALE_APPEAR: AScaleAppear;
+$ANIMATION_SCALE_DISAPPEAR: AScaleDisappear;
+
+$ANIMATION_EMPHASIZE: AEmphasize;
+
+
+@keyframes AEmphasize {
+  0%   {background-color: unset;}
+  50%  {background-color: #7aced2;}
+  100% {background-color: unset;}
+}
+@keyframes AScaleAppear {
+  from {
+    transform: scale(0) translate3d(100%, -100%, 0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+@keyframes AScaleDisappear {
+  from {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0) translate3d(100%, -100%, 0);
+  }
+}
+@keyframes AFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translate3d(0, -100%, 0);
+    transform: translate3d(0, -50%, 0);
   }
 
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -50%, 0);
   }
 }
 @keyframes bounceInRight {

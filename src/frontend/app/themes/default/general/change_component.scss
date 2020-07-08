@@ -145,6 +145,20 @@
   height: 25px;
 }
 
+.navigation_extra_action_loading{
+  min-height: 34px;
+  margin: 0 14px 0 0;
+  right: 0;
+  width: 32px;
+  float: right;
+  line-height: 34px;
+}
+
+.navigation_extra_action_loading>div{
+  width: 16px;
+  height: 16px;
+}
+
 .form_select_description_textarea{
   textarea{
     height: auto !important;
@@ -161,6 +175,9 @@
 }
 .form_input_label{
   font-family: $FONT_FAMILY;
+}
+.form_input_readonly_input{
+  margin: 0 65px;
 }
 .form_input_label_for_connection{
   font-family: $FONT_FAMILY;
@@ -503,7 +520,9 @@
   line-height:80px;
   width: 5%;
 }
-
+.invoker_item_add_button:hover{
+  color: black;
+}
 .invoker_item_delete_button{
   cursor: pointer;
   position: absolute;
@@ -511,7 +530,9 @@
   right: 0;
   top: 10px;
 }
-
+.invoker_item_delete_button:hover{
+  color: black;
+}
 
 
 .invoker_authentication_item_key{
@@ -567,6 +588,9 @@
   cursor: pointer;
   left: 230px;
 }
+.input_import_json_button:hover{
+  color: black;
+}
 
 .input_textarea_import_json{
   textarea{
@@ -597,7 +621,64 @@
 .invoker_operation_header_for_connection:hover{
   background: #fffdfd;
 }
-
+.invoker_operation_add_icon{
+  cursor: pointer;
+  position: absolute;
+}
+.invoker_operation_add_icon:hover{
+  color: black;
+}
+.invoker_operation_add_method_radio{
+  position: absolute;
+  padding: 2px 2px 0 0;
+  .radio_field{
+    font-family: $FONT_FAMILY;
+    text-align: left !important;
+    margin-bottom: 1px !important;
+    height: 13px !important;
+  }
+  .radio_radio{
+    font-family: $FONT_FAMILY;
+    width: 12px !important;
+    height: 12px !important;
+    border: 1px solid rgb(0, 0, 0);
+    background: white;
+  }
+  .radio_radio_from_connector{
+    @extend .radio_radio;
+    float: right;
+  }
+  .radio_radio_to_connector{
+    @extend .radio_radio;
+    float: left;
+  }
+  .radio_text{
+    font-family: $FONT_FAMILY;
+    line-height: 12px !important;
+  }
+  .radio_text_from_connector{
+    @extend .radio_text;
+    float: right;
+    padding: 0 0 0 10px !important;
+    margin: 0 2px 0 0 !important;
+  }
+  .radio_text_to_connector{
+    @extend .radio_text;
+    float: left;
+    padding: 0 10px 0 0 !important;
+    margin: 0 0 0 2px !important;
+  }
+}
+.invoker_operation_add_method_radio_from_connector{
+  @extend .invoker_operation_add_method_radio;
+  right: 0;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
+}
+.invoker_operation_add_method_radio_to_connector{
+  @extend .invoker_operation_add_method_radio;
+  left: 0;
+  background-image: linear-gradient(to left, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
+}
 .invoker_request_item_method{
   background: #eeeeee;
   padding: 5px 20px;
@@ -632,7 +713,6 @@
 
 .invoker_item_method_for_connection{
   font-size: $FONT_SIZE_TINY;
-  float: left;
   padding: 1px;
   width: 50px;
   text-align: center;
@@ -667,7 +747,7 @@
   font-family: $FONT_FAMILY;
 }
 .invoker_item_name_for_connection{
-  margin-left: 5px;
+  margin: 0 5px;
   font-family: $FONT_FAMILY;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -776,7 +856,7 @@
   position: fixed;
   top: 270px;
   cursor: pointer;
-  background: #e1e1e1;
+  background: #f7f7f7;
   padding: 2px 6px;
   border-radius: 3px;
   transform: perspective(1px) translateZ(0);
@@ -811,6 +891,9 @@
   transform-origin: center left;
   transform: rotate(90deg);
   left: 15px;
+  span{
+    transform: rotate(270deg);
+  }
 }
 
 .form_connector_invoker_button_to{
@@ -818,8 +901,8 @@
   transform-origin: center right;
   transform: rotate(270deg);
   right: 15px;
-  div{
-    transform: rotate(180deg);
+  span{
+    transform: rotate(90deg) scaleX(-1);
   }
 }
 
@@ -831,13 +914,16 @@
   @extend .form_connector_invoker_opened;
   transform: rotate(0deg);
   left: 0;
+  span{
+    transform: rotate(0deg);
+  }
 }
 .form_connector_invoker_opened_to{
   @extend .form_connector_invoker_opened;
   transform: rotate(360deg);
   right: 0;
-  div{
-    transform: rotate(0deg);
+  span{
+    transform: rotate(0deg) scaleX(-1);
   }
 }
 
@@ -845,5 +931,372 @@
   a{
     padding: 5px 10px;
     font-size: $FONT_SIZE_14;
+  }
+}
+.items_top_limit{
+  top: -25px;
+  position: absolute;
+  width: 310px;
+  background: white;
+  z-index: 100;
+  left: 0;
+}
+
+.items_bottom_limit{
+  position: absolute;
+  width: 310px;
+  background: white;
+  z-index: 100;
+  bottom: 90px;
+  left: 8px;
+}
+
+.items{
+  position: relative;
+  margin-top: 50px;
+}
+.items_arrows{
+  position: absolute;
+  left: -30px;
+  top: 50px;
+}
+.items_navigation_bar{
+  margin: 0 2px;
+  background: #eee;
+  height: 25px;
+  width: 20px;
+}
+.items_navigation_current{
+  width: 100%;
+  background: #3f51b5;
+}
+.item_arrow_disable{
+  cursor: default;
+  color: #eee;
+}
+.items_arrow_up{
+  display: block;
+  cursor: pointer;
+}
+.items_arrow_down{
+  cursor: pointer;
+}
+
+.history_label{
+  .icon{
+    transition: all 0.7s;
+    cursor: default;
+  }
+  position: absolute;
+  top: -50px;
+  .colon{
+    display: block;
+    float: right;
+    margin-right: 5px;
+  }
+}
+.operators_history{
+  position: absolute;
+  top: -55px;
+  padding: 3px;
+  margin: 2px 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  width: 79%;
+  right: 10%;
+  .history_element{
+    cursor: pointer;
+    display: inline-block;
+    height: 26px;
+    transition: all 0.3s ease 0s;
+    padding: 3px;
+    span{
+      font-size: 20px !important;
+    }
+  }
+  .history_element:hover{
+    box-shadow: rgb(159, 159, 159) 0 0 3px 0;
+  }
+  .history_color{
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+  }
+  .history_arrow{
+    margin: 0 2px;
+    display: inline-block;
+    font-size: 14px;
+  }
+}
+.operators_history::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.operators_history::-webkit-scrollbar-track {
+  background: #888;
+}
+.operators_history::-webkit-scrollbar-thumb {
+  background: #464646;
+}
+.operators_history::-webkit-scrollbar-thumb:hover {
+  background: #111;
+}
+
+
+.notification_select_label{
+  font-family: $FONT_FAMILY;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.notification_template_select_focused{
+  color: rgb(63, 81, 181) !important;
+}
+.notification_template_select_focused>div{
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgb(63, 81, 181);
+  box-shadow: none;
+  box-sizing: content-box;
+}
+
+.notification_template_select>div{
+  color: black;
+  font-family: $FONT_FAMILY;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2121211f;
+  box-sizing: content-box;
+}
+.notification_template_editor{
+  button {
+    padding: 3px 5px;
+    margin: 0;
+    line-height: 1;
+  }
+}
+.notification_template_editor_padding{
+  border-bottom-width: 0 !important;
+}
+.connection_request_icon_left{
+  position: absolute;
+  right: 3px;
+  top: 3px;
+}
+.connection_request_icon_right{
+  position: absolute;
+  left: 3px;
+  top: 3px;
+}
+.connection_request_tabs{
+  margin-top: 20px;
+}
+.connection_request_button_loading{
+  margin-top: 5px;
+  max-height: 10px;
+  min-height: 10px;
+  float: left;
+  margin-left: 40%;
+}
+.connection_request_tab_loading{
+  margin-top: 0;
+  max-height: 10px;
+  min-height: 10px;
+  float: left;
+  margin-left: 20px;
+}
+.connection_request_loading>div{
+  width: 12px;
+  height: 12px;
+}
+.url_field{
+  display: flex;
+  .method{
+    width: 20%;
+    color: black;
+  }
+  .url{
+    width: 65%;
+    .input{
+      padding: 0 5px;
+    }
+  }
+  .action{
+    width: 15%;
+    .send_button{
+      width: 100%;
+      padding: 8px 12px;
+    }
+  }
+}
+.operation_item_header_arrow{
+  position: absolute;
+  top: 100px;
+  left: -15px;
+}
+.operation_item_header_arrow_prev{
+  display: block;
+  cursor: pointer;
+}
+.operation_item_header_arrow_next{
+  cursor: pointer;
+}
+.operation_item_header_arrow_disable{
+  cursor: default;
+  color: #eee;
+}
+.operation_item_header_appear{
+  animation-name: $ANIMATION_FADE_IN_DOWN;
+  animation-duration: .3s;
+}
+.from_connector_button{
+  margin-bottom: 20px;
+}
+.to_connector_button{
+  float: right;
+  margin-bottom: 20px;
+}
+.check_connection{
+  table-layout: fixed;
+  .method_name{
+    cursor: default;
+    padding: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 100%;
+  }
+  .counter{
+    position: absolute;
+    right: 32px;
+    top: 2px;
+    font-size: 12px;
+    padding: 0 4px;
+    background: white;
+    .splitter{
+      padding: 0 2px;
+      font-size: 13px;
+      vertical-align: super;
+    }
+    .counter_value{
+      display: inline-block;
+      position: relative;
+      min-width: 20px;
+      text-align: center;
+      background: #eee;
+    }
+    .counter_arrows{
+      position: absolute;
+      cursor: pointer;
+      font-size: 20px;
+      right: 0;
+      left: 0;
+    }
+    .disabled_arrow{
+      cursor: default;
+      color: #eee;
+    }
+    .counter_up{
+      top: -15px;
+      @extend .counter_arrows;
+    }
+    .counter_down{
+      top: 14px;
+      @extend .counter_arrows;
+    }
+  }
+  .fields{
+    max-height: 105px;
+    overflow-y: auto;
+    padding: 15px 10px 0;
+    .field{
+      min-height: 35px;
+      line-height: 35px;
+      padding-right: 20px;
+      float: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      span{
+        padding: 5px;
+      }
+    }
+    .selected_field{
+      animation-name: $ANIMATION_EMPHASIZE;
+      animation-duration: 3.5s;
+      border-radius: 3px;
+    }
+    .value{
+      min-height: 35px;
+      line-height: 35px;
+      float: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dependencies{
+      float: left;
+      margin-top: -5px;
+      .dependency{
+        min-height: 35px;
+        max-width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding: 3px;
+        border-radius: 3px;
+        margin: 3px 3px;
+        display: inline-block;
+        cursor: default;
+        .dependency_value{
+          padding: 2px;
+          border-radius: 3px;
+        }
+        .dependency_value:hover{
+          box-shadow: #9f9f9f 0 1px 3px 0;
+          cursor: pointer;
+        }
+        .delimiter{
+          padding: 2px 0;
+        }
+      }
+    }
+  }
+  .expand{
+    padding: 2px 2px;
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .expand:hover{
+    padding: 2px 2px;
+    box-shadow: #9f9f9f 0 1px 3px 0;
+  }
+  .loop_navigation{
+    text-align: center;
+    position: absolute;
+    width: 45px;
+    max-height: 48px;
+    transition: all 0.3s;
+    .previous{
+      font-size: 18px;
+      cursor: pointer;
+      display: block;
+    }
+    .current_index{
+      font-size: 14px;
+      padding: 0 5px;
+      display: block;
+      color: #179221;
+    }
+    .next{
+      font-size: 18px;
+      cursor: pointer;
+      display: block;
+    }
+    .disabled{
+      cursor: default;
+      color: #eee;
+    }
   }
 }

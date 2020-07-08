@@ -18,10 +18,10 @@ import {withRouter} from 'react-router';
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 
-import ListItemLink from "../../general/basic_components/ListItemLink";
-import {addMenuUserGroupsKeyNavigation, removeMenuUserGroupsKeyNavigation} from "../../../utils/key_navigation";
-import {permission} from "../../../decorators/permission";
-import {UserGroupPermissions} from "../../../utils/constants/permissions";
+import ListItemLink from "@basic_components/ListItemLink";
+import {addMenuUserGroupsKeyNavigation, removeMenuUserGroupsKeyNavigation} from "@utils/key_navigation";
+import {permission} from "@decorators/permission";
+import {UserGroupPermissions} from "@utils/constants/permissions";
 
 
 function mapStateToProps(state){

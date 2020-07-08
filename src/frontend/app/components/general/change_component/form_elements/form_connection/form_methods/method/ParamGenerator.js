@@ -19,17 +19,17 @@ import Select from 'react-select';
 import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {dotColor} from "../utils";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import SelectSearch from "../../../../../basic_components/inputs/SelectSearch";
+import styles from '@themes/default/general/form_methods.scss';
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import SelectSearch from "@basic_components/inputs/SelectSearch";
 import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
-} from "../../../../../../../classes/components/content/invoker/response/CResponse";
-import Input from "../../../../../basic_components/inputs/Input";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import CStatement, {STATEMENT_RESPONSE} from "../../../../../../../classes/components/content/connection/operator/CStatement";
+} from "@classes/components/content/invoker/response/CResponse";
+import Input from "@basic_components/inputs/Input";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CStatement, {STATEMENT_RESPONSE} from "@classes/components/content/connection/operator/CStatement";
+import {dotColor} from "../help";
 
 
 
@@ -246,7 +246,7 @@ class ParamGenerator extends Component {
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method, isVisible} = this.props;
+        let {method, isVisible, submitEdit} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
         let divStyles = {float: 'left', width: isVisible ? '75%' : '130px'};
@@ -273,6 +273,8 @@ class ParamGenerator extends Component {
                         doAction={::this.onChangeField}
                         onInputChange={::this.onChangeField}
                         inputValue={field}
+                        submitEdit={submitEdit}
+                        autoFocus
                     />
                 </Input>
             </div>

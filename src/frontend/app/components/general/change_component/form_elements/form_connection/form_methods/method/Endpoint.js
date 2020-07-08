@@ -18,10 +18,10 @@ import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import ContentEditable from 'react-contenteditable';
 
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 import theme from "react-toolbox/lib/input/theme.css";
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
-import TooltipText from "../../../../../basic_components/tooltips/TooltipText";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+import TooltipText from "@basic_components/tooltips/TooltipText";
 import ParamGenerator from "./ParamGenerator";
 
 
@@ -73,16 +73,25 @@ class Endpoint extends Component{
         if(this.hasAdded){
             this.hasAdded = false;
             let el = document.getElementById(`endpoint_${method.index}`);
-            if(el.childNodes.length > 0) {
-                let lastNode = el.childNodes[el.childNodes.length - 1];
-                let range = document.createRange();
-                let sel = window.getSelection();
-                range.setStart(lastNode, 1);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-            el.focus();
+            this.setFocusToTheEnd(el);
+        }
+    }
+
+    setFocusToTheEnd(el) {
+        el.focus();
+        if (typeof window.getSelection != "undefined"
+            && typeof document.createRange != "undefined") {
+            let range = document.createRange();
+            range.selectNodeContents(el);
+            range.collapse(false);
+            let sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } else if (typeof document.body.createTextRange != "undefined") {
+            let textRange = document.body.createTextRange();
+            textRange.moveToElementText(el);
+            textRange.collapse(false);
+            textRange.select();
         }
     }
 

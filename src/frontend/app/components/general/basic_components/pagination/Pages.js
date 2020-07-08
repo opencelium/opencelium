@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import { withRouter } from 'react-router';
 import Pagination from 'react-bootstrap/Pagination';
 
-import styles from '../../../../themes/default/general/pagination.scss';
+import styles from '@themes/default/general/pagination.scss';
 
 
 /**
@@ -30,8 +30,12 @@ class Pages extends Component{
     }
 
     openPage(pageNumber){
-        const {router, link} = this.props;
-        router.push(`${link}${pageNumber}`);
+        const {router, link, loadPage, current} = this.props;
+        if(typeof loadPage !== 'function') {
+            router.push(`${link}${pageNumber}`);
+        } else{
+            loadPage(pageNumber);
+        }
     }
 
     renderPages(){
@@ -62,5 +66,9 @@ class Pages extends Component{
         );
     }
 }
+
+Pages.defaultProps = {
+    loadPage: null,
+};
 
 export default withRouter(Pages);

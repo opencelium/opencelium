@@ -1,17 +1,17 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ReactJson from 'react-json-view';
-import {isArray, isJsonString, isString, setFocusById, subArrayToString} from "../../../../../../../utils/app";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
+import {isArray, isJsonString, isString, setFocusById, subArrayToString} from "@utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ParamGenerator from "./ParamGenerator";
-import Input from "../../../../../basic_components/inputs/Input";
-import Dialog from "../../../../../basic_components/Dialog";
+import Input from "@basic_components/inputs/Input";
+import Dialog from "@basic_components/Dialog";
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
-import CConnectorItem, {CONNECTOR_FROM} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
+import styles from '@themes/default/general/form_methods.scss';
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+import CConnectorItem, {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
+import CConnection from "@classes/components/content/connection/CConnection";
 import Enhancement from "../mapping/enhancement/Enhancement";
 
 class Body extends Component{
@@ -23,7 +23,7 @@ class Body extends Component{
         this.state = {
             showImportJson: false,
             isBodyEditOpened: false,
-            importJsonBody: {},
+            importJsonBody: JSON.stringify(props.method.request.body),
             showEnhancement: false,
             currentEnhancement: null,
         };
@@ -127,6 +127,9 @@ class Body extends Component{
     renderEnhancement(){
         const {showEnhancement, currentEnhancement} = this.state;
         const {readOnly, connection, method} = this.props;
+        if(!(connection instanceof CConnection)){
+            return null;
+        }
         let bindingItem = connection.fieldBinding.find(item => item.to.findIndex(elem => elem.color === method.color) !== -1);
         if(!bindingItem){
             return null;
@@ -183,15 +186,15 @@ class Body extends Component{
     renderPlaceholder(){
         const {method} = this.props;
         let hasError = false;
-        if(method.error.hasError){
+        if(method.error && method.error.hasError){
             if(method.error.location === 'body'){
                 hasError = true;
             }
         }
         return(
             <React.Fragment>
-                <br/>
                 <span className={styles.method_body_placeholder}
+                      title={'more details'}
                       style={hasError ? {color: 'red'} : {}}
                       onClick={::this.openBodyEdit}>{`{ ... }`}</span>
             </React.Fragment>
@@ -211,12 +214,16 @@ class Body extends Component{
 
     render(){
         const {isBodyEditOpened} = this.state;
-        const {id, readOnly, method, connector, connection, updateBody, setCurrentItem} = this.props;
+        const {id, readOnly, method, connector, connection, updateBody, setCurrentItem, bodyStyles} = this.props;
         if(!isBodyEditOpened){
             return this.renderPlaceholder();
         }
+        let ownBodyStyles = {left: '-20px'};
+        if(bodyStyles){
+            ownBodyStyles = bodyStyles;
+        }
         return(
-            <div className={`${theme.input} ${styles.method_body}`}>
+            <div className={`${theme.input} ${styles.method_body}`} style={ownBodyStyles}>
                 {::this.renderCloseMenuEditButton()}
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <div style={{display: 'none'}} id={`${id}_reference_component`}/>
@@ -231,16 +238,21 @@ class Body extends Component{
                     onSelect={setCurrentItem}
                     style={{wordBreak: 'break-word', padding: '8px 0', width: '80%', display: 'inline-block', position: 'relative'}}
                     ReferenceComponent={{
-                        component: <ParamGenerator
-                            ref={this.paramGenerator}
-                            connection={connection}
-                            connector={connector}
-                            method={method}
-                            readOnly={readOnly}
-                            addParam={updateBody}
-                            isVisible={true}
-                            id={`${id}_reference_component`}
-                        />,
+                        getComponent: (params) => {
+                            const {submitEdit} = params;
+                            return (
+                                <ParamGenerator
+                                    ref={this.paramGenerator}
+                                    connection={connection}
+                                    connector={connector}
+                                    method={method}
+                                    readOnly={readOnly}
+                                    addParam={updateBody}
+                                    isVisible={true}
+                                    submitEdit={submitEdit}
+                                    id={`${id}_reference_component`}
+                                />
+                            );},
                         id: `${id}_reference_component`,
                         self: this.paramGenerator,
                     }}
@@ -268,15 +280,15 @@ class Body extends Component{
 Body.propTypes = {
     id: PropTypes.string.isRequired,
     readOnly: PropTypes.bool,
-    method: PropTypes.instanceOf(CMethodItem).isRequired,
-    connection: PropTypes.instanceOf(CConnection).isRequired,
-    connector: PropTypes.instanceOf(CConnectorItem).isRequired,
-    updateBody: PropTypes.func.isRequired,
-    setCurrentItem: PropTypes.func.isRequired,
+    connection: PropTypes.instanceOf(CConnection),
+    connector: PropTypes.instanceOf(CConnectorItem),
+    updateBody: PropTypes.func,
+    setCurrentItem: PropTypes.func,
 };
 
 Body.defaultProps = {
     readOnly: false,
+    bodyStyles: {},
 };
 
 export default Body;

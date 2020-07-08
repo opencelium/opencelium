@@ -18,8 +18,8 @@ import {Route, IndexRoute, DefaultRoute} from 'react-router';
 
 import isAuth from '../hocs/isAuth';
 import isNotAuth from '../hocs/isNotAuth';
-import Layout from '../components/layout/Layout';
-import PageNotFound from "../components/general/app/PageNotFound";
+import Layout from '@components/layout/Layout';
+import PageNotFound from "@components/general/app/PageNotFound";
 import LoadableRouteComponents from './LoadableRouteComponents';
 
 
@@ -83,6 +83,13 @@ export const createRoutes = (store) => {
                 <IndexRoute component={LoadableRouteComponents.TemplatesList}/>
                 <Route path='/templates/import' component={LoadableRouteComponents.TemplateImport}/>
                 <Route path='/templates/page/:pageNumber' component={LoadableRouteComponents.TemplatesList}/>
+            </Route>
+            <Route path='/notification_templates' component={isAuth(LoadableRouteComponents.NotificationTemplateLayout, store)}>
+                <IndexRoute component={LoadableRouteComponents.NotificationTemplatesList}/>
+                <Route path='/notification_templates/add' component={LoadableRouteComponents.NotificationTemplateAdd}/>
+                <Route path='/notification_templates/page/:pageNumber' component={LoadableRouteComponents.NotificationTemplatesList}/>
+                <Route path='/notification_templates/:id/view' component={LoadableRouteComponents.NotificationTemplateView}/>
+                <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfile, store)}/>
             <Route path='/login' component={isNotAuth(LoadableRouteComponents.Login, store)}/>

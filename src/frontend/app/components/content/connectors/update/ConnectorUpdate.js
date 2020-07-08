@@ -17,23 +17,23 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import Content from "../../../general/content/Content";
-import ChangeContent from "../../../general/change_component/ChangeContent";
+import ChangeContent from "@change_component/ChangeContent";
 
-import {fetchConnector} from '../../../../actions/connectors/fetch';
-import {updateConnector} from '../../../../actions/connectors/update';
-import {testConnector} from '../../../../actions/connectors/test';
-import {fetchInvokers} from '../../../../actions/invokers/fetch';
-import {ConnectorPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
+import {fetchConnector} from '@actions/connectors/fetch';
+import {updateConnector} from '@actions/connectors/update';
+import {testConnector} from '@actions/connectors/test';
+import {fetchInvokers} from '@actions/invokers/fetch';
+import {permission} from "@decorators/permission";
+import {SingleComponent} from "@decorators/SingleComponent";
 import { AuthenticationTypes, DefaultAuthenticationType } from '../AuthenticationTypes';
-import {INPUTS} from "../../../../utils/constants/inputs";
-import {capitalize, isString} from './../../../../utils/app';
-import {CONNECTOR_TOURS, USERGROUP_TOURS} from "../../../../utils/constants/tours";
-import OCTour from "../../../general/basic_components/OCTour";
-import {API_REQUEST_STATE} from "../../../../utils/constants/app";
-import {setFocusById} from "../../../../utils/app";
-import i18n from "../../../../utils/i18n";
+import OCTour from "@basic_components/OCTour";
+import {CONNECTOR_TOURS, USERGROUP_TOURS} from "@utils/constants/tours";
+import {INPUTS} from "@utils/constants/inputs";
+import {capitalize, isString} from '@utils/app';
+import {ConnectorPermissions} from "@utils/constants/permissions";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {setFocusById} from "@utils/app";
+import i18n from "@utils/i18n";
 
 const connectorPrefixURL = '/connectors';
 

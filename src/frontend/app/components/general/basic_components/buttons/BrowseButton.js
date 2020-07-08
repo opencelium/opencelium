@@ -15,7 +15,7 @@
 
 import React, {Component} from 'react';
 import { BrowseButton as ToolboxBrowseButton } from "react-toolbox/lib/button";
-import {formatHtmlId} from "../../../../utils/app";
+import {formatHtmlId} from "@utils/app";
 
 
 /**

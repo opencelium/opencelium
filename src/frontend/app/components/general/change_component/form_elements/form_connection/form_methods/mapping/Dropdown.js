@@ -18,24 +18,17 @@ import PropTypes from 'prop-types';
 
 import {Row, Col} from "react-grid-system";
 import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
-import {cloneObject} from "../../../../../../../utils/app";
 
-import changeStyles from '../../../../../../../themes/default/general/change_component.scss';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {isString} from "../../../../../../../utils/app";
-import {markFieldNameAsArray} from "../utils";
-import SelectSearch from "../../../../../basic_components/inputs/SelectSearch";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
+import changeStyles from '@themes/default/general/change_component.scss';
+import styles from '@themes/default/general/form_methods.scss';
+import SelectSearch from "@basic_components/inputs/SelectSearch";
+import CConnection from "@classes/components/content/connection/CConnection";
 import {
     CONNECTOR_FROM,
-    INSIDE_ITEM,
-    OUTSIDE_ITEM
-} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CBindingItem from "../../../../../../../classes/components/content/connection/field_binding/CBindingItem";
-import {STATEMENT_RESPONSE} from "../../../../../../../classes/components/content/connection/operator/CStatement";
-import {RESPONSE_SUCCESS, RESPONSE_FAIL} from "../../../../../../../classes/components/content/invoker/response/CResponse";
-
-const PARAM_DELIMITER = '.';
+} from "@classes/components/content/connection/CConnectorItem";
+import CBindingItem from "@classes/components/content/connection/field_binding/CBindingItem";
+import {STATEMENT_RESPONSE} from "@classes/components/content/connection/operator/CStatement";
+import {RESPONSE_SUCCESS, RESPONSE_FAIL} from "@classes/components/content/invoker/response/CResponse";
 
 
 /**

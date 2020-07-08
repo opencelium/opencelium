@@ -16,9 +16,12 @@
 
 package com.becon.opencelium.backend.resource.request;
 
+import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Resource
 public class SchedulerRequestResource extends ResourceSupport {
@@ -28,6 +31,8 @@ public class SchedulerRequestResource extends ResourceSupport {
     private String title;
     private boolean status;
     private String cronExp;
+
+    private List<NotificationResource> notificationResources = new ArrayList<>();
 
     public int getSchedulerId() {
         return schedulerId;
@@ -67,5 +72,13 @@ public class SchedulerRequestResource extends ResourceSupport {
 
     public void setCronExp(String cronExp) {
         this.cronExp = cronExp;
+    }
+
+    public List<NotificationResource> getNotificationResources() {
+        return notificationResources;
+    }
+
+    public void setNotificationResources(List<NotificationResource> notificationResources) {
+        this.notificationResources = notificationResources;
     }
 }

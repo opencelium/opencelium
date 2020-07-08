@@ -16,13 +16,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import styles from '../../../../themes/default/general/basic_components.scss';
-import {getThemeClass, isArray} from "../../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {getThemeClass, isArray} from "@utils/app";
 import TooltipFontIcon from "../tooltips/TooltipFontIcon";
 import {
     FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
     FIELD_TYPE_STRING
-} from "../../../../classes/components/content/connection/method/CMethodItem";
+} from "@classes/components/content/connection/method/CMethodItem";
 import Input from "./Input";
 
 const PARAM_DELIMITER = '.';
@@ -64,15 +64,23 @@ class SelectSearch extends Component{
     }
 
     /**
-     * to hadle press on Enter, Arrow Up and Arrow Down
+     * to handle press on Enter, Arrow Up and Arrow Down
      */
     onKeyDown(e){
+        const {submitEdit} = this.props;
         const {currentItem, currentItems} = this.state;
         switch(e.keyCode){
             case 13:
                 e.preventDefault();
-                if(currentItems.length > 0){
-                    this.onSelectItem(e, currentItems[currentItem].value);
+
+                if(!e.ctrlKey) {
+                    if (currentItems.length > 0) {
+                        this.onSelectItem(e, currentItems[currentItem].value);
+                    }
+                } else{
+                    if(typeof submitEdit === 'function') {
+                        submitEdit();
+                    }
                 }
                 break;
             case 38:
@@ -93,7 +101,6 @@ class SelectSearch extends Component{
                 e.preventDefault();
             }
         }
-
     }
 
     /**
@@ -211,7 +218,7 @@ class SelectSearch extends Component{
     }
 
     render(){
-        const {authUser, items, onInputChange, inputValue, doAction, icon, predicator, ...props} = this.props;
+        const {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, ...props} = this.props;
         let {theme, className, disabled, placeholder} = this.props;
         let classNames = [
             'input_input_element',

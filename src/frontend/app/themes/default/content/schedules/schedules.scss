@@ -15,11 +15,6 @@
 
 @import '../../constants';
 
-@keyframes AEmphasize {
-  0%   {background-color: unset;}
-  50%  {background-color: #7aced2;}
-  100% {background-color: unset;}
-}
 .last_success_cell{
   transition: all 1s;
 }
@@ -29,7 +24,7 @@
 }
 
 .emphasize_cell{
-  animation-name: AEmphasize;
+  animation-name: $ANIMATION_EMPHASIZE;
   animation-duration: 2s;
 }
 
@@ -59,6 +54,7 @@
 }
 
 .schedule_list_action{
+  position: relative;
   color: #2e75b6;
   cursor: pointer;
   transition: color;
@@ -307,6 +303,9 @@
   font-family: $FONT_FAMILY;
   cursor: pointer;
   color: #2e75b6;
+  :hover{
+    color: #3f51b5;
+  }
 }
 .webhook_loading{
   min-height: 0 !important;
@@ -366,4 +365,282 @@
   overflow: hidden;
   white-space: nowrap;
   max-width: 60px;
+}
+
+
+.notification_change_event_type{
+  .label{
+    border: none;
+    padding-bottom: 0;
+  }
+  .radio_group{
+    height: 25px;
+  }
+  .radio_button{
+    float: left;
+    margin-bottom: 10px !important;
+    margin-right: 20px;
+  }
+  .radio_text{
+    padding-left: 5px;
+  }
+}
+
+.notifications{
+  tr{
+    th{
+      text-align: center;
+    }
+    td{
+      padding: 0 !important;
+    }
+  }
+}
+.notification_add_button{
+  margin-top: 20px;
+}
+
+.notification_select_label{
+  font-family: $FONT_FAMILY;
+  padding: 0;
+  border: none !important;
+}
+
+.notification_select_focused{
+  color: rgb(63, 81, 181) !important;
+}
+.notification_select_focused>div{
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgb(63, 81, 181);
+  box-shadow: none;
+  box-sizing: content-box;
+}
+
+.notification_select>div{
+  color: black;
+  font-family: $FONT_FAMILY;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #2121211f;
+  box-sizing: content-box;
+}
+
+.notification_dialog_body{
+  overflow-x: auto;
+}
+.notification_recipients{
+  margin-top: 2px;
+  margin-bottom: 0;
+  min-height: 100px;
+}
+@keyframes ARecipientDisappear {
+  from {
+    opacity: 1.0;
+  }
+  to {
+    opacity: 0.0;
+  }
+}
+@keyframes ARecipientAppear {
+  from {
+    opacity: 0.0;
+  }
+  to {
+    opacity: 1.0;
+  }
+}
+.notification_recipient{
+  list-style-type: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  .icon{
+    cursor: pointer;
+    color: #2e75b6;
+  }
+  .icon:hover{
+    color: #3f51b5;
+  }
+  .title{
+    vertical-align: text-bottom;
+    color: black;
+  }
+}
+
+.recipient_appear{
+  animation-duration: 0.2s;
+  animation-fill-mode: forwards;
+  animation-name: ARecipientAppear;
+}
+.recipient_disappear{
+  animation-duration: 0.2s;
+  animation-fill-mode: forwards;
+  animation-name: ARecipientDisappear;
+}
+.recipients_before{
+  position: absolute;
+  top: 60px;
+  left: 170px;
+}
+.recipients_after{
+  position: absolute;
+  bottom: -10px;
+  left: 170px;
+}
+.notification_recipients_alert_message{
+  font-style: $FONT_FAMILY;
+  min-height: 100px;
+}
+.notifications_arrows{
+  position: absolute;
+  top: 100px;
+}
+.notifications_arrow_disable{
+  cursor: default;
+  color: #eee;
+}
+.notifications_arrow_prev{
+  display: block;
+  cursor: pointer;
+}
+.notifications_arrow_next{
+  cursor: pointer;
+}
+.notification_list{
+  cursor: default;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+  position: absolute;
+  min-width: 200px;
+  background: white;
+  right: 23px;
+  top: -10px;
+  border: 1px solid #eee;
+  max-height: 106px;
+  z-index: 1;
+  .empty_list{
+    color: black;
+    cursor: default;
+  }
+  .loading_add{
+    margin-top: -3px;
+    max-height: 10px;
+    min-height: 10px;
+    float: left;
+    margin-left: 3px;
+  }
+  .loading_add>div{
+    width: 12px;
+    height: 12px;
+  }
+
+  .search_input{
+    font-size: 12px;
+    padding: 0;
+  }
+  .search_input_element{
+    color: black;
+    padding: 2px 0;
+    font-size: 12px;
+  }
+  .search_input_label{
+    font-size: 12px;
+    top: 14px;
+  }
+  .search_input_label:focus{
+    top: 0 !important;
+  }
+  .search_input_element:placeholder-shown{
+    font-size: 12px;
+  }
+  .items{
+    margin-bottom: 2px;
+    border-bottom: 1px solid #eee;
+    overflow-y: auto;
+    max-height: 63px;
+    min-width: 200px;
+    max-width: 200px;
+  }
+  .item{
+    cursor: default;
+    font-family: $FONT_FAMILY;
+    color: black;
+    text-align: left;
+    padding: 1px 3px;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    float: left;
+  }
+  .action{
+    float: left;
+    position: relative;
+    color: #2e75b6;
+    cursor: pointer;
+    transition: color;
+    transition-duration: 0.3s;
+    height: 18px;
+    :hover{
+      color: #3f51b5;
+    }
+    span{
+      font-size: 18px !important;
+    }
+    .loading{
+      width: 18px;
+      height: 18px;
+      margin-top: 0;
+    }
+    .loading>div{
+      width: 12px;
+      height: 12px;
+    }
+  }
+  .add_icon{
+    float: left;
+    font-size: 18px;
+    margin-top: -2px;
+    cursor: pointer;
+    color: #2e75b6;
+  }
+  .add_icon:hover{
+    color: #3f51b5;
+  }
+  .close_icon{
+    float: right;
+    font-size: 18px;
+    margin-top: -2px;
+    cursor: pointer;
+    color: #2e75b6;
+  }
+  .close_icon:hover{
+    color: #3f51b5;
+  }
+}
+.notification_input_appear{
+  animation-name: $ANIMATION_FADE_IN_DOWN;
+  animation-duration: .3s;
+}
+.notification_input_loading{
+  width: 18px;
+  height: 18px;
+  margin-top: 0;
+  position: absolute;
+  left: -52px;
+  top: 25px;
+}
+.notification_input_loading>div{
+  width: 14px;
+  height: 14px;
+}
+.notifications_loading{
+  min-height: 0 !important;
+  display: inline-block;
+  margin-top: 0 !important;
+}
+.notifications_loading>div{
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
 }

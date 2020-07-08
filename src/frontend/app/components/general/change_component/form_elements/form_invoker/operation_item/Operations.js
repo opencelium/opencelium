@@ -15,12 +15,12 @@
 
 import React, {Component} from 'react';
 import OperationItem from "./OperationItem";
-import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
 
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import COperation, {METHOD_TYPE_TEST} from "../../../../../../classes/components/content/invoker/COperation";
+import styles from '@themes/default/general/change_component.scss';
+import COperation, {METHOD_TYPE_TEST} from "@classes/components/content/invoker/COperation";
 import AccordionItem from "./AccordionItem";
 
 

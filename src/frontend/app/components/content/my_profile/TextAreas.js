@@ -19,9 +19,9 @@ import {withTranslation} from 'react-i18next';
 import SubHeader from "../../general/view_component/SubHeader";
 import { Row, Col } from "react-grid-system";
 
-import styles from '../../../themes/default/content/my_profile/my_profile.scss';
+import styles from '@themes/default/content/my_profile/my_profile.scss';
 import {connect} from "react-redux";
-import {getThemeClass} from "../../../utils/app";
+import {getThemeClass} from "@utils/app";
 
 
 function mapStateToProps(state){

@@ -37,6 +37,7 @@ public class UserDetailResource extends ResourceSupport {
     private String profilePicture;
     private boolean appTour;
     private String theme;
+    private String lang;
     //TODO: need to make it long type. Should be in unix timestamp like 1232341312313
     private Date requestTime;
 
@@ -55,6 +56,7 @@ public class UserDetailResource extends ResourceSupport {
         this.userTitle = userDetail.getTitle();
         this.appTour = userDetail.getTutorial();
         this.theme = userDetail.getTheme();
+        this.lang = userDetail.getLang();
         if (userDetail.getProfilePicture() != null){
             this.profilePicture = imagePath + userDetail.getProfilePicture();
         }
@@ -133,6 +135,14 @@ public class UserDetailResource extends ResourceSupport {
 
     public void setTheme(String theme) {
         this.theme = theme;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 
     public Date getRequestTime() {

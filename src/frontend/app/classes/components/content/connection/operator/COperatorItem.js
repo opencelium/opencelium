@@ -25,11 +25,16 @@ export const LOOP_OPERATOR = 'loop';
  */
 export default class COperatorItem{
 
-    constructor(index = '', type = '', condition = null, error = null){
+    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false){
+        this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
         this._condition = CCondition.createCondition(condition);
         this._error = this.checkError(error);
+        this._isMinimized = isMinimized;
+        this._isToggled = isToggled;
+        this._intend = 0;
+        this._isDisabled = false;
     }
 
     static createOperatorItem(operatorItem){
@@ -37,7 +42,9 @@ export default class COperatorItem{
         let type = operatorItem && operatorItem.hasOwnProperty('type') ? operatorItem.type : '';
         let condition = operatorItem && operatorItem.hasOwnProperty('condition') ? operatorItem.condition : null;
         let error = operatorItem && operatorItem.hasOwnProperty('error') ? operatorItem.error : null;
-        return new COperatorItem(index, type, condition, error);
+        let isMinimized = operatorItem && operatorItem.hasOwnProperty('isMinimized') ? operatorItem.isMinimized : false;
+        let isToggled = operatorItem && operatorItem.hasOwnProperty('isToggled') ? operatorItem.isToggled : false;
+        return new COperatorItem(index, type, condition, error, isMinimized, isToggled);
     }
 
     deleteError(){
@@ -70,6 +77,10 @@ export default class COperatorItem{
             depth--;
         }
         return depth;
+    }
+
+    get uniqueIndex(){
+        return this._uniqueIndex;
     }
 
     get index(){
@@ -150,6 +161,38 @@ export default class COperatorItem{
 
     set error(error){
         this._error = this.checkError(error);
+    }
+
+    get isMinimized(){
+        return this._isMinimized;
+    }
+
+    set isMinimized(isMinimized){
+        this._isMinimized = isMinimized;
+    }
+
+    get isToggled(){
+        return this._isToggled;
+    }
+
+    set isToggled(isToggled){
+        this._isToggled = isToggled;
+    }
+
+    get intend(){
+        return this._intend;
+    }
+
+    set intend(intend){
+        this._intend = intend;
+    }
+
+    get isDisabled(){
+        return this._isDisabled;
+    }
+
+    set isDisabled(isDisabled){
+        this._isDisabled = isDisabled;
     }
 
     getObject(){

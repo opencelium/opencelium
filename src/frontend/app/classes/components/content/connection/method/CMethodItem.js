@@ -26,7 +26,8 @@ export const FIELD_TYPE_OBJECT = 'object';
  */
 export default class CMethodItem{
 
-    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null){
+    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null, isToggled = false){
+        this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._invoker = this.convertInvoker(invoker);
         this._name = name;
@@ -34,6 +35,9 @@ export default class CMethodItem{
         this._request = this.convertRequest(request);
         this._response = this.convertResponse(response);
         this._error = this.checkError(error);
+        this._isToggled = isToggled;
+        this._intend = 0;
+        this._isDisabled = false;
     }
 
     static createMethodItem(methodItem){
@@ -44,7 +48,8 @@ export default class CMethodItem{
         let response = methodItem ? methodItem.response : null;
         let invoker = methodItem && methodItem.hasOwnProperty('invoker') ? methodItem.invoker : null;
         let error = methodItem && methodItem.hasOwnProperty('error') ? methodItem.error : null;
-        return new CMethodItem(index, name, color, request, response, invoker, error);
+        let isToggled = methodItem && methodItem.hasOwnProperty('isToggled') ? methodItem.isToggled : false;
+        return new CMethodItem(index, name, color, request, response, invoker, error, isToggled);
     }
 
     deleteError(){
@@ -104,6 +109,10 @@ export default class CMethodItem{
 
     getValueForSelectInput(connector){
         return {label: this._name, value: `${connector.getPrefixForMethodOption()}${this._index}`, color: this._color};
+    }
+
+    get uniqueIndex(){
+        return this._uniqueIndex;
     }
 
     get index(){
@@ -177,6 +186,30 @@ export default class CMethodItem{
 
     set error(error){
         this._error = this.checkError(error);
+    }
+
+    get isToggled(){
+        return this._isToggled;
+    }
+
+    set isToggled(isToggled){
+        this._isToggled = isToggled;
+    }
+
+    get intend(){
+        return this._intend;
+    }
+
+    set intend(intend){
+        this._intend = intend;
+    }
+
+    get isDisabled(){
+        return this._isDisabled;
+    }
+
+    set isDisabled(isDisabled){
+        this._isDisabled = isDisabled;
     }
 
     getObject(){

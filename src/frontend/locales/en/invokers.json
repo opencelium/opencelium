@@ -21,7 +21,7 @@
       "PAGE_4": "Operations",
       "HINT_1": "Provide general information",
       "HINT_2": "Choose Authentication",
-      "HINT_3": "Provide connection items",
+      "HINT_3": "Provide operation to test connection",
       "HINT_4": "Provide request and response operations"
     },
     "VALIDATION_MESSAGES":{
@@ -51,7 +51,7 @@
       "PAGE_4": "Operations",
       "HINT_1": "Provide general information",
       "HINT_2": "Add properties for Authentication",
-      "HINT_3": "Provide connection items",
+      "HINT_3": "Provide operation to test connection",
       "HINT_4": "Provide request and response operations"
     },
     "LIST_BUTTON": "Invokers",

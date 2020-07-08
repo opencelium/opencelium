@@ -17,23 +17,23 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 import Select from 'react-select';
-import Input from '../../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
-import {dotColor} from "../utils";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import {DEFAULT_COLOR} from "../../../../../../../classes/components/content/connection/operator/CStatement";
-import TooltipFontIcon from "../../../../../basic_components/tooltips/TooltipFontIcon";
-import COperatorItem from "../../../../../../../classes/components/content/connection/operator/COperatorItem";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import {FUNCTIONAL_OPERATORS} from "../../../../../../../classes/components/content/connection/operator/CCondition";
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import SelectSearch from "../../../../../basic_components/inputs/SelectSearch";
+import styles from '@themes/default/general/form_methods.scss';
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import {DEFAULT_COLOR} from "@classes/components/content/connection/operator/CStatement";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import {FUNCTIONAL_OPERATORS} from "@classes/components/content/connection/operator/CCondition";
+import CConnection from "@classes/components/content/connection/CConnection";
+import SelectSearch from "@basic_components/inputs/SelectSearch";
 import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
-} from "../../../../../../../classes/components/content/invoker/response/CResponse";
+} from "@classes/components/content/invoker/response/CResponse";
+import {dotColor} from "../help";
 
 
 /**
@@ -265,25 +265,34 @@ class IfOperator extends Component{
         if(leftColor !== ''){
             return(
                 <div className={styles.if_placeholder} onClick={toggleIsVisibleMenuEdit}>
-                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor, maxWidth: hasValue ? '43%' : '80%'}} title={title}>{title}</div>
+                    <div className={styles.if_placeholder_title} style={{backgroundColor: leftColor}} title={title}>{title}</div>
                     {
                         relationalOperator !== ''
                         ?
-                            <div className={styles.if_placeholder_relational_operator} style={{maxWidth: hasValue ? '14%' : '20%'}} title={relationalOperator}>{this.getOperatorLabel()}</div>
+                            <div className={styles.if_placeholder_relational_operator} title={relationalOperator}>{this.getOperatorLabel()}</div>
                         :
                             null
                     }
                     {
                         isOperatorHasThreeParams
                             ?
-                            <div className={styles.if_placeholder_right_property} style={{maxWidth: '20%'}} title={rightProperty}>{rightProperty}</div>
+                                <React.Fragment>
+                                    <div className={styles.if_placeholder_right_property} style={{backgroundColor: leftColor}} title={rightProperty}>{rightProperty}</div>
+                                    {
+                                        hasValue && rightField
+                                        ?
+                                            <div className={styles.if_placeholder_right_property_in}>in</div>
+                                        :
+                                            null
+                                    }
+                                </React.Fragment>
                             :
                             null
                     }
                     {
-                        hasValue
+                        hasValue && rightField
                         ?
-                            <div className={styles.if_placeholder_right_field} style={{backgroundColor: rightColor, maxWidth: isOperatorHasThreeParams ? '23%' : '43%'}} title={rightField}>{rightField}</div>
+                            <div className={styles.if_placeholder_right_field} style={{backgroundColor: rightColor}} title={rightField}>{rightField}</div>
                         :
                             null
                     }
@@ -772,15 +781,15 @@ class IfOperator extends Component{
     }
 
     render(){
-        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton} = this.props;
+        const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton, intend} = this.props;
         let classNames = styles.operator_icon;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
-        let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : null;
+        let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : false;
         let operatorStyle = {
-            height: '50px',
-            marginLeft: `${operator.getDepth() * 20}px`,
+            height: '57.6px',
+            width: `calc(100% - ${intend})`,
             padding: '5px',
-            transition: 'all 0.3s ease 0s',
+            transition: 'width 0.5s ease 0s',
             boxShadow: 'rgb(159, 159, 159) 0px 0px 3px 0px',
         };
         if(isCurrentItem){
@@ -798,31 +807,33 @@ class IfOperator extends Component{
             menuEditStyles.left = '-17px';
         }
         return (
-            <div style={operatorStyle}>
-                <div style={{float: 'left', width: '10%', marginTop: '5px'}}>
-                    <TooltipFontIcon
-                        className={classNames}
-                        style={{transform: "rotate(180deg)"}}
-                        tooltip={tooltip}
-                        value={'call_split'}
-                        onClick={::this.setCurrentItem}
-                        tooltipPosition={'top'}
-                    />
+            <div style={{display: 'flex'}}>
+                <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
+                <div style={operatorStyle}>
+                    <div style={{float: 'left', width: '10%', marginTop: '10px'}}>
+                        <TooltipFontIcon
+                            className={classNames}
+                            style={{transform: "rotate(180deg)"}}
+                            tooltip={tooltip}
+                            value={'call_split'}
+                            onClick={::this.setCurrentItem}
+                            tooltipPosition={'top'}
+                        />
+                    </div>
+                    {
+                        isVisibleMenuEdit
+                        ?
+                            <div className={styles.menu_edit} style={menuEditStyles} onClick={::this.setCurrentItem}>
+                                {this.renderLeftStatement()}
+                                {this.renderOperatorInput()}
+                                {this.renderRightStatement()}
+                                {renderCloseMenuEditButton()}
+                            </div>
+                        :
+                            this.renderPlaceholder()
+                    }
                 </div>
-                {
-                    isVisibleMenuEdit
-                    ?
-                        <div className={styles.menu_edit} style={menuEditStyles} onClick={::this.setCurrentItem}>
-                            {this.renderLeftStatement()}
-                            {this.renderOperatorInput()}
-                            {this.renderRightStatement()}
-                            {renderCloseMenuEditButton()}
-                        </div>
-                    :
-                        this.renderPlaceholder()
-                }
             </div>
-
         );
     }
 }
@@ -832,6 +843,7 @@ IfOperator.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem).isRequired,
     operator: PropTypes.instanceOf(COperatorItem).isRequired,
     updateEntity: PropTypes.func.isRequired,
+    firstItemIndex: PropTypes.string,
 };
 
 export default IfOperator;

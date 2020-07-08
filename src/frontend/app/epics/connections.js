@@ -14,22 +14,23 @@
  */
 
 import Rx from 'rxjs/Rx';
-import {ConnectionsAction} from '../utils/actions';
+import {ConnectionsAction} from '@utils/actions';
 import {
     fetchConnection, fetchConnectionFulfilled, fetchConnectionRejected,
     fetchConnections, fetchConnectionsFulfilled, fetchConnectionsRejected,
     checkConnectionTitleFulfilled, checkConnectionTitleRejected,
     validateConnectionFormMethodsFulfilled, validateConnectionFormMethodsRejected,
-    checkNeo4j, checkNeo4jFulfilled, checkNeo4jRejected,
-} from '../actions/connections/fetch';
+    checkNeo4j, checkNeo4jFulfilled, checkNeo4jRejected, sendOperationRequestFulfilled, sendOperationRequestRejected,
+} from '@actions/connections/fetch';
 import {
     addConnectionFulfilled ,addConnectionRejected,
-} from '../actions/connections/add';
+} from '@actions/connections/add';
 import {updateConnectionFulfilled, updateConnectionRejected,
-} from '../actions/connections/update';
-import {deleteConnectionFulfilled, deleteConnectionRejected} from '../actions/connections/delete';
-import {doRequest} from "../utils/auth";
-import {APP_STATUS_DOWN, APP_STATUS_UP} from "../utils/constants/url";
+} from '@actions/connections/update';
+import {deleteConnectionFulfilled, deleteConnectionRejected} from '@actions/connections/delete';
+import {doRequest} from "@utils/auth";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
+import {checkConnectionFulfilled, checkConnectionRejected} from "@actions/connections/check";
 
 
 /**
@@ -208,6 +209,39 @@ const deleteConnectionEpic = (action$, store) => {
         });
 };
 
+/**
+ * send operation request
+ */
+const sendOperationRequestEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.SEND_OPERATIONREQUEST)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            const data = action.payload;
+            const url = `${urlPrefix}/remoteapi/test`;
+            return doRequest({url, method: 'post', data: {url: data.endpoint, header: data.header, method: data.method, body: data.body}},{
+                success: sendOperationRequestFulfilled,
+                reject: sendOperationRequestRejected,},
+            );
+        });
+};
+
+/**
+ * check one connection
+ */
+const checkConnectionEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.CHECK_CONNECTION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/check`;
+            let data = action.payload;
+            return Rx.Observable.of(checkConnectionFulfilled({}));
+            return doRequest({url, method: 'post', data},{
+                success: checkConnectionFulfilled,
+                reject: checkConnectionRejected,},
+            );
+        });
+};
+
 
 export {
     fetchConnectionEpic,
@@ -219,4 +253,6 @@ export {
     validateConnectionFormMethodsEpic,
     checkNeo4jEpic,
     checkNeo4jFulfilledEpic,
+    sendOperationRequestEpic,
+    checkConnectionEpic,
 };

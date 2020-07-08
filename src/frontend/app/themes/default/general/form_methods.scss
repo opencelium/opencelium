@@ -20,7 +20,6 @@
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_SMALL;
   margin-top: 15px;
-  width: auto !important;
   overflow: initial !important;
   .remove{
     color: #000000;
@@ -37,12 +36,36 @@
   box-shadow: 0 4px 2px rgba(0,0,0,0.12), 0 3px 10px rgba(0,0,0,0.24);
 }
 
+.method_placeholder{
+  min-height: 73.8px;
+  width: 100%;
+}
+
+.item_toggle_in{
+  animation-name: $ANIMATION_FADE_IN_DOWN;
+  animation-duration: .3s;
+  animation-fill-mode: forwards;
+}
+
+.item_toggle_out{
+  animation-name: $ANIMATION_FADE_OUT_UP;
+  animation-duration: .3s;
+  animation-fill-mode: forwards;
+}
+
+.item_fade{
+  animation-name: $ANIMATION_FADE;
+  animation-duration: .3s;
+  animation-fill-mode: forwards;
+}
+
 .item_delete_button{
-  cursor: pointer;
-  position: absolute;
-  float: right;
+  color: #000000;
+  font-size: $FONT_SIZE_MEDIUM;
   right: 0;
-  top: 17px;
+  position: absolute;
+  cursor: pointer;
+  top: -12px;
 }
 
 .item_title_arrow{
@@ -110,6 +133,7 @@
 }
 
 .operator{
+  text-align: center;
   margin-top: 15px;
   font-family: $FONT_FAMILY;
   position: relative;
@@ -121,6 +145,23 @@
     cursor: pointer;
     top: 2px;
   }
+}
+.toggle_panel{
+  text-align: center;
+  position: absolute;
+}
+.toggle_icon{
+  cursor: pointer;
+  width: 20px;
+  text-align: left;
+  position: absolute;
+  left: 0;
+  padding-top: 2px;
+}
+.more_icon{
+  cursor: pointer;
+  width: 20px;
+  text-align: left;
 }
 
 .method_item_menu{
@@ -383,7 +424,6 @@
   margin-top: 40px;
   font-size: 6px;
   margin-left: 5px;
-
 }
 
 .enhancement_dialog{
@@ -664,6 +704,7 @@
 }
 
 .body_label{
+  display: block;
   font-size: $FONT_SIZE_TINY;
   position: initial;
   font-family: $FONT_FAMILY;
@@ -700,8 +741,9 @@
 .if_placeholder{
   width: 85%;
   float: left;
-  padding: 6px 5px;
+  padding: 10px 5px;
   margin-left: 4px;
+  display: flex;
 }
 .if_placeholder:hover{
   box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
@@ -735,6 +777,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.if_placeholder_right_property_in{
+  cursor: pointer;
+  height: 26px;
+  padding: 7px 2px;
+  font-size: 12px;
+  min-width: 13px;
+}
 .if_placeholder_right_field{
   cursor: pointer;
   float: left;
@@ -764,7 +813,7 @@
 .loop_placeholder{
   width: 85%;
   float: left;
-  padding: 6px 5px;
+  padding: 10px 5px;
   margin-left: 4px;
 }
 .loop_placeholder_title{
@@ -815,7 +864,6 @@
   position: absolute;
   max-height: 500px;
   overflow: hidden auto;
-  left: -20px;
 }
 
 .method_body_placeholder{

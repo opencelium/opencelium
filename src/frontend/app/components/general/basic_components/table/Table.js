@@ -16,8 +16,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Table as ToolboxTable} from 'react-toolbox/lib/table';
-import styles from '../../../../themes/default/general/basic_components.scss';
-import {getThemeClass} from "../../../../utils/app";
+import styles from '@themes/default/general/basic_components.scss';
+import {getThemeClass} from "@utils/app";
 
 
 /**
@@ -44,10 +44,6 @@ class Table extends Component{
         );
     }
 }
-
-Table.propTypes = {
-    authUser: PropTypes.object.isRequired,
-};
 
 Table.defaultProps = {
     className: '',

@@ -19,8 +19,8 @@ import { Trans } from 'react-i18next';
 import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
     ConnectionsAction, SchedulesAction, TemplatesAction, WebHooksAction,
-    AppsAction, AdminCardsAction, InvokersAction,
-} from '../../actions';
+    AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
+} from '@utils/actions';
 
 
 /**
@@ -49,11 +49,13 @@ export const EntitiesWithNotification = [
     {name: ConnectorsAction.ADD_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectorsAction.FETCH_CONNECTORS, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.UPDATE_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
+    {name: ConnectorsAction.UPDATE_CONNECTORICON, types: ['REJECTED']},
     {name: ConnectorsAction.DELETE_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectionsAction.ADD_CONNECTION, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectionsAction.FETCH_CONNECTIONS, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectionsAction.UPDATE_CONNECTION, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectionsAction.DELETE_CONNECTION, types: ['FULFILLED', 'REJECTED', 'STORE']},
+    {name: ConnectionsAction.CHECK_CONNECTION, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectionsAction.CHECK_NEO4J, types: ['REJECTED']},
     {name: SchedulesAction.TRIGGER_SCHEDULE, types: ['FULFILLED', 'REJECTED']},
     {name: SchedulesAction.TRIGGER_SCHEDULESUCCESS, types: ['FULFILLED']},
@@ -77,6 +79,10 @@ export const EntitiesWithNotification = [
     {name: AdminCardsAction.LOAD_ADMINCARD, types: ['REJECTED']},
     {name: InvokersAction.ADD_INVOKER, types: ['FULFILLED', 'REJECTED']},
     {name: InvokersAction.DELETE_INVOKER, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATES, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.ADD_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**

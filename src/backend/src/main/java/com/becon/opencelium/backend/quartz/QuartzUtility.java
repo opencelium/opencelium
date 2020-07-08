@@ -17,12 +17,14 @@
 package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -132,6 +134,7 @@ public class QuartzUtility {
             jobDataMap.put("connectionId", connectionId);
             jobDataMap.put("schedulerId", scheduler.getId());
             jobDataMap.put("executionType", "scheduler");
+            jobDataMap.put("type", "prod");
             jobDetail = org.quartz.JobBuilder.newJob(JobExecutor.class)
                     .withIdentity(name, "connection")
                     .withDescription("runJob")
@@ -157,6 +160,30 @@ public class QuartzUtility {
         // Define a Trigger that will fire "now" and associate it with the existing job
         Trigger trigger = TriggerBuilder.newTrigger()
                 .withIdentity(Integer.toString(schedulerId) + "-now", Long.toString(connectionId))
+                .forJob(jobDetail)
+                .startNow()
+                .build();
+
+        // Schedule the trigger
+        quartzScheduler.scheduleJob(trigger);
+    }
+
+    public void runJob(ConnectionNode connectionNode) throws Exception{
+        String uuid = UUID.randomUUID().toString();
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("connectionNode", connectionNode);
+        jobDataMap.put("type", "test");
+
+        JobDetail jobDetail = org.quartz.JobBuilder.newJob(JobExecutor.class)
+                .withIdentity(uuid, "connectionTest")
+                .withDescription("testConnectionJob")
+                .usingJobData(jobDataMap)
+                .storeDurably()
+                .build();
+
+        // Define a Trigger that will fire "now" and associate it with the existing job
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity("test", uuid)
                 .forJob(jobDetail)
                 .startNow()
                 .build();
@@ -191,6 +218,10 @@ public class QuartzUtility {
         return jobDataMaps.stream()
                 .collect(Collectors.toMap(c -> c.getIntValue("schedulerId"),
                         c -> c.getLongValue("connectionId")));
+    }
+
+    public boolean validateCronExpression(String cronExpression){
+        return CronExpression.isValidExpression(cronExpression);
     }
 
 

@@ -16,11 +16,11 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchConnector} from '../../../../actions/connectors/fetch';
+import {fetchConnector} from '@actions/connectors/fetch';
 import Content from "../../../general/content/Content";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {permission} from "../../../../decorators/permission";
-import {ConnectorPermissions} from "../../../../utils/constants/permissions";
+import {SingleComponent} from "@decorators/SingleComponent";
+import {permission} from "@decorators/permission";
+import {ConnectorPermissions} from "@utils/constants/permissions";
 import General from "./General";
 import Invoker from "./Invoker";
 import Operations from "./Operations";

@@ -18,13 +18,13 @@ import {withRouter} from 'react-router';
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import ListItemLink from "@basic_components/ListItemLink";
 import {
 addMenuMyProfileKeyNavigation, removeMenuMyProfileKeyNavigation,
-} from "../../../utils/key_navigation";
-import {permission} from "../../../decorators/permission";
-import {MyProfilePermissions} from "../../../utils/constants/permissions";
-import styles from '../../../themes/default/layout/header.scss';
+} from "@utils/key_navigation";
+import {permission} from "@decorators/permission";
+import {MyProfilePermissions} from "@utils/constants/permissions";
+import styles from '@themes/default/layout/header.scss';
 
 
 function mapStateToProps(state){

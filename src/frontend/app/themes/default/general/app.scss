@@ -205,6 +205,8 @@
   margin-top: 10%;
 }
 .support_action{
-  cursor: pointer;
   text-decoration: underline;
+  span{
+    cursor: pointer;
+  }
 }

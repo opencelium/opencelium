@@ -16,15 +16,15 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {history} from '../../../components/App';
+import {history} from '@components/App';
 
-import ListItemLink from "../../general/basic_components/ListItemLink";
+import ListItemLink from "@basic_components/ListItemLink";
 import Confirmation from "../../general/app/Confirmation";
-import {logoutUserFulfilled} from '../../../actions/auth';
+import {logoutUserFulfilled} from '@actions/auth';
 import {
     addLogoutKeyNavigation, removeLogoutKeyNavigation,
-} from '../../../utils/key_navigation';
-import styles from '../../../themes/default/layout/header.scss';
+} from '@utils/key_navigation';
+import styles from '@themes/default/layout/header.scss';
 
 
 function mapStateToProps(state){

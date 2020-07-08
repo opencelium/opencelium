@@ -60,7 +60,7 @@
                     <body>
                         <field name="error" type="object">
                             <field name="code" type="string">-32500</field>
-                            <field name="message" type="string">Application error.</field>
+                            <field name="eventMessage" type="string">Application error.</field>
                             <field name="data" type="string">Login name or password is incorrect.</field>
                         </field>
                     </body>

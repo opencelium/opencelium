@@ -499,6 +499,63 @@ export const LIST_TOURS = {
     ]
 };
 
+export const NOTIFICATION_TEMPLATE_ADD_TOURS = {
+    page_1: [
+        {
+            selector: '.page-1-first-tour-step',
+            content:
+                <SwitchOffTour>
+                    Give a name to the template
+                </SwitchOffTour>,
+        },
+        {
+            selector: '.page-1-second-tour-step',
+            content: 'Here you choose a template type',
+        },
+    ],
+    page_2: [
+        {
+            selector: '.page-2-first-tour-step',
+            content:
+                <SwitchOffTour>
+                    Give a subject to the template
+                </SwitchOffTour>,
+        },
+        {
+            selector: '.page-2-second-tour-step',
+            content: 'Provide body for your template',
+        },
+    ],
+};
+
+export const NOTIFICATION_TEMPLATE_UPDATE_TOURS = {
+    page_1: [
+        {
+            selector: '.page-1-first-tour-step',
+            content:
+                <SwitchOffTour>
+                    Give a name to the template
+                </SwitchOffTour>,
+        },
+        {
+            selector: '.page-1-second-tour-step',
+            content: 'Here you choose a template type',
+        },
+    ],
+    page_2: [
+        {
+            selector: '.page-2-first-tour-step',
+            content:
+                <SwitchOffTour>
+                    Give a subject to the template
+                </SwitchOffTour>,
+        },
+        {
+            selector: '.page-2-second-tour-step',
+            content: 'Provide body for your template',
+        },
+    ],
+};
 
 export function automaticallyShowTour(authUser){
     if(authUser && authUser.hasOwnProperty('userDetail') && authUser.userDetail && authUser.userDetail.hasOwnProperty('appTour')){

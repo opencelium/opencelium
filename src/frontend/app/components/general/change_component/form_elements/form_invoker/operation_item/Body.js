@@ -16,14 +16,14 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ReactJson from 'react-json-view';
-import Input from '../../../../basic_components/inputs/Input';
+import Input from '@basic_components/inputs/Input';
 
 import theme from "react-toolbox/lib/input/theme.css";
-import styles from '../../../../../../themes/default/general/change_component.scss';
-import {isString, isJsonString, setFocusById} from "../../../../../../utils/app";
-import TooltipFontIcon from "../../../../basic_components/tooltips/TooltipFontIcon";
-import FontIcon from "../../../../basic_components/FontIcon";
-import Dialog from "../../../../basic_components/Dialog";
+import styles from '@themes/default/general/change_component.scss';
+import {isString, isJsonString, setFocusById} from "@utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
+import Dialog from "@basic_components/Dialog";
 
 /**
  * Component for Body in Invoker.RequestItem
@@ -35,7 +35,7 @@ class Body extends Component{
 
         this.state = {
             showImportJson: false,
-            importJson: '',
+            importJson: JSON.stringify(props.entity.body),
             focused: false,
         };
     }
@@ -121,13 +121,20 @@ class Body extends Component{
 
     render(){
         const {icon, readOnly} = this.props.data;
-        let {tourStep, entity, forConnection} = this.props;
+        let {tourStep, entity, forConnection, hasHeightLimits} = this.props;
         let value = entity.body;
         if(value === ''){
             value = {};
         }
+        const noIcon = icon === '';
+        let reactJsonStyle = {padding: '10px 0 0 0', width: '80%', display: 'inline-block'};
+        if(hasHeightLimits){
+            reactJsonStyle.maxHeight = '200px';
+            reactJsonStyle.overflowY = 'auto';
+            reactJsonStyle.width = '100%';
+        }
         return (
-            <div className={`${forConnection ? '' : theme.withIcon} ${theme.input}`}>
+            <div className={`${forConnection || noIcon ? '' : theme.withIcon} ${theme.input}`} style={{paddingBottom: 0}}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <ReactJson
                     name={'body'}
@@ -137,7 +144,7 @@ class Body extends Component{
                     onEdit={readOnly ? false : ::this.handleInput}
                     onDelete={readOnly ? false : ::this.handleInput}
                     onAdd={readOnly ? false : ::this.handleInput}
-                    style={{padding: '10px 0 0 0', width: '80%', display: 'inline-block'}}
+                    style={reactJsonStyle}
                 />
                 {!readOnly
                     ?
@@ -152,7 +159,7 @@ class Body extends Component{
                 }
                 {!readOnly ? this.renderDialogImportJson() : null}
 
-                <FontIcon value={icon} className={theme.icon}/>
+                {!noIcon ? <FontIcon value={icon} className={theme.icon}/> : null}
                 <span className={theme.bar}/>
                 {this.renderLabel()}
             </div>
@@ -163,6 +170,11 @@ class Body extends Component{
 Body.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
+    updateEntity: PropTypes.func,
+};
+
+Body.defaultProps = {
+    hasHeightLimits: false,
 };
 
 

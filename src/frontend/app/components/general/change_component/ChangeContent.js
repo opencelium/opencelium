@@ -19,7 +19,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import Form from "./Form";
 import Hint from "./Hint";
 import Navigation from "./Navigation";
-import {isNumber, setFocusById} from "../../../utils/app";
+import {isNumber, setFocusById} from "@utils/app";
 import ValidationMessage from "./ValidationMessage";
 import {
     addChangeContentActionNavigation, addFocusDocumentNavigation,
@@ -27,10 +27,10 @@ import {
     addPrevPageChangeEntityKeyNavigation, removeChangeContentActionNavigation, removeFocusDocumentNavigation,
     removeNextPageChangeEntityKeyNavigation,
     removePrevPageChangeEntityKeyNavigation
-} from "../../../utils/key_navigation";
+} from "@utils/key_navigation";
 
-import {isEmptyObject} from '../../../utils/app';
-import {API_REQUEST_STATE} from "../../../utils/constants/app";
+import {isEmptyObject} from '@utils/app';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 /**
@@ -58,7 +58,6 @@ class ChangeContent extends Component{
                 }
             }
         }
-        this.doExit = false;
         this.state = {
             entity,
             page: 0,
@@ -298,9 +297,33 @@ class ChangeContent extends Component{
     doAction(){
         window.scrollTo(0,document.body.scrollHeight);
         if(this.checkFields()) {
-            const {action} = this.props;
-            action(this.state.entity);
+            if(!::this.test()) {
+                const {action} = this.props;
+                action(this.state.entity);
+            }
         }
+    }
+
+    getTestData(){
+        const {page} = this.state;
+        const {contents} = this.props;
+        return contents[page].hasOwnProperty('test') ? contents[page].test : {
+            isTested: 1,
+            callback: null
+        };
+    }
+
+    /**
+     * to test Connector
+     */
+    test(){
+        const {entity} = this.state;
+        const testData = this.getTestData();
+        if(testData.isTested === -1 || testData.isTested === 0) {
+            testData.callback(entity);
+            return true;
+        }
+        return false;
     }
 
     renderValidationMessage(){
@@ -318,12 +341,15 @@ class ChangeContent extends Component{
     render(){
         const {breadcrumbsItems, contents, translations, type, isActionInProcess, noBreadcrumbs, noHint, noNavigation, authUser} = this.props;
         const {page, focusedInput, contentsLength} = this.state;
+        const inputs = contents[page].inputs;
+        const {extraAction} = contents[page];
         let navigationPage = {
             page,
             lastPage: contentsLength - 1,
             prevPage: ::this.prevPage,
             nextPage: ::this.nextPage,
         };
+        const test = ::this.getTestData();
         return (
             <div>
                 <Breadcrumbs items={breadcrumbsItems} page={page} exactPage={::this.exactPage} authUser={authUser}/>
@@ -336,7 +362,7 @@ class ChangeContent extends Component{
                 }
                 <Form
                     clearValidationMessage={::this.clearValidationMessage}
-                    inputs={contents[page].inputs}
+                    inputs={inputs}
                     entity={this.state.entity}
                     updateEntity={::this.updateEntity}
                     focusedInput={focusedInput.name}
@@ -355,13 +381,11 @@ class ChangeContent extends Component{
                             translations={translations}
                             type={type}
                             isActionInProcess={isActionInProcess}
-                            test={contents[page].hasOwnProperty('test') ? contents[page].test : {
-                                isTested: 1,
-                                callback: null
-                            }}
+                            isTested={test.isTested}
                             entity={this.state.entity}
                             authUser={authUser}
                             makingRequest={this.state.makingRequest}
+                            extraAction={extraAction}
                         />
                 }
             </div>
@@ -393,6 +417,7 @@ ChangeContent.defaultProps = {
     noNavigation: false,
     noHint: false,
     noBreadcrumbs: false,
+    extraAction: '',
 };
 
 export default ChangeContent;

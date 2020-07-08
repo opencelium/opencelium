@@ -15,15 +15,16 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styles from '../../../../../../../themes/default/general/form_methods.scss';
+import styles from '@themes/default/general/form_methods.scss';
 
 import chroma from 'chroma-js';
-import CConnection from "../../../../../../../classes/components/content/connection/CConnection";
-import CConnectorItem from "../../../../../../../classes/components/content/connection/CConnectorItem";
-import CMethodItem from "../../../../../../../classes/components/content/connection/method/CMethodItem";
+import CConnection from "@classes/components/content/connection/CConnection";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 import MethodRequest from "./MethodRequest";
 import MethodTitle from "./MethodTitle";
-import Card from "../../../../../basic_components/card/Card";
+import Card from "@basic_components/card/Card";
+import {consoleLog} from "@utils/app";
 
 
 /**
@@ -41,16 +42,55 @@ class MethodItem extends Component{
             showConfirm: false,
             onDeleteButtonOver: false,
             showParams: false,
+            methodClassName: '',
+            isHidden: false,
+            deletingMethod: false,
         };
     }
 
-    componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps, prevState){
+        let {showParams, isHidden, deletingMethod} = this.state;
+        let methodClassName = '';
         const curMethod = this.props.method;
-        if(curMethod.error.hasError && !this.state.showParams){
+        const prevMethod = prevProps.method;
+        if(deletingMethod){
+            methodClassName = styles.item_toggle_out;
+            deletingMethod = false;
             this.setState({
-                showParams: true,
+                methodClassName,
+                deletingMethod,
             });
+            return;
         }
+        if(curMethod.error.hasError && !this.state.showParams){
+            showParams = true;
+        }
+        if(curMethod.isToggled){
+            methodClassName = styles.item_toggle_out;
+            isHidden = true;
+        } else{
+            methodClassName = styles.item_toggle_in;
+            isHidden = false;
+        }
+        if(showParams !== prevState.showParams) {
+                this.setState({
+                    showParams,
+                });
+        }
+        if(isHidden !== prevState.isHidden){
+            let that = this;
+            if(methodClassName === styles.item_toggle_out){
+                setTimeout(() => that.setState({
+                    isHidden,
+                }), 300);
+            }
+        }
+    }
+
+    toggleDeleteMethod(){
+        this.setState({
+            deletingMethod: !this.state.deletingMethod,
+        });
     }
 
     updateEntity(){
@@ -69,55 +109,63 @@ class MethodItem extends Component{
     }
 
     render(){
-        const {connection, connector, method, readOnly} = this.props;
+        const {methodClassName, isHidden} = this.state;
+        if(isHidden){
+            return null;
+        }
+        const {connection, connector, method, readOnly, index, firstItemIndex} = this.props;
         const {showParams} = this.state;
-        let methodStyles = {position: 'relative', transition: 'all 0.3s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
+        let methodStyles = {position: 'relative', transition: 'width 0.5s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
         let methodTitleStyles = {backgroundColor: method.color};
         let isCurrentItem = connector.getCurrentItem().index === method.index;
         if(isCurrentItem){
             methodTitleStyles.borderBottomStyle = 'none';
             methodStyles.boxShadow = `0 0 0 0 rgba(0, 0, 0, .14), 0px 1px 7px 1px  ${chroma(`${method.color}c2`).darken(3)}, 0 1px 1px 0 rgba(0, 0, 0, .22)`;
-            methodStyles.borderRadius = '3px';
+            methodStyles.borderBottomLeftRadius = '3px';
+            methodStyles.borderBottomRightRadius = '3px';
+            methodStyles.borderTopLeftRadius = '3px';
+            methodStyles.borderTopRightRadius = '3px';
         }
         if(method.error.hasError){
             methodStyles.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
-            methodStyles.border = 'border: 1px solid #d14b4b';
+            methodStyles.border = '1px solid #d14b4b';
         }
-        let indexSplitter = method.index.split('_');
-        let marginLeftTimes = indexSplitter.length;
-        if(marginLeftTimes > 1) {
-            methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
-        }
+        const intend = method.intend * 20 + 'px';
+        methodStyles.width = `calc(100% - ${intend})`;
         return (
-            <div id={`${method.index}__${connector.getConnectorType()}`}>
-                <Card
-                    theme={{card: styles.item}}
-                    style={methodStyles}
-                >
-                    <MethodTitle
-                        connection={connection}
-                        connector={connector}
-                        method={method}
-                        updateEntity={::this.updateEntity}
-                        toggleShowParams={::this.toggleShowParams}
-                        showParams={showParams}
-                        readOnly={readOnly}
-                    />
-                    {
-                        showParams
-                        ?
-                            <MethodRequest
-                                id={`params_${connector.getConnectorType()}_${method.index}`}
-                                readOnly={readOnly}
-                                connection={connection}
-                                connector={connector}
-                                method={method}
-                                updateEntity={::this.updateEntity}
-                            />
-                        :
-                            null
-                    }
-                </Card>
+            <div id={`${method.index}__${connector.getConnectorType()}`} className={methodClassName} style={{zIndex: 99 - index, position: 'relative'}}>
+                <div style={{display: 'flex'}}>
+                    <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
+                    <Card
+                        theme={{card: styles.item}}
+                        style={methodStyles}
+                    >
+                        <MethodTitle
+                            connection={connection}
+                            connector={connector}
+                            method={method}
+                            updateEntity={::this.updateEntity}
+                            toggleShowParams={::this.toggleShowParams}
+                            showParams={showParams}
+                            readOnly={readOnly}
+                            toggleDeleteMethod={::this.toggleDeleteMethod}
+                        />
+                        {
+                            showParams
+                            ?
+                                <MethodRequest
+                                    id={`params_${connector.getConnectorType()}_${method.index}`}
+                                    readOnly={readOnly}
+                                    connection={connection}
+                                    connector={connector}
+                                    method={method}
+                                    updateEntity={::this.updateEntity}
+                                />
+                            :
+                                null
+                        }
+                    </Card>
+                </div>
             </div>
         );
     }
@@ -128,6 +176,11 @@ MethodItem.propTypes = {
     connector: PropTypes.instanceOf(CConnectorItem),
     method: PropTypes.instanceOf(CMethodItem),
     updateEntity: PropTypes.func.isRequired,
+    firstItemIndex: PropTypes.string,
+};
+
+MethodItem.defaultProps = {
+    firstItemIndex: '0',
 };
 
 

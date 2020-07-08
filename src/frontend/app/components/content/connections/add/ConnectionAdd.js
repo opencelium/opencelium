@@ -19,20 +19,20 @@ import {withTranslation} from 'react-i18next';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import Content from "../../../general/content/Content";
 
-import {checkConnectionTitle} from '../../../../actions/connections/fetch';
-import {addConnection} from '../../../../actions/connections/add';
-import {addTemplate} from "../../../../actions/templates/add";
-import {fetchConnectors} from '../../../../actions/connectors/fetch';
-import {ConnectionPermissions} from "../../../../utils/constants/permissions";
-import {permission} from "../../../../decorators/permission";
-import {setFocusById} from "../../../../utils/app";
-import {INPUTS} from "../../../../utils/constants/inputs";
-import OCTour from "../../../general/basic_components/OCTour";
-import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "../../../../utils/constants/tours";
-import CConnection from "../../../../classes/components/content/connection/CConnection";
-import ChangeContent from "../../../general/change_component/ChangeContent";
-import {SingleComponent} from "../../../../decorators/SingleComponent";
-import {TEMPLATE_MODE} from "../../../../classes/components/content/connection/CTemplate";
+import {checkConnectionTitle} from '@actions/connections/fetch';
+import {addConnection} from '@actions/connections/add';
+import {addTemplate} from "@actions/templates/add";
+import {fetchConnectors} from '@actions/connectors/fetch';
+import {ConnectionPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {setFocusById} from "@utils/app";
+import {INPUTS} from "@utils/constants/inputs";
+import OCTour from "@basic_components/OCTour";
+import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "@utils/constants/tours";
+import CConnection, {ALL_COLORS} from "@classes/components/content/connection/CConnection";
+import ChangeContent from "@change_component/ChangeContent";
+import {SingleComponent} from "@decorators/SingleComponent";
+import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
 
 
 const connectionPrefixURL = '/connections';
@@ -255,7 +255,7 @@ class ConnectionAdd extends Component{
                     required: true,
                     source: connectorMenuItems,
                     callback: ::this.setMethods,
-                    connectors: connectors,
+                    connectors,
                     check: (e, entity) => ::this.validateConnectors(e, entity),
                 },
             ],
@@ -267,6 +267,7 @@ class ConnectionAdd extends Component{
                     label: t('ADD.FORM.CONNECTORS'),
                     placeholders: [t('ADD.FORM.CHOSEN_CONNECTOR_FROM'), t('ADD.FORM.CHOSEN_CONNECTOR_TO')],
                     source: connectorMenuItems,
+                    connectors,
                     readOnly: true,
                 },{
                     ...INPUTS.MODE,
@@ -289,6 +290,7 @@ class ConnectionAdd extends Component{
                     placeholders: [t('ADD.FORM.CHOSEN_CONNECTOR_FROM'), t('ADD.FORM.CHOSEN_CONNECTOR_TO')],
                     source: connectorMenuItems,
                     readOnly: true,
+                    hasAddMethod: true,
                 },
                 {
                     ...INPUTS.METHODS,
@@ -301,6 +303,7 @@ class ConnectionAdd extends Component{
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
+            //extraAction: 'CHECK_CONNECTION',
         },
         ];
         return (

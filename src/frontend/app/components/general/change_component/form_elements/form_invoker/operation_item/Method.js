@@ -14,11 +14,11 @@
  */
 
 import React, {Component} from 'react';
-import styles from '../../../../../../themes/default/general/change_component.scss';
+import styles from '@themes/default/general/change_component.scss';
 import theme from "react-toolbox/lib/input/theme.css";
-import FontIcon from "../../../../basic_components/FontIcon";
-import {onEnter} from "../../../../../../utils/app";
-import {METHOD_TYPES} from "../../../../../../classes/components/content/invoker/request/CRequest";
+import FontIcon from "@basic_components/FontIcon";
+import {onEnter} from "@utils/app";
+import {METHOD_TYPES} from "@classes/components/content/invoker/request/CRequest";
 
 
 

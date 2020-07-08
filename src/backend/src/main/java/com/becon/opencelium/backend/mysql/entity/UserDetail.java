@@ -65,6 +65,9 @@ public class UserDetail {
     @Column(name = "theme")
     private String theme;
 
+    @Column(name = "lang")
+    private String lang;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", updatable = false)
@@ -88,6 +91,7 @@ public class UserDetail {
         this.profilePicture = StringUtility.findImageFromUrl(userDetailResource.getProfilePicture());
         this.tutorial = userDetailResource.isAppTour();
         this.theme = userDetailResource.getTheme();
+        this.lang = userDetailResource.getLang();
     }
 
 
@@ -177,6 +181,14 @@ public class UserDetail {
 
     public void setTheme(String theme) {
         this.theme = theme;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 
     public Date getCreatedAt() {
