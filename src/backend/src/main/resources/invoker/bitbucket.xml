@@ -1,0 +1,123 @@
+<invoker type="RESTful">
+    <name>bitbucket</name>
+    <description>bitbucket description</description>
+    <hint>This interface provides the basic_auth. Check out the documentation https://developer.atlassian.com/bitbucket/api/2/reference/</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="private">https://api.bitbucket.org/2.0</item>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="user" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/user</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body/>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="workspaces" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/workspaces</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="values" type="array">
+                           <field name="uuid" type="string"/>
+                           <field name="name" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>        
+        <operation name="repositories" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/repositories</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="values" type="array">
+                           <field name="full_name" type="string"/>
+                           <field name="name" type="string"/>
+                           <field name="slug" type="string"/>                                
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="commits" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/repositories/{workspace}/{repo_slug}/commits/</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body>
+                        <field name="values" type="array">
+                           <field name="rendered" type="object">
+                             <field name="message" type="object">
+                               <field name="raw" type="string"/>
+                             </field>   
+                           </field>                  
+                           <field name="author" type="string">
+                             <field name="raw" type="string"/>
+                           </field>                          
+                           <field name="hash" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>       
+    </operations>
+</invoker>
