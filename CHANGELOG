@@ -1,6 +1,29 @@
 OC Changelog
 --------------------------------------------------------------------------------
 
+1.2
+--------------------------------------------------------------------------------
+[Feature]					Send method test calls in connection view 
+[Feature]					Managing notifications for a job (PRE/POST/ALERT)
+[Connector]			                Jira
+[Connector]			                Bitbucket
+[Connector]			                Trello
+[Connector]			                PRTG Network Monitor
+[Connector]			                Aruba Clearpass
+[Connector]			                CSV2API (Microsoft SQL Server)
+[Business template][PRTG][i-doit]		Status update
+[Improvement]                            	Autoupdate changeset of application yaml configuration 
+[Improvement]                            	Autoupdate changeset of database structur
+[Improvement]                            	Better overview of the connection with the integration of history and tree view functionality
+[Improvement]                                   Supporting of notification templates via GUI
+[Bug][OC-238]					Sorting of the items in Connection (Add/Update) is wrong if the amount is more than 10
+[Bug][OC-239]					Minimize(maximize) animation works not stable in Connection (Add/Update)
+[Bug][OC-240]					The removing of last item in the subtree of Connector does not work correctly in Connection (Add/Update)
+[Bug][OC-241]					Update from v1.0 to v1.1
+[Bug][OC-250]					Scheduler saving
+[Bug][OC-251]					Backend creates job even crontab entered wrong
+[Bug][OC-258]  				  	Fix bug when updating connector with null value of image property
+
 1.1
 --------------------------------------------------------------------------------
 [New connector]                                 Azure
