@@ -23,6 +23,8 @@ import theme from "react-toolbox/lib/input/theme.css";
 import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 import TooltipText from "@basic_components/tooltips/TooltipText";
 import ParamGenerator from "./ParamGenerator";
+import Input from "@basic_components/inputs/Input";
+import {setFocusById} from "@utils/app";
 
 
 function mapStateToProps(state){
@@ -39,6 +41,25 @@ class Endpoint extends Component{
         super(props);
         this.affixValue = React.createRef();
         this.hasAdded = false;
+        this.state = {
+            isEndpointEditOpen: false,
+            endpointEditValue: props.method.request ? props.method.request.query : '',
+        };
+    }
+
+    openEndpointEdit(){
+        const {method} = this.props;
+        this.setState({isEndpointEditOpen: true});
+    }
+
+    closeEndpointEdit(){
+        this.setState({isEndpointEditOpen: false});
+    }
+
+    onChangeEndpointEditValue(endpointEditValue){
+        this.setState({
+            endpointEditValue,
+        });
     }
 
     onChangeEndpoint(e){
@@ -95,6 +116,14 @@ class Endpoint extends Component{
         }
     }
 
+    saveEndpointValue(){
+        const {endpointEditValue} = this.state;
+        const {method, updateEntity} = this.props;
+        method.request.query = endpointEditValue;
+        updateEntity();
+        this.closeEndpointEdit();
+    }
+
     addParam(param){
         const {method, updateEntity} = this.props;
         method.setRequestEndpointAffix(`${method.request.affix}{%${param}%} `);
@@ -148,7 +177,16 @@ class Endpoint extends Component{
         }
     }
 
+    renderEndpointEdit(){
+        const {endpointEditValue} = this.state;
+        const {method} = this.props;
+        return (
+            <Input className={styles.endpoint_edit} autoFocus id={`${method.index}_endpoint`} value={endpointEditValue} onChange={::this.onChangeEndpointEditValue} onBlur={::this.saveEndpointValue}/>
+        );
+    }
+
     render(){
+        const {isEndpointEditOpen} = this.state;
         const {authUser, connection, connector, method, readOnly} = this.props;
         const endpoint = method.request ? method.request.query : '';
         let hasError = false;
@@ -163,13 +201,19 @@ class Endpoint extends Component{
         return (
             <div>
                 <div className={`${theme.input}`}>
-                    <TooltipText
-                        authUser={authUser}
-                        tooltip={endpoint}
-                        text={'[...]'}
-                        className={styles.method_affix}
-                        style={hasError ? {...tooltipTextStyles, color: 'red'} : tooltipTextStyles}
-                    />
+                    <span className={styles.method_affix}>
+                        <TooltipText
+                            authUser={authUser}
+                            tooltip={endpoint}
+                            text={'[...]'}
+                            className={styles.method_affix_placeholder}
+                            style={hasError ? {...tooltipTextStyles, color: 'red'} : tooltipTextStyles}
+                            onClick={::this.openEndpointEdit}
+                        />
+                        {
+                            isEndpointEditOpen && this.renderEndpointEdit()
+                        }
+                    </span>
                     <div
                         className={`${theme.inputElement} ${theme.filled}`}
                         style={{width: '5%', float: 'left', paddingLeft: '3px', color: hasError ? 'red' : 'black'}}>

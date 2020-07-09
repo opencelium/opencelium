@@ -637,12 +637,31 @@
 }
 
 .method_affix{
-  cursor: default;
   float: left;
   width: 10%;
-  padding-top: 10px;
   height: 41px;
   border-bottom: 1px solid rgba(33, 33, 33, 0.12);
+  padding-top: 10px;
+}
+.method_affix_placeholder{
+  cursor: pointer;
+  padding: 4px 0;
+}
+.method_affix_placeholder:hover{
+  box-shadow: #9f9f9f 0 1px 3px 0;
+}
+
+.endpoint_edit{
+  z-index: 5;
+  animation: APopupInputAppear .25s;
+  position: absolute;
+  top: 15px;
+  left: -35px;
+  transition: all 0.3s ease 0s;
+  border-radius: 3px;
+  padding: 8px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+  background: white;
 }
 
 .param_generator{
