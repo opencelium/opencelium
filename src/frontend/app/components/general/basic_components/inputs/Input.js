@@ -128,7 +128,8 @@ class Input extends Component{
                     theme={theme}
                     onClick={null}
                     onChange={onChange}
-                    onBlur={onBlur}>{null}</ToolboxInput>
+                    onBlur={onBlur}>{null}
+                </ToolboxInput>
             );
         }
         return (
