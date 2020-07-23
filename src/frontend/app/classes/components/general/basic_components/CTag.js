@@ -7,6 +7,8 @@ export const TAG_VALUE_TYPES = {
     ITEM: 'ITEM',
 };
 
+const TAB_CHAR = '    ';
+
 export default class CTag{
     constructor(name, tags, properties = {}) {
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
@@ -129,5 +131,48 @@ export default class CTag{
             this._valueType = valueType;
         }
         consoleError('Such tag value type does not exist');
+    }
+
+    convertPropertiesToXml(){
+        if(this._properties.length !== 0) {
+            return ' ' + this._properties.map(property => property.convertToXml()).join(' ');
+        }
+        return '';
+    }
+
+    convertToXml(settings = {}){
+        let {hasFormat, indent} = settings;
+        if(typeof hasFormat === 'undefined'){
+            hasFormat = true;
+        }
+        if(typeof indent === 'undefined'){
+            indent = 1;
+        }
+        let startTag = `<${this._name}${this.convertPropertiesToXml()}`;
+        let items = '';
+        let endTag = '';
+        switch(this._valueType){
+            case TAG_VALUE_TYPES.EMPTY:
+                startTag += '/>';
+                break;
+            case TAG_VALUE_TYPES.TEXT:
+                startTag += '>';
+                items = this._tags;
+                endTag = `</${this._name}>`;
+                break;
+            case TAG_VALUE_TYPES.ITEM:
+                if(this._tags.length === 0){
+                    startTag += `/>`;
+                } else {
+                    startTag += `>${hasFormat ? '\n' : ''}`;
+                    items = this._tags.map(t => `${hasFormat ? TAB_CHAR.repeat(indent) : ''}${t.convertToXml({
+                        hasFormat,
+                        indent: indent + 1
+                    })}`).join(`${hasFormat ? '\n' : ''}`);
+                    endTag = `${hasFormat ? '\n' + TAB_CHAR.repeat(indent - 1) : ''}</${this._name}>`;
+                }
+                break;
+        }
+        return `${startTag}${items}${endTag}`;
     }
 }

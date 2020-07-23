@@ -33,4 +33,8 @@ export default class CProperty{
     get uniqueIndex(){
         return this._uniqueIndex;
     }
+
+    convertToXml(){
+        return `${this._name}="${this._value}"`;
+    }
 }

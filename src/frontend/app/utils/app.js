@@ -29,6 +29,12 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
+
+export function findTopLeft(elemId) {
+    let rec = document.getElementById(elemId).getBoundingClientRect();
+    return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+}
+
 /**
  * to format html id
  *
@@ -255,13 +261,31 @@ export function consoleError(value){
     }
 }
 
+export function checkXmlTagFormat(tagName){
+    if(isNumber(tagName[0])){
+        alert('Name cannot start with a number');
+        return false;
+    }
+    if(tagName.substring(0, 3) === 'xml'){
+        alert('Name cannot start with \'xml\'');
+        return false;
+    }
+    if(!tagName[0].toLowerCase().match(/[a-z]/i)){
+        if(tagName[0] !== '_') {
+            alert('Name should start from letter or underscore');
+            return false
+        }
+    }
+    return true;
+}
+
 /**
  * to check if element is Number
  *
  * @param number - number itself
  */
 export function isNumber(number){
-    return !isNaN(parseInt(number));
+    return !isNaN(number);
 }
 
 /**

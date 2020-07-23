@@ -108,7 +108,7 @@ class ConnectionView extends Component{
                     translations={changeContentTranslations}
                     authUser={authUser}
                     action={null}
-                    isActionInProcess={false}
+                    isActionInProcess={0}
                     noBreadcrumbs={true}
                     noHint={true}
                     noNavigation={true}

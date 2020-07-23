@@ -1,10 +1,11 @@
+import ReactDOM from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
 import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/CTag";
 import styles from "@themes/default/general/basic_components";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
-import {isArray, isString, setFocusById} from "@utils/app";
+import {checkXmlTagFormat, findTopLeft, isArray, isNumber, isString, setFocusById} from "@utils/app";
 import Button from "@basic_components/buttons/Button";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
@@ -13,10 +14,13 @@ class ChangeTag extends React.Component{
         super(props);
 
         this.state = {
-            name: props.tag.name,
+            name: props.tag.name ? props.tag.name : '',
             valueType: props.mode === 'add' ? TAG_VALUE_TYPES.ITEM : props.tag.valueType,
             text: isString(props.tag.tags) ? props.tag.tags : '',
         }
+        const {top, left} = findTopLeft(props.correspondedId);
+        this.top = top;
+        this.left = left;
     }
 
     componentDidMount() {
@@ -55,6 +59,10 @@ class ChangeTag extends React.Component{
         const {name, valueType, text} = this.state;
         const {change, tag, close, mode, parent} = this.props;
         if(name === ''){
+            alert('Name is a required field');
+            return;
+        }
+        if(!checkXmlTagFormat(name)){
             return;
         }
         let tags = [];
@@ -84,8 +92,8 @@ class ChangeTag extends React.Component{
     render(){
         const {name, valueType, text} = this.state;
         const {tag, mode, close} = this.props;
-        return(
-            <div className={styles.change_tag_popup}>
+        return ReactDOM.createPortal(
+            <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
                 <TooltipFontIcon tooltip={'Close'} value={'close'} className={styles.close_icon} onClick={close}/>
                 <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'}/>
                 <RadioGroup name='valueType' value={valueType} onChange={::this.changeValueType} className={`${styles.radio_group}`}>
@@ -95,8 +103,9 @@ class ChangeTag extends React.Component{
                 </RadioGroup>
                 {valueType === TAG_VALUE_TYPES.TEXT && <Input id={`${tag.uniqueIndex}_text`} value={text} onChange={::this.changeText} onKeyDown={::this.pressKey} label={'Text'}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
-            </div>
-        )
+            </div>,
+            document.getElementById('oc_modal')
+        );
     }
 }
 
@@ -106,6 +115,7 @@ ChangeTag.propTypes = {
     change: PropTypes.func.isRequired,
     close: PropTypes.func.isRequired,
     mode: PropTypes.string,
+    correspondedId: PropTypes.string.isRequired,
 };
 
 ChangeTag.defaultProps = {

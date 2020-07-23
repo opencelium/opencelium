@@ -127,51 +127,51 @@ class Tag extends React.Component{
     }
 
     renderProperties(){
-        const {tag, update} = this.props;
+        const {tag, update, readOnly} = this.props;
         return tag.properties.map(property => {
             return(
-                <Property key={`${property.name}`} tag={tag} property={property} update={update}/>
+                <Property key={`${property.name}`} tag={tag} property={property} update={update} readOnly={readOnly}/>
             );
         })
     }
 
     renderSubTags(){
-        const {tag, update, } = this.props;
+        const {tag, update, readOnly} = this.props;
         if(tag.minimized){
             return <TooltipFontIcon className={styles.expand_tag} tooltip={'more'} value={'more_horiz'} onClick={::this.toggleTag}/>;
         }
         if(isString(tag.tags)){
             return <span>{tag.tags}</span>;
         }
-        if(tag.tags.length === 0){
-            return <div><TooltipFontIcon className={styles.add_tag_icon_outside} tooltip={'Add Item'} value={'add_circle_outline'} onClick={::this.showAddTagPopup}/></div>;
+        if(tag.tags.length === 0 && !readOnly){
+            return <div><TooltipFontIcon id={`${tag.uniqueIndex}_add_tag`} className={styles.add_tag_icon_outside} tooltip={'Add Item'} value={'add_circle_outline'} onClick={::this.showAddTagPopup}/></div>;
         }
         return tag.tags ? tag.tags.map((t, index) => {
-            return <Tag key={`${t.name}_${index}`} tag={t} update={update} deleteTag={(e) => ::this.deleteTag(e, index)}/>;
+            return <Tag key={`${t.name}_${index}`} tag={t} update={update} deleteTag={(e) => ::this.deleteTag(e, index)} readOnly={readOnly}/>;
         }) : null;
     }
 
     render() {
         const {hasAddPropertyIcon, hasDeleteTagIcon, hasMinimizerIcon, hasAddPropertyPopup, property, hasUpdateTagPopup, hasAddTagPopup, addTag, hasAddTagIcon} = this.state;
-        const {tag, isDeclaration, deleteTag, update} = this.props;
+        const {tag, isDeclaration, deleteTag, update, readOnly} = this.props;
         const hasMinimizer = !isString(tag.tags) && tag.tags !== null && hasMinimizerIcon;
         const isMinimized = tag.minimized;
         return(
             <span onMouseOver={::this.showMinimizerIcon} onMouseLeave={::this.hideMinimizerIcon}>
                 {hasMinimizer && <div className={styles.minimized_icon} style={{marginLeft: `${XML_TAG_INDENT - 10}px`}}><TooltipFontIcon tooltip={isMinimized ? 'Maximize' : 'Minimize'} value={isMinimized ? 'add' : 'remove'} onClick={::this.toggleTag}/></div>}
                 <div className={styles.tag} style={{paddingLeft: `${XML_TAG_INDENT}px`}}>
-                    <span onMouseOver={::this.showTagIcons} onMouseLeave={::this.hideTagIcons} style={{position: 'relative'}}>
+                    <span onMouseOver={::this.showTagIcons} onMouseLeave={::this.hideTagIcons} className={styles.tag_open}>
                         <span className={styles.bracket}>{`<${isDeclaration ? '?' : ''}`}</span>
-                        <span className={styles.name_open} onClick={::this.showUpdateTagPopup}>{tag.name}</span>
-                        {hasUpdateTagPopup && <ChangeTag tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'}/>}
-                        {hasAddTagPopup && <ChangeTag parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'}/>}
+                        <span className={`${styles.name_open} ${!readOnly ? styles.name_open_hovered : ''}`} onClick={!readOnly ? ::this.showUpdateTagPopup : null} id={`${tag.uniqueIndex}_tag_name`}>{tag.name}</span>
+                        {hasUpdateTagPopup && !readOnly && <ChangeTag correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'}/>}
+                        {hasAddTagPopup && !readOnly && <ChangeTag correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'}/>}
                         {this.renderProperties()}
-                        {hasAddPropertyIcon && <TooltipFontIcon tooltip={'Add Property'} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
-                        {hasAddPropertyPopup && <ChangeProperty property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'}/>}
+                        {hasAddPropertyIcon && !readOnly && <TooltipFontIcon id={`${tag.uniqueIndex}_add_property`} tooltip={'Add Property'} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
+                        {hasAddPropertyPopup && !readOnly && <ChangeProperty correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
-                        {hasDeleteTagIcon && <TooltipFontIcon tooltip={'Delete Tag'} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null}/>}
-                        {hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && <TooltipFontIcon tooltip={'Add Tag'} value={'add_circle_outline'} className={styles.add_tag_icon_inside} onClick={::this.showAddTagPopup}/>}
+                        {hasDeleteTagIcon && !readOnly && <TooltipFontIcon tooltip={'Delete Tag'} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '16px' : '0'}}/>}
+                        {hasAddTagIcon && !readOnly && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration && <TooltipFontIcon id={`${tag.uniqueIndex}_add_tag`} tooltip={'Add Item'} value={'add_circle_outline'} className={styles.add_tag_icon_inside} onClick={::this.showAddTagPopup}/>}
                     </span>
                     {
                         tag.tags &&
@@ -195,10 +195,12 @@ Tag.propTypes = {
     isDeclaration: PropTypes.bool,
     update: PropTypes.func.isRequired,
     deleteTag: PropTypes.func.isRequired,
+    readOnly: PropTypes.bool,
 };
 
 Tag.defaultProps = {
     isDeclaration: false,
+    readOnly: false,
 };
 
 

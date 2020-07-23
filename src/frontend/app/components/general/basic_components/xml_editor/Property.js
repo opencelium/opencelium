@@ -48,14 +48,14 @@ class Property extends React.Component{
 
     render() {
         const {hasRemoveIcon, hasUpdatePopup} = this.state;
-        const {property, update} = this.props;
+        const {property, update, readOnly} = this.props;
         return(
             <span style={{position: 'relative'}}>
-                <span className={styles.property} onMouseOver={::this.showRemoveIcon} onMouseLeave={::this.hideRemoveIcon} onClick={::this.showUpdatePopup}>
+                <span id={`${property.uniqueIndex}_property`} className={`${styles.property} ${!readOnly ? styles.property_hovered : ''}`} onMouseOver={!readOnly ? ::this.showRemoveIcon : null} onMouseLeave={::this.hideRemoveIcon} onClick={!readOnly ? ::this.showUpdatePopup : null}>
                     <span className={styles.name}>{property.name}</span><span className={styles.value}>{`="${property.value}"`}</span>
-                    {hasRemoveIcon && <TooltipFontIcon tooltip={'Delete Attribute'} value={'delete'} className={styles.remove_icon} onClick={::this.removeProperty}/>}
+                    {hasRemoveIcon && !readOnly && <TooltipFontIcon tooltip={'Delete Attribute'} value={'delete'} className={styles.remove_icon} onClick={::this.removeProperty}/>}
                 </span>
-                {hasUpdatePopup && <ChangeProperty property={property} change={update} close={::this.hideUpdatePopup} mode={'update'}/>}
+                {hasUpdatePopup && !readOnly && <ChangeProperty correspondedId={`${property.uniqueIndex}_property`} property={property} change={update} close={::this.hideUpdatePopup} mode={'update'}/>}
             </span>
         );
     }
@@ -66,6 +66,11 @@ Property.propTypes = {
     property: PropTypes.instanceOf(CProperty).isRequired,
     update: PropTypes.func.isRequired,
     tag: PropTypes.instanceOf(CTag).isRequired,
+    readOnly: PropTypes.bool,
+};
+
+Property.defaultProps = {
+    readOnly: false,
 };
 
 export default Property;

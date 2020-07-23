@@ -36,6 +36,8 @@ import CConnection from "@classes/components/content/connection/CConnection";
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
 import {convertFieldNameForBackend} from "../help";
 import Body from "./Body";
+import XmlEditor from "@basic_components/xml_editor/XmlEditor";
+import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
 
 
 class MethodRequest extends Component{
@@ -173,7 +175,7 @@ class MethodRequest extends Component{
 
     updateBody(reactJson){
         const {method, updateEntity} = this.props;
-        let body = reactJson.updated_src;
+        let body = isString(reactJson) ? reactJson : reactJson.updated_src;
         this.setCurrentItem();
         this.updateFieldBinding(reactJson);
         this.cleanFieldBinding(reactJson);
@@ -188,6 +190,25 @@ class MethodRequest extends Component{
         const {connector, method, updateEntity} = this.props;
         connector.setCurrentItem(method);
         updateEntity();
+    }
+
+    renderBody(){
+        const {id, readOnly, method, connector, connection, updateEntity} = this.props;
+        return (
+            <XmlBody method={method} updateBody={::this.updateBody} readOnly={readOnly}/>
+        );
+        return (
+            <Body
+                id={id}
+                readOnly={readOnly}
+                method={method}
+                connection={connection}
+                connector={connector}
+                updateBody={::this.updateBody}
+                updateEntity={updateEntity}
+                setCurrentItem={::this.setCurrentItem}
+            />
+        );
     }
 
     render(){
@@ -211,16 +232,7 @@ class MethodRequest extends Component{
                             updateEntity={updateEntity}
                         />
                         <label className={`${theme.label} ${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</label>
-                        <Body
-                            id={id}
-                            readOnly={readOnly}
-                            method={method}
-                            connection={connection}
-                            connector={connector}
-                            updateBody={::this.updateBody}
-                            updateEntity={updateEntity}
-                            setCurrentItem={::this.setCurrentItem}
-                        />
+                        {this.renderBody()}
                     </div>
                 </CardText>
             </div>

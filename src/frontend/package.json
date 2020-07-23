@@ -170,7 +170,8 @@
   },
   "jest": {
     "moduleNameMapper": {
-      "\\.(css|scss)$": "identity-obj-proxy"
+      "^@classes(.*)$": "<rootDir>/app/classes$1",
+      "^@utils(.*)$": "<rootDir>/app/utils$1"
     },
     "setupFiles": [
       "raf/polyfill"

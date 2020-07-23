@@ -7,7 +7,7 @@ export default class CXmlEditor{
         this._xml = xml2js(xml, {compact: true});
         this._declaration = null;
         this._tag = null;
-        this.convertXml();
+        this.convertFromXml();
     }
 
     static createXmlEditor(xml){
@@ -17,7 +17,7 @@ export default class CXmlEditor{
         return null;
     }
 
-    convertXml(){
+    convertFromXml(){
         if(this._xml.hasOwnProperty('_declaration')){
             this._declaration = CTag.createTag('xml', this._xml._declaration);
         }
@@ -43,5 +43,24 @@ export default class CXmlEditor{
 
     get tag(){
         return this._tag;
+    }
+
+    convertDeclaration(){
+        if(this._declaration) {
+            return `<?xml ${this._declaration.properties.map(property => property.convertToXml()).join(' ')} ?>`;
+        }
+        return '';
+    }
+
+    convertToXml(settings = {}){
+        const {hasFormat} = settings;
+        const declaration = this.convertDeclaration();
+        if(hasFormat || typeof hasFormat === 'undefined'){
+            const coreTag = this._tag.convertToXml(settings);
+            return `${declaration}\n${coreTag}`;
+        } else{
+            const coreTag = this._tag.convertToXml(settings);
+            return `${declaration}${coreTag}`;
+        }
     }
 }

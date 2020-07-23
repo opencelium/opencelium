@@ -829,6 +829,11 @@
   font-size: $FONT_SIZE_SMALL;
 }
 
+.xml_body_close_menu_edit{
+  @extend .body_close_menu_edit;
+  z-index: 1;
+}
+
 .loop_placeholder{
   width: 85%;
   float: left;
@@ -883,6 +888,12 @@
   position: absolute;
   max-height: 500px;
   overflow: hidden auto;
+}
+
+.method_body_xml{
+  @extend .method_body;
+  width: 500px;
+  max-height: 300px;
 }
 
 .method_body_placeholder{

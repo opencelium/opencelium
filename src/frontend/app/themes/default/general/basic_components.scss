@@ -398,6 +398,10 @@
   justify-content: center;
 }
 /*XmlEditor*/
+.xml_editor{
+  position: relative;
+  margin-top: -20px;
+}
 .add_tag_icon_outside{
   cursor: pointer;
   font-size: 14px;
@@ -414,17 +418,22 @@
   z-index: 10;
   span{
     font-size: 13px;
-    line-height: 28px;
+    line-height: 21px;
     cursor: pointer;
   }
 }
 .tag{
   position: relative;
+  .tag_open{
+    position: relative;
+    overflow-wrap: break-word;
+  }
   .name_open{
     color: #ff5a71;
-    cursor: pointer;
+    cursor: text;
   }
-  .name_open:hover{
+  .name_open_hovered:hover{
+    cursor: pointer;
     box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
     border-radius: 2px;
   }
@@ -445,19 +454,15 @@
     cursor: pointer;
     font-size: 16px !important;
     position: absolute;
-    margin-left: 8px;
-    top: -4px;
   }
   .add_tag_icon_inside{
     cursor: pointer;
     font-size: 16px !important;
     position: absolute;
-    margin-left: -8px;
-    top: -4px;
   }
 }
 .property{
-  cursor: pointer;
+  cursor: text;
   margin-left: 5px;
   position: relative;
   padding: 2px;
@@ -480,8 +485,8 @@
   top: 0;
   min-width: 150px;
   max-width: 150px;
-  right: -50px;
-  z-index: 5;
+  right: 0;
+  z-index: 100;
   animation: APopupInputAppear .25s;
   position: absolute;
   transition: all 0.3s ease 0s;
@@ -490,6 +495,7 @@
   box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
   background: white;
   .close_icon{
+    z-index: 10;
     position: absolute;
     right: 2px;
     top: 2px;
@@ -509,9 +515,10 @@
   @extend .change_popup;
   min-width: 250px;
   max-width: 250px;
-  left: 0;
+  right: 0;
 }
-.property:hover{
+.property_hovered:hover{
   box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
   border-radius: 2px;
+  cursor: pointer;
 }
