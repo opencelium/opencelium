@@ -1,4 +1,4 @@
-import {isString} from "@utils/app";
+import {isArray, isString} from "@utils/app";
 import {xml2js} from 'xml-js';
 import CTag from "@classes/components/general/basic_components/CTag";
 
@@ -41,8 +41,16 @@ export default class CXmlEditor{
         return this._declaration;
     }
 
+    addDeclaration(){
+        this._declaration = new CTag('xml', null);
+    }
+
     get tag(){
         return this._tag;
+    }
+
+    addTag(name, tags){
+        this._tag = new CTag(name, tags);
     }
 
     convertDeclaration(){

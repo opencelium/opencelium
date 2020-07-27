@@ -401,11 +401,13 @@
 .xml_editor{
   position: relative;
   margin-top: -20px;
+  min-height: 36px;
 }
 .add_tag_icon_outside{
   cursor: pointer;
   font-size: 14px;
   margin: 0 5px;
+  background: white;
 }
 .expand_tag{
   cursor: pointer;
@@ -449,17 +451,20 @@
     margin: 0 5px;
     vertical-align: text-bottom;
     line-height: 16px;
+    background: white;
   }
   .delete_icon{
     cursor: pointer;
     font-size: 16px !important;
     position: absolute;
+    background: white;
   }
-  .add_tag_icon_inside{
-    cursor: pointer;
-    font-size: 16px !important;
-    position: absolute;
-  }
+}
+.add_tag_icon_inside{
+  cursor: pointer;
+  font-size: 16px !important;
+  position: absolute;
+  background: white;
 }
 .property{
   cursor: text;
@@ -478,6 +483,7 @@
     right: -10px;
     top: -5px;
     position: absolute;
+    background: white;
   }
 }
 .change_popup{
@@ -501,14 +507,23 @@
     top: 2px;
     cursor: pointer;
     font-size: 14px;
+    background: white;
   }
   .radio_group{
-    height: 25px;
+    height: 50px;
   }
   .radio_button{
     margin-right: 10px;
     float: left;
     margin-bottom: 10px !important;
+  }
+  .radio_button_radio{
+    width: 16px;
+    height: 16px;
+  }
+  .radio_button_text{
+    line-height: 16px;
+    padding-left: 5px;
   }
 }
 .change_tag_popup{

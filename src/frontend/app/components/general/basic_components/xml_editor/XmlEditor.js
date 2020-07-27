@@ -3,14 +3,37 @@ import PropTypes from 'prop-types';
 import Tag from "@basic_components/xml_editor/Tag";
 import CXmlEditor from "@classes/components/general/basic_components/CXmlEditor";
 import styles from '@themes/default/general/basic_components.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import ChangeTag from "@basic_components/xml_editor/ChangeTag";
+import CTag from "@classes/components/general/basic_components/CTag";
 
 class XmlEditor extends React.Component{
     constructor(props) {
         super(props);
 
         this.state = {
-            xml: CXmlEditor.createXmlEditor(props.xml),
+            xml: CXmlEditor.createXmlEditor(props.xml ? props.xml : '<item><name>Jack</name><name>Mary</name></item>'),
+            addTag: CTag.createTag(),
+            hasAddTagPopup: false,
         };
+    }
+
+    addDeclaration(){
+        const {xml} = this.state;
+        xml.addDeclaration();
+        this.updateXml();
+    }
+
+    showAddTagPopup(){
+        this.setState({
+            hasAddTagPopup: true,
+        });
+    }
+
+    hideAddTagPopup(){
+        this.setState({
+            hasAddTagPopup: false,
+        });
     }
 
     updateXml(){
@@ -35,12 +58,26 @@ class XmlEditor extends React.Component{
     }
 
     render() {
+        const {xml, hasAddTagPopup, addTag} = this.state;
         const {className, readOnly} = this.props;
-        const {xml} = this.state;
         return(
             <div className={`${styles.xml_editor} ${className}`}>
-                {xml && xml.declaration && <Tag tag={xml.declaration} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration} readOnly={readOnly}/>}
-                {xml && xml.tag && <Tag tag={xml.tag} update={::this.updateXml} deleteTag={::this.deleteCoreTag} readOnly={readOnly}/>}
+                {xml && xml.declaration ?
+                    <Tag tag={xml.declaration} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration} readOnly={readOnly}/>
+                :
+                    <React.Fragment>
+                        <TooltipFontIcon tooltip={'Add Declaration'} value={'add_circle_outline'} style={{paddingLeft: '15px'}} className={styles.add_tag_icon_inside} onClick={::this.addDeclaration}/>
+                        <br/>
+                    </React.Fragment>
+                }
+                {xml && xml.tag ?
+                    <Tag tag={xml.tag} update={::this.updateXml} deleteTag={::this.deleteCoreTag} readOnly={readOnly}/>
+                :
+                    <React.Fragment>
+                        <TooltipFontIcon id={`xml_add_tag`} tooltip={'Add Item'} value={'add_circle_outline'} style={{paddingLeft: '15px'}} className={styles.add_tag_icon_inside} onClick={::this.showAddTagPopup}/>
+                        {hasAddTagPopup && !readOnly && <ChangeTag correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup} mode={'add'}/>}
+                    </React.Fragment>
+                }
             </div>
         );
     }

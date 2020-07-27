@@ -447,7 +447,7 @@ export function getThemeClass({classNames, authUser, styles}){
 }
 
 /**
- * tp copy text to a clipboard
+ * to copy text to a clipboard
  *
  * @param text - text that is going to be copied
  */
@@ -460,6 +460,18 @@ export function copyStringToClipboard(text) {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
+}
+
+/**
+ * to get text from a clipboard
+ */
+export async function getStringFromClipboard() {
+    try {
+        const text = await navigator.clipboard.readText();
+        return text;
+    } catch (err) {
+        console.error('Failed to read clipboard contents: ', err);
+    }
 }
 
 /**

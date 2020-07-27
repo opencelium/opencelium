@@ -5,9 +5,17 @@ import Input from "@basic_components/inputs/Input";
 import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/CTag";
 import styles from "@themes/default/general/basic_components";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
-import {checkXmlTagFormat, findTopLeft, isArray, isNumber, isString, setFocusById} from "@utils/app";
+import {
+    checkXmlTagFormat,
+    findTopLeft,
+    getStringFromClipboard,
+    isArray,
+    isString,
+    setFocusById
+} from "@utils/app";
 import Button from "@basic_components/buttons/Button";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CXmlEditor from "@classes/components/general/basic_components/CXmlEditor";
 
 class ChangeTag extends React.Component{
     constructor(props) {
@@ -58,14 +66,18 @@ class ChangeTag extends React.Component{
     change(){
         const {name, valueType, text} = this.state;
         const {change, tag, close, mode, parent} = this.props;
-        if(name === ''){
-            alert('Name is a required field');
-            return;
-        }
-        if(!checkXmlTagFormat(name)){
-            return;
+        if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
+            if (name === '') {
+                alert('Name is a required field');
+                return;
+            }
+            if (!checkXmlTagFormat(name)) {
+                return;
+            }
         }
         let tags = [];
+        let clipboardPromise = '';
+        let clipboardXml = null;
         switch (valueType) {
             case TAG_VALUE_TYPES.EMPTY:
                 tags = null;
@@ -76,6 +88,27 @@ class ChangeTag extends React.Component{
             case TAG_VALUE_TYPES.ITEM:
                 tags = isArray(tag.tags) ? tag.tags : [];
                 break;
+            case TAG_VALUE_TYPES.CLIPBOARD:
+                clipboardPromise = getStringFromClipboard();
+                clipboardPromise.then(text => {
+                    try {
+                        clipboardXml = CXmlEditor.createXmlEditor(text);
+                        tags = clipboardXml ? clipboardXml.tag : [];
+                        switch (mode) {
+                            case 'add':
+                                parent.addTag(tags);
+                                break;
+                            case 'update':
+                                tag.updateTag(tags);
+                                break;
+                        }
+                        change();
+                        close();
+                    } catch(e){
+                        alert('Please, check the xml format');
+                    }
+                });
+                return;
         }
         switch(mode){
             case 'add':
@@ -95,12 +128,13 @@ class ChangeTag extends React.Component{
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
                 <TooltipFontIcon tooltip={'Close'} value={'close'} className={styles.close_icon} onClick={close}/>
-                <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'}/>
                 <RadioGroup name='valueType' value={valueType} onChange={::this.changeValueType} className={`${styles.radio_group}`}>
-                    <RadioButton label={'Empty'} value={TAG_VALUE_TYPES.EMPTY} className={`${styles.radio_button}`}/>
-                    <RadioButton label={'Text'} value={TAG_VALUE_TYPES.TEXT} className={`${styles.radio_button}`}/>
-                    <RadioButton label={'Item'} value={TAG_VALUE_TYPES.ITEM} className={`${styles.radio_button}`}/>
+                    <RadioButton label={'Empty'} value={TAG_VALUE_TYPES.EMPTY} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
+                    <RadioButton label={'Text'} value={TAG_VALUE_TYPES.TEXT} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
+                    <RadioButton label={'Item'} value={TAG_VALUE_TYPES.ITEM} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
+                    <RadioButton label={'From Clipboard'} value={TAG_VALUE_TYPES.CLIPBOARD} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
                 </RadioGroup>
+                {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'}/>}
                 {valueType === TAG_VALUE_TYPES.TEXT && <Input id={`${tag.uniqueIndex}_text`} value={text} onChange={::this.changeText} onKeyDown={::this.pressKey} label={'Text'}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
             </div>,

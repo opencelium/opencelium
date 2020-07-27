@@ -26,6 +26,7 @@ class Tag extends React.Component{
             hasAddTagPopup: false,
             hasAddTagIcon: false,
             addTag: CTag.createTag(),
+            hasCopyToClipboardIcon: false,
         };
     }
 
@@ -95,6 +96,7 @@ class Tag extends React.Component{
             hasDeleteTagIcon: true,
             hasAddPropertyIcon: true,
             hasAddTagIcon: true,
+            hasCopyToClipboardIcon: true,
         });
     }
 
@@ -103,6 +105,7 @@ class Tag extends React.Component{
             hasDeleteTagIcon: false,
             hasAddPropertyIcon: false,
             hasAddTagIcon: false,
+            hasCopyToClipboardIcon: false,
         });
     }
 
@@ -124,6 +127,11 @@ class Tag extends React.Component{
             alert('Property name should be unique');
         }
         update();
+    }
+
+    copyToClipboard(){
+        const {tag} = this.props;
+        tag.copyToClipboard();
     }
 
     renderProperties(){
@@ -152,7 +160,7 @@ class Tag extends React.Component{
     }
 
     render() {
-        const {hasAddPropertyIcon, hasDeleteTagIcon, hasMinimizerIcon, hasAddPropertyPopup, property, hasUpdateTagPopup, hasAddTagPopup, addTag, hasAddTagIcon} = this.state;
+        const {hasAddPropertyIcon, hasDeleteTagIcon, hasMinimizerIcon, hasAddPropertyPopup, property, hasUpdateTagPopup, hasAddTagPopup, addTag, hasAddTagIcon, hasCopyToClipboardIcon} = this.state;
         const {tag, isDeclaration, deleteTag, update, readOnly} = this.props;
         const hasMinimizer = !isString(tag.tags) && tag.tags !== null && hasMinimizerIcon;
         const isMinimized = tag.minimized;
@@ -170,7 +178,8 @@ class Tag extends React.Component{
                         {hasAddPropertyPopup && !readOnly && <ChangeProperty correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
-                        {hasDeleteTagIcon && !readOnly && <TooltipFontIcon tooltip={'Delete Tag'} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '16px' : '0'}}/>}
+                        {hasDeleteTagIcon && !readOnly && <TooltipFontIcon tooltip={'Delete Tag'} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}
+                        {hasCopyToClipboardIcon && <TooltipFontIcon id={`${tag.uniqueIndex}_copy_to_clipboard`} tooltip={'Copy to Clipboard'} value={'keyboard'} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !readOnly && !isDeclaration  ? '16px': '0'}} className={styles.add_tag_icon_inside} onClick={::this.copyToClipboard}/>}
                         {hasAddTagIcon && !readOnly && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration && <TooltipFontIcon id={`${tag.uniqueIndex}_add_tag`} tooltip={'Add Item'} value={'add_circle_outline'} className={styles.add_tag_icon_inside} onClick={::this.showAddTagPopup}/>}
                     </span>
                     {

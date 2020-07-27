@@ -1,10 +1,12 @@
 import CProperty from "@classes/components/general/basic_components/CProperty";
-import {isArray, isString} from "@utils/app";
+import {copyStringToClipboard, isArray, isString} from "@utils/app";
+import {instanceOf} from "prop-types";
 
 export const TAG_VALUE_TYPES = {
     EMPTY: 'EMPTY',
     TEXT: 'TEXT',
     ITEM: 'ITEM',
+    CLIPBOARD: 'CLIPBOARD'
 };
 
 const TAB_CHAR = '    ';
@@ -69,18 +71,28 @@ export default class CTag{
         return this._tags;
     }
 
-    addTag(name, tags){
-        const newTag = new CTag(name, tags);
-        if(isArray(this._tags)) {
-            this._tags.push(newTag);
-        } else{
-            this._tags = [newTag];
+    addTag(nameOrTag, tags){
+        if(nameOrTag instanceof CTag){
+            this.tags.push(nameOrTag);
+        } else {
+            const newTag = new CTag(nameOrTag, tags);
+            if (isArray(this._tags)) {
+                this._tags.push(newTag);
+            } else {
+                this._tags = [newTag];
+            }
         }
     }
 
-    updateTag(name, tags){
-        this._name = name;
-        this._tags = tags;
+    updateTag(nameOrTag, tags){
+        if(nameOrTag instanceof CTag){
+            this._name = nameOrTag.name;
+            this._tags = nameOrTag.tags;
+            this._properties = nameOrTag.properties;
+        } else {
+            this._name = nameOrTag;
+            this._tags = tags;
+        }
         this._valueType = this.getValueType();
     }
 
@@ -131,6 +143,10 @@ export default class CTag{
             this._valueType = valueType;
         }
         consoleError('Such tag value type does not exist');
+    }
+
+    copyToClipboard(){
+        copyStringToClipboard(this.convertToXml());
     }
 
     convertPropertiesToXml(){
