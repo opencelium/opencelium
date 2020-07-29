@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Property from "@basic_components/xml_editor/Property";
 import styles from '@themes/default/general/basic_components.scss';
-import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/CTag";
+import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/xml_editor/CTag";
 import {isString} from "@utils/app";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import CProperty from "@classes/components/general/basic_components/CProperty";
+import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
 import ChangeProperty from "@basic_components/xml_editor/ChangeProperty";
 import ChangeTag from "@basic_components/xml_editor/ChangeTag";
 
@@ -135,16 +135,16 @@ class Tag extends React.Component{
     }
 
     renderProperties(){
-        const {tag, update, readOnly} = this.props;
+        const {tag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         return tag.properties.map(property => {
             return(
-                <Property key={`${property.name}`} tag={tag} property={property} update={update} readOnly={readOnly}/>
+                <Property key={`${property.name}`} tag={tag} property={property} update={update} readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
             );
         })
     }
 
     renderSubTags(){
-        const {tag, update, readOnly} = this.props;
+        const {tag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         if(tag.minimized){
             return <TooltipFontIcon className={styles.expand_tag} tooltip={'more'} value={'more_horiz'} onClick={::this.toggleTag}/>;
         }
@@ -155,13 +155,13 @@ class Tag extends React.Component{
             return <div><TooltipFontIcon id={`${tag.uniqueIndex}_add_tag`} className={styles.add_tag_icon_outside} tooltip={'Add Item'} value={'add_circle_outline'} onClick={::this.showAddTagPopup}/></div>;
         }
         return tag.tags ? tag.tags.map((t, index) => {
-            return <Tag key={`${t.name}_${index}`} tag={t} update={update} deleteTag={(e) => ::this.deleteTag(e, index)} readOnly={readOnly}/>;
+            return <Tag key={`${t.name}_${index}`} tag={t} update={update} deleteTag={(e) => ::this.deleteTag(e, index)} readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>;
         }) : null;
     }
 
     render() {
         const {hasAddPropertyIcon, hasDeleteTagIcon, hasMinimizerIcon, hasAddPropertyPopup, property, hasUpdateTagPopup, hasAddTagPopup, addTag, hasAddTagIcon, hasCopyToClipboardIcon} = this.state;
-        const {tag, isDeclaration, deleteTag, update, readOnly} = this.props;
+        const {tag, isDeclaration, deleteTag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         const hasMinimizer = !isString(tag.tags) && tag.tags !== null && hasMinimizerIcon;
         const isMinimized = tag.minimized;
         return(
@@ -171,11 +171,11 @@ class Tag extends React.Component{
                     <span onMouseOver={::this.showTagIcons} onMouseLeave={::this.hideTagIcons} className={styles.tag_open}>
                         <span className={styles.bracket}>{`<${isDeclaration ? '?' : ''}`}</span>
                         <span className={`${styles.name_open} ${!readOnly ? styles.name_open_hovered : ''}`} onClick={!readOnly ? ::this.showUpdateTagPopup : null} id={`${tag.uniqueIndex}_tag_name`}>{tag.name}</span>
-                        {hasUpdateTagPopup && !readOnly && <ChangeTag correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'}/>}
-                        {hasAddTagPopup && !readOnly && <ChangeTag correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'}/>}
+                        {hasUpdateTagPopup && !readOnly && <ChangeTag correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
+                        {hasAddTagPopup && !readOnly && <ChangeTag correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
                         {this.renderProperties()}
                         {hasAddPropertyIcon && !readOnly && <TooltipFontIcon id={`${tag.uniqueIndex}_add_property`} tooltip={'Add Property'} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
-                        {hasAddPropertyPopup && !readOnly && <ChangeProperty correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'}/>}
+                        {hasAddPropertyPopup && !readOnly && <ChangeProperty correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
                         {hasDeleteTagIcon && !readOnly && <TooltipFontIcon tooltip={'Delete Tag'} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}

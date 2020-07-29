@@ -1,4 +1,4 @@
-import CXmlEditor from "@classes/components/general/basic_components/CXmlEditor.js";
+import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor.js";
 const xml = `<?xml version="1.0" encoding="UTF-8" ?>
 <invoker type="RESTful">
     <name>trello</name>

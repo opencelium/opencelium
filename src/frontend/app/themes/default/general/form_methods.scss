@@ -683,6 +683,11 @@
   }
 }
 
+.param_generator_not_absolute{
+  float: left;
+  margin-bottom: 20px;
+}
+
 .param_generator_json{
   z-index: 1;
   position: absolute;
@@ -827,10 +832,6 @@
   left: 100%;
   color: black;
   font-size: $FONT_SIZE_SMALL;
-}
-
-.xml_body_close_menu_edit{
-  @extend .body_close_menu_edit;
   z-index: 1;
 }
 

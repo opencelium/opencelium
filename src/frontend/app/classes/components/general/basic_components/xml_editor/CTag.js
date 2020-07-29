@@ -1,4 +1,4 @@
-import CProperty from "@classes/components/general/basic_components/CProperty";
+import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
 import {copyStringToClipboard, isArray, isString} from "@utils/app";
 import {instanceOf} from "prop-types";
 

@@ -1,67 +1,40 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import XmlEditor from "@basic_components/xml_editor/XmlEditor";
-import styles from "@themes/default/general/form_methods";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {RequestBody} from "@decorators/RequestBody";
+import CConnection from "@classes/components/content/connection/CConnection";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
 
+
+@RequestBody(CXmlEditor)
 class XmlBody extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {
-            isBodyEditOpened: false,
-        };
-    }
-
-    openBodyEdit(){
-        this.setState({isBodyEditOpened: true});
-    }
-
-    closeBodyEdit(){
-        this.setState({isBodyEditOpened: false});
-    }
-
-    renderPlaceholder(){
-        const {method} = this.props;
-        let hasError = false;
-        if(method && method.error && method.error.hasError){
-            if(method.error.location === 'body'){
-                hasError = true;
-            }
-        }
-        return(
-            <React.Fragment>
-                <span className={styles.method_body_placeholder}
-                      title={'more details'}
-                      style={hasError ? {color: 'red'} : {}}
-                      onClick={::this.openBodyEdit}>{`<?xml ... ?>`}</span>
-            </React.Fragment>
-        );
-    }
-
-    renderCloseMenuEditButton(){
-        return (
-            <TooltipFontIcon
-                className={styles.xml_body_close_menu_edit}
-                value={'check_circle_outline'}
-                tooltip={'Apply'}
-                onClick={::this.closeBodyEdit}
-            />
-        );
     }
 
     render(){
-        const {isBodyEditOpened} = this.state;
-        const {method, updateBody, readOnly} = this.props;
-        if(!isBodyEditOpened){
-            return this.renderPlaceholder();
-        }
+        const {method, updateBody, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         return(
-            <div className={styles.method_body_xml}>
-                {::this.renderCloseMenuEditButton()}
-                <XmlEditor xml={method.request.body} afterUpdateCallback={updateBody} readOnly={readOnly}/>
-            </div>
+            <XmlEditor
+                xml={method.request.body}
+                afterUpdateCallback={updateBody}
+                readOnly={readOnly}
+                ReferenceComponent={ReferenceComponent}
+                onReferenceClick={onReferenceClick}
+            />
         );
     }
 }
+
+XmlBody.propTypes = {
+    id: PropTypes.string.isRequired,
+    readOnly: PropTypes.bool,
+    connection: PropTypes.instanceOf(CConnection),
+    connector: PropTypes.instanceOf(CConnectorItem),
+    updateBody: PropTypes.func,
+    setCurrentItem: PropTypes.func,
+};
 
 XmlBody.defaultProps = {
     readOnly: false,

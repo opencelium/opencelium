@@ -2,9 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from '@themes/default/general/basic_components.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import CTag from "@classes/components/general/basic_components/CTag";
-import CProperty from "@classes/components/general/basic_components/CProperty";
+import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
+import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
 import ChangeProperty from "@basic_components/xml_editor/ChangeProperty";
+import XmlEditor from "@basic_components/xml_editor/XmlEditor";
+import {checkReferenceFormat} from "@utils/app";
+import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
 
 class Property extends React.Component{
     constructor(props) {
@@ -46,16 +49,34 @@ class Property extends React.Component{
         update();
     }
 
+    renderValue(){
+        const {property} = this.props;
+        let isReference = checkReferenceFormat(property.value);
+        if(isReference){
+            return (
+                <span>=<ReferenceValues references={property.value} styles={{padding: '0 12px', margin: '0 0 0 6px', width: 0, height: 0,fontSize: '12px'}} maxVisible={4} hasDelete={false}/></span>
+            );
+        }
+        return(
+            <span className={styles.value}>{`="${property.value}"`}</span>
+        );
+    }
+
     render() {
         const {hasRemoveIcon, hasUpdatePopup} = this.state;
-        const {property, update, readOnly} = this.props;
+        const {property, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         return(
-            <span style={{position: 'relative'}}>
+            <span style={{position: 'relative', display: 'inline-block'}}>
                 <span id={`${property.uniqueIndex}_property`} className={`${styles.property} ${!readOnly ? styles.property_hovered : ''}`} onMouseOver={!readOnly ? ::this.showRemoveIcon : null} onMouseLeave={::this.hideRemoveIcon} onClick={!readOnly ? ::this.showUpdatePopup : null}>
-                    <span className={styles.name}>{property.name}</span><span className={styles.value}>{`="${property.value}"`}</span>
+                    <span className={styles.name}>{property.name}</span>
+                    {this.renderValue()}
                     {hasRemoveIcon && !readOnly && <TooltipFontIcon tooltip={'Delete Attribute'} value={'delete'} className={styles.remove_icon} onClick={::this.removeProperty}/>}
                 </span>
-                {hasUpdatePopup && !readOnly && <ChangeProperty correspondedId={`${property.uniqueIndex}_property`} property={property} change={update} close={::this.hideUpdatePopup} mode={'update'}/>}
+                {
+                    hasUpdatePopup && !readOnly &&
+                        <ChangeProperty correspondedId={`${property.uniqueIndex}_property`} property={property} change={update} close={::this.hideUpdatePopup}
+                                        mode={'update'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
+                }
             </span>
         );
     }

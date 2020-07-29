@@ -233,6 +233,7 @@
     box-sizing: border-box;
   }
   .item{
+    text-align: left;
     background-color: #FFFFFF;
     color: inherit;
     cursor: default;
@@ -483,14 +484,13 @@
     right: -10px;
     top: -5px;
     position: absolute;
-    background: white;
   }
 }
 .change_popup{
   text-align: center;
   top: 0;
-  min-width: 150px;
-  max-width: 150px;
+  min-width: 250px;
+  max-width: 250px;
   right: 0;
   z-index: 100;
   animation: APopupInputAppear .25s;
@@ -512,18 +512,33 @@
   .radio_group{
     height: 50px;
   }
+  .radio_group_value_type{
+    margin-top: 12px;
+    margin-bottom: 25px;
+  }
+  .radio_group_tag_type{
+    margin-top: 12px;
+    text-align: left;
+  }
   .radio_button{
-    margin-right: 10px;
-    float: left;
-    margin-bottom: 10px !important;
+    margin: 0;
+    width: 100px;
+    display: inline-block;
   }
   .radio_button_radio{
+    width: 16px;
+    height: 16px;
+  }
+  .radio_button_radio_checked{
     width: 16px;
     height: 16px;
   }
   .radio_button_text{
     line-height: 16px;
     padding-left: 5px;
+  }
+  .change_tag_name{
+    padding-bottom: 10px;
   }
 }
 .change_tag_popup{
@@ -535,5 +550,16 @@
 .property_hovered:hover{
   box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
   border-radius: 2px;
+  cursor: pointer;
+}
+.reference_value{
+  margin: 7px 0 7px 4px;
+  width: 29px;
+  height: 12px;
+}
+.reference_value_delete{
+  margin-left: -8px;
+  font-size: 13px;
+  z-index: 1;
   cursor: pointer;
 }

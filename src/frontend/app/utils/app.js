@@ -30,6 +30,53 @@ export const DEBUGGER_ERRORS = true;
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
+/**
+ * to check the references format in connections
+ */
+export function checkReferenceFormat(value){
+    let result = false;
+    let pointers = [];
+    let counter = 0;
+    if(value !== '#' && typeof value === 'string') {
+        pointers = value.split(';');
+        if(pointers.length > 0) {
+            for(let i = 0; i < pointers.length; i++) {
+                let pointer = pointers[i];
+                let splitPointer = pointer.split('.');
+                if (splitPointer.length > 3) {
+                    if (splitPointer[0][0] === '#') {
+                        if (splitPointer[0].length === 7) {
+                            if (splitPointer[1].substring(1, splitPointer[1].length - 1) === 'response'
+                                || splitPointer[1].substring(1, splitPointer[1].length - 1) === 'request') {
+                                if (splitPointer[2] === 'success' || splitPointer[2] === 'fail') {
+                                    if (splitPointer[3].length > 0) {
+                                        result = true;
+                                        counter++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else{
+        if(value === '#'){
+            result = true;
+        } else{
+            result = false;
+        }
+    }
+    if(result && counter === pointers.length){
+        return true;
+    } else{
+        return false;
+    }
+}
+
+/**
+ * to get top and left value of the element according to window
+ */
 export function findTopLeft(elemId) {
     let rec = document.getElementById(elemId).getBoundingClientRect();
     return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};

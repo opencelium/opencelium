@@ -1,6 +1,6 @@
 import {isArray, isString} from "@utils/app";
 import {xml2js} from 'xml-js';
-import CTag from "@classes/components/general/basic_components/CTag";
+import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
 
 export default class CXmlEditor{
     constructor(xml) {
@@ -10,11 +10,27 @@ export default class CXmlEditor{
         this.convertFromXml();
     }
 
+    static getPlaceholder(){
+        return '<?xml ... ?>';
+    }
+
+    static getClassName(){
+        return 'method_body_xml';
+    }
+
+    static hasImport(){
+        return false;
+    }
+
     static createXmlEditor(xml){
         if(isString(xml)) {
             return new CXmlEditor(xml);
         }
         return null;
+    }
+
+    static isAbsolute(){
+        return false;
     }
 
     convertFromXml(){

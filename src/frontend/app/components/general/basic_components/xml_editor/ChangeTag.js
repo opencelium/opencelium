@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
-import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/CTag";
+import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/xml_editor/CTag";
 import styles from "@themes/default/general/basic_components";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 import {
@@ -15,7 +15,8 @@ import {
 } from "@utils/app";
 import Button from "@basic_components/buttons/Button";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import CXmlEditor from "@classes/components/general/basic_components/CXmlEditor";
+import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
+import TagType from "@basic_components/xml_editor/TagType";
 
 class ChangeTag extends React.Component{
     constructor(props) {
@@ -128,13 +129,8 @@ class ChangeTag extends React.Component{
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
                 <TooltipFontIcon tooltip={'Close'} value={'close'} className={styles.close_icon} onClick={close}/>
-                <RadioGroup name='valueType' value={valueType} onChange={::this.changeValueType} className={`${styles.radio_group}`}>
-                    <RadioButton label={'Empty'} value={TAG_VALUE_TYPES.EMPTY} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
-                    <RadioButton label={'Text'} value={TAG_VALUE_TYPES.TEXT} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
-                    <RadioButton label={'Item'} value={TAG_VALUE_TYPES.ITEM} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
-                    <RadioButton label={'From Clipboard'} value={TAG_VALUE_TYPES.CLIPBOARD} className={`${styles.radio_button}`} theme={{radio: `${styles.radio_button_radio}`, text: `${styles.radio_button_text}`}}/>
-                </RadioGroup>
-                {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'}/>}
+                <TagType valueType={valueType} changeValueType={::this.changeValueType}/>
+                {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'} theme={{input: styles.change_tag_name}}/>}
                 {valueType === TAG_VALUE_TYPES.TEXT && <Input id={`${tag.uniqueIndex}_text`} value={text} onChange={::this.changeText} onKeyDown={::this.pressKey} label={'Text'}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
             </div>,
