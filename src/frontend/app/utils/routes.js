@@ -20,6 +20,7 @@ import isAuth from '../hocs/isAuth';
 import isNotAuth from '../hocs/isNotAuth';
 import Layout from '@components/layout/Layout';
 import PageNotFound from "@components/general/app/PageNotFound";
+import XmlEditor from "@basic_components/xml_editor/XmlEditor";
 import LoadableRouteComponents from './LoadableRouteComponents';
 
 
@@ -93,6 +94,7 @@ export const createRoutes = (store) => {
             </Route>
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfile, store)}/>
             <Route path='/login' component={isNotAuth(LoadableRouteComponents.Login, store)}/>
+            <Route path='/test' component={XmlEditor}/>
             <Route path='/*' component={PageNotFound}/>
         </Route>
     );

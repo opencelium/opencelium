@@ -233,6 +233,7 @@
     box-sizing: border-box;
   }
   .item{
+    text-align: left;
     background-color: #FFFFFF;
     color: inherit;
     cursor: default;
@@ -396,4 +397,169 @@
 }
 [data-tour-elem='controls']{
   justify-content: center;
+}
+/*XmlEditor*/
+.xml_editor{
+  position: relative;
+  margin-top: -20px;
+  min-height: 36px;
+}
+.add_tag_icon_outside{
+  cursor: pointer;
+  font-size: 14px;
+  margin: 0 5px;
+  background: white;
+}
+.expand_tag{
+  cursor: pointer;
+  font-size: 14px;
+  margin: 0 5px;
+  vertical-align: sub;
+}
+.minimized_icon{
+  position: absolute;
+  z-index: 10;
+  span{
+    font-size: 13px;
+    line-height: 21px;
+    cursor: pointer;
+  }
+}
+.tag{
+  position: relative;
+  .tag_open{
+    position: relative;
+    overflow-wrap: break-word;
+  }
+  .name_open{
+    color: #ff5a71;
+    cursor: text;
+  }
+  .name_open_hovered:hover{
+    cursor: pointer;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    border-radius: 2px;
+  }
+  .name_close {
+    color: #ff5a71;
+  }
+  .bracket{
+    color: black;
+  }
+  .add_property_icon{
+    font-size: 14px;
+    cursor: pointer;
+    margin: 0 5px;
+    vertical-align: text-bottom;
+    line-height: 16px;
+    background: white;
+  }
+  .delete_icon{
+    cursor: pointer;
+    font-size: 16px !important;
+    position: absolute;
+    background: white;
+  }
+}
+.add_tag_icon_inside{
+  cursor: pointer;
+  font-size: 16px !important;
+  position: absolute;
+  background: white;
+}
+.property{
+  cursor: text;
+  margin-left: 5px;
+  position: relative;
+  padding: 2px;
+  .name{
+    color: #5e805e;
+  }
+  .value{
+    color: #4770f5;
+  }
+  .remove_icon{
+    cursor: pointer;
+    font-size: 16px !important;
+    right: -10px;
+    top: -5px;
+    position: absolute;
+  }
+}
+.change_popup{
+  text-align: center;
+  top: 0;
+  min-width: 250px;
+  max-width: 250px;
+  right: 0;
+  z-index: 100;
+  animation: APopupInputAppear .25s;
+  position: absolute;
+  transition: all 0.3s ease 0s;
+  border-radius: 3px;
+  padding: 8px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+  background: white;
+  .close_icon{
+    z-index: 10;
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    cursor: pointer;
+    font-size: 14px;
+    background: white;
+  }
+  .radio_group{
+    height: 50px;
+  }
+  .radio_group_value_type{
+    margin-top: 12px;
+    margin-bottom: 25px;
+  }
+  .radio_group_tag_type{
+    margin-top: 12px;
+    text-align: left;
+  }
+  .radio_button{
+    margin: 0;
+    width: 100px;
+    display: inline-block;
+  }
+  .radio_button_radio{
+    width: 16px;
+    height: 16px;
+  }
+  .radio_button_radio_checked{
+    width: 16px;
+    height: 16px;
+  }
+  .radio_button_text{
+    line-height: 16px;
+    padding-left: 5px;
+  }
+  .change_tag_name{
+    padding-bottom: 10px;
+  }
+}
+.change_tag_popup{
+  @extend .change_popup;
+  min-width: 250px;
+  max-width: 250px;
+  right: 0;
+}
+.property_hovered:hover{
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.reference_value{
+  margin: 7px 0 7px 4px;
+  width: 29px;
+  height: 12px;
+}
+.reference_value_delete{
+  margin-left: -8px;
+  font-size: 13px;
+  z-index: 1;
+  cursor: pointer;
 }

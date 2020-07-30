@@ -34,7 +34,18 @@ export default class CRequest{
         const parsedQuery = this.parseQuery(query);
         this._query = parsedQuery.query;
         this._affix = parsedQuery.affix;
-        this._body = body === null ? {} : body;
+        //this._body = body === null ? {} : body;
+        this.body = `<?xml version="1.0" encoding="UTF-8" ?>
+<invoker type="RESTful">
+    <name>trello</name>
+    <description>trello description</description>
+    <hint>This interface provides the apikey auth. First you need to create a apikey token (https://trello.com/app-key/). Check out the documentation https://developer.atlassian.com/cloud/trello/rest/</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="private">https://api.trello.com</item>
+        <item name="username" type="string" visibility="public"/>
+        <item name="key" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="protected"/>
+    </requiredData></invoker>`;
         this._invokerBody = body === null ? {} : body;
         this._method = method;
         this._header = parseHeader(header);

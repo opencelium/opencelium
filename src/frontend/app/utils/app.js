@@ -29,6 +29,59 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
+
+/**
+ * to check the references format in connections
+ */
+export function checkReferenceFormat(value){
+    let result = false;
+    let pointers = [];
+    let counter = 0;
+    if(value !== '#' && typeof value === 'string') {
+        pointers = value.split(';');
+        if(pointers.length > 0) {
+            for(let i = 0; i < pointers.length; i++) {
+                let pointer = pointers[i];
+                let splitPointer = pointer.split('.');
+                if (splitPointer.length > 3) {
+                    if (splitPointer[0][0] === '#') {
+                        if (splitPointer[0].length === 7) {
+                            if (splitPointer[1].substring(1, splitPointer[1].length - 1) === 'response'
+                                || splitPointer[1].substring(1, splitPointer[1].length - 1) === 'request') {
+                                if (splitPointer[2] === 'success' || splitPointer[2] === 'fail') {
+                                    if (splitPointer[3].length > 0) {
+                                        result = true;
+                                        counter++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else{
+        if(value === '#'){
+            result = true;
+        } else{
+            result = false;
+        }
+    }
+    if(result && counter === pointers.length){
+        return true;
+    } else{
+        return false;
+    }
+}
+
+/**
+ * to get top and left value of the element according to window
+ */
+export function findTopLeft(elemId) {
+    let rec = document.getElementById(elemId).getBoundingClientRect();
+    return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+}
+
 /**
  * to format html id
  *
@@ -255,13 +308,31 @@ export function consoleError(value){
     }
 }
 
+export function checkXmlTagFormat(tagName){
+    if(isNumber(tagName[0])){
+        alert('Name cannot start with a number');
+        return false;
+    }
+    if(tagName.substring(0, 3) === 'xml'){
+        alert('Name cannot start with \'xml\'');
+        return false;
+    }
+    if(!tagName[0].toLowerCase().match(/[a-z]/i)){
+        if(tagName[0] !== '_') {
+            alert('Name should start from letter or underscore');
+            return false
+        }
+    }
+    return true;
+}
+
 /**
  * to check if element is Number
  *
  * @param number - number itself
  */
 export function isNumber(number){
-    return !isNaN(parseInt(number));
+    return !isNaN(number);
 }
 
 /**
@@ -423,7 +494,7 @@ export function getThemeClass({classNames, authUser, styles}){
 }
 
 /**
- * tp copy text to a clipboard
+ * to copy text to a clipboard
  *
  * @param text - text that is going to be copied
  */
@@ -436,6 +507,18 @@ export function copyStringToClipboard(text) {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
+}
+
+/**
+ * to get text from a clipboard
+ */
+export async function getStringFromClipboard() {
+    try {
+        const text = await navigator.clipboard.readText();
+        return text;
+    } catch (err) {
+        console.error('Failed to read clipboard contents: ', err);
+    }
 }
 
 /**

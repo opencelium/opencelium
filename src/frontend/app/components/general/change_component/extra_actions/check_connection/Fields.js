@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styles from "@themes/default/general/change_component";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {isString} from "@utils/app";
-import Body from "@change_component/form_elements/form_connection/form_methods/method/Body";
+import JsonBody from "@change_component/form_elements/form_connection/form_methods/method/JsonBody";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 import CFields from "@classes/components/general/change_component/extra_actions/CFields";
 import Counter from "@change_component/extra_actions/check_connection/Counter";
@@ -175,7 +175,7 @@ class Fields extends Component{
                                             ?
                                                 <span title={value} style={{padding: '0 5px'}}>{value}</span>
                                             :
-                                                <Body bodyStyles={{top: 0}} readOnly={true} method={{request: {body: value}}} id={'key'}/>
+                                                <JsonBody bodyStyles={{top: 0}} readOnly={true} method={{request: {body: value}}} id={'key'}/>
                                         }
                                     </div>
                                     {
@@ -195,7 +195,7 @@ class Fields extends Component{
                                                                         <span title={dependency.name}>
                                                                             <span className={styles.dependency_value} onClick={() => this.openDependency({...dependency, currentIndex})} style={{ background: dependency.color}}>{dependency.name}</span>
                                                                             <span className={styles.delimiter}>:</span>
-                                                                            <Body bodyStyles={{top: 0, right: 0}} readOnly={true} method={{request: {body: dependency.values[currentIndex]}}} id={'key'}/>
+                                                                            <JsonBody bodyStyles={{top: 0, right: 0}} readOnly={true} method={{request: {body: dependency.values[currentIndex]}}} id={'key'}/>
                                                                         </span>
                                                                 }
                                                             </span>
