@@ -46,7 +46,7 @@
                     <header>
                         <item name="Content-Type" type="string">application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="Error" type="object">
                             <field name="ErrorMessage"  type="string"/>
                             <field name="ErrorCode" type="string"/>
@@ -62,7 +62,7 @@
                 <header>
                     <item name="Content-Type" type="string"/>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="ConfigItem" type="object">
                         <field name="Number" type="string"/>
                         <field name="Class" type="string"/>
@@ -80,7 +80,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="ConfigItemID" type="string"/>
                         <field name="Number" type="string"/>
                     </body>
@@ -89,7 +89,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="faultcode" type="string"/>
                         <field name="faultstring" type="string"/>
                     </body>
@@ -103,7 +103,7 @@
                 <header>
                     <item name="Content-Type" type="string"/>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="ConfigItemID" type="string"/>
                     <field name="ConfigItem" type="object">
                         <field name="Number" type="string"/>
@@ -122,7 +122,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="ConfigItemID" type="string"/>
                         <field name="Number" type="string"/>
                     </body>
@@ -131,7 +131,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="faultcode" type="string"/>
                         <field name="faultstring" type="string"/>
                     </body>
@@ -145,7 +145,7 @@
                 <header>
                     <item name="Content-Type" type="string" >application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="ConfigItem" type="object">
                         <field name="Number" type="string"/>
                         <field name="Class" type="string"/>
@@ -160,7 +160,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <!-- for empty or not need to ask a user -->
                         <field name="ConfigItemIDs" type="array"/>
                     </body>
@@ -169,7 +169,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="Error" type="object">
                             <field name="ErrorMessage"  type="string"/>
                             <field name="ErrorCode" type="string"/>
@@ -185,7 +185,7 @@
                 <header>
                     <item name="Content-Type" type="string" >application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="ConfigItemID" type="array"/>
                 </body>
             </request>
@@ -194,7 +194,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <!-- for empty or not need to ask a user -->
                         <field name="ConfigItemID" type="array"/>
                     </body>
@@ -203,7 +203,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="Error" type="object">
                             <field name="ErrorMessage"  type="string"/>
                             <field name="ErrorCode" type="string"/>
@@ -219,7 +219,7 @@
                 <header>
                     <item name="Content-Type" type="string"/>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="ConfigItemID" type="array"/>
                 </body>
             </request>
@@ -228,7 +228,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="ConfigItem" type="array">
                             <field name="Number" type="string"/>
                             <field name="Class" type="string"/>
@@ -245,7 +245,7 @@
                     <header>
                         <item name="Content-Type" type="string" >application/json</item>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="faultcode" type="string"/>
                         <field name="faultstring" type="string"/>
                     </body>

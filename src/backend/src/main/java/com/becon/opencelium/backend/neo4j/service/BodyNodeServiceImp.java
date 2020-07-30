@@ -16,7 +16,9 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.neo4j.entity.BodyNode;
+import com.becon.opencelium.backend.resource.connector.BodyResource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -24,8 +26,13 @@ import java.util.Map;
 @Service
 public class BodyNodeServiceImp implements BodyNodeService {
 
-    public static Map<String, Object> toResource(BodyNode entity){
-        return FieldNodeServiceImp.toResource(entity.getFields());
+    public static BodyResource toResource(BodyNode entity){
+        BodyResource bodyResource = new BodyResource();
+        bodyResource.setData(entity.getData());
+        bodyResource.setFormat(entity.getFormat());
+        bodyResource.setType(entity.getType());
+        bodyResource.setFields(FieldNodeServiceImp.toResource(entity.getFields()));
+        return bodyResource;
     }
 
     @Override

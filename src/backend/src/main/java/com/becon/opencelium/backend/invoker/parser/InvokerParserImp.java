@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.invoker.parser;
 
 import com.becon.opencelium.backend.factory.InvokerParserFactory;
 import com.becon.opencelium.backend.invoker.entity.*;
+import com.sun.xml.messaging.saaj.soap.ver1_1.BodyElement1_1Impl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -121,7 +122,7 @@ public class InvokerParserImp {
             String method = getMethod(node.getChildNodes());
             String endpoint = getEndpoint(node.getChildNodes());
             Map<String, String> header = getHeader(node.getChildNodes());
-            Map<String, Object> body = getBody(node.getChildNodes());
+            Body body = getBody(node.getChildNodes());
 
             request.setMethod(method);
             request.setEndpoint(endpoint);
@@ -162,10 +163,25 @@ public class InvokerParserImp {
         return xmlDomParser.doAction("header", node -> getItem(node.getChildNodes()));
     }
 
-    private Map<String, Object> getBody(NodeList nodeList){
-        InvokerParserFactory<Map<String, Object>> invokerParserFactory = new InvokerParserFactory<>();
-        XMLParser<Node, Map<String, Object>> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
-        return xmlDomParser.doAction("body", node -> getFields(node.getChildNodes()));
+    private Body getBody(NodeList nodeList){
+        InvokerParserFactory<Body> invokerParserFactory = new InvokerParserFactory<>();
+        XMLParser<Node, Body> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
+        return xmlDomParser.doAction("body", node -> {
+            Body body = new Body();
+
+            if (!node.hasAttributes()) {
+                return null;
+            }
+            String format= node.getAttributes().getNamedItem("format").getNodeValue();
+            String type = node.getAttributes().getNamedItem("type").getNodeValue();
+            String data = node.getAttributes().getNamedItem("data").getNodeValue();
+            Map<String, Object> fields = getFields(node.getChildNodes());
+            body.setFields(fields);
+            body.setData(data);
+            body.setFormat(format);
+            body.setType(type);
+            return body;
+        });
     }
 
     private Map<String, Object> getFields(NodeList nodeList){
@@ -215,7 +231,7 @@ public class InvokerParserImp {
         XMLParser<Node, ResultInv> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
         return xmlDomParser.doAction(resultType, node -> {
             Map<String, String> header = getHeader(node.getChildNodes());
-            Map<String, Object> body = getBody(node.getChildNodes());
+            Body body = getBody(node.getChildNodes());
             resultInv.setBody(body);
             resultInv.setHeader(header);
             resultInv.setStatus(node.getAttributes().getNamedItem("status").getNodeValue());

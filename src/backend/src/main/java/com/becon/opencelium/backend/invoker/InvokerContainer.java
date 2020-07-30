@@ -44,6 +44,8 @@ public class InvokerContainer {
                     return invoker;
                 }
             }
+
+            throw new RuntimeException("Invoker " + name + " from DB not found in invoker folder");
         }
         return invokers.get(name);
     }

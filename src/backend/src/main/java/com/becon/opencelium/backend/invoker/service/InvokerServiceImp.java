@@ -18,8 +18,10 @@ package com.becon.opencelium.backend.invoker.service;
 
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
+import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.neo4j.entity.BodyNode;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.ConditionUtility;
@@ -108,7 +110,7 @@ public class InvokerServiceImp implements InvokerService{
     //TODO: need to add path of field
     @Override
     public String findFieldType(String invokerName, String methodName, String exchangeType, String result, String fieldName) {
-        Map<String, Object> body = new HashMap<>();
+        Body body = null;
 
         if (exchangeType.equals("response") && result.equals("success")){
             body = invokerContainer.getByName(invokerName).getOperations().stream()
@@ -125,7 +127,7 @@ public class InvokerServiceImp implements InvokerService{
             body = functionInvoker.getRequest().getBody();
         }
 
-        Object type = findField(fieldName, body);
+        Object type = findField(fieldName, body.getFields());
 
         if(type instanceof HashMap){
             return "object";
@@ -143,26 +145,26 @@ public class InvokerServiceImp implements InvokerService{
         Invoker invoker = findByName(invokerName);
         FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
                 .findFirst().orElseThrow(() -> new RuntimeException("Method not found in invoker"));
-        Map<String, Object> body;
+        Map<String, Object> fields;
         if (exchangeType.equals("response") && result.equals("success")){
-            body = functionInvoker.getResponse().getSuccess().getBody();
+            fields = functionInvoker.getResponse().getSuccess().getBody().getFields();
         } else if (exchangeType.equals("response") && result.equals("fail")){
-            body = functionInvoker.getResponse().getFail().getBody();
+            fields = functionInvoker.getResponse().getFail().getBody().getFields();
         } else {
-            body = functionInvoker.getRequest().getBody();
+            fields = functionInvoker.getRequest().getBody().getFields();
         }
 
         String[] valueParts = ConditionUtility.getRefValue(path).split("\\.");
 
         Object value = new Object();
         for (String part : valueParts) {
-             value = body.get(part);
+             value = fields.get(part);
              if (value instanceof Map){
-                 body = ( Map<String, Object>) value;
+                 fields = ( Map<String, Object>) value;
              }
 
             if (value instanceof ArrayList){
-                body = (( ArrayList<Map<String, Object>>) value).get(0);
+                fields = (( ArrayList<Map<String, Object>>) value).get(0);
             }
         }
 
@@ -178,6 +180,10 @@ public class InvokerServiceImp implements InvokerService{
     }
 
     private Object findField(String field, Map<String, Object> body){
+
+        if (body == null) {
+            return null;
+        }
         Map<String, Object> fields = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : body.entrySet()) {

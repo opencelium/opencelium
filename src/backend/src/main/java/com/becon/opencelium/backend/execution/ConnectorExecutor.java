@@ -315,11 +315,19 @@ public class ConnectorExecutor {
         if (bodyNode == null){
             return "null";
         }
-        Map<String, Object> body = replaceValues(bodyNode.getFields());
+        Map<String, Object> fields = replaceValues(bodyNode.getFields());
 //        body = fieldNodeService.deleteEmptyFields(body); // user should determine which fields should be in body.
+        Object content = new Object();
+        if (bodyNode.getType().equals("array")){
+            List<Object> c = new ArrayList<>();
+            c.add(fields);
+            content = c;
+        } else {
+            content = fields;
+        }
         String result = "";
         try {
-            result =  new ObjectMapper().writeValueAsString(body);
+            result = new ObjectMapper().writeValueAsString(content);
         } catch (JsonProcessingException e){
             throw new RuntimeException(e);
         }

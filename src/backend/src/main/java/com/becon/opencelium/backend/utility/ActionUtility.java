@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.resource.connection.ConditionResource;
 import com.becon.opencelium.backend.resource.connection.MethodResource;
 import com.becon.opencelium.backend.resource.connection.OperatorResource;
+import com.becon.opencelium.backend.resource.connector.BodyResource;
 import com.becon.opencelium.backend.resource.connector.RequestResource;
 import com.becon.opencelium.backend.resource.connector.ResponseResource;
 import com.becon.opencelium.backend.resource.connector.ResultResource;
@@ -217,11 +218,14 @@ public class ActionUtility {
         return fieldNodeList;
     }
 
-    private BodyNode buildBody(Map<String, Object> body){
+    private BodyNode buildBody(BodyResource bodyResource){
         BodyNode bodyNode = new BodyNode();
         ErrorMessageData messageData = validationContext.get(connectionName);
         messageData.setLocation("body");
-        bodyNode.setFields(buildFields(body));
+        bodyNode.setData(bodyNode.getData());
+        bodyNode.setFormat(bodyNode.getFormat());
+        bodyNode.setType(bodyNode.getType());
+        bodyNode.setFields(buildFields(bodyResource.getFields()));
         return bodyNode;
     }
 

@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.invoker;
 
+import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -149,9 +150,9 @@ public class InvokerRequestBuilder{
 
     private String buildBody() {
         try {
-            Map<String,Object> body = functionInvoker.getRequest().getBody();
+           Body body = functionInvoker.getRequest().getBody();
             ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(body);
+            String json = objectMapper.writeValueAsString(body.getFields());
             for (RequestData data : requestData) {
                 String field = "{" + data.getField() + "}";
                 if (!json.contains(field)){
