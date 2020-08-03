@@ -30,7 +30,10 @@ public class BodyNode {
     @GeneratedValue
     private Long id;
 
-    private String name = "body";
+    final private String name = "body";
+    private String type;
+    private String format;
+    private String data;
 
     @Relationship(type = "has_field", direction = Relationship.OUTGOING)
     private List<FieldNode> fields;
@@ -53,5 +56,29 @@ public class BodyNode {
 
     public void setFields(List<FieldNode> fields) {
         this.fields = fields;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
     }
 }

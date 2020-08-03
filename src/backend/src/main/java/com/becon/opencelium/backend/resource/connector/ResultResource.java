@@ -28,13 +28,15 @@ public class ResultResource extends ResourceSupport {
     private Long nodeId;
     private String status;
     private Map<String, String> header;
-    private Map<String, Object> body;
+    private BodyResource body;
 
     public ResultResource() {
     }
 
     public ResultResource(ResultInv resultInv) {
-        this.body = resultInv.getBody();
+        if (resultInv.getBody() != null) {
+            this.body = new BodyResource(resultInv.getBody());
+        }
         this.header = resultInv.getHeader();
         this.status = resultInv.getStatus();
     }
@@ -63,11 +65,11 @@ public class ResultResource extends ResourceSupport {
         this.header = header;
     }
 
-    public Map<String, Object> getBody() {
+    public BodyResource getBody() {
         return body;
     }
 
-    public void setBody(Map<String, Object> body) {
+    public void setBody(BodyResource body) {
         this.body = body;
     }
 }

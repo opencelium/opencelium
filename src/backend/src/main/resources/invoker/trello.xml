@@ -43,7 +43,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                       <field name="id" type="string"/>
                       <field name="name" type="string"/>
                       <field name="closed" type="string"/>
@@ -72,7 +72,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                       <field name="id" type="string"/>
                       <field name="idBoard" type="string"/>
                       <field name="name" type="string"/>
@@ -99,7 +99,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                        <field name="id" type="string"/>
                        <field name="name" type="string"/>
                        <field name="shortUrl" type="string"/>
@@ -135,7 +135,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                        <field name="id" type="string"/>
                        <field name="name" type="string"/>
                        <field name="date" type="string"/>
@@ -170,7 +170,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                        <field name="id" type="string"/>
                        <field name="date" type="string"/>
                        <field name="idMemberCreator" type="string"/>
@@ -198,7 +198,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                        <field name="id" type="string"/>
                        <field name="dateLastActivity" type="string"/>
                     </body>
@@ -222,7 +222,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                        <field name="id" type="string"/>
                        <field name="date" type="string"/>
                     </body>
@@ -246,7 +246,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                        <field name="id" type="string"/>
                        <field name="date" type="string"/>
                        <field name="idMemberCreator" type="string"/>

@@ -24,14 +24,16 @@ public class ResultInv {
 
     private String status;
     private Map<String, String> header;
-    private Map<String, Object> body;
+    private Body body;
 
     public ResultInv() {
     }
 
     public ResultInv(ResultResource result) {
         this.header = result.getHeader();
-        this.body = result.getBody();
+        if (result.getBody() != null) {
+            this.body = new Body(result.getBody());
+        }
     }
 
     public String getStatus() {
@@ -50,11 +52,11 @@ public class ResultInv {
         this.header = header;
     }
 
-    public Map<String, Object> getBody() {
+    public Body getBody() {
         return body;
     }
 
-    public void setBody(Map<String, Object> body) {
+    public void setBody(Body body) {
         this.body = body;
     }
 }

@@ -25,7 +25,7 @@ public class RequestInv {
     private String method;
     private String endpoint;
     private Map<String, String> header;
-    private Map<String, Object> body;
+    private Body body;
 
     public RequestInv() {
     }
@@ -34,7 +34,7 @@ public class RequestInv {
         this.method = requestResource.getMethod();
         this.method = requestResource.getEndpoint();
         this.header = requestResource.getHeader();
-        this.body = requestResource.getBody();
+        this.body = new Body(requestResource.getBody());
     }
 
     public String getMethod() {
@@ -61,11 +61,11 @@ public class RequestInv {
         this.header = header;
     }
 
-    public Map<String, Object> getBody() {
+    public Body getBody() {
         return body;
     }
 
-    public void setBody(Map<String, Object> body) {
+    public void setBody(Body body) {
         this.body = body;
     }
 }

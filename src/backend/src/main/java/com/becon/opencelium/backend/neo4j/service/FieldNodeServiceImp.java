@@ -327,13 +327,13 @@ public class FieldNodeServiceImp implements FieldNodeService {
         FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
                 .findFirst().orElseThrow(() -> new RuntimeException("Method not found in invoker"));
 
-        Map<String, Object> body;
+        Map<String, Object> fields;
         if (exchangeType.equals("response") && result.equals("success")){
-            body = functionInvoker.getResponse().getSuccess().getBody();
+            fields = functionInvoker.getResponse().getSuccess().getBody().getFields();
         } else if (exchangeType.equals("response") && result.equals("fail")){
-            body = functionInvoker.getResponse().getFail().getBody();
+            fields = functionInvoker.getResponse().getFail().getBody().getFields();
         } else {
-            body = functionInvoker.getRequest().getBody();
+            fields = functionInvoker.getRequest().getBody().getFields();
         }
 
         Object value = new Object();
@@ -347,17 +347,17 @@ public class FieldNodeServiceImp implements FieldNodeService {
 
         boolean exists = false;
         for (String part : valueParts) {
-            exists = body.containsKey(part);
+            exists = fields.containsKey(part);
             if (!exists){
                 continue;
             }
 
-            value = body.get(part);
+            value = fields.get(part);
             if (value instanceof Map){
-                body = ( Map<String, Object>) value;
+                fields = ( Map<String, Object>) value;
             }
             if (value instanceof ArrayList){
-                body = (( ArrayList<Map<String, Object>>) value).get(0);
+                fields = (( ArrayList<Map<String, Object>>) value).get(0);
             }
 
         }

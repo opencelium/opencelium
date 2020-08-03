@@ -56,7 +56,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="foreign-source" type="string"/>
                     <field name="node" type="array"/>
                 </body>
@@ -86,7 +86,7 @@
             <response>
                 <success status="200">
                     <header/>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="count" type="number"/>
                         <field name="offset" type="number"/>
                         <field name="totalCount" type="number"/>
@@ -118,7 +118,7 @@
             <response>
                 <success status="200">
                     <header/>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="model-import" type="array">
                             <field name="date-stamp" type="number"/>
                             <field name="foreign-source" type="string"/>
@@ -150,7 +150,7 @@
             <response>
                 <success status="200">
                     <header/>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="date-stamp" type="number"/>
                         <field name="foreign-source" type="string"/>
                         <field name="last-import" type="number"/>
@@ -175,7 +175,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="rescanExisting" type="boolean"/>
                 </body>
             </request>
@@ -199,7 +199,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="nodeCheck" type="number"/>
                     <field name="nodeData" type="number"/>
                 </body>
@@ -334,7 +334,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="foreign-id" type="string"/>
                     <field name="node-label" type="string"/>
                     <field name="interface" type="array">
