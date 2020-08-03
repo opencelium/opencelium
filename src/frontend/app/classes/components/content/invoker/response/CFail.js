@@ -14,26 +14,27 @@
  */
 
 
-import {isEmptyObject} from "@utils/app";
 import {
     convertFieldNameForBackend, convertHeaderFormatToObject,
     getFieldsForSelectSearch, parseHeader
 } from "@change_component/form_elements/form_connection/form_methods/help";
+import CBody, {BODY_TYPE} from "@classes/components/content/invoker/CBody";
+import {instanceOf} from "prop-types";
 
 /**
  * Class Fail for Response
  */
 export default class CFail{
 
-    constructor(status = '', body = {}, header = []){
+    constructor(status = '', body = null, header = []){
         this._status = status;
-        this._body = body === null ? {} : body;
+        this._body = CBody.createBody(body);
         this._header = parseHeader(header);
     }
 
     static createFail(fail = null){
         let status = fail && fail.hasOwnProperty('status') ? fail.status : '';
-        let body = fail && fail.hasOwnProperty('body') ? fail.body : {};
+        let body = fail && fail.hasOwnProperty('body') ? fail.body : null;
         let header = fail && fail.hasOwnProperty('header') ? fail.header : [];
         return new CFail(status, body, header);
     }
@@ -55,7 +56,23 @@ export default class CFail{
     }
 
     set body(body){
-        this._body = body;
+        if(!instanceOf(CBody)) {
+            this._body = CBody.createBody(body);
+        } else{
+            this._body = body;
+        }
+    }
+
+    getBodyFields(){
+        return this._body.fields;
+    }
+
+    setBodyFields(fields){
+        this._body.fields = fields;
+    }
+
+    getBodyType(){
+        return this._body.type;
     }
 
     get header(){
@@ -87,17 +104,22 @@ export default class CFail{
     }
 
     convertFieldNameForBackend(fieldName){
-        return convertFieldNameForBackend(this._body, fieldName);
+        return convertFieldNameForBackend(this.getBodyFields(), fieldName);
     }
 
     getFields(searchField){
-        return getFieldsForSelectSearch(this._body, searchField);
+        let fields = this.getBodyFields();
+        let type = this.getBodyType();
+        if(type === BODY_TYPE.ARRAY && fields.length > 0){
+            fields = fields[0];
+        }
+        return getFieldsForSelectSearch(fields, searchField);
     }
 
     getObject(){
         let obj = {
             status: this._status,
-            body: isEmptyObject(this._body) ? null : this._body,
+            body: this._body.getObject(),
         };
         if(this._header && this._header.length > 0){
             obj.header = convertHeaderFormatToObject(this._header);

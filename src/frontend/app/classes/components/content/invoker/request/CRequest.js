@@ -13,11 +13,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {isEmptyObject, isString, isArray, isObject} from "@utils/app";
+import {isString} from "@utils/app";
 import {
     convertHeaderFormatToObject,
     parseHeader
 } from "@change_component/form_elements/form_connection/form_methods/help";
+import CBody from "@classes/components/content/invoker/CBody";
+import {instanceOf} from "prop-types";
 export const METHOD_TYPES = [
     {value: 'POST', label: 'POST'},
     {value: 'GET', label: 'GET'},
@@ -29,24 +31,13 @@ export const METHOD_TYPES = [
  */
 export default class CRequest{
 
-    constructor(query = '', affix = '', body = {}, method = '', header = [], operation = null){
+    constructor(query = '', affix = '', body = null, method = '', header = [], operation = null){
         this._operation = operation ? operation : null;
         const parsedQuery = this.parseQuery(query);
         this._query = parsedQuery.query;
         this._affix = parsedQuery.affix;
-        //this._body = body === null ? {} : body;
-        this.body = `<?xml version="1.0" encoding="UTF-8" ?>
-<invoker type="RESTful">
-    <name>trello</name>
-    <description>trello description</description>
-    <hint>This interface provides the apikey auth. First you need to create a apikey token (https://trello.com/app-key/). Check out the documentation https://developer.atlassian.com/cloud/trello/rest/</hint>
-    <requiredData>
-        <item name="url" type="string" visibility="private">https://api.trello.com</item>
-        <item name="username" type="string" visibility="public"/>
-        <item name="key" type="string" visibility="public"/>
-        <item name="token" type="string" visibility="protected"/>
-    </requiredData></invoker>`;
-        this._invokerBody = body === null ? {} : body;
+        this._body = CBody.createBody(body);
+        this._invokerBody = CBody.createBody(body);
         this._method = method;
         this._header = parseHeader(header);
     }
@@ -54,7 +45,7 @@ export default class CRequest{
     static createRequest(request = null){
         let query = request && request.hasOwnProperty('endpoint') ? request.endpoint : '';
         let affix = '';
-        let body = request && request.hasOwnProperty('body') ? request.body : {};
+        let body = request && request.hasOwnProperty('body') ? request.body : null;
         let method = request && request.hasOwnProperty('method') ? request.method : '';
         let header = request && request.hasOwnProperty('header') ? request.header : [];
         let operation = request && request.hasOwnProperty('operation') ? request.operation : null;
@@ -101,6 +92,8 @@ export default class CRequest{
     set affix(affix){
         if(isString(affix)) {
             this._affix = affix;
+        } else{
+            consoleError(`CRequest has a wrong set of affix: ${affix}`);
         }
     }
 
@@ -109,7 +102,19 @@ export default class CRequest{
     }
 
     set body(body){
-        this._body = body;
+        if(!instanceOf(CBody)) {
+            this._body = CBody.createBody(body);
+        } else{
+            this._body = body;
+        }
+    }
+
+    getBodyFields(){
+        return this._body.fields;
+    }
+
+    setBodyFields(fields){
+        this._body.fields = fields;
     }
 
     get method(){
@@ -168,7 +173,7 @@ export default class CRequest{
     getObject(){
         let obj = {
             endpoint: this._affix !== '' ? `${this._query}/${this._affix}` : this._query,
-            body: isEmptyObject(this._body) ? null : this._body,
+            body: this._body.getObject(),
             method: this._method,
         };
         if(this._header && this._header.length > 0){

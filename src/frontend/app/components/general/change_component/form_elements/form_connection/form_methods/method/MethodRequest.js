@@ -37,6 +37,7 @@ import CConnectorItem from "@classes/components/content/connection/CConnectorIte
 import {convertFieldNameForBackend} from "../help";
 import JsonBody from "./JsonBody";
 import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
+import {BODY_FORMAT} from "@classes/components/content/invoker/CBody";
 
 
 class MethodRequest extends Component{
@@ -102,7 +103,7 @@ class MethodRequest extends Component{
     parseFieldOnArrays(field){
         const {method} = this.props;
         let invokerBody = method.request.invokerBody;
-        return convertFieldNameForBackend(invokerBody, field, true);
+        return convertFieldNameForBackend(invokerBody.fields, field, true);
     }
 
     updateFieldBinding(reactJson){
@@ -178,7 +179,7 @@ class MethodRequest extends Component{
         this.setCurrentItem();
         this.updateFieldBinding(reactJson);
         this.cleanFieldBinding(reactJson);
-        method.setRequestBody(body);
+        method.setRequestBodyFields(body);
         updateEntity();
     }
 
@@ -193,30 +194,35 @@ class MethodRequest extends Component{
 
     renderBody(){
         const {id, readOnly, method, connector, connection, updateEntity} = this.props;
-        return (
-            <XmlBody
-                id={id}
-                readOnly={readOnly}
-                method={method}
-                connection={connection}
-                connector={connector}
-                updateBody={::this.updateBody}
-                updateEntity={updateEntity}
-                setCurrentItem={::this.setCurrentItem}
-            />
-        );
-        /*return (
-            <JsonBody
-                id={id}
-                readOnly={readOnly}
-                method={method}
-                connection={connection}
-                connector={connector}
-                updateBody={::this.updateBody}
-                updateEntity={updateEntity}
-                setCurrentItem={::this.setCurrentItem}
-            />
-        );*/
+        switch(method.bodyFormat){
+            case BODY_FORMAT.JSON:
+                return (
+                    <JsonBody
+                        id={id}
+                        readOnly={readOnly}
+                        method={method}
+                        connection={connection}
+                        connector={connector}
+                        updateBody={::this.updateBody}
+                        updateEntity={updateEntity}
+                        setCurrentItem={::this.setCurrentItem}
+                    />
+                );
+            case BODY_FORMAT.XML:
+                return (
+                    <XmlBody
+                        id={id}
+                        readOnly={readOnly}
+                        method={method}
+                        connection={connection}
+                        connector={connector}
+                        updateBody={::this.updateBody}
+                        updateEntity={updateEntity}
+                        setCurrentItem={::this.setCurrentItem}
+                    />
+                );
+        }
+        return null;
     }
 
     render(){

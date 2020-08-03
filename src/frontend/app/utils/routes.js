@@ -14,22 +14,19 @@
  */
 
 import React from 'react';
-import {Route, IndexRoute, DefaultRoute} from 'react-router';
+import {Route, IndexRoute} from 'react-router';
 
 import isAuth from '../hocs/isAuth';
 import isNotAuth from '../hocs/isNotAuth';
 import Layout from '@components/layout/Layout';
 import PageNotFound from "@components/general/app/PageNotFound";
-import XmlEditor from "@basic_components/xml_editor/XmlEditor";
 import LoadableRouteComponents from './LoadableRouteComponents';
-
 
 
 /**
  * create routes for app
  */
 export const createRoutes = (store) => {
-
     return (
         <Route path='/' component={Layout}>
             <IndexRoute component={isAuth(LoadableRouteComponents.DashboardLayout, store)}/>
@@ -94,7 +91,6 @@ export const createRoutes = (store) => {
             </Route>
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfile, store)}/>
             <Route path='/login' component={isNotAuth(LoadableRouteComponents.Login, store)}/>
-            <Route path='/test' component={XmlEditor}/>
             <Route path='/*' component={PageNotFound}/>
         </Route>
     );

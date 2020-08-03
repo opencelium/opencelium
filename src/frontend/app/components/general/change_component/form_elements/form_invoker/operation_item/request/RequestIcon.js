@@ -76,7 +76,7 @@ class RequestIcon extends Component{
     getRequest(){
         const {request, requestData} = this.props;
         let endpoint = request.endpoint;
-        let body = JSON.stringify(request.body);
+        let body = JSON.stringify(request.getBodyFields());
         if(requestData){
             for(let param in requestData){
                 endpoint = endpoint.split(`{${param}}`).join(requestData[param]);
@@ -84,14 +84,13 @@ class RequestIcon extends Component{
             }
         }
         request.endpoint = endpoint;
-        request.body = JSON.parse(body);
+        request.setBodyFields(JSON.parse(body));
         return request;
     }
     
     render(){
         const {showRequestDialog, request, activeTab, startSendingRequest} = this.state;
         const {isVisible, response, connectorType, requestData} = this.props;
-        //const responseEntity = response.success ? CSuccess.createSuccess(response) : CFail.createFail(response);
         const responseEntity = CSuccess.createSuccess(response);
         return(
             <div className={connectorType === CONNECTOR_FROM ? styles.connection_request_icon_left : styles.connection_request_icon_right}>

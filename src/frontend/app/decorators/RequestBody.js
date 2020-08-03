@@ -37,7 +37,7 @@ export function RequestBody(CRequestType){
                 this.state = {
                     showImportJson: false,
                     isBodyEditOpened: false,
-                    importJsonBody: JSON.stringify(props.method.request.body),
+                    importJsonBody: JSON.stringify(props.method.request.getBodyFields()),
                     showEnhancement: false,
                     currentEnhancement: null,
                 };

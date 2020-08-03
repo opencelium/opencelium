@@ -85,5 +85,4 @@ export default class CXmlReParent{
         }
         return result;
     }
-
 }
