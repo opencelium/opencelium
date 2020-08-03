@@ -20,20 +20,7 @@ export default class CBody{
         this._type = this.checkType(type) ? type : BODY_TYPE.OBJECT;
         this._format = this.checkFormat(format) ? format : BODY_FORMAT.JSON;
         this._data = this.checkData(data) ? data : BODY_DATA.RAW;
-        /*
-        * RELEASE: remove xml test data
-        */
-        this._fields = this._format === BODY_FORMAT.XML ? `<?xml version="1.0" encoding="UTF-8" ?>
-<invoker type="RESTful">
-    <name>trello</name>
-    <description>trello description</description>
-    <hint>This interface provides the apikey auth. First you need to create a apikey token (https://trello.com/app-key/). Check out the documentation https://developer.atlassian.com/cloud/trello/rest/</hint>
-    <requiredData>
-        <item name="url" type="string" visibility="private">https://api.trello.com</item>
-        <item name="username" type="string" visibility="public"/>
-        <item name="key" type="string" visibility="public"/>
-        <item name="token" type="string" visibility="protected"/>
-    </requiredData></invoker>` : fields === null ? {} : fields;
+        this._fields = fields === null ? {} : fields;
     }
 
     static createBody(body){
