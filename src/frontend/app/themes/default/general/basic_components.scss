@@ -458,14 +458,14 @@
     cursor: pointer;
     font-size: 16px !important;
     position: absolute;
-    background: white;
+    z-index: 10;
   }
 }
 .add_tag_icon_inside{
   cursor: pointer;
   font-size: 16px !important;
   position: absolute;
-  background: white;
+  z-index: 10;
 }
 .property{
   cursor: text;

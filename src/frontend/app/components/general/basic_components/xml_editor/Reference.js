@@ -11,7 +11,7 @@ class Reference extends React.Component{
     add(){
         const {ReferenceComponent} = this.props;
         ReferenceComponent.self.current.setIdValue();
-        this.props.add(false);
+        this.props.add();
     }
 
     render(){

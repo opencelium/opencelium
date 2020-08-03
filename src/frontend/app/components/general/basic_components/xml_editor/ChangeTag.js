@@ -17,6 +17,7 @@ import Button from "@basic_components/buttons/Button";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
 import TagType from "@basic_components/xml_editor/TagType";
+import Value from "@basic_components/xml_editor/Value";
 
 class ChangeTag extends React.Component{
     constructor(props) {
@@ -66,7 +67,7 @@ class ChangeTag extends React.Component{
 
     change(){
         const {name, valueType, text} = this.state;
-        const {change, tag, close, mode, parent} = this.props;
+        const {change, tag, close, mode, parent, ReferenceComponent} = this.props;
         if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
             if (name === '') {
                 alert('Name is a required field');
@@ -119,19 +120,21 @@ class ChangeTag extends React.Component{
                 tag.updateTag(name, tags);
                 break;
         }
+        let referenceDiv = document.getElementById(ReferenceComponent.id);
+        referenceDiv.innerText = '';
         change();
         close();
     }
 
     render(){
         const {name, valueType, text} = this.state;
-        const {tag, mode, close} = this.props;
+        const {tag, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
                 <TooltipFontIcon tooltip={'Close'} value={'close'} className={styles.close_icon} onClick={close}/>
                 <TagType valueType={valueType} changeValueType={::this.changeValueType}/>
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'} theme={{input: styles.change_tag_name}}/>}
-                {valueType === TAG_VALUE_TYPES.TEXT && <Input id={`${tag.uniqueIndex}_text`} value={text} onChange={::this.changeText} onKeyDown={::this.pressKey} label={'Text'}/>}
+                {valueType === TAG_VALUE_TYPES.TEXT && <Value ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={'Text'}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
             </div>,
             document.getElementById('oc_modal')

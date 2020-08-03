@@ -235,6 +235,7 @@ export function RequestBody(CRequestType){
                     return this.renderPlaceholder();
                 }
                 let ownBodyStyles = {left: '-20px'};
+                let hasReferenceComponent = !(method.index === '0' && connector.getConnectorType() === CONNECTOR_FROM);
                 if(bodyStyles){
                     ownBodyStyles = bodyStyles;
                 }
@@ -246,7 +247,7 @@ export function RequestBody(CRequestType){
                         {this.renderEnhancement()}
                         <Component
                             {...this.props}
-                            ReferenceComponent={{
+                            ReferenceComponent={hasReferenceComponent ? {
                                 getComponent: (params) => {
                                     const {submitEdit} = params;
                                     return (
@@ -265,8 +266,8 @@ export function RequestBody(CRequestType){
                                     );},
                                 id: `${id}_reference_component`,
                                 self: this.paramGenerator,
-                            }}
-                            onReferenceClick={::this.openEnhancement}
+                            } : null}
+                            onReferenceClick={hasReferenceComponent ? ::this.openEnhancement : null}
                         />
                         {
                             !readOnly && CRequestType.hasImport()

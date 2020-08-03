@@ -3,11 +3,12 @@ import PropTypes from 'prop-types';
 import Property from "@basic_components/xml_editor/Property";
 import styles from '@themes/default/general/basic_components.scss';
 import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/xml_editor/CTag";
-import {isString} from "@utils/app";
+import {checkReferenceFormat, isString} from "@utils/app";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
 import ChangeProperty from "@basic_components/xml_editor/ChangeProperty";
 import ChangeTag from "@basic_components/xml_editor/ChangeTag";
+import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
 
 const XML_TAG_INDENT = 15;
 
@@ -30,18 +31,6 @@ class Tag extends React.Component{
         };
     }
 
-    showAddTagIcon(){
-        this.setState({
-            hasAddTagIcon: true,
-        });
-    }
-
-    hideAddTagIcon(){
-        this.setState({
-            hasAddTagIcon: false,
-        });
-    }
-
     showAddTagPopup(){
         this.setState({
             hasAddTagPopup: true,
@@ -51,6 +40,10 @@ class Tag extends React.Component{
     hideAddTagPopup(){
         this.setState({
             hasAddTagPopup: false,
+            hasDeleteTagIcon: false,
+            hasAddPropertyIcon: false,
+            hasAddTagIcon: false,
+            hasCopyToClipboardIcon: false,
         });
     }
 
@@ -63,6 +56,10 @@ class Tag extends React.Component{
     hideUpdateTagPopup(){
         this.setState({
             hasUpdateTagPopup: false,
+            hasDeleteTagIcon: false,
+            hasAddPropertyIcon: false,
+            hasAddTagIcon: false,
+            hasCopyToClipboardIcon: false,
         });
     }
 
@@ -76,6 +73,10 @@ class Tag extends React.Component{
         this.setState({
             hasAddPropertyPopup: false,
             property: CProperty.createProperty(),
+            hasDeleteTagIcon: false,
+            hasAddPropertyIcon: false,
+            hasAddTagIcon: false,
+            hasCopyToClipboardIcon: false,
         });
     }
 
@@ -143,13 +144,26 @@ class Tag extends React.Component{
         })
     }
 
+    renderTagValue(){
+        const {tag} = this.props;
+        let isReference = checkReferenceFormat(tag.tags);
+        if(isReference){
+            return (
+                <ReferenceValues references={tag.tags} styles={{padding: '0 12px', margin: '0 0 0 6px', width: 0, height: 0,fontSize: '12px'}} maxVisible={4} hasDelete={false}/>
+            );
+        }
+        return(
+            <span>{tag.tags}</span>
+        );
+    }
+
     renderSubTags(){
         const {tag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         if(tag.minimized){
             return <TooltipFontIcon className={styles.expand_tag} tooltip={'more'} value={'more_horiz'} onClick={::this.toggleTag}/>;
         }
         if(isString(tag.tags)){
-            return <span>{tag.tags}</span>;
+            return this.renderTagValue();
         }
         if(tag.tags.length === 0 && !readOnly){
             return <div><TooltipFontIcon id={`${tag.uniqueIndex}_add_tag`} className={styles.add_tag_icon_outside} tooltip={'Add Item'} value={'add_circle_outline'} onClick={::this.showAddTagPopup}/></div>;
