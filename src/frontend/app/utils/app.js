@@ -78,8 +78,13 @@ export function checkReferenceFormat(value){
  * to get top and left value of the element according to window
  */
 export function findTopLeft(elemId) {
-    let rec = document.getElementById(elemId).getBoundingClientRect();
-    return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+    let elem = document.getElementById(elemId);
+    if(elem) {
+        let rec = elem.getBoundingClientRect();
+        return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+    } else{
+        return {top: 0, left: 0};
+    }
 }
 
 /**

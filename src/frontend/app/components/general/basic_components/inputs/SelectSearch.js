@@ -26,7 +26,7 @@ import {
 import Input from "./Input";
 
 const PARAM_DELIMITER = '.';
-const MIN_SEARCH_WORD_LENGTH = 2;
+const MIN_SEARCH_WORD_LENGTH = 0;
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -164,7 +164,7 @@ class SelectSearch extends Component{
         if(result.length > 0) {
             result = result.map(field => {
                 let {value} = field;
-                let label = field.value;
+                let label = field.hasOwnProperty('label') ? field.label : field.value;
                 switch(field.type){
                     case FIELD_TYPE_STRING:
                         break;

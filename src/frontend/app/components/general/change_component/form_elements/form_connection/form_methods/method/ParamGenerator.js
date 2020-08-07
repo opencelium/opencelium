@@ -29,6 +29,8 @@ import Input from "@basic_components/inputs/Input";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CStatement, {STATEMENT_RESPONSE} from "@classes/components/content/connection/operator/CStatement";
 import {dotColor} from "../help";
+import {findTopLeft} from "@utils/app";
+import ReactDOM from "react-dom";
 
 
 class ParamGenerator extends Component {
@@ -41,6 +43,9 @@ class ParamGenerator extends Component {
             field: '',
             responseType: RESPONSE_SUCCESS,
         };
+        const {top, left} = findTopLeft(props.parentId);
+        this.top = top;
+        this.left = left;
     }
 
     componentWillUnmount(){
@@ -144,7 +149,7 @@ class ParamGenerator extends Component {
 
     renderMethodSelect(){
         const {color} = this.state;
-        const {connection, readOnly, isVisible} = this.props;
+        const {connection, readOnly} = this.props;
         let method = connection.toConnector.getMethodByColor(color);
         let connector = connection.toConnector;
         if(!method){
@@ -152,7 +157,7 @@ class ParamGenerator extends Component {
             connector = connection.fromConnector;
         }
         let value = method ? method.getValueForSelectInput(connector) : null;
-        let selectThemeInputStyle = {width: isVisible ? '25%' : '70px', float: 'left'};
+        let selectThemeInputStyle = {width: '70px', float: 'left'};
         let source = this.getOptionsForMethods();
         selectThemeInputStyle.padding = 0;
         return (
@@ -250,10 +255,10 @@ class ParamGenerator extends Component {
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method, isVisible, submitEdit} = this.props;
+        let {method, submitEdit} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
-        let divStyles = {float: 'left', width: isVisible ? '75%' : '130px'};
+        let divStyles = {float: 'left', width: '130px'};
         inputTheme.input = styles.param_generator_param;
         return (
             <div style={divStyles}>
@@ -308,22 +313,22 @@ class ParamGenerator extends Component {
         return null;
     }
 
-    render(){
+    renderGenerator(){
         const {showGenerator} = this.state;
-        const {isVisible, isAbsolute} = this.props;
+        const {isVisible, isAbsolute, parentId, submitEdit} = this.props;
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
         return(
-            <div className={isAbsolute ? isVisible ? styles.param_generator_json : styles.param_generator : styles.param_generator_not_absolute}>
+            <div className={isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} style={parentId ? {left: this.left, top: this.top} : {}}>
                 {::this.renderArrowIcon()}
                 {
                     showGenerator || isVisible
                         ?
-                        <div key={2} className={isAbsolute ? isVisible ? styles.param_generator_form_json : styles.param_generator_form : ''}>
+                        <div key={2} className={isAbsolute ? styles.param_generator_form : ''}>
                             {this.renderMethodSelect()}
                             {this.renderParamInput()}
-                            {!isVisible ? <TooltipFontIcon tooltip={'Add'} value={'add'} className={styles.param_generator_form_add} onClick={::this.addParam}/> : null}
+                            <TooltipFontIcon tooltip={'Add'} value={'add'} className={styles.param_generator_form_add} onClick={submitEdit ? submitEdit : ::this.addParam}/>
                         </div>
                         :
                         null
@@ -331,10 +336,21 @@ class ParamGenerator extends Component {
             </div>
         );
     }
+
+    render(){
+        const {parentId} = this.props;
+        if(parentId){
+            return ReactDOM.createPortal(this.renderGenerator(),
+                document.getElementById('oc_modal'));
+        }
+        return this.renderGenerator();
+    }
 }
 
 ParamGenerator.defaultProps = {
     isAbsolute: true,
+    parentId: '',
+    submitEdit: null,
 };
 
 export default ParamGenerator;

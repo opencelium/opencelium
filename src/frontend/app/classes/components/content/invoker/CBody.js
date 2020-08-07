@@ -1,10 +1,9 @@
 import {consoleLog, isArray, isEmptyObject, isObject} from "@utils/app";
-
-export const BODY_TYPE = {
-    OBJECT: 'object',
-    ARRAY: 'array',
-    STRING: 'string',
-};
+import {
+    FIELD_TYPE_ARRAY,
+    FIELD_TYPE_OBJECT,
+    FIELD_TYPE_STRING
+} from "@classes/components/content/connection/method/CMethodItem";
 
 export const BODY_FORMAT = {
     JSON: 'json',
@@ -15,16 +14,19 @@ export const BODY_DATA = {
     RAW: 'raw',
 };
 
+export const ATTRIBUTES_MARK = '__oc__attributes';
+export const VALUE_MARK = '__oc__value';
+
 export default class CBody{
-    constructor(type = BODY_TYPE.OBJECT, format = BODY_FORMAT.JSON, data = BODY_DATA.RAW, fields) {
-        this._type = this.checkType(type) ? type : BODY_TYPE.OBJECT;
+    constructor(type = FIELD_TYPE_OBJECT, format = BODY_FORMAT.JSON, data = BODY_DATA.RAW, fields) {
+        this._type = this.checkType(type) ? type : FIELD_TYPE_OBJECT;
         this._format = this.checkFormat(format) ? format : BODY_FORMAT.JSON;
         this._data = this.checkData(data) ? data : BODY_DATA.RAW;
         this._fields = fields === null ? {} : fields;
     }
 
     static createBody(body){
-        const type = body && body.hasOwnProperty('type') ? body.type : BODY_TYPE.OBJECT;
+        const type = body && body.hasOwnProperty('type') ? body.type : FIELD_TYPE_OBJECT;
         const format = body && body.hasOwnProperty('format') ? body.format : BODY_FORMAT.JSON;
         const data = body && body.hasOwnProperty('data') ? body.data : BODY_DATA.RAW;
         const fields = body && body.hasOwnProperty('fields') ? body.fields : isObject(body) ? body : {};
@@ -32,10 +34,8 @@ export default class CBody{
     }
 
     checkType(bodyType){
-        for(const type in BODY_TYPE) {
-            if(bodyType === BODY_TYPE[type]){
-                return true;
-            }
+        if(bodyType === FIELD_TYPE_STRING || bodyType === FIELD_TYPE_OBJECT || bodyType === FIELD_TYPE_ARRAY){
+            return true;
         }
         consoleLog(`Body has a wrong type: ${bodyType}`);
         return false;
@@ -66,7 +66,7 @@ export default class CBody{
     }
 
     set type(type){
-        this._type = this.checkType(type) ? type : BODY_TYPE.STRING;
+        this._type = this.checkType(type) ? type : FIELD_TYPE_STRING;
     }
 
     get format(){
@@ -90,10 +90,11 @@ export default class CBody{
     }
 
     set fields(fields){
-        if(fields !== null && !isObject(fields)){
-            if(isArray(fields)){
-                this._type = BODY_TYPE.ARRAY;
-            }
+        if(isArray(fields)){
+            this._type = FIELD_TYPE_ARRAY;
+        }
+        if(isObject(fields)){
+            this._type = FIELD_TYPE_OBJECT;
         }
         this._fields = fields === null ? {} : fields;
     }

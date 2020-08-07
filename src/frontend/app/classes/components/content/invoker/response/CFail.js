@@ -16,10 +16,11 @@
 
 import {
     convertFieldNameForBackend, convertHeaderFormatToObject,
-    getFieldsForSelectSearch, parseHeader
+    getFieldsForSelectSearch, hasArrayMark, parseHeader
 } from "@change_component/form_elements/form_connection/form_methods/help";
-import CBody, {BODY_TYPE} from "@classes/components/content/invoker/CBody";
+import CBody from "@classes/components/content/invoker/CBody";
 import {instanceOf} from "prop-types";
+import {FIELD_TYPE_ARRAY} from "@classes/components/content/connection/method/CMethodItem";
 
 /**
  * Class Fail for Response
@@ -110,10 +111,16 @@ export default class CFail{
     getFields(searchField){
         let fields = this.getBodyFields();
         let type = this.getBodyType();
-        if(type === BODY_TYPE.ARRAY && fields.length > 0){
-            fields = fields[0];
+        if(type === FIELD_TYPE_ARRAY){
+            if(hasArrayMark(searchField)){
+                let index = searchField.indexOf('.') + 1;
+                return getFieldsForSelectSearch(fields, searchField.substring(index));
+            } else{
+                return [{value: '[*]', type: FIELD_TYPE_ARRAY}, {value: '[0]', type: FIELD_TYPE_ARRAY}];
+            }
+        } else {
+            return getFieldsForSelectSearch(fields, searchField);
         }
-        return getFieldsForSelectSearch(fields, searchField);
     }
 
     getObject(){

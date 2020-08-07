@@ -262,6 +262,8 @@ export function RequestBody(CRequestType){
                                             submitEdit={submitEdit}
                                             id={`${id}_reference_component`}
                                             isAbsolute={CRequestType.isAbsolute()}
+                                            parentId={`${id}_reference_component_editor_value`}
+                                            hasArrowIcon={true}
                                         />
                                     );},
                                 id: `${id}_reference_component`,

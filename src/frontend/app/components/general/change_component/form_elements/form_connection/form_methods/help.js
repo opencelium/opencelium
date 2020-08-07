@@ -15,11 +15,12 @@
 
 
 
-import {isArray, isObject, isString} from "@utils/app";
+import {isArray, isNumber, isObject, isString} from "@utils/app";
 import {
     FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
     FIELD_TYPE_STRING
 } from "@classes/components/content/connection/method/CMethodItem";
+import {ATTRIBUTES_MARK, VALUE_MARK} from "@classes/components/content/invoker/CBody";
 
 /**
  * constants from backend
@@ -84,17 +85,32 @@ export function convertFieldNameForBackend(invokerBody, fieldName, arrayCanBeEmp
     return result;
 }
 
+export function hasArrayMark(str){
+    let splitStr = str.split('.');
+    if(splitStr.length > 1){
+        let potentialArrayMark = splitStr[0];
+        if(potentialArrayMark.length > 2){
+            if(potentialArrayMark[0] === '[' && potentialArrayMark[potentialArrayMark.length - 1] === ']'){
+                if(isNumber(potentialArrayMark.substring(1, potentialArrayMark.length - 1))){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 
-export function getFieldsForSelectSearch(invokerBody, searchField){
+export function getFieldsForSelectSearch(invokerBody, searchField, forAttributes = false){
     let result = [];
     let splitValue = searchField.split('.');
     let subValue = invokerBody;
     if(subValue) {
         for (let i = 0; i < splitValue.length; i++) {
-            let hasProperty = subValue.hasOwnProperty(splitValue[i]);
+            let subProperty = splitValue[i] !== '@' ? splitValue[i] : ATTRIBUTES_MARK;
+            let hasProperty = subValue.hasOwnProperty(subProperty);
             if (i < splitValue.length - 1) {
                 if (hasProperty) {
-                    let elem = subValue[splitValue[i]];
+                    let elem = subValue[subProperty];
                     if (isString(elem)) {
                         subValue = elem;
                     } else if (isArray(elem)) {
@@ -109,26 +125,42 @@ export function getFieldsForSelectSearch(invokerBody, searchField){
                     return [];
                 }
             } else if (i === splitValue.length - 1) {
-                hasProperty = subValue.hasOwnProperty(splitValue[i]);
+                hasProperty = subValue.hasOwnProperty(subProperty);
                 if (hasProperty) {
-                    let elem = subValue[splitValue[i]];
+                    let elem = subValue[subProperty];
+                    let value = subProperty;
+                    if(value === ATTRIBUTES_MARK){
+                        for (let item in elem) {
+                            result.push({value: `@${item}`, type: FIELD_TYPE_STRING, label: item});
+                        }
+                        return result;
+                    }
+                    if(value === VALUE_MARK){
+                        return [];
+                    }
+                    if(forAttributes){
+                        value = `@${value}`;
+                    }
                     if (isString(elem)) {
-                        result.push({value: splitValue[i], type: FIELD_TYPE_STRING});
+                        result.push({value, type: FIELD_TYPE_STRING});
                     } else if (isArray(elem)) {
-                        result.push({value: splitValue[i], type: FIELD_TYPE_ARRAY});
+                        result.push({value, type: FIELD_TYPE_ARRAY});
                     } else {
-                        result.push({value: splitValue[i], type: FIELD_TYPE_OBJECT});
+                        result.push({value, type: FIELD_TYPE_OBJECT});
                     }
                 } else {
                     for (let item in subValue) {
-                        if (item.toLowerCase().includes(splitValue[i].toLowerCase())) {
-                            if (isString(subValue[item])) {
-                                result.push({value: item, type: FIELD_TYPE_STRING});
-                            } else if (isArray(subValue[item])) {
-                                result.push({value: item, type: FIELD_TYPE_ARRAY});
-                            } else {
-                                result.push({value: item, type: FIELD_TYPE_OBJECT});
+                        if (item.toLowerCase().includes(subProperty.toLowerCase())) {
+                            let value = item;
+                            let type = isString(subValue[item]) ? FIELD_TYPE_STRING ? isArray(subValue[item]) : FIELD_TYPE_ARRAY : FIELD_TYPE_OBJECT;
+                            if(value === ATTRIBUTES_MARK){
+                                value = '@';
+                                type = FIELD_TYPE_STRING;
                             }
+                            if(value === VALUE_MARK){
+                                continue;
+                            }
+                            result.push({value, type});
                         }
                     }
                 }
