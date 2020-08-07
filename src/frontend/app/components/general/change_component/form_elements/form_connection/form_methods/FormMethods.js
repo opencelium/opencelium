@@ -26,6 +26,7 @@ import Items from "./Items";
 import Mapping from "./mapping/Mapping";
 
 import AddTemplate from "./AddTemplate";
+import AddParam from "@change_component/form_elements/form_connection/form_methods/AddParam";
 
 
 function mapStateToProps(state){
@@ -72,6 +73,10 @@ class FormMethods extends Component{
             <div className={`${theme.withIcon} ${theme.input}`} style={{margin: '0 65px'}}>
                 {!readOnly ?
                     <AddTemplate data={data} entity={entity} authUser={authUser}/>
+                    : null
+                }
+                {!readOnly ?
+                    <AddParam data={data} entity={entity} authUser={authUser}/>
                     : null
                 }
                 <div>

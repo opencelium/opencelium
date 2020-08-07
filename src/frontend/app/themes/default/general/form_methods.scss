@@ -665,10 +665,12 @@
 }
 
 .param_generator{
+  z-index: 100;
   position: absolute;
   margin-top: -26px;
   right: -20px;
   cursor: pointer;
+  width: 1px;
 }
 
 .param_generator_param{
@@ -689,7 +691,7 @@
 }
 
 .param_generator_json{
-  z-index: 1;
+  z-index: 100;
   position: absolute;
   cursor: pointer;
   left: 0;
