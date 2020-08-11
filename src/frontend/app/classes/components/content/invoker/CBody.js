@@ -1,4 +1,4 @@
-import {consoleLog, isArray, isEmptyObject, isObject} from "@utils/app";
+import {consoleLog, isArray, isEmptyObject, isObject, isString} from "@utils/app";
 import {
     FIELD_TYPE_ARRAY,
     FIELD_TYPE_OBJECT,
@@ -14,9 +14,15 @@ export const BODY_DATA = {
     RAW: 'raw',
 };
 
-export const ATTRIBUTES_MARK = '__oc__attributes';
-export const VALUE_MARK = '__oc__value';
+export const VALUE_PROPERTY = '__oc__value';
+export const ATTRIBUTES_PROPERTY = '__oc__attributes';
+export const ATTRIBUTES_MARK = '@';
+export const ATTRIBUTES_MARK_REG = '/^@$/';
+export const TAG_MARK_REG = '/^<.+/>$/';
 
+/**
+ * Body class for Request, Success and Fail classes
+ */
 export default class CBody{
     constructor(type = FIELD_TYPE_OBJECT, format = BODY_FORMAT.JSON, data = BODY_DATA.RAW, fields) {
         this._type = this.checkType(type) ? type : FIELD_TYPE_OBJECT;
@@ -74,7 +80,7 @@ export default class CBody{
     }
 
     set format(format){
-        this._format = this.checkFormat(format) ? format : BODY_FORMAT.STRING;
+        this._format = this.checkFormat(format) ? format : BODY_FORMAT.JSON;
     }
 
     get data(){
@@ -82,7 +88,7 @@ export default class CBody{
     }
 
     set data(data){
-        this._data = this.checkData(data) ? data : BODY_DATA.STRING;
+        this._data = this.checkData(data) ? data : BODY_DATA.RAW;
     }
 
     get fields(){
@@ -97,6 +103,106 @@ export default class CBody{
             this._type = FIELD_TYPE_OBJECT;
         }
         this._fields = fields === null ? {} : fields;
+    }
+
+    _isAttributeProperty(property){
+        return property === ATTRIBUTES_PROPERTY;
+    }
+
+    _isValueProperty(property){
+        return property === VALUE_PROPERTY;
+    }
+
+    _getProperty(property){
+        return ATTRIBUTES_MARK === property ? ATTRIBUTES_PROPERTY : property;
+    }
+
+    _getSubField(fields, property){
+        if (isString(fields[property])) {
+            fields = fields[property];
+        } else if (isArray(fields[property])) {
+            fields = fields[property][0];
+        } else {
+            fields = fields[property];
+        }
+        return fields;
+    }
+
+    _addFoundedProperty(result, fields, property){
+        let type = isString(fields[property]) ? FIELD_TYPE_STRING ? isArray(fields[property]) : FIELD_TYPE_ARRAY : FIELD_TYPE_OBJECT;
+        if (this._isAttributeProperty(property)) {
+            property = ATTRIBUTES_MARK;
+            type = FIELD_TYPE_STRING;
+        }
+        if (this._isValueProperty(property)) {
+            return;
+        }
+        result.push({value: property, type, label: property});
+    }
+
+    _ifFoundAddProperty(result, fields, item, searchValue){
+        if (item.toLowerCase().includes(searchValue.toLowerCase())) {
+            this._addFoundedProperty(result, fields, item);
+        }
+    }
+
+    _sortResultFields(fields){
+        return fields.sort((field1, field2) => (field1.label > field2.label) ? 1 : ((field2.label > field1.label) ? -1 : 0));
+    }
+
+    getFieldsForSelectSearch(searchValue){
+        let result = [];
+        let properties = searchValue.split('.');
+        let fields = this._fields;
+        if(fields) {
+            for (let i = 0; i < properties.length; i++) {
+                let property = this._getProperty(properties[i]);
+                let hasProperty = fields.hasOwnProperty(property);
+                if (i < properties.length - 1) {
+                    if (hasProperty) {
+                        fields = this._getSubField(fields, property);
+                        if(!fields){
+                            return [];
+                        }
+                    } else {
+                        return [];
+                    }
+                } else if (i === properties.length - 1) {
+                    hasProperty = fields.hasOwnProperty(property);
+                    if(hasProperty) {
+                        if(this._isAttributeProperty(property)){
+                            for (let item in fields[property]) {
+                                if(fields[property].hasOwnProperty(item)) {
+                                    result.push({
+                                        value: `${ATTRIBUTES_MARK}${item}`,
+                                        type: FIELD_TYPE_STRING,
+                                        label: item
+                                    });
+                                }
+                            }
+                            return result;
+                        }
+                        if(this._isValueProperty(property)){
+                            return [];
+                        }
+                        this._addFoundedProperty(result, fields, property);
+                    } else {
+                        for (let item in fields) {
+                            this._ifFoundAddProperty(result, fields, item, property);
+                        }
+                    }
+                    /*
+                    * the case when user wants to select the whole xml tag segment
+                    * TODO: implement converter from invoker structure to xml string
+                    *  depending on property and paste it in value
+                    */
+                    if(this._format === BODY_FORMAT.XML){
+                        result.unshift({label: `<${properties[i]}/>`, value: `<xml/>`})
+                    }
+                }
+            }
+        }
+        return this._sortResultFields(result);
     }
 
     getObject(){

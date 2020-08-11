@@ -17,6 +17,9 @@ import {js2xml} from 'xml-js';
 import CInvoker from "../invoker/CInvoker";
 import CXmlInvoker from "../invoker_xml/CXmlInvoker";
 
+/**
+ * Xml class
+ */
 export default class CXml{
     constructor(className, attributes, element){
         this._className = className;
@@ -45,10 +48,6 @@ export default class CXml{
                 break;
         }
         return element;
-    }
-
-    generateXmlFile(){
-
     }
 
     generateXmlString(){

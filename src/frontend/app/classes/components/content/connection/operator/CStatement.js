@@ -22,7 +22,7 @@ export const STATEMENT_STATIC = 'static';
 export const DEFAULT_COLOR = '#ffffff';
 
 /**
- * (not used)
+ * Statement class for Condition class
  */
 export default class CStatement{
 

@@ -22,7 +22,7 @@ export const FIELD_TYPE_ARRAY = 'array';
 export const FIELD_TYPE_OBJECT = 'object';
 
 /**
- * (not used)
+ * Method Item class for Connector Item class
  */
 export default class CMethodItem{
 

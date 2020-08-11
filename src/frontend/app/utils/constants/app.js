@@ -50,3 +50,10 @@ export const API_REQUEST_STATE = {
 };
 
 export const NO_DATA = '-';
+
+export const API_METHOD = {
+    POST: 'POST',
+    GET: 'GET',
+    PUT: 'PUT',
+    DELETE: 'DELETE'
+};

@@ -18,6 +18,7 @@ import {
     addErrorTicketFulfilled, addErrorTicketRejected
 } from '@actions/app';
 import {doRequest} from "@utils/auth";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -38,7 +39,7 @@ const addErrorTicketEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
-            return doRequest({url, method: 'post', data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                 success: addErrorTicketFulfilled,
                 reject: addErrorTicketRejected,},
             );

@@ -17,10 +17,8 @@
 
 import {isArray, isNumber, isObject, isString} from "@utils/app";
 import {
-    FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
-    FIELD_TYPE_STRING
+    FIELD_TYPE_ARRAY
 } from "@classes/components/content/connection/method/CMethodItem";
-import {ATTRIBUTES_MARK, VALUE_MARK} from "@classes/components/content/invoker/CBody";
 
 /**
  * constants from backend
@@ -98,76 +96,6 @@ export function hasArrayMark(str){
         }
     }
     return false;
-}
-
-export function getFieldsForSelectSearch(invokerBody, searchField, forAttributes = false){
-    let result = [];
-    let splitValue = searchField.split('.');
-    let subValue = invokerBody;
-    if(subValue) {
-        for (let i = 0; i < splitValue.length; i++) {
-            let subProperty = splitValue[i] !== '@' ? splitValue[i] : ATTRIBUTES_MARK;
-            let hasProperty = subValue.hasOwnProperty(subProperty);
-            if (i < splitValue.length - 1) {
-                if (hasProperty) {
-                    let elem = subValue[subProperty];
-                    if (isString(elem)) {
-                        subValue = elem;
-                    } else if (isArray(elem)) {
-                        subValue = elem[0];
-                    } else {
-                        subValue = elem;
-                    }
-                    if(!subValue){
-                        return [];
-                    }
-                } else {
-                    return [];
-                }
-            } else if (i === splitValue.length - 1) {
-                hasProperty = subValue.hasOwnProperty(subProperty);
-                if (hasProperty) {
-                    let elem = subValue[subProperty];
-                    let value = subProperty;
-                    if(value === ATTRIBUTES_MARK){
-                        for (let item in elem) {
-                            result.push({value: `@${item}`, type: FIELD_TYPE_STRING, label: item});
-                        }
-                        return result;
-                    }
-                    if(value === VALUE_MARK){
-                        return [];
-                    }
-                    if(forAttributes){
-                        value = `@${value}`;
-                    }
-                    if (isString(elem)) {
-                        result.push({value, type: FIELD_TYPE_STRING});
-                    } else if (isArray(elem)) {
-                        result.push({value, type: FIELD_TYPE_ARRAY});
-                    } else {
-                        result.push({value, type: FIELD_TYPE_OBJECT});
-                    }
-                } else {
-                    for (let item in subValue) {
-                        if (item.toLowerCase().includes(subProperty.toLowerCase())) {
-                            let value = item;
-                            let type = isString(subValue[item]) ? FIELD_TYPE_STRING ? isArray(subValue[item]) : FIELD_TYPE_ARRAY : FIELD_TYPE_OBJECT;
-                            if(value === ATTRIBUTES_MARK){
-                                value = '@';
-                                type = FIELD_TYPE_STRING;
-                            }
-                            if(value === VALUE_MARK){
-                                continue;
-                            }
-                            result.push({value, type});
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return result;
 }
 
 export function parseHeader(header){

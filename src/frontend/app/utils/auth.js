@@ -25,6 +25,7 @@ import {setLS, getLS} from '@utils/LocalStorage';
 import {baseUrl, baseUrlApi} from '@utils/constants/url';
 import {history} from '@components/App';
 import {AuthAction} from "@utils/actions";
+import {API_METHOD} from "@utils/constants/app";
 
 const {ajax} = Rx.Observable;
 
@@ -47,7 +48,7 @@ export function getRequestSettings(params){
     if(fullUrl !== true){
         url = isApi ? baseUrlApi + url : baseUrl + url;
     }
-    method = typeof method === 'undefined' ? 'get' : method;
+    method = typeof method === 'undefined' ? API_METHOD.GET : method;
     if(typeof data === 'undefined'){
         data = {};
     }
@@ -71,16 +72,16 @@ export function getRequestSettings(params){
         settings.headers['Authorization'] = getLS('token');
     }
     switch(method){
-        case 'post':
+        case API_METHOD.POST:
             settings.body = data;
             break;
-        case 'get':
+        case API_METHOD.GET:
             settings.body = data;
             break;
-        case 'put':
+        case API_METHOD.PUT:
             settings.body = data;
             break;
-        case 'delete':
+        case API_METHOD.DELETE:
             settings.body = data;
             break;
     }

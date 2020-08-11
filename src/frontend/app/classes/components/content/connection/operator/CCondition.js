@@ -32,7 +32,7 @@ export const FUNCTIONAL_OPERATORS = [
 ];
 
 /**
- * (not used)
+ * Condition class for Operator Item class
  */
 export default class CCondition{
 

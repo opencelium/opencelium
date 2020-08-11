@@ -31,6 +31,7 @@ import {deleteConnectionFulfilled, deleteConnectionRejected} from '@actions/conn
 import {doRequest} from "@utils/auth";
 import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
 import {checkConnectionFulfilled, checkConnectionRejected} from "@actions/connections/check";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -50,7 +51,7 @@ const validateConnectionFormMethodsEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/validate`;
-            return doRequest({url, method: 'post', data: action.payload},{
+            return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: validateConnectionFormMethodsFulfilled,
                 reject: validateConnectionFormMethodsRejected,
             });
@@ -170,7 +171,7 @@ const addConnectionEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
-            return doRequest({url, method: 'post', data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                     success: addConnectionFulfilled,
                     reject: addConnectionRejected,},
             );
@@ -186,7 +187,7 @@ const updateConnectionEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             let {id, ...data} = action.payload;
-            return doRequest({url, method: 'put', data},{
+            return doRequest({url, method: API_METHOD.PUT, data},{
                     success: updateConnectionFulfilled,
                     reject: updateConnectionRejected,},
             );
@@ -201,7 +202,7 @@ const deleteConnectionEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteConnectionFulfilled,
                     reject: deleteConnectionRejected,},
                 res => {return {connectionId: action.payload.id};}
@@ -218,7 +219,7 @@ const sendOperationRequestEpic = (action$, store) => {
         .mergeMap((action) => {
             const data = action.payload;
             const url = `${urlPrefix}/remoteapi/test`;
-            return doRequest({url, method: 'post', data: {url: data.endpoint, header: data.header, method: data.method, body: data.body}},{
+            return doRequest({url, method: API_METHOD.POST, data: {url: data.endpoint, header: data.header, method: data.method, body: data.body}},{
                 success: sendOperationRequestFulfilled,
                 reject: sendOperationRequestRejected,},
             );
@@ -235,7 +236,7 @@ const checkConnectionEpic = (action$, store) => {
             let url = `${urlPrefix}/check`;
             let data = action.payload;
             return Rx.Observable.of(checkConnectionFulfilled({}));
-            return doRequest({url, method: 'post', data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                 success: checkConnectionFulfilled,
                 reject: checkConnectionRejected,},
             );

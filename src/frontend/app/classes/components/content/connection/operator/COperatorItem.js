@@ -21,7 +21,7 @@ export const IF_OPERATOR = 'if';
 export const LOOP_OPERATOR = 'loop';
 
 /**
- * (not used)
+ * Operator Item class for Connector Item class
  */
 export default class COperatorItem{
 

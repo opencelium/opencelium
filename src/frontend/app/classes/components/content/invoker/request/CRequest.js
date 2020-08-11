@@ -20,14 +20,15 @@ import {
 } from "@change_component/form_elements/form_connection/form_methods/help";
 import CBody from "@classes/components/content/invoker/CBody";
 import {instanceOf} from "prop-types";
+import {API_METHOD} from "@utils/constants/app";
 export const METHOD_TYPES = [
-    {value: 'POST', label: 'POST'},
-    {value: 'GET', label: 'GET'},
-    {value: 'PUT', label: 'PUT'},
-    {value: 'DELETE', label: 'DELETE'},
+    {value: API_METHOD.POST, label: 'POST'},
+    {value: API_METHOD.GET, label: 'GET'},
+    {value: API_METHOD.PUT, label: 'PUT'},
+    {value: API_METHOD.DELETE, label: 'DELETE'},
 ];
 /**
- * (not used)
+ * Request class for class Operation
  */
 export default class CRequest{
 

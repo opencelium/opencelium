@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Dialog from "@basic_components/Dialog";
@@ -75,7 +76,7 @@ class RequestIcon extends Component{
 
     getRequest(){
         const {request, requestData} = this.props;
-        let endpoint = request.endpoint;
+        let endpoint = request.affix !== '' ? `${request.query}/${request.affix}` : request.query;
         let body = JSON.stringify(request.getBodyFields());
         if(requestData){
             for(let param in requestData){
@@ -116,6 +117,10 @@ class RequestIcon extends Component{
         );
     }
 }
+
+RequestIcon.propTypes = {
+    request: PropTypes.instanceOf(CRequest).isRequired,
+};
 
 RequestIcon.defaultProps = {
     isVisible: false,

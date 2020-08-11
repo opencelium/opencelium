@@ -138,9 +138,7 @@ class AccordionItem extends Component{
     render(){
         const {isVisible, isMouseOver} = this.state;
         const {index, forConnection, entity, operation, readOnly, connector, ...props} = this.props;
-        const {connectors} = this.props.data;
         const connectorType = connector.getConnectorType();
-        const request = operation.request.getObject();
         const requestData = this.getRequestData();
         return(
             <div onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
@@ -149,7 +147,7 @@ class AccordionItem extends Component{
                     <div style={{float: connectorType === CONNECTOR_FROM ? 'left' : 'right'}} className={`${forConnection ? styles.invoker_item_method_for_connection : styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
                     <span className={`${forConnection ? styles.invoker_item_name_for_connection : styles.invoker_item_name}`}>{operation.name}</span>
                     {readOnly && operation.type === METHOD_TYPE_TEST && !forConnection ? <div className={styles.invoker_item_method_test}>Connection Test</div> : null}
-                    {forConnection ? <RequestIcon request={request} isVisible={isMouseOver} connectorType={connectorType} requestData={requestData}/> : null}
+                    {forConnection ? <RequestIcon request={operation.request} isVisible={isMouseOver} connectorType={connectorType} requestData={requestData}/> : null}
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey={index} >
                     <Card.Body className={forConnection ? styles.no_card_header_tabs_for_connection : styles.no_card_header_tabs}>
