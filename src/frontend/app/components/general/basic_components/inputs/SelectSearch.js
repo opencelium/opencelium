@@ -128,6 +128,7 @@ class SelectSearch extends Component{
      * to select item in menu
      */
     onSelectItem(e, value){
+        e.preventDefault();
         const {inputValue, id} = this.props;
         if(value !== "-1") {
             let newValue = value;
@@ -157,7 +158,7 @@ class SelectSearch extends Component{
      */
     filterFields(inputValue){
         let {items, predicator} = this.props;
-        if(!inputValue || inputValue === '' || inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
+        if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
         let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue) : [];
@@ -165,16 +166,6 @@ class SelectSearch extends Component{
             result = result.map(field => {
                 let {value} = field;
                 let label = field.hasOwnProperty('label') ? field.label : field.value;
-                switch(field.type){
-                    case FIELD_TYPE_STRING:
-                        break;
-                    case FIELD_TYPE_ARRAY:
-                        label = `${label} (Array)`;
-                        break;
-                    case FIELD_TYPE_OBJECT:
-                        label = `${label} (Object)`;
-                        break;
-                }
                 return {label, value};
             });
         } else{

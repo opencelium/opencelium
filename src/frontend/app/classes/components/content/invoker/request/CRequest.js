@@ -171,10 +171,18 @@ export default class CRequest{
         this.removeHeaderByIndex(index);
     }
 
-    getObject(){
+    /**
+     * get object of the class
+     * @param params =
+     *      {
+     *          bodyOnlyConvert: bool,      //if you need just convert the object and not get object of the class (difference read in CBody class)
+     *      }
+     * @returns Object (mostly for backend api request only)
+     */
+    getObject(params = {bodyOnlyConvert: false}){
         let obj = {
             endpoint: this._affix !== '' ? `${this._query}/${this._affix}` : this._query,
-            body: this._body.getObject(),
+            body: params.bodyOnlyConvert ? this._body.convertToObject() : this._body.getObject(),
             method: this._method,
         };
         if(this._header && this._header.length > 0){

@@ -22,6 +22,9 @@ import CBody from "@classes/components/content/invoker/CBody";
 import {instanceOf} from "prop-types";
 import {FIELD_TYPE_ARRAY} from "@classes/components/content/connection/method/CMethodItem";
 
+export const ARRAY_SIGN = '[]';
+export const WHOLE_ARRAY = '[*]';
+
 /**
  * Class ResponseResult as a Parent for Success and Fail classes
  */
@@ -109,7 +112,7 @@ export default class CResponseResult{
                 return this._body.getFieldsForSelectSearch(searchField.substring(index));
             } else{
                 return [
-                    {value: '[*]', type: FIELD_TYPE_ARRAY, label: 'Whole Result'},
+                    {value: WHOLE_ARRAY, type: FIELD_TYPE_ARRAY, label: 'Whole Result'},
                     {value: '[0]', type: FIELD_TYPE_ARRAY, label: 'One Element of Result'}
                 ];
             }
@@ -118,10 +121,18 @@ export default class CResponseResult{
         }
     }
 
-    getObject(){
+    /**
+     * get object of the class
+     * @param params =
+     *      {
+     *          bodyOnlyConvert: bool,      //if you need just convert the object and not get object of the class (difference read in CBody class)
+     *      }
+     * @returns Object (mostly for backend api request only)
+     */
+    getObject(params = {bodyOnlyConvert: false}){
         let obj = {
             status: this._status,
-            body: this._body.getObject(),
+            body: params.bodyOnlyConvert ? this._body.convertToObject() : this._body.getObject(),
         };
         if(this._header && this._header.length > 0){
             obj.header = convertHeaderFormatToObject(this._header);

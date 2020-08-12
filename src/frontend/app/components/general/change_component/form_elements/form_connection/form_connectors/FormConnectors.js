@@ -121,8 +121,8 @@ class FormConnectors extends Component{
         }
         if(operation !== null && connector !== null) {
             item.name = operation.name;
-            item.request = operation.request.getObject();
-            item.response = operation.response.getObject();
+            item.request = operation.request.getObject({bodyOnlyConvert: true});
+            item.response = operation.response.getObject({bodyOnlyConvert: true});
             switch (connector.getConnectorType()) {
                 case CONNECTOR_FROM:
                     entity.addFromConnectorMethod(item, methodType);

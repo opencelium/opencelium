@@ -71,7 +71,7 @@ class RequestIcon extends Component{
         this.setState({
             startSendingRequest: true,
         });
-        sendOperationRequest(request.getObject());
+        sendOperationRequest(request.getObject({bodyOnlyConvert: true}));
     }
 
     getRequest(){

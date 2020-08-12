@@ -13,17 +13,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 import {isArray, isNumber, isObject, isString} from "@utils/app";
-import {
-    FIELD_TYPE_ARRAY
-} from "@classes/components/content/connection/method/CMethodItem";
+import {ARRAY_SIGN, WHOLE_ARRAY} from "@classes/components/content/invoker/response/CResponseResult";
 
-/**
- * constants from backend
- */
-export const ARRAY_SIGN = '[]';
 
 
 /**
@@ -47,15 +39,14 @@ export const dotColor = (color = '#ccc') => ({
 /**
  * to mark field name as array
  */
-export function markFieldNameAsArray(fieldType, name){
-    if(fieldType === FIELD_TYPE_ARRAY){
-        return `${name}${ARRAY_SIGN}`;
-    } else{
-        return name;
+export function markFieldNameAsArray(fieldName){
+    if(isString(fieldName)) {
+        return `${fieldName}${ARRAY_SIGN}`;
     }
+    return fieldName;
 }
 
-export function convertFieldNameForBackend(invokerBody, fieldName, arrayCanBeEmpty = false){
+export function convertFieldNameForBackend(invokerBody, fieldName){
     let fieldNameSplitted = fieldName.split('.');
     let subValue = invokerBody;
     let result = '';
@@ -66,12 +57,12 @@ export function convertFieldNameForBackend(invokerBody, fieldName, arrayCanBeEmp
             if (isString(elem)) {
                 result += `${fieldNameSplitted[i]}`;
                 subValue = elem;
-            } else if (isArray(elem)) {
-                result += `${fieldNameSplitted[i]}[]`;
+            } else if (isArray(elem) && fieldNameSplitted[i] !== WHOLE_ARRAY) {
+                result += markFieldNameAsArray(fieldNameSplitted[i]);
                 subValue = elem[0];
             } else {
-                subValue = elem;
                 result += `${fieldNameSplitted[i]}`;
+                subValue = elem;
             }
         } else{
             result += `${fieldNameSplitted[i]}`;

@@ -30,6 +30,21 @@ export const DEBUGGER_ERRORS = true;
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
+export function checkExpiredMessages(data){
+    let result = false;
+    if(isString(data)){
+        result = TOKEN_EXPIRED_MESSAGES.indexOf(data) !== -1;
+    } else{
+        if(data && data.hasOwnProperty('message')){
+            result = TOKEN_EXPIRED_MESSAGES.indexOf(data.message) !== -1;
+        }
+        if(!result && data && data.hasOwnProperty('response') && data.response.hasOwnProperty('message')){
+            result = TOKEN_EXPIRED_MESSAGES.indexOf(data.response.message) !== -1;
+        }
+    }
+    return result;
+}
+
 /**
  * to check the references format in connections
  */

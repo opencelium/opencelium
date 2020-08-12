@@ -137,7 +137,11 @@ export default class CBody{
         if (this._isValueProperty(property)) {
             return;
         }
-        result.push({value: property, type, label: property});
+        result.push({
+            value: property,
+            type,
+            label: this._getLabel(type, property),
+        });
     }
 
     _ifFoundAddProperty(result, fields, item, searchValue){
@@ -148,6 +152,16 @@ export default class CBody{
 
     _sortResultFields(fields){
         return fields.sort((field1, field2) => (field1.label > field2.label) ? 1 : ((field2.label > field1.label) ? -1 : 0));
+    }
+
+    _getLabel(type, label){
+        switch(type){
+            case FIELD_TYPE_ARRAY:
+                return `${label} (Array)`;
+            case FIELD_TYPE_OBJECT:
+                return `${label} (Object)`;
+        }
+        return label;
     }
 
     getFieldsForSelectSearch(searchValue){
@@ -180,7 +194,7 @@ export default class CBody{
                                     });
                                 }
                             }
-                            return result;
+                            return this._sortResultFields(result);
                         }
                         if(this._isValueProperty(property)){
                             return [];
@@ -205,12 +219,27 @@ export default class CBody{
         return this._sortResultFields(result);
     }
 
-    getObject(){
+    /**
+     * convert class to object
+     * (difference between getObject method is even if fields are empty the method still returns some data
+     * while getObject will return null)
+     */
+    convertToObject(){
         return {
             type: this._type,
             format: this._format,
             data: this._data,
             fields: isEmptyObject(this._fields) ? null : this._fields,
         };
+    }
+
+    /**
+     * get object of the class
+     */
+    getObject(){
+        if(isEmptyObject(this._fields) || this._fields === null){
+            return null;
+        }
+        return this.convertToObject();
     }
 }
