@@ -29,6 +29,7 @@ public class OperatorNode {
 
     private String index;
     private String type;
+    private String iterator;
     private String operand;
 
     @Relationship(type = "left", direction = Relationship.OUTGOING)
@@ -127,5 +128,13 @@ public class OperatorNode {
 
     public void setBodyOperator(OperatorNode bodyOperator) {
         this.bodyOperator = bodyOperator;
+    }
+
+    public String getIterator() {
+        return iterator;
+    }
+
+    public void setIterator(String iterator) {
+        this.iterator = iterator;
     }
 }

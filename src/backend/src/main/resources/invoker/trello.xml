@@ -43,7 +43,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body type="object" format="json" data="raw">
+                    <body type="array" format="json" data="raw">
                       <field name="id" type="string"/>
                       <field name="name" type="string"/>
                       <field name="closed" type="string"/>

@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.jayway.jsonpath.JsonPath;
 
@@ -23,6 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageContainer {
 
@@ -115,10 +118,13 @@ public class MessageContainer {
             }
 
             // TODO added size and index i. for checking is next element after an array
-            if (part.contains("[]") && hasLoop){
+            Pattern pattern = Pattern.compile(RegExpression.arrayWithIndex);
+            Matcher m = pattern.matcher(part);
+            boolean hasIndex = m.find();
+            if ((part.contains("[]") || hasIndex) && hasLoop){
                 part = part.replace("[]", ""); // removed [index] and put []
                 part = part + "[" + index + "]";
-            } else if(part.contains("[]") && !hasLoop){
+            } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
                 part = part.replace("[]", "");
                 part = part + "[*]";
             }

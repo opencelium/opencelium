@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.constant.InvokerRegEx;
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorFactory;
@@ -27,7 +27,6 @@ import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.*;
-import com.becon.opencelium.backend.neo4j.service.FieldNodeService;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.StatementNodeServiceImp;
@@ -318,7 +317,7 @@ public class ConnectorExecutor {
         Map<String, Object> fields = replaceValues(bodyNode.getFields());
 //        body = fieldNodeService.deleteEmptyFields(body); // user should determine which fields should be in body.
         Object content = new Object();
-        if (bodyNode.getType().equals("array")){
+        if (bodyNode.getType() != null && bodyNode.getType().equals("array")){
             List<Object> c = new ArrayList<>();
             c.add(fields);
             content = c;
@@ -357,8 +356,8 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String exp) {
         String result = exp;
-        String refRegex = InvokerRegEx.requiredData;
-        String refResRegex = InvokerRegEx.responsePointer;
+        String refRegex = RegExpression.requiredData;
+        String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(exp);
         List<String> refParts = new ArrayList<>();

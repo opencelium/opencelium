@@ -62,7 +62,7 @@
                 <header>
                     <item name="Content-Type" type="string"/>
                 </header>
-                <body type="object" format="json" data="raw">
+                <body type="array" format="json" data="raw">
                     <field name="ConfigItem" type="object">
                         <field name="Number" type="string"/>
                         <field name="Class" type="string"/>
