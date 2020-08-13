@@ -31,6 +31,7 @@ import {updateUserFulfilled, updateUserRejected,updateUserDetailFulfilled, updat
 import {deleteUserFulfilled, deleteUserRejected} from '@actions/users/delete';
 import {doRequest} from "@utils/auth";
 import {isString} from "@utils/app";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -113,7 +114,7 @@ const addUserEpic = (action$, store) => {
                 successResponse = addProfilePicture;
             }
             delete data.userDetail.profilePicture;
-            return doRequest({url, method: 'post', data: {...data}},{
+            return doRequest({url, method: API_METHOD.POST, data: {...data}},{
                 success: successResponse,
                 reject: addUserRejected,},
                 res => {
@@ -136,7 +137,7 @@ const addProfilePictureEpic = (action$, store) => {
             data.append('email', action.payload.email);
             data.append('file', action.payload.userDetail.profilePicture);
             return doRequest(
-                {url, method: 'post', data, contentType: 'multipart/form-data'},{
+                {url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
                     success: addProfilePictureFulfilled,
                     reject: addProfilePictureRejected,
                 },
@@ -160,7 +161,7 @@ const updateUserEpic = (action$, store) => {
                 successResponse = updateProfilePicture;
                 delete data.userDetail.profilePicture;
             }
-            return doRequest({url, method: 'put', data: {...data}},{
+            return doRequest({url, method: API_METHOD.PUT, data: {...data}},{
                 success: successResponse,
                 reject: updateUserRejected,},
                 res => {let result = res.response; result.userDetail.profilePicture = profilePicture; return result;}
@@ -179,7 +180,7 @@ const updateProfilePictureEpic = (action$, store) => {
             let data = new FormData();
             data.append('email', action.payload.email);
             data.append('file', action.payload.userDetail.profilePicture);
-            return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
+            return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
                     success: updateProfilePictureFulfilled,
                     reject: updateProfilePictureRejected,},
                 res => {return action.payload;}
@@ -196,7 +197,7 @@ const updateUserDetailEpic = (action$, store) => {
         .mergeMap((action) => {
             let data = action.payload;
             let url = `${urlPrefix}/${data.id}`;
-            return doRequest({url, method: 'put', data: data.userDetail},{
+            return doRequest({url, method: API_METHOD.PUT, data: data.userDetail},{
                 success: updateUserDetailFulfilled,
                 reject: updateUserDetailRejected,},
                 res => {return {...data.userDetail, id: data.id};}
@@ -212,7 +213,7 @@ const deleteUserEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                 success: deleteUserFulfilled,
                 reject: deleteUserRejected,},
                 res => {return {...action.payload};}

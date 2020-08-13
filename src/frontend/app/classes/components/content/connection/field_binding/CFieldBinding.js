@@ -18,7 +18,7 @@ import CEnhancement from "./CEnhancement";
 import CBindingItem from "./CBindingItem";
 
 /**
- * (not used)
+ * Field binding class for Connection class
  */
 export default class CFieldBinding{
 

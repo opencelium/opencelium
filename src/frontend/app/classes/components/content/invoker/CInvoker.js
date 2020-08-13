@@ -18,7 +18,7 @@ import COperation, {METHOD_TYPE_TEST} from "./COperation";
 import CXml from "../xml/CXml";
 
 /**
- * (not used)
+ * Class Invoker
  */
 export default class CInvoker{
 

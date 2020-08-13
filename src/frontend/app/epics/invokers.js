@@ -29,6 +29,7 @@ import {
 } from '@actions/invokers/delete';
 
 import {doRequest} from "@utils/auth";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -79,7 +80,7 @@ const addInvokerEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return doRequest({url, method: 'post', data: action.payload},{
+            return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: addInvokerFulfilled,
                 reject: addInvokerRejected,},
             );
@@ -93,7 +94,7 @@ const updateInvokerEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return doRequest({url, method: 'post', data: action.payload},{
+            return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: updateInvokerFulfilled,
                 reject: updateInvokerRejected,},
             );
@@ -108,7 +109,7 @@ const deleteInvokerEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteInvokerFulfilled,
                     reject: deleteInvokerRejected,},
                 res => {return {...res.response, id: action.payload.id};}

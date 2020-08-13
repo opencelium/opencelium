@@ -20,7 +20,7 @@ import {history} from "../../App";
 
 import {ERROR_TYPE} from "@utils/constants/app";
 import ComponentError from "./ComponentError";
-import {TOKEN_EXPIRED_MESSAGES} from "@utils/app";
+import {checkExpiredMessages, TOKEN_EXPIRED_MESSAGES} from "@utils/app";
 
 
 /**
@@ -36,7 +36,7 @@ class RejectedRequest extends Component{
     componentDidMount(){
         const {error} = this.props;
         if(error && error.hasOwnProperty('response') && error.response && error.response.hasOwnProperty('message')){
-            if(TOKEN_EXPIRED_MESSAGES.indexOf(error.response.message) !== -1){
+            if(checkExpiredMessages(error)){
                 history.push('/login');
             }
         }

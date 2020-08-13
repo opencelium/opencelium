@@ -21,7 +21,7 @@ export const IF_OPERATOR = 'if';
 export const LOOP_OPERATOR = 'loop';
 
 /**
- * (not used)
+ * Operator Item class for Connector Item class
  */
 export default class COperatorItem{
 
@@ -35,6 +35,7 @@ export default class COperatorItem{
         this._isToggled = isToggled;
         this._intend = 0;
         this._isDisabled = false;
+        this._iterator = '';
     }
 
     static createOperatorItem(operatorItem){
@@ -200,6 +201,7 @@ export default class COperatorItem{
             index: this._index,
             type: this._type,
             condition: this._condition.getObject(),
+            iterator: this._iterator,
         };
         return obj;
     }

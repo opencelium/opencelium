@@ -37,7 +37,7 @@ export function RequestBody(CRequestType){
                 this.state = {
                     showImportJson: false,
                     isBodyEditOpened: false,
-                    importJsonBody: JSON.stringify(props.method.request.body),
+                    importJsonBody: JSON.stringify(props.method.request.getBodyFields()),
                     showEnhancement: false,
                     currentEnhancement: null,
                 };
@@ -262,6 +262,8 @@ export function RequestBody(CRequestType){
                                             submitEdit={submitEdit}
                                             id={`${id}_reference_component`}
                                             isAbsolute={CRequestType.isAbsolute()}
+                                            parentId={`${id}_reference_component_editor_value`}
+                                            hasArrowIcon={true}
                                         />
                                     );},
                                 id: `${id}_reference_component`,

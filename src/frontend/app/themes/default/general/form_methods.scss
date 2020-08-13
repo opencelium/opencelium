@@ -665,10 +665,12 @@
 }
 
 .param_generator{
+  z-index: 100;
   position: absolute;
   margin-top: -26px;
   right: -20px;
   cursor: pointer;
+  width: 1px;
 }
 
 .param_generator_param{
@@ -689,7 +691,7 @@
 }
 
 .param_generator_json{
-  z-index: 1;
+  z-index: 100;
   position: absolute;
   cursor: pointer;
   left: 0;
@@ -700,12 +702,9 @@
   width: 232px;
   background: #fff;
   z-index: 100;
-  border: 1px solid #b7dedc;
   padding: 5px;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  box-shadow: rgba(0, 0, 0, 0.14) 0 0 0 0, rgb(105, 68, 47) 0 2px 11px 2px, rgba(0, 0, 0, 0.12) 0 1px 5px 0;
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
 }
 
 .param_generator_form{

@@ -25,6 +25,7 @@ const HotApp = hot(App);
 const getApp = () => {
     return hasHMR ? <HotApp/> : <App/>;
 };
+
 /**
  * root enter of the app
  */
@@ -36,6 +37,9 @@ const renderApp = () =>
         </React.Fragment>, document.getElementById('app')
     );
 
+/**
+ * hot module replacement case
+ */
 if (hasHMR && module.hot) {
     module.hot.accept('@components/App', renderApp)
 }

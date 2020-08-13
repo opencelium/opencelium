@@ -30,6 +30,7 @@ import {
 import {deleteConnectorFulfilled, deleteConnectorRejected} from '@actions/connectors/delete';
 import {doRequest} from "@utils/auth";
 import {addProfilePicture, addUserFulfilled, addUserRejected} from "@actions/users/add";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -53,7 +54,7 @@ const testConnectorEpic = (action$, store) => {
             if(data.hasOwnProperty('icon')) {
                 delete data.icon;
             }
-            return doRequest({url, method: 'post', data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                     success: testConnectorFulfilled,
                     reject: testConnectorRejected,},
             );
@@ -106,7 +107,7 @@ const addConnectorEpic = (action$, store) => {
                 successResponse = addConnectorIcon;
             }
             delete data.icon;
-            return doRequest({url, method: 'post', data: {...data}},{
+            return doRequest({url, method: API_METHOD.POST, data: {...data}},{
                     success: successResponse,
                     reject: addConnectorRejected,},
                 res => {
@@ -127,7 +128,7 @@ const addConnectorIconEpic = (action$, store) => {
             let data = new FormData();
             data.append('connectorId', action.payload.connectorId);
             data.append('file', action.payload.icon);
-            return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
+            return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
                     success: addConnectorIconFulfilled,
                     reject: addConnectorIconRejected,},
                 res => {return action.payload;}
@@ -151,7 +152,7 @@ const updateConnectorEpic = (action$, store) => {
                 successResponse = updateConnectorIcon;
             }
             delete data.icon;
-            return doRequest({url, method: 'put', data: {...data}},{
+            return doRequest({url, method: API_METHOD.PUT, data: {...data}},{
                     success: successResponse,
                     reject: updateConnectorRejected,},
                 res => {
@@ -173,7 +174,7 @@ const updateConnectorIconEpic = (action$, store) => {
             let data = new FormData();
             data.append('connectorId', action.payload.connectorId);
             data.append('file', action.payload.icon);
-            return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
+            return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
                     success: updateConnectorIconFulfilled,
                     reject: updateConnectorIconRejected,},
                 res => {return action.payload;}
@@ -189,7 +190,7 @@ const deleteConnectorEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteConnectorFulfilled,
                     reject: deleteConnectorRejected,},
                 res => {return {...res.response, id: action.payload.id};}

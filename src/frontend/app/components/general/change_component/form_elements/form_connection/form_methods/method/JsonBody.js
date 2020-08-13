@@ -19,7 +19,7 @@ class JsonBody extends Component{
             <ReactJson
                 name={false}
                 collapsed={false}
-                src={method.request.body}
+                src={method.request.getBodyFields()}
                 onEdit={readOnly ? false : updateBody}
                 onDelete={readOnly ? false : updateBody}
                 onAdd={readOnly ? false : updateBody}

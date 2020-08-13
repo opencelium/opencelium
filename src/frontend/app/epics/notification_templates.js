@@ -30,6 +30,7 @@ import {
 } from '@actions/notification_templates/delete';
 
 import {doRequest} from "@utils/auth";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -80,7 +81,7 @@ const addNotificationTemplateEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return doRequest({url, method: 'post', data: action.payload},{
+            return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: addNotificationTemplateFulfilled,
                 reject: addNotificationTemplateRejected,},
             );
@@ -94,7 +95,7 @@ const updateNotificationTemplateEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return doRequest({url, method: 'post', data: action.payload},{
+            return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: updateNotificationTemplateFulfilled,
                 reject: updateNotificationTemplateRejected,},
             );
@@ -109,7 +110,7 @@ const deleteNotificationTemplateEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteNotificationTemplateFulfilled,
                     reject: deleteNotificationTemplateRejected,},
                 res => {return {...res.response, id: action.payload.id};}

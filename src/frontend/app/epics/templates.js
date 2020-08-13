@@ -24,6 +24,7 @@ import {
 } from '@actions/templates/add';
 import {deleteTemplateFulfilled, deleteTemplateRejected} from '@actions/templates/delete';
 import {doRequest} from "@utils/auth";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /*
@@ -66,7 +67,7 @@ const addTemplateEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
-            return doRequest({url, method: 'post', data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                 success: addTemplateFulfilled,
                 reject: addTemplateRejected,},
             );
@@ -82,7 +83,7 @@ const deleteTemplateEpic = (action$, store) => {
         .mergeMap((action) => {
             let id = action.payload.hasOwnProperty('templateId') ? action.payload.templateId : action.payload.id;
             let url = `${urlPrefix}/${id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteTemplateFulfilled,
                     reject: deleteTemplateRejected,},
                 res => {return {...res.response, templateId: id};}
@@ -100,7 +101,7 @@ const importTemplateEpic = (action$, store) => {
             let url = `storage/${urlPrefix}`;
             let data = new FormData();
             data.append('file', action.payload.template);
-            return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
+            return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
                 success: importTemplateFulfilled,
                 reject: importTemplateRejected,},
             );

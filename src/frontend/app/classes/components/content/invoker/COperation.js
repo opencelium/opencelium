@@ -21,7 +21,7 @@ import CResponse from "./response/CResponse";
 export const METHOD_TYPE_TEST = 'test';
 
 /**
- * (not used)
+ * Operation class for XmlOperation, Invokers classes
  */
 export default class COperation{
 

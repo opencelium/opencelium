@@ -1300,3 +1300,64 @@
     }
   }
 }
+.add_param_existed_input{
+  float: left;
+  width: 44%;
+}
+.add_param_existed_input_name{
+  @extend .add_param_existed_input;
+  margin-left: 2%;
+}
+.add_param_existed_input_value{
+  @extend .add_param_existed_input;
+  margin-left: 4%;
+}
+.add_param_existed_delete{
+  margin: 27px 0;
+  cursor: pointer;
+}
+.add_param_existed_delete:hover{
+  color: black;
+}
+.add_param_input{
+  float: left;
+  width: 39%;
+}
+.add_param_input_name{
+  @extend .add_param_input;
+  margin-left: 2%;
+}
+.add_param_input_value{
+  @extend .add_param_input;
+  margin-left: 4%;
+}
+.add_param_button{
+  margin-top: 20px;
+  margin-left: 2%;
+  float: right;
+}
+.add_param_dialog_normal{
+  width: 32vw;
+}
+.add_param_navigation {
+  float: right;
+}
+.navigation_arrows {
+  position: absolute;
+  top: 30%;
+  left: 5px;
+}
+
+.navigation_arrow_disable {
+  cursor: default;
+  color: #eee;
+}
+
+.navigation_arrow_prev {
+  display: block;
+  cursor: pointer;
+}
+
+.navigation_arrow_next {
+  cursor: pointer;
+}

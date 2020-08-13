@@ -46,7 +46,7 @@ const ENDPOINT_DATA = [
 const INVOKER_RESTFUL = 'RESTful';
 
 /**
- * (not used)
+ * XmlInvoker class
  */
 export default class CXmlInvoker{
 

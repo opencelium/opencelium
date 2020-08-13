@@ -17,7 +17,7 @@ import CSuccess from "../../invoker/response/CSuccess";
 import CXmlReParent from "../CXmlReParent";
 
 /**
- * (not used)
+ * XmlSuccess class
  */
 export default class CXmlSuccess extends CXmlReParent{
 

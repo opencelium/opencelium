@@ -17,7 +17,7 @@ import CRequest from "../../invoker/request/CRequest";
 import CXmlReParent from "../CXmlReParent";
 
 /**
- * (not used)
+ * XmlRequest class
  */
 export default class CXmlRequest extends  CXmlReParent{
 

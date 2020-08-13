@@ -13,95 +13,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-import {isEmptyObject} from "@utils/app";
-import {
-    convertFieldNameForBackend, convertHeaderFormatToObject,
-    getFieldsForSelectSearch, parseHeader
-} from "@change_component/form_elements/form_connection/form_methods/help";
+import CResponseResult from "@classes/components/content/invoker/response/CResponseResult";
 
 /**
  * Class Success for Response
  */
-export default class CSuccess{
+export default class CSuccess extends CResponseResult{
 
-    constructor(status = '', body = {}, header = []){
-        this._status = status;
-        this._body = body === null ? {} : body;
-        this._header = parseHeader(header);
-    }
-
-    static createSuccess(success = null){
+    constructor(success = CSuccess){
         let status = success && success.hasOwnProperty('status') ? success.status : '';
-        let body = success && success.hasOwnProperty('body') ? success.body : {};
+        let body = success && success.hasOwnProperty('body') ? success.body : null;
         let header = success && success.hasOwnProperty('header') ? success.header : [];
-        return new CSuccess(status, body, header);
+        super(status, body, header);
     }
 
-    checkHeaderItem(headerItem){
-        return headerItem && headerItem.hasOwnProperty('name') && headerItem.hasOwnProperty('value');
-    }
-
-    get status(){
-        return this._status;
-    }
-
-    set status(status){
-        this._status = status;
-    }
-
-    get body(){
-        return this._body;
-    }
-
-    set body(body){
-        this._body = body;
-    }
-
-    get header(){
-        return this._header;
-    }
-
-    addHeader(headerItem){
-        if(this.checkHeaderItem(headerItem)) {
-            this._header.push(headerItem);
-        }
-    }
-
-    updateHeaderByName(header){
-        let index = this._header.findIndex(h => h.name === header.name);
-        if(index !== -1) {
-            this._header[index] = header;
-        }
-    }
-
-    removeHeaderByIndex(index){
-        if(index !== -1) {
-            this._header.splice(index, 1);
-        }
-    }
-
-    removeHeaderByName(name){
-        let index = this._header.findIndex(h => h.name === name);
-        this.removeHeaderByIndex(index);
-    }
-
-    convertFieldNameForBackend(fieldName){
-        return convertFieldNameForBackend(this._body, fieldName);
-    }
-
-    getFields(searchField){
-        return getFieldsForSelectSearch(this._body, searchField);
-    }
-
-    getObject(){
-        let obj = {
-            status: this._status,
-            body: isEmptyObject(this._body) ? null : this._body,
-        };
-        if(this._header && this._header.length > 0){
-            obj.header = convertHeaderFormatToObject(this._header);
-        }
-        return obj;
+    static createSuccess(success){
+        return new CSuccess(success);
     }
 }

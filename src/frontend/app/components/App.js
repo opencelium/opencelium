@@ -55,7 +55,6 @@ setAuthSettings();
 class App extends React.Component {
 
     componentDidMount(){
-
         //animated appearance of the app
         setTimeout(function(){
             const app = document.getElementById('app');

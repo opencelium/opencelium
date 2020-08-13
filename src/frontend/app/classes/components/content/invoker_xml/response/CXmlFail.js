@@ -18,7 +18,7 @@ import CXmlReParent from "../CXmlReParent";
 import CFail from "../../invoker/response/CFail";
 
 /**
- * (not used)
+ * XmlFail class
  */
 export default class CXmlFail extends CXmlReParent{
 

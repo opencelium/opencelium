@@ -30,6 +30,21 @@ export const DEBUGGER_ERRORS = true;
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
+export function checkExpiredMessages(data){
+    let result = false;
+    if(isString(data)){
+        result = TOKEN_EXPIRED_MESSAGES.indexOf(data) !== -1;
+    } else{
+        if(data && data.hasOwnProperty('message')){
+            result = TOKEN_EXPIRED_MESSAGES.indexOf(data.message) !== -1;
+        }
+        if(!result && data && data.hasOwnProperty('response') && data.response.hasOwnProperty('message')){
+            result = TOKEN_EXPIRED_MESSAGES.indexOf(data.response.message) !== -1;
+        }
+    }
+    return result;
+}
+
 /**
  * to check the references format in connections
  */
@@ -78,8 +93,13 @@ export function checkReferenceFormat(value){
  * to get top and left value of the element according to window
  */
 export function findTopLeft(elemId) {
-    let rec = document.getElementById(elemId).getBoundingClientRect();
-    return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+    let elem = document.getElementById(elemId);
+    if(elem) {
+        let rec = elem.getBoundingClientRect();
+        return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+    } else{
+        return {top: 0, left: 0};
+    }
 }
 
 /**

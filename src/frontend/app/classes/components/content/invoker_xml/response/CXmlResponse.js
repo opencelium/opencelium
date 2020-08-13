@@ -18,11 +18,9 @@ import CXmlSuccess from "./CXmlSuccess";
 import CXmlFail from "./CXmlFail";
 import CResponse from "../../invoker/response/CResponse";
 
-export const RESPONSE_SUCCESS = 'success';
-export const RESPONSE_FAIL = 'fail';
 
 /**
- * (not used)
+ * XmlResponse class
  */
 export default class CXmlResponse{
 

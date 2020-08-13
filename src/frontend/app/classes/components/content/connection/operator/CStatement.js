@@ -15,6 +15,8 @@
 
 import {consoleLog, isString} from "@utils/app";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../../invoker/response/CResponse";
+import {ARRAY_SIGN, WHOLE_ARRAY} from "@classes/components/content/invoker/response/CResponseResult";
+import {markFieldNameAsArray} from "@change_component/form_elements/form_connection/form_methods/help";
 
 export const STATEMENT_REQUEST = 'request';
 export const STATEMENT_RESPONSE = 'response';
@@ -22,7 +24,7 @@ export const STATEMENT_STATIC = 'static';
 export const DEFAULT_COLOR = '#ffffff';
 
 /**
- * (not used)
+ * Statement class for Condition class
  */
 export default class CStatement{
 
@@ -54,11 +56,11 @@ export default class CStatement{
     }
 
     getFieldWithoutArrayBrackets(){
-        return this._field.replace('[]', '');
+        return this._field.replace(ARRAY_SIGN, '');
     }
 
     getRightPropertyValueWithoutArrayBrackets(){
-        return this._rightPropertyValue.replace('[]', '');
+        return this._rightPropertyValue.replace(ARRAY_SIGN, '');
     }
 
     checkType(type){
@@ -134,13 +136,13 @@ export default class CStatement{
                 let tmpField = '';
                 let newField = '';
                 for(let i = 0; i < fieldSplit.length; i++){
-                    tmpField += tmpField !== '' ? `.${fieldSplit[i]}` : fieldSplit[i];
-                    let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplit[i]);
-                    let arrayAffix = '';
-                    if(findField && findField.type === 'array'){
-                        arrayAffix = '[]';
+                    let fieldSplitValue = fieldSplit[i];
+                    tmpField += tmpField !== '' ? `.${fieldSplitValue}` : fieldSplitValue;
+                    let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
+                    if(findField && findField.value !== WHOLE_ARRAY && findField.type === 'array'){
+                        fieldSplitValue = markFieldNameAsArray(fieldSplitValue);
                     }
-                    newField += newField !== '' ? `.${fieldSplit[i]}${arrayAffix}` : `${fieldSplit[i]}${arrayAffix}`;
+                    newField += newField !== '' ? `.${fieldSplitValue}` : `${fieldSplitValue}`;
                 }
                 field = newField;
             }

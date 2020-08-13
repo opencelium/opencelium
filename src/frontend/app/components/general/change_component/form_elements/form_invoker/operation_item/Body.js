@@ -35,7 +35,7 @@ class Body extends Component{
 
         this.state = {
             showImportJson: false,
-            importJson: JSON.stringify(props.entity.body),
+            importJson: JSON.stringify(props.entity.getBodyFields()),
             focused: false,
         };
     }
@@ -52,7 +52,7 @@ class Body extends Component{
 
     handleInput(value){
         const {entity, updateEntity} = this.props;
-        entity.body = isString(value.updated_src) ? JSON.parse(value.updated_src) : value.updated_src;
+        entity.setBodyFields(isString(value.updated_src) ? JSON.parse(value.updated_src) : value.updated_src);
         updateEntity();
     }
 
@@ -122,7 +122,7 @@ class Body extends Component{
     render(){
         const {icon, readOnly} = this.props.data;
         let {tourStep, entity, forConnection, hasHeightLimits} = this.props;
-        let value = entity.body;
+        let value = entity.getBodyFields();
         if(value === ''){
             value = {};
         }

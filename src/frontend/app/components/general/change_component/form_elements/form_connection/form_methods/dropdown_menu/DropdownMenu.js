@@ -121,8 +121,8 @@ class DropdownMenu extends Component{
             switch (itemType) {
                 case METHOD_ITEM:
                     item.name = dropdownValue.value;
-                    item.request = operation.request.getObject();
-                    item.response = operation.response.getObject();
+                    item.request = operation.request.getObject({bodyOnlyConvert: true});
+                    item.response = operation.response.getObject({bodyOnlyConvert: true});
                     switch (connector.getConnectorType()) {
                         case CONNECTOR_FROM:
                             connection.addFromConnectorMethod(item, methodType);
