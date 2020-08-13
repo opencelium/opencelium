@@ -226,9 +226,9 @@ public class ActionUtility {
         BodyNode bodyNode = new BodyNode();
         ErrorMessageData messageData = validationContext.get(connectionName);
         messageData.setLocation("body");
-        bodyNode.setData(bodyNode.getData());
-        bodyNode.setFormat(bodyNode.getFormat());
-        bodyNode.setType(bodyNode.getType());
+        bodyNode.setData(bodyResource.getData());
+        bodyNode.setFormat(bodyResource.getFormat());
+        bodyNode.setType(bodyResource.getType());
         bodyNode.setFields(buildFields(bodyResource.getFields()));
         return bodyNode;
     }
