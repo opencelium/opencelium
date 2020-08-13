@@ -125,7 +125,7 @@ class Items extends Component{
                 {
                     history.map((operator, key) => {
                         //let field = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.field : '';
-                        let typeTooltip = operator.type ? operator.type : '';
+                        let typeTooltip = operator.type ? `${operator.type} ${operator.iterator}` : '';
                         let color = operator.condition && operator.condition.leftStatement ? operator.condition.leftStatement.color : '';
                         const conditionMethod = connector.getMethodByColor(color);
                         let fieldTooltip = conditionMethod ? conditionMethod.name : '';

@@ -111,10 +111,14 @@ export default class CResponseResult{
                 let index = searchField.indexOf('.') + 1;
                 return this._body.getFieldsForSelectSearch(searchField.substring(index));
             } else{
-                return [
-                    {value: WHOLE_ARRAY, type: FIELD_TYPE_ARRAY, label: 'Whole Result'},
-                    {value: '[0]', type: FIELD_TYPE_ARRAY, label: 'One Element of Result'}
-                ];
+                if(searchField.split('.').length <= 1) {
+                    return [
+                        {value: WHOLE_ARRAY, type: FIELD_TYPE_ARRAY, label: 'Whole Result'},
+                        {value: '[0]', type: FIELD_TYPE_ARRAY, label: 'First Element of Result'}
+                    ];
+                } else{
+                    return [];
+                }
             }
         } else {
             return this._body.getFieldsForSelectSearch(searchField);

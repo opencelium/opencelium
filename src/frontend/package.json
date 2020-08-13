@@ -171,6 +171,7 @@
   "jest": {
     "moduleNameMapper": {
       "^@classes(.*)$": "<rootDir>/app/classes$1",
+      "^@change_component(.*)$": "<rootDir>app/components/general/change_component$1",
       "^@utils(.*)$": "<rootDir>/app/utils$1"
     },
     "setupFiles": [

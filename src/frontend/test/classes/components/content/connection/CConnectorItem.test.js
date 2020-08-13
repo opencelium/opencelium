@@ -101,3 +101,36 @@ describe('Check OperatorsHistory', () => {
         expect(connectorItem.operatorsHistory[1].index).toBe('1_1');
     });
 });
+
+describe.only('Check Iterators', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    beforeEach(() => {
+        connectorItem.methods = [];
+        connectorItem.operators = [];
+    });
+
+    it('first operator should be \'i\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        expect(connectorItem.operators[0].iterator).toBe('i');
+    });
+
+    it('second operator should be \'i\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        connectorItem.addOperator({type: 'loop'});
+        expect(connectorItem.operators[1].iterator).toBe('i');
+    });
+
+    it('second operator should be \'j\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        connectorItem.addOperator({type: 'loop'}, INSIDE_ITEM);
+        expect(connectorItem.operators[1].iterator).toBe('j');
+    });
+
+    it('third operator should be \'k\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        connectorItem.addOperator({type: 'loop'}, INSIDE_ITEM);
+        connectorItem.addOperator({type: 'loop'}, INSIDE_ITEM);
+        console.log(connectorItem.operators[2].iterator);
+        expect(connectorItem.operators[2].iterator).toBe('k');
+    });
+});

@@ -257,9 +257,9 @@ const xml = `<?xml version="1.0" encoding="UTF-8" ?>
         </operation>
     </operations>
 </invoker>`;
-describe.only('CXmlEditor class', () => {
+describe.skip('CXmlEditor class', () => {
 
-    test.only('Check convertToXml', () => {
+    test('Check convertToXml', () => {
         const received = CXmlEditor.createXmlEditor(xml).convertToXml();
         const expected = xml;
         expect(received).toBe(expected);

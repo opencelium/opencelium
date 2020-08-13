@@ -25,7 +25,7 @@ export const LOOP_OPERATOR = 'loop';
  */
 export default class COperatorItem{
 
-    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false){
+    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = ''){
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
@@ -35,7 +35,7 @@ export default class COperatorItem{
         this._isToggled = isToggled;
         this._intend = 0;
         this._isDisabled = false;
-        this._iterator = '';
+        this._iterator = iterator;
     }
 
     static createOperatorItem(operatorItem){
@@ -45,7 +45,8 @@ export default class COperatorItem{
         let error = operatorItem && operatorItem.hasOwnProperty('error') ? operatorItem.error : null;
         let isMinimized = operatorItem && operatorItem.hasOwnProperty('isMinimized') ? operatorItem.isMinimized : false;
         let isToggled = operatorItem && operatorItem.hasOwnProperty('isToggled') ? operatorItem.isToggled : false;
-        return new COperatorItem(index, type, condition, error, isMinimized, isToggled);
+        let iterator = operatorItem && operatorItem.hasOwnProperty('iterator') ? operatorItem.iterator : '';
+        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator);
     }
 
     deleteError(){
@@ -196,13 +197,23 @@ export default class COperatorItem{
         this._isDisabled = isDisabled;
     }
 
+    get iterator(){
+        return this._iterator;
+    }
+
+    set iterator(iterator){
+        this._iterator = iterator;
+    }
+
     getObject(){
         let obj = {
             index: this._index,
             type: this._type,
             condition: this._condition.getObject(),
-            iterator: this._iterator,
         };
+        if(this._iterator !== ''){
+            obj.iterator = this._iterator;
+        }
         return obj;
     }
 }

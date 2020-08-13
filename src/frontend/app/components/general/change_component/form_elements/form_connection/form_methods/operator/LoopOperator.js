@@ -34,6 +34,7 @@ import {
 } from "@classes/components/content/invoker/response/CResponse";
 import Input from "@basic_components/inputs/Input";
 import {dotColor} from "../help";
+import TooltipText from "@basic_components/tooltips/TooltipText";
 
 
 /**
@@ -316,7 +317,7 @@ class LoopOperator extends Component{
                             tooltipPosition={'top'}
                         />
                     </div>
-
+                    <span title={'Iterator'}className={styles.operator_iterator}>{operator.iterator}</span>
                     {
                         isVisibleMenuEdit
                         ?

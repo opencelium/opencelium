@@ -19,7 +19,7 @@ import CConnectorPagination from "../../../../../app/classes/components/content/
 import {ALL_COLORS} from "../../../../../app/classes/components/content/connection/CConnection";
 
 
-describe('Load Pages', () => {
+describe.skip('Load Pages', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     beforeEach(() => {
         connectorItem.title = 'i-doit';

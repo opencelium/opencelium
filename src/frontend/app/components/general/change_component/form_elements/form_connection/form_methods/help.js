@@ -80,7 +80,7 @@ export function hasArrayMark(str){
         let potentialArrayMark = splitStr[0];
         if(potentialArrayMark.length > 2){
             if(potentialArrayMark[0] === '[' && potentialArrayMark[potentialArrayMark.length - 1] === ']'){
-                if(isNumber(potentialArrayMark.substring(1, potentialArrayMark.length - 1))){
+                if(potentialArrayMark.substring(1, potentialArrayMark.length - 1) !== '*'){
                     return true;
                 }
             }
