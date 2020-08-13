@@ -260,7 +260,6 @@ public class ActionUtility {
         OperatorResource operatorResource = operatorResources.stream()
                 .filter(m -> m.getIndex().equals(i)).findAny().get();
 
-
         ErrorMessageData messageData = validationContext.get(connectionName);
         if (messageData == null){
             messageData = new ErrorMessageData();
@@ -274,10 +273,11 @@ public class ActionUtility {
 
         OperatorNode operatorNode = toOperatorNode(operatorResource);
 
+        operatorNode.setIterator(operatorResource.getIterator());
         operatorNode.setRightStatement(ConditionUtility.buildStringStatement(operatorResource.getCondition().getRightStatement()));
         operatorNode.setLeftStatement(ConditionUtility.buildStringStatement(operatorResource.getCondition().getLeftStatement()));
 
-        if (i.length() < nextElement.length()){ // TODO: should be refactored. Invoker name initialization is not clear
+        if (i.length() < nextElement.length()){
             operatorNode.setBodyOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName));
             operatorNode.setBodyFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
         }

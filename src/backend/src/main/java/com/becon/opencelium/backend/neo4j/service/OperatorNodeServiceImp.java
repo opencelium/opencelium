@@ -48,6 +48,7 @@ public class OperatorNodeServiceImp implements OperatorNodeService {
         operatorResource.setIndex(entity.getIndex());
         operatorResource.setNodeId(entity.getId());
         operatorResource.setType(entity.getType());
+        operatorResource.setIterator(entity.getIterator());
         operatorResource.setCondition(new ConditionResource(entity));
         //TODO: convert ot condition type in enhancement
         return operatorResource;
