@@ -139,7 +139,7 @@ public class ExecutionContainer {
                 return convertToArray(result);
             } else {
                 result = result.replace("\"", "");
-                return result;
+                return o;
             }
         } catch (ScriptException | IOException e){
             throw new RuntimeException(e);
