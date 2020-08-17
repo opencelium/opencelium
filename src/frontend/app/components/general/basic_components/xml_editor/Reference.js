@@ -20,8 +20,7 @@ class Reference extends React.Component{
             <div className={`${theme.input}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                     <div>
-                        <div style={{width: '220px'}}>{ReferenceComponent.getComponent({})}</div>
-                        <TooltipFontIcon tooltip={'Add Reference'} value={'add'} onClick={::this.add} style={{cursor: 'pointer', fontSize: '14px', lineHeight: '38px'}}/>
+                        <div>{ReferenceComponent.getComponent({submitEdit: ::this.add})}</div>
                     </div>
                 <span className={theme.bar}/>
                 <label className={theme.label}>{'Value'}</label>

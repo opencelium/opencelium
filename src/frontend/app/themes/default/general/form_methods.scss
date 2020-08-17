@@ -699,7 +699,7 @@
 
 .param_generator_form_parent{
   position: absolute;
-  width: 232px;
+  width: 244px;
   background: #fff;
   z-index: 100;
   padding: 5px;
@@ -720,10 +720,11 @@
 }
 
 .param_generator_form_add{
-  width: 20px;
+  width: 34px;
   line-height: 40px;
   text-align: center;
   float: left;
+  cursor: pointer;
 }
 
 .body_label{

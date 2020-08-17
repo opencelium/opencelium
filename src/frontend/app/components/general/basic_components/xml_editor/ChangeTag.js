@@ -137,7 +137,7 @@ class ChangeTag extends React.Component{
                 {valueType === TAG_VALUE_TYPES.TEXT && <Value ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={'Text'}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
             </div>,
-            document.getElementById('oc_modal')
+            document.getElementById('oc_xml_modal')
         );
     }
 }

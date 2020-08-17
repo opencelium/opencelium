@@ -12,7 +12,7 @@ class XmlEditor extends React.Component{
         super(props);
 
         this.state = {
-            xml: CXmlEditor.createXmlEditor(props.xml ? props.xml : '<item><name>Jack</name><name>Mary</name></item>'),
+            xml: CXmlEditor.createXmlEditor('<item><name>Jack</name><name>Mary</name></item>'),
             addTag: CTag.createTag(),
             hasAddTagPopup: false,
         };

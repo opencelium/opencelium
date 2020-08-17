@@ -43,7 +43,7 @@ class ParamGenerator extends Component {
             field: '',
             responseType: RESPONSE_SUCCESS,
         };
-        const {top, left} = findTopLeft(props.parentId);
+        const {top, left} = findTopLeft(props.parent);
         this.top = top;
         this.left = left;
     }
@@ -315,12 +315,12 @@ class ParamGenerator extends Component {
 
     renderGenerator(){
         const {showGenerator} = this.state;
-        const {isVisible, isAbsolute, parentId, submitEdit} = this.props;
+        const {isVisible, isAbsolute, parent, submitEdit} = this.props;
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
         return(
-            <div className={isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} style={parentId ? {left: this.left, top: this.top} : {}}>
+            <div className={isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} style={parent ? {left: this.left, top: this.top} : {}}>
                 {::this.renderArrowIcon()}
                 {
                     showGenerator || isVisible
@@ -338,10 +338,10 @@ class ParamGenerator extends Component {
     }
 
     render(){
-        const {parentId} = this.props;
-        if(parentId){
+        const {parent} = this.props;
+        if(parent){
             return ReactDOM.createPortal(this.renderGenerator(),
-                document.getElementById('oc_modal'));
+                document.getElementById('oc_generator_modal'));
         }
         return this.renderGenerator();
     }
@@ -349,7 +349,7 @@ class ParamGenerator extends Component {
 
 ParamGenerator.defaultProps = {
     isAbsolute: true,
-    parentId: '',
+    parent: null,
     submitEdit: null,
 };
 

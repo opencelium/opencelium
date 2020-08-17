@@ -14,4 +14,8 @@ export class CJsonEditor{
     static isAbsolute(){
         return true;
     }
+
+    static getParent(textarea = null){
+        return textarea && textarea.id ? document.getElementById(textarea.id) : document.activeElement;
+    }
 }

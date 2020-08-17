@@ -4,7 +4,7 @@ import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
 
 export default class CXmlEditor{
     constructor(xml) {
-        this._xml = xml2js(xml, {compact: true});
+        this._xml = isString(xml) ? xml2js(xml, {compact: true}) : xml;
         this._declaration = null;
         this._tag = null;
         this.convertFromXml();
@@ -23,14 +23,15 @@ export default class CXmlEditor{
     }
 
     static createXmlEditor(xml){
-        if(isString(xml)) {
-            return new CXmlEditor(xml);
-        }
-        return null;
+        return new CXmlEditor(xml);
     }
 
     static isAbsolute(){
         return false;
+    }
+
+    static getParent(){
+        return null;
     }
 
     convertFromXml(){

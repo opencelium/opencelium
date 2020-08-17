@@ -249,7 +249,7 @@ export function RequestBody(CRequestType){
                             {...this.props}
                             ReferenceComponent={hasReferenceComponent ? {
                                 getComponent: (params) => {
-                                    const {submitEdit} = params;
+                                    const {submitEdit, textarea} = params;
                                     return (
                                         <ParamGenerator
                                             ref={this.paramGenerator}
@@ -262,7 +262,7 @@ export function RequestBody(CRequestType){
                                             submitEdit={submitEdit}
                                             id={`${id}_reference_component`}
                                             isAbsolute={CRequestType.isAbsolute()}
-                                            parentId={`${id}_reference_component_editor_value`}
+                                            parent={CRequestType.getParent(textarea)}
                                             hasArrowIcon={true}
                                         />
                                     );},

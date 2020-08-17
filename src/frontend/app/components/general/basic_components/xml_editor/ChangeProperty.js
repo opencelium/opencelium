@@ -58,8 +58,10 @@ class ChangeProperty extends React.Component{
             return;
         }
         property.update(name, value);
-        let referenceDiv = document.getElementById(ReferenceComponent.id);
-        referenceDiv.innerText = '';
+        if(ReferenceComponent){
+            let referenceDiv = document.getElementById(ReferenceComponent.id);
+            referenceDiv.innerText = '';
+        }
         switch(mode){
             case 'add':
                 change(property);
@@ -87,7 +89,7 @@ class ChangeProperty extends React.Component{
                 <Value value={value} changeValue={::this.changeValue} uniqueIndex={property.uniqueIndex} ReferenceComponent={ReferenceComponent} pressKey={::this.pressKey}/>
                 <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
             </div>,
-            document.getElementById('oc_modal')
+            document.getElementById('oc_xml_modal')
         )
     }
 }
