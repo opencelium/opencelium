@@ -27,6 +27,8 @@ import Mapping from "./mapping/Mapping";
 
 import AddTemplate from "./AddTemplate";
 import AddParam from "@change_component/form_elements/form_connection/form_methods/AddParam";
+import Draft from "@change_component/form_elements/form_connection/form_methods/Draft";
+import {setLS} from "@utils/LocalStorage";
 
 
 function mapStateToProps(state){
@@ -51,7 +53,8 @@ class FormMethods extends Component{
      * to update entity
      */
     updateEntity(e = null){
-        const {entity, updateEntity} = this.props;
+        const {authUser, entity, updateEntity} = this.props;
+        setLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, JSON.stringify(entity.getObject()), `connection_${authUser.userId}`);
         if(e === null) {
             updateEntity(entity);
         } else{
@@ -60,7 +63,7 @@ class FormMethods extends Component{
     }
 
     render(){
-        const {entity, data, authUser} = this.props;
+        const {entity, data, authUser, isDraft, noMethodTitle} = this.props;
         const {readOnly} = data;
         let {tourSteps} = data;
         let tourClassNames = [];
@@ -71,58 +74,55 @@ class FormMethods extends Component{
         }
         return (
             <div className={`${theme.withIcon} ${theme.input}`} style={{margin: '0 65px'}}>
-                {!readOnly ?
-                    <AddTemplate data={data} entity={entity} authUser={authUser}/>
-                    : null
-                }
-                {!readOnly ?
-                    <AddParam data={data} entity={entity} authUser={authUser}/>
-                    : null
+                {!readOnly &&
+                    <React.Fragment>
+                        {!isDraft && <Draft connection={entity} updateEntity={::this.updateEntity}/>}
+                        <AddTemplate data={data} entity={entity} authUser={authUser}/>
+                        <AddParam data={data} entity={entity} authUser={authUser}/>
+                    </React.Fragment>
                 }
                 <div>
                     <div className={tourClassNames[0] ? tourClassNames[0] : ''}>
                         <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                        <hr noshade="noshade" size="1" style={{marginTop: '40px'}} color={"#f0f0f0"}/>
-                        <div className={styles.mapping_methods}>Methods</div>
+                        {!noMethodTitle &&
+                            <React.Fragment>
+                                <hr noshade="noshade" size="1" style={{marginTop: '40px'}} color={"#f0f0f0"}/>
+                                <div className={styles.mapping_methods}>Methods</div>
+                            </React.Fragment>
+                        }
                         <Row>
                             <Col xl={5} lg={5} md={6} sm={6} className={`${styles.form_select_method}`}>
                                 <Items
+                                    isDraft={isDraft}
                                     readOnly={readOnly}
                                     connection={entity}
                                     connector={entity.fromConnector}
                                     updateEntity={::this.updateEntity}
                                 />
-                                {
-                                    readOnly
-                                    ?
-                                        null
-                                    :
-                                        <DropdownMenu
-                                            readOnly={readOnly}
-                                            connection={entity}
-                                            connector={entity.fromConnector}
-                                            updateEntity={::this.updateEntity}
-                                        />
+                                {!readOnly &&
+                                    <DropdownMenu
+                                        readOnly={readOnly}
+                                        connection={entity}
+                                        connector={entity.fromConnector}
+                                        updateEntity={::this.updateEntity}
+                                    />
                                 }
                             </Col>
                             <Col offset={{xl: 2, lg: 2}} xl={5} lg={5} md={6} sm={6} className={`${styles.form_select_method}`}>
                                 <Items
+                                    isDraft={isDraft}
                                     readOnly={readOnly}
                                     connection={entity}
                                     connector={entity.toConnector}
                                     updateEntity={::this.updateEntity}
                                 />
-                                {
-                                    readOnly
-                                        ?
-                                        null
-                                        :
-                                        <DropdownMenu
-                                            readOnly={readOnly}
-                                            connection={entity}
-                                            connector={entity.toConnector}
-                                            updateEntity={::this.updateEntity}
-                                        />
+                                {!readOnly &&
+                                    <DropdownMenu
+                                        readOnly={readOnly}
+                                        connection={entity}
+                                        connector={entity.toConnector}
+                                        updateEntity={::this.updateEntity}
+                                    />
                                 }
                             </Col>
                         </Row>
@@ -142,6 +142,11 @@ class FormMethods extends Component{
 FormMethods.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
+};
+
+FormMethods.defaultProps = {
+    isDraft: false,
+    noMethodTitle: false,
 };
 
 

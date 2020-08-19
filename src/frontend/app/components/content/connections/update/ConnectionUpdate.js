@@ -32,6 +32,7 @@ import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "@utils/constants/t
 import {SingleComponent} from "@decorators/SingleComponent";
 import CConnection from "@classes/components/content/connection/CConnection";
 import {setFocusById} from "@utils/app";
+import {removeLS} from "@utils/LocalStorage";
 
 
 const connectionPrefixURL = '/connections';
@@ -159,10 +160,16 @@ class ConnectionUpdate extends Component{
         addTemplate({name: template.name, description: template.description, connection: template.entity.getObject()});
     }
 
+    doAction(connection){
+        const {authUser} = this.props;
+        removeLS(`${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`, `connection_${authUser.userId}`);
+        this.props.doAction(connection);
+    }
+
     render(){
         const {
             t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
-            updatingConnection, doAction,
+            updatingConnection,
         } = this.props;
         let {connection, error} = this.props;
         connection.error = error;
@@ -231,7 +238,7 @@ class ConnectionUpdate extends Component{
                     breadcrumbsItems={breadcrumbsItems}
                     contents={contents}
                     translations={changeContentTranslations}
-                    action={doAction}
+                    action={::this.doAction}
                     entity={connectionClass}
                     type={'update'}
                     isActionInProcess={updatingConnection}

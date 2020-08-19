@@ -211,7 +211,7 @@ class Endpoint extends Component{
                             onClick={::this.openEndpointEdit}
                         />
                         {
-                            isEndpointEditOpen && this.renderEndpointEdit()
+                            isEndpointEditOpen && !readOnly && this.renderEndpointEdit()
                         }
                     </span>
                     <div

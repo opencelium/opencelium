@@ -996,6 +996,7 @@
   }
 }
 .operators_history{
+  color: black;
   position: absolute;
   top: -55px;
   padding: 3px;
@@ -1360,4 +1361,17 @@
 
 .navigation_arrow_next {
   cursor: pointer;
+}
+
+//Draft
+.draft{
+  .connectors{
+    font-size: $FONT_SIZE_MEDIUM;
+    color: black;
+    text-align: center;
+  }
+  .draft_connection{
+    max-height: 300px;
+    overflow-y: auto;
+  }
 }

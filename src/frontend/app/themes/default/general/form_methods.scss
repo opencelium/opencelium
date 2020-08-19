@@ -21,6 +21,7 @@
   font-size: $FONT_SIZE_SMALL;
   margin-top: 15px;
   overflow: initial !important;
+  color: black;
   .remove{
     color: #000000;
     font-size: $FONT_SIZE_MEDIUM;
@@ -70,7 +71,7 @@
 
 .item_title_arrow{
   margin-top: 4px;
-  width: 15%;
+  width: 25px;
   float: left;
 }
 
@@ -78,7 +79,7 @@
   vertical-align: super;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_MEDIUM !important;
-  width: 85%;
+  width: calc(100% - 25px);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -90,7 +91,7 @@
 }
 
 .item_card_title{
-  padding: 14px 0 14px 16px !important;
+  padding: 14px 2px 14px 2px !important;
 }
 .item_card_title>div{
   width: 100%;
@@ -137,6 +138,7 @@
   margin-top: 15px;
   font-family: $FONT_FAMILY;
   position: relative;
+  color: black;
   .remove{
     color: #000000;
     font-size: $FONT_SIZE_MEDIUM;

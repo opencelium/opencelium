@@ -79,6 +79,15 @@ export default class CConnection{
         return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error);
     }
 
+    static duplicateConnection(connection){
+        let duplicate;
+        if(connection instanceof CConnection){
+            duplicate = connection.getObject();
+            duplicate.connectionId = duplicate.id;
+        }
+        return new CConnection(duplicate);
+    }
+
     convertBindingItem(bindingItem){
         if(!(bindingItem instanceof CBindingItem) || bindingItem === null) {
             return CBindingItem.createBindingItem(bindingItem);

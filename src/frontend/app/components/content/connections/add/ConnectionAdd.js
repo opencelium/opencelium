@@ -33,6 +33,7 @@ import CConnection, {ALL_COLORS} from "@classes/components/content/connection/CC
 import ChangeContent from "@change_component/ChangeContent";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
+import {removeLS} from "@utils/LocalStorage";
 
 
 const connectionPrefixURL = '/connections';
@@ -215,11 +216,16 @@ class ConnectionAdd extends Component{
         addTemplate({name: template.name, description: template.description, connection: template.entity.getObject()});
     }
 
+    doAction(connection){
+        const {authUser} = this.props;
+        removeLS(`${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`, `connection_${authUser.userId}`);
+        this.props.doAction(connection);
+    }
 
     render(){
         const {
             t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
-            addingConnection, doAction, error,
+            addingConnection, error,
         } = this.props;
         let {connection} = this.state;
         connection.setError(error);
@@ -312,7 +318,7 @@ class ConnectionAdd extends Component{
                     breadcrumbsItems={breadcrumbsItems}
                     contents={contents}
                     translations={changeContentTranslations}
-                    action={doAction}
+                    action={::this.doAction}
                     entity={connection}
                     isActionInProcess={addingConnection}
                     authUser={authUser}
