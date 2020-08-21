@@ -50,6 +50,9 @@ export function RequestBody(CRequestType){
             }
 
             openBodyEdit(){
+                const {connector, method, updateEntity} = this.props;
+                connector.setCurrentItem(method);
+                updateEntity();
                 this.setState({isBodyEditOpened: true});
             }
 
@@ -78,9 +81,8 @@ export function RequestBody(CRequestType){
              */
             importJson(){
                 let {importJsonBody} = this.state;
-                const {updateBody} = this.props;
                 if(isJsonString(importJsonBody)) {
-                    updateBody({updated_src: JSON.parse(importJsonBody)});
+                    this.updateBody({updated_src: JSON.parse(importJsonBody)});
                     this.toggleImportJson();
                 } else{
                     alert('Not JSON format');
@@ -136,6 +138,17 @@ export function RequestBody(CRequestType){
                 connection.updateEnhancement(currentEnhancement);
                 updateEntity();
                 this.toggleEnhancement();
+            }
+
+            /**
+             * to update body
+             */
+            updateBody(bodyData){
+                const {connection, connector, method, updateEntity} = this.props;
+                connector.setCurrentItem(method);
+                CRequestType.updateFieldsBinding(connection, connector, method, CRequestType.convertForFieldBinding(bodyData));
+                method.setRequestBodyFields(CRequestType.convertToBodyFormat(bodyData));
+                updateEntity();
             }
 
             renderEnhancement(){
@@ -207,12 +220,12 @@ export function RequestBody(CRequestType){
                 }
                 return(
                     <React.Fragment>
-                        <span className={styles.method_body_placeholder}
-                              title={'more details'}
-                              style={hasError ? {color: 'red'} : {}}
-                              onClick={::this.openBodyEdit}>
-                            {CRequestType.getPlaceholder()}
-                        </span>
+                        <TooltipFontIcon
+                            className={styles.method_body_placeholder}
+                            tooltip={'more details'}
+                            value={<span>{CRequestType.getPlaceholder()}</span>}
+                            style={hasError ? {color: 'red'} : {}}
+                            onClick={::this.openBodyEdit}/>
                     </React.Fragment>
                 );
             }
@@ -230,7 +243,7 @@ export function RequestBody(CRequestType){
 
             render(){
                 const {isBodyEditOpened} = this.state;
-                const {id, readOnly, method, connector, connection, updateBody, bodyStyles} = this.props;
+                const {id, readOnly, method, connector, connection, bodyStyles, isDraft} = this.props;
                 if(!isBodyEditOpened){
                     return this.renderPlaceholder();
                 }
@@ -240,13 +253,14 @@ export function RequestBody(CRequestType){
                     ownBodyStyles = bodyStyles;
                 }
                 return(
-                    <div className={`${theme.input} ${styles[CRequestType.getClassName()]}`} style={ownBodyStyles}>
+                    <div className={`${theme.input} ${styles[CRequestType.getClassName({isDraft})]}`} style={ownBodyStyles}>
                         {::this.renderCloseMenuEditButton()}
                         <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                         <div style={{display: 'none'}} id={`${id}_reference_component`}/>
                         {this.renderEnhancement()}
                         <Component
                             {...this.props}
+                            updateBody={::this.updateBody}
                             ReferenceComponent={hasReferenceComponent ? {
                                 getComponent: (params) => {
                                     const {submitEdit, textarea} = params;
@@ -257,7 +271,7 @@ export function RequestBody(CRequestType){
                                             connector={connector}
                                             method={method}
                                             readOnly={readOnly}
-                                            addParam={updateBody}
+                                            addParam={::this.updateBody}
                                             isVisible={true}
                                             submitEdit={submitEdit}
                                             id={`${id}_reference_component`}

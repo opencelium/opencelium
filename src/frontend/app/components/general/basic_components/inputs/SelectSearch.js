@@ -72,10 +72,14 @@ class SelectSearch extends Component{
         switch(e.keyCode){
             case 13:
                 e.preventDefault();
-
                 if(!e.ctrlKey) {
                     if (currentItems.length > 0) {
-                        this.onSelectItem(e, currentItems[currentItem].value);
+                        this.onSelectItem(e, currentItems[currentItem]);
+                        if(currentItems.length === 1){
+                            if(typeof submitEdit === 'function') {
+                                submitEdit();
+                            }
+                        }
                     }
                 } else{
                     if(typeof submitEdit === 'function') {
@@ -128,16 +132,20 @@ class SelectSearch extends Component{
      * to select item in menu
      */
     onSelectItem(e, value){
-        e.preventDefault();
-        const {inputValue, id} = this.props;
-        if(value !== "-1") {
-            let newValue = value;
-            let splitValue = inputValue ? inputValue.split(PARAM_DELIMITER) : [];
-            if (splitValue.length > 1) {
-                splitValue[splitValue.length - 1] = value;
-                newValue = splitValue.join(PARAM_DELIMITER);
+        const {inputValue, submitEdit, id} = this.props;
+        if(value){
+            if(value.value !== "-1") {
+                let newValue = value.value;
+                let splitValue = inputValue ? inputValue.split(PARAM_DELIMITER) : [];
+                if (splitValue.length > 1) {
+                    splitValue[splitValue.length - 1] = value.value;
+                    newValue = splitValue.join(PARAM_DELIMITER);
+                }
+                this.changeInputValue(newValue);
             }
-            this.changeInputValue(newValue);
+            if(!(value.type !== FIELD_TYPE_ARRAY && value.type !== FIELD_TYPE_OBJECT)){
+                e.preventDefault();
+            }
         }
     }
 
@@ -164,9 +172,9 @@ class SelectSearch extends Component{
         let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue) : [];
         if(result.length > 0) {
             result = result.map(field => {
-                let {value} = field;
+                let {value, type} = field;
                 let label = field.hasOwnProperty('label') ? field.label : field.value;
-                return {label, value};
+                return {label, value, type};
             });
         } else{
             result = [{label: 'No params', value: '-1', disabled: true}];
@@ -192,7 +200,7 @@ class SelectSearch extends Component{
                 <div
                     className={`${styles[classNames.item]} ${currentItem === key ? styles[classNames.item_hover] : ''}`}
                     key={key}
-                    onMouseDown={(e) => ::this.onSelectItem(e, value.value)}
+                    onMouseDown={(e) => ::this.onSelectItem(e, value)}
                     onMouseOver={(e) => ::this.currentHoveredItem(e, key)}
                 >
                     {value.label}

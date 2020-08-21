@@ -86,6 +86,7 @@ class ChangeTag extends React.Component{
                 break;
             case TAG_VALUE_TYPES.TEXT:
                 tags = text;
+                CXmlEditor.setLastEditElement(tag, text, tag.tags, mode);
                 break;
             case TAG_VALUE_TYPES.ITEM:
                 tags = isArray(tag.tags) ? tag.tags : [];
@@ -96,6 +97,7 @@ class ChangeTag extends React.Component{
                     try {
                         clipboardXml = CXmlEditor.createXmlEditor(text);
                         tags = clipboardXml ? clipboardXml.tag : [];
+                        tags.parent = parent;
                         switch (mode) {
                             case 'add':
                                 parent.addTag(tags);

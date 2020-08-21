@@ -14,7 +14,7 @@ class JsonBody extends Component{
     }
 
     render(){
-        const {readOnly, method, updateBody, setCurrentItem, ReferenceComponent, onReferenceClick} = this.props;
+        const {readOnly, method, updateBody, ReferenceComponent, onReferenceClick} = this.props;
         return(
             <ReactJson
                 name={false}
@@ -23,7 +23,6 @@ class JsonBody extends Component{
                 onEdit={readOnly ? false : updateBody}
                 onDelete={readOnly ? false : updateBody}
                 onAdd={readOnly ? false : updateBody}
-                onSelect={setCurrentItem}
                 style={{wordBreak: 'break-word', padding: '8px 0', width: '80%', display: 'inline-block', position: 'relative'}}
                 ReferenceComponent={ReferenceComponent}
                 onReferenceClick={onReferenceClick}
@@ -38,12 +37,12 @@ JsonBody.propTypes = {
     connection: PropTypes.instanceOf(CConnection),
     connector: PropTypes.instanceOf(CConnectorItem),
     updateBody: PropTypes.func,
-    setCurrentItem: PropTypes.func,
 };
 
 JsonBody.defaultProps = {
     readOnly: false,
     bodyStyles: {},
+    isDraft: false,
 };
 
 export default JsonBody;

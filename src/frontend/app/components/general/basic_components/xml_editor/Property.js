@@ -8,6 +8,7 @@ import ChangeProperty from "@basic_components/xml_editor/ChangeProperty";
 import XmlEditor from "@basic_components/xml_editor/XmlEditor";
 import {checkReferenceFormat} from "@utils/app";
 import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
+import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
 
 class Property extends React.Component{
     constructor(props) {
@@ -45,6 +46,7 @@ class Property extends React.Component{
 
     removeProperty(){
         const {tag, property, update} = this.props;
+        CXmlEditor.setLastEditElement(property, '', property.value, 'remove');
         tag.removeProperty(property.name);
         update();
     }

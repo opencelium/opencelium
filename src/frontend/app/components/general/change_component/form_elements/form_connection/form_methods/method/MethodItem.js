@@ -113,7 +113,7 @@ class MethodItem extends Component{
         if(isHidden){
             return null;
         }
-        const {connection, connector, method, readOnly, index, firstItemIndex} = this.props;
+        const {connection, connector, method, readOnly, index, isDraft} = this.props;
         const {showParams} = this.state;
         let methodStyles = {position: 'relative', transition: 'width 0.5s ease 0s', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px'};
         let methodTitleStyles = {backgroundColor: method.color};
@@ -155,6 +155,7 @@ class MethodItem extends Component{
                             ?
                                 <MethodRequest
                                     id={`params_${connector.getConnectorType()}_${method.index}`}
+                                    isDraft={isDraft}
                                     readOnly={readOnly}
                                     connection={connection}
                                     connector={connector}
@@ -181,6 +182,7 @@ MethodItem.propTypes = {
 
 MethodItem.defaultProps = {
     firstItemIndex: '0',
+    isDraft: false,
 };
 
 

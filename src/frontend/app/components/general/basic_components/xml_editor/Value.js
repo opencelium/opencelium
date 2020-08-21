@@ -20,7 +20,7 @@ class Value extends React.Component{
     }
 
     changeNotReferenceValue(notReferenceValue){
-        this.setState({notReferenceValue}, this.props.changeValue(notReferenceValue));
+        this.setState({notReferenceValue}, this.props.changeValue(notReferenceValue, false));
     }
 
     changeValueType(valueType){
@@ -29,7 +29,7 @@ class Value extends React.Component{
 
     updateReferences(references){
         const {changeValue} = this.props;
-        changeValue(references);
+        changeValue(references, true);
         this.setState({
             references,
         });
@@ -42,7 +42,7 @@ class Value extends React.Component{
         let newReferences = references;
         if (checkReferenceFormat(referenceDiv.innerText)) {
             newReferences = references ? `${references};${referenceDiv.innerText}` : referenceDiv.innerText;
-            changeValue(newReferences);
+            changeValue(newReferences, true);
             referenceDiv.innerText = '';
             this.setState({
                 references: newReferences,

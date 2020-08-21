@@ -8,6 +8,8 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ReactDOM from "react-dom";
 import basicStyles from "@themes/default/general/basic_components";
 import Value from "@basic_components/xml_editor/Value";
+import CXml from "@classes/components/content/xml/CXml";
+import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
 
 class ChangeProperty extends React.Component{
     constructor(props) {
@@ -15,6 +17,7 @@ class ChangeProperty extends React.Component{
         this.state = {
             name: props.property.name,
             value: props.property.value,
+            isReference: props.property.isReference,
         };
         const {top, left} = findTopLeft(props.correspondedId);
         this.top = top;
@@ -30,9 +33,10 @@ class ChangeProperty extends React.Component{
         this.setState({name});
     }
 
-    changeValue(value){
+    changeValue(value, isReference){
         this.setState({
             value,
+            isReference: value !== '' ? isReference : false,
         });
     }
 
@@ -46,7 +50,7 @@ class ChangeProperty extends React.Component{
     }
 
     change(doClose = true){
-        const {name, value, valueType, references} = this.state;
+        const {name, value, references, isReference} = this.state;
         const {change, property, close, mode, ReferenceComponent} = this.props;
         let newReferences = references;
         if(name === ''){
@@ -57,6 +61,8 @@ class ChangeProperty extends React.Component{
             alert('Name cannot be a number');
             return;
         }
+        let prevValue = property.value;
+        property.isReference = isReference;
         property.update(name, value);
         if(ReferenceComponent){
             let referenceDiv = document.getElementById(ReferenceComponent.id);
@@ -70,6 +76,7 @@ class ChangeProperty extends React.Component{
                 change();
                 break;
         }
+        CXmlEditor.setLastEditElement(property, value, prevValue, mode);
         if(doClose) {
             close();
         } else{

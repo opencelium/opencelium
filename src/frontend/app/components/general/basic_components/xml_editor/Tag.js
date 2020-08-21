@@ -9,6 +9,7 @@ import CProperty from "@classes/components/general/basic_components/xml_editor/C
 import ChangeProperty from "@basic_components/xml_editor/ChangeProperty";
 import ChangeTag from "@basic_components/xml_editor/ChangeTag";
 import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
+import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
 
 const XML_TAG_INDENT = 15;
 
@@ -21,12 +22,12 @@ class Tag extends React.Component{
             hasDeleteTagIcon: false,
             hasAddPropertyIcon: false,
             hasMinimizerIcon: false,
-            property: CProperty.createProperty(),
+            property: CProperty.createProperty('', '', props.tag),
             hasAddPropertyPopup: false,
             hasUpdateTagPopup: false,
             hasAddTagPopup: false,
             hasAddTagIcon: false,
-            addTag: CTag.createTag(),
+            addTag: CTag.createTag('', null, props.tag),
             hasCopyToClipboardIcon: false,
         };
     }
@@ -72,7 +73,7 @@ class Tag extends React.Component{
     hideAddPropertyPopup(){
         this.setState({
             hasAddPropertyPopup: false,
-            property: CProperty.createProperty(),
+            property: CProperty.createProperty('', '', this.props.tag),
             hasDeleteTagIcon: false,
             hasAddPropertyIcon: false,
             hasAddTagIcon: false,
@@ -112,6 +113,7 @@ class Tag extends React.Component{
 
     deleteTag(e, index){
         const {tag, update} = this.props;
+        CXmlEditor.setLastEditElement(tag.tags[index], '', tag.tags[index].tags, 'remove');
         tag.removeTag(index);
         update();
     }

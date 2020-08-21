@@ -6,14 +6,15 @@ import styles from '@themes/default/general/basic_components.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ChangeTag from "@basic_components/xml_editor/ChangeTag";
 import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
+import TooltipText from "@basic_components/tooltips/TooltipText";
 
 class XmlEditor extends React.Component{
     constructor(props) {
         super(props);
-
+        const xml = CXmlEditor.createXmlEditor(props.xml);
         this.state = {
-            xml: CXmlEditor.createXmlEditor('<item><name>Jack</name><name>Mary</name></item>'),
-            addTag: CTag.createTag(),
+            xml,
+            addTag: CTag.createTag('', null, xml),
             hasAddTagPopup: false,
         };
     }
@@ -39,10 +40,11 @@ class XmlEditor extends React.Component{
     updateXml(){
         const {xml} = this.state;
         const {afterUpdateCallback} = this.props;
-        this.setState({xml});
-        if(afterUpdateCallback){
-            afterUpdateCallback(xml.convertToXml());
-        }
+        this.setState({xml},() => {
+            if(afterUpdateCallback){
+                afterUpdateCallback(xml);
+            }}
+        );
     }
 
     deleteCoreTag(){
@@ -67,7 +69,7 @@ class XmlEditor extends React.Component{
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
-                        <TooltipFontIcon tooltip={'Add Declaration'} value={'add_circle_outline'} style={{paddingLeft: '15px'}} className={styles.add_tag_icon_inside} onClick={::this.addDeclaration}/>
+                        <TooltipFontIcon tooltip={'Add Declaration'} value={<span>{'<?xml?>'}</span>} className={styles.add_declaration_icon} onClick={::this.addDeclaration}/>
                         <br/>
                     </React.Fragment>
                 }
@@ -76,7 +78,7 @@ class XmlEditor extends React.Component{
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
-                        <TooltipFontIcon id={`xml_add_tag`} tooltip={'Add Item'} value={'add_circle_outline'} style={{paddingLeft: '15px'}} className={styles.add_tag_icon_inside} onClick={::this.showAddTagPopup}/>
+                        <TooltipFontIcon id={`xml_add_tag`} tooltip={'Add Item'} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
                         {
                             hasAddTagPopup && !readOnly &&
                                 <ChangeTag correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}
@@ -90,7 +92,6 @@ class XmlEditor extends React.Component{
 }
 
 XmlEditor.propTypes = {
-    xml: PropTypes.string.isRequired,
     afterUpdateCallback: PropTypes.func,
     className: PropTypes.string,
     readOnly: PropTypes.bool,

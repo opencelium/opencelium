@@ -904,10 +904,21 @@
   overflow: hidden auto;
 }
 
+.method_body_draft{
+  @extend .method_body;
+  width: 260px;
+}
+
 .method_body_xml{
   @extend .method_body;
   width: 500px;
   max-height: 300px;
+  min-height: 64px;
+}
+.method_body_xml_draft{
+  @extend .method_body_xml;
+  width: 270px;
+  overflow-x: auto;
 }
 
 .method_body_placeholder{

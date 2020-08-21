@@ -195,14 +195,14 @@ class Items extends Component{
     }
 
     renderItems() {
-        const {connection, connector, updateEntity, readOnly} = this.props;
+        const {connection, connector, updateEntity, readOnly, isDraft} = this.props;
         const animationDirection = connector.pagination.animationDirection;
         const isAnimating = connector.pagination.isAnimating;
         let allItems = isAnimating ? animationDirection === 'down' ? connector.pagination.closurePreviousItems : connector.pagination.closureNextItems : connector.pagination.currentItems;
         let allComponents = [];
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
-                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} isDraft={isDraft} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
             }
             if(allItems[i] instanceof  COperatorItem){
                 allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);

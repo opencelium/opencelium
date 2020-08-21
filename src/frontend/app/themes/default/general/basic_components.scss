@@ -152,11 +152,16 @@
 /*tooltip*/
 .tooltip_switch{
   position: relative;
+  z-index: 1000;
   .tooltip{
     position: absolute;
     left: 40%;
     top: 25%;
     max-width: none !important;
+  }
+  .tooltip_bottom{
+    left: 50% !important;
+    top: 50% !important;
   }
 }
 /*tooltip end*/
@@ -455,17 +460,31 @@
     background: white;
   }
   .delete_icon{
+    background: white;
     cursor: pointer;
     font-size: 16px !important;
     position: absolute;
-    z-index: 10;
+    z-index: 10000;
   }
 }
 .add_tag_icon_inside{
+  background: white;
   cursor: pointer;
   font-size: 16px !important;
   position: absolute;
-  z-index: 10;
+  z-index: 10000;
+}
+.add_declaration_icon{
+  @extend .add_tag_icon_inside;
+  padding-left: 15px;
+  color: #c0c0c5;
+}
+.add_declaration_icon:hover{
+  color: #444b4c;
+}
+.add_first_tag_icon{
+  @extend .add_declaration_icon;
+  margin-top: 3px;
 }
 .property{
   cursor: text;
@@ -560,6 +579,6 @@
 .reference_value_delete{
   margin-left: -8px;
   font-size: 13px;
-  z-index: 1;
+  z-index: 1000;
   cursor: pointer;
 }

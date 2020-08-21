@@ -50,17 +50,21 @@ class TooltipText extends Component{
         let classNames = [
             'tooltip_switch',
             'tooltip',
+            'tooltip_bottom',
         ];
+        classNames = getThemeClass({classNames, authUser, styles});
         let tooltipPositionClassname = theme.tooltipTop;
         switch (tooltipPosition){
             case 'right':
                 tooltipPositionClassname = theme.tooltipRight;
                 break;
             case 'left':
-                tooltipPositionClassname = theme. tooltipRight;
+                tooltipPositionClassname = theme.tooltipLeft;
+                break;
+            case 'bottom':
+                tooltipPositionClassname = styles[classNames.tooltip_bottom];
                 break;
         }
-        classNames = getThemeClass({classNames, authUser, styles});
         return (
             <span className={`${styles[classNames.tooltip_switch]} ${className}`} onMouseOver={::this.activate} onMouseLeave={::this.deactivate} onClick={onClick} style={style}>
                 <span className={`${theme.tooltip} ${tooltipPositionClassname} ${ this.state.isActive ? `${theme.tooltipActive}` : ''} ${styles[classNames.tooltip]}`} style={tooltipStyle}>
