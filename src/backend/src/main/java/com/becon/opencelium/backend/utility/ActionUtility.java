@@ -95,8 +95,12 @@ public class ActionUtility {
         methodNode.setResponseNode(buildResponse(methodResource.getResponse()));
 
         if (i.length() == nextElement.length()){
-            methodNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, this.connectionName));
-            methodNode.setNextOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, this.connectionName));
+            MethodNode methodNode1 = buildMethodEntity(methodResources, operatorResources, connectorNode, this.connectionName);
+            if (methodNode1 != null) {
+                methodNode.setNextFunction(methodNode1);
+            } else {
+                methodNode.setNextOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, this.connectionName));
+            }
         }
 
         return methodNode;
@@ -222,9 +226,9 @@ public class ActionUtility {
         BodyNode bodyNode = new BodyNode();
         ErrorMessageData messageData = validationContext.get(connectionName);
         messageData.setLocation("body");
-        bodyNode.setData(bodyNode.getData());
-        bodyNode.setFormat(bodyNode.getFormat());
-        bodyNode.setType(bodyNode.getType());
+        bodyNode.setData(bodyResource.getData());
+        bodyNode.setFormat(bodyResource.getFormat());
+        bodyNode.setType(bodyResource.getType());
         bodyNode.setFields(buildFields(bodyResource.getFields()));
         return bodyNode;
     }
@@ -290,8 +294,12 @@ public class ActionUtility {
         }
 
         if (i.length() == nextElement.length()){
-            operatorNode.setNextOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName));
-            operatorNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
+            OperatorNode operatorNode1 = buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName);
+            if (operatorNode != null) {
+                operatorNode.setNextOperator(operatorNode1);
+            } else {
+                operatorNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
+            }
         }
         return operatorNode;
     }
