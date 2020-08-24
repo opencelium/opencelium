@@ -49,12 +49,14 @@ class XmlEditor extends React.Component{
 
     deleteCoreTag(){
         const {xml} = this.state;
+        CXmlEditor.setLastEditElement(xml.tag, '', xml.tag.tags, 'remove');
         xml.removeCoreTag();
         this.updateXml();
     }
 
     deleteDeclaration(){
         const {xml} = this.state;
+        CXmlEditor.setLastEditElement(xml.declaration, '', xml.declaration.tags, 'remove');
         xml.removeDeclaration();
         this.updateXml();
     }

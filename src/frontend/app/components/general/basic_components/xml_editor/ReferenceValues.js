@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import appStyles from '@themes/default/general/basic_components.scss';
 import TooltipText from "@basic_components/tooltips/TooltipText";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import styles from "@themes/default/general/form_methods";
 
 
 class ReferenceValues extends React.Component{
@@ -32,10 +33,10 @@ class ReferenceValues extends React.Component{
                             }
                             return (
                                 <React.Fragment key={key}>
-                                    <TooltipText
-                                        tooltip={pointer.slice(2, pointer.length).join('.').replace('[]', '')}
+                                    <TooltipFontIcon
                                         className={appStyles.reference_value}
-                                        text={''}
+                                        tooltip={pointer.slice(2, pointer.length).join('.').replace('[]', '')}
+                                        value={<span/>}
                                         style={{background: pointer[0], ...styles, ...extraStyles}}
                                     />
                                     {hasDelete && <TooltipFontIcon tooltip={'Delete'} onClick={() => ::this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
