@@ -48,7 +48,7 @@ export function checkExpiredMessages(data){
 /**
  * to check the references format in connections
  */
-export function checkReferenceFormat(value){
+export function checkReferenceFormat(value, isStrict = false){
     let result = false;
     let pointers = [];
     let counter = 0;
@@ -76,7 +76,7 @@ export function checkReferenceFormat(value){
             }
         }
     } else{
-        if(value === '#'){
+        if(value === '#' && !isStrict){
             result = true;
         } else{
             result = false;

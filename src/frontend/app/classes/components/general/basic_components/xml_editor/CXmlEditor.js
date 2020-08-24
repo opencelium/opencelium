@@ -1,8 +1,9 @@
-import {isString} from "@utils/app";
+import {isArray, isString} from "@utils/app";
 import {xml2js} from 'xml-js';
 import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
 import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
 import {CBodyEditor} from "@classes/components/general/basic_components/CBodyEditor";
+import CXml from "@classes/components/content/xml/CXml";
 
 export default class CXmlEditor extends CBodyEditor{
     constructor(xml) {
@@ -15,21 +16,45 @@ export default class CXmlEditor extends CBodyEditor{
     }
 
     static updateFieldsBinding(connection, connector, method, xmlData){
-        if(xmlData && xmlData.hasOwnProperty('existingValue') && !isString(xmlData.existingValue)){
-            if(xmlData instanceof CTag){
-                for(let i = 0; i < xmlData.existingValue.properties; i++){/*
-                    let newXmlData = {
-                        namespaces: lastEditElement.namespaces,
-                        newValue: lastEditElement.value,
-                        name: lastEditElement.name,
-                        existingValue: lastEditElement.prevValue,
-                    }*/
-                    if(xmlData.existingValue.properties[i].isReference){
-                        CBodyEditor.updateFieldsBinding(connection, connector, method, xmlData.existingValue);
+        if(xmlData && xmlData.hasOwnProperty('existingValue')){
+            if(xmlData.item instanceof CTag){
+                for(let i = 0; i < xmlData.item.properties.length; i++){
+                    if(xmlData.item.properties[i].isReference){
+                        let newValue = xmlData.mode === 'remove' ? '' : xmlData.item.properties[i].value;
+                        CBodyEditor.updateFieldsBinding(
+                            connection,
+                            connector,
+                            method,
+                            {
+                                ...xmlData,
+                                existingValue: xmlData.item.properties[i].value,
+                                newValue,
+                                namespaces: [...xmlData.namespaces, xmlData.name],
+                                name: `@${xmlData.item.properties[i].name}`,
+                                item: xmlData.item.properties[i]
+                            }
+                        );
+                    }
+                }
+                if(isArray(xmlData.existingValue)){
+                    for(let i = 0; i < xmlData.existingValue.length; i++){
+                        let newValue = xmlData.mode === 'remove' ? '' : xmlData.existingValue[i].tags;
+                        CXmlEditor.updateFieldsBinding(
+                            connection,
+                            connector,
+                            method,
+                            {
+                                ...xmlData,
+                                existingValue: xmlData.existingValue[i].tags,
+                                newValue,
+                                namespaces: [...xmlData.namespaces, xmlData.name],
+                                name: xmlData.existingValue[i].name,
+                                item: xmlData.existingValue[i]
+                            }
+                        );
                     }
                 }
             }
-        } else{
             CBodyEditor.updateFieldsBinding(connection, connector, method, xmlData);
         }
     }
@@ -87,6 +112,7 @@ export default class CXmlEditor extends CBodyEditor{
                 prevValue,
                 name,
                 mode,
+                item,
             };
         }
     }
@@ -103,6 +129,8 @@ export default class CXmlEditor extends CBodyEditor{
                 newValue: lastEditElement.value,
                 name: lastEditElement.name,
                 existingValue: lastEditElement.prevValue,
+                item: lastEditElement.item,
+                mode: lastEditElement.mode,
             };
         }
         return null;
@@ -142,6 +170,7 @@ export default class CXmlEditor extends CBodyEditor{
 
     addTag(name, tags){
         this._tag = new CTag(name, tags, {}, this);
+        return this._tag;
     }
 
     set lastEditElement(lastEditElement){

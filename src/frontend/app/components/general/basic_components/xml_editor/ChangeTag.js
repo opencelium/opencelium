@@ -68,6 +68,7 @@ class ChangeTag extends React.Component{
     change(){
         const {name, valueType, text} = this.state;
         const {change, tag, close, mode, parent, ReferenceComponent} = this.props;
+        let referenceToNewTag = null;
         if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
             if (name === '') {
                 alert('Name is a required field');
@@ -86,7 +87,6 @@ class ChangeTag extends React.Component{
                 break;
             case TAG_VALUE_TYPES.TEXT:
                 tags = text;
-                CXmlEditor.setLastEditElement(tag, text, tag.tags, mode);
                 break;
             case TAG_VALUE_TYPES.ITEM:
                 tags = isArray(tag.tags) ? tag.tags : [];
@@ -100,11 +100,16 @@ class ChangeTag extends React.Component{
                         tags.parent = parent;
                         switch (mode) {
                             case 'add':
-                                parent.addTag(tags);
+                                referenceToNewTag = parent.addTag(tags);
                                 break;
                             case 'update':
                                 tag.updateTag(tags);
                                 break;
+                        }
+                        if(referenceToNewTag !== null){
+                            CXmlEditor.setLastEditElement(referenceToNewTag, referenceToNewTag.tags, referenceToNewTag.tags, mode);
+                        } else{
+                            CXmlEditor.setLastEditElement(tag, tag.tags, tag.tags, mode);
                         }
                         change();
                         close();
@@ -116,11 +121,18 @@ class ChangeTag extends React.Component{
         }
         switch(mode){
             case 'add':
-                parent.addTag(name, tags);
+                referenceToNewTag = parent.addTag(name, tags);
                 break;
             case 'update':
                 tag.updateTag(name, tags);
                 break;
+        }
+        if(valueType === TAG_VALUE_TYPES.TEXT){
+            if(referenceToNewTag !== null){
+                CXmlEditor.setLastEditElement(referenceToNewTag, text, referenceToNewTag.tags, mode);
+            } else{
+                CXmlEditor.setLastEditElement(tag, text, tag.tags, mode);
+            }
         }
         let referenceDiv = document.getElementById(ReferenceComponent.id);
         referenceDiv.innerText = '';

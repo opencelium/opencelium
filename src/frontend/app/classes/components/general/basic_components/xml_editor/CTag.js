@@ -106,6 +106,7 @@ export default class CTag{
             }
         }
         this._valueType = this.getValueType();
+        return this.tags[this.tags.length - 1];
     }
 
     updateTag(nameOrTag, tags){
