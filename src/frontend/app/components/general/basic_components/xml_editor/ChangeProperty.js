@@ -66,14 +66,14 @@ class ChangeProperty extends Component{
      */
     change(doClose = true){
         const {name, value, references, isReference} = this.state;
-        const {change, property, close, mode, ReferenceComponent} = this.props;
+        const {translate, change, property, close, mode, ReferenceComponent} = this.props;
         let newReferences = references;
         if(name === ''){
-            alert('Name is a required field');
+            alert(translate('XML_EDITOR.PROPERTY.VALIDATIONS.REQUIRED_NAME'));
             return;
         }
         if(isNumber(name)){
-            alert('Name cannot be a number');
+            alert(translate('XML_EDITOR.PROPERTY.VALIDATIONS.NAME_NOT_NUMBER'));
             return;
         }
         let prevValue = property.value;
@@ -103,13 +103,13 @@ class ChangeProperty extends Component{
 
     render(){
         const {name, value} = this.state;
-        const {property, mode, close, ReferenceComponent} = this.props;
+        const {translate, property, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={basicStyles.change_popup} style={{top: this.top, left: this.left}}>
-                <TooltipFontIcon tooltip={'Close'} value={'close'} className={basicStyles.close_icon} onClick={close}/>
-                <Input id={`${property.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'} theme={{input: basicStyles.change_tag_name}}/>
-                <Value value={value} changeValue={::this.changeValue} uniqueIndex={property.uniqueIndex} ReferenceComponent={ReferenceComponent} pressKey={::this.pressKey}/>
-                <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
+                <TooltipFontIcon tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={basicStyles.close_icon} onClick={close}/>
+                <Input id={`${property.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.PROPERTY.NAME')} theme={{input: basicStyles.change_tag_name}}/>
+                <Value translate={translate} value={value} changeValue={::this.changeValue} uniqueIndex={property.uniqueIndex} ReferenceComponent={ReferenceComponent} pressKey={::this.pressKey}/>
+                <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.PROPERTY.ADD') : translate('XML_EDITOR.PROPERTY.UPDATE')}/>
             </div>,
             document.getElementById('oc_xml_modal')
         )

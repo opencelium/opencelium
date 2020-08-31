@@ -5,7 +5,7 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 /**
- * ReferenceValues component to display list of references
+ * ReferenceValues component to display line of references
  */
 class ReferenceValues extends Component{
 
@@ -23,7 +23,7 @@ class ReferenceValues extends Component{
     }
 
     render() {
-        const {references, maxVisible, hasDelete} = this.props;
+        const {translate, references, maxVisible, hasDelete} = this.props;
         let {styles} = this.props;
         if(typeof references === 'string') {
             let pointers = references.split(';');
@@ -44,14 +44,14 @@ class ReferenceValues extends Component{
                                         value={<span/>}
                                         style={{background: pointer[0], ...styles, ...extraStyles}}
                                     />
-                                    {hasDelete && <TooltipFontIcon tooltip={'Delete'} onClick={() => ::this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
+                                    {hasDelete && <TooltipFontIcon tooltip={translate('XML_EDITOR.DELETE_ICON')} onClick={() => ::this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
                                 </React.Fragment>
                             );
                         } else{
                             if(key === maxVisible) {
                                 return <span
                                     key={key}
-                                    title={`more than ${maxVisible} references`}
+                                    title={translate('REJECTED_REQUESTS.ERROR_FETCH_LIST', {number: maxVisible})}
                                     style={{margin: '0 2px'}}
                                 >...</span>;
                             }

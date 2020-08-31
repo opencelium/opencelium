@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
 import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/xml_editor/CTag";
 import styles from "@themes/default/general/basic_components";
-import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 import {
     checkXmlTagFormat,
     findTopLeft,
@@ -85,11 +84,11 @@ class ChangeTag extends Component{
      */
     change(){
         const {name, valueType, text} = this.state;
-        const {change, tag, close, mode, parent, ReferenceComponent} = this.props;
+        const {translate, change, tag, close, mode, parent, ReferenceComponent} = this.props;
         let referenceToNewTag = null;
         if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
             if (name === '') {
-                alert('Name is a required field');
+                alert(translate('XML_EDITOR.TAG.VALIDATIONS.REQUIRED_NAME'));
                 return;
             }
             if (!checkXmlTagFormat(name)) {
@@ -132,7 +131,7 @@ class ChangeTag extends Component{
                         change();
                         close();
                     } catch(e){
-                        alert('Please, check the xml format');
+                        alert(translate('XML_EDITOR.TAG.VALIDATIONS.WRONG_FORMAT'));
                     }
                 });
                 return;
@@ -160,14 +159,14 @@ class ChangeTag extends Component{
 
     render(){
         const {name, valueType, text} = this.state;
-        const {tag, mode, close, ReferenceComponent} = this.props;
+        const {translate, tag, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
-                <TooltipFontIcon tooltip={'Close'} value={'close'} className={styles.close_icon} onClick={close}/>
-                <TagType valueType={valueType} changeValueType={::this.changeValueType}/>
-                {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={'Name'} theme={{input: styles.change_tag_name}}/>}
-                {valueType === TAG_VALUE_TYPES.TEXT && <Value ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={'Text'}/>}
-                <Button onClick={::this.change} title={mode === 'add' ? 'Add' : 'Update'}/>
+                <TooltipFontIcon tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
+                <TagType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>
+                {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}
+                {valueType === TAG_VALUE_TYPES.TEXT && <Value translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}
+                <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.TAG.ADD') : translate('XML_EDITOR.TAG.UPDATE')}/>
             </div>,
             document.getElementById('oc_xml_modal')
         );

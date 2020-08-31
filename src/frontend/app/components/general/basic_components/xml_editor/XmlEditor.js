@@ -84,27 +84,27 @@ class XmlEditor extends Component{
 
     render() {
         const {xml, hasAddTagPopup, addTag} = this.state;
-        const {className, readOnly, ReferenceComponent, onReferenceClick} = this.props;
+        const {translate, className, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         return(
             <div className={`${styles.xml_editor} ${className}`}>
                 {xml && xml.declaration ?
-                    <Tag tag={xml.declaration} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration}
+                    <Tag translate={translate} tag={xml.declaration} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration}
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
-                        <TooltipFontIcon tooltip={'Add Declaration'} value={<span>{'<?xml?>'}</span>} className={styles.add_declaration_icon} onClick={::this.addDeclaration}/>
+                        <TooltipFontIcon tooltip={translate('XML_EDITOR.ADD_DECLARATION')} value={<span>{'<?xml?>'}</span>} className={styles.add_declaration_icon} onClick={::this.addDeclaration}/>
                         <br/>
                     </React.Fragment>
                 }
                 {xml && xml.tag ?
-                    <Tag tag={xml.tag} update={::this.updateXml} deleteTag={::this.deleteCoreTag}
+                    <Tag translate={translate} tag={xml.tag} update={::this.updateXml} deleteTag={::this.deleteCoreTag}
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
-                        <TooltipFontIcon id={`xml_add_tag`} tooltip={'Add Item'} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
+                        <TooltipFontIcon id={`xml_add_tag`} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
                         {
                             hasAddTagPopup && !readOnly &&
-                                <ChangeTag correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}
+                                <ChangeTag translate={translate} correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}
                                     mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                         }
                     </React.Fragment>
@@ -118,6 +118,7 @@ XmlEditor.propTypes = {
     afterUpdateCallback: PropTypes.func,
     className: PropTypes.string,
     readOnly: PropTypes.bool,
+    translate: PropTypes.func.isRequired,
 };
 
 XmlEditor.defaultProps = {

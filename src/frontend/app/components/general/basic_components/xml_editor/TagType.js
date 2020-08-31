@@ -15,18 +15,18 @@ class TagType extends Component{
     }
 
     render(){
-        const {valueType, changeValueType} = this.props;
+        const {translate, valueType, changeValueType} = this.props;
         return (
             <div className={`${theme.input}`} style={{paddingBottom: 0}}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <RadioGroup name='valueType' value={valueType} onChange={changeValueType} className={`${basicStyles.radio_group_tag_type}`}>
-                    <RadioButton label={'Empty'} value={TAG_VALUE_TYPES.EMPTY} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={'Text'} value={TAG_VALUE_TYPES.TEXT} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={'Item'} value={TAG_VALUE_TYPES.ITEM} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={'From Clipboard'} value={TAG_VALUE_TYPES.CLIPBOARD} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
+                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.EMPTY')} value={TAG_VALUE_TYPES.EMPTY} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
+                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.TEXT')} value={TAG_VALUE_TYPES.TEXT} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
+                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.ITEM')} value={TAG_VALUE_TYPES.ITEM} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
+                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.FROM_CLIPBOARD')} value={TAG_VALUE_TYPES.CLIPBOARD} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
                 </RadioGroup>
                 <span className={theme.bar}/>
-                <label className={theme.label}>{'Tag Type'}</label>
+                <label className={theme.label}>{translate('XML_EDITOR.TAG.TYPE.TAG_TYPE_LABEL')}</label>
             </div>
         );
     }

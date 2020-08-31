@@ -68,7 +68,7 @@ class Value extends Component{
 
     renderValue(){
         const {valueType, references, notReferenceValue} = this.state;
-        const {uniqueIndex, ReferenceComponent, pressKey, label} = this.props;
+        const {translate, uniqueIndex, ReferenceComponent, pressKey, label} = this.props;
         if(valueType === 'reference'){
             if(ReferenceComponent) {
                 return (
@@ -78,10 +78,10 @@ class Value extends Component{
                             <div className={`${theme.input}`} style={{paddingBottom: 0}}>
                                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                                 <div style={{position: 'relative', display: 'flex', width: '100%', flexWrap: 'wrap', padding: '0 1px'}}>
-                                    <ReferenceValues references={references} updateReferences={::this.updateReferences}/>
+                                    <ReferenceValues translate={translate} references={references} updateReferences={::this.updateReferences}/>
                                 </div>
                                 <span className={theme.bar}/>
-                                <label className={theme.label}>{'List of references'}</label>
+                                <label className={theme.label}>{translate('XML_EDITOR.LIST_OF_REFERENCES')}</label>
                             </div>
                         }
                         <Reference ReferenceComponent={ReferenceComponent} add={::this.change}/>

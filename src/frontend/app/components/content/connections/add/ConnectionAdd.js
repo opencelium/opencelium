@@ -16,7 +16,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import Content from "../../../general/content/Content";
 
 import {checkConnectionTitle} from '@actions/connections/fetch';
@@ -65,7 +64,7 @@ function mapConnection(connection){
  */
 @connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle})
 @permission(ConnectionPermissions.CREATE, true)
-@withTranslation(['connections', 'app'])
+@withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'adding', ['connectors'], mapConnection)
 class ConnectionAdd extends Component{
 

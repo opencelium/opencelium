@@ -21,7 +21,7 @@ class Reference extends Component{
     }
 
     render(){
-        const {ReferenceComponent} = this.props;
+        const {translate, ReferenceComponent} = this.props;
         return (
             <div className={`${theme.input}`}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
@@ -29,7 +29,7 @@ class Reference extends Component{
                         <div>{ReferenceComponent.getComponent({submitEdit: ::this.add})}</div>
                     </div>
                 <span className={theme.bar}/>
-                <label className={theme.label}>{'Value'}</label>
+                <label className={theme.label}>{translate('XML_EDITOR.TAG.TYPE.REFERENCE_VALUE')}</label>
             </div>
         );
     }

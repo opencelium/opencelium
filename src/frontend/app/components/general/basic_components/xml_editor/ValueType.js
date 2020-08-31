@@ -14,16 +14,16 @@ class ValueType extends Component{
     }
 
     render(){
-        const {valueType, changeValueType} = this.props;
+        const {translate, valueType, changeValueType} = this.props;
         return (
             <div className={`${theme.input}`} style={{paddingBottom: 0}}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <RadioGroup name='valueType' value={valueType} onChange={changeValueType} className={`${basicStyles.radio_group_tag_type}`}>
-                    <RadioButton label={'Text'} value={'text'} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={'Reference'} value={'reference'} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
+                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.TEXT')} value={'text'} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
+                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.REFERENCE')} value={'reference'} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
                 </RadioGroup>
                 <span className={theme.bar}/>
-                <label className={theme.label}>{'Value Type'}</label>
+                <label className={theme.label}>{translate('XML_EDITOR.TAG.TYPE.VALUE_TYPE')}</label>
             </div>
         );
     }

@@ -14,9 +14,10 @@ class XmlBody extends React.Component{
     }
 
     render(){
-        const {method, readOnly, updateBody, ReferenceComponent, onReferenceClick} = this.props;
+        const {t, method, readOnly, updateBody, ReferenceComponent, onReferenceClick} = this.props;
         return(
             <XmlEditor
+                translate={t}
                 xml={method.request.getBodyFields()}
                 afterUpdateCallback={updateBody}
                 readOnly={readOnly}
