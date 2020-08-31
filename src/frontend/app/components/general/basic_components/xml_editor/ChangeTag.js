@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
 import CTag, {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/xml_editor/CTag";
@@ -19,7 +19,10 @@ import CXmlEditor from "@classes/components/general/basic_components/xml_editor/
 import TagType from "@basic_components/xml_editor/TagType";
 import Value from "@basic_components/xml_editor/Value";
 
-class ChangeTag extends React.Component{
+/**
+ * ChangeTag component to add or update Tag
+ */
+class ChangeTag extends Component{
     constructor(props) {
         super(props);
 
@@ -27,7 +30,7 @@ class ChangeTag extends React.Component{
             name: props.tag.name ? props.tag.name : '',
             valueType: props.mode === 'add' ? TAG_VALUE_TYPES.ITEM : props.tag.valueType,
             text: isString(props.tag.tags) ? props.tag.tags : '',
-        }
+        };
         const {top, left} = findTopLeft(props.correspondedId);
         this.top = top;
         this.left = left;
@@ -38,24 +41,36 @@ class ChangeTag extends React.Component{
         setFocusById(`${tag.uniqueIndex}_name`);
     }
 
+    /**
+     * to change name
+     */
     changeName(name){
         this.setState({
             name,
         });
     }
 
+    /**
+     * to change value type
+     */
     changeValueType(valueType){
         this.setState({
             valueType,
         });
     }
 
+    /**
+     * to change text
+     */
     changeText(text){
         this.setState({
             text,
         });
     }
 
+    /**
+     * to press key in name input
+     */
     pressKey(e){
         if(e.which === 27){
             this.props.close();
@@ -65,6 +80,9 @@ class ChangeTag extends React.Component{
         }
     }
 
+    /**
+     * to change tag (add or update)
+     */
     change(){
         const {name, valueType, text} = this.state;
         const {change, tag, close, mode, parent, ReferenceComponent} = this.props;

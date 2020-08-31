@@ -1,11 +1,15 @@
-import React from 'react';
+import React, {Component} from 'react';
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/general/form_methods";
 import basicStyles from "@themes/default/general/basic_components";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 import {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/xml_editor/CTag";
 
-class TagType extends React.Component{
+
+/**
+ * TagType component for ChangeTag
+ */
+class TagType extends Component{
     constructor(props) {
         super(props);
     }

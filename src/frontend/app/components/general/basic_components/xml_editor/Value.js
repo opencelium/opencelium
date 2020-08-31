@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
 import {checkReferenceFormat} from "@utils/app";
@@ -8,7 +8,11 @@ import ValueType from "@basic_components/xml_editor/ValueType";
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/general/form_methods";
 
-class Value extends React.Component{
+
+/**
+ * Value component to display value of the Tag (TAG_VALUE_TYPES.TEXT) or of the Property
+ */
+class Value extends Component{
     constructor(props) {
         super(props);
         let hasReferences = checkReferenceFormat(props.value);
@@ -19,14 +23,23 @@ class Value extends React.Component{
         };
     }
 
+    /**
+     * to change not reference value
+     */
     changeNotReferenceValue(notReferenceValue){
         this.setState({notReferenceValue}, this.props.changeValue(notReferenceValue, false));
     }
 
+    /**
+     * to change value type
+     */
     changeValueType(valueType){
         this.setState({valueType});
     }
 
+    /**
+     * to update references in this component
+     */
     updateReferences(references){
         const {changeValue} = this.props;
         changeValue(references, true);
@@ -35,6 +48,9 @@ class Value extends React.Component{
         });
     }
 
+    /**
+     * to change references in XmlEditor
+     */
     change(){
         const {references} = this.state;
         const {ReferenceComponent, changeValue} = this.props;

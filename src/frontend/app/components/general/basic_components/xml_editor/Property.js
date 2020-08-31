@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styles from '@themes/default/general/basic_components.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
@@ -10,7 +10,10 @@ import {checkReferenceFormat} from "@utils/app";
 import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
 import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
 
-class Property extends React.Component{
+/**
+ * Property component for XmlEditor
+ */
+class Property extends Component{
     constructor(props) {
         super(props);
 
@@ -20,30 +23,45 @@ class Property extends React.Component{
         };
     }
 
+    /**
+     * to show remove icon
+     */
     showRemoveIcon(){
         this.setState({
             hasRemoveIcon: true,
         });
     }
 
+    /**
+     * to hide remove icon
+     */
     hideRemoveIcon(){
         this.setState({
             hasRemoveIcon: false,
         });
     }
 
+    /**
+     * to show update popup window
+     */
     showUpdatePopup(){
         this.setState({
             hasUpdatePopup: true,
         });
     }
 
+    /**
+     * to hide update popup window
+     */
     hideUpdatePopup(){
         this.setState({
             hasUpdatePopup: false,
         });
     }
 
+    /**
+     * to remove this property
+     */
     removeProperty(){
         const {tag, property, update} = this.props;
         CXmlEditor.setLastEditElement(property, '', property.value, 'remove');

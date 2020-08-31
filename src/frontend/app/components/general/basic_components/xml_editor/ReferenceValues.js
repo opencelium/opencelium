@@ -1,13 +1,18 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import appStyles from '@themes/default/general/basic_components.scss';
-import TooltipText from "@basic_components/tooltips/TooltipText";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import styles from "@themes/default/general/form_methods";
 
 
-class ReferenceValues extends React.Component{
+/**
+ * ReferenceValues component to display list of references
+ */
+class ReferenceValues extends Component{
 
+    /**
+     * to delete reference by index
+     * @param index - of the reference
+     */
     deleteReference(index){
         const {references} = this.props;
         let pointers = references.split(';');

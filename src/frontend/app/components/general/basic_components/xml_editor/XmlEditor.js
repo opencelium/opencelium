@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Tag from "@basic_components/xml_editor/Tag";
 import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
@@ -6,9 +6,12 @@ import styles from '@themes/default/general/basic_components.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ChangeTag from "@basic_components/xml_editor/ChangeTag";
 import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
-import TooltipText from "@basic_components/tooltips/TooltipText";
 
-class XmlEditor extends React.Component{
+
+/**
+ * XmlEditor with References
+ */
+class XmlEditor extends Component{
     constructor(props) {
         super(props);
         const xml = CXmlEditor.createXmlEditor(props.xml);
@@ -19,24 +22,56 @@ class XmlEditor extends React.Component{
         };
     }
 
+    /**
+     * to add declaration in xml
+     */
     addDeclaration(){
         const {xml} = this.state;
         xml.addDeclaration();
         this.updateXml();
     }
 
+    /**
+     * to show add tag popup window
+     */
     showAddTagPopup(){
         this.setState({
             hasAddTagPopup: true,
         });
     }
 
+    /**
+     * to hide add tag popup window
+     */
     hideAddTagPopup(){
         this.setState({
             hasAddTagPopup: false,
         });
     }
 
+    /**
+     * to delete all tags in xml
+     */
+    deleteCoreTag(){
+        const {xml} = this.state;
+        CXmlEditor.setLastEditElement(xml.tag, '', xml.tag.tags, 'remove');
+        xml.removeCoreTag();
+        this.updateXml();
+    }
+
+    /**
+     * to delete declaration of xml
+     */
+    deleteDeclaration(){
+        const {xml} = this.state;
+        CXmlEditor.setLastEditElement(xml.declaration, '', xml.declaration.tags, 'remove');
+        xml.removeDeclaration();
+        this.updateXml();
+    }
+
+    /**
+     * to update whole xml
+     */
     updateXml(){
         const {xml} = this.state;
         const {afterUpdateCallback} = this.props;
@@ -45,20 +80,6 @@ class XmlEditor extends React.Component{
                 afterUpdateCallback(xml);
             }}
         );
-    }
-
-    deleteCoreTag(){
-        const {xml} = this.state;
-        CXmlEditor.setLastEditElement(xml.tag, '', xml.tag.tags, 'remove');
-        xml.removeCoreTag();
-        this.updateXml();
-    }
-
-    deleteDeclaration(){
-        const {xml} = this.state;
-        CXmlEditor.setLastEditElement(xml.declaration, '', xml.declaration.tags, 'remove');
-        xml.removeDeclaration();
-        this.updateXml();
     }
 
     render() {

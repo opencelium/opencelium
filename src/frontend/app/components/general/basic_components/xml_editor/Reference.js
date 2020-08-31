@@ -1,13 +1,19 @@
-import React from 'react';
+import React, {Component} from 'react';
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/general/form_methods";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
-class Reference extends React.Component{
+
+/**
+ * Reference component to display reference value
+ */
+class Reference extends Component{
     constructor(props) {
         super(props);
     }
 
+    /**
+     * to add reference
+     */
     add(){
         const {ReferenceComponent} = this.props;
         ReferenceComponent.self.current.setIdValue();

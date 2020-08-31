@@ -1,10 +1,14 @@
-import React from 'react';
+import React, {Component} from 'react';
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/general/form_methods";
 import basicStyles from "@themes/default/general/basic_components";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 
-class ValueType extends React.Component{
+
+/**
+ * ValueType component for Value
+ */
+class ValueType extends Component{
     constructor(props) {
         super(props);
     }

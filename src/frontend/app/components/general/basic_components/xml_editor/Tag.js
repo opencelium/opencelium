@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Property from "@basic_components/xml_editor/Property";
 import styles from '@themes/default/general/basic_components.scss';
@@ -14,7 +14,10 @@ import CXmlEditor from "@classes/components/general/basic_components/xml_editor/
 const XML_TAG_INDENT = 15;
 
 
-class Tag extends React.Component{
+/**
+ * Tag component for XmlEditor
+ */
+class Tag extends Component{
     constructor(props) {
         super(props);
 
@@ -32,12 +35,18 @@ class Tag extends React.Component{
         };
     }
 
+    /**
+     * to show add tag popup window
+     */
     showAddTagPopup(){
         this.setState({
             hasAddTagPopup: true,
         });
     }
 
+    /**
+     * to hide add tag popup window
+     */
     hideAddTagPopup(){
         this.setState({
             hasAddTagPopup: false,
@@ -48,12 +57,18 @@ class Tag extends React.Component{
         });
     }
 
+    /**
+     * to show update tag popup window
+     */
     showUpdateTagPopup(){
         this.setState({
             hasUpdateTagPopup: true,
         });
     }
 
+    /**
+     * to hide add tag popup window
+     */
     hideUpdateTagPopup(){
         this.setState({
             hasUpdateTagPopup: false,
@@ -64,12 +79,18 @@ class Tag extends React.Component{
         });
     }
 
+    /**
+     * to show add property popup window
+     */
     showAddPropertyPopup(){
         this.setState({
             hasAddPropertyPopup: true,
         });
     }
 
+    /**
+     * to hide add property popup window
+     */
     hideAddPropertyPopup(){
         this.setState({
             hasAddPropertyPopup: false,
@@ -81,18 +102,27 @@ class Tag extends React.Component{
         });
     }
 
+    /**
+     * to show minimize icon for Tag
+     */
     showMinimizerIcon(){
         this.setState({
             hasMinimizerIcon: true,
         });
     }
 
+    /**
+     * to hide minimize icon for Tag
+     */
     hideMinimizerIcon(){
         this.setState({
             hasMinimizerIcon: false,
         });
     }
 
+    /**
+     * to show next icons: add property, add tag, copy to clipboard, delete tag
+     */
     showTagIcons(){
         this.setState({
             hasDeleteTagIcon: true,
@@ -102,6 +132,9 @@ class Tag extends React.Component{
         });
     }
 
+    /**
+     * to hide next icons: add property, add tag, copy to clipboard, delete tag
+     */
     hideTagIcons(){
         this.setState({
             hasDeleteTagIcon: false,
@@ -111,6 +144,11 @@ class Tag extends React.Component{
         });
     }
 
+    /**
+     * to delete subtag by index
+     * @param e - event
+     * @param index - subtag index
+     */
     deleteTag(e, index){
         const {tag, update} = this.props;
         CXmlEditor.setLastEditElement(tag.tags[index], '', tag.tags[index].tags, 'remove');
@@ -118,12 +156,18 @@ class Tag extends React.Component{
         update();
     }
 
+    /**
+     * to minimize or maximize tag
+     */
     toggleTag(){
         const {tag, update} = this.props;
         tag.minimized = !tag.minimized;
         update();
     }
 
+    /**
+     * to add property into tag
+     */
     addProperty(property){
         const {tag, update} = this.props;
         if(!tag.addProperty(property)){
@@ -132,6 +176,9 @@ class Tag extends React.Component{
         update();
     }
 
+    /**
+     * to copy to clipboard tag in xml string format
+     */
     copyToClipboard(){
         const {tag} = this.props;
         tag.copyToClipboard();
