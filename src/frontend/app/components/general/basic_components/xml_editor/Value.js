@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
-import {checkReferenceFormat} from "@utils/app";
+import {checkReferenceFormat, setFocusById} from "@utils/app";
 import Reference from "@basic_components/xml_editor/Reference";
 import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
 import ValueType from "@basic_components/xml_editor/ValueType";
@@ -34,7 +34,9 @@ class Value extends Component{
      * to change value type
      */
     changeValueType(valueType){
+        const {uniqueIndex} = this.props;
         this.setState({valueType});
+        setFocusById(`${uniqueIndex}_value`);
     }
 
     /**
@@ -84,7 +86,7 @@ class Value extends Component{
                                 <label className={theme.label}>{translate('XML_EDITOR.LIST_OF_REFERENCES')}</label>
                             </div>
                         }
-                        <Reference ReferenceComponent={ReferenceComponent} add={::this.change}/>
+                        <Reference id={`${uniqueIndex}_value`}  translate={translate} ReferenceComponent={ReferenceComponent} add={::this.change}/>
                     </React.Fragment>
                 );
             }
@@ -96,10 +98,10 @@ class Value extends Component{
 
     render(){
         const {valueType} = this.state;
-        const {ReferenceComponent} = this.props;
+        const {translate, ReferenceComponent} = this.props;
         return (
             <React.Fragment>
-                {ReferenceComponent && <ValueType valueType={valueType} changeValueType={::this.changeValueType}/>}
+                {ReferenceComponent && <ValueType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>}
                 {this.renderValue()}
             </React.Fragment>
         )

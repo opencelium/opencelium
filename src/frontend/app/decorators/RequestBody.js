@@ -266,10 +266,11 @@ export function RequestBody(CRequestType){
                                 updateBody={::this.updateBody}
                                 ReferenceComponent={hasReferenceComponent ? {
                                     getComponent: (params) => {
-                                        const {submitEdit, textarea} = params;
+                                        const {submitEdit, textarea, selectId} = params;
                                         return (
                                             <ParamGenerator
                                                 ref={this.paramGenerator}
+                                                selectId={selectId}
                                                 connection={connection}
                                                 connector={connector}
                                                 method={method}

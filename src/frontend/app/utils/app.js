@@ -260,25 +260,24 @@ export function shuffle(array) {
  * to focus on input by id
  *
  * @param id - id of the html element
+ * @param timeout - timout before focus
  */
 export function setFocusById(id, timeout = 100){
-    let element = document.getElementById(id);
-    const inputs = ['input', 'select', 'button', 'textarea'];
-    if (element) {
-        let inputElement = null;
-        if(inputs.indexOf(element.tagName.toLowerCase()) === -1){
-            inputElement = element.querySelector('input');
-        }
-        if(inputElement) {
-            setTimeout(() => {
+    setTimeout(() => {
+        let element = document.getElementById(id);
+        const inputs = ['input', 'select', 'button', 'textarea'];
+        if (element) {
+            let inputElement = null;
+            if(inputs.indexOf(element.tagName.toLowerCase()) === -1){
+                inputElement = element.querySelector('input');
+            }
+            if(inputElement) {
                 inputElement.focus();
-            }, timeout);
-        } else{
-            setTimeout(() => {
+            } else{
                 element.focus();
-            }, timeout);
+            }
         }
-    }
+    }, timeout);
 }
 
 /**

@@ -53,9 +53,13 @@ class ChangeTag extends Component{
      * to change value type
      */
     changeValueType(valueType){
+        const {tag} = this.props;
         this.setState({
             valueType,
         });
+        if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
+            setFocusById(`${tag.uniqueIndex}_name`);
+        }
     }
 
     /**

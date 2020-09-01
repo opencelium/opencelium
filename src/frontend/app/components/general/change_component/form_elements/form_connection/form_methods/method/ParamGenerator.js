@@ -149,7 +149,7 @@ class ParamGenerator extends Component {
 
     renderMethodSelect(){
         const {color} = this.state;
-        const {connection, readOnly} = this.props;
+        const {connection, readOnly, selectId} = this.props;
         let method = connection.toConnector.getMethodByColor(color);
         let connector = connection.toConnector;
         if(!method){
@@ -164,6 +164,7 @@ class ParamGenerator extends Component {
             <div className={`${theme.input}`} style={selectThemeInputStyle}>
                 <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <Select
+                    id={selectId}
                     name={'...'}
                     value={value}
                     onChange={::this.updateColor}
