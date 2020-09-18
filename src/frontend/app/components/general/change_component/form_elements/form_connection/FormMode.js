@@ -34,6 +34,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 import Input from "@basic_components/inputs/Input";
 
 import {isString} from "@utils/app";
+import TemplateOption from "@change_component/form_elements/form_connection/form_methods/TemplateOption";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -256,7 +257,7 @@ class FormMode extends Component{
         let result = [];
         const {entity, templates} = this.props;
         for(let i = 0; i < templates.length; i++){
-            result.push({value: templates[i].templateId, label: templates[i].name, description: templates[i].description, content: templates[i].connection});
+            result.push({value: templates[i].templateId, label: templates[i].name, description: templates[i].description, content: templates[i].connection, template: templates[i]});
         }
         entity.allTemplates = templates;
         return result;
@@ -316,6 +317,7 @@ class FormMode extends Component{
                         id={'templates'}
                         name={'connection_mode'}
                         value={template}
+                        components={{ Option: TemplateOption }}
                         onChange={::this.handleChangeTemplate}
                         options={options}
                         closeOnSelect={false}
@@ -324,7 +326,6 @@ class FormMode extends Component{
                         isSearchable={!readOnly}
                         openMenuOnClick={true}
                         styles={{
-
                             container:(styles, {}) => {
                                 return {
                                     ...styles,

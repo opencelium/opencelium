@@ -1,0 +1,12 @@
+.top{
+    bottom: auto !important;
+    top: 0 !important;
+}
+.bottom{
+    top: auto !important;
+    bottom: 0 !important;
+}
+.middle{
+    bottom: auto !important;
+    top: 40% !important;
+}

@@ -15,13 +15,14 @@
 
 import {List, fromJS} from 'immutable';
 
-import {TemplatesAction} from '../utils/actions';
+import {SchedulesAction, TemplatesAction} from '../utils/actions';
 import {isArray} from "../utils/app";
 import {API_REQUEST_STATE} from "../utils/constants/app";
 
 
 const initialState = fromJS({
     addingTemplate: API_REQUEST_STATE.INITIAL,
+    updatingTemplate: API_REQUEST_STATE.INITIAL,
     fetchingTemplates: API_REQUEST_STATE.INITIAL,
     deletingTemplate: API_REQUEST_STATE.INITIAL,
     exportingTemplate: API_REQUEST_STATE.INITIAL,
@@ -49,6 +50,18 @@ const reducer = (state = initialState, action) => {
             return state.set('addingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.set(templates.size, action.payload));
         case TemplatesAction.ADD_TEMPLATE_REJECTED:
             return state.set('addingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case TemplatesAction.UPDATE_TEMPLATE:
+            return state.set('updatingTemplate', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case TemplatesAction.UPDATE_TEMPLATE_FULFILLED:
+            index = templates.findIndex(function (template) {
+                return template.templateId === action.payload.oldTemplate.templateId;
+            });
+            if(index >= 0) {
+                templates = templates.set(index, action.payload.newTemplate);
+            }
+            return state.set('updatingTemplate', false).set('templates', templates);
+        case TemplatesAction.UPDATE_TEMPLATE_REJECTED:
+            return state.set('updatingTemplate', false).set('isRejected', true).set('error', action.payload);
         case TemplatesAction.FETCH_TEMPLATES:
             return state.set('fetchingTemplates', API_REQUEST_STATE.START).set('error', null);
         case TemplatesAction.FETCH_TEMPLATES_FULFILLED:

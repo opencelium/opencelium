@@ -16,7 +16,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import Select from 'react-select';
-import styles from '@themes/default/general/basic_components.scss';
 import {getThemeClass} from "@utils/app";
 
 function mapStateToProps(state){
@@ -65,7 +64,7 @@ class OCSelect extends Component{
                     },
                     menu: (provided) => ({
                         ...provided,
-                        zIndex: 999,
+                        zIndex: 100,
                         color: 'black'
                     })
                 }}

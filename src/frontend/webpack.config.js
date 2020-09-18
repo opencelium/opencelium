@@ -171,7 +171,8 @@ module.exports = {
             '@themes': path.resolve(__dirname, 'app/themes'),
             '@utils': path.resolve(__dirname, 'app/utils'),
             '@validations': path.resolve(__dirname, 'app/validations')
-        }
+        },
+        modules: ['node_modules', 'oc_modules']
     },
     optimization: optimization(),
     devtool: NodeParams.IS_DEV ? '#cheap-module-source-map' : 'source-map',

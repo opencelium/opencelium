@@ -254,6 +254,14 @@ const NotificationTemplateUpdate =  Loadable({
     loading: Loading,
 });
 
+/**
+ * Loadable Template Converter
+ */
+const TemplateConverterLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'template_converter_layout' */ '@components/content/template_converter/TemplateConverterLayout'),
+    loading: Loading,
+});
+
 export default {
     UserLayout,
     UserAdd,
@@ -300,4 +308,5 @@ export default {
     NotificationTemplatesList,
     NotificationTemplateView,
     NotificationTemplateUpdate,
+    TemplateConverterLayout,
 };

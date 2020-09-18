@@ -25,6 +25,7 @@ import {
 import {deleteTemplateFulfilled, deleteTemplateRejected} from '@actions/templates/delete';
 import {doRequest} from "@utils/auth";
 import {API_METHOD} from "@utils/constants/app";
+import {updateTemplateFulfilled, updateTemplateRejected} from "@actions/templates/update";
 
 
 /*
@@ -70,6 +71,23 @@ const addTemplateEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.POST, data},{
                 success: addTemplateFulfilled,
                 reject: addTemplateRejected,},
+            );
+        });
+};
+
+/**
+ * update one template
+ */
+const updateTemplateEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.UPDATE_TEMPLATE)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.templateId}`;
+            let {...data} = action.payload;
+            return doRequest({url, method: API_METHOD.PUT, data},{
+                success: updateTemplateFulfilled,
+                reject: updateTemplateRejected,},
+                res => {return {newTemplate: res.response, oldTemplate: data};}
             );
         });
 };
@@ -129,6 +147,7 @@ const exportTemplateEpic = (action$, store) => {
 export {
     fetchTemplatesEpic,
     addTemplateEpic,
+    updateTemplateEpic,
     deleteTemplateEpic,
     importTemplateEpic,
     exportTemplateEpic,

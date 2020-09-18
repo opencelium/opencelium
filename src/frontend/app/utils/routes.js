@@ -89,6 +89,7 @@ export const createRoutes = (store) => {
                 <Route path='/notification_templates/:id/view' component={LoadableRouteComponents.NotificationTemplateView}/>
                 <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
+            <Route path='/template_converter' component={isAuth(LoadableRouteComponents.TemplateConverterLayout, store)}/>
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfile, store)}/>
             <Route path='/login' component={isNotAuth(LoadableRouteComponents.Login, store)}/>
             <Route path='/*' component={PageNotFound}/>

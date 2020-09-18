@@ -48,7 +48,7 @@ import {
 } from '@epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
-    importTemplateEpic, exportTemplateEpic,
+    importTemplateEpic, exportTemplateEpic, updateTemplateEpic,
 } from '@epics/templates';
 import {
     fetchScheduleEpic, fetchSchedulesEpic, addScheduleEpic,
@@ -152,6 +152,7 @@ export default combineEpics(
     deleteTemplateEpic,
     fetchTemplatesEpic,
     addTemplateEpic,
+    updateTemplateEpic,
     importTemplateEpic,
     exportTemplateEpic,
     fetchAppsEpic,
