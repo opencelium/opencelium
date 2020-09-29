@@ -41,7 +41,7 @@ public class MethodNode {
     private MethodNode nextFunction;
 
     @Relationship(type = "next_action", direction = Relationship.OUTGOING)
-    private OperatorNode nextOperator;
+    private StatementNode nextOperator;
 
     public Long getId() {
         return id;
@@ -99,11 +99,11 @@ public class MethodNode {
         this.nextFunction = nextFunction;
     }
 
-    public OperatorNode getNextOperator() {
+    public StatementNode getNextOperator() {
         return nextOperator;
     }
 
-    public void setNextOperator(OperatorNode nextOperator) {
+    public void setNextOperator(StatementNode nextOperator) {
         this.nextOperator = nextOperator;
     }
 }

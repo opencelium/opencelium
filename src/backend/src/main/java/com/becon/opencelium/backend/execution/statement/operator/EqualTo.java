@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.execution.statement.operator;
 
-public class EqualTo implements Operator{
+public class EqualTo implements Operator {
 
 
     @Override

@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.utility;
 
-import com.becon.opencelium.backend.neo4j.entity.StatementNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 import com.becon.opencelium.backend.resource.connection.StatementResource;
 
 import java.util.Arrays;
@@ -40,20 +40,20 @@ public class ConditionUtility {
         return matcher.group();
     }
 
-    public static StatementResource buildStatement(StatementNode statementNode){
-        if (statementNode == null){
+    public static StatementResource buildStatement(StatementVariable statementVariable){
+        if (statementVariable == null){
             return null;
         }
-        return new StatementResource(statementNode);
+        return new StatementResource(statementVariable);
     }
 
     //TODO: should be in StatementNodeService class;
-    public static StatementNode buildStringStatement(StatementResource statementResource){
+    public static StatementVariable buildStringStatement(StatementResource statementResource){
         if (statementResource == null){
             return null;
         }
 
-        return new StatementNode(statementResource);
+        return new StatementVariable(statementResource);
     }
 
     public static String getArray(String condition) {

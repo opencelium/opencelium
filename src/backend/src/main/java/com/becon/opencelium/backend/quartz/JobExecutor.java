@@ -90,7 +90,7 @@ public class JobExecutor extends QuartzJobBean {
     private LogMessageServiceImp logMessageService;
 
     @Autowired
-    private StatementNodeServiceImp statementNodeService;
+    private VariableNodeServiceImp statementNodeService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {

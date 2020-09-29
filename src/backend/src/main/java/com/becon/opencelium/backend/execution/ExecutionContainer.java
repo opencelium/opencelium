@@ -139,6 +139,10 @@ public class ExecutionContainer {
                 return convertToArray(result);
             } else {
                 result = result.replace("\"", "");
+                if(o.getClass() == Double.class) {
+                    Double dd = (Double) o;
+                    return dd.intValue();
+                }
                 return o;
             }
         } catch (ScriptException | IOException e){

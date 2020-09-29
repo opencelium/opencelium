@@ -16,32 +16,39 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import com.becon.opencelium.backend.resource.connection.StatementResource;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
 @NodeEntity(label = "Statement")
 public class StatementNode {
-
     @Id
     @GeneratedValue
     private Long id;
 
-    private String color;
-    private String type;
-    private String filed;
-    private String rightPropertyValue;
+    private String index;
+    private String type; // response or request type
+    private String iterator;
+    private String operand;
 
-    public StatementNode() {
-    }
+    @Relationship(type = "left", direction = Relationship.OUTGOING)
+    private StatementVariable leftStatementVariable;
 
-    public StatementNode(StatementResource resource) {
-        this.color = resource.getColor();
-        this.type = resource.getType();
-        this.filed = resource.getField();
-        this.rightPropertyValue = resource.getRightPropertyValue();
-    }
+    @Relationship(type = "right", direction = Relationship.OUTGOING)
+    private StatementVariable rightStatementVariable;
+
+    @Relationship(type = "next_action", direction = Relationship.OUTGOING)
+    private MethodNode nextFunction;
+
+    @Relationship(type = "next_action", direction = Relationship.OUTGOING)
+    private StatementNode nextOperator;
+
+    @Relationship(type = "body_action", direction = Relationship.OUTGOING)
+    private MethodNode bodyFunction;
+
+    @Relationship(type = "body_action", direction = Relationship.OUTGOING)
+    private StatementNode bodyOperator;
 
     public Long getId() {
         return id;
@@ -51,12 +58,12 @@ public class StatementNode {
         this.id = id;
     }
 
-    public String getColor() {
-        return color;
+    public String getIndex() {
+        return index;
     }
 
-    public void setColor(String color) {
-        this.color = color;
+    public void setIndex(String index) {
+        this.index = index;
     }
 
     public String getType() {
@@ -67,19 +74,67 @@ public class StatementNode {
         this.type = type;
     }
 
-    public String getFiled() {
-        return filed;
+    public StatementVariable getLeftStatementVariable() {
+        return leftStatementVariable;
     }
 
-    public void setFiled(String filed) {
-        this.filed = filed;
+    public void setLeftStatementVariable(StatementVariable leftStatementVariable) {
+        this.leftStatementVariable = leftStatementVariable;
     }
 
-    public String getRightPropertyValue() {
-        return rightPropertyValue;
+    public StatementVariable getRightStatementVariable() {
+        return rightStatementVariable;
     }
 
-    public void setRightPropertyValue(String rightPropertyValue) {
-        this.rightPropertyValue = rightPropertyValue;
+    public void setRightStatementVariable(StatementVariable rightStatementVariable) {
+        this.rightStatementVariable = rightStatementVariable;
+    }
+
+    public String getOperand() {
+        return operand;
+    }
+
+    public void setOperand(String operand) {
+        this.operand = operand;
+    }
+
+    public MethodNode getNextFunction() {
+        return nextFunction;
+    }
+
+    public void setNextFunction(MethodNode nextFunction) {
+        this.nextFunction = nextFunction;
+    }
+
+    public StatementNode getNextOperator() {
+        return nextOperator;
+    }
+
+    public void setNextOperator(StatementNode nextOperator) {
+        this.nextOperator = nextOperator;
+    }
+
+    public MethodNode getBodyFunction() {
+        return bodyFunction;
+    }
+
+    public void setBodyFunction(MethodNode bodyFunction) {
+        this.bodyFunction = bodyFunction;
+    }
+
+    public StatementNode getBodyOperator() {
+        return bodyOperator;
+    }
+
+    public void setBodyOperator(StatementNode bodyOperator) {
+        this.bodyOperator = bodyOperator;
+    }
+
+    public String getIterator() {
+        return iterator;
+    }
+
+    public void setIterator(String iterator) {
+        this.iterator = iterator;
     }
 }

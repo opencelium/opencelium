@@ -16,19 +16,26 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Connection;
-import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.enums.ExecutionType;
+import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.execution2.executor.Execution;
+import com.becon.opencelium.backend.execution2.factory.ExecutionFactory;
+import com.becon.opencelium.backend.execution2.data.ExecutionData;
+import com.becon.opencelium.backend.execution2.data.InitialData;
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.ConnectionRepository;
+import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
+import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
+import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,10 +51,19 @@ public class ConnectionServiceImp implements ConnectionService{
     private EnhancementServiceImp enhancementService;
 
     @Autowired
+    private EnhancementNodeServiceImp enhancementNodeServiceImp;
+
+    @Autowired
     private ConnectionNodeServiceImp connectionNodeService;
 
     @Autowired
     private SchedulerServiceImp schedulerService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
 
     @Override
     public void save(Connection connection) {
@@ -88,12 +104,38 @@ public class ConnectionServiceImp implements ConnectionService{
     }
 
     @Override
-    public void execute(Long connectionId, int schedulerId) {
+    public void run(Long connectionId) throws Exception {
 
-//        ConnectionNode connectionNode = connectionNodeService.findByConnectionId(connectionId)
-//                .orElseThrow(() -> new RuntimeException("Connection - " + connectionId + " not found."));
-//
-//        connectionNode.getToConnector();
+        ConnectionNode ctionNode = connectionNodeService.findByConnectionId(connectionId)
+                .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
+        List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
+        List<EnhancementNode> enhNodes = enhancementNodeServiceImp.findAllByConnectionId(connectionId);
+        Map<Integer, List<RequestData>> ctorsRequestData = getCtorsRequestData(ctionNode);
+
+        InitialData initialData = new InitialData.Builder()
+                .setConnectionNode(ctionNode)
+                .setEnhancementNodes(enhNodes)
+                .setEnhancements(enhancements)
+                .setRequestDataMap(ctorsRequestData)
+                .setInvokerService(invokerServiceImp)
+                .setRestTemplate(restTemplate)
+                .build();
+
+        Execution execution = ExecutionFactory.newExecution(ExecutionType.CONNECTION);
+        execution.start(new ExecutionData(initialData));
+    }
+
+    private Map<Integer, List<RequestData>> getCtorsRequestData(ConnectionNode ctionNode) {
+        Map<Integer, List<RequestData>> requestDataMap = new HashMap<>();
+        int ctorId = ctionNode.getFromConnector().getConnectorId();
+        List<RequestData> fromCtorReqData = connectorService.getRequestData(ctorId);
+        requestDataMap.put(ctorId, fromCtorReqData);
+
+        ctorId = ctionNode.getToConnector().getConnectorId();
+        List<RequestData> toCtorReqData = connectorService.getRequestData(ctorId);
+        requestDataMap.put(ctorId, toCtorReqData);
+
+        return requestDataMap;
     }
 
     @Override

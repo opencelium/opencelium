@@ -2,10 +2,9 @@ package com.becon.opencelium.backend.execution.test;
 
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
-import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.ConnectorNode;
 import com.becon.opencelium.backend.neo4j.entity.MethodNode;
-import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,19 +38,19 @@ public class TConnectorExecutor {
         executionMediator.setInvoker(invoker);
 
         MethodNode methodNode = connectorNode.getStartMethod();
-        OperatorNode operatorNode = connectorNode.getStartOperator();
+        StatementNode statementNode = connectorNode.getStartOperator();
         tMethodExecutor.execute(methodNode);
-        tOperatorExecutor.execute(operatorNode);
+        tOperatorExecutor.execute(statementNode);
     }
 
     private void collectMethods(Object operationNode, List<MethodNode> methods) {
         if (operationNode == null) {
             return;
         }
-        OperatorNode operatorNode = null;
+        StatementNode statementNode = null;
         MethodNode methodNode = null;
-        if (operationNode instanceof OperatorNode) {
-            operatorNode = (OperatorNode) operationNode;
+        if (operationNode instanceof StatementNode) {
+            statementNode = (StatementNode) operationNode;
         } else if (operationNode instanceof MethodNode) {
             methodNode = (MethodNode) operationNode;
         }
@@ -67,20 +66,20 @@ public class TConnectorExecutor {
             }
         } else {
 //            operations.add(operationNode);
-            if (operatorNode.getNextFunction() != null) {
-                collectMethods(operatorNode.getNextFunction(), methods);
+            if (statementNode.getNextFunction() != null) {
+                collectMethods(statementNode.getNextFunction(), methods);
             }
 
-            if (operatorNode.getNextOperator() != null) {
-                collectMethods(operatorNode.getNextOperator(), methods);
+            if (statementNode.getNextOperator() != null) {
+                collectMethods(statementNode.getNextOperator(), methods);
             }
 
-            if (operatorNode.getBodyFunction() != null) {
-                collectMethods(operatorNode.getBodyFunction(), methods);
+            if (statementNode.getBodyFunction() != null) {
+                collectMethods(statementNode.getBodyFunction(), methods);
             }
 
-            if (operatorNode.getBodyOperator() != null) {
-                collectMethods(operatorNode.getBodyOperator(), methods);
+            if (statementNode.getBodyOperator() != null) {
+                collectMethods(statementNode.getBodyOperator(), methods);
             }
         }
     }
