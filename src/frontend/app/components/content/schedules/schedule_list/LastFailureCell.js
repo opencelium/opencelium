@@ -87,9 +87,9 @@ class LastFailureCell extends Component{
 
     render(){
         return (
-            <TableCell>
+            <td>
                 {::this.renderData()}
-            </TableCell>
+            </td>
         );
     }
 }

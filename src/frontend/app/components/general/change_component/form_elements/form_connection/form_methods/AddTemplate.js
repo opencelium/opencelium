@@ -85,8 +85,7 @@ class AddTemplate extends Component{
                 <Dialog
                     actions={[{label: 'Ok', onClick: ::this.addTemplate, id: 'add_template_ok'}, {label: 'Cancel', onClick: ::this.toggleAddTemplateDialog, id: 'add_template_cancel'}]}
                     active={visibleAddTemplateDialog}
-                    onEscKeyDown={::this.toggleAddTemplateDialog}
-                    onOverlayClick={::this.toggleAddTemplateDialog}
+                    toggle={::this.toggleAddTemplateDialog}
                     title={templateLabels.addTemplateTitle}
                     theme={{title: styles.template_dialog_title}}
                 >

@@ -136,7 +136,7 @@ const updateUserGroupEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let data = {...action.payload};
-            let url = `${urlPrefix}/${data.id}/component`;
+            let url = `${urlPrefix}/${data.id}`;
             let successResponse = updateUserGroupFulfilled;
             if(data.icon !== null && !isString(data.icon)){
                 successResponse = updateGroupIcon;

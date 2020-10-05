@@ -15,14 +15,10 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { RadioGroup, RadioButton } from 'react-toolbox/lib/radio';
 
-
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
-import FontIcon from "@basic_components/FontIcon";
 import Input from "@basic_components/inputs/Input";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 const types = [
     {value: 'apikey',                label: 'API Key'},
@@ -51,17 +47,6 @@ class FormAuthentication extends Component{
         };
     }
 
-    componentDidMount(){
-        const {entity, data} = this.props;
-        const {name, readOnly} = data;
-        let value = entity[name];
-        if(value && !readOnly) {
-            let icon = document.getElementById(`input_${name}`).parentElement.parentElement.parentElement.querySelector('[data-react-toolbox="font-icon"]');
-            icon.style.color = '#3f51b5';
-        }
-    }
-
-
     handleChange(value){
         const {name, readonly} = this.props.data;
         if(!readonly) {
@@ -71,62 +56,35 @@ class FormAuthentication extends Component{
         }
     }
 
-    onFocusValue(e){
-        let icon = e.currentTarget.parentElement.parentElement.parentElement.querySelector('[data-react-toolbox="font-icon"]');
-        icon.style.color = '#3f51b5';
-        this.setState({focused: true});
-    }
-
-    renderLabel(){
-        let {label, required} = this.props.data;
-        let labelStyle = theme.label;
-        if(this.state.focused){
-            labelStyle += ' ' + styles.multiselect_focused;
-        }
-        if(typeof required !== 'boolean'){
-            required = false;
-        }
-        if(!required){
-            return <label className={labelStyle}>{label}</label>;
-        }
-        return <label className={labelStyle}>{label}<span className={theme.required}> *</span></label>;
-    }
-
-    renderAuthTypes(){
+    getAuthTypes(){
         const {name} = this.props.data;
-        return types.map((type, key) => {
+        let authTypes = [];
+        types.map((type, key) => {
             if(!type.hasOwnProperty('visible')){
-                return (
-                    <RadioButton
-                        key={type.value}
-                        label={type.label}
-                        value={type.value}
-                        onFocus={::this.onFocusValue}
-                        id={key === 0 ? `input_${name}` : ''}
-                        theme={{field: styles.form_invoker_auth_radio_field, text: styles.form_invoker_auth_radio_text}}
-                    />
-                );
+                authTypes.push({
+                    key: type.value,
+                    label: type.label,
+                    value: type.value,
+                    id: key === 0 ? `input_${name}` : '',
+                });
             } else{
                 if(type.visible){
-                    return (
-                        <RadioButton
-                            key={type.value}
-                            label={type.label}
-                            value={type.value}
-                            onFocus={::this.onFocusValue}
-                            id={key === 0 ? `input_${name}` : ''}
-                            theme={{field: styles.form_invoker_auth_radio_field, text: styles.form_invoker_auth_radio_text}}
-                        />
-                    );
+                    authTypes.push({
+                        key: type.value,
+                        label: type.label,
+                        value: type.value,
+                        id: key === 0 ? `input_${name}` : '',
+                    });
                 }
             }
         });
+        return authTypes;
     }
 
     render(){
-        const {name, icon, readOnly} = this.props.data;
+        const {name, icon, readOnly, label, required} = this.props.data;
         const {entity} = this.props;
-        let {tourStep, label} = this.props.data;
+        let {tourStep} = this.props.data;
         let value = entity[name];
         if(readOnly) {
             return (
@@ -134,15 +92,17 @@ class FormAuthentication extends Component{
             );
         }
         return(
-            <div className={`${theme.withIcon} ${theme.input} ${tourStep ? tourStep : ''}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.radiogroup_label}`}/>
-                <RadioGroup name={name} value={value} onChange={::this.handleChange}>
-                    {this.renderAuthTypes()}
-                </RadioGroup>
-                <FontIcon value={icon} className={theme.icon}/>
-                <span className={theme.bar}/>
-                {this.renderLabel()}
-            </div>
+            <RadioButtons
+                inline={false}
+                tourStep={tourStep}
+                required={required}
+                icon={icon}
+                name={name}
+                label={label}
+                value={value}
+                handleChange={::this.handleChange}
+                radios={::this.getAuthTypes()}
+            />
         );
     }
 }

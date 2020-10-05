@@ -24,7 +24,6 @@ import CMethodItem from "@classes/components/content/connection/method/CMethodIt
 import MethodRequest from "./MethodRequest";
 import MethodTitle from "./MethodTitle";
 import Card from "@basic_components/card/Card";
-import {consoleLog} from "@utils/app";
 
 
 /**

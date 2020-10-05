@@ -17,7 +17,6 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/form_methods.scss';
 import {FormElement} from "@decorators/FormElement";
 import Button from "@basic_components/buttons/Button";
@@ -32,9 +31,8 @@ import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connecti
 import FontIcon from "@basic_components/FontIcon";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Input from "@basic_components/inputs/Input";
-
-import {isString} from "@utils/app";
 import TemplateOption from "@change_component/form_elements/form_connection/form_methods/TemplateOption";
+import {setFocusById} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -87,6 +85,7 @@ class FormMode extends Component{
             this.fetchTemplates();
         }
         window.addEventListener('resize', this.resize, false);
+        setFocusById('button_expert')
     }
 
     componentDidUpdate(prevProps){
@@ -315,6 +314,7 @@ class FormMode extends Component{
                 <div className={`second-tour-step ${styles.template_select}`}>
                     <Select
                         id={'templates'}
+                        className={styles.form_mode_template}
                         name={'connection_mode'}
                         value={template}
                         components={{ Option: TemplateOption }}
@@ -325,25 +325,15 @@ class FormMode extends Component{
                         isDisabled={readOnly}
                         isSearchable={!readOnly}
                         openMenuOnClick={true}
-                        styles={{
-                            container:(styles, {}) => {
-                                return {
-                                    ...styles,
-                                    width: currentWidth > 768 ? '95%' : '90%',
-                                };
-                            },
-                        }}
                     />
-                    <div>
-                        <FontIcon
-                            className={styles.item_delete_button}
-                            style={{lineHeight: 0, ...deleteButtonStyle}}
-                            value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
-                            onMouseOver={::this.isOnDeleteButtonOver}
-                            onMouseLeave={::this.isNotOnDeleteButtonOver}
-                            onClick={::this.toggleConfirmDelete}
-                        />
-                    </div>
+                    <FontIcon
+                        className={styles.item_delete_button}
+                        style={{lineHeight: 0, ...deleteButtonStyle}}
+                        value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
+                        onMouseOver={::this.isOnDeleteButtonOver}
+                        onMouseLeave={::this.isNotOnDeleteButtonOver}
+                        onClick={::this.toggleConfirmDelete}
+                    />
                     {::this.renderTemplateDescription(options)}
                     <Confirmation
                         okClick={::this.deleteTemplate}
@@ -381,7 +371,7 @@ class FormMode extends Component{
             tourStep = '';
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${tourStep}`} style={{margin: '0 65px'}}>
+            <div className={`${tourStep}`} style={{margin: '20px 65px 0'}}>
                 <div style={{textAlign: 'center'}}>
                     <Button
                         isActive={mode === EXPERT_MODE}

@@ -16,7 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
-import OCSelect from "@basic_components/inputs/Select";
+import Select from "@basic_components/inputs/Select";
 import CRequest, {METHOD_TYPES} from "@classes/components/content/invoker/request/CRequest";
 import styles from '@themes/default/general/change_component.scss';
 import Button from "@basic_components/buttons/Button";
@@ -57,7 +57,7 @@ class UrlField extends Component{
         return (
             <div className={styles.url_field}>
                 <div className={styles.method}>
-                    <OCSelect
+                    <Select
                         id={'input_method'}
                         name={'input_method'}
                         value={request.getMethodForSelect()}

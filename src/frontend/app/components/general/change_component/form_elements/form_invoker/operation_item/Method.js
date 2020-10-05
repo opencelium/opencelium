@@ -15,10 +15,9 @@
 
 import React, {Component} from 'react';
 import styles from '@themes/default/general/change_component.scss';
-import theme from "react-toolbox/lib/input/theme.css";
-import FontIcon from "@basic_components/FontIcon";
 import {onEnter} from "@utils/app";
 import {METHOD_TYPES} from "@classes/components/content/invoker/request/CRequest";
+import ToolboxThemeInput from "../../../../../../hocs/ToolboxThemeInput";
 
 
 
@@ -34,6 +33,18 @@ class Method extends Component{
         };
     }
 
+    onFocus(){
+        this.setState({
+            focused: true,
+        });
+    }
+
+    onBlur(){
+        this.setState({
+            focused: false,
+        });
+    }
+
     chooseMethod(e, method){
         const {operation, updateEntity} = this.props;
         operation.request.method = method;
@@ -41,53 +52,45 @@ class Method extends Component{
     }
 
     renderLabel(){
-        let {required} = this.props.data;
-        let labelStyle = theme.label;
+        let labelStyle = '';
         if(this.state.focused){
             labelStyle += ' ' + styles.multiselect_focused;
         }
-        if(typeof required !== 'boolean'){
-            required = false;
-        }
-        if(!required){
-            return <label className={labelStyle}>Method</label>;
-        }
-        return <label className={labelStyle}>Method<span className={theme.required}> *</span></label>;
+        return(
+            <span className={labelStyle}>Method</span>
+        );
     }
 
     render(){
+        const {focused} = this.state;
         const {operation, tourStep, data} = this.props;
-        let {readOnly} = data;
+        let {readOnly, required} = data;
         let value = operation.request.method;
-        let inputStyle = '';
-        if(tourStep){
-            inputStyle = tourStep;
-        }
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${inputStyle}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={{padding: '8px 0 0 0'}}/>
-                <div>
-                    {
-                        METHOD_TYPES.map((type, key) => {
-                            return (
+            <ToolboxThemeInput icon={'public'} tourStep={tourStep} required={required} label={this.renderLabel()} iconClassName={focused ? styles.icon_focused : ''}>
+                {
+                    METHOD_TYPES.map((type, key) => {
+                        return (
+                            <button
+                                className={styles.invoker_request_item_method_button}
+                                onClick={readOnly ? null : (e) => ::this.chooseMethod(e, type.value)}
+                                onKeyDown={readOnly ? null : (e) => onEnter(e, (e) => ::this.chooseMethod(e, type.value))}
+                                onFocus={::this.onFocus}
+                                onBlur={::this.onBlur}
+                            >
                                 <span
                                     id={`method_${type.value}`}
                                     tabIndex={2 + key}
                                     key={key}
                                     className={`${value === type.value ? `${styles.invoker_selected_method} ${styles[`invoker_method_${type.value.toLowerCase()}`]}` : `${styles.invoker_request_item_method} ${readOnly ? '' : styles.invoker_request_item_method_not_readonly}`}`}
-                                    onClick={readOnly ? null : (e) => ::this.chooseMethod(e, type.value)}
-                                    onKeyDown={readOnly ? null : (e) => onEnter(e, (e) => ::this.chooseMethod(e, type.value))}
                                 >
                                     {type.label}
                                 </span>
-                            );
-                        })
-                    }
-                </div>
-                <FontIcon value={'public'} className={theme.icon}/>
-                <span className={theme.bar}/>
-                {this.renderLabel()}
-            </div>
+                            </button>
+                        );
+                    })
+                }
+            </ToolboxThemeInput>
         );
     }
 }

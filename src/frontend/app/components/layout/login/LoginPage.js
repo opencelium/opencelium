@@ -44,14 +44,14 @@ class LoginPage extends Component{
     componentDidUpdate(){
         const {isAuth, router} = this.props;
         if(isAuth){
-            router.push('/');
+            setTimeout(() => router.push('/'), 1000);
         }
     }
 
     render(){
         const {authUser, logining} = this.props;
         if(logining){
-            return <Loading authUser={authUser}/>;
+            //return <Loading authUser={authUser}/>;
         }
         return (
             <div className={styles.login_page}>

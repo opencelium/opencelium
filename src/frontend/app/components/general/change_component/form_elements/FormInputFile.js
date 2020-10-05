@@ -16,10 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
-import FontIcon from "@basic_components/FontIcon";
 import BrowseButton from "@basic_components/buttons/BrowseButton";
 
 
@@ -61,20 +58,20 @@ class FormInputFile extends Component{
             }
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${tourStep ? tourStep : ''}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.input_file_label}`}>{browseTitle}</div>
-                <BrowseButton
-                    icon="file_upload"
-                    label="Upload"
-                    onChange={::this.handleChange}
-                    accept="image/x-png,image/jpeg"
-                    className={`${styles.input_file_browse}`}
-                    name={label}
-                />
-                <FontIcon value={icon} className={theme.icon}/>
-                <span className={theme.bar}/>
-                <label className={theme.label}>{label}</label>
-            </div>
+            <BrowseButton
+                label={label}
+                icon={icon}
+                tourStep={tourStep}
+                name={name}
+                browseTitle={browseTitle}
+                browseProps={{
+                    icon: "file_upload",
+                    label: "Upload",
+                    onChange: ::this.handleChange,
+                    accept: "image/x-png,image/jpeg",
+                    name: label,
+                }}
+            />
         );
     }
 }

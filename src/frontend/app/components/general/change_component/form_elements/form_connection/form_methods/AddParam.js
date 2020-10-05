@@ -185,10 +185,9 @@ class AddParam extends Component{
                 <Dialog
                     actions={[{label: 'Ok', onClick: ::this.addParam, id: 'add_template_ok'}, {label: 'Cancel', onClick: ::this.toggleAddParamDialog, id: 'add_template_cancel'}]}
                     active={visibleAddParamDialog}
-                    onEscKeyDown={::this.toggleAddParamDialog}
-                    onOverlayClick={::this.toggleAddParamDialog}
+                    toggle={::this.toggleAddParamDialog}
                     title={'Add Param'}
-                    theme={{title: styles.template_dialog_title, normal: styles.add_param_dialog_normal}}
+                    theme={{title: styles.template_dialog_title}}
                 >
                     {::this.renderParams()}
                     {::this.renderNavigation()}

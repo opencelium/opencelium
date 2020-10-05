@@ -17,15 +17,14 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Input from '@basic_components/inputs/Input';
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/change_component.scss';
 import FormSelect from "../../../FormSelect";
 import {isString} from "@utils/app";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import FontIcon from "@basic_components/FontIcon";
 import {HTTPRequestHeaders} from "@utils/constants/HTTPRequestHeaders";
 import HeaderValue from "./HeaderValue";
 import HeaderKey from "./HeaderKey";
+import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
 
 const HEADER_LIMIT = 2;
 
@@ -291,7 +290,7 @@ class Header extends Component{
                     onBlur={::this.onBlurValue}
                 />
                 <div className={styles.invoker_item_add_button}>
-                    <TooltipFontIcon value={'add'} tooltip={'Add Header'} onClick={::this.addItem} style={{cursor: 'pointer'}}/>
+                    <TooltipFontIcon isButton={true} value={'add'} tooltip={'Add Header'} onClick={::this.addItem} iconStyles={{cursor: 'pointer'}}/>
                 </div>
                 <Input
                     onChange={::this.changeHeaderVal}
@@ -308,15 +307,6 @@ class Header extends Component{
                 />
             </div>
         );
-    }
-
-    renderLabel(){
-        let label = 'Header';
-        let labelStyle = theme.label;
-        if(this.state.focused){
-            labelStyle += ' ' + styles.multiselect_focused;
-        }
-        return <label className={labelStyle}>{label}</label>;
     }
 
     renderNavigation(){
@@ -340,6 +330,7 @@ class Header extends Component{
     }
 
     render(){
+        const {focused} = this.state;
         const {entity, data, forConnection, mode, noIcon, hasHeightLimits} = this.props;
         const {readOnly} = data;
         let items = entity.header;
@@ -351,18 +342,20 @@ class Header extends Component{
             inputsStyle.maxHeight = '200px';
         }
         return(
-            <div className={`${forConnection || noIcon ? '' : theme.withIcon} ${theme.input}`} style={forConnection ? {paddingBottom: 0} : null}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`} style={forConnection ? {padding: 0} : null}/>
-
+            <ToolboxThemeInput
+                label={'Header'}
+                isFocused={focused}
+                style={forConnection ? {paddingBottom: 0} : null}
+                inputElementClassName={styles.multiselect_label}
+                inputElementStyle={forConnection ? {padding: 0} : {}}
+                icon={forConnection || noIcon ? '' : 'public'}
+            >
                 {this.renderNavigation()}
                 <div style={inputsStyle}>
                     {this.renderInputs()}
                     {readOnly || forConnection ? null : this.renderAddItem()}
                 </div>
-                {forConnection || noIcon ? null : <FontIcon value={'public'} className={theme.icon}/>}
-                <span className={theme.bar}/>
-                {this.renderLabel()}
-            </div>
+            </ToolboxThemeInput>
         );
     }
 }

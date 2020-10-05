@@ -14,7 +14,9 @@
  */
 
 import React, {Component} from 'react';
-import {Checkbox as ToolboxCheckbox} from 'react-toolbox/lib/checkbox';
+import {Label, Input} from 'reactstrap';
+
+import styles from '@themes/default/general/basic_components.scss';
 
 
 /**
@@ -27,11 +29,19 @@ class Checkbox extends Component{
     }
 
     render(){
-        return (
-            <ToolboxCheckbox {...this.props}>
-                {this.props.children}
-            </ToolboxCheckbox>
-        );
+        const {theme, className, labelClassName, checked, label, ...props} = this.props;
+        if(label !== ''){
+            return (
+                <Label style={{margin: 0}}>
+                    <span className={`${styles.checkbox_label} ${labelClassName}`}>{label}</span>
+                    <Input type="checkbox" {...props} checked={checked} className={`${className} ${styles.checkbox}`}/>
+                </Label>
+            );
+        } else{
+            return(
+                <Input type="checkbox" {...props} checked={checked} className={`${className} ${styles.checkbox}`}/>
+            );
+        }
     }
 }
 

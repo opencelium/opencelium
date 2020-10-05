@@ -15,6 +15,16 @@
 
 @import '../constants';
 
+.clear_button{
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.clear_button:focus-within{
+  box-shadow: $FOCUS_BOX_SHADOW !important;
+  outline: none !important;
+}
+
 .form{
   margin-top: 50px;
   margin-bottom: 50px;
@@ -85,6 +95,32 @@
   position: relative;
 }
 
+.navigation_button{
+  cursor: pointer;
+  background: white;
+  border: none;
+  padding: 0;
+  height: 100%;
+}
+.navigation_button:focus-within{
+  box-shadow: $FOCUS_BOX_SHADOW !important;
+  outline: none !important;
+}
+.navigation_next_button{
+  @extend .navigation_button;
+  float: right;
+  cursor: pointer;
+  margin-right: 15px;
+}
+.navigation_prev_button{
+  @extend .navigation_button;
+  float: left;
+  cursor: pointer;
+  margin-left: 15px;
+}
+.navigation_icon{
+  color: black !important;
+}
 .navigation_icon:hover{
   border-bottom: 1px solid rgba(128, 128, 128, 0.5);
   border-radius: 15px;
@@ -95,21 +131,6 @@
   top:1px;
   border-bottom: 1px solid rgba(128, 128, 128, 0.8);
   border-radius: 15px;
-}
-
-.navigation_next_icon{
-  @extend .navigation_icon;
-  float: right;
-  cursor: pointer;
-  margin-right: 15px;
-}
-
-
-.navigation_prev_icon{
-  @extend .navigation_icon;
-  float: left;
-  cursor: pointer;
-  margin-left: 15px;
 }
 
 .navigation_action_icon{
@@ -210,23 +231,6 @@
   font-size: 14px !important;
 }
 
-.input_file_label{
-  font-family: $FONT_FAMILY;
-  width: 69% !important;
-  float: left;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.input_file_browse{
-  font-family: $FONT_FAMILY;
-  width: 31%;
-  border-bottom: none;
-  padding: 1px 0 0 0 !important;
-  min-width: auto;
-}
 
 .user_group_row_table{
   padding: 0 15px;
@@ -237,22 +241,6 @@
   overflow-x: auto !important;
 }
 
-.user_group_table{
-  font-family: $FONT_FAMILY;
-  .header_cell{
-    text-align: center;
-  }
-  .row_cell{
-    text-align: center;
-  }
-  .checkbox_field{
-    margin-left: 5px;
-    display: inline;
-  }
-  .checkbox_field_value{
-    margin-bottom: unset;
-  }
-}
 
 .user_group_description{
   font-family: $FONT_FAMILY;
@@ -264,9 +252,11 @@
   padding: 0;
   border: none !important;
 }
-
+.icon_focused{
+  color: $INPUT_SELECT_COLOR !important;
+}
 .multiselect_focused{
-  color: rgb(63, 81, 181) !important;
+  color: $INPUT_SELECT_COLOR !important;
 }
 .multiselect_focused>div{
   border-radius: 0;
@@ -307,14 +297,19 @@
   overflow: inherit !important;
 }
 
+.form_connector_input{
+  padding: 0 !important;
+}
+.form_connector_input_element{
+  padding: 0;
+}
+
 .input_secret{
   font-family: $FONT_FAMILY;
   position: relative;
-  input[type="checkbox"] {
-    height: 12px;
-    width: 12px;
+  .check{
     position: absolute;
-    right: 0;
+    right: 0px;
     top: 30px;
     margin: 0;
   }
@@ -371,7 +366,8 @@
 }
 
 .input_direction_arrow_readonly{
-  font-size: 40px;
+  padding-top: 2px;
+  font-size: 30px;
   color: #000000;
 }
 
@@ -386,11 +382,6 @@
 .template_dialog{
   min-height: 240px;
   max-height: 240px;
-}
-
-.template_dialog_title {
-  font-family: $FONT_FAMILY;
-  text-align: center;
 }
 
 .invoker_chip{
@@ -628,62 +619,77 @@
 .invoker_operation_add_icon:hover{
   color: black;
 }
-.invoker_operation_add_method_radio{
-  position: absolute;
-  padding: 2px 2px 0 0;
-  .radio_field{
-    font-family: $FONT_FAMILY;
-    text-align: left !important;
-    margin-bottom: 1px !important;
-    height: 13px !important;
-  }
-  .radio_radio{
-    font-family: $FONT_FAMILY;
-    width: 12px !important;
-    height: 12px !important;
-    border: 1px solid rgb(0, 0, 0);
-    background: white;
-  }
-  .radio_radio_from_connector{
-    @extend .radio_radio;
-    float: right;
-  }
-  .radio_radio_to_connector{
-    @extend .radio_radio;
-    float: left;
-  }
-  .radio_text{
-    font-family: $FONT_FAMILY;
-    line-height: 12px !important;
-  }
-  .radio_text_from_connector{
-    @extend .radio_text;
-    float: right;
-    padding: 0 0 0 10px !important;
-    margin: 0 2px 0 0 !important;
-  }
-  .radio_text_to_connector{
-    @extend .radio_text;
-    float: left;
-    padding: 0 10px 0 0 !important;
-    margin: 0 0 0 2px !important;
-  }
-}
 .invoker_operation_add_method_radio_from_connector{
-  @extend .invoker_operation_add_method_radio;
+  display: block;
+  position: absolute;
   right: 0;
+  width: 40px;
   background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
+  .radio_input_in{
+    position: absolute;
+    right: 0;
+    top: -4px;
+  }
+  .radio_label_in{
+    margin-right: 15px;
+    position: absolute;
+    right: 0;
+    top: -4px;
+  }
+  .radio_input_out{
+    position: absolute;
+    right: 0;
+    top: 12px;
+  }
+  .radio_label_out{
+    position: absolute;
+    right: 0;
+    top: 10px;
+  }
 }
 .invoker_operation_add_method_radio_to_connector{
-  @extend .invoker_operation_add_method_radio;
+  display: block;
+  position: absolute;
   left: 0;
+  width: 40px;
   background-image: linear-gradient(to left, rgba(0, 0, 0, 0), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247), rgb(247, 247, 247));
+  .radio_input_in{
+    position: absolute;
+    left: 0;
+    margin-left: 0;
+    top: -4px;
+  }
+  .radio_label_in{
+    margin-left: 15px;
+    position: absolute;
+    left: 0;
+    top: -4px;
+  }
+  .radio_input_out{
+    position: absolute;
+    top: 12px;
+    margin-left: 0;
+  }
+  .radio_label_out{
+    margin-left: 15px;
+    position: absolute;
+    left: 0;
+    top: 10px;
+  }
+}
+.invoker_request_item_method_button{
+  @extend .clear_button;
+  :focus{
+    box-shadow: $FOCUS_BOX_SHADOW !important;
+    outline: none !important;
+  }
+  border-radius: 3px;
+  margin-right: 10px;
 }
 .invoker_request_item_method{
   background: #eeeeee;
   padding: 5px 20px;
   border-radius: 3px;
-  margin-right: 10px;
   cursor: pointer;
 }
 .invoker_request_item_method_not_readonly:hover{
@@ -696,7 +702,6 @@
 .invoker_selected_method{
   padding: 5px 20px;
   border-radius: 3px;
-  margin-right: 10px;
   color: #fff;
   cursor: default;
 }
@@ -777,27 +782,39 @@
   cursor: pointer;
 }
 
-.form_user_title{
-  .label{
-    border: none;
-    padding-bottom: 0;
-  }
-  .radio_group{
-    height: 25px;
-  }
-  .first_radio_button{
-    margin-right: 20px;
-  }
-  .radio_button{
-    float: left;
-    margin-bottom: 10px !important;
-  }
-}
-
 .radiogroup_label{
   font-family: $FONT_FAMILY;
   padding: 15px 0 0 0;
   border: none !important;
+}
+
+.radios_inline{
+  .radio_button_label{
+    margin-right: 10px;
+  }
+  input{
+    position: relative;
+    margin: 0 5px 0 0;
+  }
+  input:focus-within{
+    box-shadow: $FOCUS_BOX_SHADOW !important;
+    outline: none !important;
+  }
+}
+.radios_block{
+  .radio_button_label{
+    margin-right: 10px;
+    display: block;
+  }
+  input{
+    position: relative;
+    margin: 5px 5px 0 0;
+    float: left;
+  }
+  input:focus-within{
+    box-shadow: $FOCUS_BOX_SHADOW !important;
+    outline: none !important;
+  }
 }
 
 .invoker_method_label{
@@ -1079,14 +1096,15 @@
 .notification_template_editor_padding{
   border-bottom-width: 0 !important;
 }
+.request_icon_dialog{
+  min-width: 750px;
+}
 .connection_request_icon_left{
   position: absolute;
-  right: 3px;
   top: 3px;
 }
 .connection_request_icon_right{
   position: absolute;
-  left: 3px;
   top: 3px;
 }
 .connection_request_tabs{
@@ -1301,6 +1319,9 @@
     }
   }
 }
+.check_connection_dialog{
+  min-width: 750px;
+}
 .add_param_existed_input{
   float: left;
   width: 44%;
@@ -1337,9 +1358,6 @@
   margin-left: 2%;
   float: right;
 }
-.add_param_dialog_normal{
-  width: 32vw;
-}
 .add_param_navigation {
   float: right;
 }
@@ -1364,6 +1382,9 @@
 }
 
 //Draft
+.draft_dialog{
+  min-width: 750px;
+}
 .draft{
   .connectors{
     font-size: $FONT_SIZE_MEDIUM;

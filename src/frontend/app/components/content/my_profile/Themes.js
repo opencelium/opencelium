@@ -16,13 +16,13 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import { Row, Col } from "react-grid-system";
-import { RadioGroup, RadioButton } from 'react-toolbox/lib/radio';
 
 import {updateTheme} from '@actions/auth';
 import styles from '@themes/default/content/my_profile/my_profile.scss';
 import SubHeader from "../../general/view_component/SubHeader";
 import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -66,10 +66,22 @@ class Themes extends Component{
                     <SubHeader title={'Theme'} authUser={authUser} className={styles[classNames.user_details_themes_title]}/>
                     <Row className={styles[classNames.user_details_themes]}>
                         <Col md={12}>
-                            <RadioGroup name='theme' value={theme} onChange={::this.handleChangeTheme}>
-                                <RadioButton id={`theme_default`} label={`${t('THEME.DEFAULT')}`} value='default'/>
-                                <RadioButton id={`theme_other`} label={`${t('THEME.OTHER')}`} value='other'/>
-                            </RadioGroup>
+                            <RadioButtons
+                                label={''}
+                                value={theme}
+                                handleChange={::this.handleChangeTheme}
+                                radios={[
+                                    {
+                                        id: `theme_default`,
+                                        label: `${t('THEME.DEFAULT')}`,
+                                        value: 'default',
+                                    },{
+                                        id: `theme_other`,
+                                        label: `${t('THEME.OTHER')}`,
+                                        value: 'other',
+                                    }
+                                ]}
+                            />
                         </Col>
                     </Row>
                 </Col>

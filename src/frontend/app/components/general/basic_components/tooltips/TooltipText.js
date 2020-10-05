@@ -48,7 +48,7 @@ class TooltipText extends Component{
     render(){
         const {authUser, tooltip, text, className, onClick, tooltipPosition, style, tooltipStyle} = this.props;
         let classNames = [
-            'tooltip_switch',
+            'tooltip_text',
             'tooltip',
             'tooltip_bottom',
         ];

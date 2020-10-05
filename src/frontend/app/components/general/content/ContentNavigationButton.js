@@ -21,6 +21,7 @@ import { withRouter } from 'react-router';
 import {Row, Col} from 'react-grid-system';
 
 import styles from '@themes/default/general/content.scss';
+import basicComponentStyles from '@themes/default/general/basic_components.scss';
 import {permission} from "@decorators/permission";
 import {formatHtmlId, getThemeClass, isString} from "@utils/app";
 import Button from "@basic_components/buttons/Button";
@@ -94,23 +95,16 @@ class ContentNavigationButton extends Component{
                 title = title.title;
             }
         }
-        let classNames = ['navigation_button'];
-        classNames = getThemeClass({classNames, authUser, styles});
+        if(type !== 'add'){
+            title = ::this.renderTitle();
+        }
         return (
             <Row className={className}>
                 <Col>
-                    {
-                        type !== 'add' 
-                            ?
-                            <span className={styles[classNames.navigation_button]} onClick={::this.click} id={formatHtmlId(`button_${title}`)}>
-                                {icon !== '' ? <FontIcon value={icon}/> : null}
-                                {::this.renderTitle()}
-                            </span>
-                            :
-                            <Button authUser={authUser} title={title} icon={icon} onClick={::this.click} className={buttonClassname}/>
-                    }
+                    <Button authUser={authUser} icon={icon} onClick={::this.click} className={buttonClassname} id={formatHtmlId(`button_${title}`)}>
+                        {title}
+                    </Button>
                 </Col>
-                    
             </Row>
         );
     }

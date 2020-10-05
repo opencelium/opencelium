@@ -76,9 +76,9 @@ class StatusCell extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         if((updatingScheduleStatus || triggeringSchedule || triggeringScheduleSuccessfully) && currentSchedule.id === schedule.id){
             return (
-                <TableCell>
+                <td>
                     <Loading className={styles[classNames.schedule_list_status_cell_loading]} authUser={authUser}/>
-                </TableCell>
+                </td>
             );
         }
         const {status, lastExecution} = schedule;
@@ -102,15 +102,16 @@ class StatusCell extends Component{
         }
         backgroundStyle = `${backgroundStyle} ${styles[classNames.schedule_list_status]}`;
         return (
-            <TableCell className={backgroundStyle}>
+            <td className={backgroundStyle}>
                 <TooltipSwitch
                     id={`switch_status_${index}`}
                     authUser={authUser}
                     tooltip={schedule.status ? t('LIST.TOOLTIP_ENABLE_SWITCH_FALSE') : t('LIST.TOOLTIP_ENABLE_SWITCH_TRUE')}
                     checked={status}
                     onChange={::this.manageScheduleStatus}
+                    middle={true}
                 />
-            </TableCell>
+            </td>
         );
     }
 }

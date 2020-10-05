@@ -20,7 +20,6 @@ import {withTranslation} from "react-i18next";
 import { Row, Col } from "react-grid-system";
 import Input from "@basic_components/inputs/Input";
 import CNotification from "@classes/components/content/schedule/notification/CNotification";
-import FontIcon from "@basic_components/FontIcon";
 import {getThemeClass} from "@utils/app";
 import Recipient from "./Recipient";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
@@ -29,7 +28,7 @@ import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 
 import styles from "@themes/default/content/schedules/schedules.scss";
-import theme from "react-toolbox/lib/input/theme.css";
+import ToolboxThemeInput from "../../../../../../hocs/ToolboxThemeInput";
 
 
 const RECIPIENTS_LIMIT = 3;
@@ -316,15 +315,27 @@ class RecipientsInput extends Component{
         const isNextDisable = iterator * RECIPIENTS_LIMIT >= recipients.length;
         return(
             <React.Fragment>
-                {isPrevDisable ? null : <div className={styles[classNames.recipients_before]} title={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.MORE_ICON_TOOLTIP')}>...</div>}
+                {!isPrevDisable && <div className={styles[classNames.recipients_before]} title={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.MORE_ICON_TOOLTIP')}>...</div>}
                 <div className={styles[classNames.notifications_arrows]}>
                     <TooltipFontIcon tooltip={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.PREVIOUS_ICON_TOOLTIP')} value={'keyboard_arrow_up'} onClick={isPrevDisable ? null : () => ::this.decreaseIterator(iteratorName)}
                                      className={`${styles[classNames.notifications_arrow_prev]} ${isPrevDisable ? styles[classNames.notifications_arrow_disable] : ''}`}/>
                     <TooltipFontIcon tooltip={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.NEXT_ICON_TOOLTIP')} value={'keyboard_arrow_down'} onClick={isNextDisable ? null : () => ::this.increaseIterator(iteratorName)}
                                      className={`${styles[classNames.notifications_arrow_next]} ${isNextDisable ? styles[classNames.notifications_arrow_disable] : ''}`}/>
                 </div>
-                {isNextDisable ? null : <div className={styles[classNames.recipients_after]} title={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.MORE_ICON_TOOLTIP')}>...</div>}
+                {!isNextDisable && <div className={styles[classNames.recipients_after]} title={t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.MORE_ICON_TOOLTIP')}>...</div>}
             </React.Fragment>
+        );
+    }
+
+    renderLabel(){
+        const {focused} = this.state;
+        const {t, authUser} = this.props;
+        let classNames = [
+            'notification_select_focused',
+        ];
+        classNames = getThemeClass({classNames, authUser, styles});
+        return(
+            <span className={`${focused ? styles[classNames.notification_select_focused] : ''}`}>{t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.LABEL')}</span>
         );
     }
 
@@ -335,7 +346,6 @@ class RecipientsInput extends Component{
             'notification_input_appear',
             'notification_change_event_type',
             'label',
-            'notification_select_focused',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         const selectedRecipients = this.getSelectedRecipients();
@@ -343,8 +353,12 @@ class RecipientsInput extends Component{
         const restRecipients = this.getRestRecipients();
         const currentRestRecipients = this.getCurrentRestRecipients(restRecipients);
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${styles[classNames.notification_change_event_type]} ${styles[classNames.notification_input_appear]}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.label]}`}/>
+            <ToolboxThemeInput
+                className={`${styles[classNames.notification_change_event_type]} ${styles[classNames.notification_input_appear]}`}
+                label={::this.renderLabel()}
+                icon={'group'}
+                iconClassName={focused ? styles[classNames.notification_select_focused] : ''}
+            >
                 <Row>
                     <Col md={6}>
                         {this.renderNavigation('rest', restRecipients)}
@@ -385,13 +399,7 @@ class RecipientsInput extends Component{
                         </div>
                     </Col>
                 </Row>
-                <FontIcon value={'group'}  className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
-                <span className={theme.bar}/>
-                <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
-                    {t('NOTIFICATION.NOTIFICATION_CHANGE.RECIPIENTS.LABEL')}
-                    <span className={theme.required}> *</span>
-                </label>
-            </div>
+            </ToolboxThemeInput>
         );
     }
 }

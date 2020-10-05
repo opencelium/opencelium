@@ -22,9 +22,10 @@ import Dialog from "@basic_components/Dialog";
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ParamGenerator from "@change_component/form_elements/form_connection/form_methods/method/ParamGenerator";
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/form_methods.scss';
 import Input from "@basic_components/inputs/Input";
+import CRequest from "@classes/components/content/invoker/request/CRequest";
+import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
 
 
 export function RequestBody(CRequestType){
@@ -40,7 +41,7 @@ export function RequestBody(CRequestType){
                     this.state = {
                         showImportJson: false,
                         isBodyEditOpened: false,
-                        importJsonBody: JSON.stringify(props.method.request.getBodyFields()),
+                        importJsonBody: JSON.stringify( props.method.request instanceof CRequest ? props.method.request.getBodyFields() : {}),
                         showEnhancement: false,
                         currentEnhancement: null,
                     };
@@ -170,11 +171,9 @@ export function RequestBody(CRequestType){
                         <Dialog
                             actions={[{label: 'Ok', onClick: ::this.updateEnhancement, id: 'body_ok'}, {label: 'Cancel', onClick: ::this.toggleEnhancement, id: 'body_cancel'}]}
                             active={showEnhancement}
-                            onEscKeyDown={::this.toggleEnhancement}
-                            onOverlayClick={::this.toggleEnhancement}
+                            toggle={::this.toggleEnhancement}
                             title={'Enhancement'}
-                            className={styles.enhancement_dialog}
-                            theme={{title: styles.enhancement_dialog_title}}
+                            theme={{dialog: styles.enhancement_dialog}}
                         >
                             <div>
                                 <Enhancement
@@ -195,9 +194,9 @@ export function RequestBody(CRequestType){
                         <Dialog
                             actions={[{label: 'Ok', onClick: ::this.importJson}, {label: 'Cancel', onClick: ::this.toggleImportJson}]}
                             active={showImportJson}
-                            onEscKeyDown={::this.toggleImportJson}
-                            onOverlayClick={::this.toggleImportJson}
+                            toggle={::this.toggleImportJson}
                             title={'Import Json'}
+                            theme={{dialog: styles.enhancement_dialog}}
                         >
                             <Input
                                 className={styles.textarea_import_json}
@@ -256,10 +255,9 @@ export function RequestBody(CRequestType){
                         ownBodyStyles = bodyStyles;
                     }
                     return(
-                        <div className={`${theme.input} ${styles[CRequestType.getClassName({isDraft})]}`} style={ownBodyStyles}>
-                            {::this.renderCloseMenuEditButton()}
-                            <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+                        <ToolboxThemeInput className={styles[CRequestType.getClassName({isDraft})]} style={ownBodyStyles}>
                             <div style={{display: 'none'}} id={`${id}_reference_component`}/>
+                            {::this.renderCloseMenuEditButton()}
                             {this.renderEnhancement()}
                             <Component
                                 {...this.props}
@@ -304,8 +302,7 @@ export function RequestBody(CRequestType){
                                 :
                                     null
                             }
-                            <span className={theme.bar}/>
-                        </div>
+                        </ToolboxThemeInput>
                     );
                 }
             }

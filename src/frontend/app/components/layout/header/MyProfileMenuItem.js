@@ -63,7 +63,7 @@ class MyProfileMenuItem extends Component{
                 tooltip={t('HEADER.MY_PROFILE.TITLE')}
                 to='/myprofile'
                 icon='face'
-                style={{paddingRight: '30px', height: '40px', paddingTop: '8px'}}
+                style={{paddingRight: '30px', height: '40px', paddingTop: '8px', color: 'white'}}
                 className={'tour-step-myprofile'}
                 itemClassName={styles.my_profile_header}
             />

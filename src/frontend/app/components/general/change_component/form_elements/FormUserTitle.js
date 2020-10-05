@@ -16,12 +16,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {withTranslation} from "react-i18next";
-import { RadioGroup, RadioButton } from 'react-toolbox/lib/radio';
-import FontIcon from "@basic_components/FontIcon";
-
-import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
-import theme from "react-toolbox/lib/input/theme.css";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 /**
  * Component for Form User Title
@@ -56,17 +52,19 @@ class FormUserTitle extends Component{
         const {t, entity} = this.props;
         let {tourStep} = this.props.data;
         let value = entity[name];
+        const radios = [
+            {id: 'input_mr', label: t('TITLE.MR'), value: 'mr'},
+            {id: 'input_mrs', label: t('TITLE.MRS'), value: 'mrs'},
+        ];
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${styles.form_user_title} ${tourStep ? tourStep : ''}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.label}`}/>
-                <RadioGroup name='theme' value={value} onChange={::this.handleChangeTitle} className={`${styles.radio_group}`}>
-                    <RadioButton id='input_mr' label={`${t('TITLE.MR')}`} value='mr' className={`${styles.radio_button} ${styles.first_radio_button}`}/>
-                    <RadioButton id='input_mrs' label={`${t('TITLE.MRS')}`} value='mrs' className={`${styles.radio_button}`}/>
-                </RadioGroup>
-                <FontIcon value={icon} className={theme.icon}/>
-                <span className={theme.bar}/>
-                <label className={theme.label}>{label}</label>
-            </div>
+            <RadioButtons
+                label={label}
+                value={value}
+                handleChange={::this.handleChangeTitle}
+                tourStep={tourStep}
+                icon={icon}
+                radios={radios}
+            />
         );
     }
 }

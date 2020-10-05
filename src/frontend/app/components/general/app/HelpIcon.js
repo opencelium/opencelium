@@ -37,6 +37,7 @@ class HelpIcon extends Component{
                     tooltip={'Help'}
                     onClick={onClick}
                     id={`help_icon_${formatHtmlId(id)}`}
+                    isButton={true}
                 />
             </sup>
         );

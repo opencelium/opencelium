@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {isArray, isNumber} from "@utils/app";
-import {getConfig} from "@classes/components/content/template_converter/Configs";
+import {getConfig} from "@utils/execution_config";
 
 const SELECTED_PARAM = "$SELECTED_PARAM$";
 

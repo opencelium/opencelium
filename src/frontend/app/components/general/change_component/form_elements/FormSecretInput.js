@@ -19,6 +19,7 @@ import Input from '@basic_components/inputs/Input';
 
 import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
+import Checkbox from "@basic_components/inputs/Checkbox";
 
 
 /**
@@ -77,7 +78,12 @@ class FormSecretInput extends Component{
                     value={value}
                     required={required}
                 />
-                <input type={'checkbox'} checked={this.state.isVisibleText} onChange={::this.manageSecret}/>
+                <Checkbox
+                    id={`input_check_${name}`}
+                    checked={this.state.isVisibleText}
+                    onChange={::this.manageSecret}
+                    className={styles.check}
+                />
             </div>
         );
     }

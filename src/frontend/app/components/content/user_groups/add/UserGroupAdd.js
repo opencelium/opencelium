@@ -28,7 +28,7 @@ import {INPUTS} from "@utils/constants/inputs";
 import {automaticallyShowTour, USERGROUP_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {setFocusById, isEmptyObject} from "@utils/app";
+import {setFocusById} from "@utils/app";
 
 const userGroupPrefixURL = '/usergroups';
 

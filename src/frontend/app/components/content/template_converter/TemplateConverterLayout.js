@@ -33,11 +33,12 @@ class TemplateConverterLayout extends Component{
 
     render(){
         const {authUser} = this.props;
+        let header = {title: 'Converter', breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         return (
             <Container>
                 <Suspense fallback={(<Loading authUser={authUser}/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        <ViewHeader header={'Converter'} authUser={authUser}/>
+                        <ViewHeader header={header} authUser={authUser}/>
                         <TemplateConverter/>
                     </ComponentError>
                 </Suspense>

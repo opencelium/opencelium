@@ -80,9 +80,9 @@ class Draft extends Component{
             <Dialog
                 actions={[{label: 'Delete', onClick: ::this.deleteDraft, id: 'draft_dialog_delete'},{label: 'Load', onClick: ::this.loadDraft, id: 'draft_dialog_load'},{label: 'Cancel', onClick: ::this.toggleDraft, id: 'draft_dialog_cancel'}]}
                 active={isVisibleDraft}
-                onEscKeyDown={::this.toggleDraft}
-                onOverlayClick={::this.toggleDraft}
+                toggle={::this.toggleDraft}
                 title={'Draft'}
+                theme={{dialog: styles.draft_dialog}}
             >
                 <div className={styles.draft}>
                     <Row className={styles.connectors}><Col xl={6}>{connection.fromConnector.invoker.name}</Col><Col xl={6}>{connection.toConnector.invoker.name}</Col></Row>

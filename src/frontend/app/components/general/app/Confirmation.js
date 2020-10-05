@@ -33,25 +33,18 @@ class Confirmation extends Component{
 
     render(){
         const {t, okClick, cancelClick, active, title, message} = this.props;
-        let {onEscKeyDown, onOverlayClick} = this.props;
         const actions = [
             {label: t('CONFIRMATION.OK'), onClick: okClick, tabIndex: 2, id: 'confirmation_ok'},
             {label: t('CONFIRMATION.CANCEL'), onClick: cancelClick, autoFocus: true, tabIndex: 1, id: 'confirmation_cancel'},
         ];
-        if(onEscKeyDown === null){
-            onEscKeyDown = cancelClick;
-        }
-        if(onOverlayClick === null){
-            onOverlayClick = cancelClick;
-        }
         return (
             <Dialog
                 actions={actions}
                 active={active}
-                onEscKeyDown={onEscKeyDown}
-                onOverlayClick={onOverlayClick}
+                toggle={cancelClick}
                 title={title}
                 theme={{wrapper: styles.confirmation_wrapper}}
+                isConfirmation={true}
             >
                 <p>{message}</p>
             </Dialog>
@@ -63,15 +56,8 @@ Confirmation.propTypes = {
     okClick: PropTypes.func.isRequired,
     cancelClick: PropTypes.func.isRequired,
     active: PropTypes.bool.isRequired,
-    onEscKeyDown: PropTypes.func,
-    onOverlayClick: PropTypes.func,
     title: PropTypes.string.isRequired,
     message: PropTypes.string.isRequired,
-};
-
-Confirmation.defaultProps = {
-    onEscKeyDown: null,
-    onOverlayClick: null,
 };
 
 export default Confirmation;

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/general/form_methods";
+import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 
 
 /**
@@ -23,14 +23,9 @@ class Reference extends Component{
     render(){
         const {id, translate, ReferenceComponent} = this.props;
         return (
-            <div className={`${theme.input}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                    <div>
-                        <div>{ReferenceComponent.getComponent({submitEdit: ::this.add, selectId: id})}</div>
-                    </div>
-                <span className={theme.bar}/>
-                <label className={theme.label}>{translate('XML_EDITOR.TAG.TYPE.REFERENCE_VALUE')}</label>
-            </div>
+            <ToolboxThemeInput label={translate('XML_EDITOR.TAG.TYPE.REFERENCE_VALUE')} inputElementClassName={styles.multiselect_label}>
+                <div>{ReferenceComponent.getComponent({submitEdit: ::this.add, selectId: id})}</div>
+            </ToolboxThemeInput>
         );
     }
 }

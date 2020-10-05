@@ -5,8 +5,8 @@ import {checkReferenceFormat, setFocusById} from "@utils/app";
 import Reference from "@basic_components/xml_editor/Reference";
 import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
 import ValueType from "@basic_components/xml_editor/ValueType";
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/general/form_methods";
+import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 
 
 /**
@@ -77,14 +77,11 @@ class Value extends Component{
                     <React.Fragment>
                         {
                             references !== '' &&
-                            <div className={`${theme.input}`} style={{paddingBottom: 0}}>
-                                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                                <div style={{position: 'relative', display: 'flex', width: '100%', flexWrap: 'wrap', padding: '0 1px'}}>
-                                    <ReferenceValues translate={translate} references={references} updateReferences={::this.updateReferences}/>
-                                </div>
-                                <span className={theme.bar}/>
-                                <label className={theme.label}>{translate('XML_EDITOR.LIST_OF_REFERENCES')}</label>
-                            </div>
+                                <ToolboxThemeInput style={{paddingBottom: 0}} inputElementClassName={styles.multiselect_label} label={translate('XML_EDITOR.LIST_OF_REFERENCES')}>
+                                    <div style={{position: 'relative', display: 'flex', width: '100%', flexWrap: 'wrap', padding: '0 1px'}}>
+                                        <ReferenceValues translate={translate} references={references} updateReferences={::this.updateReferences}/>
+                                    </div>
+                                </ToolboxThemeInput>
                         }
                         <Reference id={`${uniqueIndex}_value`}  translate={translate} ReferenceComponent={ReferenceComponent} add={::this.change}/>
                     </React.Fragment>

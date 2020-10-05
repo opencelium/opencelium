@@ -16,12 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Select from '@basic_components/inputs/Select';
-
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import FontIcon from "@basic_components/FontIcon";
 
 
 /**
@@ -70,21 +65,6 @@ class FormSelect extends Component{
         }
     }
 
-    renderLabel(){
-        let {label, required} = this.props.data;
-        let labelStyle = theme.label;
-        if(this.state.focused){
-            labelStyle += ' ' + styles.multiselect_focused;
-        }
-        if(typeof required !== 'boolean'){
-            required = false;
-        }
-        if(!required){
-            return <label className={labelStyle}>{label}</label>;
-        }
-        return <label className={labelStyle}>{label}<span className={theme.required}> *</span></label>;
-    }
-
     getValue(){
         const {source, name} = this.props.data;
         const {entity, value} = this.props;
@@ -95,50 +75,33 @@ class FormSelect extends Component{
     }
 
     render(){
-        const {icon, source, name, placeholder, selectClassName, tourStep, tourStepHint} = this.props.data;
+        const {focused} = this.state;
+        const {icon, source, name, placeholder, selectClassName, tourStep, tourStepHint, label, required} = this.props.data;
         const {id, handleChange, hasHintTour, isDisabled} = this.props;
         let value = this.getValue();
-        let iconStyle = theme.icon;
-        let selectStyle = styles.multiselect;
-        let className = '';
-        if(this.state.focused){
-            iconStyle += ' ' + styles.multiselect_focused;
-            //selectStyle = styles.multiselect_focused;
-        }
-        if(selectClassName){
-            className = selectClassName;
-        }
-        if(tourStep){
-            className += ' ' + tourStep;
-        }
         return (
-            <div className={`${icon !== '' ? theme.withIcon : ''} ${theme.input} ${className}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                <Select
-                    id={id}
-                    name={name}
-                    value={value}
-                    onChange={handleChange ? handleChange : ::this.handleChange}
-                    onFocus={::this.onFocus}
-                    onBlur={::this.onBlur}
-                    options={source}
-                    closeOnSelect={false}
-                    placeholder={placeholder}
-                    className={selectStyle}
-                    maxMenuHeight={200}
-                    minMenuHeight={50}
-                    isDisabled={isDisabled}
-                />
-                {
-                    value && value.hasOwnProperty('hint')
-                    ?
-                        <TooltipFontIcon value={icon} tooltip={value.hint} className={`${iconStyle} ${hasHintTour ? tourStepHint : ''}`}/>
-                    :
-                        <FontIcon value={icon} className={iconStyle}/>
-                }
-                <span className={theme.bar}/>
-                {this.renderLabel()}
-            </div>
+            <Select
+                id={id}
+                className={selectClassName ? selectClassName : ''}
+                name={name}
+                value={value}
+                onChange={handleChange ? handleChange : ::this.handleChange}
+                onFocus={::this.onFocus}
+                onBlur={::this.onBlur}
+                options={source}
+                closeOnSelect={false}
+                placeholder={placeholder}
+                maxMenuHeight={200}
+                minMenuHeight={50}
+                isDisabled={isDisabled}
+                iconTooltip={value && value.hasOwnProperty('hint') ? value.hint : ''}
+                icon={icon}
+                isFocused={focused}
+                label={label}
+                required={required}
+                tourStep={tourStep}
+                tooltipTourStep={hasHintTour ? tourStepHint : ''}
+            />
         );
     }
 }

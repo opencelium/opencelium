@@ -220,18 +220,12 @@ class NotificationList extends Component{
                 <div className={styles[classNames.items]}>
                     {this.renderNotifications()}
                 </div>
-                {
-                    startAddingNotification
-                    ?
-                        <Loading className={styles[classNames.loading_add]}/>
-                    :
-                        <TooltipFontIcon
-                            tooltip={t('schedules:NOTIFICATION.ADD_ICON_TOOLTIP')}
-                            value={'add'}
-                            onClick={::this.toggleAddDialog}
-                            className={styles[classNames.add_icon]}
-                        />
-                }
+                <TooltipFontIcon
+                    tooltip={t('schedules:NOTIFICATION.ADD_ICON_TOOLTIP')}
+                    value={startAddingNotification ? <Loading className={styles[classNames.loading_add]}/> : 'add'}
+                    onClick={::this.toggleAddDialog}
+                    className={styles[classNames.add_icon]}
+                />
                 <TooltipFontIcon
                     tooltip={t('schedules:NOTIFICATION.CLOSE_ICON_TOOLTIP')}
                     value={'close'}
@@ -241,9 +235,9 @@ class NotificationList extends Component{
                 <Dialog
                     actions={[{label: t('schedules:NOTIFICATION.ADD_DIALOG.ADD'), onClick: ::this.addNotification, id: 'schedule_notification_add_ok'},{label: t('schedules:NOTIFICATION.ADD_DIALOG.CANCEL'), onClick: ::this.toggleAddDialog, id: 'schedule_notification_add_cancel'}]}
                     active={showAddDialog}
-                    onEscKeyDown={::this.toggleAddDialog}
-                    onOverlayClick={::this.toggleAddDialog}
+                    toggle={::this.toggleAddDialog}
                     title={t('schedules:NOTIFICATION.ADD_DIALOG.TITLE')}
+                    theme={{dialog: styles.notification_dialog}}
                 >
                     <NotificationChange notification={newNotification} changeNotification={::this.changeNewNotification}/>
                     <ValidationMessage message={validationMessage}/>

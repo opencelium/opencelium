@@ -88,21 +88,21 @@ class ScheduleDelete extends Component{
         const {t, authUser, schedule, stateSchedule, deletingSchedule, index} = this.props;
         let classNames = ['schedule_list_action', 'schedule_delete_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
+        let icon = 'delete';
+        if(stateSchedule && stateSchedule.id === schedule.id && deletingSchedule){
+            icon = 'loading';
+        }
         return (
-            <span className={styles[classNames.schedule_list_action]}>
-                {
-
-                    stateSchedule && stateSchedule.id === schedule.id && deletingSchedule
-                        ?
-                            <Loading authUser={authUser} className={styles[classNames.schedule_delete_loading]}/>
-                        :
-                            <TooltipFontIcon
-                                id={`schedule_delete_${index}`}
-                                value={'delete'}
-                                tooltip={t('schedules:LIST.TOOLTIP_DELETE_ICON')}
-                                onClick={::this.toggleConfirm}
-                            />
-                }
+            <span>
+                <TooltipFontIcon
+                    isButton={true}
+                    iconClassName={styles[classNames.schedule_list_action]}
+                    id={`schedule_delete_${index}`}
+                    value={icon}
+                    tooltip={t('schedules:LIST.TOOLTIP_DELETE_ICON')}
+                    onClick={::this.toggleConfirm}
+                    blueTheme={true}
+                />
                 {this.renderConfirmation()}
             </span>
         );

@@ -227,13 +227,11 @@ class Mapping extends Component{
         let enhancement = currentEnhancement ? currentEnhancement : isArray(currentBindingItem) && currentBindingItem.length > 0 && currentBindingItem[0].hasOwnProperty('to') ? getEnhancement(currentBindingItem[0].to) :  null;
         return (
             <Dialog
-                actions={[{label: 'Ok', onClick: ::this.updateEnhancement, id: 'mapping_ok'}]}
+                actions={[{label: 'Apply', onClick: ::this.updateEnhancement, id: 'mapping_ok'}]}
                 active={showEnhancement}
-                onEscKeyDown={::this.toggleEnhancement}
-                onOverlayClick={::this.toggleEnhancement}
+                toggle={::this.toggleEnhancement}
                 title={'Enhancement'}
-                className={styles.enhancement_dialog}
-                theme={{title: styles.enhancement_dialog_title}}
+                theme={{dialog: styles.enhancement_dialog}}
             >
                 <div>
                     <Enhancement

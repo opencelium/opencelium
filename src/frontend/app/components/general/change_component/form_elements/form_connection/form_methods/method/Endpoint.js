@@ -24,7 +24,7 @@ import CMethodItem from "@classes/components/content/connection/method/CMethodIt
 import TooltipText from "@basic_components/tooltips/TooltipText";
 import ParamGenerator from "./ParamGenerator";
 import Input from "@basic_components/inputs/Input";
-import {setFocusById} from "@utils/app";
+import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
 
 
 function mapStateToProps(state){
@@ -197,10 +197,10 @@ class Endpoint extends Component{
         }
         let depth = method.getDepth();
         let tooltipTextStyles = {width: depth < 4 ? '10%' : depth < 6 ? '12%' : depth < 8 ? '15%' : '18%' };
-        let contentEditableStyles = {width: depth < 4 ? '85%' : depth < 6 ? '83%' : depth < 8 ? '80%' : '77%', overflow: 'hidden', whiteSpace: 'nowrap', height: '41px', color: hasError ? 'red' : 'black'};
+        let contentEditableStyles = {width: depth < 4 ? '85%' : depth < 6 ? '83%' : depth < 8 ? '80%' : '78%', overflow: 'hidden', whiteSpace: 'nowrap', height: '41px', color: hasError ? 'red' : 'black'};
         return (
             <div>
-                <div className={`${theme.input}`}>
+                <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
                     <span className={styles.method_affix}>
                         <TooltipText
                             authUser={authUser}
@@ -214,20 +214,16 @@ class Endpoint extends Component{
                             isEndpointEditOpen && !readOnly && this.renderEndpointEdit()
                         }
                     </span>
-                    <div
-                        className={`${theme.inputElement} ${theme.filled}`}
-                        style={{width: '5%', float: 'left', paddingLeft: '3px', color: hasError ? 'red' : 'black'}}>
-                        {`/ `}
-                    </div>
-                    <ContentEditable
-                        id={`endpoint_${method.index}`}
-                        innerRef={this.affixValue}
-                        html={::this.parseEndpoint()}
-                        disabled={readOnly}
-                        onChange={::this.onChangeEndpoint}
-                        className={`${theme.inputElement} ${theme.filled}`}
-                        style={contentEditableStyles}
-                    />
+                    <span className={styles.method_affix_delimiter}>{`/ `}</span>
+                        <ContentEditable
+                            id={`endpoint_${method.index}`}
+                            innerRef={this.affixValue}
+                            html={::this.parseEndpoint()}
+                            disabled={readOnly}
+                            onChange={::this.onChangeEndpoint}
+                            className={`${theme.inputElement} ${theme.filled}`}
+                            style={contentEditableStyles}
+                        />
                     <ParamGenerator
                         connection={connection}
                         connector={connector}
@@ -235,9 +231,7 @@ class Endpoint extends Component{
                         addParam={::this.addParam}
                         readOnly={readOnly}
                     />
-                    <span className={theme.bar}/>
-                    <label className={theme.label} style={hasError ? {color: 'red'} : {}}>{'Query'}</label>
-                </div>
+                </ToolboxThemeInput>
             </div>
         );
     }

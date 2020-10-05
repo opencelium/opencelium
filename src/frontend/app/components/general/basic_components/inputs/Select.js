@@ -14,67 +14,101 @@
  */
 
 import React, {Component} from 'react';
-import {connect} from 'react-redux';
-import Select from 'react-select';
-import {getThemeClass} from "@utils/app";
-
-function mapStateToProps(state){
-    const auth = state.get('auth');
-    return{
-        authUser: auth.get('authUser')
-    };
-}
-
+import PropTypes from 'prop-types';
+import ReactSelect from 'react-select';
+import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
+import basicStyles from '@themes/default/general/basic_components.scss';
 /**
  * Select Component
  */
-@connect(mapStateToProps, {})
-class OCSelect extends Component{
+class Select extends Component{
 
     constructor(props){
         super(props);
     }
 
     render(){
-        const {authUser, styles, ...props} = this.props;
-        let {className} = this.props;
-        let classNames = [
-            'select',
-        ];
-        classNames = getThemeClass({classNames, authUser, styles});
+        const {styles, tourStep, icon, iconTooltip, label, required, isFocused, hasFocusStyle, className, tooltipTourStep, ...props} = this.props;
+        let {selectClassName} = this.props;
         return (
-            <Select
-                {...props}
-                maxMenuHeight={200}
-                minMenuHeight={50}
+            <ToolboxThemeInput
+                tourStep={tourStep}
+                icon={icon}
+                iconTooltip={iconTooltip}
+                label={label}
+                required={required}
+                isFocused={isFocused}
+                labelClassName={basicStyles.select_label}
+                hasFocusStyle={hasFocusStyle}
                 className={className}
-                styles={{
-                    ...styles,
-                    option: (provided) => ({
-                        ...provided,
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                    }),
-                    valueContainer:(styles, {data}) => {
-                        return {
-                            ...styles,
-                            padding: '2px 0',
-                        };
-                    },
-                    menu: (provided) => ({
-                        ...provided,
-                        zIndex: 100,
-                        color: 'black'
-                    })
-                }}
-            />
+                tooltipTourStep={tooltipTourStep}
+                inputElementClassName={basicStyles.select_input_element}
+            >
+                <ReactSelect
+                    {...props}
+                    maxMenuHeight={200}
+                    minMenuHeight={50}
+                    className={`${selectClassName}`}
+                    styles={{
+                        ...styles,
+                        option: (provided) => ({
+                            ...provided,
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                        }),
+                        valueContainer:(styles, {data}) => {
+                            return {
+                                ...styles,
+                                padding: '2px 0',
+                            };
+                        },
+                        menu: (provided) => ({
+                            ...provided,
+                            zIndex: 100,
+                            color: 'black',
+                            minWidth: '250px'
+                        }),
+                        control:(provided) => ({
+                            ...provided,
+                            color: 'black',
+                            fontFamily: 'Arial, sans-serif',
+                            borderRadius: 0,
+                            border: 'none',
+                            borderBottom: '1px solid #2121211f',
+                            boxSizing: 'content-box',
+                            minHeight: '37px',
+                        }),
+                        container:(provided) => ({
+                            ...provided,
+                            border: 'none',
+                        })
+                    }}
+                />
+            </ToolboxThemeInput>
         );
     }
 }
 
-OCSelect.defaultProps = {
-    className: '',
+Select.propTypes = {
+    tourStep: PropTypes.string,
+    required: PropTypes.bool,
+    selectClassName: PropTypes.string,
+    iconTooltip: PropTypes.string,
+    tooltipTourStep: PropTypes.string,
+    hasFocusStyle: PropTypes.bool,
 };
 
-export default OCSelect;
+Select.defaultProps = {
+    hasFocusStyle: false,
+    className: '',
+    tourStep: '',
+    icon: '',
+    label: '',
+    required: false,
+    selectClassName: '',
+    iconTooltip: '',
+    tooltipTourStep: '',
+};
+
+export default Select

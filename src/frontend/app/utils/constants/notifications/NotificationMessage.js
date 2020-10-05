@@ -51,8 +51,7 @@ class NotificationMessage extends Component{
             <Dialog
                 actions={[{label: t('DIALOG_DETAILS.CLOSE'), onClick: ::this.toggleShowDialogInDetails, id: 'dialog_close'}]}
                 active={showDialogInDetails}
-                onEscKeyDown={::this.toggleShowDialogInDetails}
-                onOverlayClick={::this.toggleShowDialogInDetails}
+                toggle={::this.toggleShowDialogInDetails}
                 title={t('DIALOG_DETAILS.TITLE')}
             >
                 <p>{inDetailsMessage}</p>

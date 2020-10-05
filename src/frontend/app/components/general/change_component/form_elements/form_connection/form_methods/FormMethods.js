@@ -18,7 +18,6 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {Row, Col} from "react-grid-system";
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
 import DropdownMenu from "./dropdown_menu/DropdownMenu";
@@ -73,7 +72,7 @@ class FormMethods extends Component{
             }
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input}`} style={{margin: '0 65px'}}>
+            <div style={{margin: '0 65px', padding: '20px 0'}}>
                 {!readOnly &&
                     <React.Fragment>
                         {!isDraft && <Draft connection={entity} updateEntity={::this.updateEntity}/>}
@@ -83,10 +82,9 @@ class FormMethods extends Component{
                 }
                 <div>
                     <div className={tourClassNames[0] ? tourClassNames[0] : ''}>
-                        <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                         {!noMethodTitle &&
                             <React.Fragment>
-                                <hr noshade="noshade" size="1" style={{marginTop: '40px'}} color={"#f0f0f0"}/>
+                                <hr noshade="noshade" size="1" style={{marginTop: '56px'}} color={"#f0f0f0"}/>
                                 <div className={styles.mapping_methods}>Methods</div>
                             </React.Fragment>
                         }

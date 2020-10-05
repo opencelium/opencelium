@@ -34,6 +34,7 @@ const initialState = fromJS({
     checkOCConnectionResult: null,
     error: null,
     message: {},
+    fromLogin: false,
 });
 
 let authUser = null;
@@ -46,7 +47,7 @@ const reducer = (state = initialState, action) => {
         case AuthAction.INITIAL_STATE:
             return state;
         case AuthAction.LOG_IN:
-            return state.set('logining', true).set('error', null);
+            return state.set('logining', true).set('error', null).set('fromLogin', action.payload.fromLogin);
         case AuthAction.LOG_IN_FULFILLED:
             return state.set('logining', false).set('authUser', action.payload).set('isAuth', true).set('checkOCConnectionResult', null);
         case AuthAction.LOG_IN_REJECTED:

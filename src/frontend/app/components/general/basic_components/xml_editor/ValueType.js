@@ -1,8 +1,5 @@
 import React, {Component} from 'react';
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from "@themes/default/general/form_methods";
-import basicStyles from "@themes/default/general/basic_components";
-import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 
 /**
@@ -16,15 +13,24 @@ class ValueType extends Component{
     render(){
         const {translate, valueType, changeValueType} = this.props;
         return (
-            <div className={`${theme.input}`} style={{paddingBottom: 0}}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                <RadioGroup name='valueType' value={valueType} onChange={changeValueType} className={`${basicStyles.radio_group_tag_type}`}>
-                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.TEXT')} value={'text'} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={translate('XML_EDITOR.TAG.TYPE.REFERENCE')} value={'reference'} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                </RadioGroup>
-                <span className={theme.bar}/>
-                <label className={theme.label}>{translate('XML_EDITOR.TAG.TYPE.VALUE_TYPE')}</label>
-            </div>
+            <RadioButtons
+                name='valueType'
+                label={translate('XML_EDITOR.TAG.TYPE.VALUE_TYPE')}
+                value={valueType}
+                handleChange={changeValueType}
+                style={{paddingBottom: '10px'}}
+                radios={[
+                    {
+                        label: translate('XML_EDITOR.TAG.TYPE.TEXT'),
+                        value: 'text',
+                        inputStyle: {display: 'block'},
+                    },
+                    {
+                        label: translate('XML_EDITOR.TAG.TYPE.REFERENCE'),
+                        value: 'reference',
+                    },
+                ]}
+            />
         );
     }
 }

@@ -15,7 +15,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Table as ToolboxTable} from 'react-toolbox/lib/table';
+import {Table as BootstrapTable} from 'reactstrap';
 import styles from '@themes/default/general/basic_components.scss';
 import {getThemeClass} from "@utils/app";
 
@@ -38,9 +38,9 @@ class Table extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         className = `${className} ${styles[classNames.table]}`;
         return (
-            <ToolboxTable {...props} className={className}>
+            <BootstrapTable {...props} className={className}>
                 {this.props.children}
-            </ToolboxTable>
+            </BootstrapTable>
         );
     }
 }

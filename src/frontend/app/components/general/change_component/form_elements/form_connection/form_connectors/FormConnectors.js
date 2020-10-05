@@ -15,23 +15,20 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Select from 'react-select';
 import Input from '@basic_components/inputs/Input';
-
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
 import {Row, Col} from "react-grid-system";
 import {ArrowRight} from '@basic_components/Arrows';
 
 import {
-    CONNECTOR_DEPTH_LIMIT,
     CONNECTOR_FROM,
     CONNECTOR_TO,
-    METHOD_ITEM, OPERATOR_ITEM, OUTSIDE_ITEM
 } from "@classes/components/content/connection/CConnectorItem";
 import FormOperations from "../../form_invoker/FormOperations";
 import InvokerButton from "./InvokerButton";
+import ToolboxThemeInput from "../../../../../../hocs/ToolboxThemeInput";
+import Select from "@basic_components/inputs/Select";
 
 
 /**
@@ -167,7 +164,6 @@ class FormConnectors extends Component{
 
     renderReadonlyConnectors(){
         const {isFromInvokerOpened, isToInvokerOpened} = this.state;
-        const {placeholders} = this.props.data;
         const {entity} = this.props;
         let fromConnectorValue = entity.fromConnector.title;
         let toConnectorValue = entity.toConnector.title;
@@ -175,11 +171,11 @@ class FormConnectors extends Component{
             <Row>
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <Input
-                        label={placeholders[0]}
                         type={'text'}
                         value={fromConnectorValue}
                         readOnly
-                        required
+                        tabIndex={-1}
+                        theme={{input: styles.form_connector_input}}
                     />
                     <InvokerButton onClick={::this.toggleFromInvoker} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>
                     {::this.renderFromInvoker()}
@@ -189,11 +185,11 @@ class FormConnectors extends Component{
                 </Col>
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <Input
-                        label={placeholders[1]}
                         type={'text'}
                         value={toConnectorValue}
                         readOnly
-                        required
+                        tabIndex={-1}
+                        theme={{input: styles.form_connector_input}}
                     />
                     <InvokerButton onClick={::this.toggleToInvoker} tooltip={toConnectorValue} position={'right'} isOpened={isToInvokerOpened}/>
                     {::this.renderToInvoker()}
@@ -213,30 +209,28 @@ class FormConnectors extends Component{
         return(
             <Row>
                 <Col md={5} className={`${styles.form_select_connector}`}>
-                    <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{fromPlaceholder}</div>
                     <Select
                         id={'from_connector'}
                         value={fromConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'fromConnector')}
                         options={source}
                         closeOnSelect={false}
-                        placeholder={'Connector'}
+                        placeholder={fromPlaceholder}
                         maxMenuHeight={200}
                         minMenuHeight={50}
                     />
                 </Col>
-                <Col md={2} style={{textAlign: 'center', lineHeight: '84px'}}>
-                    <ArrowRight style={{marginTop: '32px'}} className={styles.input_direction_arrow_readonly}/>
+                <Col md={2} style={{textAlign: 'center'}}>
+                    <ArrowRight className={styles.input_direction_arrow_readonly}/>
                 </Col>
                 <Col md={5} className={`${styles.form_select_connector}`}>
-                    <div className={`${theme.inputElement} ${theme.filled} ${styles.input_connector_placeholder}`}>{toPlaceholder}</div>
                     <Select
                         id={'to_connector'}
                         value={toConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'toConnector')}
                         options={source}
                         closeOnSelect={false}
-                        placeholder={'Connector'}
+                        placeholder={toPlaceholder}
                         maxMenuHeight={200}
                         minMenuHeight={50}
                     />
@@ -251,8 +245,15 @@ class FormConnectors extends Component{
             tourStep = '';
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${tourStep}`} style={{margin: '0 65px'}}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <ToolboxThemeInput
+                label={'Connectors'}
+                style={readOnly ? {margin: '0 65px'} : {}}
+                icon={'share'}
+                tourStep={tourStep}
+                required={true}
+                hasFocusStyle={false}
+                inputElementClassName={styles.form_connector_input_element}
+            >
                 {
                     typeof readOnly === 'boolean' && readOnly
                     ?
@@ -260,7 +261,7 @@ class FormConnectors extends Component{
                     :
                         this.renderConnectors()
                 }
-            </div>
+            </ToolboxThemeInput>
         );
     }
 }

@@ -48,7 +48,8 @@ import {
 } from '@epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
-    importTemplateEpic, exportTemplateEpic, updateTemplateEpic,
+    importTemplateEpic, exportTemplateEpic, convertTemplateEpic,
+    convertTemplatesEpic
 } from '@epics/templates';
 import {
     fetchScheduleEpic, fetchSchedulesEpic, addScheduleEpic,
@@ -70,7 +71,7 @@ import {
     fetchAdminCardsEpic, loadAdminCardsLinkEpic,
 } from "@epics/admin_cards";
 import {
-    addErrorTicketEpic,
+    addErrorTicketEpic, fetchAppVersionEpic,
 } from "@epics/app";
 import {
     fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
@@ -152,7 +153,8 @@ export default combineEpics(
     deleteTemplateEpic,
     fetchTemplatesEpic,
     addTemplateEpic,
-    updateTemplateEpic,
+    convertTemplateEpic,
+    convertTemplatesEpic,
     importTemplateEpic,
     exportTemplateEpic,
     fetchAppsEpic,
@@ -166,6 +168,7 @@ export default combineEpics(
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,
+    fetchAppVersionEpic,
     fetchNotificationTemplatesEpic,
     fetchNotificationTemplateEpic,
     addNotificationTemplateEpic,

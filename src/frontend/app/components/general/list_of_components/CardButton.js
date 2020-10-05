@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {permission} from "@decorators/permission";
 import {formatHtmlId} from "@utils/app";
+import styles from "@themes/default/general/list_of_components.scss";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -39,11 +40,19 @@ class CardButton extends Component{
     }
 
     render(){
-        const {className, onClick, text, index} = this.props;
+        const {className, onClick, text, index, hasTab} = this.props;
         let id = formatHtmlId(`button_${text}_${index}`);
-        return (
-            <div className={className} onClick={onClick} id={id}>{text}</div>
-        );
+        if(hasTab) {
+            return (
+                <button className={`${styles.card_button} ${className}`} onClick={onClick} id={id}>
+                    <div>{text}</div>
+                </button>
+            );
+        } else{
+            return (
+                <div className={className} onClick={onClick} id={id}>{text}</div>
+            );
+        }
     }
 }
 
@@ -52,9 +61,11 @@ CardButton.propTypes = {
     onClick: PropTypes.func,
     text: PropTypes.string.isRequired,
     index: PropTypes.number.isRequired,
+    hasTab: PropTypes.bool,
 };
 
 CardButton.defaultProps = {
+    hasTab: true,
     className: '',
     onClick: null,
 };

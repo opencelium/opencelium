@@ -126,20 +126,21 @@ class ScheduleNotification extends Component{
         const {t, authUser, index} = this.props;
         let classNames = ['schedule_list_action', 'notifications_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
+        let icon = 'mail';
+        if(startFetchingScheduleNotifications){
+            icon = 'loading';
+        }
         return (
-            <span className={styles[classNames.schedule_list_action]}>
-                {
-                    startFetchingScheduleNotifications
-                    ?
-                        <Loading className={styles[classNames.notifications_loading]}/>
-                    :
-                        <TooltipFontIcon
-                            id={`schedule_update_${index}`}
-                            value={'mail'}
-                            tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
-                            onClick={::this.toggleScheduleNotification}
-                        />
-                }
+            <span style={{position: 'relative'}}>
+                <TooltipFontIcon
+                    isButton={true}
+                    iconClassName={styles[classNames.schedule_list_action]}
+                    id={`schedule_update_${index}`}
+                    value={icon}
+                    tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
+                    onClick={::this.toggleScheduleNotification}
+                    blueTheme={true}
+                />
                 {this.renderDialogScheduleNotification()}
             </span>
         );

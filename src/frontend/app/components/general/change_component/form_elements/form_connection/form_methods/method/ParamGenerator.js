@@ -15,10 +15,7 @@
 
 
 import React, {Component} from 'react';
-import Select from 'react-select';
-import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/form_methods.scss';
 import SelectSearch from "@basic_components/inputs/SelectSearch";
 import {
@@ -31,6 +28,8 @@ import CStatement, {STATEMENT_RESPONSE} from "@classes/components/content/connec
 import {dotColor} from "../help";
 import {findTopLeft} from "@utils/app";
 import ReactDOM from "react-dom";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
+import Select from "@basic_components/inputs/Select";
 
 
 class ParamGenerator extends Component {
@@ -161,8 +160,7 @@ class ParamGenerator extends Component {
         let source = this.getOptionsForMethods();
         selectThemeInputStyle.padding = 0;
         return (
-            <div className={`${theme.input}`} style={selectThemeInputStyle}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <div style={selectThemeInputStyle}>
                 <Select
                     id={selectId}
                     name={'...'}
@@ -184,8 +182,6 @@ class ParamGenerator extends Component {
                         control: styles => ({
                             ...styles,
                             borderRadius: 0,
-                            border: 'none',
-                            borderBottom: '1px solid rgba(33, 33, 33, 0.12)',
                             boxShadow: 'none',
                             backgroundColor: 'initial'
                         }),
@@ -196,7 +192,6 @@ class ParamGenerator extends Component {
                                 top: 'auto',
                                 marginTop: '-16px',
                                 marginBottom: '8px',
-                                width: '200px',
                                 zIndex: '1',
                             };
                             if(isDisabled || source.length === 0){
@@ -226,7 +221,6 @@ class ParamGenerator extends Component {
                         }
                     }}
                 />
-                <span className={theme.bar}/>
             </div>
         );
     }
@@ -235,18 +229,22 @@ class ParamGenerator extends Component {
         const {color, responseType} = this.state;
         let hasMethod = color !== '';
         return (
-            <RadioGroup
-                name='response_type'
+            <RadioButtons
+                label={''}
                 value={responseType}
-                onChange={::this.onChangeResponseType}
-                className={styles.operator_response_radio_area_loop}
+                handleChange={::this.onChangeResponseType()}
                 disabled={!hasMethod}
-            >
-                <RadioButton label='s' value={RESPONSE_SUCCESS}
-                             theme={{field: styles.operator_radio_field, radio: styles.operator_radio_radio, disabled: styles.operator_radio_field_disabled, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-                <RadioButton label='f' value={RESPONSE_FAIL}
-                             theme={{field: `${styles.operator_radio_field} ${styles.operator_radio_field_fail}`, radio: styles.operator_radio_radio, disabled: `${styles.operator_radio_field_disabled} ${styles.operator_radio_field_fail}`, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-            </RadioGroup>
+                radios={[
+                    {
+                        value: RESPONSE_SUCCESS,
+                        label: 's',
+                    },
+                    {
+                        value: RESPONSE_FAIL,
+                        label: 'f',
+                    }
+                ]}
+            />
         );
     }
 

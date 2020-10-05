@@ -1,0 +1,44 @@
+@import './constants';
+.toolbox_theme_input{
+  text-align: left;
+  .label{
+    font-family: $FONT_FAMILY;
+    border: none;
+    padding-bottom: 0;
+  }
+  .input {
+    input {
+      margin-left: 0;
+    }
+    input:focus {
+      box-shadow: $FOCUS_BOX_SHADOW !important;
+      outline: none !important;
+    }
+  }
+  input:focus:not([disabled]):not([readonly]) ~ ~ .icon{
+    color: $INPUT_SELECT_COLOR !important;
+  }
+  input:focus:not([disabled]):not([readonly]) ~ ~ .loading_icon{
+    color: $INPUT_SELECT_COLOR !important;
+  }
+  input:focus:not([disabled]):not([readonly]) ~ ~ .label{
+    color: $INPUT_SELECT_COLOR !important;
+  }
+  .icon{
+
+  }
+  .loading_icon{
+    margin-top: 0;
+    min-height: unset;
+  }
+  .loading_icon>div{
+    width: 18px;
+    height: 18px;
+  }
+  .label{
+
+  }
+  .focused{
+    color: $INPUT_SELECT_COLOR !important;
+  }
+}

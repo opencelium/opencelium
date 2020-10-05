@@ -105,6 +105,18 @@ export function findTopLeft(elem) {
 }
 
 /**
+ * to get all focusable elements inside element
+ *
+ * @param elem - target element
+ */
+export function getFocusableElements(elem = document){
+    if(elem) {
+        return elem.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    }
+    return [];
+}
+
+/**
  * to format html id
  *
  * @param id - id of the html element
@@ -254,6 +266,20 @@ export function shuffle(array) {
         array[randomIndex] = temporaryValue;
     }
     return array;
+}
+
+/**
+ * to show component setting opacity to 1
+ *
+ * @param elementId - id of the html element
+ */
+export function componentAppear(elementId){
+    setTimeout(function(){
+        const element = document.getElementById(elementId);
+        if(element !== null) {
+            element.style.opacity = 1;
+        }
+    }, 500);
 }
 
 /**

@@ -13,6 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Rx from 'rxjs/Rx';
 import {TemplatesAction} from '@utils/actions';
 import {
     fetchTemplatesFulfilled, fetchTemplatesRejected,
@@ -25,7 +26,13 @@ import {
 import {deleteTemplateFulfilled, deleteTemplateRejected} from '@actions/templates/delete';
 import {doRequest} from "@utils/auth";
 import {API_METHOD} from "@utils/constants/app";
-import {updateTemplateFulfilled, updateTemplateRejected} from "@actions/templates/update";
+import {
+    convertTemplateFulfilled,
+    convertTemplateRejected,
+    convertTemplatesFulfilled,
+    convertTemplatesRejected
+} from "@actions/templates/update";
+import {checkConnectionFulfilled} from "@actions/connections/check";
 
 
 /*
@@ -76,21 +83,43 @@ const addTemplateEpic = (action$, store) => {
 };
 
 /**
- * update one template
+ * convert one template
  */
-const updateTemplateEpic = (action$, store) => {
-    return action$.ofType(TemplatesAction.UPDATE_TEMPLATE)
+const convertTemplateEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.CONVERT_TEMPLATE)
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.templateId}`;
             let {...data} = action.payload;
             return doRequest({url, method: API_METHOD.PUT, data},{
-                success: updateTemplateFulfilled,
-                reject: updateTemplateRejected,},
+                success: convertTemplateFulfilled,
+                reject: convertTemplateRejected,},
                 res => {return {newTemplate: res.response, oldTemplate: data};}
             );
         });
 };
+
+/**
+ * convert templates
+ */
+const convertTemplatesEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.CONVERT_TEMPLATES)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.templateId}`;
+            let data = action.payload;
+            /*
+            * TODO: Rework when backend will be done
+            */
+            return Rx.Observable.of(convertTemplatesFulfilled({newTemplates: data, oldTemplates: data}));
+            /*return doRequest({url, method: API_METHOD.PUT, data: {templates:data}},{
+                    success: convertTemplatesFulfilled,
+                    reject: convertTemplatesRejected,},
+                res => {return {newTemplates: data, oldTemplates: data};}
+            );*/
+        });
+};
+
 
 /**
  * delete one template by id
@@ -147,7 +176,8 @@ const exportTemplateEpic = (action$, store) => {
 export {
     fetchTemplatesEpic,
     addTemplateEpic,
-    updateTemplateEpic,
+    convertTemplateEpic,
+    convertTemplatesEpic,
     deleteTemplateEpic,
     importTemplateEpic,
     exportTemplateEpic,

@@ -52,7 +52,15 @@ class Breadcrumbs extends Component{
         if(key < items.length - 1){
             return (
                 <span>
-                    <span id={id} className={itemStyle} onClick={onClickItem}>{item}</span>
+                    {
+                        onClickItem === null
+                        ?
+                            <span id={id} className={itemStyle}>{item}</span>
+                        :
+                            <button className={styles.clear_button} onClick={onClickItem}>
+                                <span id={id} className={itemStyle}>{item}</span>
+                            </button>
+                    }
                     <FontIcon value={'keyboard_arrow_right'} style={{fontSize: '17px'}}/>
                 </span>
             );
@@ -61,7 +69,8 @@ class Breadcrumbs extends Component{
             <span
                 id={id}
                 className={itemStyle}
-                onClick={onClickItem}>
+                onClick={onClickItem}
+            >
                 {item}
             </span>
         );

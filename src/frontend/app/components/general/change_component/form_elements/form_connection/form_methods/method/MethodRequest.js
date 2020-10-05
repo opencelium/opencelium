@@ -16,31 +16,15 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styles from '@themes/default/general/form_methods.scss';
-import {consoleLog, isString} from "@utils/app";
 import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
-
-import theme from "react-toolbox/lib/input/theme.css";
-import {
-    STATEMENT_REQUEST,
-    STATEMENT_RESPONSE
-} from "@classes/components/content/connection/operator/CStatement";
-import {
-    RESPONSE_FAIL,
-    RESPONSE_SUCCESS
-} from "@classes/components/content/invoker/response/CResponse";
-import {CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import CBindingItem from "@classes/components/content/connection/field_binding/CBindingItem";
 import CardText from "@basic_components/card/CardText";
 import Endpoint from "./Endpoint";
 import CConnection from "@classes/components/content/connection/CConnection";
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
-import {convertFieldNameForBackend} from "../help";
 import JsonBody from "./JsonBody";
 import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
 import {BODY_FORMAT} from "@classes/components/content/invoker/CBody";
-import CXml from "@classes/components/content/xml/CXml";
-import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
-import {CJsonEditor} from "@classes/components/general/basic_components/json_editor/CJsonEditor";
+import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
 
 
 class MethodRequest extends Component{
@@ -114,8 +98,9 @@ class MethodRequest extends Component{
                             readOnly={readOnly}
                             updateEntity={updateEntity}
                         />
-                        <label className={`${theme.label} ${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</label>
-                        {this.renderBody()}
+                        <ToolboxThemeInput className={styles.method_body_label} label={<span className={`${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</span>}>
+                            {this.renderBody()}
+                        </ToolboxThemeInput>
                     </div>
                 </CardText>
             </div>

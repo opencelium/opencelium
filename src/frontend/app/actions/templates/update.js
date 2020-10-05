@@ -18,44 +18,84 @@ import {TemplatesAction} from "@utils/actions";
 
 
 /**
- * update a template for connection
+ * convert a template for connection
  * @param template
  * @returns {{type: string, payload: {}}}
  */
-const updateTemplate = (template) => {
+const convertTemplate = (template) => {
     return {
-        type: TemplatesAction.UPDATE_TEMPLATE,
+        type: TemplatesAction.CONVERT_TEMPLATE,
         payload: Object.assign({}, template),
     };
 };
 
 /**
- * update a template for connection fulfilled
+ * convert a template for connection fulfilled
  * @param template
  * @returns {{type: string, payload: {}}}
  */
-const updateTemplateFulfilled = (template) => {
+const convertTemplateFulfilled = (template) => {
     return {
-        type: TemplatesAction.UPDATE_TEMPLATE_FULFILLED,
+        type: TemplatesAction.CONVERT_TEMPLATE_FULFILLED,
         payload: template,
     };
 };
 
 /**
- * update a template for connection rejected
+ * convert a template for connection rejected
  * @param error
  * @returns {promise}
  */
-const updateTemplateRejected = (error) => {
+const convertTemplateRejected = (error) => {
     return Rx.Observable.of({
-        type: TemplatesAction.UPDATE_TEMPLATE_REJECTED,
+        type: TemplatesAction.CONVERT_TEMPLATE_REJECTED,
+        payload: error
+    });
+};
+
+
+/**
+ * update templates for connection
+ * @param templates
+ * @returns {{type: string, payload: {}}}
+ */
+const convertTemplates = (templates) => {
+    return {
+        type: TemplatesAction.CONVERT_TEMPLATES,
+        payload: templates,
+    };
+};
+
+/**
+ * update templates for connection fulfilled
+ * @param templates
+ * @returns {{type: string, payload: {}}}
+ */
+const convertTemplatesFulfilled = (templates) => {
+    return {
+        type: TemplatesAction.CONVERT_TEMPLATES_FULFILLED,
+        payload: templates,
+    };
+};
+
+/**
+ * update templates for connection rejected
+ * @param error
+ * @returns {promise}
+ */
+const convertTemplatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: TemplatesAction.CONVERT_TEMPLATES_REJECTED,
         payload: error
     });
 };
 
 
 export {
-    updateTemplate,
-    updateTemplateFulfilled,
-    updateTemplateRejected,
+    convertTemplate,
+    convertTemplateFulfilled,
+    convertTemplateRejected,
+    convertTemplates,
+    convertTemplatesFulfilled,
+    convertTemplatesRejected,
 };

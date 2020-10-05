@@ -41,7 +41,14 @@ import {
     addFocusDocumentNavigation,
     removeFocusDocumentNavigation,
 } from "@utils/key_navigation";
-import {getThemeClass, isString, searchByNameFunction, setFocusById, sortByNameFunction} from "@utils/app";
+import {
+    componentAppear,
+    getThemeClass,
+    isString,
+    searchByNameFunction,
+    setFocusById,
+    sortByNameFunction
+} from "@utils/app";
 import styles from '@themes/default/general/list_of_components.scss';
 import Input from "@basic_components/inputs/Input";
 
@@ -85,12 +92,7 @@ class List extends Component{
         }
         addFocusDocumentNavigation(this);
         setFocusById('search_field');
-        setTimeout(function(){
-            const app_list = document.getElementById("app_list");
-            if(app_list !== null) {
-                app_list.style.opacity = 1;
-            }
-        }, 500);
+        componentAppear('app_list');
     }
 
     componentWillUnmount(){
@@ -239,13 +241,10 @@ class List extends Component{
                     <Container style={containerStyles} style={{marginBottom: '70px'}}>
                         <ListHeader header={translations.header} authUser={authUser}/>
                         {
-                            entities.length > 0 && !noSearchField
-                            ?
+                            entities.length > 0 && !noSearchField &&
                                 <div className={'tour-step-search-1'}>
                                     <Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'} id={'search_field'}/>
                                 </div>
-                            :
-                                null
                         }
                         <Row>
                             {
@@ -290,6 +289,7 @@ class List extends Component{
                                                             onCardClickLink={onCardClickLink}
                                                             keyNavigate={::this.keyNavigate}
                                                             load={load}
+                                                            isButton={onCardClickLink !== ''}
                                                         />
                                                     </CardError>
                                                 </Col>
@@ -314,10 +314,11 @@ class List extends Component{
                                     authUser={authUser}
                                 />
                                 :
-                                    mapEntity.hasOwnProperty('getAddComponent') ?
-                                        <mapEntity.getAddComponent/>
-                                    :
-                                        null
+                                    mapEntity.hasOwnProperty('AddButton') &&
+                                        <mapEntity.AddButton/>
+                        }
+                        {
+                            mapEntity.hasOwnProperty('AdditionalButton') && mapEntity.AdditionalButton
                         }
                     </Container>
                 </Col>
