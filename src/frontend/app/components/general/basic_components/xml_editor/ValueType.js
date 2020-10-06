@@ -18,12 +18,11 @@ class ValueType extends Component{
                 label={translate('XML_EDITOR.TAG.TYPE.VALUE_TYPE')}
                 value={valueType}
                 handleChange={changeValueType}
-                style={{paddingBottom: '10px'}}
+                style={{paddingBottom: '10px', height: 'auto'}}
                 radios={[
                     {
                         label: translate('XML_EDITOR.TAG.TYPE.TEXT'),
                         value: 'text',
-                        inputStyle: {display: 'block'},
                     },
                     {
                         label: translate('XML_EDITOR.TAG.TYPE.REFERENCE'),

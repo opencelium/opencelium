@@ -24,22 +24,21 @@ class TagType extends Component{
                     {
                         label: translate('XML_EDITOR.TAG.TYPE.EMPTY'),
                         value: TAG_VALUE_TYPES.EMPTY,
-                        inputStyle: {display: 'block'},
+                        labelStyle: {marginRight: '20px'}
                     },
                     {
                         label: translate('XML_EDITOR.TAG.TYPE.TEXT'),
                         value: TAG_VALUE_TYPES.TEXT,
+                        labelStyle: {marginRight: '20px'}
                     },
                     {
                         label: translate('XML_EDITOR.TAG.TYPE.ITEM'),
                         value: TAG_VALUE_TYPES.ITEM,
-                        style: {display: 'block'}
+                        labelStyle: {marginRight: '20px'}
                     },
                     {
                         label: translate('XML_EDITOR.TAG.TYPE.FROM_CLIPBOARD'),
                         value: TAG_VALUE_TYPES.CLIPBOARD,
-                        inputStyle: {display: 'block'},
-                        labelStyle: {display: 'flex'}
                     },
                 ]}
             />

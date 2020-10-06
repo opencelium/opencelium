@@ -28,7 +28,7 @@ export const WHOLE_ARRAY = '[*]';
 /**
  * Class ResponseResult as a Parent for Success and Fail classes
  */
-export default class CResponseResult{
+export class CResponseResult{
 
     constructor(status = '', body = null, header = []){
         this._status = status;

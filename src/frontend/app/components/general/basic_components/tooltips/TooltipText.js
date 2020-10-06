@@ -34,15 +34,19 @@ class TooltipText extends Component{
     }
 
     activate(){
-        this.setState({
-            isActive: true,
-        });
+        if(!this.state.isActive) {
+            this.setState({
+                isActive: true,
+            });
+        }
     }
 
     deactivate(){
-        this.setState({
-            isActive: false,
-        });
+        if(this.state.isActive) {
+            this.setState({
+                isActive: false,
+            });
+        }
     }
 
     render(){

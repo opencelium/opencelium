@@ -152,8 +152,4 @@ UNLOCK TABLES;
 
 --changeset 1.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 
-alter table detail add column lang  varchar(3) not null default 'eng';
-
---changeset 1.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-
-alter table connector add column icon  varchar(128);
+alter table detail add column lang varchar(3) not null default 'eng';

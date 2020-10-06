@@ -18,7 +18,7 @@ import CConnectorItem, {INSIDE_ITEM} from "../../../../../app/classes/components
 import {ALL_COLORS} from "../../../../../app/classes/components/content/connection/CConnection";
 
 
-describe('Add Method', () => {
+describe.skip('Add Method', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     beforeEach(() => {
         connectorItem.title = 'i-doit';
@@ -64,7 +64,7 @@ describe('Add Method', () => {
 });
 
 
-describe('Check OperatorsHistory', () => {
+describe.skip('Check OperatorsHistory', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     beforeEach(() => {
         connectorItem.methods = [];
@@ -102,7 +102,7 @@ describe('Check OperatorsHistory', () => {
     });
 });
 
-describe.only('Check Iterators', () => {
+describe.skip('Check Iterators', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     beforeEach(() => {
         connectorItem.methods = [];

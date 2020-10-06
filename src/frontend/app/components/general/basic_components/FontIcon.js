@@ -44,20 +44,16 @@ class FontIcon extends Component{
                 <Loading className={styles.loading_icon} spinnerStyle={{...sizeStyle}}/>
             );
         }
-        if(isString(value)) {
-            if (isButton) {
-                return (
-                    <button className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id}>
-                        <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles}}/>
-                    </button>
-                );
-            } else {
-                return (
-                    <ToolboxFontIcon value={value} className={className} {...props} onClick={onClick} id={id}/>
-                );
-            }
-        } else{
-            return value;
+        if (isButton) {
+            return (
+                <button className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id}>
+                    <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles}}/>
+                </button>
+            );
+        } else {
+            return (
+                <ToolboxFontIcon value={value} className={className} {...props} onClick={onClick} id={id}/>
+            );
         }
     }
 }

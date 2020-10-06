@@ -54,4 +54,10 @@ export default class CProperty{
     convertToXml(){
         return `${this._name}="${this._value}"`;
     }
+
+    convertToBackendXml(){
+        return{
+            [this._name]: this._value,
+        };
+    }
 }
