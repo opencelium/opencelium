@@ -38,6 +38,9 @@ public class FieldNode {
     @Relationship(type = "has_field", direction = Relationship.OUTGOING)
     private List<FieldNode> child;
 
+    @Relationship(type = "has_attribute", direction = Relationship.OUTGOING)
+    private List<AttributeNode> attribute;
+
     public Long getId() {
         return id;
     }
@@ -76,5 +79,13 @@ public class FieldNode {
 
     public void setChild(List<FieldNode> child) {
         this.child = child;
+    }
+
+    public List<AttributeNode> getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(List<AttributeNode> attribute) {
+        this.attribute = attribute;
     }
 }

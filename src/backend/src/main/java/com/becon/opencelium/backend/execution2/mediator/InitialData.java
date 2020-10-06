@@ -1,11 +1,9 @@
-package com.becon.opencelium.backend.execution2.data;
+package com.becon.opencelium.backend.execution2.mediator;
 
-import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -15,18 +13,13 @@ public class InitialData {
     private final List<EnhancementNode> enhancementNodes; // stores link between fields
     private final List<Enhancement> enhancements; // stores programming language code for managing data in enhancement
     private final Map<Integer, List<RequestData>> requestDataMap; // contains request data of connectors
-    private final InvokerService invokerService; // need to get data from invoker files
-    private final RestTemplate restTemplate;
 
     private InitialData(ConnectionNode connectionNode, List<EnhancementNode> enhancementNodes,
-                          List<Enhancement> enhancements, Map<Integer, List<RequestData>> requestDataMap,
-                          InvokerService invokerService, RestTemplate restTemplate) {
+                          List<Enhancement> enhancements, Map<Integer, List<RequestData>> requestDataMap) {
         this.connectionNode = connectionNode;
         this.enhancementNodes = enhancementNodes;
         this.enhancements = enhancements;
         this.requestDataMap = requestDataMap;
-        this.invokerService = invokerService;
-        this.restTemplate = restTemplate;
     }
 
     public ConnectionNode getConnectionNode() {
@@ -45,22 +38,12 @@ public class InitialData {
         return requestDataMap;
     }
 
-    public InvokerService getInvokerService() {
-        return invokerService;
-    }
-
-    public RestTemplate getRestTemplate() {
-        return restTemplate;
-    }
-
     // ----------------------------------- Builder ---------------------------------------------------- //
     public static class Builder {
         private ConnectionNode connectionNode;
         private List<EnhancementNode> enhancementNodes;
         private List<Enhancement> enhancements;
         private Map<Integer, List<RequestData>> requestDataMap;
-        private InvokerService invokerService;
-        private RestTemplate restTemplate;
 
         public InitialData.Builder setConnectionNode(ConnectionNode connectionNode) {
             this.connectionNode = connectionNode;
@@ -82,19 +65,8 @@ public class InitialData {
             return this;
         }
 
-        public InitialData.Builder setInvokerService(InvokerService invokerService) {
-            this.invokerService = invokerService;
-            return this;
-        }
-
-        public InitialData.Builder setRestTemplate(RestTemplate restTemplate) {
-            this.restTemplate = restTemplate;
-            return this;
-        }
-
         public InitialData build() {
-            return new InitialData(connectionNode, enhancementNodes, enhancements, requestDataMap,
-                    invokerService, restTemplate);
+            return new InitialData(connectionNode, enhancementNodes, enhancements, requestDataMap);
         }
     }
 }

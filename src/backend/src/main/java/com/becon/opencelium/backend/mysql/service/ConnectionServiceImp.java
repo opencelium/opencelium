@@ -20,8 +20,8 @@ import com.becon.opencelium.backend.enums.ExecutionType;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.execution2.executor.Execution;
 import com.becon.opencelium.backend.execution2.factory.ExecutionFactory;
-import com.becon.opencelium.backend.execution2.data.ExecutionData;
-import com.becon.opencelium.backend.execution2.data.InitialData;
+import com.becon.opencelium.backend.execution2.mediator.ExecutionContext;
+import com.becon.opencelium.backend.execution2.mediator.InitialData;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.ConnectionRepository;
@@ -117,12 +117,10 @@ public class ConnectionServiceImp implements ConnectionService{
                 .setEnhancementNodes(enhNodes)
                 .setEnhancements(enhancements)
                 .setRequestDataMap(ctorsRequestData)
-                .setInvokerService(invokerServiceImp)
-                .setRestTemplate(restTemplate)
                 .build();
 
         Execution execution = ExecutionFactory.newExecution(ExecutionType.CONNECTION);
-        execution.start(new ExecutionData(initialData));
+        execution.start(new ExecutionContext(initialData));
     }
 
     private Map<Integer, List<RequestData>> getCtorsRequestData(ConnectionNode ctionNode) {

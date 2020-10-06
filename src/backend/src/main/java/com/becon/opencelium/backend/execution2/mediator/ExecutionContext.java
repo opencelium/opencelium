@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution2.data;
+package com.becon.opencelium.backend.execution2.mediator;
 
 import com.becon.opencelium.backend.enums.ExecutionType;
 import com.becon.opencelium.backend.execution2.executor.Execution;
@@ -8,19 +8,21 @@ import com.becon.opencelium.backend.neo4j.entity.*;
 
 import java.util.HashMap;
 
-public class ExecutionData {
+public class ExecutionContext {
 
     private final InitialData initialData; // holds initial data of connection when execution starts running
+
     // Connector data
     private ConnectorNode currentCtor; // currently executing connector
     private String ctorDirection; // determines connector type "from" or "to"
-    private String webServiceType;
 
     // Action data
     private Object action; // current method or operator
     private HashMap<ExecutionType, Execution> executionInstance = new HashMap<>();// contains execution objects
 
-    public ExecutionData(InitialData initialData) {
+
+
+    public ExecutionContext(InitialData initialData) {
         this.initialData = initialData;
         getExecutionInstance().put(ExecutionType.METHOD, ExecutionFactory.newExecution(ExecutionType.METHOD));
         getExecutionInstance().put(ExecutionType.STATEMENT, ExecutionFactory.newExecution(ExecutionType.STATEMENT));

@@ -1,27 +1,25 @@
 package com.becon.opencelium.backend.execution2.executor;
 
 import com.becon.opencelium.backend.enums.ExecutionType;
-import com.becon.opencelium.backend.execution2.data.ExecutionData;
+import com.becon.opencelium.backend.execution2.mediator.ExecutionContext;
 
 public class ConnectorExecution implements Execution {
 
     @Override
-    public void start(ExecutionData executionData) {
-        if (executionData == null) {
+    public void start(ExecutionContext executionContext) {
+        if (executionContext == null) {
             throw new RuntimeException("Execution state is null in ConnectorExecutor");
         }
         Execution execution;
         // finding which action start first. If it is not method then operator
-        if (executionData.getCurrentCtor().getStartMethod() != null) {
-            execution = executionData.getExecutionInstance().get(ExecutionType.METHOD);
-            executionData.setAction(executionData.getCurrentCtor().getStartMethod());
+        if (executionContext.getCurrentCtor().getStartMethod() != null) {
+            execution = executionContext.getExecutionInstance().get(ExecutionType.METHOD);
+            executionContext.setAction(executionContext.getCurrentCtor().getStartMethod());
         } else {
-            execution = executionData.getExecutionInstance().get(ExecutionType.STATEMENT);
-            executionData.setAction(executionData.getCurrentCtor().getStartOperator());
+            execution = executionContext.getExecutionInstance().get(ExecutionType.STATEMENT);
+            executionContext.setAction(executionContext.getCurrentCtor().getStartOperator());
         }
 
-        executionData.getCurrentCtor().getWebService();
-
-        execution.start(executionData);
+        execution.start(executionContext);
     }
 }
