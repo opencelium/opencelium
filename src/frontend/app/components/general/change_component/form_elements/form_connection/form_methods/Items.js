@@ -65,6 +65,9 @@ class Items extends Component{
             let child = document.getElementById(`${currentItem.index}__${connectorType}`);
             if (child) {
                 let nextTop = child.offsetTop + 18 < 35 ? 35 : child.offsetTop + 18;
+                if(currentItem.index !== '0' && currentItem instanceof CMethodItem){
+                    nextTop += 16;
+                }
                 if(pointerTop !== nextTop) {
                     this.setState({pointerTop: nextTop});
                 }
@@ -192,14 +195,14 @@ class Items extends Component{
     }
 
     renderItems() {
-        const {connection, connector, updateEntity, readOnly} = this.props;
+        const {connection, connector, updateEntity, readOnly, isDraft} = this.props;
         const animationDirection = connector.pagination.animationDirection;
         const isAnimating = connector.pagination.isAnimating;
         let allItems = isAnimating ? animationDirection === 'down' ? connector.pagination.closurePreviousItems : connector.pagination.closureNextItems : connector.pagination.currentItems;
         let allComponents = [];
         for(let i = 0; i < allItems.length; i++){
             if(allItems[i] instanceof CMethodItem){
-                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
+                allComponents.push(<MethodItem key={allItems[i].uniqueIndex} isDraft={isDraft} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
             }
             if(allItems[i] instanceof  COperatorItem){
                 allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
@@ -230,7 +233,7 @@ class Items extends Component{
 
     render(){
         const {isHierarchyOpened} = this.state;
-        const {connector} = this.props;
+        const {connector, isDraft} = this.props;
         const history = connector.operatorsHistory;
         const isAnimating = connector.pagination.isAnimating;
         const animationDirection = connector.pagination.animationDirection;
@@ -247,7 +250,7 @@ class Items extends Component{
         return (
             <div className={styles.items}>
                 <InputHierarchy
-                    id={`input_hierarchy_${connector.getConnectorType()}`}
+                    id={`input_hierarchy_${connector.getConnectorType()}${isDraft && '_draft'}`}
                     hierarchy={connector.getObject()}
                     currentItem={connector.getCurrentItem()}
                     onItemClick={::this.setCurrentItem}
@@ -291,6 +294,10 @@ Items.propTypes = {
     connection: PropTypes.instanceOf(CConnection).isRequired,
     connector: PropTypes.instanceOf(CConnectorItem).isRequired,
     updateEntity: PropTypes.func.isRequired,
+};
+
+Items.defaultProps = {
+    isDraft: false,
 };
 
 export default Items;

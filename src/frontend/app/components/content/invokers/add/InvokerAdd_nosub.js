@@ -14,25 +14,19 @@
  */
 
 import React, {Component} from 'react';
-import {TableHead as ToolboxTableHead} from 'react-toolbox/lib/table';
-
 
 /**
- * TableHead Component
+ * Component to Add Invoker
  */
-class TableHead extends Component{
+class InvokerAdd extends Component{
 
     constructor(props){
         super(props);
     }
 
     render(){
-        return (
-            <ToolboxTableHead {...this.props}>
-                {this.props.children}
-            </ToolboxTableHead>
-        );
+        return <div style={{fontSize: '30px', textAlign: 'center', marginTop: '150px'}}>Sorry, you do not have a subscription to use this function</div>;
     }
 }
 
-export default TableHead;
+export default InvokerAdd;

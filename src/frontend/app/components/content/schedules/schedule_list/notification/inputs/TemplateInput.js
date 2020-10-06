@@ -19,10 +19,9 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {getThemeClass} from "@utils/app";
-import theme from "react-toolbox/lib/input/theme.css";
 import FontIcon from "@basic_components/FontIcon";
 import CNotification from "@classes/components/content/schedule/notification/CNotification";
-import OCSelect from "@basic_components/inputs/Select";
+import Select from "@basic_components/inputs/Select";
 import {fetchScheduleNotificationTemplates} from "@actions/schedules/fetch";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Loading from "@loading";
@@ -114,47 +113,43 @@ class TemplateInput extends Component{
         fetchScheduleNotificationTemplates(notification);
     }
 
-    getTemplate(){
-        return this.props.templates.map(template => CNotificationTemplate.createNotificationTemplate(template));
+    renderIcon(){
+        const {startFetchingTemplates} = this.state;
+        let icon = 'library_books';
+        if(startFetchingTemplates){
+            icon = 'loading';
+        }
+        return(
+            <FontIcon value={icon}/>
+        );
     }
 
     render(){
-        const {focused, startFetchingTemplates} = this.state;
+        const {focused} = this.state;
         const {t, authUser, notification, templates} = this.props;
         if(notification.notificationType === ''){
             return null;
         }
         const options = CNotificationTemplate.getTemplatesForSelect(templates);
-        let classNames = ['notification_input_appear', 'notification_select', 'notification_select_label', 'notification_select_focused', 'notification_input_loading'];
+        let classNames = ['notification_input_appear'];
         classNames = getThemeClass({classNames, authUser, styles});
         const value = CNotification.getTemplateForSelect(options, notification.template.id);
         return(
-            <div className={`${styles[classNames.notification_input_appear]} ${theme.withIcon} ${theme.input}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.notification_select_label]}`}/>
-                <OCSelect
-                    id={'input_template_type'}
-                    name={'input_template_type'}
-                    value={value}
-                    onChange={::this.onChangeTemplate}
-                    onFocus={::this.focusNotificationType}
-                    onBlur={::this.blurNotificationType}
-                    options={options}
-                    placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.TEMPLATE_PLACEHOLDER')}
-                    className={styles[classNames.notification_select]}
-                />
-                {
-                    startFetchingTemplates
-                    ?
-                        <Loading className={styles[classNames.notification_input_loading]}/>
-                    :
-                        <FontIcon value={'library_books'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
-                }
-                <span className={theme.bar}/>
-                <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
-                    {t('NOTIFICATION.NOTIFICATION_CHANGE.TEMPLATE_LABEL')}
-                    <span className={theme.required}> *</span>
-                </label>
-            </div>
+            <Select
+                id={'input_template_type'}
+                className={styles[classNames.notification_input_appear]}
+                name={'input_template_type'}
+                value={value}
+                onChange={::this.onChangeTemplate}
+                onFocus={::this.focusNotificationType}
+                onBlur={::this.blurNotificationType}
+                options={options}
+                placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.TEMPLATE_PLACEHOLDER')}
+                label={t('NOTIFICATION.NOTIFICATION_CHANGE.TEMPLATE_LABEL')}
+                icon={::this.renderIcon()}
+                isFocused={focused}
+                required={true}
+            />
         );
     }
 }

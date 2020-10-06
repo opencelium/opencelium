@@ -37,13 +37,13 @@ class ContentHeader extends Component{
 
     renderBreadcrumbs(){
         let {authUser, header} = this.props;
-        let classNames = ['content_header_breadcrumb'];
+        let classNames = ['content_header_breadcrumb', 'title'];
         classNames = getThemeClass({classNames, authUser, styles});
         if(header.hasOwnProperty('breadcrumbs')){
             return header.breadcrumbs.map((b, key) => {
                 return (
-                    <div key={key} className={`${styles[classNames.content_header_breadcrumb]}`} onClick={(e) => ::this.onClickBreadcrumb(e, b)}>
-                        <span>{b.text}</span>{` / `}
+                    <div key={key} className={`${styles[classNames.content_header_breadcrumb]}`}>
+                        <button className={styles[classNames.title]} onClick={(e) => ::this.onClickBreadcrumb(e, b)}>{b.text}</button>{` / `}
                     </div>
                 );
             });

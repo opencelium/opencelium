@@ -7,10 +7,10 @@ import {checkConnection} from "@actions/connections/check";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Loading from "@components/general/app/Loading";
 import Dialog from "@basic_components/Dialog";
-import {Table} from "reactstrap";
 import Fields from "@change_component/extra_actions/check_connection/Fields";
 import Pagination from "@basic_components/pagination/Pagination";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import Table from "@basic_components/table/Table";
 
 const METHODS_PER_PAGE = 3;
 
@@ -275,15 +275,15 @@ class CheckConnection extends Component{
     }
 
     renderResult(){
-        const {currentTable} = this.state;
+        const {currentTable, showResult} = this.state;
         const {currentConnection} = this.props;
         return(
             <Dialog
                 actions={[{label: 'Ok', onClick: ::this.toggleResult, id: 'check_result_ok'}]}
-                active={this.state.showResult}
-                onEscKeyDown={::this.toggleResult}
-                onOverlayClick={::this.toggleResult}
+                active={showResult}
+                toggle={::this.toggleResult}
                 title={'Result of Connection Check'}
+                theme={{dialog: styles.check_connection_dialog}}
             >
                 <div>
                     <Button

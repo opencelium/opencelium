@@ -1,13 +1,19 @@
-import React from 'react';
-import theme from "react-toolbox/lib/input/theme.css";
+import React, {Component} from 'react';
 import styles from "@themes/default/general/form_methods";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 
-class Reference extends React.Component{
+
+/**
+ * Reference component to display reference value
+ */
+class Reference extends Component{
     constructor(props) {
         super(props);
     }
 
+    /**
+     * to add reference
+     */
     add(){
         const {ReferenceComponent} = this.props;
         ReferenceComponent.self.current.setIdValue();
@@ -15,17 +21,11 @@ class Reference extends React.Component{
     }
 
     render(){
-        const {ReferenceComponent} = this.props;
+        const {id, translate, ReferenceComponent} = this.props;
         return (
-            <div className={`${theme.input}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                    <div>
-                        <div style={{width: '220px'}}>{ReferenceComponent.getComponent({})}</div>
-                        <TooltipFontIcon tooltip={'Add Reference'} value={'add'} onClick={::this.add} style={{cursor: 'pointer', fontSize: '14px', lineHeight: '38px'}}/>
-                    </div>
-                <span className={theme.bar}/>
-                <label className={theme.label}>{'Value'}</label>
-            </div>
+            <ToolboxThemeInput label={translate('XML_EDITOR.TAG.TYPE.REFERENCE_VALUE')} inputElementClassName={styles.multiselect_label}>
+                <div>{ReferenceComponent.getComponent({submitEdit: ::this.add, selectId: id})}</div>
+            </ToolboxThemeInput>
         );
     }
 }

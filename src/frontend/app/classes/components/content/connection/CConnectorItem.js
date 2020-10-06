@@ -342,7 +342,7 @@ export default class CConnectorItem{
     }
 
     setCurrentItem(item){
-        this._currentItem = item;
+        this._currentItem = item ? item : null;
         this.reloadOperatorsHistory();
     }
 

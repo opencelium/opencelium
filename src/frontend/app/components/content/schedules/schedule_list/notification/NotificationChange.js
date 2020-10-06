@@ -23,7 +23,6 @@ import CNotification from "@classes/components/content/schedule/notification/CNo
 import EventTypeInput from "./inputs/EventTypeInput";
 import NotificationTypeInput from "./inputs/NotificationTypeInput";
 import TemplateInput from "./inputs/TemplateInput";
-import {setFocusById} from "@utils/app";
 import NameInput from "./inputs/NameInput";
 import TargetGroupInput from "./inputs/TargetGroupInput";
 
@@ -45,10 +44,6 @@ class NotificationChange extends Component{
 
     constructor(props){
         super(props);
-    }
-
-    componentDidMount(){
-        setFocusById('input_notification_name');
     }
 
     render(){

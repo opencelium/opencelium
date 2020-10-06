@@ -26,7 +26,7 @@ import {ADMINCARD_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 
 
-const prefixUrl = '/admin';
+const prefixUrl = '/admin_cards';
 
 function mapStateToProps(state){
     const auth = state.get('auth');

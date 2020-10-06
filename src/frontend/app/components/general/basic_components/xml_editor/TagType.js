@@ -1,29 +1,48 @@
-import React from 'react';
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from "@themes/default/general/form_methods";
-import basicStyles from "@themes/default/general/basic_components";
-import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
+import React, {Component} from 'react';
 import {TAG_VALUE_TYPES} from "@classes/components/general/basic_components/xml_editor/CTag";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
-class TagType extends React.Component{
+
+/**
+ * TagType component for ChangeTag
+ */
+class TagType extends Component{
     constructor(props) {
         super(props);
     }
 
     render(){
-        const {valueType, changeValueType} = this.props;
+        const {translate, valueType, changeValueType} = this.props;
         return (
-            <div className={`${theme.input}`} style={{paddingBottom: 0}}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                <RadioGroup name='valueType' value={valueType} onChange={changeValueType} className={`${basicStyles.radio_group_tag_type}`}>
-                    <RadioButton label={'Empty'} value={TAG_VALUE_TYPES.EMPTY} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={'Text'} value={TAG_VALUE_TYPES.TEXT} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={'Item'} value={TAG_VALUE_TYPES.ITEM} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                    <RadioButton label={'From Clipboard'} value={TAG_VALUE_TYPES.CLIPBOARD} className={`${basicStyles.radio_button}`} theme={{radio: `${basicStyles.radio_button_radio}`, radioChecked: `${basicStyles.radio_button_radio_checked}`, text: `${basicStyles.radio_button_text}`}}/>
-                </RadioGroup>
-                <span className={theme.bar}/>
-                <label className={theme.label}>{'Tag Type'}</label>
-            </div>
+            <RadioButtons
+                name='valueType'
+                label={translate('XML_EDITOR.TAG.TYPE.TAG_TYPE_LABEL')}
+                value={valueType}
+                handleChange={changeValueType}
+                style={{paddingBottom: '10px'}}
+                radios={[
+                    {
+                        label: translate('XML_EDITOR.TAG.TYPE.EMPTY'),
+                        value: TAG_VALUE_TYPES.EMPTY,
+                        inputStyle: {display: 'block'},
+                    },
+                    {
+                        label: translate('XML_EDITOR.TAG.TYPE.TEXT'),
+                        value: TAG_VALUE_TYPES.TEXT,
+                    },
+                    {
+                        label: translate('XML_EDITOR.TAG.TYPE.ITEM'),
+                        value: TAG_VALUE_TYPES.ITEM,
+                        style: {display: 'block'}
+                    },
+                    {
+                        label: translate('XML_EDITOR.TAG.TYPE.FROM_CLIPBOARD'),
+                        value: TAG_VALUE_TYPES.CLIPBOARD,
+                        inputStyle: {display: 'block'},
+                        labelStyle: {display: 'flex'}
+                    },
+                ]}
+            />
         );
     }
 }

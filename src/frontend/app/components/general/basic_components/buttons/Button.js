@@ -15,8 +15,9 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {Button as BootstrapButton} from 'reactstrap';
 import styles from '@themes/default/general/basic_components.scss';
-import {getThemeClass, formatHtmlId} from "@utils/app";
+import {getThemeClass, formatHtmlId, isString} from "@utils/app";
 import FontIcon from "../FontIcon";
 
 
@@ -30,29 +31,33 @@ class Button extends Component{
     }
 
     render(){
-        const {authUser, title, icon, disabled, onClick, isActive, ...props} = this.props;
-        let {className, id} = this.props;
+        const {authUser, icon, disabled, onClick, isActive, theme, ...props} = this.props;
+        let buttonClassName = this.props.className;
+        let {title} = this.props;
+        let {id} = this.props;
+        if(title === '' && this.props.children === null){
+            return null;
+        }
         let classNames = [
-            'button',
-            'active_button',
             'button_icon',
             'button_title',
-            'button_disable',
+            'ripple',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        className = `${className} ${disabled ? styles[classNames.button_disable] : isActive ? styles[classNames.active_button] : styles[classNames.button]}`;
         id = id !== '' ? id : formatHtmlId(`button_${title}`);
         return (
-            <button {...props} className={className} onClick={disabled || isActive ? null : onClick} id={id}>
+            <BootstrapButton {...props} disabled={disabled} active={isActive} style={{overflow: 'hidden'}} className={`${buttonClassName} ${styles[classNames.ripple]}`} color="primary" onClick={disabled || isActive ? null : onClick} id={id}>
                 {
-                    icon !== ''
-                    ?
-                        <FontIcon value={icon} className={styles[classNames.button_icon]}/>
-                    :
-                        null
+                    icon !== '' && <FontIcon theme={theme} value={icon} className={styles[classNames.button_icon]}/>
                 }
-                <span style={{cursor: disabled || isActive ? 'default' : 'pointer'}}>{title}</span>
-            </button>
+                {
+                    title !== ''
+                    ?
+                        <span className={styles[classNames.button_title]} style={icon !== '' ? {marginLeft: '5px'} : {}}>{title}</span>
+                    :
+                        this.props.children
+                }
+            </BootstrapButton>
         );
     }
 }

@@ -54,8 +54,6 @@ const doRequestRejected = (error) => {
     });
 };
 
-
-
 /**
  * create a new error ticket
  * @param data
@@ -90,6 +88,40 @@ const addErrorTicketRejected = (error) => {
     });
 };
 
+/**
+ * fetch application version
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchAppVersion = () => {
+    return {
+        type: AppAction.FETCH_APPVERSION,
+    };
+};
+
+/**
+ * fetch application version fulfilled
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchAppVersionFulfilled = (app) => {
+    return {
+        type: AppAction.FETCH_APPVERSION_FULFILLED,
+        payload: app,
+    };
+};
+
+/**
+ * fetch application version rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchAppVersionRejected = (error) => {
+    return Rx.Observable.of({
+        type: AppAction.FETCH_APPVERSION_REJECTED,
+        payload: error
+    });
+};
+
+
 
 export {
     changeLanguage,
@@ -98,4 +130,7 @@ export {
     addErrorTicket,
     addErrorTicketFulfilled,
     addErrorTicketRejected,
+    fetchAppVersion,
+    fetchAppVersionFulfilled,
+    fetchAppVersionRejected,
 };

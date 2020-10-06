@@ -16,6 +16,9 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {FontIcon as ToolboxFontIcon} from "react-toolbox/lib/font_icon/FontIcon";
+import styles from "@themes/default/general/basic_components.scss";
+import Loading from "@components/general/app/Loading";
+import {isString} from "@utils/app";
 
 
 /**
@@ -28,10 +31,46 @@ class FontIcon extends Component{
     }
 
     render(){
-        return (
-            <ToolboxFontIcon {...this.props}/>
-        );
+        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, iconStyles, value, ...props} = this.props;
+        let theme = darkTheme === true ? styles.dark_theme : '';
+        if(blueTheme === true){
+            theme = styles.blue_theme;
+        }
+        if(value === 'loading'){
+            return(
+                <Loading className={styles.loading_icon}/>
+            );
+        }
+        if(isString(value)) {
+            if (isButton) {
+                return (
+                    <button className={`${styles.clear_button} ${theme} ${className}`} onClick={onClick} id={id}>
+                        <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles}}/>
+                    </button>
+                );
+            } else {
+                return (
+                    <ToolboxFontIcon value={value} className={className} {...props} onClick={onClick} id={id}/>
+                );
+            }
+        } else{
+            return value;
+        }
     }
 }
+
+FontIcon.propTypes = {
+    isButton: PropTypes.bool,
+    iconStyles: PropTypes.object,
+    darkTheme: PropTypes.bool,
+    blueTheme: PropTypes.bool,
+};
+
+FontIcon.defaultProps = {
+    isButton: false,
+    iconStyles: {},
+    darkTheme: true,
+    blueTheme: false,
+};
 
 export default FontIcon;

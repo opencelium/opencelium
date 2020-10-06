@@ -31,7 +31,7 @@
 .user_details_app_tour{
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_TINY;
-  width: 160px;
+  width: 200px;
 }
 
 .user_details_themes_title{
@@ -42,8 +42,10 @@
 
 .user_details_themes{
   font-family: $FONT_FAMILY;
-  font-size: $FONT_SIZE_TINY;
-  width: 100px;
+  font-size: $FONT_SIZE_SMALL;
+  >div>div{
+    padding: 0 !important;
+  }
 }
 
 .user_details_textareas{
@@ -224,14 +226,6 @@
   overflow-x: auto !important;
 }
 
-.user_group_table{
-  .header_cell{
-    text-align: center;
-  }
-  .row_cell{
-    text-align: center;
-  }
-}
 
 .user_group_description{
   font-family: $FONT_FAMILY;

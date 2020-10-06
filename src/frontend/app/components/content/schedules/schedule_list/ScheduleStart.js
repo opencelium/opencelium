@@ -63,25 +63,23 @@ class ScheduleStart extends Component{
         const {t, authUser, stateSchedule, schedule, triggeringSchedule, index} = this.props;
         let classNames = ['schedule_list_action', 'trigger_schedule_start_off', 'schedule_start_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
-        let trigger_schedule_start = '';
+        let trigger_schedule_start = styles[classNames.schedule_list_action];
         if(!this.enableTriggerSchedule){
             trigger_schedule_start = styles[classNames.trigger_schedule_start_off];
         }
+        let icon = 'play_arrow';
+        if(stateSchedule && stateSchedule.id === schedule.id && triggeringSchedule){
+            icon = 'loading';
+        }
         return (
-            <span className={styles[classNames.schedule_list_action]}>
-                {
-                    stateSchedule && stateSchedule.id === schedule.id && triggeringSchedule
-                        ?
-                        <Loading authUser={authUser} className={styles[classNames.schedule_start_loading]}/>
-                        :
-                        <TooltipFontIcon
-                            id={`schedule_start_${index}`}
-                            className={trigger_schedule_start}
-                            value={'play_arrow'}
-                            tooltip={t('LIST.TOOLTIP_START_ICON')}
-                            onClick={::this.triggerSchedule}/>
-                }
-            </span>
+            <TooltipFontIcon
+                isButton={true}
+                id={`schedule_start_${index}`}
+                iconClassName={trigger_schedule_start}
+                value={icon}
+                tooltip={t('LIST.TOOLTIP_START_ICON')}
+                blueTheme={true}
+                onClick={::this.triggerSchedule}/>
         );
     }
 }

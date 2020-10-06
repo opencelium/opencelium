@@ -1,12 +1,16 @@
+import {checkReferenceFormat} from "@utils/app";
+
 export default class CProperty{
-    constructor(name = '', value = '') {
+    constructor(name = '', value = '', parent = null) {
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._name = name;
         this._value = value;
+        this._parent = parent;
+        this._isReference = checkReferenceFormat(value, true);
     }
 
-    static createProperty(name, value){
-        return new CProperty(name, value);
+    static createProperty(name, value, parent){
+        return new CProperty(name, value, parent);
     }
 
     update(name, value){
@@ -28,10 +32,23 @@ export default class CProperty{
 
     set value(value){
         this._value = value;
+        this._isReference = checkReferenceFormat(value, true);
     }
 
     get uniqueIndex(){
         return this._uniqueIndex;
+    }
+
+    get parent(){
+        return this._parent;
+    }
+
+    get isReference(){
+        return this._isReference;
+    }
+
+    set isReference(isReference){
+        this._isReference = isReference;
     }
 
     convertToXml(){

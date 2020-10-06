@@ -12,29 +12,44 @@ export const TAG_VALUE_TYPES = {
 const TAB_CHAR = '    ';
 
 export default class CTag{
-    constructor(name, tags, properties = {}) {
+    constructor(name, tags, properties = {}, parent = null) {
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._name = name;
         this._tags = tags;
         this._properties = this.convertProperties(properties);
         this._minimized = false;
         this._valueType = this.getValueType();
+        this._parent = parent;
     }
 
-    static createTag(name, node = null){
+    static createTag(name = '', node = null, parent = null){
         let tags = [];
-        let properties = node && node.hasOwnProperty('_attributes') ? node._attributes : {};
-        if(node && node.hasOwnProperty('_text')){
-            tags = node._text;
-        } else {
-            for (let subNode in node) {
-                if (subNode !== '_attributes' && subNode !== '_text') {
-                    if(isArray(node[subNode])){
-                        for(let i = 0; i < node[subNode].length; i++){
-                            tags.push(CTag.createTag(subNode, node[subNode][i]));
+        let attributes = {};
+        let newTag = new CTag(name);
+        if(node){
+            let nodeValue = null;
+            if(node.hasOwnProperty('__oc__value')){
+                nodeValue = node.__oc__value;
+            } else if(node.hasOwnProperty('_text')){
+                nodeValue = node._text;
+            }
+            if(node.hasOwnProperty('__oc__attributes'))
+                attributes = node.__oc__attributes;
+            else if(node.hasOwnProperty('_attributes')){
+                attributes = node._attributes;
+            }
+            if(nodeValue !== null){
+                tags = nodeValue;
+            } else {
+                for (let subNode in node) {
+                    if (subNode !== '__oc__attributes' && subNode !== '_attributes' && subNode !== '__oc__value' && subNode !== '_text') {
+                        if(isArray(node[subNode])){
+                            for(let i = 0; i < node[subNode].length; i++){
+                                tags.push(CTag.createTag(subNode, node[subNode][i], newTag));
+                            }
+                        } else {
+                            tags.push(CTag.createTag(subNode, node[subNode], newTag));
                         }
-                    } else {
-                        tags.push(CTag.createTag(subNode, node[subNode]));
                     }
                 }
             }
@@ -42,13 +57,16 @@ export default class CTag{
         if(tags.length === 0){
             tags = null;
         }
-        return new CTag(name, tags, properties);
+        newTag.properties = attributes;
+        newTag.tags = tags;
+        newTag.parent = parent;
+        return newTag;
     }
 
     convertProperties(properties){
         let convertedProperties = [];
         for(let property in properties){
-            convertedProperties.push(CProperty.createProperty(property, properties[property]));
+            convertedProperties.push(CProperty.createProperty(property, properties[property], this));
         }
         return convertedProperties;
     }
@@ -71,17 +89,24 @@ export default class CTag{
         return this._tags;
     }
 
+    set tags(tags){
+        this._tags = tags;
+        this._valueType = this.getValueType();
+    }
+
     addTag(nameOrTag, tags){
         if(nameOrTag instanceof CTag){
             this.tags.push(nameOrTag);
         } else {
-            const newTag = new CTag(nameOrTag, tags);
+            const newTag = new CTag(nameOrTag, tags, {}, this);
             if (isArray(this._tags)) {
                 this._tags.push(newTag);
             } else {
                 this._tags = [newTag];
             }
         }
+        this._valueType = this.getValueType();
+        return this.tags[this.tags.length - 1];
     }
 
     updateTag(nameOrTag, tags){
@@ -106,8 +131,12 @@ export default class CTag{
         return this._properties;
     }
 
+    set properties(properties){
+        this._properties = this.convertProperties(properties);
+    }
+
     addProperty(property){
-        let index = this._properties.findIndex(p => p.name === name);
+        let index = this._properties.findIndex(p => p.name === property.name);
         if(index === -1) {
             this._properties.push(property);
             return true;
@@ -143,6 +172,14 @@ export default class CTag{
             this._valueType = valueType;
         }
         consoleError('Such tag value type does not exist');
+    }
+
+    get parent(){
+        return this._parent;
+    }
+
+    set parent(parent){
+        this._parent = parent;
     }
 
     copyToClipboard(){

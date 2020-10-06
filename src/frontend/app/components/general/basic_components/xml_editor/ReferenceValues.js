@@ -1,12 +1,18 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import appStyles from '@themes/default/general/basic_components.scss';
-import TooltipText from "@basic_components/tooltips/TooltipText";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
-class ReferenceValues extends React.Component{
+/**
+ * ReferenceValues component to display line of references
+ */
+class ReferenceValues extends Component{
 
+    /**
+     * to delete reference by index
+     * @param index - of the reference
+     */
     deleteReference(index){
         const {references} = this.props;
         let pointers = references.split(';');
@@ -17,7 +23,7 @@ class ReferenceValues extends React.Component{
     }
 
     render() {
-        const {references, maxVisible, hasDelete} = this.props;
+        const {translate, references, maxVisible, hasDelete} = this.props;
         let {styles} = this.props;
         if(typeof references === 'string') {
             let pointers = references.split(';');
@@ -32,20 +38,20 @@ class ReferenceValues extends React.Component{
                             }
                             return (
                                 <React.Fragment key={key}>
-                                    <TooltipText
-                                        tooltip={pointer.slice(2, pointer.length).join('.').replace('[]', '')}
+                                    <TooltipFontIcon
                                         className={appStyles.reference_value}
-                                        text={''}
+                                        tooltip={pointer.slice(2, pointer.length).join('.').replace('[]', '')}
+                                        value={<span/>}
                                         style={{background: pointer[0], ...styles, ...extraStyles}}
                                     />
-                                    {hasDelete && <TooltipFontIcon tooltip={'Delete'} onClick={() => ::this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
+                                    {hasDelete && <TooltipFontIcon tooltip={translate('XML_EDITOR.DELETE_ICON')} onClick={() => ::this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
                                 </React.Fragment>
                             );
                         } else{
                             if(key === maxVisible) {
                                 return <span
                                     key={key}
-                                    title={`more than ${maxVisible} references`}
+                                    title={translate('REJECTED_REQUESTS.ERROR_FETCH_LIST', {number: maxVisible})}
                                     style={{margin: '0 2px'}}
                                 >...</span>;
                             }

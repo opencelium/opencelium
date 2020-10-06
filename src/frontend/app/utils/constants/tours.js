@@ -295,6 +295,10 @@ export const INVOKER_ADD_TOURS = {
             selector: '.tour-page-1-step-3',
             content: 'Provide hint to display more information (optional)',
         },
+        {
+            selector: '.tour-page-1-step-4',
+            content: 'Provide icon for invoker (optional)',
+        },
     ],
     page_2: [
         {

@@ -15,14 +15,12 @@
 
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import Dialog from "react-toolbox/lib/dialog";
+import Dialog from "@basic_components/Dialog";
 import ContentNavigationButton from "../../../general/content/ContentNavigationButton";
-import FontIcon from "@basic_components/FontIcon";
 import BrowseButton from "@basic_components/buttons/BrowseButton";
 import {TemplatePermissions} from "@utils/constants/permissions";
 import {importTemplate} from "@actions/templates/add";
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/content/templates/list.scss';
 
 
@@ -89,23 +87,21 @@ class TemplateImport extends Component{
                 <Dialog
                     actions={[{label: 'Ok', onClick: ::this.import}, {label: 'Cancel', onClick: ::this.toggleImport}]}
                     active={showDialog}
-                    onEscKeyDown={::this.toggleImport}
-                    onOverlayClick={::this.toggleImport}
+                    toggle={::this.toggleImport}
                     title={'Import Template'}
                 >
-                    <div className={`${theme.input} ${theme.withIcon}`}>
-                        <div className={`${theme.inputElement} ${theme.filled} ${styles.input_file_label}`}>{browseTitle}</div>
-                        <BrowseButton
-                            icon="file_upload"
-                            label="Upload"
-                            onChange={::this.onChangeImportTemplateFile}
-                            accept=".json"
-                            className={`${styles.input_file_browse}`}
-                        />
-                        <FontIcon value={'attach_file'} className={theme.icon}/>
-                        <span className={theme.bar}/>
-                        <label className={theme.label}>{'JSON'}</label>
-                    </div>
+                    <BrowseButton
+                        label={'JSON'}
+                        icon={'attach_file'}
+                        browseTitle={browseTitle}
+                        browseProps={{
+                            icon: "file_upload",
+                            label: "Upload",
+                            onChange: ::this.onChangeImportTemplateFile,
+                            accept: ".json",
+                            className: styles.input_file_browse,
+                        }}
+                    />
                 </Dialog>
             </div>
         );

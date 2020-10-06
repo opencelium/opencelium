@@ -15,11 +15,11 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Switch from 'react-toolbox/lib/switch';
 
 import theme from "react-toolbox/lib/tooltip/theme.css";
 import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/general/basic_components.scss';
+import {CustomInput} from "reactstrap";
 
 
 /**
@@ -47,10 +47,12 @@ class TooltipSwitch extends Component{
     }
 
     render(){
-        const {authUser, tooltip, ...props} = this.props;
+        const {authUser, tooltip, middle, ...props} = this.props;
         let classNames = [
             'tooltip_switch',
             'tooltip',
+            'switch_field',
+            'switch',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
@@ -58,7 +60,7 @@ class TooltipSwitch extends Component{
                 <span className={`${theme.tooltip} ${theme.tooltipTop} ${ this.state.isActive ? theme.tooltipActive : ''} ${styles[classNames.tooltip]}`}>
                     <span className={`${theme.tooltipInner}`}>{tooltip}</span>
                 </span>
-                <Switch {...props}/>
+                <CustomInput type="switch" {...props} className={middle ? styles[classNames.switch] : ''} />
             </span>
         );
     }
@@ -69,6 +71,10 @@ TooltipSwitch.propTypes = {
     checked: PropTypes.bool.isRequired,
     onChange: PropTypes.func.isRequired,
     tooltip: PropTypes.string.isRequired,
+};
+
+TooltipSwitch.defaultProps = {
+    middle: false,
 };
 
 export default TooltipSwitch;

@@ -48,7 +48,7 @@ export function checkExpiredMessages(data){
 /**
  * to check the references format in connections
  */
-export function checkReferenceFormat(value){
+export function checkReferenceFormat(value, isStrict = false){
     let result = false;
     let pointers = [];
     let counter = 0;
@@ -76,7 +76,7 @@ export function checkReferenceFormat(value){
             }
         }
     } else{
-        if(value === '#'){
+        if(value === '#' && !isStrict){
             result = true;
         } else{
             result = false;
@@ -92,14 +92,28 @@ export function checkReferenceFormat(value){
 /**
  * to get top and left value of the element according to window
  */
-export function findTopLeft(elemId) {
-    let elem = document.getElementById(elemId);
+export function findTopLeft(elem) {
+    if(isString(elem)){
+        elem = document.getElementById(elem);
+    }
     if(elem) {
         let rec = elem.getBoundingClientRect();
         return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
     } else{
         return {top: 0, left: 0};
     }
+}
+
+/**
+ * to get all focusable elements inside element
+ *
+ * @param elem - target element
+ */
+export function getFocusableElements(elem = document){
+    if(elem) {
+        return elem.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    }
+    return [];
 }
 
 /**
@@ -255,28 +269,41 @@ export function shuffle(array) {
 }
 
 /**
+ * to show component setting opacity to 1
+ *
+ * @param elementId - id of the html element
+ */
+export function componentAppear(elementId){
+    setTimeout(function(){
+        const element = document.getElementById(elementId);
+        if(element !== null) {
+            element.style.opacity = 1;
+        }
+    }, 500);
+}
+
+/**
  * to focus on input by id
  *
  * @param id - id of the html element
+ * @param timeout - timout before focus
  */
 export function setFocusById(id, timeout = 100){
-    let element = document.getElementById(id);
-    const inputs = ['input', 'select', 'button', 'textarea'];
-    if (element) {
-        let inputElement = null;
-        if(inputs.indexOf(element.tagName.toLowerCase()) === -1){
-            inputElement = element.querySelector('input');
-        }
-        if(inputElement) {
-            setTimeout(() => {
+    setTimeout(() => {
+        let element = document.getElementById(id);
+        const inputs = ['input', 'select', 'button', 'textarea'];
+        if (element) {
+            let inputElement = null;
+            if(inputs.indexOf(element.tagName.toLowerCase()) === -1){
+                inputElement = element.querySelector('input');
+            }
+            if(inputElement) {
                 inputElement.focus();
-            }, timeout);
-        } else{
-            setTimeout(() => {
+            } else{
                 element.focus();
-            }, timeout);
+            }
         }
-    }
+    }, timeout);
 }
 
 /**

@@ -810,7 +810,7 @@ function focusDocument(e, that){
         //esc
         case 27:
             if (document.activeElement) {
-                document.activeElement.blur();
+                setTimeout(() => document.activeElement.blur(), 300);
             }
             break;
     }

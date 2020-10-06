@@ -16,7 +16,6 @@
 import React, {Component} from 'react';
 import {withTranslation} from "react-i18next";
 import {connect} from "react-redux";
-import {Button} from "react-toolbox/lib/button";
 
 import {generateLabel, onEnter, setFocusById} from "@utils/app";
 import {loginUser} from '@actions/auth';
@@ -28,12 +27,21 @@ import {
     removeLoginKeyNavigation
 } from "@utils/key_navigation";
 import ValidationMessage from "@change_component/ValidationMessage";
+import Button from "@basic_components/buttons/Button";
+import LoginIcon from "@components/icons/LoginIcon";
 
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return{
+        isAuth: auth.get('isAuth'),
+    };
+}
 
 /**
  * App Login Form
  */
-@connect(null, {loginUser})
+@connect(mapStateToProps, {loginUser})
 @withTranslation(['layout', 'users'])
 class Login extends Component{
 
@@ -87,7 +95,7 @@ class Login extends Component{
      */
     login(){
         if(this.validate()) {
-            this.props.loginUser({email: this.state.email, password: this.state.password});
+            this.props.loginUser({email: this.state.email, password: this.state.password, fromLogin: true});
         }
     }
 
@@ -164,7 +172,7 @@ class Login extends Component{
     }
 
     render(){
-        const {t} = this.props;
+        const {t, isAuth} = this.props;
         return (
             <div className={styles.login}>
                 <div className={styles.caption}>{t("LOGIN.HEADER")}</div>
@@ -183,17 +191,21 @@ class Login extends Component{
                     value={this.state.password}
                     theme={styles}
                     onChange={::this.changePassword}
-                    onKeyPress={(e) => onEnter(e, ::this.login)}
+                    onKeyPress={(e) => onEnter(e, () => {::this.login(); setFocusById('login_button');})}
                     id={'login_password'}
                 />
                 {this.renderValidation()}
-                <Button
+                <LoginIcon
+                    isUnlocked={isAuth}
+                    onClick={::this.login}
+                    id={'login_button'}
+                />
+                {/*<Button
                     className={styles.button_connect}
                     onClick={::this.login}
                     id={'login_button'}
-                >
-                    {generateLabel(t("LOGIN.BUTTON_CONNECT"), 0, {keyNavigationLetter: styles.key_navigation_letter})}
-                </Button>
+                    title={t("LOGIN.BUTTON_CONNECT")}
+                />*/}
             </div>
         );
     }

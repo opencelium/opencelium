@@ -15,6 +15,85 @@
 
 @import '../constants';
 
+
+/*font icon*/
+.clear_button{
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.blue_theme{
+  >span{
+    color: $BUTTON_COLOR;
+    transition: background 0.8s;
+  }
+  >span:hover {
+    color: #47a7f5;
+  }
+  >span:active {
+    color: #6eb9f7;
+    background-size: 100%;
+    transition: background 0s;
+  }
+}
+.blue_theme:focus-within{
+  outline: none !important;
+  >span {
+    color: #6eb9f7;
+  }
+}
+.dark_theme{
+  >span{
+    color: #000000;
+    transition: background 0.8s;
+  }
+  >span:hover {
+    color: #4d4d4d;
+  }
+  >span:active {
+    color: #7c7c7c;
+    background-size: 100%;
+    transition: background 0s;
+  }
+}
+.dark_theme:focus-within{
+  outline: none !important;
+  >span {
+    color: #7c7c7c;
+  }
+}
+.loading_icon{
+  min-height: 0 !important;
+  display: inline-block;
+  margin-top: 0 !important;
+}
+
+.loading_icon>div{
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+}
+/*font icon dialog*/
+/*dialog*/
+.dialog {
+  font: $FONT_FAMILY !important;
+}
+/*end dialog*/
+
+/*checkbox*/
+.checkbox_label{
+  margin-right: 25px;
+  font-size: $FONT_SIZE_14;
+}
+.checkbox:focus-within {
+  box-shadow: $FOCUS_BOX_SHADOW !important;
+  outline: none !important;
+}
+/*end checkbox*/
+
 /*table*/
 .table{
   overflow: auto;
@@ -22,102 +101,100 @@
     font-family: $FONT_FAMILY;
   }
   th{
+    text-align: center;
+    border-top: none !important;
     font-size: $TABLE_HEAD_TEXT_SIZE;
   }
   tr{
     font-size: $TABLE_ROW_TEXT_SIZE;
   }
   td{
-    padding: 5px;
     text-align: center;
+    font-size: $FONT_SIZE_14 !important;
   }
 }
 /*table end*/
 
+/*ripple*/
+.ripple {
+  background-position: center;
+  transition: background 0.8s;
+}
+.ripple:hover {
+  background: #47a7f5 radial-gradient(circle, transparent 1%, #47a7f5 1%) center/15000%;
+}
+.ripple:active {
+  background-color: #6eb9f7;
+  background-size: 100%;
+  transition: background 0s;
+}
+/*ripple end*/
 /*button*/
-.button {
-  box-shadow: 0 0 0 transparent;
-  border: 0 solid transparent;
-  cursor: pointer;
+.button_title{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
   display: inline-block;
-  text-align: center;
-  vertical-align: middle;
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: #3c97ed;
-  background: -webkit-gradient(linear, left top, left bottom, from(#3c97ed), to(#255d92));
-  background: -moz-linear-gradient(top, #3c97ed, #255d92);
-  background: linear-gradient(to bottom, #3c97ed, #255d92);
-  text-shadow: #173a5b 1px 1px 2px;
-  font: normal normal normal $FONT_SIZE_SMALL arial;
-  color: #ffffff;
-  text-decoration: none;
 }
-.button:hover,
-.button:focus {
-  background: #48b5ff;
-  background: -webkit-gradient(linear, left top, left bottom, from(#48b5ff), to(#2c70af));
-  background: -moz-linear-gradient(top, #48b5ff, #2c70af);
-  background: linear-gradient(to bottom, #48b5ff, #2c70af);
-  color: #ffffff;
-  text-decoration: none;
-}
-.button:active {
-  background: #255d92;
-  background: -webkit-gradient(linear, left top, left bottom, from(#255d92), to(#255d92));
-  background: -moz-linear-gradient(top, #255d92, #255d92);
-  background: linear-gradient(to bottom, #255d92, #255d92);
-}
-
-.active_button{
-  box-shadow: 0 0 0 transparent;
-  border: 0 solid transparent;
-  display: inline-block;
-  text-align: center;
-  vertical-align: middle;
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: #255d92;
-  background: -webkit-gradient(linear, left top, left bottom, from(#255d92), to(#255d92));
-  background: -moz-linear-gradient(top, #255d92, #255d92);
-  background: linear-gradient(to bottom, #255d92, #255d92);
-  text-shadow: #173a5b 1px 1px 2px;
-  font: normal normal normal $FONT_SIZE_SMALL arial;
-  color: #ffffff;
-  text-decoration: none;
-}
-
 .button_icon{
   font-size: $FONT_SIZE_MEDIUM;
   vertical-align: middle;
   line-height: 0;
   margin-top: -3px;
 }
+/*button end*/
 
-.button_title{
-  cursor: default;
+/*input file*/
+.input_file_icon{
+
 }
-
-.button_disable{
-  box-shadow: 0 0 0 transparent;
-  border: 0 solid transparent;
-  cursor: default;
+.input_file_browse:focus:not([disabled]):not([readonly]) ~ ~ .input_file_icon{
+  color: $INPUT_SELECT_COLOR !important;
+}
+.input_file_browse:focus-within{
+  box-shadow: $FOCUS_BOX_SHADOW !important;
+}
+.input_file_browse{
   display: inline-block;
+  font-weight: 400;
   text-align: center;
   vertical-align: middle;
-  padding: 8px 14px;
-  border-radius: 8px;
-  background: #3c97ed;
-  background: -webkit-gradient(linear, left top, left bottom, from(#929497), to(#3e4246));
-  background: -moz-linear-gradient(top, #929497, #3e4246);
-  text-shadow: #173a5b 1px 1px 2px;
-  font: normal normal normal $FONT_SIZE_SMALL arial;
-  color: #ffffff;
-  text-decoration: none;
-  background: linear-gradient(to bottom, #929497, #3e4246);
+  user-select: none;
+  padding: 2px 12px !important;
+  font-size: $FONT_SIZE_SMALL;
+  line-height: 1.5;
+  border-radius: .25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  font-family: $FONT_FAMILY;
+  height: 40px;
+  width: 31%;
+  color: #fff !important;
+  background-color: #007bff !important;
+  border-color: #007bff;
 }
+.input_file_browse:active{
+  color: #fff !important;
+  background-color: #0062cc !important;
+  border-color: #005cbf !important;
+}
+.input_file_browse:hover{
+  color: #fff !important;
+  background-color: #0069d9 !important;
+  border-color: #0062cc !important;
+}
+.input_file_browse:focus{
+  box-shadow: $FOCUS_BOX_SHADOW !important;
+}
+.input_file_label{
+  font-family: $FONT_FAMILY;
+  width: 69% !important;
+  float: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/*input file end*/
 
-/*button end*/
 .list_item{
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_MEDIUM;
@@ -131,6 +208,15 @@
 .list_item:hover{
   font-family: $FONT_FAMILY;
   text-decoration: underline;
+}
+.list_item_icon:focus{
+  box-shadow: $FOCUS_BOX_SHADOW !important;
+  outline: none !important;
+}
+.list_item:focus{
+  text-decoration: underline;
+  box-shadow: none;
+  outline: none !important;
 }
 
 .selected_list_item{
@@ -151,13 +237,35 @@
 
 /*tooltip*/
 .tooltip_switch{
+  label{
+  font-size: $FONT_SIZE_SMALL;
+    font-family: $FONT_FAMILY;
+  }
   position: relative;
+  z-index: 1000;
   .tooltip{
     position: absolute;
     left: 40%;
     top: 25%;
     max-width: none !important;
   }
+  .tooltip_bottom{
+    left: 50% !important;
+    top: 50% !important;
+  }
+  .switch_field:focus{
+    box-shadow: $FOCUS_BOX_SHADOW !important;
+  }
+  .switch{
+    padding-left: calc(50% + 20px);
+  }
+  .switch>label{
+    cursor: pointer;
+  }
+}
+.tooltip_text{
+  @extend .tooltip_switch;
+  z-index: 0;
 }
 /*tooltip end*/
 
@@ -186,6 +294,17 @@
 .input_input_element{
   font-family: $FONT_FAMILY;
   height: 38px;
+}
+.input_input_element:focus:not([disabled]):not([readonly]) ~ .input_icon{
+  color: $INPUT_SELECT_COLOR !important;
+}
+.input_input_element ~ .input_bar::before{
+  background-color: $INPUT_SELECT_COLOR !important;
+}
+.input_input_element ~ .input_bar::after{
+  background-color: $INPUT_SELECT_COLOR !important;
+}
+.input_icon{
 }
 
 .highlighted_input_input_element{
@@ -252,8 +371,55 @@
     background-color: #DEEBFF;
   }
 }
-.select{
-
+.select_label{
+  padding: 0;
+}
+.select_input_element{
+  padding: 2px 0 0 !important;
+}
+.select_option{
+  position: relative;
+  color: black;
+  cursor: default;
+  display: block;
+  font-size: inherit;
+  padding: 8px 12px;
+  width: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  .convert{
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    vertical-align: text-top;
+    float: right;
+  }
+  .loading{
+    width: 14px;
+    height: 14px;
+    position: absolute;
+    right: 10px;
+    top: 12px;
+  }
+}
+.selected_option{
+  background-color: #2684FF;
+  color: white;
+}
+.select_option_hover:hover{
+  background-color: #DEEBFF;
+  color: black;
+}
+.option_invalid{
+  color: #eee;
 }
 
 @keyframes AAppearInput {
@@ -273,6 +439,7 @@
   }
 }
 .input_hierarchy{
+  color: black;
   position: absolute;
   width: 100%;
   height: 78px;
@@ -313,7 +480,6 @@
     transform: rotate(0deg);
   }
   .search_icon_disappear{
-    right: 260px;
     opacity: 0;
     transform: rotate(-360deg);
   }
@@ -455,17 +621,31 @@
     background: white;
   }
   .delete_icon{
+    background: white;
     cursor: pointer;
     font-size: 16px !important;
     position: absolute;
-    z-index: 10;
+    z-index: 10000;
   }
 }
 .add_tag_icon_inside{
+  background: white;
   cursor: pointer;
   font-size: 16px !important;
   position: absolute;
-  z-index: 10;
+  z-index: 10000;
+}
+.add_declaration_icon{
+  @extend .add_tag_icon_inside;
+  padding-left: 15px;
+  color: #c0c0c5;
+}
+.add_declaration_icon:hover{
+  color: #444b4c;
+}
+.add_first_tag_icon{
+  @extend .add_declaration_icon;
+  margin-top: 3px;
 }
 .property{
   cursor: text;
@@ -560,6 +740,6 @@
 .reference_value_delete{
   margin-left: -8px;
   font-size: 13px;
-  z-index: 1;
+  z-index: 1000;
   cursor: pointer;
 }

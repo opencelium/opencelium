@@ -15,6 +15,7 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
 import RequestIcon from "./request/RequestIcon";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 
 class AccordionItem extends Component{
@@ -94,30 +95,27 @@ class AccordionItem extends Component{
             }
             if (isMouseOver) {
                 if (methodTypeRadioButtonVisible) {
-                    const radioStyles = connectorType === CONNECTOR_FROM ? styles.radio_radio_from_connector : styles.radio_radio_to_connector;
-                    const radioText = connectorType === CONNECTOR_FROM ? styles.radio_text_from_connector : styles.radio_text_to_connector;
                     return (
-                        <RadioGroup
-                            name='method_type'
-                            value={''}
-                            onChange={::this.onChangeMethodType}
+                        <RadioButtons
                             className={connectorType === CONNECTOR_FROM ? styles.invoker_operation_add_method_radio_from_connector : styles.invoker_operation_add_method_radio_to_connector}
-                        >
-                            <RadioButton label='in' value={INSIDE_ITEM}
-                                         theme={{
-                                             field: styles.radio_field,
-                                             radio: radioStyles,
-                                             radioChecked: formMethodStyles.method_radio_radio_checked,
-                                             text: radioText,
-                                         }}/>
-                            <RadioButton label='out' value={OUTSIDE_ITEM}
-                                         theme={{
-                                             field: styles.radio_field,
-                                             radio: radioStyles,
-                                             radioChecked: formMethodStyles.method_radio_radio_checked,
-                                             text: radioText,
-                                         }}/>
-                        </RadioGroup>
+                            hasToolboxTheme={false}
+                            label={''}
+                            value={''}
+                            handleChange={::this.onChangeMethodType}
+                            radios={[
+                                {
+                                    label: 'in',
+                                    value: INSIDE_ITEM,
+                                    inputClassName: styles.radio_input_in,
+                                    labelClassName: styles.radio_label_in,
+                                },{
+                                    label: 'out',
+                                    value: OUTSIDE_ITEM,
+                                    inputClassName: styles.radio_input_out,
+                                    labelClassName: styles.radio_label_out,
+                                }
+                            ]}
+                        />
                     );
                 } else {
                     return (
@@ -137,9 +135,10 @@ class AccordionItem extends Component{
 
     render(){
         const {isVisible, isMouseOver} = this.state;
-        const {index, forConnection, entity, operation, readOnly, connector, ...props} = this.props;
+        const {index, forConnection, entity, operation, readOnly, connector, addMethod, ...props} = this.props;
         const connectorType = connector.getConnectorType();
         const requestData = this.getRequestData();
+        const hasAddMethod = typeof addMethod === 'function';
         return(
             <div onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
                 {this.renderAddMethod()}
@@ -147,7 +146,7 @@ class AccordionItem extends Component{
                     <div style={{float: connectorType === CONNECTOR_FROM ? 'left' : 'right'}} className={`${forConnection ? styles.invoker_item_method_for_connection : styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
                     <span className={`${forConnection ? styles.invoker_item_name_for_connection : styles.invoker_item_name}`}>{operation.name}</span>
                     {readOnly && operation.type === METHOD_TYPE_TEST && !forConnection ? <div className={styles.invoker_item_method_test}>Connection Test</div> : null}
-                    {forConnection ? <RequestIcon request={operation.request} isVisible={isMouseOver} connectorType={connectorType} requestData={requestData}/> : null}
+                    {forConnection ? <RequestIcon request={operation.request} isVisible={isMouseOver} connectorType={connectorType} requestData={requestData} hasAddMethod={hasAddMethod}/> : null}
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey={index} >
                     <Card.Body className={forConnection ? styles.no_card_header_tabs_for_connection : styles.no_card_header_tabs}>

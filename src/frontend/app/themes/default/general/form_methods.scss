@@ -21,6 +21,7 @@
   font-size: $FONT_SIZE_SMALL;
   margin-top: 15px;
   overflow: initial !important;
+  color: black;
   .remove{
     color: #000000;
     font-size: $FONT_SIZE_MEDIUM;
@@ -58,6 +59,9 @@
   animation-duration: .3s;
   animation-fill-mode: forwards;
 }
+.form_mode_template{
+  width: 95%;
+}
 
 .item_delete_button{
   color: #000000;
@@ -65,12 +69,12 @@
   right: 0;
   position: absolute;
   cursor: pointer;
-  top: -12px;
+  top: 20px;
 }
 
 .item_title_arrow{
   margin-top: 4px;
-  width: 15%;
+  width: 25px;
   float: left;
 }
 
@@ -78,7 +82,7 @@
   vertical-align: super;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_MEDIUM !important;
-  width: 85%;
+  width: calc(100% - 25px);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -90,7 +94,7 @@
 }
 
 .item_card_title{
-  padding: 14px 0 14px 16px !important;
+  padding: 14px 2px 14px 2px !important;
 }
 .item_card_title>div{
   width: 100%;
@@ -137,6 +141,7 @@
   margin-top: 15px;
   font-family: $FONT_FAMILY;
   position: relative;
+  color: black;
   .remove{
     color: #000000;
     font-size: $FONT_SIZE_MEDIUM;
@@ -201,13 +206,22 @@
 .input_method_add{
   cursor: pointer;
   text-align: center;
-  float: left;
-  line-height: 50px;
+  float: right;
+  height: 80px;
+  position: relative;
 }
 
 
 .input_method_add_icon{
   font-size: $FONT_SIZE_MEDIUM;
+  margin-top: 28px;
+  span{
+    color: black !important;
+  }
+}
+.input_method_add_icon_for_operator{
+  @extend .input_method_add_icon;
+  margin: 28px 9px 0;
 }
 
 .items_menu{
@@ -297,6 +311,10 @@
   }
 }
 
+.method_body_label{
+  padding-bottom: 0;
+}
+
 .methods_method_item{
   font-family: $FONT_FAMILY;
   cursor: pointer;
@@ -311,6 +329,7 @@
   margin: auto;
   width: 75%;
   height: 94px;
+  position: relative;
 }
 
 .mapping_area{
@@ -398,7 +417,6 @@
   padding: 0;
   border: none;
 }
-
 .multiselect_focused{
   color: rgb(63, 81, 181);
 }
@@ -417,7 +435,33 @@
   box-shadow: none;
   background-color: initial;
 }
-
+.dropdown_menu_radios{
+  display: block;
+  height: 80px;
+  float: left;
+  position: relative;
+  width: 50%;
+  .radio_in{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+  }
+  .label_in{
+    position: absolute;
+    top: 18px;
+    left: 20px;
+  }
+  .radio_out{
+    position: absolute;
+    top: 40px;
+    left: 20px;
+  }
+  .label_out{
+    position: absolute;
+    top: 38px;
+    left: 20px;
+  }
+}
 .method_radio_area{
   font-family: $FONT_FAMILY;
   float:left;
@@ -427,11 +471,7 @@
 }
 
 .enhancement_dialog{
-}
-
-.enhancement_dialog_title {
-  font-family: $FONT_FAMILY;
-  text-align: center;
+  min-width: 750px;
 }
 
 .operator_response_radio_area_loop{
@@ -650,7 +690,31 @@
 .method_affix_placeholder:hover{
   box-shadow: #9f9f9f 0 1px 3px 0;
 }
-
+.method_endpoint_label_has_error{
+  color: red;
+}
+.method_affix_delimiter{
+   width: 5%;
+   float: left;
+   padding-left: 3px;
+   color: black;
+   height: 41px;
+   border-bottom: 1px solid rgba(33, 33, 33, .12);
+   padding-top: 12px;
+ }
+.method_endpoint_content_editable{
+  background-color: transparent;
+  border-bottom: 1px solid rgba(33, 33, 33, 0.12);
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  border-top: 0;
+  color: rgb(33, 33, 33);
+  display: block;
+  font-size: 16px;
+  outline: none;
+  padding: 8px 0;
+}
 .endpoint_edit{
   z-index: 5;
   animation: APopupInputAppear .25s;
@@ -699,7 +763,7 @@
 
 .param_generator_form_parent{
   position: absolute;
-  width: 232px;
+  width: 244px;
   background: #fff;
   z-index: 100;
   padding: 5px;
@@ -720,10 +784,11 @@
 }
 
 .param_generator_form_add{
-  width: 20px;
+  width: 34px;
   line-height: 40px;
   text-align: center;
   float: left;
+  cursor: pointer;
 }
 
 .body_label{
@@ -838,7 +903,7 @@
 .body_close_menu_edit{
   position: sticky;
   cursor: pointer;
-  top: 3px;
+  bottom: 96%;
   left: 100%;
   color: black;
   font-size: $FONT_SIZE_SMALL;
@@ -901,10 +966,21 @@
   overflow: hidden auto;
 }
 
+.method_body_draft{
+  @extend .method_body;
+  width: 260px;
+}
+
 .method_body_xml{
   @extend .method_body;
   width: 500px;
   max-height: 300px;
+  min-height: 64px;
+}
+.method_body_xml_draft{
+  @extend .method_body_xml;
+  width: 270px;
+  overflow-x: auto;
 }
 
 .method_body_placeholder{
@@ -926,4 +1002,7 @@
 }
 .method_body_has_error{
   color: #d14b4b;
+}
+.value_type:nth-child(2){
+  padding: 10px 0 !important;
 }

@@ -182,9 +182,9 @@ class NotificationListItem extends Component{
                     id: 'schedule_notification_add_cancel'
                 }]}
                 active={showUpdateDialog}
-                onEscKeyDown={::this.toggleUpdateDialog}
-                onOverlayClick={::this.toggleUpdateDialog}
+                toggle={::this.toggleUpdateDialog}
                 title={t('schedules:NOTIFICATION.UPDATE_DIALOG.TITLE')}
+                theme={{dialog: styles.notification_dialog}}
             >
                 <NotificationChange notification={notification} changeNotification={::this.changeNotification}/>
                 <ValidationMessage message={validationMessage}/>

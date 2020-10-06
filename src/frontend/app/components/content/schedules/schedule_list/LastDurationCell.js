@@ -60,11 +60,11 @@ class LastDurationCell extends Component{
             duration = parseInt(duration / 1000);
         }
         return (
-            <TableCell>
+            <td>
                 <span className={`${styles.last_success_cell} ${appearClassName}`}>
                     {duration} {duration !== NO_DATA ? t('LIST.LAST_DURATION_SEC') : ''}
                 </span>
-            </TableCell>
+            </td>
         );
     }
 }

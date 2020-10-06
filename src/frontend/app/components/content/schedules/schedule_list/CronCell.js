@@ -36,7 +36,7 @@ class CronCell extends Component{
             const {cronExp} = schedule;
             return (
                 <div>
-                    <span style={{fontSize: '10px'}} className={`${isFirst ? 'tour-step-8' : ''}`}>{cronExp}</span>
+                    <span className={`${isFirst ? 'tour-step-8' : ''}`}>{cronExp}</span>
                     {/*<PopupText
                         className={`${styles.date_cell_cron} ${isFirst ? 'tour-step-8' : ''}`}
                         text={'cron'}
@@ -49,9 +49,9 @@ class CronCell extends Component{
 
     render(){
         return (
-            <TableCell>
+            <td>
                 {::this.renderData()}
-            </TableCell>
+            </td>
         );
     }
 }

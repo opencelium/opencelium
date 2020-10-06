@@ -77,14 +77,16 @@ class Input extends Component{
         let classNames = [
             'highlighted_input_input_element',
             'popup_input',
+            'input_bar',
+            'input_icon',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        popupInputTheme = {...popupInputTheme, inputElement: styles[classNames.highlighted_input_input_element]};
+        popupInputTheme = {...popupInputTheme, inputElement: styles[classNames.highlighted_input_input_element], bar: styles[classNames.input_bar], icon: styles[classNames.input_icon]};
         if(!isVisiblePopupInput){
             return null;
         }
         let fn = child =>
-            React.cloneElement(child, {onBlur: ::this.onBlur, autoFocus: true, theme: {inputElement: styles[classNames.highlighted_input_input_element]}});
+            React.cloneElement(child, {onBlur: ::this.onBlur, autoFocus: true, theme: {inputElement: styles[classNames.highlighted_input_input_element], bar: styles[classNames.input_bar], icon: styles[classNames.input_icon]}});
         let children = React.Children.map(this.props.children, fn);
         return(
             <div className={styles[classNames.popup_input]}>
@@ -113,13 +115,19 @@ class Input extends Component{
         let {theme, className} = this.props;
         let classNames = [
             'input_input_element',
+            'input_bar',
+            'input_icon',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         let inputElement = theme && theme.hasOwnProperty('inputElement') ? theme.inputElement : styles[classNames.input_input_element];
+        let bar = theme && theme.hasOwnProperty('bar') ? theme.bar : styles[classNames.input_bar];
+        let icon = theme && theme.hasOwnProperty('icon') ? theme.icon : styles[classNames.input_icon];
         if(theme === null){
             theme = {};
         }
         theme.inputElement = inputElement;
+        theme.bar = bar;
+        theme.icon = icon;
         if(!isPopupInput){
             return (
                 <ToolboxInput

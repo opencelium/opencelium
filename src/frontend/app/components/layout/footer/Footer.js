@@ -17,7 +17,7 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 
-import {getThemeClass} from "@utils/app";
+import {componentAppear, getThemeClass} from "@utils/app";
 import styles from '@themes/default/layout/footer.scss';
 
 
@@ -25,6 +25,7 @@ function mapStateToProps(state){
     const auth = state.get('auth');
     return {
         authUser: auth.get('authUser'),
+        fromLogin: auth.get('fromLogin'),
     };
 }
 
@@ -37,14 +38,29 @@ class Footer extends Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            visible: !props.fromLogin,
+        };
+    }
+
+    componentDidMount(){
+        if(!this.state.visible) {
+            setTimeout(() => this.setState({visible: true}, () => componentAppear('app_footer')), 1000);
+        } else{
+            componentAppear('app_footer');
+        }
     }
 
     render(){
+        const {visible} = this.state;
         const {authUser, t} = this.props;
+        if(!visible){
+            return null;
+        }
         let classNames = ['footer', 'open_celium', 'logo_icon_bottom_right'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <footer className={styles[classNames.footer]}>
+            <footer className={styles[classNames.footer]} id={'app_footer'}>
                 <div className={styles[classNames.logo_icon_bottom_right]}/>
                 <div className={styles[classNames.open_celium]}>{t('FOOTER.OPENCELIUM')}</div>
             </footer>

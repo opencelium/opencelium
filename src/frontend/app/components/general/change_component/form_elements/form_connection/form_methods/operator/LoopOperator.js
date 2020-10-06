@@ -15,10 +15,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Select from 'react-select';
-import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/form_methods.scss';
 import {
     DEFAULT_COLOR,
@@ -34,7 +31,8 @@ import {
 } from "@classes/components/content/invoker/response/CResponse";
 import Input from "@basic_components/inputs/Input";
 import {dotColor} from "../help";
-import TooltipText from "@basic_components/tooltips/TooltipText";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
+import Select from "@basic_components/inputs/Select";
 
 
 /**
@@ -166,8 +164,7 @@ class LoopOperator extends Component{
         generalStyles.width = myStyles.width;
         selectThemeInputStyle.padding = 0;
         return (
-            <div className={`${theme.input}`} style={selectThemeInputStyle}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <div style={selectThemeInputStyle}>
                 <Select
                     name={'method'}
                     value={value}
@@ -187,9 +184,6 @@ class LoopOperator extends Component{
                         }),
                         control: styles => ({
                             ...styles,
-                            borderRadius: 0,
-                            border: 'none',
-                            borderBottom: '1px solid rgba(33, 33, 33, 0.12)',
                             boxShadow: 'none',
                             backgroundColor: 'initial'
                         }),
@@ -200,7 +194,6 @@ class LoopOperator extends Component{
                                 top: 'auto',
                                 marginTop: '-16px',
                                 marginBottom: '8px',
-                                width: '200px',
                                 zIndex: '1',
                             };
                             if(isDisabled || source.length === 0){
@@ -228,7 +221,6 @@ class LoopOperator extends Component{
                         }
                     }}
                 />
-                <span className={theme.bar}/>
             </div>
         );
     }
@@ -237,19 +229,24 @@ class LoopOperator extends Component{
         const {responseType} = this.state;
         const {operator} = this.props;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
-        return (
-            <RadioGroup
+        return(
+            <RadioButtons
                 name='response_type'
+                label={''}
                 value={responseType}
-                onChange={::this.onChangeResponseType}
-                className={styles.operator_response_radio_area_loop}
+                handleChange={::this.onChangeResponseType}
                 disabled={!hasMethod}
-            >
-                <RadioButton label='s' value={RESPONSE_SUCCESS}
-                             theme={{field: styles.operator_radio_field, radio: styles.operator_radio_radio, disabled: styles.operator_radio_field_disabled, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-                <RadioButton label='f' value={RESPONSE_FAIL}
-                             theme={{field: `${styles.operator_radio_field} ${styles.operator_radio_field_fail}`, radio: styles.operator_radio_radio, disabled: `${styles.operator_radio_field_disabled} ${styles.operator_radio_field_fail}`, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-            </RadioGroup>
+                radios={[
+                    {
+                        label: 's',
+                        value: RESPONSE_SUCCESS,
+                    },
+                    {
+                        label: 'f',
+                        value: RESPONSE_FAIL,
+                    },
+                ]}
+            />
         );
     }
 

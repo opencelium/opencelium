@@ -91,17 +91,23 @@ class RequestIcon extends Component{
     
     render(){
         const {showRequestDialog, request, activeTab, startSendingRequest} = this.state;
-        const {isVisible, response, connectorType, requestData} = this.props;
+        const {isVisible, response, connectorType, requestData, hasAddMethod} = this.props;
         const responseEntity = CSuccess.createSuccess(response);
+        const style = {};
+        if(connectorType === CONNECTOR_FROM){
+            style.right = hasAddMethod ? '40px' : '3px';
+        } else{
+            style.left = hasAddMethod ? '40px' : '3px';
+        }
         return(
-            <div className={connectorType === CONNECTOR_FROM ? styles.connection_request_icon_left : styles.connection_request_icon_right}>
-                {isVisible ? <TooltipFontIcon tooltip={'API Request'} value={'cloud_upload'} onClick={::this.toggleShowRequestDialog}/> : null}
+            <div className={connectorType === CONNECTOR_FROM ? styles.connection_request_icon_left : styles.connection_request_icon_right} style={style}>
+                {isVisible && <TooltipFontIcon tooltip={'API Request'} value={'cloud_upload'} onClick={::this.toggleShowRequestDialog}/>}
                 <Dialog
                     actions={[{label: 'Close', onClick: ::this.toggleShowRequestDialog, id: 'request_dialog_close'}]}
                     active={showRequestDialog}
-                    onEscKeyDown={::this.toggleShowRequestDialog}
-                    onOverlayClick={::this.toggleShowRequestDialog}
+                    toggle={::this.toggleShowRequestDialog}
                     title={'Request'}
+                    theme={{dialog: styles.request_icon_dialog}}
                 >
                     <UrlField requestData={requestData} request={request} update={::this.updateRequest} sendRequest={::this.sendRequest} isLoading={startSendingRequest}/>
                     <Tabs activeKey={activeTab} onSelect={::this.handleTabChange} className={styles.connection_request_tabs}>
@@ -120,10 +126,12 @@ class RequestIcon extends Component{
 
 RequestIcon.propTypes = {
     request: PropTypes.instanceOf(CRequest).isRequired,
+    hasAddMethod: PropTypes.bool,
 };
 
 RequestIcon.defaultProps = {
     isVisible: false,
+    hasAddMethod: false,
 };
 
 export default RequestIcon;

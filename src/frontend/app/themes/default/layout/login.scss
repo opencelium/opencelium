@@ -44,6 +44,9 @@
     float: right;
     border: 1px solid #dbdbdb;
   }
+  .button_connect::first-letter{
+    text-decoration: underline;
+  }
 }
 
 .input {

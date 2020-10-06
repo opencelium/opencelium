@@ -24,6 +24,7 @@ import store from '@utils/store';
 import i18n from '@utils/i18n';
 import {createRoutes} from '@utils/routes';
 import Loading from "@loading";
+import {componentAppear} from "@utils/app";
 
 
 /**
@@ -55,11 +56,7 @@ setAuthSettings();
 class App extends React.Component {
 
     componentDidMount(){
-        //animated appearance of the app
-        setTimeout(function(){
-            const app = document.getElementById('app');
-            app.style.opacity = '1.0';
-        }, 500);
+        componentAppear('app');
     }
 
     render() {

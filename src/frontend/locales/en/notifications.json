@@ -37,6 +37,8 @@
     "DELETE_SCHEDULES": "The selected schedules were successfully removed",
     "FETCH_TEMPLATES": "Templates were successfully fetched",
     "ADD_TEMPLATE": "Template was successfully added",
+    "CONVERT_TEMPLATE": "Template was successfully converted",
+    "CONVERT_TEMPLATES": "Templates were successfully converted",
     "IMPORT_TEMPLATE": "Template was successfully imported",
     "DELETE_TEMPLATE": "The template was successfully removed",
     "ADD_WEBHOOK": "The webhook was successfully created",
@@ -68,7 +70,10 @@
     },
     "ADD_USERGROUOP": "The user group was not added.",
     "FETCH_USERGROUPS": "There is an error fetching user groups.",
-    "UPDATE_USERGROUP": "There is an error updating user group.",
+    "UPDATE_USERGROUP": {
+      "ROLE_ALREADY_EXIST": "Such role already exist",
+      "__DEFAULT__": "There is an error updating user group."
+    },
     "DELETE_USERGROUP": "There is an error deleting user group.",
     "TEST_CONNECTOR": {
       "COMMUNICATION_FAILED": "Connection was failed",
@@ -146,6 +151,8 @@
       "__DEFAULT__": "Templates were not fetched"
     },
     "ADD_TEMPLATE": "Template was not added",
+    "CONVERT_TEMPLATE": "Template was not converted",
+    "CONVERT_TEMPLATES": "Templates were not converted",
     "IMPORT_TEMPLATE": "Template was not imported",
     "DELETE_TEMPLATE": "The template was not removed",
     "ADD_WEBHOOK": {

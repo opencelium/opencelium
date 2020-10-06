@@ -50,6 +50,7 @@ class Mapping extends Component{
             currentEnhancement: null,
             currentWidth: window.innerWidth,
         };
+        this.mapping = React.createRef();
     }
 
     componentDidMount() {
@@ -176,32 +177,17 @@ class Mapping extends Component{
      * to get nodes and binding for displaying mapping
      */
     getNodes(connectorType = 'fromConnector'){
-        const {currentWidth} = this.state;
         const {connection} = this.props;
+        let mappingElem = this.mapping.current ? this.mapping.current.getElementsByClassName('srd-diagram srd-demo-canvas') : [];
+        let mappingElemWidth = 728;
+        if(mappingElem.length > 0){
+            mappingElemWidth = mappingElem[0].offsetWidth;
+        }
         let fieldBindingItems = [];
         let nodes = [];
-        let marginLeft = 0;
-        const minIntend = 400;
-        let flexIntend = 30;
-        if(currentWidth >= 1200){
-            marginLeft = 100;
-        }
-        if(currentWidth < 1200){
-            marginLeft = 50;
-            flexIntend = 0;
-        }
-        if(currentWidth < 990){
-            marginLeft = 0;
-            flexIntend = 0;
-        }
-        if(currentWidth < 768){
-            marginLeft = 0;
-            flexIntend = -210;
-        }
-        if(currentWidth < 576){
-            marginLeft = 0;
-            flexIntend = -260;
-        }
+        let fromConnectorLeft = (mappingElemWidth * 10)/100;
+        let toConnectorLeft = (mappingElemWidth * 75)/100;
+
         switch(connectorType){
             case CONNECTOR_FROM:
                 fieldBindingItems = connection.getAllFieldBindingFrom();
@@ -221,11 +207,11 @@ class Mapping extends Component{
                 switch (connectorType) {
                     case CONNECTOR_FROM:
                         port = node.addOutPort("Out");
-                        node.setPosition(marginLeft, 30 + i * 70);
+                        node.setPosition(fromConnectorLeft, 30 + i * 70);
                         break;
                     case CONNECTOR_TO:
                         port = node.addInPort("In");
-                        node.setPosition(marginLeft + minIntend + flexIntend, 30 + i * 70);
+                        node.setPosition(toConnectorLeft, 30 + i * 70);
                 }
                 if (port !== null) {
                     nodes.push(node);
@@ -241,13 +227,11 @@ class Mapping extends Component{
         let enhancement = currentEnhancement ? currentEnhancement : isArray(currentBindingItem) && currentBindingItem.length > 0 && currentBindingItem[0].hasOwnProperty('to') ? getEnhancement(currentBindingItem[0].to) :  null;
         return (
             <Dialog
-                actions={[{label: 'Ok', onClick: ::this.updateEnhancement, id: 'mapping_ok'}, {label: 'Cancel', onClick: ::this.toggleEnhancement, id: 'mapping_cancel'}]}
+                actions={[{label: 'Apply', onClick: ::this.updateEnhancement, id: 'mapping_ok'}]}
                 active={showEnhancement}
-                onEscKeyDown={::this.toggleEnhancement}
-                onOverlayClick={::this.toggleEnhancement}
+                toggle={::this.toggleEnhancement}
                 title={'Enhancement'}
-                className={styles.enhancement_dialog}
-                theme={{title: styles.enhancement_dialog_title}}
+                theme={{dialog: styles.enhancement_dialog}}
             >
                 <div>
                     <Enhancement
@@ -284,18 +268,21 @@ class Mapping extends Component{
         engine.setDiagramModel(model);
         model.setLocked(true);
         return (
-            <div className={tourClassNames[1] ? tourClassNames[1] : ''}>
+            <div className={tourClassNames[1] ? tourClassNames[1] : ''} ref={this.mapping}>
                 <hr noshade="noshade" size="1" style={{marginTop: '40px'}} color={"#f0f0f0"}/>
                 <div className={styles.mapping_area_title}>Mapping fields</div>
                 {this.renderEnhancement()}
-                <DiagramWidget
-                    style={diagramStyles}
-                    className={"srd-demo-canvas" + ' ' + styles.mapping_area}
-                    diagramEngine={engine}
-                    allowCanvasTranslation={false}
-                    allowCanvasZoom={false}
-                    maxNumberPointsPerLink={0}
-                />
+                {allNodes.length > 0 &&
+                    <DiagramWidget
+                        id={'form_methods_mapping_fields'}
+                        style={diagramStyles}
+                        className={"srd-demo-canvas" + ' ' + styles.mapping_area}
+                        diagramEngine={engine}
+                        allowCanvasTranslation={false}
+                        allowCanvasZoom={false}
+                        maxNumberPointsPerLink={0}
+                    />
+                }
             </div>
         );
 

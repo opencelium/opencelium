@@ -80,7 +80,7 @@ class WebHookTools extends Component{
     
     render(){
         const {authUser, addingWebHook, deletingWebHook, t, stateSchedule, schedule, index} = this.props;
-        let classNames = ['webhook_tools', 'webhook_loading'];
+        let classNames = ['webhook_tools', 'webhook_loading', 'webhook_icon'];
         classNames = getThemeClass({classNames, authUser, styles});
         let icon = 'link';
         let tooltip = t('LIST.WEBHOOK_TOOLS_TOOLTIP_CREATE');
@@ -88,20 +88,20 @@ class WebHookTools extends Component{
             icon = 'link_off';
             tooltip = t('LIST.WEBHOOK_TOOLS_TOOLTIP_DELETE');
         }
+        if(stateSchedule && stateSchedule.schedulerId === schedule.id && (addingWebHook || deletingWebHook)){
+            icon = 'loading';
+        }
         return (
             <span className={styles[classNames.webhook_tools]}>
-                {
-                    stateSchedule && stateSchedule.schedulerId === schedule.id && (addingWebHook || deletingWebHook)
-                        ?
-                            <Loading authUser={authUser} className={styles[classNames.webhook_loading]}/>
-                        :
-                            <TooltipFontIcon
-                                id={`webhook_tools_${index}`}
-                                value={icon}
-                                tooltip={tooltip}
-                                onClick={::this.onClick}
-                            />
-                }
+                <TooltipFontIcon
+                    iconClassName={styles[classNames.webhook_icon]}
+                    isButton={true}
+                    id={`webhook_tools_${index}`}
+                    value={icon}
+                    tooltip={tooltip}
+                    onClick={::this.onClick}
+                    blueTheme={true}
+                />
             </span>
         );
     }

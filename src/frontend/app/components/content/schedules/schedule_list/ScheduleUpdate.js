@@ -20,7 +20,7 @@ import {withTranslation} from "react-i18next";
 import {permission} from "@decorators/permission";
 import {SchedulePermissions} from "@utils/constants/permissions";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass, setFocusById} from "@utils/app";
+import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import Input from "@basic_components/inputs/Input";
 import {updateSchedule} from '@actions/schedules/update';
@@ -86,8 +86,7 @@ class ScheduleUpdate extends Component{
             <Dialog
                 actions={[{label: 'Ok', onClick: ::this.updateSchedule, id: 'schedule_update_ok'}, {label: 'Cancel', onClick: ::this.toggleUpdateSchedule, id: 'schedule_update_cancel'}]}
                 active={this.state.showUpdateSchedule}
-                onEscKeyDown={::this.toggleUpdateSchedule}
-                onOverlayClick={::this.toggleUpdateSchedule}
+                toggle={::this.toggleUpdateSchedule}
                 title={'Update Schedule'}
             >
                 <Input
@@ -95,7 +94,6 @@ class ScheduleUpdate extends Component{
                     onChange={::this.setScheduleTitle}
                     value={this.state.scheduleTitle}
                     label={'title'}
-                    hasFocus={true}
                 />
             </Dialog>
         );
@@ -106,12 +104,15 @@ class ScheduleUpdate extends Component{
         let classNames = ['schedule_list_action'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <span className={styles[classNames.schedule_list_action]}>
+            <span>
                 <TooltipFontIcon
+                    isButton={true}
+                    iconClassName={styles[classNames.schedule_list_action]}
                     id={`schedule_update_${index}`}
                     value={'edit'}
                     tooltip={t('LIST.TOOLTIP_UPDATE_ICON')}
                     onClick={::this.toggleUpdateSchedule}
+                    blueTheme={true}
                 />
                 {this.renderDialogUpdateSchedule()}
             </span>

@@ -13,9 +13,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {fromJS, List} from 'immutable';
+import {fromJS} from 'immutable';
 
-import {AppAction, ComponentsAction} from '../utils/actions';
+import {AppAction} from '../utils/actions';
 import i18n from '../utils/i18n';
 import {defaultLanguage} from "../utils/constants/languages";
 
@@ -26,6 +26,8 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
 const initialState = fromJS({
     currentLanguage: defaultLanguage.code,
     addingErrorTicket: API_REQUEST_STATE.INITIAL,
+    fetchingAppVersion: API_REQUEST_STATE.INITIAL,
+    appVersion: '2',
     currentMenu: {},
     error: null,
     message: {},
@@ -48,6 +50,12 @@ const reducer = (state = initialState, action) => {
             return state.set('addingErrorTicket', API_REQUEST_STATE.FINISH);
         case AppAction.ADD_ERRORTICKET_REJECTED:
             return state.set('addingErrorTicket', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case AppAction.FETCH_APPVERSION:
+            return state.set('fetchingAppVersion', API_REQUEST_STATE.START).set('error', null);
+        case AppAction.FETCH_APPVERSION_FULFILLED:
+            return state.set('fetchingAppVersion', API_REQUEST_STATE.FINISH).set('appVersion', action.payload);
+        case AppAction.FETCH_APPVERSION_REJECTED:
+            return state.set('fetchingAppVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

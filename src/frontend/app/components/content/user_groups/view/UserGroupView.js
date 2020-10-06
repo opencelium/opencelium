@@ -19,7 +19,6 @@ import {withTranslation} from 'react-i18next';
 import {fetchUserGroup} from '@actions/usergroups/fetch';
 import Content from "../../../general/content/Content";
 import { Row, Col, Visible, Hidden } from "react-grid-system";
-import {Table, TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 import {SingleComponent} from "@decorators/SingleComponent";
 import {Permissions} from '@utils/constants/app';
 import styles from '@themes/default/content/user_groups/view.scss';
@@ -27,6 +26,7 @@ import {UserGroupPermissions} from '@utils/constants/permissions';
 import UserGroupIcon from "../../../icons/UserGroupIcon";
 import {permission} from "@decorators/permission";
 import {getThemeClass} from "@utils/app";
+import Table from "@basic_components/table/Table";
 
 
 const prefixUrl = '/usergroups';
@@ -65,7 +65,6 @@ class UserGroupView extends Component{
             'user_group_description',
             'user_group_row_table',
             'user_group_col_table',
-            'user_group_table',
             'header_cell',
             'row_cell'];
         classNames = getThemeClass({classNames, authUser, styles});
@@ -100,29 +99,33 @@ class UserGroupView extends Component{
                         </Row>
                         <Row className={styles[classNames.user_group_row_table]}>
                             <Col md={12} className={styles[classNames.user_group_col_table]}>
-                                <Table selectable={false} className={styles[classNames.user_group_table]}>
-                                    <TableHead>
-                                        <TableCell>{t('VIEW.TABLE_HEAD')}</TableCell>
-                                        {Permissions.map((permission, key) => (
-                                            <TableCell key={key} className={styles[classNames.header_cell]}>{t(`app:PERMISSIONS.${permission}`)}</TableCell>
+                                <Table hover>
+                                    <thead>
+                                        <tr>
+                                            <th>{t('VIEW.TABLE_HEAD')}</th>
+                                            {Permissions.map((permission, key) => (
+                                                <th key={key}>{t(`app:PERMISSIONS.${permission}`)}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {components.map((component, key) => (
+                                            <tr key={key}>
+                                                <td>{t(`app:COMPONENTS.${component.name}`)}</td>
+                                                {
+                                                    Permissions.map((permission, key2) => {
+                                                        let value = '-';
+                                                        if(component.permissions.indexOf(permission) !== -1){
+                                                            value = '+';
+                                                        }
+                                                        return (
+                                                            <td key={key2}>{value}</td>
+                                                        );
+                                                    })
+                                                }
+                                            </tr>
                                         ))}
-                                    </TableHead>
-                                    {components.map((component, key) => (
-                                        <TableRow key={key}>
-                                            <TableCell>{t(`app:COMPONENTS.${component.name}`)}</TableCell>
-                                            {
-                                                Permissions.map((permission, key2) => {
-                                                    let value = '-';
-                                                    if(component.permissions.indexOf(permission) !== -1){
-                                                        value = '+';
-                                                    }
-                                                    return (
-                                                        <TableCell key={key2} className={styles[classNames.row_cell]}>{value}</TableCell>
-                                                    );
-                                                })
-                                            }
-                                        </TableRow>
-                                    ))}
+                                    </tbody>
                                 </Table>
                             </Col>
                         </Row>

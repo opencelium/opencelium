@@ -70,6 +70,8 @@ export const EntitiesWithNotification = [
     {name: SchedulesAction.START_SCHEDULES, types: ['FULFILLED', 'REJECTED',]},
     {name: TemplatesAction.FETCH_TEMPLATES, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.ADD_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: TemplatesAction.CONVERT_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: TemplatesAction.CONVERT_TEMPLATES, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.IMPORT_TEMPLATE, types: ['FULFILLED', 'REJECTED',]},
     {name: TemplatesAction.DELETE_TEMPLATE, types: ['FULFILLED', 'REJECTED',]},
     {name: WebHooksAction.ADD_WEBHOOK, types: ['FULFILLED', 'REJECTED',]},
