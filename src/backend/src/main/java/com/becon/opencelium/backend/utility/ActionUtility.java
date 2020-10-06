@@ -245,10 +245,10 @@ public class ActionUtility {
         return headerNode;
     }
 
-    public OperatorNode buildOperatorEntity(List<MethodResource> methodResources,
-                                            List<OperatorResource> operatorResources,
-                                            ConnectorNode connectorNode,
-                                            String connectionName){
+    public StatementNode buildOperatorEntity(List<MethodResource> methodResources,
+                                             List<OperatorResource> operatorResources,
+                                             ConnectorNode connectorNode,
+                                             String connectionName){
         String invokerName = connectorNode.getName();
         LinkedList<String> indexes = getIndexes(methodResources, operatorResources);
         if (indexes.isEmpty() || startsWithMethod(indexes.get(0), methodResources)){
@@ -275,15 +275,15 @@ public class ActionUtility {
 
         operatorResources.remove(operatorResource);
 
-        OperatorNode operatorNode = toOperatorNode(operatorResource);
+        StatementNode statementNode = toOperatorNode(operatorResource);
 
-        operatorNode.setIterator(operatorResource.getIterator());
-        operatorNode.setRightStatement(ConditionUtility.buildStringStatement(operatorResource.getCondition().getRightStatement()));
-        operatorNode.setLeftStatement(ConditionUtility.buildStringStatement(operatorResource.getCondition().getLeftStatement()));
+        statementNode.setIterator(operatorResource.getIterator());
+        statementNode.setRightStatementVariable(ConditionUtility.buildStringStatement(operatorResource.getCondition().getRightStatement()));
+        statementNode.setLeftStatementVariable(ConditionUtility.buildStringStatement(operatorResource.getCondition().getLeftStatement()));
 
         if (i.length() < nextElement.length()){
-            operatorNode.setBodyOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName));
-            operatorNode.setBodyFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
+            statementNode.setBodyOperator(buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName));
+            statementNode.setBodyFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
         }
 
         List<String> restIndex = getIndexes(methodResources, operatorResources);
@@ -294,14 +294,14 @@ public class ActionUtility {
         }
 
         if (i.length() == nextElement.length()){
-            OperatorNode operatorNode1 = buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName);
-            if (operatorNode != null) {
-                operatorNode.setNextOperator(operatorNode1);
+            StatementNode statementNode1 = buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName);
+            if (statementNode1 != null) {
+                statementNode.setNextOperator(statementNode1);
             } else {
-                operatorNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
+                statementNode.setNextFunction(buildMethodEntity(methodResources, operatorResources, connectorNode, connectionName));
             }
         }
-        return operatorNode;
+        return statementNode;
     }
 
     private String buildCondition(ConditionResource conditionResource){
@@ -355,12 +355,12 @@ public class ActionUtility {
         return methodNode;
     }
 
-    private OperatorNode toOperatorNode(OperatorResource operatorResource){
-        OperatorNode operatorNode = new OperatorNode();
-        operatorNode.setId(operatorResource.getNodeId());
-        operatorNode.setIndex(operatorResource.getIndex());
-        operatorNode.setType(operatorResource.getType());
-        operatorNode.setOperand(operatorResource.getCondition().getRelationalOperator());
-        return operatorNode;
+    private StatementNode toOperatorNode(OperatorResource operatorResource){
+        StatementNode statementNode = new StatementNode();
+        statementNode.setId(operatorResource.getNodeId());
+        statementNode.setIndex(operatorResource.getIndex());
+        statementNode.setType(operatorResource.getType());
+        statementNode.setOperand(operatorResource.getCondition().getRelationalOperator());
+        return statementNode;
     }
 }

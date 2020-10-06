@@ -4,7 +4,6 @@ import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.execution.ExecutionMediator;
 import com.becon.opencelium.backend.execution.MessageContainer;
 import com.becon.opencelium.backend.execution.test.entity.TConnection;
-import com.becon.opencelium.backend.execution.test.entity.TMethod;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
@@ -46,7 +45,7 @@ public class TExecutionMediator implements ExecutionMediator {
     private TConnection testConnection;
     private ConnectorNode connectorNode;
     private Invoker invoker;
-    private OperatorNode currentOperator;
+    private StatementNode currentOperator;
     private MethodNode currentMethod;
 
     private List<RequestData> supportRequestData = new LinkedList<>();
@@ -85,11 +84,11 @@ public class TExecutionMediator implements ExecutionMediator {
         this.connectorNode = connectorNode;
     }
 
-    public OperatorNode getCurrentOperator() {
+    public StatementNode getCurrentOperator() {
         return currentOperator;
     }
 
-    public void setCurrentOperator(OperatorNode currentOperator) {
+    public void setCurrentOperator(StatementNode currentOperator) {
         this.currentOperator = currentOperator;
     }
 

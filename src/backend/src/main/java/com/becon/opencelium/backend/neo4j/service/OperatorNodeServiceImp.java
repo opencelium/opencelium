@@ -17,7 +17,7 @@
 package com.becon.opencelium.backend.neo4j.service;
 
 import com.becon.opencelium.backend.neo4j.entity.ConnectorNode;
-import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 import com.becon.opencelium.backend.neo4j.repository.OperatorNodeRepository;
 import com.becon.opencelium.backend.resource.connection.ConditionResource;
 import com.becon.opencelium.backend.resource.connection.MethodResource;
@@ -37,13 +37,13 @@ public class OperatorNodeServiceImp implements OperatorNodeService {
     @Autowired
     private ActionUtility actionUtility;
 
-    public OperatorNode toEntity(List<MethodResource> methodResources, List<OperatorResource> operatorResources,
-                                 ConnectorNode connectorNode, String connectionName){
+    public StatementNode toEntity(List<MethodResource> methodResources, List<OperatorResource> operatorResources,
+                                  ConnectorNode connectorNode, String connectionName){
 
         return actionUtility.buildOperatorEntity(methodResources, operatorResources, connectorNode, connectionName);
     }
 
-    public static OperatorResource toResource(OperatorNode entity){
+    public static OperatorResource toResource(StatementNode entity){
         OperatorResource operatorResource = new OperatorResource();
         operatorResource.setIndex(entity.getIndex());
         operatorResource.setNodeId(entity.getId());
@@ -55,7 +55,7 @@ public class OperatorNodeServiceImp implements OperatorNodeService {
     }
 
     @Override
-    public List<OperatorNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer connectorId) {
+    public List<StatementNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer connectorId) {
         if (direction.equals("to_connector")){
             return operatorNodeRepository.findToOperatorByConnectionIdAndConnectorId(connectionId, connectorId);
         } else {

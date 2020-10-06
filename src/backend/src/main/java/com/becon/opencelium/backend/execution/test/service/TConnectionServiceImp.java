@@ -64,7 +64,7 @@ public class TConnectionServiceImp implements TConnectionService {
         toConnector.setConnectorId(index++);
 
         MethodNode startMethod = fromConnector.getStartMethod();
-        OperatorNode startOperator = fromConnector.getStartOperator();
+        StatementNode startOperator = fromConnector.getStartOperator();
         setMethodIds(startMethod, index);
         setOperatorIds(startOperator, index);
         return connectionNode;
@@ -136,17 +136,17 @@ public class TConnectionServiceImp implements TConnectionService {
         }
     }
 
-    private void setOperatorIds(OperatorNode operatorNode, int index) {
-        if (operatorNode == null) {
+    private void setOperatorIds(StatementNode statementNode, int index) {
+        if (statementNode == null) {
             return;
         }
 
-        operatorNode.setId(Integer.toUnsignedLong(index++));
+        statementNode.setId(Integer.toUnsignedLong(index++));
 
-        setMethodIds(operatorNode.getBodyFunction(), index);
-        setOperatorIds(operatorNode.getBodyOperator(), index);
+        setMethodIds(statementNode.getBodyFunction(), index);
+        setOperatorIds(statementNode.getBodyOperator(), index);
 
-        setMethodIds(operatorNode.getNextFunction(), index);
-        setOperatorIds(operatorNode.getNextOperator(), index);
+        setMethodIds(statementNode.getNextFunction(), index);
+        setOperatorIds(statementNode.getNextOperator(), index);
     }
 }

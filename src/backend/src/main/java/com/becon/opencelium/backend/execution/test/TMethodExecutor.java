@@ -82,8 +82,6 @@ public class TMethodExecutor implements TExecutor {
         operatorExecutor.execute(methodNode.getNextOperator());
     }
 
-
-
     private String createEndpoint(String endpoint) {
 
         String requiredField;

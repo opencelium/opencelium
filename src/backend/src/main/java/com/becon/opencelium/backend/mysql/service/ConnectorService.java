@@ -40,6 +40,8 @@ public interface ConnectorService {
 
     boolean existByTitle(String title);
 
+    List<RequestData> getRequestData(Integer ctorId);
+
     List<Connector> findAll();
 
     Connector toEntity(ConnectorResource resource);

@@ -53,8 +53,7 @@ public class TokenAuth implements AuthenticationType {
 
     @Override
     public List<RequestData> getAccessCredentials(Connector connector, ResponseEntity<?> responseEntity) {
-        InvokerRequestBuilder requestBuilder = new InvokerRequestBuilder(restTemplate);
-
+//        InvokerRequestBuilder requestBuilder = new InvokerRequestBuilder(restTemplate);
         Invoker invoker = invokerList.stream()
                 .filter(inv -> inv.getName().equals(connector.getInvoker()))
                 .findFirst().orElseThrow(() -> new RuntimeException("Invoker not found in storage"));

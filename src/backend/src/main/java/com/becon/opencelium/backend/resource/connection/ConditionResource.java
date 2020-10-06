@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
 import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import org.springframework.hateoas.ResourceSupport;
@@ -33,20 +32,20 @@ public class ConditionResource extends ResourceSupport {
     public ConditionResource() {
     }
 
-    public ConditionResource(OperatorNode operatorNode, String type) {
+    public ConditionResource(StatementNode statementNode, String type) {
         if (type.equals("if")){
-            this.relationalOperator = ConditionUtility.findOperator(operatorNode.getOperand());
-            this.rightStatement = ConditionUtility.buildStatement(operatorNode.getRightStatement());
+            this.relationalOperator = ConditionUtility.findOperator(statementNode.getOperand());
+            this.rightStatement = ConditionUtility.buildStatement(statementNode.getRightStatementVariable());
         }
-        this.leftStatement = ConditionUtility.buildStatement(operatorNode.getLeftStatement());
+        this.leftStatement = ConditionUtility.buildStatement(statementNode.getLeftStatementVariable());
     }
 
-    public ConditionResource(OperatorNode entity) {
+    public ConditionResource(StatementNode entity) {
         if (entity.getType().equals("if")){
             this.relationalOperator = entity.getOperand();
-            this.rightStatement = ConditionUtility.buildStatement(entity.getRightStatement());
+            this.rightStatement = ConditionUtility.buildStatement(entity.getRightStatementVariable());
         }
-        this.leftStatement = ConditionUtility.buildStatement(entity.getLeftStatement());
+        this.leftStatement = ConditionUtility.buildStatement(entity.getLeftStatementVariable());
     }
 
     public String getRelationalOperator() {

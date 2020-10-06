@@ -13,7 +13,8 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
-<invoker type="RESTful">
+<invoker>
+    <web_service>rest</web_service>
     <name>openNMS</name>
     <description>Open Network Monitoring System: built for scalability, integration, and high levels of configuration since 2000.</description>
     <hint>Open Network Monitoring System. Read api documentation https://docs.opennms.org/opennms/releases/17.0.0/guide-development/guide-development.html</hint>

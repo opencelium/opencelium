@@ -121,14 +121,14 @@ public class EnhancementNodeServiceImp implements EnhancementNodeService {
     private List<MethodNode> gatherAllMethods(ConnectionNode connectionNode) {
         List<MethodNode> methodNodes = new ArrayList<>();
         MethodNode startMethod = connectionNode.getFromConnector().getStartMethod();
-        OperatorNode operatorNode = connectionNode.getFromConnector().getStartOperator();
+        StatementNode statementNode = connectionNode.getFromConnector().getStartOperator();
         goToMethod(startMethod, methodNodes);
-        goToOperator(operatorNode, methodNodes);
+        goToOperator(statementNode, methodNodes);
 
         startMethod = connectionNode.getToConnector().getStartMethod();
-        operatorNode = connectionNode.getToConnector().getStartOperator();
+        statementNode = connectionNode.getToConnector().getStartOperator();
         goToMethod(startMethod, methodNodes);
-        goToOperator(operatorNode, methodNodes);
+        goToOperator(statementNode, methodNodes);
 
         return methodNodes;
     }
@@ -144,15 +144,15 @@ public class EnhancementNodeServiceImp implements EnhancementNodeService {
         goToOperator(methodNode.getNextOperator(), methodNodes);
     }
 
-    private void goToOperator(OperatorNode operatorNode, List<MethodNode> methodNodes) {
-        if (operatorNode == null) {
+    private void goToOperator(StatementNode statementNode, List<MethodNode> methodNodes) {
+        if (statementNode == null) {
             return;
         }
 
-        goToMethod(operatorNode.getBodyFunction(), methodNodes);
-        goToOperator(operatorNode.getBodyOperator(), methodNodes);
+        goToMethod(statementNode.getBodyFunction(), methodNodes);
+        goToOperator(statementNode.getBodyOperator(), methodNodes);
 
-        goToMethod(operatorNode.getNextFunction(), methodNodes);
-        goToOperator(operatorNode.getNextOperator(), methodNodes);
+        goToMethod(statementNode.getNextFunction(), methodNodes);
+        goToOperator(statementNode.getNextOperator(), methodNodes);
     }
 }

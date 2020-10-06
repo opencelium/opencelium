@@ -2,9 +2,9 @@ package com.becon.opencelium.backend.execution.test;
 
 import com.becon.opencelium.backend.execution.MessageContainer;
 import com.becon.opencelium.backend.execution.statement.operator.Operator;
-import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorFactory;
-import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
+import com.becon.opencelium.backend.execution.statement.operator.factory.ComparisonOperatorFactory;
 import com.becon.opencelium.backend.neo4j.entity.StatementNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeService;
 
 import java.util.ArrayList;
@@ -21,37 +21,37 @@ public class TOperatorExecutor {
         this.methodExecutor = executionMediator.getMethodExecutor();
     }
 
-    public void execute(OperatorNode operatorNode) {
-        if (operatorNode == null) {
+    public void execute(StatementNode statementNode) {
+        if (statementNode == null) {
             return;
         }
-        executionMediator.setCurrentOperator(operatorNode);
+        executionMediator.setCurrentOperator(statementNode);
 
-        switch (operatorNode.getType()) {
+        switch (statementNode.getType()) {
             case "if":
-                executeIfStatement(operatorNode);
+                executeIfStatement(statementNode);
                 break;
             case "loop":
-                executeLoopStatement(operatorNode);
+                executeLoopStatement(statementNode);
                 break;
             default:
         }
 
-        methodExecutor.execute(operatorNode.getNextFunction());
-        this.execute(operatorNode.getNextOperator());
+        methodExecutor.execute(statementNode.getNextFunction());
+        this.execute(statementNode.getNextOperator());
     }
 
-    private void executeIfStatement(OperatorNode ifStatement){
-        OperatorFactory operatorFactory = new OperatorFactory();
-        Operator operator = operatorFactory.getOperator(ifStatement.getOperand());
-        Object leftStatement = getValue(ifStatement.getLeftStatement(), "");
+    private void executeIfStatement(StatementNode ifStatement){
+        ComparisonOperatorFactory comparisonOperatorFactory = new ComparisonOperatorFactory();
+        Operator operator = comparisonOperatorFactory.getOperator(ifStatement.getOperand());
+        Object leftStatement = getValue(ifStatement.getLeftStatementVariable(), "");
         System.out.println("=============== " + ifStatement.getOperand() + " =================");
         if(leftStatement != null){
             System.out.println("Left Statement: " + leftStatement.toString());
         }
 
-        String ref = convertToRef(ifStatement.getLeftStatement());
-        Object rightStatement = getValue(ifStatement.getRightStatement(), ref);
+        String ref = convertToRef(ifStatement.getLeftStatementVariable());
+        Object rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
         if (rightStatement != null){
             System.out.println("Right Statement: " + rightStatement.toString());
         }
@@ -62,8 +62,8 @@ public class TOperatorExecutor {
         }
     }
 
-    private void executeLoopStatement(OperatorNode operatorNode){
-        StatementNode leftStatement = operatorNode.getLeftStatement();
+    private void executeLoopStatement(StatementNode statementNode){
+        StatementVariable leftStatement = statementNode.getLeftStatementVariable();
         String methodKey = leftStatement.getColor();
         String condition = leftStatement.getColor() + ".(" + leftStatement.getType() + ")." + leftStatement.getFiled();
 //        // TODO: Need to rework for "request" types too.
@@ -80,32 +80,32 @@ public class TOperatorExecutor {
         for (int i = 0; i < array.size(); i++) {
             System.out.println("Loop " + condition + "-------- index : " + i);
             loopStack.put(condition, i);
-            methodExecutor.execute(operatorNode.getBodyFunction());
-            this.execute(operatorNode.getBodyOperator());
+            methodExecutor.execute(statementNode.getBodyFunction());
+            this.execute(statementNode.getBodyOperator());
         }
 
         if (loopStack.containsKey(condition)){
             loopStack.remove(condition);
         }
-        methodExecutor.execute(operatorNode.getNextFunction());
-        this.execute(operatorNode.getNextOperator());
+        methodExecutor.execute(statementNode.getNextFunction());
+        this.execute(statementNode.getNextOperator());
     }
 
-    private Object getValue(StatementNode statementNode, String leftStatement) {
-        if (statementNode == null) {
+    private Object getValue(StatementVariable statementVariable, String leftStatement) {
+        if (statementVariable == null) {
             return null;
         }
 
-        if (statementNode.getRightPropertyValue() != null && !statementNode.getRightPropertyValue().isEmpty()) {
+        if (statementVariable.getRightPropertyValue() != null && !statementVariable.getRightPropertyValue().isEmpty()) {
             List<Object> result = new ArrayList<>();
-            String ref = convertToRef(statementNode);
-            String rightPropertyValueRef = leftStatement + "." + statementNode.getRightPropertyValue();
+            String ref = convertToRef(statementVariable);
+            String rightPropertyValueRef = leftStatement + "." + statementVariable.getRightPropertyValue();
             Object value;
             if (FieldNodeService.hasReference(ref)){
                 value = executionMediator.getValueFromResponseData(ref);
                 result.add(value);
             } else {
-                result.add(statementNode.getFiled());
+                result.add(statementVariable.getFiled());
             }
 
             value = executionMediator.getValueFromResponseData(rightPropertyValueRef);
@@ -113,17 +113,17 @@ public class TOperatorExecutor {
             return result;
         }
 
-        String ref = convertToRef(statementNode);
+        String ref = convertToRef(statementVariable);
         if (!FieldNodeService.hasReference(ref)){
-            return statementNode.getFiled();
+            return statementVariable.getFiled();
         }
         return executionMediator.getValueFromResponseData(ref);
     }
 
-    private String convertToRef(StatementNode statementNode) {
-        if (statementNode == null){
+    private String convertToRef(StatementVariable statementVariable) {
+        if (statementVariable == null){
             return null;
         }
-        return statementNode.getColor() + ".(" + statementNode.getType() + ")." + statementNode.getFiled();
+        return statementVariable.getColor() + ".(" + statementVariable.getType() + ")." + statementVariable.getFiled();
     }
 }

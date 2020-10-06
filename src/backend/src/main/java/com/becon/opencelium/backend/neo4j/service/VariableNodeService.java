@@ -16,16 +16,9 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
-import com.becon.opencelium.backend.neo4j.entity.StatementNode;
-import org.springframework.stereotype.Service;
+import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 
-@Service
-public class StatementNodeServiceImp implements StatementNodeService {
-    @Override
-    public String convertToRef(StatementNode statementNode) {
-        if (statementNode == null){
-            return null;
-        }
-        return statementNode.getColor() + ".(" + statementNode.getType() + ")." + statementNode.getFiled();
-    }
+public interface VariableNodeService {
+
+    String convertToRef(StatementVariable statementVariable);
 }
