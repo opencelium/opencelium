@@ -49,7 +49,7 @@ export default function (data){
                 tag={Link}
                 to={to}
                 onClick={onClick}
-                activeClassName={styles.selected_list_item}
+                activeClassName={data.to === '#' ? '' : styles.selected_list_item}
                 className={linkClassName}>
                 {
                     data.icon

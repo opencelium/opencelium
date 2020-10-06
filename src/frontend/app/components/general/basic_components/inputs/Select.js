@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import ReactSelect from 'react-select';
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 import basicStyles from '@themes/default/general/basic_components.scss';
+
 /**
  * Select Component
  */

@@ -53,7 +53,7 @@ class Loading extends Component{
     }
 
     render(){
-        const {className, style, authUser, error} = this.props;
+        const {className, style, spinnerStyle, authUser, error} = this.props;
         if (error) {
             consoleError(error);
             return (
@@ -68,7 +68,7 @@ class Loading extends Component{
         }
         return (
             <div className={`${loadingClassName} ${className}`} style={style}>
-                <Spinner type="grow" color="primary" />
+                <Spinner type="grow" color="primary" style={spinnerStyle}/>
                 {this.renderCancelButton()}
             </div>
         );
@@ -80,6 +80,7 @@ Loading.defaultProps = {
     error: null,
     cancelCallback: null,
     style: {},
+    spinnerStyle: {},
 };
 
 export default Loading;
