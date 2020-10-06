@@ -62,7 +62,7 @@ class WebHook extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <div className={styles[classNames.webhook]}>
-                <TooltipFontIcon blueTheme={true} iconStyles={{fontSize: '13px'}} isButton={true} id={`webhook_${index}`} value={'file_copy'} tooltip={t('LIST.WEBHOOK_TOOLTIP')} onClick={::this.copyToClipboard} className={styles[classNames.webhook_url]}/>
+                <TooltipFontIcon blueTheme={true} size={13} isButton={true} id={`webhook_${index}`} value={'file_copy'} tooltip={t('LIST.WEBHOOK_TOOLTIP')} onClick={::this.copyToClipboard} className={styles[classNames.webhook_url]}/>
             </div>
         );
     }

@@ -31,20 +31,23 @@ class FontIcon extends Component{
     }
 
     render(){
-        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, iconStyles, value, ...props} = this.props;
+        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, value, size, ...props} = this.props;
+        let {iconStyles} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
+        let sizeStyle = {width: `${size}px`, height: `${size}px`};
+        iconStyles.fontSize = `${size}px`;
         if(blueTheme === true){
             theme = styles.blue_theme;
         }
         if(value === 'loading'){
             return(
-                <Loading className={styles.loading_icon}/>
+                <Loading className={styles.loading_icon} spinnerStyle={{...sizeStyle}}/>
             );
         }
         if(isString(value)) {
             if (isButton) {
                 return (
-                    <button className={`${styles.clear_button} ${theme} ${className}`} onClick={onClick} id={id}>
+                    <button className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id}>
                         <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles}}/>
                     </button>
                 );
@@ -60,6 +63,7 @@ class FontIcon extends Component{
 }
 
 FontIcon.propTypes = {
+    size: PropTypes.number,
     isButton: PropTypes.bool,
     iconStyles: PropTypes.object,
     darkTheme: PropTypes.bool,
@@ -67,6 +71,7 @@ FontIcon.propTypes = {
 };
 
 FontIcon.defaultProps = {
+    size: 24,
     isButton: false,
     iconStyles: {},
     darkTheme: true,

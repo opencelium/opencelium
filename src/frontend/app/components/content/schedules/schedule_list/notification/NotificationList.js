@@ -221,12 +221,18 @@ class NotificationList extends Component{
                     {this.renderNotifications()}
                 </div>
                 <TooltipFontIcon
+                    size={18}
+                    blueTheme={true}
+                    isButton={true}
                     tooltip={t('schedules:NOTIFICATION.ADD_ICON_TOOLTIP')}
                     value={startAddingNotification ? <Loading className={styles[classNames.loading_add]}/> : 'add'}
                     onClick={::this.toggleAddDialog}
                     className={styles[classNames.add_icon]}
                 />
                 <TooltipFontIcon
+                    size={18}
+                    blueTheme={true}
+                    isButton={true}
                     tooltip={t('schedules:NOTIFICATION.CLOSE_ICON_TOOLTIP')}
                     value={'close'}
                     onClick={closeNotificationList}

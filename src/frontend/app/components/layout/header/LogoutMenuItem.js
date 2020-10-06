@@ -90,7 +90,7 @@ class LogoutMenuItem extends Component{
                 onClick={::this.wantLogout}
                 tooltip={t('HEADER.LOGOUT.TITLE')}
                 icon='exit_to_app'
-                style={{paddingRight: '30px', height: '40px', paddingTop: '8px'}}
+                style={{paddingRight: '30px', height: '40px', paddingTop: '8px', cursor: 'pointer'}}
                 className={`tour-step-logout`}
                 itemClassName={styles.logout_header}
                 key={1}
