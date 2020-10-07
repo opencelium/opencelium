@@ -161,7 +161,7 @@
   border-radius: .25rem;
   transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
   font-family: $FONT_FAMILY;
-  height: 40px;
+  height: 34px;
   width: 31%;
   color: #fff !important;
   background-color: #007bff !important;
@@ -181,6 +181,7 @@
   box-shadow: $FOCUS_BOX_SHADOW !important;
 }
 .input_file_label{
+  min-height: 24px;
   font-family: $FONT_FAMILY;
   width: 69% !important;
   float: left;
@@ -228,7 +229,7 @@
   margin-left: -42px;
   margin-top: 18px;
   cursor: pointer;
-  color: #d42222;
+  color: $ERROR_COLOR;
 }
 
 /*tooltip*/
@@ -469,6 +470,7 @@
   }
   .search_icon_disabled{
     color: #eee;
+    cursor: default;
   }
   .search_icon_appear{
     right: 5px;

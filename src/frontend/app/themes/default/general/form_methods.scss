@@ -215,9 +215,6 @@
 .input_method_add_icon{
   font-size: $FONT_SIZE_MEDIUM;
   margin-top: 28px;
-  span{
-    color: black !important;
-  }
 }
 .input_method_add_icon_for_operator{
   @extend .input_method_add_icon;
@@ -241,14 +238,35 @@
   height: 30px;
   line-height: 26px;
   font-weight: bold;
-  margin-left: 5px;
 }
-
-.item_menu:hover{
+.item_menu_hovered{
   cursor: pointer;
   transition: width 0.4s;
   width: 63px;
   font-size: $FONT_SIZE_TINY;
+}
+.item_menu:hover{
+  @extend .item_menu_hovered;
+}
+
+.item_button{
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-left: 5px;
+}
+.item_button:focus{
+  outline: none !important;
+  .item_menu_method::after{
+    @extend .item_menu_method_hovered;
+  }
+  .item_menu_operator::after{
+    @extend .item_menu_operator_hovered;
+  }
+  .item_menu{
+    @extend .item_menu_hovered;
+  }
 }
 
 .item_menu_method{
@@ -256,10 +274,12 @@
   margin-left: 0;
   background-color: #F5F5F5;
 }
-
-.item_menu_method:hover::after{
+.item_menu_method_hovered{
   font-family: $FONT_FAMILY;
   content: 'ethod';
+}
+.item_menu_method:hover::after{
+  @extend .item_menu_method_hovered;
 }
 
 .item_menu_param{
@@ -277,9 +297,13 @@
   background-color: #D5E8D4;
 }
 
-.item_menu_operator:hover::after{
+.item_menu_operator_hovered{
   font-family: $FONT_FAMILY;
   content: 'perator';
+}
+
+.item_menu_operator:hover::after{
+  @extend .item_menu_operator_hovered;
 }
 
 .item_menu_selected{

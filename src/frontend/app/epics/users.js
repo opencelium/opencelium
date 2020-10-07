@@ -110,7 +110,7 @@ const addUserEpic = (action$, store) => {
             let profilePicture = action.payload.userDetail.profilePicture;
             let data = {...action.payload};
             let successResponse = addUserFulfilled;
-            if(data.userDetail.profilePicture !== null){
+            if(data.userDetail.profilePicture !== null && data.userDetail.profilePicture !== ''){
                 successResponse = addProfilePicture;
             }
             delete data.userDetail.profilePicture;
@@ -157,7 +157,7 @@ const updateUserEpic = (action$, store) => {
             let profilePicture = action.payload.userDetail.profilePicture;
             let data = {...action.payload};
             let successResponse = updateUserFulfilled;
-            if(data.userDetail.profilePicture !== null && !isString(data.userDetail.profilePicture)){
+            if((data.userDetail.profilePicture !== null && !isString(data.userDetail.profilePicture))){
                 successResponse = updateProfilePicture;
                 delete data.userDetail.profilePicture;
             }

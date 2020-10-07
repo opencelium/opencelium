@@ -109,9 +109,10 @@ class ScheduleNotification extends Component{
 
     renderDialogScheduleNotification(){
         const {animationName, showScheduleNotifications} = this.state;
-        const {schedule, notifications} = this.props;
+        const {schedule, notifications, index} = this.props;
         if(showScheduleNotifications) {
             return <NotificationList
+                index={index}
                 schedule={schedule}
                 notifications={notifications}
                 closeNotificationList={::this.closeNotificationList}

@@ -31,6 +31,7 @@ import {deleteConnectorFulfilled, deleteConnectorRejected} from '@actions/connec
 import {doRequest} from "@utils/auth";
 import {addProfilePicture, addUserFulfilled, addUserRejected} from "@actions/users/add";
 import {API_METHOD} from "@utils/constants/app";
+import {isString} from "@utils/app";
 
 
 /**
@@ -103,7 +104,7 @@ const addConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = addConnectorFulfilled;
-            if(data.icon !== null){
+            if(data.icon !== null && data.icon !== ''){
                 successResponse = addConnectorIcon;
             }
             delete data.icon;
@@ -148,7 +149,7 @@ const updateConnectorEpic = (action$, store) => {
             let connectorIcon = action.payload.icon;
             let data = {...action.payload};
             let successResponse = updateConnectorFulfilled;
-            if(data.icon){
+            if(data.icon && !isString(data.icon)){
                 successResponse = updateConnectorIcon;
             }
             delete data.icon;

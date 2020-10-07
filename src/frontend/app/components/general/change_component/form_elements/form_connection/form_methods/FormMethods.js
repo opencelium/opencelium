@@ -76,8 +76,10 @@ class FormMethods extends Component{
                 {!readOnly &&
                     <React.Fragment>
                         {!isDraft && <Draft connection={entity} updateEntity={::this.updateEntity}/>}
-                        <AddTemplate data={data} entity={entity} authUser={authUser}/>
-                        <AddParam data={data} entity={entity} authUser={authUser}/>
+                        <div style={{float: 'right'}}>
+                            <AddTemplate data={data} entity={entity} authUser={authUser}/>
+                            <AddParam data={data} entity={entity} authUser={authUser}/>
+                        </div>
                     </React.Fragment>
                 }
                 <div>

@@ -34,6 +34,7 @@ import {
 import FontIcon from "@basic_components/FontIcon";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import Select from "@basic_components/inputs/Select";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
@@ -272,7 +273,7 @@ class DropdownMenu extends Component{
                         {this.renderDropdown(isOperator)}
                         <div className={`${styles.input_method_add}`} style={inputMethodAddStyle}>
                             {this.renderMethodRadio(isOperator)}
-                            <FontIcon className={inputMethodAddIconClassName} value={'check_circle_outline'} onClick={::this.onAdd} isButton={true}/>
+                            <TooltipFontIcon tooltip={'Create'} className={inputMethodAddIconClassName} value={'check_circle_outline'} onClick={::this.onAdd} isButton={true}/>
                         </div>
                     </div>
                 </Dropdown>

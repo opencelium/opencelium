@@ -176,8 +176,6 @@ class InputHierarchy extends Component{
     showSearch(){
         const {id} = this.props;
         const inputHierarchyWidth = document.getElementById(`${id}_parent`).offsetWidth;
-        console.log(document.getElementById(id));
-        console.log(inputHierarchyWidth);
         this.setState({inputClassName: styles.input_appear, searchStyles: {right: `${inputHierarchyWidth - 15}px`}, searchClassName: styles.search_icon_disappear, hierarchyStyle: {zIndex: 100}});
         setTimeout(() => {::this.showHierarchy(); setFocusById(id);}, 700);
     }
@@ -190,6 +188,7 @@ class InputHierarchy extends Component{
         return(
             <div className={styles.input_hierarchy} style={hierarchyStyle} id={`${id}_parent`}>
                 <Input
+                    disabled={inputClassName === styles.input_disappear || inputClassName === ''}
                     onChange={::this.handleChange}
                     onKeyDown={::this.onKeyDown}
                     name={id}
@@ -199,7 +198,7 @@ class InputHierarchy extends Component{
                     value={searchValue}
                     theme={{input: `${styles.input} ${inputClassName}`, inputElement: styles.input_element}}
                 />
-                <TooltipFontIcon tooltip={'Search'} value={'search'} style={searchStyles} className={`${styles.search_icon} ${searchClassName} ${searchDisable ? styles.search_icon_disabled : ''}`} onClick={searchDisable ? null : ::this.showSearch}/>
+                <TooltipFontIcon isButton={!searchDisable} tooltip={'Search'} value={'search'} style={searchStyles} className={`${styles.search_icon} ${searchClassName} ${searchDisable ? styles.search_icon_disabled : ''}`} onClick={searchDisable ? null : ::this.showSearch}/>
                 {
                     isVisibleHierarchy && isNotEmpty
                     ?

@@ -228,6 +228,8 @@ class OperatorItem extends Component{
     renderCloseMenuEditButton(){
         return (
             <TooltipFontIcon
+                size={16}
+                isButton={true}
                 className={styles.operator_close_menu_edit}
                 value={'check_circle_outline'}
                 tooltip={'Apply'}

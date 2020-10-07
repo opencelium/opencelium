@@ -56,7 +56,7 @@ function mapConnector(connector){
     const {title, description, icon, invoker, authenticationFields} = connector;
     data['title'] = title;
     data['description'] = description;
-    data['icon'] = icon === '' ? null : icon;
+    data['icon'] = icon;
     data['invoker'] = {name: invoker.hasOwnProperty('value') ? invoker.value : invoker};
     data['requestData'] = {};
     for(let field in authenticationFields){

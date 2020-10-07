@@ -45,9 +45,11 @@ class ItemsMenu extends Component{
         classNames.method = styles.item_menu_method;
         classNames[itemType] += ` ${styles.item_menu_selected}`;
         return (
-            <span onClick={() => ::this.selectItem('method')} className={classNames.method}>
-                {`M`}
-            </span>
+            <button className={styles.item_button} onClick={() => ::this.selectItem('method')}>
+                <span className={classNames.method}>
+                    {`M`}
+                </span>
+            </button>
         );
     }
 
@@ -64,9 +66,11 @@ class ItemsMenu extends Component{
         if(depth <= CONNECTOR_DEPTH_LIMIT) {
             if (connector.getConnectorType() === CONNECTOR_TO || connector.methods.length > 0) {
                 return (
-                    <span onClick={() => ::this.selectItem('operator')} className={classNames.operator}>
-                        {`O`}
-                    </span>
+                    <button className={styles.item_button} onClick={() => ::this.selectItem('operator')}>
+                        <span className={classNames.operator}>
+                            {`O`}
+                        </span>
+                    </button>
                 );
             }
         }

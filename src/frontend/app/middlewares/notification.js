@@ -68,7 +68,6 @@ export default function (store){
                         next(action);
                         return;
                     }
-                    console.log(action.payload);
                     if (action.payload
                         && (action.payload.status === 403 || checkExpiredMessages(action.payload))
                     ) {

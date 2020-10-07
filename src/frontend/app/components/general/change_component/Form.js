@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import FormInput from "./form_elements/FormInput";
 import FormSelect from "./form_elements/FormSelect";
-import FormInputFile from "./form_elements/FormInputFile";
+import FormInputImage from "./form_elements/FormInputImage";
 import FormSelectDescription from "./form_elements/FormSelectDescription";
 import FormMultiSelect from "./form_elements/FormMultiSelect";
 import FormPermissionTable from "./form_elements/FormPermissionTable";
@@ -86,7 +86,7 @@ class Form extends Component{
                     data={data}
                 />;
             case 'file':
-                return <FormInputFile
+                return <FormInputImage
                     key={key}
                     entity={entity}
                     updateEntity={updateEntity}

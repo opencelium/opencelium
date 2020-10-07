@@ -166,6 +166,8 @@ class MethodTitle extends Component{
                             !readOnly && (isCurrentItem || hasDeleteButton) ?
                                 <div>
                                     <TooltipFontIcon
+                                        size={20}
+                                        isButton={true}
                                         className={styles.item_delete_button}
                                         value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
                                         onMouseOver={::this.isOnDeleteButtonOver}
