@@ -569,6 +569,7 @@ class IfOperator extends Component{
                         readOnly={readOnly}
                         theme={inputTheme}
                         isPopupInput={true}
+                        disabled={!isOperatorHasThreeParams}
                     >
                         <SelectSearch
                             id={`if_operator_${operator.type}_${operator.index}`}
@@ -619,7 +620,7 @@ class IfOperator extends Component{
                     options={source.length > 0 ? source : [{label: 'No params', value: 0, color: 'white'}]}
                     closeOnSelect={false}
                     placeholder={rightField !== '' && value === null ? '' : '...'}
-                    isDisabled={readOnly}
+                    isDisabled={readOnly || !isVisible}
                     isSearchable={!readOnly}
                     openMenuOnClick={true}
                     maxMenuHeight={200}
@@ -747,6 +748,7 @@ class IfOperator extends Component{
                     readOnly={readOnly}
                     theme={inputTheme}
                     isPopupInput={true}
+                    disabled={!hasValue}
                 >
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}

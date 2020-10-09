@@ -339,7 +339,7 @@ class ScheduleList extends Component{
             <Table authUser={authUser}>
                 <thead>
                     <tr>
-                        <th><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} labelClassName={styles[classNames.checkbox_label]} className={styles[classNames.checkbox_field]}/></th>
+                        <th><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} labelClassName={styles[classNames.checkbox_label]} inputClassName={styles[classNames.checkbox_field]}/></th>
                         <th><span>{t('LIST.TITLE')}</span></th>
                         <th><span>{t('LIST.CONNECTION')}</span></th>
                         <th className={'tour-step-3'}><span>{t('LIST.CRON')}</span></th>
@@ -370,7 +370,7 @@ class ScheduleList extends Component{
                                             checked={checked}
                                             onChange={(e) => checkOneSchedule(e, {key, id: schedule.id})}
                                             labelClassName={styles[classNames.checkbox_label]}
-                                            className={styles[classNames.checkbox_field]}
+                                            inputClassName={styles[classNames.checkbox_field]}
                                         />
                                     </td>
                                     <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>

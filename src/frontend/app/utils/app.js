@@ -13,6 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import ReactDOM from 'react-dom';
 import React from 'react';
 import CUserGroup from "@classes/components/content/user_group/CUserGroup";
 import CComponent from "@classes/components/content/user_group/CComponent";
@@ -123,7 +124,7 @@ export function getFocusableElements(elem = document){
  */
 export function formatHtmlId(id){
     if(isString(id)) {
-        return id.replace(' ', '_').toLowerCase();
+        return id.replace(' ', '_').toLowerCase().trim();
     }
     return 'no_id';
 }
@@ -401,6 +402,38 @@ export function isInteger(number) {
     Number.isInteger(number);
 }
 
+export function findTopLeftPosition(elem) {
+    if(typeof elem  === 'string'){
+        elem = document.getElementById(elem);
+    }
+    if(elem) {
+        elem = ReactDOM.findDOMNode(elem);
+        let rec = elem.getBoundingClientRect();
+        return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+    } else{
+        return {top: 0, left: 0};
+    }
+}
+function isClassComponent(component) {
+    return (
+        typeof component === 'function' &&
+        !!component.prototype.isReactComponent
+    )
+}
+
+function isFunctionComponent(component) {
+    return (
+        typeof component === 'function' &&
+        String(component).includes('return React.createElement')
+    )
+}
+
+export function isReactComponent(component) {
+    return (
+        isClassComponent(component) ||
+        isFunctionComponent(component)
+    )
+}
 /**
  * to check if element is String
  *

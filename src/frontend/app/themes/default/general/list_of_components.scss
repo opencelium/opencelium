@@ -71,7 +71,7 @@
 }
 .key_navigation_letter_delete{
   font-family: $FONT_FAMILY;
-  color: #d42222;
+  color: $ERROR_COLOR;
   margin-left: 0;
   text-decoration: underline;
   animation-name: Aselected_letter;
@@ -163,13 +163,13 @@
 
 .button_delete{
   font-family: $FONT_FAMILY;
-  color: #d42222;
+  color: $ERROR_COLOR;
   float: right;
 }
 
 .only_button_delete{
   font-family: $FONT_FAMILY;
-  color: #d42222;
+  color: $ERROR_COLOR;
 }
 
 .add_button{

@@ -75,6 +75,8 @@ class DeleteIcon extends Component{
         return (
             <div>
                 <TooltipFontIcon
+                    size={20}
+                    isButton={true}
                     className={styles.remove}
                     value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
                     onClick={::this.toggleConfirm}

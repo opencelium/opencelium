@@ -10,6 +10,8 @@ export const TAG_VALUE_TYPES = {
 };
 
 const TAB_CHAR = '    ';
+const BACKEND_ATTRIBUTE_PROPERTY = '__oc__attributes';
+const BACKEND_VALUE_PROPERTY = '__oc__value';
 
 export default class CTag{
     constructor(name, tags, properties = {}, parent = null) {
@@ -28,13 +30,13 @@ export default class CTag{
         let newTag = new CTag(name);
         if(node){
             let nodeValue = null;
-            if(node.hasOwnProperty('__oc__value')){
-                nodeValue = node.__oc__value;
+            if(node.hasOwnProperty(BACKEND_VALUE_PROPERTY)){
+                nodeValue = node[BACKEND_VALUE_PROPERTY];
             } else if(node.hasOwnProperty('_text')){
                 nodeValue = node._text;
             }
-            if(node.hasOwnProperty('__oc__attributes'))
-                attributes = node.__oc__attributes;
+            if(node.hasOwnProperty(BACKEND_ATTRIBUTE_PROPERTY))
+                attributes = node[BACKEND_ATTRIBUTE_PROPERTY];
             else if(node.hasOwnProperty('_attributes')){
                 attributes = node._attributes;
             }
@@ -42,7 +44,7 @@ export default class CTag{
                 tags = nodeValue;
             } else {
                 for (let subNode in node) {
-                    if (subNode !== '__oc__attributes' && subNode !== '_attributes' && subNode !== '__oc__value' && subNode !== '_text') {
+                    if (subNode !== BACKEND_ATTRIBUTE_PROPERTY && subNode !== '_attributes' && subNode !== BACKEND_VALUE_PROPERTY && subNode !== '_text') {
                         if(isArray(node[subNode])){
                             for(let i = 0; i < node[subNode].length; i++){
                                 tags.push(CTag.createTag(subNode, node[subNode][i], newTag));
@@ -227,5 +229,34 @@ export default class CTag{
                 break;
         }
         return `${startTag}${items}${endTag}`;
+    }
+
+    convertToBackendXml(){
+        let tag = {};
+        if(this._properties.length > 0){
+            for(let i = 0; i < this._properties.length; i++){
+                if(tag.hasOwnProperty(BACKEND_ATTRIBUTE_PROPERTY)) {
+                    tag[BACKEND_ATTRIBUTE_PROPERTY] = {...tag[BACKEND_ATTRIBUTE_PROPERTY], ...this._properties[i].convertToBackendXml()};
+                } else{
+                    tag[BACKEND_ATTRIBUTE_PROPERTY] = this._properties[i].convertToBackendXml();
+                }
+            }
+        } else{
+            tag[BACKEND_ATTRIBUTE_PROPERTY] = null;
+        }
+        switch(this._valueType){
+            case TAG_VALUE_TYPES.EMPTY:
+                tag[BACKEND_VALUE_PROPERTY] = null;
+                break;
+            case TAG_VALUE_TYPES.TEXT:
+                tag[BACKEND_VALUE_PROPERTY] = this._tags;
+                break;
+            case TAG_VALUE_TYPES.ITEM:
+                for(let i = 0; i < this._tags.length; i++){
+                    tag[this._tags[i].name] = this._tags[i].convertToBackendXml();
+                }
+                break;
+        }
+        return tag;
     }
 }

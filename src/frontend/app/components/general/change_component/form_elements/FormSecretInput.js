@@ -82,7 +82,7 @@ class FormSecretInput extends Component{
                     id={`input_check_${name}`}
                     checked={this.state.isVisibleText}
                     onChange={::this.manageSecret}
-                    className={styles.check}
+                    inputClassName={styles.check}
                 />
             </div>
         );

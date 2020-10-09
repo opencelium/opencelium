@@ -126,7 +126,6 @@ const reducer = (state = initialState, action) => {
         case TemplatesAction.EXPORT_TEMPLATE:
             return state.set('exportingTemplate', API_REQUEST_STATE.START).set('error', null).set('exportedTemplate', action.payload);
         case TemplatesAction.EXPORT_TEMPLATE_FULFILLED:
-            console.log(action.payload.templateContent);
             let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(action.payload.templateContent));
             let downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href",     dataStr);

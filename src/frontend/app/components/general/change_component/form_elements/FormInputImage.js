@@ -18,20 +18,39 @@ import PropTypes from 'prop-types';
 
 import {FormElement} from "@decorators/FormElement";
 import BrowseButton from "@basic_components/buttons/BrowseButton";
+import Checkbox from "@basic_components/inputs/Checkbox";
+import styles from "@themes/default/general/change_component.scss";
 
 
 /**
  * Component for Form Input File
  */
 @FormElement()
-class FormInputFile extends Component{
+class FormInputImage extends Component{
 
     constructor(props){
         super(props);
 
         this.state = {
             browseTitle: '',
+            checkboxLabel: '',
+            hasImage: true,
         };
+    }
+
+    onChangeCheckbox(e){
+        let {checkboxLabel} = this.state;
+        const {name} = this.props.data;
+        const {entity, updateEntity} = this.props;
+        let hasImage = e.target.checked;
+        if(!hasImage) {
+            checkboxLabel = 'Set Image';
+            entity[name] = '';
+        } else{
+            checkboxLabel = '';
+            entity[name] = null;
+        }
+        this.setState({hasImage, checkboxLabel}, updateEntity(entity));
     }
 
     handleChange(e){
@@ -47,6 +66,7 @@ class FormInputFile extends Component{
     };
 
     render(){
+        const {hasImage, checkboxLabel} = this.state;
         const {entity, data} = this.props;
         const {icon, label, name} = data;
         let {tourStep, browseTitle} = data;
@@ -58,27 +78,39 @@ class FormInputFile extends Component{
             }
         }
         return (
-            <BrowseButton
-                label={label}
-                icon={icon}
-                tourStep={tourStep}
-                name={name}
-                browseTitle={browseTitle}
-                browseProps={{
-                    icon: "file_upload",
-                    label: "Upload",
-                    onChange: ::this.handleChange,
-                    accept: "image/x-png,image/jpeg",
-                    name: label,
-                }}
-            />
+            <div className={styles.form_input_image}>
+                <Checkbox
+                    className={styles.form_input_image_checkbox}
+                    labelClassName={styles.form_input_image_label}
+                    label={checkboxLabel}
+                    checked={hasImage}
+                    onChange={::this.onChangeCheckbox}
+                    inputPosition={'left'}
+                />
+                <BrowseButton
+                    themeStyle={{paddingLeft: '20px'}}
+                    label={label}
+                    icon={icon}
+                    tourStep={tourStep}
+                    name={name}
+                    browseTitle={browseTitle}
+                    hideInput={!hasImage}
+                    browseProps={{
+                        icon: "file_upload",
+                        label: "Upload",
+                        onChange: ::this.handleChange,
+                        accept: "image/x-png,image/jpeg",
+                        name: label,
+                    }}
+                />
+            </div>
         );
     }
 }
 
-FormInputFile.propTypes = {
+FormInputImage.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
 };
 
-export default FormInputFile;
+export default FormInputImage;

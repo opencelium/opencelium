@@ -18,7 +18,6 @@ import PropTypes from 'prop-types';
 import {FontIcon as ToolboxFontIcon} from "react-toolbox/lib/font_icon/FontIcon";
 import styles from "@themes/default/general/basic_components.scss";
 import Loading from "@components/general/app/Loading";
-import {isString} from "@utils/app";
 
 
 /**
@@ -28,14 +27,13 @@ class FontIcon extends Component{
 
     constructor(props){
         super(props);
+        this.icon = React.createRef();
     }
 
     render(){
-        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, value, size, ...props} = this.props;
-        let {iconStyles} = this.props;
+        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, value, size, ref, iconStyles, onButtonFocus, onButtonBlur, ...props} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
         let sizeStyle = {width: `${size}px`, height: `${size}px`};
-        iconStyles.fontSize = `${size}px`;
         if(blueTheme === true){
             theme = styles.blue_theme;
         }
@@ -44,20 +42,18 @@ class FontIcon extends Component{
                 <Loading className={styles.loading_icon} spinnerStyle={{...sizeStyle}}/>
             );
         }
-        if(isString(value)) {
-            if (isButton) {
-                return (
-                    <button className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id}>
-                        <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles}}/>
-                    </button>
-                );
-            } else {
-                return (
+        if (isButton) {
+            return (
+                <button ref={ref ? ref : this.icon} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
+                    <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles, fontSize: `${size}px`}}/>
+                </button>
+            );
+        } else {
+            return (
+                <span ref={ref ? ref : this.icon} >
                     <ToolboxFontIcon value={value} className={className} {...props} onClick={onClick} id={id}/>
-                );
-            }
-        } else{
-            return value;
+                </span>
+            );
         }
     }
 }
@@ -68,6 +64,8 @@ FontIcon.propTypes = {
     iconStyles: PropTypes.object,
     darkTheme: PropTypes.bool,
     blueTheme: PropTypes.bool,
+    onButtonBlur: PropTypes.func,
+    onButtonFocus: PropTypes.func,
 };
 
 FontIcon.defaultProps = {
@@ -76,6 +74,9 @@ FontIcon.defaultProps = {
     iconStyles: {},
     darkTheme: true,
     blueTheme: false,
+    ref: null,
+    onButtonBlur: () => {},
+    onButtonFocus: () => {},
 };
 
 export default FontIcon;

@@ -201,7 +201,7 @@ class NotificationList extends Component{
 
     render(){
         const {showAddDialog, newNotification, validationMessage, startAddingNotification} = this.state;
-        const {authUser, t, closeNotificationList, listStyles} = this.props;
+        const {authUser, t, closeNotificationList, listStyles, index} = this.props;
         let classNames = [
             'notification_list',
             'notification_add_button',
@@ -222,6 +222,7 @@ class NotificationList extends Component{
                 </div>
                 <TooltipFontIcon
                     size={18}
+                    id={`notification_list_add_${index}`}
                     blueTheme={true}
                     isButton={true}
                     tooltip={t('schedules:NOTIFICATION.ADD_ICON_TOOLTIP')}
@@ -231,6 +232,7 @@ class NotificationList extends Component{
                 />
                 <TooltipFontIcon
                     size={18}
+                    id={`notification_list_close_${index}`}
                     blueTheme={true}
                     isButton={true}
                     tooltip={t('schedules:NOTIFICATION.CLOSE_ICON_TOOLTIP')}

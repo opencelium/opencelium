@@ -27,10 +27,10 @@ class RadioButtons extends React.Component{
     }
 
     render(){
-        const {hasToolboxTheme, style, className, radios, label, inline, ...props} = this.props;
+        const {hasToolboxTheme, style, className, radios, label, inline, handleChange, ...props} = this.props;
         if(hasToolboxTheme) {
             return (
-                <ToolboxThemeInput style={{...style, height: label !== '' ? '78px' : ''}} className={`${className} ${inline ? styles.radios_inline : styles.radios_block}`} label={label} {...props}>
+                <ToolboxThemeInput style={{...style, height: style.height ? style.height : label !== '' ? '78px' : 'auto'}} className={`${className} ${inline ? styles.radios_inline : styles.radios_block}`} label={label} {...props}>
                     {this.renderRadios()}
                 </ToolboxThemeInput>
             );
@@ -54,7 +54,7 @@ RadioButtons.propTypes = {
     value: PropTypes.string.isRequired,
     handleChange: PropTypes.func.isRequired,
     radios: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string.isRequired,
+        id: PropTypes.string,
         label: PropTypes.string.isRequired,
         value: PropTypes.string.isRequired,
         inputStyle: PropTypes.object,

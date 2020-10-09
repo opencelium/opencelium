@@ -165,8 +165,8 @@
     "build_prod": "cross-env NODE_ENV=production webpack --mode production",
     "start_prod_server": "node prod_server.js",
     "start_mock": "node json-server.js",
-    "watch:test": "node_modules/.bin/jest --watch --no-watchman",
-    "test": "node_modules/.bin/jest"
+    "watch:test": "jest --watch --no-watchman",
+    "test": "jest"
   },
   "jest": {
     "moduleNameMapper": {

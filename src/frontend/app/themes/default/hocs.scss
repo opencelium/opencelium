@@ -1,10 +1,18 @@
 @import './constants';
 .toolbox_theme_input{
   text-align: left;
+  .content{
+    transition: all 0.5s;
+  }
+  .hide_label{
+    width: 0 !important;
+    opacity: 0;
+  }
   .label{
     font-family: $FONT_FAMILY;
     border: none;
     padding-bottom: 0;
+    transition: all 0.5s;
   }
   .input {
     input {

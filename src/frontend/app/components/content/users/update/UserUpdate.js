@@ -64,7 +64,7 @@ function mapUser(user){
     updatedUser.userDetail.organisation = user.organisation;
     updatedUser.userDetail.department = user.department;
     updatedUser.userDetail.userTitle = user.userTitle;
-    updatedUser.userDetail.profilePicture = user.profilePicture === '' ? null : user.profilePicture;
+    updatedUser.userDetail.profilePicture = user.profilePicture;
 
     return updatedUser;
 }
@@ -343,8 +343,8 @@ class UserUpdate extends Component{
                         check: (e, entity) => ::this.validateSurname(e, entity)
                     },
                     {...INPUTS.PHONE_NUMBER, label: t('UPDATE.FORM.PHONE_NUMBER')},
-                    {...INPUTS.ORGANIZATION, label: t('UPDATE.FORM.ORGANISATION')},
                     {...INPUTS.DEPARTMENT, label: t('UPDATE.FORM.DEPARTMENT')},
+                    {...INPUTS.ORGANIZATION, label: t('UPDATE.FORM.ORGANISATION')},
                     {...INPUTS.USER_TITLE, label: t('UPDATE.FORM.USER_TITLE')},
                     {...INPUTS.PROFILE_PICTURE, label: t('UPDATE.FORM.PROFILE_PICTURE'), browseTitle: t('UPDATE.FORM.PROFILE_PICTURE_PLACEHOLDER')},
                 ],

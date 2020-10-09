@@ -3,7 +3,6 @@ import {xml2js} from 'xml-js';
 import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
 import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
 import {CBodyEditor} from "@classes/components/general/basic_components/CBodyEditor";
-import CXml from "@classes/components/content/xml/CXml";
 
 export default class CXmlEditor extends CBodyEditor{
     constructor(xml) {
@@ -118,7 +117,7 @@ export default class CXmlEditor extends CBodyEditor{
     }
 
     static convertToBodyFormat(bodyData){
-        return bodyData.convertToXml();
+        return bodyData.convertToBackendXml();
     }
 
     static convertForFieldBinding(xmlEditor){
@@ -201,5 +200,16 @@ export default class CXmlEditor extends CBodyEditor{
             }
         }
         return xmlString;
+    }
+
+    convertToBackendXml(){
+        let backendXml = {};
+        if(this._tag) {
+            backendXml[this._tag.name] = this._tag.convertToBackendXml();
+        } else{
+            backendXml = null;
+        }
+        return backendXml;
+
     }
 }

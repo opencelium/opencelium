@@ -66,10 +66,6 @@ class SwitchOffTour extends Component{
                         label={'Do not show again'}
                         checked={!this.state.checked}
                         onChange={::this.handleCheck}
-                        theme={{
-                            check: styles.switch_off_tour_checkbox,
-                            field: styles.switch_off_tour_field,
-                        }}
                     />
                 </div>
             </div>

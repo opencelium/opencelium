@@ -257,11 +257,34 @@ const xml = `<?xml version="1.0" encoding="UTF-8" ?>
         </operation>
     </operations>
 </invoker>`;
+
+const bodyXml = {
+    uuid: {
+        __oc__attributes: {
+            name: 'Jack',
+            age: '18'
+        },
+        position: {
+            __oc__attributes: null,
+            __oc__value: 'Gold Grabber'
+        },
+        items: {
+            __oc__attributes: null,
+            __oc__value: 'Hammer'
+        }
+    }
+};
 describe.skip('CXmlEditor class', () => {
 
-    test('Check convertToXml', () => {
+    test.skip('Convert xml object to xml string', () => {
         const received = CXmlEditor.createXmlEditor(xml).convertToXml();
         const expected = xml;
         expect(received).toBe(expected);
     });
+
+    test('Convert xml object to xml object for backend', () => {
+        const received = CXmlEditor.createXmlEditor(bodyXml).convertToBackendXml();
+        const expected = bodyXml;
+        expect(received).toEqual(expected);
+    })
 });

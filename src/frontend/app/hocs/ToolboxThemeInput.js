@@ -13,13 +13,13 @@ class ToolboxThemeInput extends React.Component{
     }
 
     render(){
-        const {icon, tourStep, style, label, required, iconClassName, hasFocusStyle, className, isFocused, labelClassName, inputElementClassName, iconTooltip, tooltipTourStep, inputElementText, inputElementStyle, ...props} = this.props;
+        const {icon, tourStep, style, label, required, iconClassName, hasFocusStyle, className, isFocused, labelClassName, inputElementClassName, iconTooltip, tooltipTourStep, inputElementText, inputElementStyle, hideInput, ...props} = this.props;
         return(
             <div className={`${className} ${icon !== '' ? theme.withIcon : ''} ${label !== '' ? theme.input : ''} ${styles.toolbox_theme_input} ${hasFocusStyle ? styles.input : ''} ${tourStep ? tourStep : ''}`} style={style} {...props}>
-                {label !== '' && <div style={inputElementStyle} className={`${theme.inputElement} ${theme.filled} ${styles.label} ${inputElementClassName}`}>{inputElementText}</div>}
-                {
-                    this.props.children
-                }
+                {label !== '' && <div style={inputElementStyle} className={`${theme.inputElement} ${theme.filled} ${styles.label} ${inputElementClassName} ${hideInput ? styles.hide_label : ''}`}>{inputElementText}</div>}
+                <div className={`${styles.content} ${hideInput ? styles.hide_label : ''}`}>
+                    {this.props.children}
+                </div>
                 {isString(icon) && icon !== '' && icon !== 'loading' && iconTooltip ==='' && <FontIcon value={icon} className={`${theme.icon} ${styles.icon} ${iconClassName} ${isFocused ? styles.focused : ''}`}/>}
                 {isString(icon) && icon !== '' && icon !== 'loading' && iconTooltip !== '' && <TooltipFontIcon value={icon} tooltip={iconTooltip} className={`${theme.icon} ${tooltipTourStep} ${styles.icon} ${iconClassName} ${isFocused ? styles.focused : ''}`}/>}
                 {!isString(icon) && <span className={`${theme.icon} ${styles.icon} ${isFocused ? styles.focused : ''}`}>{icon}</span>}
@@ -52,6 +52,7 @@ ToolboxThemeInput.propTypes = {
     tooltipTourStep: PropTypes.string,
     inputElementText: PropTypes.string,
     inputElementStyle: PropTypes.object,
+    hideInput: PropTypes.bool,
 };
 
 ToolboxThemeInput.defaultProps = {
@@ -70,6 +71,7 @@ ToolboxThemeInput.defaultProps = {
     inputElementClassName: '',
     tooltipTourStep: '',
     inputElementStyle: {},
+    hideInput: false,
 };
 
 export default ToolboxThemeInput;

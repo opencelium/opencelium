@@ -44,15 +44,16 @@ class BrowseButton extends Component{
 
     render(){
         const {focused} = this.state;
-        const {name, tourStep, browseTitle, icon, label, browseProps} = this.props;
+        const {name, tourStep, browseTitle, icon, label, themeStyle, hideInput, browseProps} = this.props;
         return (
-            <ToolboxThemeInput tourStep={tourStep} inputElementClassName={styles.input_file_label} inputElementText={browseTitle} icon={icon} label={label} isFocused={focused}>
+            <ToolboxThemeInput style={themeStyle} hideInput={hideInput} tourStep={tourStep} inputElementClassName={styles.input_file_label} inputElementText={browseTitle} icon={icon} label={label} isFocused={focused}>
                 <ToolboxBrowseButton
                     {...browseProps}
                     className={styles.input_file_browse}
                     id={formatHtmlId(`button_${name ? name : label}`)}
                     onFocus={::this.onFocus}
                     onBlur={::this.onBlur}
+                    disabled={hideInput}
                 />
             </ToolboxThemeInput>
         );
@@ -66,6 +67,12 @@ BrowseButton.propTypes = {
     icon: PropTypes.string,
     label: PropTypes.string,
     browseProps: PropTypes.object.isRequired,
+    hideInput: PropTypes.bool,
+};
+
+BrowseButton.defaultProps = {
+    themeStyle: {},
+    hideInput: false,
 };
 
 export default BrowseButton;
