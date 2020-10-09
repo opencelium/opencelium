@@ -16,10 +16,8 @@
 
 package com.becon.opencelium.backend.factory;
 
-import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.XMLDomParser;
 import com.becon.opencelium.backend.invoker.parser.XMLParser;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 

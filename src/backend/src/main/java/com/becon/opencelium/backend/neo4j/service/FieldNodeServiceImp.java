@@ -83,6 +83,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         String color = fieldResource.getColor();
         String type = fieldResource.getType();
         String field = fieldResource.getField();
+        field = field.replace("@", "__oc__attributes.");
         LinkedList<String> path = new LinkedList<>(Arrays.asList(field.split("\\.")));
         String result;
         if (type.equals("response")){
@@ -108,8 +109,17 @@ public class FieldNodeServiceImp implements FieldNodeService {
             throw new RuntimeException("Field path is incorrect in method with color: " + color);
         }
 
-        for (String nextField : path) {
+//        for (String nextField : path) {
+//            nextField = StringUtility.removeSquareBraces(nextField);
+//            currentField = fieldNodeRepository.findNextField(nextField, currentField.getId());
+//        }
+
+        while (!path.isEmpty()) {
+            String nextField = path.pop();
             nextField = StringUtility.removeSquareBraces(nextField);
+            if (path.isEmpty() && !currentField.getName().equals("__oc__attributes") && !nextField.equals("__oc__value")) {
+                path.push("__oc__value");
+            }
             currentField = fieldNodeRepository.findNextField(nextField, currentField.getId());
         }
 

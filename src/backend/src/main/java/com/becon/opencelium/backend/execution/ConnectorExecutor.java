@@ -32,6 +32,7 @@ import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.VariableNodeServiceImp;
 import com.becon.opencelium.backend.execution.statement.operator.Operator;
+import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
@@ -41,7 +42,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -327,11 +332,32 @@ public class ConnectorExecutor {
         }
         String result = "";
         try {
-            result = new ObjectMapper().writeValueAsString(content);
+            switch (bodyNode.getFormat()) {
+                case "xml" :
+                    Document document = createDocument();
+                    XmlTransformer transformer = new XmlTransformer(document);
+                    result = transformer.xmlToString(content);
+                    break;
+                case "json":
+                    result = new ObjectMapper().writeValueAsString(content);
+                    break;
+                default:
+            }
         } catch (JsonProcessingException e){
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    private Document createDocument() {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.newDocument();
+        }catch (ParserConfigurationException parserException) {
+            parserException.printStackTrace();
+            throw new RuntimeException(parserException);
+        }
     }
 
     public HttpHeaders buildHeader(FunctionInvoker functionInvoker){
