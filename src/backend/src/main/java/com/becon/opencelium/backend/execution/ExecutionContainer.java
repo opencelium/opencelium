@@ -81,6 +81,7 @@ public class ExecutionContainer {
                 .orElseThrow(() -> new RuntimeException("Method not found"));
         String outFieldPath = fieldNodeService.getPath(outMethod, outgoingFiled);
         String outFieldValue = fieldNodeService.getFieldValue(outgoingFiled);
+        outFieldPath = outFieldPath.replace("__oc__attributes.", "@").replace(".__oc__value", "");
         expertVarProperties.put(outFieldPath, outFieldValue);
 
         incomingFields.forEach(f -> {
@@ -95,6 +96,8 @@ public class ExecutionContainer {
                         .findFirst().orElse(null);
                 Object o = messageContainer.getValue(inFieldPath, getLoopIndex());
                 String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
+
+                inFieldPath = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
                 expertVarProperties.put(inFieldPath, inFieldValue);
             } catch (JsonProcessingException e){
                 throw new RuntimeException(e);

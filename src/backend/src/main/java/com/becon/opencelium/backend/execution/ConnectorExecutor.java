@@ -43,6 +43,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -130,6 +131,7 @@ public class ConnectorExecutor {
                 responseContainer.put(loopIndex,responseEntity.getBody());
 
                 messageContainer.setMethodKey(methodNode.getColor());
+                messageContainer.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
                 messageContainer.setExchangeType("response");
                 messageContainer.setResult("success");
 //                if (responseHasError(responseEntity)){
@@ -507,6 +509,8 @@ public class ConnectorExecutor {
             System.out.println("Right Statement: " + rightStatement.toString());
         }
 
+        if (leftVariable instanceof NodeList)
+
         if (operator.compare(leftVariable, rightStatement)){
             executeMethod(ifStatement.getBodyFunction());
             executeDecisionStatement(ifStatement.getBodyOperator());
@@ -554,8 +558,8 @@ public class ConnectorExecutor {
                 .filter(m -> m.getMethodKey().equals(methodKey))
                 .findFirst()
                 .orElse(null);
-        List<Map<String, Object>> array =
-                (List<Map<String, Object>>) message.getValue(condition, loopIndex);
+        List<Object> array =
+                (List<Object>) message.getValue(condition, loopIndex);
 
         for (int i = 0; i < array.size(); i++) {
             System.out.println("Loop " + condition + "-------- index : " + i);
