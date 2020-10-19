@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import ReactSelect from 'react-select';
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 import basicStyles from '@themes/default/general/basic_components.scss';
+import {dotColor} from "@change_component/form_elements/form_connection/form_methods/help";
 
 /**
  * Select Component
@@ -52,11 +53,13 @@ class Select extends Component{
                     className={`${selectClassName}`}
                     styles={{
                         ...styles,
-                        option: (provided) => ({
+                        option: (provided, {data, isDisabled,}) => ({
                             ...provided,
                             textOverflow: 'ellipsis',
                             overflow: 'hidden',
                             whiteSpace: 'nowrap',
+                            ...dotColor(data.color),
+                            cursor: isDisabled ? 'not-allowed' : 'default',
                         }),
                         valueContainer:(styles, {data}) => {
                             return {
@@ -83,7 +86,7 @@ class Select extends Component{
                         container:(provided) => ({
                             ...provided,
                             border: 'none',
-                        })
+                        }),
                     }}
                 />
             </ToolboxThemeInput>

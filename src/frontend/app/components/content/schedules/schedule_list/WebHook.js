@@ -18,7 +18,6 @@ import PropTypes from 'prop-types';
 import {getThemeClass, copyStringToClipboard} from "@utils/app";
 
 import styles from '@themes/default/content/schedules/schedules.scss';
-import TooltipText from "@basic_components/tooltips/TooltipText";
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 import {copyToClipboardWebHookFulfilled} from "@actions/webhooks/fetch";

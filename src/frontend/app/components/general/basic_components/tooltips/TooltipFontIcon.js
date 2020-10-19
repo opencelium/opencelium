@@ -15,7 +15,7 @@
 import ReactDOM from 'react-dom';
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import OCFontIcon from "../FontIcon";
+import FontIcon from "../FontIcon";
 import {findTopLeftPosition} from "@utils/app";
 import theme from "react-toolbox/lib/tooltip/theme.css";
 
@@ -42,7 +42,11 @@ class TooltipFontIcon extends Component{
     }
 
     componentDidUpdate(){
+        const {isButton} = this.props;
         let iconElem = ReactDOM.findDOMNode(this.icon.current);
+        if(!isButton){
+            iconElem = iconElem.firstChild;
+        }
         let position = findTopLeftPosition(iconElem);
         let newLeft = position.left + (iconElem.offsetWidth / 2);
         let newTop = position.top + (iconElem.offsetHeight / 2) - 2;
@@ -80,7 +84,7 @@ class TooltipFontIcon extends Component{
         return (
             <span onMouseOver={::this.show} onMouseLeave={::this.hide}>
                 {showTooltip && ReactDOM.createPortal(<span className={`${theme.tooltip} ${position} ${theme.tooltipActive}`} style={{left, top}}><span className={theme.tooltipInner}>{tooltip}</span></span>, this.tooltip)}
-                <OCFontIcon ref={this.icon} onButtonFocus={::this.show} onButtonBlur={::this.hide} {...props}/>
+                <FontIcon myRef={this.icon} onButtonFocus={::this.show} onButtonBlur={::this.hide} {...props}/>
             </span>
         );
     }
@@ -88,10 +92,12 @@ class TooltipFontIcon extends Component{
 
 TooltipFontIcon.propTypes = {
     tooltip: PropTypes.string.isRequired,
+    isButton: PropTypes.bool,
 };
 
 TooltipFontIcon.defaultProps = {
     tooltipPosition: 'top',
+    isButton: false,
 };
 
 export default TooltipFontIcon;

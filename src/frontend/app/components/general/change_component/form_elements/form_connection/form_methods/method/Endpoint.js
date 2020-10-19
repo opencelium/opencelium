@@ -19,12 +19,11 @@ import PropTypes from 'prop-types';
 import ContentEditable from 'react-contenteditable';
 
 import styles from '@themes/default/general/form_methods.scss';
-import theme from "react-toolbox/lib/input/theme.css";
 import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
-import TooltipText from "@basic_components/tooltips/TooltipText";
 import ParamGenerator from "./ParamGenerator";
 import Input from "@basic_components/inputs/Input";
 import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
@@ -202,13 +201,13 @@ class Endpoint extends Component{
             <div>
                 <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
                     <span className={styles.method_affix}>
-                        <TooltipText
-                            authUser={authUser}
+                        <TooltipFontIcon
+                            size={14}
+                            isButton={true}
                             tooltip={endpoint}
-                            text={'[...]'}
-                            className={styles.method_affix_placeholder}
-                            style={hasError ? {...tooltipTextStyles, color: 'red'} : tooltipTextStyles}
+                            value={<span>[...]</span>}
                             onClick={::this.openEndpointEdit}
+                            className={styles.method_affix_placeholder}
                         />
                         {
                             isEndpointEditOpen && !readOnly && this.renderEndpointEdit()
@@ -221,7 +220,7 @@ class Endpoint extends Component{
                             html={::this.parseEndpoint()}
                             disabled={readOnly}
                             onChange={::this.onChangeEndpoint}
-                            className={`${theme.inputElement} ${theme.filled}`}
+                            className={`${styles.method_endpoint_content_editable}`}
                             style={contentEditableStyles}
                         />
                     <ParamGenerator

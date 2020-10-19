@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Button as BootstrapButton} from 'reactstrap';
 import styles from '@themes/default/general/basic_components.scss';
-import {getThemeClass, formatHtmlId, isString} from "@utils/app";
+import {getThemeClass, formatHtmlId} from "@utils/app";
 import FontIcon from "../FontIcon";
 
 

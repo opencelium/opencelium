@@ -20,6 +20,8 @@ import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
 import {checkConnection} from "@decorators/checkConnection";
+import CVoiceControl from "@classes/components/content/voice_control/CVoiceControl";
+import CConnectionVoiceControl from "@classes/components/content/voice_control/CConnectionVoiceControl";
 
 
 /**
@@ -30,6 +32,14 @@ class ConnectionLayout extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount(){
+        //CVoiceControl.initCommands(this, CConnectionVoiceControl);
+    }
+
+    componentWillUnmount(){
+        //CVoiceControl.removeCommands(CConnectionVoiceControl);
     }
 
     render(){

@@ -20,6 +20,7 @@ import theme from "react-toolbox/lib/tooltip/theme.css";
 import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/general/basic_components.scss';
 import {CustomInput} from "reactstrap";
+import Loading from "@components/general/app/Loading";
 
 
 /**
@@ -47,14 +48,20 @@ class TooltipSwitch extends Component{
     }
 
     render(){
-        const {authUser, tooltip, middle, ...props} = this.props;
+        const {authUser, tooltip, middle, isLoading, ...props} = this.props;
         let classNames = [
+            'tooltip_switch_loading',
             'tooltip_switch',
             'tooltip',
             'switch_field',
             'switch',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
+        if(isLoading){
+            return (
+                <Loading className={styles[classNames.tooltip_switch_loading]} authUser={authUser}/>
+            );
+        }
         return (
             <span className={styles[classNames.tooltip_switch]} onMouseOver={::this.activate} onMouseLeave={::this.deactivate}>
                 <span className={`${theme.tooltip} ${theme.tooltipTop} ${ this.state.isActive ? theme.tooltipActive : ''} ${styles[classNames.tooltip]}`}>
@@ -71,10 +78,12 @@ TooltipSwitch.propTypes = {
     checked: PropTypes.bool.isRequired,
     onChange: PropTypes.func.isRequired,
     tooltip: PropTypes.string.isRequired,
+    isLoading: PropTypes.bool,
 };
 
 TooltipSwitch.defaultProps = {
     middle: false,
+    isLoading: false,
 };
 
 export default TooltipSwitch;

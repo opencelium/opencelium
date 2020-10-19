@@ -708,10 +708,17 @@
   padding-top: 10px;
 }
 .method_affix_placeholder{
-  cursor: pointer;
-  padding: 4px 0;
+  width: auto !important;
+  height: auto !important;
+  >span{
+    font-size: 14px !important;
+  }
+  padding: 1px 2px;
 }
 .method_affix_placeholder:hover{
+  box-shadow: #9f9f9f 0 1px 3px 0;
+}
+.method_affix_placeholder:focus{
   box-shadow: #9f9f9f 0 1px 3px 0;
 }
 .method_endpoint_label_has_error{
@@ -808,11 +815,9 @@
 }
 
 .param_generator_form_add{
-  width: 34px;
-  line-height: 40px;
-  text-align: center;
-  float: left;
-  cursor: pointer;
+  position: absolute;
+  right: 8px;
+  top: 10px;
 }
 
 .body_label{
@@ -1008,11 +1013,19 @@
 }
 
 .method_body_placeholder{
-  padding: 6px 5px;
-  cursor: pointer;
+  width: auto !important;
+  height: auto !important;
+  >span{
+    font-size: 14px !important;
+  }
+  padding: 4px 3px;
 }
 .method_body_placeholder:hover{
-  padding: 6px 5px;
+  padding: 4px 3px;
+  box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
+}
+.method_body_placeholder:focus{
+  padding: 4px 3px;
   box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
 }
 

@@ -79,7 +79,14 @@ class Value extends Component{
                             references !== '' &&
                                 <ToolboxThemeInput style={{paddingBottom: 0}} inputElementClassName={styles.multiselect_label} label={translate('XML_EDITOR.LIST_OF_REFERENCES')}>
                                     <div style={{position: 'relative', display: 'flex', width: '100%', flexWrap: 'wrap', padding: '0 1px'}}>
-                                        <ReferenceValues translate={translate} references={references} updateReferences={::this.updateReferences}/>
+                                        <ReferenceValues
+                                            styles={{
+                                                display: 'inline-block'
+                                            }}
+                                            translate={translate}
+                                            references={references}
+                                            updateReferences={::this.updateReferences}
+                                        />
                                     </div>
                                 </ToolboxThemeInput>
                         }

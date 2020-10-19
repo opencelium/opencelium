@@ -25,7 +25,6 @@ import {
 import Input from "@basic_components/inputs/Input";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CStatement, {STATEMENT_RESPONSE} from "@classes/components/content/connection/operator/CStatement";
-import {dotColor} from "../help";
 import {findTopLeft} from "@utils/app";
 import ReactDOM from "react-dom";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
@@ -179,12 +178,6 @@ class ParamGenerator extends Component {
                             fontSize: '12px',
                             borderBottom: isFocused && !isDisabled ? '2px solid #3f51b5 !important' : 'none',
                         }),
-                        control: styles => ({
-                            ...styles,
-                            borderRadius: 0,
-                            boxShadow: 'none',
-                            backgroundColor: 'initial'
-                        }),
                         dropdownIndicator: () => ({display: 'none'}),
                         menu: (styles, {isDisabled}) => {
                             let s = {
@@ -202,22 +195,21 @@ class ParamGenerator extends Component {
                             }
                             return s;
                         },
-                        option: (styles, {data, isDisabled,}) => {
-                            return {
-                                ...styles,
-                                ...dotColor(data.color),
-                                cursor: isDisabled ? 'not-allowed' : 'default',
-                            };
-                        },
                         singleValue: (styles, {data}) => {
                             return {
                                 ...styles,
-                                margin: 0,
+                                margin: '0 5%',
                                 maxWidth: '100%',
                                 color: data.color,
                                 background: data.color,
-                                width: '65%'
+                                width: '90%'
                             };
+                        },
+                        placeholder: (styles) => {
+                            return{
+                                ...styles,
+                                left: `calc(50% - 10px)`,
+                            }
                         }
                     }}
                 />
@@ -271,6 +263,7 @@ class ParamGenerator extends Component {
                     readOnly={readOnly || !hasMethod}
                     theme={inputTheme}
                     isPopupInput={true}
+                    disabled={!hasMethod}
                 >
                     <SelectSearch
                         id={`param_generator_${method.index}`}
@@ -298,14 +291,19 @@ class ParamGenerator extends Component {
         if(!isVisible) {
             if (showGenerator) {
                 return (
-                    <TooltipFontIcon key={1} value={'keyboard_arrow_left'} tooltip={'Hide Param Generator'}
-                                     onClick={::this.toggleShowGenerator}/>
+                    <TooltipFontIcon
+                        isButton={true}
+                        value={'keyboard_arrow_left'}
+                        tooltip={'Hide Param Generator'}
+                        onClick={::this.toggleShowGenerator}/>
                 );
             } else {
                 return (
-                    <TooltipFontIcon value={'keyboard_arrow_right'}
-                                     tooltip={showGenerator ? 'Hide Param Generator' : 'Show Param Generator'}
-                                     onClick={::this.toggleShowGenerator}/>
+                    <TooltipFontIcon
+                        isButton={true}
+                        value={'keyboard_arrow_right'}
+                        tooltip={showGenerator ? 'Hide Param Generator' : 'Show Param Generator'}
+                        onClick={::this.toggleShowGenerator}/>
                 );
             }
         }
@@ -313,8 +311,9 @@ class ParamGenerator extends Component {
     }
 
     renderGenerator(){
-        const {showGenerator} = this.state;
+        const {showGenerator, color} = this.state;
         const {isVisible, isAbsolute, parent, submitEdit} = this.props;
+        let hasMethod = color !== '';
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
@@ -327,7 +326,14 @@ class ParamGenerator extends Component {
                         <div key={2} className={isAbsolute ? styles.param_generator_form : ''}>
                             {this.renderMethodSelect()}
                             {this.renderParamInput()}
-                            <TooltipFontIcon tooltip={'Add'} value={'add'} className={styles.param_generator_form_add} onClick={submitEdit ? submitEdit : ::this.addParam}/>
+                            <TooltipFontIcon
+                                isButton={true}
+                                tooltip={'Add'}
+                                value={'add'}
+                                disabled={!hasMethod}
+                                className={styles.param_generator_form_add}
+                                onClick={submitEdit ? submitEdit : ::this.addParam}
+                            />
                         </div>
                         :
                         null

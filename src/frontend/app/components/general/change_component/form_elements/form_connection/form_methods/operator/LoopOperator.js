@@ -30,7 +30,6 @@ import {
     RESPONSE_SUCCESS
 } from "@classes/components/content/invoker/response/CResponse";
 import Input from "@basic_components/inputs/Input";
-import {dotColor} from "../help";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import Select from "@basic_components/inputs/Select";
 
@@ -204,19 +203,14 @@ class LoopOperator extends Component{
                             }
                             return s;
                         },
-                        option: (styles, {data, isDisabled,}) => {
-                            return {
-                                ...styles,
-                                ...dotColor(data.color),
-                                cursor: isDisabled ? 'not-allowed' : 'default',
-                            };
-                        },
                         singleValue: (styles, {data}) => {
                             return {
                                 ...styles,
                                 color: data.color,
                                 background: data.color,
-                                width: '70%'
+                                margin: '0 10%',
+                                width: '80%',
+                                maxWidth: 'none',
                             };
                         }
                     }}

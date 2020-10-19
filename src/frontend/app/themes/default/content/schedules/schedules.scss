@@ -68,16 +68,6 @@
   font-family: $FONT_FAMILY;
 }
 
-.schedule_list_status_cell_loading{
-  font-family: $FONT_FAMILY;
-  margin: 0 !important;
-  min-height: 0 !important;
-  >div {
-    height: 20px;
-    width: 20px;
-  }
-}
-
 .schedule_list_status{
   transition: all 0.5s;
   vertical-align: middle !important;

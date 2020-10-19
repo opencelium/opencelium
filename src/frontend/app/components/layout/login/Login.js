@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import {withTranslation} from "react-i18next";
 import {connect} from "react-redux";
 
-import {generateLabel, onEnter, setFocusById} from "@utils/app";
+import {onEnter, setFocusById} from "@utils/app";
 import {loginUser} from '@actions/auth';
 import Input from "@basic_components/inputs/Input";
 import styles from '@themes/default/layout/login.scss';
@@ -27,7 +27,6 @@ import {
     removeLoginKeyNavigation
 } from "@utils/key_navigation";
 import ValidationMessage from "@change_component/ValidationMessage";
-import Button from "@basic_components/buttons/Button";
 import LoginIcon from "@components/icons/LoginIcon";
 
 
@@ -200,12 +199,6 @@ class Login extends Component{
                     onClick={::this.login}
                     id={'login_button'}
                 />
-                {/*<Button
-                    className={styles.button_connect}
-                    onClick={::this.login}
-                    id={'login_button'}
-                    title={t("LOGIN.BUTTON_CONNECT")}
-                />*/}
             </div>
         );
     }

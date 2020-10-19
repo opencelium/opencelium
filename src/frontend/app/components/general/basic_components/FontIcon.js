@@ -31,11 +31,14 @@ class FontIcon extends Component{
     }
 
     render(){
-        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, value, size, ref, iconStyles, onButtonFocus, onButtonBlur, ...props} = this.props;
+        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, value, size, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
         let sizeStyle = {width: `${size}px`, height: `${size}px`};
         if(blueTheme === true){
             theme = styles.blue_theme;
+        }
+        if(disabled){
+            theme = styles.disabled_item;
         }
         if(value === 'loading'){
             return(
@@ -44,13 +47,13 @@ class FontIcon extends Component{
         }
         if (isButton) {
             return (
-                <button ref={ref ? ref : this.icon} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
+                <button ref={myRef ? myRef : this.icon} disabled={disabled} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
                     <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles, fontSize: `${size}px`}}/>
                 </button>
             );
         } else {
             return (
-                <span ref={ref ? ref : this.icon} >
+                <span ref={myRef ? myRef : this.icon} >
                     <ToolboxFontIcon value={value} className={className} {...props} onClick={onClick} id={id}/>
                 </span>
             );
@@ -66,6 +69,7 @@ FontIcon.propTypes = {
     blueTheme: PropTypes.bool,
     onButtonBlur: PropTypes.func,
     onButtonFocus: PropTypes.func,
+    disabled: PropTypes.bool,
 };
 
 FontIcon.defaultProps = {
@@ -74,9 +78,10 @@ FontIcon.defaultProps = {
     iconStyles: {},
     darkTheme: true,
     blueTheme: false,
-    ref: null,
+    myRef: null,
     onButtonBlur: () => {},
     onButtonFocus: () => {},
+    disabled: false,
 };
 
 export default FontIcon;

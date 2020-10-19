@@ -21,7 +21,7 @@ import {ARRAY_SIGN, WHOLE_ARRAY} from "@classes/components/content/invoker/respo
 /**
  * circle with background color to select method
  */
-export const dotColor = (color = '#ccc') => ({
+export const dotColor = (color = '#ccc') => (color !== '#ccc' ? {
     alignItems: 'center',
     display: 'flex',
 
@@ -34,7 +34,7 @@ export const dotColor = (color = '#ccc') => ({
         height: 10,
         width: 10,
     },
-});
+} : {});
 
 /**
  * to mark field name as array

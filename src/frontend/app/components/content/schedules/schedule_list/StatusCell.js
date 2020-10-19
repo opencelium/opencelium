@@ -64,7 +64,6 @@ class StatusCell extends Component{
         const {schedule, currentSchedule, updatingScheduleStatus, triggeringSchedule, triggeringScheduleSuccessfully, authUser, t, index} = this.props;
         let classNames = [
             'schedule_list_status',
-            'schedule_list_status_cell_loading',
             'schedule_list_status_red',
             'schedule_list_status_green',
             'schedule_list_status_created',
@@ -74,13 +73,7 @@ class StatusCell extends Component{
             'schedule_list_status_disable',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        if((updatingScheduleStatus || triggeringSchedule || triggeringScheduleSuccessfully) && currentSchedule.id === schedule.id){
-            return (
-                <td>
-                    <Loading className={styles[classNames.schedule_list_status_cell_loading]} authUser={authUser}/>
-                </td>
-            );
-        }
+        const isLoading = (updatingScheduleStatus || triggeringSchedule || triggeringScheduleSuccessfully) && currentSchedule.id === schedule.id;
         const {status, lastExecution} = schedule;
         let backgroundStyle = styles[classNames.schedule_list_status_created];
         if(lastExecution) {
@@ -105,6 +98,7 @@ class StatusCell extends Component{
             <td className={backgroundStyle}>
                 <TooltipSwitch
                     id={`switch_status_${index}`}
+                    isLoading={isLoading}
                     authUser={authUser}
                     tooltip={schedule.status ? t('LIST.TOOLTIP_ENABLE_SWITCH_FALSE') : t('LIST.TOOLTIP_ENABLE_SWITCH_TRUE')}
                     checked={status}

@@ -13,20 +13,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component, Suspense} from 'react';
+import React, {Component} from 'react';
 import {withTranslation} from "react-i18next";
+import { withRouter } from 'react-router';
 import {connect} from "react-redux";
 import Header from "./header/Header";
 import Footer from "./footer/Footer";
 import {changeLanguage} from "@actions/app";
 import {defaultLanguage} from "@utils/constants/languages";
-import store from '@utils/store';
 import {addUserInStore} from '@actions/users/add';
 
 import { addUserListener,
 } from '@utils/socket/users';
 import LayoutError from "./LayoutError";
-import styles from '@themes/default/layout/layout.scss';
 import Notification from "../general/app/Notification";
 import {NotificationType} from "@utils/constants/notifications/notifications";
 import {checkOCConnection, logoutUserFulfilled} from "@actions/auth";
@@ -156,4 +155,4 @@ class Layout extends Component{
         );
     }
 }
-export default Layout;
+export default withRouter(Layout);

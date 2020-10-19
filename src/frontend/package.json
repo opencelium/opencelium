@@ -4,6 +4,7 @@
   "description": "OpenSource API-Hub",
   "private": true,
   "dependencies": {
+    "annyang": "^2.6.1",
     "autoprefixer": "^9.6.1",
     "body-scroll-lock": "^2.6.1",
     "bootstrap": "^4.3.1",

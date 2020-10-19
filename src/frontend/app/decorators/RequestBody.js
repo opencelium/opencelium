@@ -223,6 +223,7 @@ export function RequestBody(CRequestType){
                     return(
                         <React.Fragment>
                             <TooltipFontIcon
+                                isButton={true}
                                 className={styles.method_body_placeholder}
                                 tooltip={'more details'}
                                 value={<span>{CRequestType.getPlaceholder()}</span>}
@@ -235,6 +236,8 @@ export function RequestBody(CRequestType){
                 renderCloseMenuEditButton(){
                     return (
                         <TooltipFontIcon
+                            size={16}
+                            isButton={true}
                             className={styles.body_close_menu_edit}
                             value={'check_circle_outline'}
                             tooltip={'Apply'}
