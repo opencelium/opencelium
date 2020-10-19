@@ -21,7 +21,7 @@ export const RESPONSE_SUCCESS = 'success';
 export const RESPONSE_FAIL = 'fail';
 
 /**
- * (not used)
+ * Response Class
  */
 export default class CResponse{
 
