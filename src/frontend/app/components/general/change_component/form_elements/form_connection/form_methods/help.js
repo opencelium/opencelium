@@ -13,10 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {isArray, isNumber, isObject, isString} from "@utils/app";
-import {ARRAY_SIGN, WHOLE_ARRAY} from "@classes/components/content/invoker/response/CResponseResult";
+import {isArray, isObject, isString} from "@utils/app";
 
 
+export const ARRAY_SIGN = '[]';
+export const WHOLE_ARRAY = '[*]';
 
 /**
  * circle with background color to select method

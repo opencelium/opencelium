@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {CResponseResult} from "@classes/components/content/invoker/response/CResponseResult";
+import CResponseResult from "@classes/components/content/invoker/response/CResponseResult";
 
 /**
  * Class Success for Response

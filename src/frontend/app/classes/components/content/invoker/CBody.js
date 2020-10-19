@@ -17,8 +17,6 @@ export const BODY_DATA = {
 export const VALUE_PROPERTY = '__oc__value';
 export const ATTRIBUTES_PROPERTY = '__oc__attributes';
 export const ATTRIBUTES_MARK = '@';
-export const ATTRIBUTES_MARK_REG = '/^@$/';
-export const TAG_MARK_REG = '/^<.+/>$/';
 
 /**
  * Body class for Request, Success and Fail classes

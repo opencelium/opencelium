@@ -19,7 +19,6 @@ import {
     hasArrayMark, parseHeader
 } from "@change_component/form_elements/form_connection/form_methods/help";
 import CBody from "@classes/components/content/invoker/CBody";
-import {instanceOf} from "prop-types";
 import {FIELD_TYPE_ARRAY} from "@classes/components/content/connection/method/CMethodItem";
 
 export const ARRAY_SIGN = '[]';
@@ -28,7 +27,7 @@ export const WHOLE_ARRAY = '[*]';
 /**
  * Class ResponseResult as a Parent for Success and Fail classes
  */
-export class CResponseResult{
+export default class CResponseResult{
 
     constructor(status = '', body = null, header = []){
         this._status = status;
@@ -53,7 +52,7 @@ export class CResponseResult{
     }
 
     set body(body){
-        if(!instanceOf(CBody)) {
+        if(!(body instanceof CBody)) {
             this._body = CBody.createBody(body);
         } else{
             this._body = body;
