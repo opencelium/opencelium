@@ -139,12 +139,17 @@ public class InvokerServiceImp implements InvokerService{
 
     @Override
     public String findFieldByPath(String invokerName, String methodName, String path)  {
+
+        path = path.replace("@", "__oc__attributes.");
+
         String exchangeType = ConditionUtility.getExchangeType(path);
         String result = ConditionUtility.getResult(path);
 
         Invoker invoker = findByName(invokerName);
         FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
                 .findFirst().orElseThrow(() -> new RuntimeException("Method not found in invoker"));
+
+        String format = functionInvoker.getResponse().getSuccess().getBody().getFormat();
         Map<String, Object> fields;
         if (exchangeType.equals("response") && result.equals("success")){
             fields = functionInvoker.getResponse().getSuccess().getBody().getFields();
@@ -155,6 +160,12 @@ public class InvokerServiceImp implements InvokerService{
         }
 
         String[] valueParts = ConditionUtility.getRefValue(path).split("\\.");
+        if (format.equals("xml")) {
+            String lastElem = valueParts[valueParts.length -1];
+            if (!lastElem.contains("@")) {
+                path = path + ".__oc__value";
+            }
+        }
 
         Object value = new Object();
         for (String part : valueParts) {

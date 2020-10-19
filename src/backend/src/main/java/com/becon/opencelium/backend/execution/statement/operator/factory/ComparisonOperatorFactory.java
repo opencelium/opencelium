@@ -47,6 +47,10 @@ public class ComparisonOperatorFactory implements OperatorFactory {
                 return new Contains();
             case "NotContains":
                 return new NotContains();
+            case "PropertyExists":
+                return new PropertyExists();
+            case "PropertyNotExists":
+                return new PropertyNotExists();
             default:
                 throw new RuntimeException("Operator '" + type + "' not supported");
         }
