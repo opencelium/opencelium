@@ -86,7 +86,7 @@ public class InvokerRequestBuilder{
         }
 
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
-        if (body.equals("null")){
+        if (body == null || body.equals("null")){
             httpEntity = new HttpEntity <Object> (header);
         }
         return restTemplate.exchange(url, method ,httpEntity, String.class);
@@ -156,6 +156,9 @@ public class InvokerRequestBuilder{
     private String buildBody() {
         try {
             Body body = functionInvoker.getRequest().getBody();
+            if (body == null) {
+                return null;
+            }
             ObjectMapper objectMapper = new ObjectMapper();
             String result = "";
             if (body.getFormat().equals("xml")) {

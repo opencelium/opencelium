@@ -150,8 +150,19 @@ public class ConnectorController {
 
         ObjectMapper mapper = new ObjectMapper();
         FunctionInvoker functionInvoker =  invokerService.getTestFunction(connector.getInvoker());
-        Map<String, Object> failBody = functionInvoker.getResponse().getFail().getBody().getFields();
-        Map<String, Object> response = mapper.readValue(responseEntity.getBody().toString(), Map.class);
+
+        Map<String, Object> failBody = null;
+        String formatType = "";
+        if (functionInvoker.getResponse().getFail().getBody() != null) {
+            formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
+            failBody = functionInvoker.getResponse().getFail().getBody().getFields();
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        if (formatType.equals("json")) {
+            response = mapper.readValue(responseEntity.getBody().toString(), Map.class);
+        }
+
         if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(failBody, response)){
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
@@ -163,6 +174,10 @@ public class ConnectorController {
     }
 
     private boolean hasError(Map<String, Object> failBody, Map<String, Object> response) {
+
+        if (failBody == null) {
+            return false;
+        }
 
         for (Map.Entry<String, Object> failEntry : failBody.entrySet()) {
             if (!response.containsKey(failEntry.getKey())){
