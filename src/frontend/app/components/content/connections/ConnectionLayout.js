@@ -14,6 +14,7 @@
  */
 
 import React, {Component, Suspense} from 'react';
+import {connect} from 'react-redux';
 import {Container} from 'react-grid-system';
 
 import Loading from '@loading';
@@ -33,8 +34,8 @@ function mapStateToProps(state){
 /**
  * Layout for Connections
  */
-@checkConnection()
 @connect(mapStateToProps, {})
+@checkConnection()
 class ConnectionLayout extends Component{
 
     constructor(props){
