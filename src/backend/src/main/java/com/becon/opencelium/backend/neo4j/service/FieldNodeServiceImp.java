@@ -86,6 +86,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         field = field.replace("@", "__oc__attributes.");
         LinkedList<String> path = new LinkedList<>(Arrays.asList(field.split("\\.")));
         String result;
+        String format = "";
         if (type.equals("response")){
             result = path.pop();
             String firstField = path.pop();
@@ -93,6 +94,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
             if (firstField.isEmpty()) {
                 firstField = path.pop();
             }
+            format = methodNode.getResponseNode().getSuccess().getBody().getFormat();
             currentField = fieldNodeRepository.findFirstFieldInResponse(connectionId,color,result,firstField);
         } else {
             String firstField;
@@ -101,6 +103,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
             } else {
                 firstField = path.pop();
             }
+            format = methodNode.getRequestNode().getBodyNode().getFormat();
             firstField = StringUtility.removeSquareBraces(firstField);
             currentField = fieldNodeRepository.findFirstFieldInRequest(connectionId,color,firstField);
         }
@@ -117,7 +120,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         while (!path.isEmpty()) {
             String nextField = path.pop();
             nextField = StringUtility.removeSquareBraces(nextField);
-            if (path.isEmpty() && !currentField.getName().equals("__oc__attributes") && !nextField.equals("__oc__value")) {
+            if (path.isEmpty() && !currentField.getName().equals("__oc__attributes") && !nextField.equals("__oc__value") && format.equals("xml")) {
                 path.push("__oc__value");
             }
             currentField = fieldNodeRepository.findNextField(nextField, currentField.getId());
