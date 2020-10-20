@@ -104,7 +104,7 @@ public class InvokerParserImp {
         return xmlDomParser.doAction("operation", node -> {
             FunctionInvoker function = new FunctionInvoker();
             String name = node.getAttributes().getNamedItem("name").getNodeValue();
-            String type = node.getAttributes().getNamedItem("type").getNodeValue();;
+            String type = node.getAttributes().getNamedItem("type").getNodeValue();
             function.setName(name);
             function.setType(type);
             function.setRequest(getRequest(node.getChildNodes()));
@@ -167,14 +167,20 @@ public class InvokerParserImp {
         InvokerParserFactory<Body> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, Body> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);
         return xmlDomParser.doAction("body", node -> {
-            Body body = new Body();
-
-            if (!node.hasAttributes()) {
+            if (!node.hasAttributes() && !node.hasChildNodes()) {
                 return null;
             }
-            String format= node.getAttributes().getNamedItem("format").getNodeValue();
-            String type = node.getAttributes().getNamedItem("type").getNodeValue();
-            String data = node.getAttributes().getNamedItem("data").getNodeValue();
+            Body body = new Body();
+
+            String format = "";
+            String type = "";
+            String data = "";
+            if (node.hasAttributes()) {
+                 format= node.getAttributes().getNamedItem("format").getNodeValue();
+                 type = node.getAttributes().getNamedItem("type").getNodeValue();
+                 data = node.getAttributes().getNamedItem("data").getNodeValue();
+            }
+
             Map<String, Object> fields = getFields(node.getChildNodes());
             body.setFields(fields);
             body.setData(data);
@@ -213,12 +219,14 @@ public class InvokerParserImp {
                 return fields;
             } else {
                 String value = node.getTextContent();
+                value = value.replace("\n", "").replace("\r", "").replace(" ", "");
                 if (node.getTextContent().isEmpty()){
                     value = "";
                 }
                 if (value.equals("null")){
                     value = null;
                 }
+
                 fields.put(name, value);
                 return fields;
             }
