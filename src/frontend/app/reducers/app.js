@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {fromJS} from 'immutable';
+import {fromJS, List} from 'immutable';
 
 import {AppAction} from '../utils/actions';
 import i18n from '../utils/i18n';
@@ -27,6 +27,7 @@ const initialState = fromJS({
     currentLanguage: defaultLanguage.code,
     addingErrorTicket: API_REQUEST_STATE.INITIAL,
     fetchingAppVersion: API_REQUEST_STATE.INITIAL,
+    currentPageItems: [],
     appVersion: '2',
     currentMenu: {},
     error: null,
@@ -56,6 +57,8 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingAppVersion', API_REQUEST_STATE.FINISH).set('appVersion', action.payload);
         case AppAction.FETCH_APPVERSION_REJECTED:
             return state.set('fetchingAppVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case AppAction.SET_CURRENT_PAGE_ITEMS:
+            return state.set('currentPageItems', List(action.payload));
         default:
             return state;
     }

@@ -20,14 +20,21 @@ import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
 import {checkConnection} from "@decorators/checkConnection";
-import CVoiceControl from "@classes/components/content/voice_control/CVoiceControl";
-import CConnectionVoiceControl from "@classes/components/content/voice_control/CConnectionVoiceControl";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CConnectionListVoiceControl from "@classes/voice_control/connection/CConnectionListVoiceControl";
 
 
+function mapStateToProps(state){
+    const app = state.get('app');
+    return {
+        currentPageItems: app.get('currentPageItems').toJS(),
+    };
+}
 /**
  * Layout for Connections
  */
 @checkConnection()
+@connect(mapStateToProps, {})
 class ConnectionLayout extends Component{
 
     constructor(props){
@@ -35,11 +42,11 @@ class ConnectionLayout extends Component{
     }
 
     componentDidMount(){
-        //CVoiceControl.initCommands(this, CConnectionVoiceControl);
+        CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems}, CConnectionListVoiceControl);
     }
 
     componentWillUnmount(){
-        //CVoiceControl.removeCommands(CConnectionVoiceControl);
+        CVoiceControl.removeCommands(CConnectionListVoiceControl);
     }
 
     render(){

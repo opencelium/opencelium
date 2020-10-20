@@ -15,6 +15,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 import { Container, Row, Col } from "react-grid-system";
 
 import ListHeader from './Header';
@@ -22,6 +23,7 @@ import Card from './Card';
 import Pagination, {ENTITIES_PRO_PAGE} from "@basic_components/pagination/Pagination";
 import CardError from "./CardError";
 import AddButton from "./AddButton";
+import {setCurrentPageItems} from "@actions/app";
 import {
     addAddEntityKeyNavigation,
     addDeleteCardKeyNavigation,
@@ -53,9 +55,16 @@ import styles from '@themes/default/general/list_of_components.scss';
 import Input from "@basic_components/inputs/Input";
 
 
+function mapStateToProps(state){
+    const app = state.get('app');
+    return {
+        currentPageItems: app.get('currentPageItems').toJS(),
+    };
+}
 /**
  * List Component
  */
+@connect(mapStateToProps, {setCurrentPageItems})
 class List extends Component{
 
     constructor(props){
@@ -71,6 +80,7 @@ class List extends Component{
 
     componentDidMount(){
         const {mapEntity} = this.props;
+        this.props.setCurrentPageItems(this.filterEntities());
         addSelectCardKeyNavigation(this);
         if(this.hasNoActions()){
             addEnterKeyNavigation(this);
@@ -120,8 +130,15 @@ class List extends Component{
         switchUserListKeyNavigation(false);
     }
 
+    componentDidUpdate(prevProps){
+        if(this.props.page.pageNumber !== prevProps.page.pageNumber){
+            this.props.setCurrentPageItems(this.filterEntities());
+        }
+    }
+
     changeSearchValue(searchValue){
         this.setState({searchValue});
+        this.props.setCurrentPageItems(this.filterEntities());
     }
 
     /**
@@ -228,17 +245,16 @@ class List extends Component{
     }
 
     render(){
-        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField} = this.props;
+        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems} = this.props;
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue} = this.state;
         let {page, translations} = this.props;
         let classNames = ['empty_list'];
-        let filteredEntities = this.filterEntities();
         classNames = getThemeClass({classNames, authUser, styles});
         page.entitiesLength = this.searchEntities().length;
         return(
             <Row id={'app_list'}>
                 <Col xl={8} lg={10} md={12} sm={12} offset={{ xl: 2, lg: 1 }} >
-                    <Container style={containerStyles} style={{marginBottom: '70px'}}>
+                    <Container style={{...containerStyles, marginBottom: '70px'}}>
                         <ListHeader header={translations.header} authUser={authUser}/>
                         {
                             entities.length > 0 && !noSearchField &&
@@ -248,9 +264,9 @@ class List extends Component{
                         }
                         <Row>
                             {
-                                filteredEntities.length > 0
+                                currentPageItems.length > 0
                                     ?
-                                        filteredEntities.map((entity, key) => {
+                                        currentPageItems.map((entity, key) => {
                                             let mappedEntity = mapEntity.map(entity, key);
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';

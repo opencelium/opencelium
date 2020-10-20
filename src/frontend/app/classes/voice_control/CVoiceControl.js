@@ -1,11 +1,15 @@
 import annyang from 'annyang';
 
+export const PREFIX_COMMAND_NAME = "(please) (let\'s)";
+
 class CVoiceControl{
 
     static getCommonCommands(){
+        const offCommandName = `${PREFIX_COMMAND_NAME} off`;
+        const pauseCommandName = `${PREFIX_COMMAND_NAME} pause`;
         return {
-            'open celium off': () => CVoiceControl.stop(),
-            'open celium pause': () => CVoiceControl.pause(),
+            [offCommandName]: () => CVoiceControl.stop(),
+            [pauseCommandName]: () => CVoiceControl.pause(),
         };
     }
 
@@ -14,9 +18,9 @@ class CVoiceControl{
         return Object.keys(commands).map(key => commands[key]);
     }
 
-    static initCommands(component, ComponentControl){
+    static initCommands(data, ComponentControl){
         if (annyang) {
-            annyang.addCommands({...CVoiceControl.getCommonCommands(), ...ComponentControl.getCommands(component)});
+            annyang.addCommands({...CVoiceControl.getCommonCommands(), ...ComponentControl.getCommands(data)});
             CVoiceControl.start();
         }
     }

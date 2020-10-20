@@ -121,6 +121,16 @@ const fetchAppVersionRejected = (error) => {
     });
 };
 
+/**
+ * set current page items
+ * @returns {{type: string, payload: {}}}
+ */
+const setCurrentPageItems = (currentItems) => {
+    return {
+        type: AppAction.SET_CURRENT_PAGE_ITEMS,
+        payload: currentItems,
+    };
+};
 
 
 export {
@@ -133,4 +143,5 @@ export {
     fetchAppVersion,
     fetchAppVersionFulfilled,
     fetchAppVersionRejected,
+    setCurrentPageItems,
 };
