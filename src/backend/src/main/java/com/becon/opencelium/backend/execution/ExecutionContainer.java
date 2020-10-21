@@ -89,7 +89,9 @@ public class ExecutionContainer {
                 MethodNode inMethod = methodNodeService.getByFieldNodeId(f.getId())
                         .orElseThrow(() -> new RuntimeException("Method not found"));
 
-                String inFieldPath = fieldNodeService.getPath(inMethod, f);
+                String inFieldPath = fieldNodeService.getPath(inMethod, f)
+                        .replace("__oc__attributes.", "@")
+                        .replace(".__oc__value", "");
                 MessageContainer messageContainer = responseData
                         .stream()
                         .filter(m -> m.getMethodKey().equals(inMethod.getColor()))
@@ -97,7 +99,7 @@ public class ExecutionContainer {
                 Object o = messageContainer.getValue(inFieldPath, getLoopIndex());
                 String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
 
-                inFieldPath = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
+                inFieldValue = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
                 expertVarProperties.put(inFieldPath, inFieldValue);
             } catch (JsonProcessingException e){
                 throw new RuntimeException(e);
@@ -108,7 +110,9 @@ public class ExecutionContainer {
         expertVarProperties.forEach((k,v) -> {
             try {
                 String var = expertVars.get(k);
-
+                if(var == null) {
+                    throw new RuntimeException(k + "not found in enhancement variables");
+                }
                 if (fieldNodeService.valueIsJSON(v)){
                     engine.put("dataModel", v);
                     JSObject obj = (JSObject)engine.eval("JSON.parse(dataModel)");
