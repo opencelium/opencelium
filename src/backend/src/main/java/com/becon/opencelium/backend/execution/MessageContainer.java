@@ -111,7 +111,7 @@ public class MessageContainer {
 
     private Object xmlPathFinder(String value, Map<String, Integer> loopStack){
         String ref = value.replaceFirst("\\$", "");
-        String jsonPath = "$";
+        String xpathQuery = "//";
         String condition = ConditionUtility.getPathToValue(ref);
         String refValue = ConditionUtility.getRefValue(ref);
 
@@ -154,24 +154,30 @@ public class MessageContainer {
                 part = part.replace("[]", "");
                 part = part + "[*]";
             }
+
+            xpathQuery = xpathQuery + part + "/";
+            i++;
         }
+
+        xpathQuery = removeLastCharOptional(xpathQuery);
+        xpathQuery = xpathQuery.replace("/__oc__value", "");
+        xpathQuery = xpathQuery.replace("/__oc__attributes", "");
 
         try {
             XPathFactory xpathfactory = XPathFactory.newInstance();
             XPath xpath = xpathfactory.newXPath();
-            condition = "//" + condition;
-            List<String> cpart =  Arrays.asList(condition.split("/"));
+            List<String> cpart =  Arrays.asList(xpathQuery.split("/"));
             String lastElem = cpart.get(cpart.size() - 1);
             if (!lastElem.contains("@")){
-                condition = condition + "/text()";
+                xpathQuery = xpathQuery + "/text()";
             }
-            XPathExpression expr = xpath.compile(condition); // //book[@year>2001]/title/text()
+            XPathExpression expr = xpath.compile(xpathQuery); // //book[@year>2001]/title/text()
             Document doc = convertStringToXMLDocument(message);
 
             NodeList nodeList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
             ArrayList<Object> result = new ArrayList<>();
             for (int j = 0; j < nodeList.getLength(); j++) {
-               Node node = nodeList.item(i);
+               Node node = nodeList.item(j);
                result.add(node.getNodeValue());
             }
 
@@ -183,6 +189,13 @@ public class MessageContainer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String removeLastCharOptional(String s) {
+        return Optional.ofNullable(s)
+                .filter(str -> str.length() != 0)
+                .map(str -> str.substring(0, str.length() - 1))
+                .orElse(s);
     }
 
     private static Document convertStringToXMLDocument(String xmlString)
