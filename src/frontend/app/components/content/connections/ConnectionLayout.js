@@ -46,6 +46,10 @@ class ConnectionLayout extends Component{
         CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems}, CConnectionListVoiceControl);
     }
 
+    componentDidUpdate(){
+        CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems}, CConnectionListVoiceControl);
+    }
+
     componentWillUnmount(){
         CVoiceControl.removeCommands(CConnectionListVoiceControl);
     }
