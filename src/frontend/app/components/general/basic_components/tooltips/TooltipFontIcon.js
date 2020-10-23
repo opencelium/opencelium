@@ -44,17 +44,19 @@ class TooltipFontIcon extends Component{
     componentDidUpdate(){
         const {isButton} = this.props;
         let iconElem = ReactDOM.findDOMNode(this.icon.current);
-        if(!isButton){
-            iconElem = iconElem.firstChild;
-        }
-        let position = findTopLeftPosition(iconElem);
-        let newLeft = position.left + (iconElem.offsetWidth / 2);
-        let newTop = position.top + (iconElem.offsetHeight / 2) - 2;
-        if(this.state.left !== newLeft || this.state.top !== newTop) {
-            this.setState({
-                left: newLeft,
-                top: newTop,
-            })
+        if(iconElem) {
+            if (!isButton) {
+                iconElem = iconElem.firstChild;
+            }
+            let position = findTopLeftPosition(iconElem);
+            let newLeft = position.left + (iconElem.offsetWidth / 2);
+            let newTop = position.top + (iconElem.offsetHeight / 2) - 2;
+            if (this.state.left !== newLeft || this.state.top !== newTop) {
+                this.setState({
+                    left: newLeft,
+                    top: newTop,
+                })
+            }
         }
     }
 

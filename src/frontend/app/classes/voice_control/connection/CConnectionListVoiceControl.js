@@ -1,4 +1,7 @@
-import CCommonControl, {VOICE_CONTROL_REPLACE_SYMBOL} from "@classes/voice_control/CCommonControl";
+import CCommonControl, {
+    VOICE_CONTROL_DATA_SYMBOL,
+    VOICE_CONTROL_REPLACE_SYMBOL
+} from "@classes/voice_control/CCommonControl";
 import {PREFIX_COMMAND_NAME} from "@classes/voice_control/CVoiceControl";
 
 export default class CConnectionListVoiceControl extends CCommonControl{
@@ -11,8 +14,8 @@ export default class CConnectionListVoiceControl extends CCommonControl{
         return {};
     }
 
-    static updateCommands(component){
-        return {};
+    static updateCommands(data){
+        return this.getUpdateCommands(`${PREFIX_COMMAND_NAME} ${VOICE_CONTROL_REPLACE_SYMBOL} ${VOICE_CONTROL_DATA_SYMBOL} connection`, data);
     }
 
     static listCommands(component){
@@ -21,9 +24,9 @@ export default class CConnectionListVoiceControl extends CCommonControl{
 
     static getCommands(data = {component: null, currentItems: []}){
         const addCommands = this.addCommands(data.component);
-        const removeCommands = this.removeCommands(data.component);
-        const updateCommands = this.updateCommands(data.component);
-        const listCommands = this.listCommands(data);
+        const removeCommands = this.removeCommands(data);
+        const updateCommands = this.updateCommands(data);
+        const listCommands = this.listCommands(data.component);
         return {
             ...addCommands,
             ...removeCommands,

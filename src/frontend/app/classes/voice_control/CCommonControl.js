@@ -1,4 +1,5 @@
 export const VOICE_CONTROL_REPLACE_SYMBOL = '#';
+export const VOICE_CONTROL_DATA_SYMBOL = '$';
 
 export default class CCommonControl{
 
@@ -21,9 +22,16 @@ export default class CCommonControl{
         return CCommonControl.defineCommands(name, value, commandTags);
     }
 
-    static getUpdateCommands(name, value){
+    static getUpdateCommands(name, data){
         const commandTags = ['update', 'refresh'];
-        return CCommonControl.defineCommands(name, value, commandTags);
+        const dataTags = ['first', 'second', 'third', 'fourth'];
+        let commands = {};
+        for(let i = 0; i < data.currentItems.length; i++){
+            let value = data.component ? () => data.component.props.router.push(`/connections/${data.currentItems[i].connectionId}/update`) : null;
+            commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, data.currentItems[i].title), value, commandTags)};
+            commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, dataTags[i]), value, commandTags)};
+        }
+        return commands;
     }
 
     static getListCommands(name, value){
