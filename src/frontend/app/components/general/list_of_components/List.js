@@ -80,7 +80,7 @@ class List extends Component{
 
     componentDidMount(){
         const {mapEntity} = this.props;
-        this.props.setCurrentPageItems(this.filterEntities());
+        this.setCurrentPageItems();
         addSelectCardKeyNavigation(this);
         if(this.hasNoActions()){
             addEnterKeyNavigation(this);
@@ -131,14 +131,20 @@ class List extends Component{
     }
 
     componentDidUpdate(prevProps){
-        if(this.props.page.pageNumber !== prevProps.page.pageNumber){
-            this.props.setCurrentPageItems(this.filterEntities());
+        if(this.props.page.pageNumber !== prevProps.page.pageNumber || this.props.entities.length !== prevProps.entities.length){
+            this.setCurrentPageItems();
         }
     }
 
     changeSearchValue(searchValue){
         this.setState({searchValue});
-        this.props.setCurrentPageItems(this.filterEntities());
+        this.setCurrentPageItems();
+    }
+
+    setCurrentPageItems(){
+        const {mapEntity, setCurrentPageItems} = this.props;
+        let filteredEntities = this.filterEntities().map((entity, key) => {return {...entity, mappedEntity: mapEntity.map(entity, key)};});
+        setCurrentPageItems(filteredEntities);
     }
 
     /**
@@ -267,7 +273,6 @@ class List extends Component{
                                 currentPageItems.length > 0
                                     ?
                                         currentPageItems.map((entity, key) => {
-                                            let mappedEntity = mapEntity.map(entity, key);
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
                                             let graphLink = mapEntity.hasOwnProperty('getGraphLink') ? mapEntity.getGraphLink(entity) : '';
@@ -288,8 +293,8 @@ class List extends Component{
                                                             hasTour={translations.header.hasOwnProperty('onHelpClick') && (key === 0 || key === 1)}
                                                             index={key}
                                                             keyNavigateType={keyNavigateType}
-                                                            entity={mappedEntity}
-                                                            isException={exceptionEntities.exceptions.indexOf(mappedEntity.id) !== -1}
+                                                            entity={entity.mappedEntity}
+                                                            isException={exceptionEntities.exceptions.indexOf(entity.mappedEntity.id) !== -1}
                                                             exceptionLabel={exceptionEntities.label}
                                                             viewLink={viewLink}
                                                             updateLink={updateLink}

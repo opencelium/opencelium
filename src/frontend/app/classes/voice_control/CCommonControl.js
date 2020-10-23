@@ -1,3 +1,5 @@
+import {capitalize, consoleLog} from "@utils/app";
+
 export const VOICE_CONTROL_REPLACE_SYMBOL = '#';
 export const VOICE_CONTROL_DATA_SYMBOL = '$';
 
@@ -17,9 +19,30 @@ export default class CCommonControl{
         return CCommonControl.defineCommands(name, value, commandTags);
     }
 
-    static getRemoveCommands(name, value){
+    static getDeleteCommands(name, data){
         const commandTags = ['remove', 'delete'];
-        return CCommonControl.defineCommands(name, value, commandTags);
+        //const dataTags = ['first', 'second', 'third', 'fourth'];
+        let commands = {};
+        if(data && data.component){
+            let deleteAction = null;
+            if(data.hasOwnProperty('deleteActionName') && data.deleteActionName !== '' && data.component.props.hasOwnProperty(data.deleteActionName)) {
+                deleteAction = data.component.props[data.deleteActionName];
+            } else {
+                if (data.component.props.hasOwnProperty(`delete${capitalize(data.componentSingleName)}`)) {
+                    deleteAction = data.component.props[`delete${capitalize(data.componentSingleName)}`];
+                }
+            }
+            if(deleteAction !== null){
+                for (let i = 0; i < data.currentItems.length; i++) {
+                    let value = () => deleteAction(data.currentItems[i].mappedEntity);
+                    commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, data.currentItems[i].mappedEntity.title), value, commandTags)};
+                    //commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, dataTags[i]), value, commandTags)};
+                }
+            } else{
+                consoleLog('You have forgot to import the delete "entity" method in "Entity"Layout');
+            }
+        }
+        return commands;
     }
 
     static getUpdateCommands(name, data){
@@ -27,7 +50,19 @@ export default class CCommonControl{
         const dataTags = ['first', 'second', 'third', 'fourth'];
         let commands = {};
         for(let i = 0; i < data.currentItems.length; i++){
-            let value = data.component ? () => data.component.props.router.push(`/connections/${data.currentItems[i].connectionId}/update`) : null;
+            let value = data.component ? () => data.component.props.router.push(`/${data.url}/${data.currentItems[i].mappedEntity.id}/update`) : null;
+            commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, data.currentItems[i].mappedEntity.title), value, commandTags)};
+            commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, dataTags[i]), value, commandTags)};
+        }
+        return commands;
+    }
+
+    static getViewCommands(name, data){
+        const commandTags = ['view'];
+        const dataTags = ['first', 'second', 'third', 'fourth'];
+        let commands = {};
+        for(let i = 0; i < data.currentItems.length; i++){
+            let value = data.component ? () => data.component.props.router.push(`/${data.url}/${data.currentItems[i].mappedEntity.id}/view`) : null;
             commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, data.currentItems[i].title), value, commandTags)};
             commands = {...commands, ...CCommonControl.defineCommands(name.replace(VOICE_CONTROL_DATA_SYMBOL, dataTags[i]), value, commandTags)};
         }

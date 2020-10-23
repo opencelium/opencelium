@@ -1,4 +1,5 @@
 import annyang from 'annyang';
+import CListVoiceControl from "@classes/voice_control/CListVoiceControl";
 
 export const PREFIX_COMMAND_NAME = "(please) (let\'s)";
 
@@ -18,16 +19,16 @@ class CVoiceControl{
         return Object.keys(commands).map(key => commands[key]);
     }
 
-    static initCommands(data, ComponentControl){
+    static initCommands(data){
         if (annyang) {
-            annyang.addCommands({...CVoiceControl.getCommonCommands(), ...ComponentControl.getCommands(data)});
+            annyang.addCommands({...CVoiceControl.getCommonCommands(), ...CListVoiceControl.getCommands(data)}, true);
             CVoiceControl.start();
         }
     }
 
-    static removeCommands(ComponentControl){
+    static removeCommands(data){
         if (annyang) {
-            annyang.removeCommands([...CVoiceControl.getCommonCommandsNames(), ...ComponentControl.getCommandsNames()]);
+            annyang.removeCommands([...CVoiceControl.getCommonCommandsNames(), ...CListVoiceControl.getCommandsNames(data)]);
             CVoiceControl.stop();
         }
     }
