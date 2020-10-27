@@ -5,6 +5,8 @@ import {convertTemplate, convertTemplateRejected} from "@actions/templates/updat
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {Spinner} from "reactstrap";
 import CExecution from "@classes/components/content/template_converter/CExecutions";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
 
 function mapStateToProps(state){
     const app = state.get('app');
@@ -21,6 +23,14 @@ function mapStateToProps(state){
 class TemplateConversionIcon extends React.Component{
     constructor(props) {
         super(props);
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CTemplateVoiceControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CTemplateVoiceControl);
     }
 
     convert(){

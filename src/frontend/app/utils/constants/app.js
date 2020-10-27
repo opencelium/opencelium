@@ -40,6 +40,9 @@ export const ERROR_TYPE = {
     BACKEND: 'BACKEND',
 };
 
+export const ENABLE_VOICE_CONTROL = true;
+
+export const ENABLE_DEBUG_VOICE_CONTROL = true;
 
 export const API_REQUEST_STATE = {
     INITIAL:    -1,

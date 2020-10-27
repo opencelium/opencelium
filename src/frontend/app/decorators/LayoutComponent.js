@@ -6,6 +6,7 @@ import {Container} from "react-grid-system";
 import Loading from "@components/general/app/Loading";
 import ComponentError from "@components/general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
+import CListVoiceControl from "@classes/voice_control/CListVoiceControl";
 
 
 function mapStateToProps(state){
@@ -14,22 +15,22 @@ function mapStateToProps(state){
         currentPageItems: app.get('currentPageItems').toJS(),
     };
 }
-export function LayoutComponent(componentSingleName = '', componentPluralName = '', url = '', deleteActionName = ''){
+export function LayoutComponent(componentSingleName = '', componentPluralName = '', url = '', deleteActionName = '', exceptions = []){
     return function (Component) {
         return (
             @connect(mapStateToProps, {setCurrentPageItems})
             class C extends React.Component {
 
                 componentDidMount(){
-                    CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems, componentSingleName, componentPluralName, url, deleteActionName});
+                    CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems, componentSingleName, componentPluralName, url, deleteActionName, exceptions}, CListVoiceControl);
                 }
 
                 componentDidUpdate(){
-                    CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems, componentSingleName, componentPluralName, url, deleteActionName});
+                    CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems, componentSingleName, componentPluralName, url, deleteActionName, exceptions}, CListVoiceControl);
                 }
 
                 componentWillUnmount(){
-                    CVoiceControl.removeCommands({component: this, currentItems: this.props.currentPageItems, componentSingleName, componentPluralName, url, deleteActionName});
+                    CVoiceControl.removeCommands({component: this, currentItems: this.props.currentPageItems, componentSingleName, componentPluralName, url, deleteActionName, exceptions}, CListVoiceControl);
                     this.props.setCurrentPageItems([]);
                 }
 

@@ -126,7 +126,6 @@ const fetchAppVersionRejected = (error) => {
  * @returns {{type: string, payload: {}}}
  */
 const setCurrentPageItems = (currentItems) => {
-    console.log(currentItems);
     return {
         type: AppAction.SET_CURRENT_PAGE_ITEMS,
         payload: currentItems,

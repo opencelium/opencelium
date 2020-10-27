@@ -16,7 +16,7 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchTemplates, exportTemplate} from '@actions/templates/fetch';
+import {fetchTemplates} from '@actions/templates/fetch';
 import {convertTemplates, convertTemplatesRejected} from "@actions/templates/update";
 import {deleteTemplate} from '@actions/templates/delete';
 
@@ -35,6 +35,9 @@ import FontIcon from "@basic_components/FontIcon";
 import TemplateConversionIcon from "@components/general/app/TemplateConversionIcon";
 import Button from "@basic_components/buttons/Button";
 import CExecution from "@classes/components/content/template_converter/CExecutions";
+import TemplateDownloadIcon from "@components/content/templates/list/TemplateDownloadIcon";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
 
 const prefixUrl = '/templates';
 
@@ -79,7 +82,7 @@ function filterTemplateSteps(tourSteps){
 /**
  * List of the Templates
  */
-@connect(mapStateToProps, {fetchTemplates, deleteTemplate, exportTemplate, convertTemplates, convertTemplatesRejected})
+@connect(mapStateToProps, {fetchTemplates, deleteTemplate, convertTemplates, convertTemplatesRejected})
 @permission(TemplatePermissions.READ, true)
 @withTranslation('templates')
 @ListComponent('templates')
@@ -90,8 +93,12 @@ class TemplatesList extends Component{
         super(props);
     }
 
-    exportTemplate(e, template){
-        this.props.exportTemplate(template);
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CTemplateVoiceControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CTemplateVoiceControl);
     }
 
     convertAll(){
@@ -125,14 +132,14 @@ class TemplatesList extends Component{
             let result = {};
             let fromInvokerName = template.connection.fromConnector.invoker.name;
             let toInvokerName = template.connection.toConnector.invoker.name;
-            let avatarElement = null;
+            let avatarElement;
             if(exportedTemplate.templateId === template.templateId && exportingTemplate === API_REQUEST_STATE.START){
                 avatarElement = <Loading authUser={authUser} className={styles.export_loading}/>;
             } else{
                 avatarElement =
                     <span className={styles.template_list_conversion}>
                         <TemplateConversionIcon data={{template}} classNameIcon={styles.loading}/>
-                        <TooltipFontIcon id={`template_download_${key}`} isButton={true} style={{cursor: 'pointer'}} value={'get_app'} tooltip={'Download'} onClick={(e) => ::this.exportTemplate(e, template)}/>
+                        <TemplateDownloadIcon index={key} template={template}/>
                     </span>;
             }
             result.id = template.templateId;

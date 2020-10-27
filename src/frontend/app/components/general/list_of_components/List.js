@@ -143,7 +143,7 @@ class List extends Component{
 
     setCurrentPageItems(){
         const {mapEntity, setCurrentPageItems} = this.props;
-        let filteredEntities = this.filterEntities().map((entity, key) => {return {...entity, mappedEntity: mapEntity.map(entity, key)};});
+        let filteredEntities = this.filterEntities().map((entity, key) => {let data = entity.getObject ? entity.getObject() : entity; return {...data, mappedEntity: mapEntity.map(entity, key)};});
         setCurrentPageItems(filteredEntities);
     }
 
@@ -276,7 +276,7 @@ class List extends Component{
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
                                             let graphLink = mapEntity.hasOwnProperty('getGraphLink') ? mapEntity.getGraphLink(entity) : '';
-                                            let onCardClickLink = mapEntity.hasOwnProperty('getOnCardClickLink') ? mapEntity.getOnCardClickLink(entity) : '';
+                                            let onCardClickLink = mapEntity.hasOwnProperty('getOnCardClickLink') ? mapEntity.getOnCardClickLink(entity.mappedEntity) : '';
                                             let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
                                             let hasView = isString(viewLink) && viewLink !== '';
                                             let hasUpdate = isString(updateLink) && updateLink !== '';

@@ -1,35 +1,25 @@
 import annyang from 'annyang';
-import CListVoiceControl from "@classes/voice_control/CListVoiceControl";
+import {ENABLE_DEBUG_VOICE_CONTROL, ENABLE_VOICE_CONTROL} from "@utils/constants/app";
 
 export const PREFIX_COMMAND_NAME = "(please) (let\'s)";
 
 class CVoiceControl{
 
-    static getCommonCommands(){
-        const offCommandName = `${PREFIX_COMMAND_NAME} off`;
-        const pauseCommandName = `${PREFIX_COMMAND_NAME} pause`;
-        return {
-            [offCommandName]: () => CVoiceControl.stop(),
-            [pauseCommandName]: () => CVoiceControl.pause(),
-        };
-    }
-
-    static getCommonCommandsNames(){
-        const commands = CVoiceControl.getCommonCommands();
-        return Object.keys(commands).map(key => commands[key]);
-    }
-
-    static initCommands(data){
-        if (annyang) {
-            annyang.addCommands({...CVoiceControl.getCommonCommands(), ...CListVoiceControl.getCommands(data)}, true);
+    static initCommands(data, VoiceControl){
+        if (annyang && ENABLE_VOICE_CONTROL) {
+            annyang.debug(ENABLE_DEBUG_VOICE_CONTROL);
+            annyang.addCommands({...VoiceControl.getCommands(data)});
             CVoiceControl.start();
         }
     }
 
-    static removeCommands(data){
-        if (annyang) {
-            annyang.removeCommands([...CVoiceControl.getCommonCommandsNames(), ...CListVoiceControl.getCommandsNames(data)]);
-            CVoiceControl.stop();
+    static removeCommands(data, VoiceControl){
+        if (annyang && ENABLE_VOICE_CONTROL) {
+            const commands = [...VoiceControl.getCommandsNames(data)];
+            annyang.removeCommands(commands);
+            if(commands.length === 0) {
+                CVoiceControl.stop();
+            }
         }
     }
 
@@ -51,6 +41,13 @@ class CVoiceControl{
     //start voice recognition
     static resume(){
         annyang.resume();
+    }
+
+    static isListening(){
+        if(annyang) {
+            return annyang.isListening();
+        }
+        return -1;
     }
 }
 

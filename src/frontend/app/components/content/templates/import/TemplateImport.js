@@ -22,6 +22,8 @@ import {TemplatePermissions} from "@utils/constants/permissions";
 import {importTemplate} from "@actions/templates/add";
 
 import styles from '@themes/default/content/templates/list.scss';
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
 
 
 function mapStateToProps(state){
@@ -45,6 +47,14 @@ class TemplateImport extends Component{
             browseTitle: 'Please, select a json file...',
             templateFile: null,
         };
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CTemplateVoiceControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CTemplateVoiceControl);
     }
 
     toggleImport(){

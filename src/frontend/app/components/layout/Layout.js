@@ -31,6 +31,8 @@ import {NotificationType} from "@utils/constants/notifications/notifications";
 import {checkOCConnection, logoutUserFulfilled} from "@actions/auth";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {removeAllLS} from "@utils/LocalStorage";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -64,11 +66,15 @@ class Layout extends Component{
         const {addUserInStore} = this.props;
         addUserListener(addUserInStore);
         setInterval(::this.checkOCConnection, 15000000);
+        CVoiceControl.initCommands({component: this}, CAppVoiceControl);
     }
 
     componentDidUpdate(){
         const {isNotAuthButStayInSystem} = this.state;
         const {checkOCConnectionResult, checkingOCConnection} = this.props;
+        if(CVoiceControl.isListening() === false){
+            CVoiceControl.initCommands({component: this}, CAppVoiceControl);
+        }
         if(checkingOCConnection === API_REQUEST_STATE.FINISH) {
             if (checkOCConnectionResult !== null && !isNotAuthButStayInSystem) {
                 removeAllLS();
@@ -82,6 +88,10 @@ class Layout extends Component{
                 this.setState({isNotAuthButStayInSystem: false});
             }
         }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CAppVoiceControl);
     }
 
     checkOCConnection(){

@@ -73,6 +73,7 @@ class AdminCardsList extends Component{
             result.id = adminCard.id;
             result.title = adminCard.name;
             result.avatar = adminCard.icon;
+            result.link = adminCard.link;
             return result;
         };
         mapEntity.getOnCardClickLink = (adminCard) => {return `${adminCard.link}`;};

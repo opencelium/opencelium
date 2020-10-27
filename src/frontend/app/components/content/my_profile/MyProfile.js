@@ -30,6 +30,7 @@ import AppTour from "./AppTour";
 import Loading from "@loading";
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
 
 
 function mapStateToProps(state){
@@ -62,18 +63,12 @@ class MyProfile extends Component{
         let translations = {};
         translations.header = t('HEADER');
         return (
-            <Container>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
-                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        <Content translations={translations} getUpdateLink={''} permissions={MyProfilePermissions} authUser={authUser}>
-                            <UserDetails user={user}/>
-                            <UserGroup usergroup={userGroup}/>
-                            <Themes/>
-                            <AppTour/>
-                        </Content>
-                    </ComponentError>
-                </Suspense>
-            </Container>
+            <Content translations={translations} getUpdateLink={''} permissions={MyProfilePermissions} authUser={authUser}>
+                <UserDetails user={user}/>
+                <UserGroup usergroup={userGroup}/>
+                <Themes/>
+                <AppTour/>
+            </Content>
         );
     }
 }
