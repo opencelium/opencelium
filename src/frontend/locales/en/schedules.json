@@ -92,7 +92,7 @@
   },
   "ADD":{
     "TITLE_PLACEHOLDER": "Title",
-    "FILTER_PLACEHOLDER": "Filter by title",
+    "SEARCH_PLACEHOLDER": "Search by title",
     "CONNECTION_PLACEHOLDER": "Connection",
     "CRONEXP_PLACEHOLDER": "Cron Expression",
     "ADD_BUTTON_TITLE": "Add Job",

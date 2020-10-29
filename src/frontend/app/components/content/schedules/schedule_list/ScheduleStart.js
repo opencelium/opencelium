@@ -24,6 +24,8 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import Loading from "@loading";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -47,6 +49,21 @@ class ScheduleStart extends Component{
         super(props);
 
         this.enableTriggerSchedule = true;
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     /**

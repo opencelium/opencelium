@@ -16,6 +16,7 @@ class CVoiceControl{
     static removeCommands(data, VoiceControl){
         if (annyang && ENABLE_VOICE_CONTROL) {
             const commands = [...VoiceControl.getCommandsNames(data)];
+            console.log(commands);
             annyang.removeCommands(commands);
             if(commands.length === 0) {
                 CVoiceControl.stop();

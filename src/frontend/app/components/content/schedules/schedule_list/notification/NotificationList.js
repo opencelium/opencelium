@@ -31,6 +31,8 @@ import ValidationMessage from "@change_component/ValidationMessage";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Loading from "@loading";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -62,9 +64,10 @@ class NotificationList extends Component{
 
     componentDidMount(){
         setFocusById('notification_search_input', 300);
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
     }
 
-    componentDidUpdate(){
+    componentDidUpdate(prevProps, prevState){
         const {addingScheduleNotification} = this.props;
         const {startAddingNotification} = this.state;
         if(startAddingNotification && addingScheduleNotification !== API_REQUEST_STATE.START) {
@@ -72,6 +75,14 @@ class NotificationList extends Component{
                 startAddingNotification: false,
             });
         }
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     /**
@@ -87,7 +98,7 @@ class NotificationList extends Component{
     /**
      * to show/hide schedule add notification dialog
      */
-    toggleAddDialog(){
+    toggleAddNotificationDialog(){
         this.setState({
             newNotification: CNotification.createNotification(),
             showAddDialog: !this.state.showAddDialog,
@@ -227,7 +238,7 @@ class NotificationList extends Component{
                     isButton={true}
                     tooltip={t('schedules:NOTIFICATION.ADD_ICON_TOOLTIP')}
                     value={startAddingNotification ? <Loading className={styles[classNames.loading_add]}/> : 'add'}
-                    onClick={::this.toggleAddDialog}
+                    onClick={::this.toggleAddNotificationDialog}
                     className={styles[classNames.add_icon]}
                 />
                 <TooltipFontIcon
@@ -241,9 +252,9 @@ class NotificationList extends Component{
                     className={styles[classNames.close_icon]}
                 />
                 <Dialog
-                    actions={[{label: t('schedules:NOTIFICATION.ADD_DIALOG.ADD'), onClick: ::this.addNotification, id: 'schedule_notification_add_ok'},{label: t('schedules:NOTIFICATION.ADD_DIALOG.CANCEL'), onClick: ::this.toggleAddDialog, id: 'schedule_notification_add_cancel'}]}
+                    actions={[{label: t('schedules:NOTIFICATION.ADD_DIALOG.ADD'), onClick: ::this.addNotification, id: 'schedule_notification_add_ok'},{label: t('schedules:NOTIFICATION.ADD_DIALOG.CANCEL'), onClick: ::this.toggleAddNotificationDialog, id: 'schedule_notification_add_cancel'}]}
                     active={showAddDialog}
-                    toggle={::this.toggleAddDialog}
+                    toggle={::this.toggleAddNotificationDialog}
                     title={t('schedules:NOTIFICATION.ADD_DIALOG.TITLE')}
                     theme={{dialog: styles.notification_dialog}}
                 >

@@ -26,6 +26,8 @@ import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
 import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
 import {NO_DATA} from "@utils/constants/app";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -49,6 +51,21 @@ class StatusCell extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     /**

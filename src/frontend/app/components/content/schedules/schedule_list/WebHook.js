@@ -22,6 +22,8 @@ import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 import {copyToClipboardWebHookFulfilled} from "@actions/webhooks/fetch";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -42,10 +44,25 @@ class WebHook extends Component{
         super(props);
     }
 
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
+    }
+
     /**
      * to copy url to clipboard
      */
-    copyToClipboard(){
+    copyWebHookToClipboard(){
         const {copyToClipboardWebHookFulfilled, schedule} = this.props;
         copyStringToClipboard(schedule.getWebhookUrl());
         copyToClipboardWebHookFulfilled();
@@ -61,7 +78,7 @@ class WebHook extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <div className={styles[classNames.webhook]}>
-                <TooltipFontIcon blueTheme={true} size={13} isButton={true} id={`webhook_${index}`} value={'file_copy'} tooltip={t('LIST.WEBHOOK_TOOLTIP')} onClick={::this.copyToClipboard} className={styles[classNames.webhook_url]}/>
+                <TooltipFontIcon blueTheme={true} size={13} isButton={true} id={`webhook_${index}`} value={'file_copy'} tooltip={t('LIST.WEBHOOK_TOOLTIP')} onClick={::this.copyWebHookToClipboard} className={styles[classNames.webhook_url]}/>
             </div>
         );
     }

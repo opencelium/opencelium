@@ -25,6 +25,8 @@ import styles from '@themes/default/content/schedules/schedules.scss';
 import Input from "@basic_components/inputs/Input";
 import {updateSchedule} from '@actions/schedules/update';
 import Dialog from "@basic_components/Dialog";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -49,6 +51,21 @@ class ScheduleUpdate extends Component{
             showUpdateSchedule: false,
             scheduleTitle: props.schedule.title,
         };
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     /**

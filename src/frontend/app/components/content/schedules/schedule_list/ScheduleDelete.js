@@ -25,6 +25,8 @@ import Confirmation from "../../../general/app/Confirmation";
 import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import Loading from "@loading";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -53,10 +55,25 @@ class ScheduleDelete extends Component{
         };
     }
 
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
+    }
+
     /**
      * to toggle confirmation window
      */
-    toggleConfirm(){
+    toggleConfirmDelete(){
         this.setState({showConfirm: !this.state.showConfirm});
     }
 
@@ -67,7 +84,7 @@ class ScheduleDelete extends Component{
         const {schedule, deleteSchedule, deleteCheck} = this.props;
         deleteCheck();
         deleteSchedule(schedule.getObject());
-        this.toggleConfirm();
+        this.toggleConfirmDelete();
     }
 
     renderConfirmation(){
@@ -76,7 +93,7 @@ class ScheduleDelete extends Component{
         return (
             <Confirmation
                 okClick={::this.deleteSchedule}
-                cancelClick={::this.toggleConfirm}
+                cancelClick={::this.toggleConfirmDelete}
                 active={showConfirm}
                 title={t('app:LIST.CARD.CONFIRMATION_TITLE')}
                 message={t('app:LIST.CARD.CONFIRMATION_MESSAGE')}
@@ -100,7 +117,7 @@ class ScheduleDelete extends Component{
                     id={`schedule_delete_${index}`}
                     value={icon}
                     tooltip={t('schedules:LIST.TOOLTIP_DELETE_ICON')}
-                    onClick={::this.toggleConfirm}
+                    onClick={::this.toggleConfirmDelete}
                     blueTheme={true}
                 />
                 {this.renderConfirmation()}
