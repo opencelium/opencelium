@@ -13,36 +13,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component, Suspense} from 'react';
-import {Container} from 'react-grid-system';
-
-import Loading from '@loading';
-import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "@utils/constants/app";
+import React, {Component} from 'react';
 import {checkConnection} from "@decorators/checkConnection";
+import {LayoutComponent} from "@decorators/LayoutComponent";
 
 
 /**
  * Layout for Applications
  */
+@LayoutComponent('application', 'applications', '')
 @checkConnection()
 class AppLayout extends Component{
 
-    constructor(props){
-        super(props);
-    }
-
     render(){
-        const {authUser, children} = this.props;
-        return (
-            <Container>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
-                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {children}
-                    </ComponentError>
-                </Suspense>
-            </Container>
-        );
+        return null;
     }
 }
 

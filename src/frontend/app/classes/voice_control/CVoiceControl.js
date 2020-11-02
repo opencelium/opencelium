@@ -1,34 +1,26 @@
 import annyang from 'annyang';
+import {ENABLE_DEBUG_VOICE_CONTROL, ENABLE_VOICE_CONTROL} from "@utils/constants/app";
 
 export const PREFIX_COMMAND_NAME = "(please) (let\'s)";
 
 class CVoiceControl{
 
-    static getCommonCommands(){
-        const offCommandName = `${PREFIX_COMMAND_NAME} off`;
-        const pauseCommandName = `${PREFIX_COMMAND_NAME} pause`;
-        return {
-            [offCommandName]: () => CVoiceControl.stop(),
-            [pauseCommandName]: () => CVoiceControl.pause(),
-        };
-    }
-
-    static getCommonCommandsNames(){
-        const commands = CVoiceControl.getCommonCommands();
-        return Object.keys(commands).map(key => commands[key]);
-    }
-
-    static initCommands(data, ComponentControl){
-        if (annyang) {
-            annyang.addCommands({...CVoiceControl.getCommonCommands(), ...ComponentControl.getCommands(data)});
+    static initCommands(data, VoiceControl){
+        if (annyang && ENABLE_VOICE_CONTROL) {
+            annyang.debug(ENABLE_DEBUG_VOICE_CONTROL);
+            annyang.addCommands({...VoiceControl.getCommands(data)});
             CVoiceControl.start();
         }
     }
 
-    static removeCommands(ComponentControl){
-        if (annyang) {
-            annyang.removeCommands([...CVoiceControl.getCommonCommandsNames(), ...ComponentControl.getCommandsNames()]);
-            CVoiceControl.stop();
+    static removeCommands(data, VoiceControl){
+        if (annyang && ENABLE_VOICE_CONTROL) {
+            const commands = [...VoiceControl.getCommandsNames(data)];
+            console.log(commands);
+            annyang.removeCommands(commands);
+            if(commands.length === 0) {
+                CVoiceControl.stop();
+            }
         }
     }
 
@@ -50,6 +42,13 @@ class CVoiceControl{
     //start voice recognition
     static resume(){
         annyang.resume();
+    }
+
+    static isListening(){
+        if(annyang) {
+            return annyang.isListening();
+        }
+        return -1;
     }
 }
 

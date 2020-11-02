@@ -17,6 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {formatHtmlId} from "@utils/app";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CHelpControl from "@classes/voice_control/CHelpControl";
 
 /**
  * Component for displaying Help Icon in Content, List
@@ -25,6 +27,14 @@ class HelpIcon extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CHelpControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CHelpControl);
     }
 
     render(){

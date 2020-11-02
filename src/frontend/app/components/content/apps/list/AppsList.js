@@ -82,6 +82,7 @@ class AppsList extends Component{
             result.avatar = app.icon;
             result.value = app.value;
             result.link = app.link;
+            result.openEntityEvent = () => checkApp(app);
             return result;
         };
         mapEntity.getOnCardClickLink = (app) => {return `${app.link}`;};

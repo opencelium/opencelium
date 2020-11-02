@@ -33,6 +33,8 @@ import styles from "@themes/default/content/schedules/schedules.scss";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Loading from "@loading";
 import CSchedule from "@classes/components/content/schedule/CSchedule";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -59,8 +61,8 @@ class NotificationListItem extends Component{
         this.state = {
             notification: CNotification.createNotification(),
             isMouseOverItem: false,
-            showUpdateDialog: false,
-            showDeleteConfirmation: false,
+            showUpdateNotificationDialog: false,
+            showDeleteNotificationConfirmation: false,
             validationMessage: '',
             startFetchingNotification: false,
             startUpdatingNotification: false,
@@ -68,13 +70,18 @@ class NotificationListItem extends Component{
         };
     }
 
-    componentDidUpdate(){
+    componentDidMount(){
+        setFocusById('notification_search_input', 300);
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
         const {fetchingScheduleNotification, updatingScheduleNotification, deletingScheduleNotification, notificationDetails} = this.props;
         const {startFetchingNotification, startUpdatingNotification, startDeletingNotification} = this.state;
         if(startFetchingNotification && fetchingScheduleNotification !== API_REQUEST_STATE.START) {
             this.setState({
                 notification: CNotification.duplicateNotification(notificationDetails),
-                showUpdateDialog: true,
+                showUpdateNotificationDialog: true,
                 startFetchingNotification: false,
             });
         }
@@ -88,6 +95,14 @@ class NotificationListItem extends Component{
                 startDeletingNotification: false,
             });
         }
+        if(this.props.notification.name !== prevProps.notification.name){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     /**
@@ -117,19 +132,19 @@ class NotificationListItem extends Component{
     /**
      * to show/hide update notification dialog
      */
-    toggleUpdateDialog(){
-        this.setState({showUpdateDialog: !this.state.showUpdateDialog});
+    toggleUpdateNotificationDialog(){
+        this.setState({showUpdateNotificationDialog: !this.state.showUpdateNotificationDialog});
     }
 
     /**
      * to show/hide delete confirmation dialog
      */
-    toggleDeleteConfirmation(){
-        this.setState({showDeleteConfirmation: !this.state.showDeleteConfirmation});
+    toggleDeleteNotificationConfirmation(){
+        this.setState({showDeleteNotificationConfirmation: !this.state.showDeleteNotificationConfirmation});
     }
 
     /**
-     * to open open update dialog
+     * to open update dialog
      */
     fetchNotification(){
         const {schedule, notification, fetchScheduleNotification} = this.props;
@@ -148,7 +163,7 @@ class NotificationListItem extends Component{
         if(validateResult.success) {
             this.setState({startUpdatingNotification: true});
             updateScheduleNotification({...pureNotification, schedulerId: schedule.id});
-            this.toggleUpdateDialog();
+            this.toggleUpdateNotificationDialog();
         } else{
             setFocusById(validateResult.id);
             this.setState({
@@ -164,11 +179,11 @@ class NotificationListItem extends Component{
         const {schedule, notification, deleteScheduleNotification} = this.props;
         this.setState({startDeletingNotification: true});
         deleteScheduleNotification({...notification.getObject(), schedulerId: schedule.id});
-        this.toggleDeleteConfirmation();
+        this.toggleDeleteNotificationConfirmation();
     }
 
     renderUpdateDialog(){
-        const {showUpdateDialog, notification, validationMessage} = this.state;
+        const {showUpdateNotificationDialog, notification, validationMessage} = this.state;
         const {t} = this.props;
         return(
             <Dialog
@@ -178,11 +193,11 @@ class NotificationListItem extends Component{
                     id: 'schedule_notification_add_ok'
                 },{
                     label: t('schedules:NOTIFICATION.UPDATE_DIALOG.CANCEL'),
-                    onClick: ::this.toggleUpdateDialog,
+                    onClick: ::this.toggleUpdateNotificationDialog,
                     id: 'schedule_notification_add_cancel'
                 }]}
-                active={showUpdateDialog}
-                toggle={::this.toggleUpdateDialog}
+                active={showUpdateNotificationDialog}
+                toggle={::this.toggleUpdateNotificationDialog}
                 title={t('schedules:NOTIFICATION.UPDATE_DIALOG.TITLE')}
                 theme={{dialog: styles.notification_dialog}}
             >
@@ -193,13 +208,13 @@ class NotificationListItem extends Component{
     }
 
     renderDeleteConfirmationDialog(){
-        const {showDeleteConfirmation} = this.state;
+        const {showDeleteNotificationConfirmation} = this.state;
         const {t} = this.props;
         return(
             <Confirmation
                 okClick={::this.deleteNotification}
-                cancelClick={::this.toggleDeleteConfirmation}
-                active={showDeleteConfirmation}
+                cancelClick={::this.toggleDeleteNotificationConfirmation}
+                active={showDeleteNotificationConfirmation}
                 title={t('app:LIST.CARD.CONFIRMATION_TITLE')}
                 message={t('app:LIST.CARD.CONFIRMATION_MESSAGE')}
             />
@@ -261,7 +276,7 @@ class NotificationListItem extends Component{
                                             id={`schedule_notification_delete_${index}`}
                                             value={'delete'}
                                             tooltip={t('NOTIFICATION.DELETE')}
-                                            onClick={::this.toggleDeleteConfirmation}
+                                            onClick={::this.toggleDeleteNotificationConfirmation}
                                         />
                                 }
                             </span>

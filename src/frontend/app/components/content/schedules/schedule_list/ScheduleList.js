@@ -46,6 +46,8 @@ import Input from "@basic_components/inputs/Input";
 import {APP_STATUS_UP} from "@utils/constants/url";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import ScheduleNotification from "./notification/ScheduleNotification";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 export const EMPHASIZE_DURATION_ANIMATION = 900;
 
@@ -86,12 +88,17 @@ class ScheduleList extends Component{
     componentDidMount(){
         setFocusById('add_title');
         this.checkElasticSearch();
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
     }
 
-    componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps, prevState){
         let prevSchedules = prevProps.schedules;
         let curSchedules = this.props.schedules;
         let notEqualedSchedules = false;
+        if(prevState.currentPage !== this.state.currentPage){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
         if(prevSchedules.length !== curSchedules.length){
             notEqualedSchedules = true;
             this.notEmphasize = true;
@@ -142,6 +149,7 @@ class ScheduleList extends Component{
         if(this.props.checkingApp === API_REQUEST_STATE.START){
             this.props.checkAppCanceled();
         }
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     onChangeFilterTitle(filterTitle){
@@ -304,9 +312,9 @@ class ScheduleList extends Component{
         }
         return(
             <Input
-                id={'filter_title'}
-                name={'filter_title'}
-                label={t('ADD.FILTER_PLACEHOLDER')}
+                id={'search_title'}
+                name={'search_title'}
+                label={t('ADD.SEARCH_PLACEHOLDER')}
                 type={'text'}
                 onChange={::this.onChangeFilterTitle}
                 value={filterTitle}

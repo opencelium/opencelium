@@ -25,6 +25,8 @@ import {
     addLogoutKeyNavigation, removeLogoutKeyNavigation,
 } from '@utils/key_navigation';
 import styles from '@themes/default/layout/header.scss';
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CLogoutControl from "@classes/voice_control/CLogoutControl";
 
 
 function mapStateToProps(state){
@@ -78,6 +80,7 @@ class LogoutMenuItem extends Component{
         const {logoutUserFulfilled} = this.props;
         logoutUserFulfilled({});
         history.push('/login');
+        CVoiceControl.removeCommands(null, CLogoutControl);
     }
 
     render(){

@@ -23,6 +23,8 @@ import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import CheckConnection from "@change_component/extra_actions/check_connection/CheckConnection";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CChangeContentControl from "@classes/voice_control/CChangeContentControl";
 
 
 /**
@@ -32,6 +34,14 @@ class Navigation extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CChangeContentControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CChangeContentControl);
     }
 
     renderPrevButton(){

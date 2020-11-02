@@ -145,6 +145,10 @@ const AppsList = Loadable({
 /**
  * Loadable MyProfile
  */
+const MyProfileLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'my_profile_layout' */ '@components/content/my_profile/MyProfileLayout'),
+    loading: Loading,
+});
 const MyProfile = Loadable({
     loader: () => import(/* webpackChunkName: 'my_profile' */ '@components/content/my_profile/MyProfile'),
     loading: Loading,
@@ -288,6 +292,7 @@ export default {
     Scheduler,
     AppLayout,
     AppsList,
+    MyProfileLayout,
     MyProfile,
     Login,
     Home,

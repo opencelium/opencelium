@@ -13,35 +13,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Component, Suspense }  from 'react';
-import {Container} from 'react-grid-system';
-
-import Loading from '@loading';
-import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "@utils/constants/app";
+import React, { Component }  from 'react';
+import {connect} from 'react-redux';
 import {checkConnection} from "@decorators/checkConnection";
+import {deleteInvoker} from "@actions/invokers/delete";
+import {LayoutComponent} from "@decorators/LayoutComponent";
 
 
 /**
  * Layout for Connectors
  */
+@connect(null, {deleteInvoker})
+@LayoutComponent('invoker', 'invokers', 'invokers')
 @checkConnection()
 class InvokerLayout extends Component{
-    constructor(props){
-        super(props);
-    }
 
     render(){
-        const {children, authUser} = this.props;
-        return (
-            <Container>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
-                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {children}
-                    </ComponentError>
-                </Suspense>
-            </Container>
-        );
+        return null;
     }
 }
 

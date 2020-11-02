@@ -13,58 +13,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component, Suspense} from 'react';
+import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import {Container} from 'react-grid-system';
-
-import Loading from '@loading';
-import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "@utils/constants/app";
 import {checkConnection} from "@decorators/checkConnection";
-import CVoiceControl from "@classes/voice_control/CVoiceControl";
-import CConnectionListVoiceControl from "@classes/voice_control/connection/CConnectionListVoiceControl";
+import {deleteConnection} from "@actions/connections/delete";
+import LayoutComponent from "@decorators/LayoutComponent";
 
 
-function mapStateToProps(state){
-    const app = state.get('app');
-    return {
-        currentPageItems: app.get('currentPageItems').toJS(),
-    };
-}
 /**
  * Layout for Connections
  */
-@connect(mapStateToProps, {})
+@connect(null, {deleteConnection})
+@LayoutComponent('connection', 'connections', 'connections')
 @checkConnection()
 class ConnectionLayout extends Component{
 
-    constructor(props){
-        super(props);
-    }
-
-    componentDidMount(){
-        CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems}, CConnectionListVoiceControl);
-    }
-
-    componentDidUpdate(){
-        CVoiceControl.initCommands({component: this, currentItems: this.props.currentPageItems}, CConnectionListVoiceControl);
-    }
-
-    componentWillUnmount(){
-        CVoiceControl.removeCommands(CConnectionListVoiceControl);
-    }
-
     render(){
-        const {children, authUser} = this.props;
-        return (
-            <Container>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
-                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {children}
-                    </ComponentError>
-                </Suspense>
-            </Container>
-        );
+        return null;
     }
 }
 

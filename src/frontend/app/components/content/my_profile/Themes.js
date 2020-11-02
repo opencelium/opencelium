@@ -23,6 +23,8 @@ import SubHeader from "../../general/view_component/SubHeader";
 import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CMyProfileControl from "@classes/voice_control/CMyProfileControl";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -41,6 +43,14 @@ class Themes extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CMyProfileControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CMyProfileControl);
     }
 
     /**
