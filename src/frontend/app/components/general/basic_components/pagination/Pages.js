@@ -17,8 +17,6 @@ import React, {Component} from 'react';
 import { withRouter } from 'react-router';
 import Pagination from 'react-bootstrap/Pagination';
 
-import styles from '@themes/default/general/pagination.scss';
-
 
 /**
  * Component for Pages
@@ -41,7 +39,6 @@ class Pages extends Component{
     renderPages(){
         let pages = [];
         const {total, current} = this.props;
-
         for(let i = 1; i <= total; i++){
             if(i === current){
                 pages.push(<Pagination.Item key={i} active>{i}</Pagination.Item>);
