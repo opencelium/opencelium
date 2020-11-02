@@ -27,6 +27,7 @@ public class TemplateResource extends ResourceSupport {
     private String templateId;
     private String name;
     private String description;
+    private String version;
     private String link;
     private ConnectionResource connection;
 
@@ -52,6 +53,14 @@ public class TemplateResource extends ResourceSupport {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getLink() {

@@ -51,6 +51,7 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setName(template.getName());
         templateResource.setTemplateId(template.getTemplateId());
         templateResource.setDescription(template.getDescription());
+        templateResource.setVersion(template.getVersion());
         templateResource.setConnection(template.getConnection());
         templateResource.setLink(templatePath + template.getTemplateId());
         return templateResource;
@@ -63,6 +64,7 @@ public class TemplateServiceImp implements TemplateService {
         template.setTemplateId(templateResource.getTemplateId());
         template.setDescription(templateResource.getDescription());
         template.setConnection(templateResource.getConnection());
+        template.setVersion(templateResource.getVersion());
         return template;
     }
 
