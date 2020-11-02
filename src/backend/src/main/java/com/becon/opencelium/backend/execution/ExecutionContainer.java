@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
@@ -86,46 +87,26 @@ public class ExecutionContainer {
         expertVarProperties.put(outFieldPath, outFieldValue);
 
         List<String> incomeRef = Arrays.asList(outgoingFiled.getValue().split(","));
-
+        String format = outMethod.getRequestNode().getBodyNode().getFormat();
         incomeRef.forEach(ref -> {
             try {
-                String methodKey = ConditionUtility.getMethodKey(ref);
+                String incRef = ref;
+                if (format.equals("xml")) {
+                    incRef = incrementIndexes(ref);
+                }
+                String methodKey = ConditionUtility.getMethodKey(incRef);
                 MessageContainer messageContainer = responseData
                         .stream()
                         .filter(m -> m.getMethodKey().equals(methodKey))
                         .findFirst().orElse(null);
-                Object o = messageContainer.getValue(ref, getLoopIndex());
+                Object o = messageContainer.getValue(incRef, getLoopIndex());
                 String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
-
                 inFieldValue = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
                 expertVarProperties.put(ref, inFieldValue);
             } catch (JsonProcessingException e){
                 throw new RuntimeException(e);
             }
         });
-
-//        incomingFields.forEach(f -> {
-//            try {
-//                MethodNode inMethod = methodNodeService.getByFieldNodeId(f.getId())
-//                        .orElseThrow(() -> new RuntimeException("Method not found"));
-//
-//                String inFieldPath = fieldNodeService.getPath(inMethod, f)
-//                        .replace("__oc__attributes.", "@")
-//                        .replace(".__oc__value", "");
-//                inFieldPath = replaceIndex(inFieldPath, enhVars);
-//                MessageContainer messageContainer = responseData
-//                        .stream()
-//                        .filter(m -> m.getMethodKey().equals(inMethod.getColor()))
-//                        .findFirst().orElse(null);
-//                Object o = messageContainer.getValue(inFieldPath, getLoopIndex());
-//                String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
-//
-//                inFieldValue = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
-//                expertVarProperties.put(inFieldPath, inFieldValue);
-//            } catch (JsonProcessingException e){
-//                throw new RuntimeException(e);
-//            }
-//        });
 
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         expertVarProperties.forEach((k,v) -> {
@@ -178,8 +159,28 @@ public class ExecutionContainer {
         }
     }
 
-    private static String replaceIndex(String path, Map<String, String> enhVars){
-        return path;
+    private static String incrementIndexes(String path){
+        String result = "";
+        List<String> pathParts = Arrays.asList( path.split("\\."));
+
+        for (String part : pathParts) {
+            final Pattern pattern = Pattern.compile(RegExpression.arrayWithNumberIndex, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(part);
+
+            int intIndex = 0;
+            while (matcher.find()) {
+                String index = matcher.group(1);
+                intIndex = Integer.parseInt(index) + 1;
+                part = part.replaceFirst("\\[" + index + "\\]", "[" + intIndex + "]");
+            }
+
+            if (!result.isEmpty()) {
+                result = result + "." + part;
+            } else {
+                result = result + part;
+            }
+        }
+        return result;
     }
 
     public Object getValueFromResponseData(String ref){

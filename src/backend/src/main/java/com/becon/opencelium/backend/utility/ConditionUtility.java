@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 import com.becon.opencelium.backend.resource.connection.StatementResource;
 
@@ -149,6 +150,18 @@ public class ConditionUtility {
         String[] pathParts = path.split("\\.");
 
         return pathParts[2];
+    }
+
+
+    public static boolean compareRegEx(String path, String regEx){
+        final Pattern pattern = Pattern.compile(regEx, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(path);
+
+        while (matcher.find()) {
+            return true;
+        }
+
+        return false;
     }
 
     public static <T> double convertToDouble(T val){
