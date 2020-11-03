@@ -18,9 +18,13 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.exception.RoleExistsException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
+import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
+import com.becon.opencelium.backend.mysql.service.PermissionServiceImpl;
 import com.becon.opencelium.backend.mysql.service.RoleHasPermissionServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.resource.user.ComponentResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,9 @@ public class RoleController {
 
     @Autowired
     private RoleHasPermissionServiceImp roleHasPermissionServiceImp;
+
+    @Autowired
+    private PermissionServiceImpl permissionService;
 
     @Autowired
     private StorageService storageService;
@@ -108,20 +115,33 @@ public class RoleController {
         userRoleResource.setGroupId(id);
 
         // First of all we need to delete old relations between user_group and component
-        roleHasPermissionServiceImp.delete(id);
-
+        for (ComponentResource component : userRoleResource.getComponents()) {
+            int componentId = component.getComponentId();
+            for (String permission : component.getPermissions()) {
+                int permissionId = permissionService.findByName(permission).get().getId();
+                RoleHasPermission.RoleHasPermissionId permissionId1 = new RoleHasPermission.RoleHasPermissionId(id, componentId, permissionId);
+                if (roleHasPermissionServiceImp.existsById(permissionId1)) {
+                    roleHasPermissionServiceImp.delete(permissionId1);
+                }
+            }
+        }
         // Creating new UserGroup object from groupJson
         UserRole role = userRoleService.toEntity(userRoleResource);
         role.setIcon(userRoleService.findById(id).get().getIcon());
+        UserRole userRole0 = userRoleService.findById(id).orElse(null);
         userRoleService.save(role);
 
-        UserRoleResource resource = userRoleService.toResource(role);
-        final URI uri = MvcUriComponentsBuilder
-                .fromController(getClass())
-                .path("/{id}")
-                .buildAndExpand(role.getId()).toUri();
+//        UserRole role1 = userRoleService.findById(id).get();
+//        UserRoleResource resource = userRoleService.toResource(role1);
+//        final URI uri = MvcUriComponentsBuilder
+//                .fromController(getClass())
+//                .path("/{id}")
+//                .buildAndExpand(role.getId()).toUri();
 
-        return ResponseEntity.created(uri).body(resource);
+        UserRole userRole1 = userRoleService.findById(id).orElse(null);
+        return userRoleService.findById(id)
+                .map(p -> ResponseEntity.ok(new UserRoleResource(p)))
+                .orElseThrow(() -> new RoleNotFoundException(id));
     }
 
     @PutMapping("/{id}")
