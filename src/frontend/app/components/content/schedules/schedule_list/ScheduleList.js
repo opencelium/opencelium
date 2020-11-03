@@ -254,10 +254,18 @@ class ScheduleList extends Component{
      * to open a page
      */
     openPage(e, pageNumber){
-        this.setState({
-            currentPage: pageNumber,
-            currentSchedules: this.filterCurrentSchedules({pageNumber, allCurrentSchedules: this.state.allCurrentSchedules}),
-        });
+        const {allCurrentSchedules} = this.state;
+        let amount = allCurrentSchedules.length;
+        let pageAmount = amount % SCHEDULES_PER_PAGE === 0 ? parseInt(amount / SCHEDULES_PER_PAGE) : parseInt(amount / SCHEDULES_PER_PAGE) + 1;
+        if(pageNumber >= 1 && pageNumber <= pageAmount) {
+            this.setState({
+                currentPage: pageNumber,
+                currentSchedules: this.filterCurrentSchedules({
+                    pageNumber,
+                    allCurrentSchedules: this.state.allCurrentSchedules
+                }),
+            });
+        }
     }
 
     renderPagination(){
