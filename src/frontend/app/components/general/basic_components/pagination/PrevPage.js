@@ -22,6 +22,8 @@ import {addPrevPageKeyNavigation, removePrevPageKeyNavigation} from '@utils/key_
 
 import styles from '@themes/default/general/pagination.scss';
 import FontIcon from "../FontIcon";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CPaginationControl from "@classes/voice_control/CPaginationControl";
 
 
 /**
@@ -37,10 +39,12 @@ class PrevPage extends Component{
 
     componentDidMount(){
         addPrevPageKeyNavigation(this);
+        CVoiceControl.initCommands({component:this}, CPaginationControl);
     }
 
     componentWillUnmount(){
         removePrevPageKeyNavigation(this);
+        CVoiceControl.removeCommands({component:this}, CPaginationControl);
     }
 
     /**
