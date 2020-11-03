@@ -100,7 +100,9 @@ public class RoleController {
     public ResponseEntity<UserRoleResource> changeComponent(@PathVariable("id") int id,
                                                              @RequestBody UserRoleResource userRoleResource) throws IOException {
 
-        if (userRoleService.existsByRole(userRoleResource.getName())){
+        UserRole userRole = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
+        boolean isIdenticalName = userRole.getName().equals(userRoleResource.getName());
+        if (!isIdenticalName && userRoleService.existsByRole(userRoleResource.getName())){
             throw new RoleExistsException(userRoleResource.getName());
         }
         userRoleResource.setGroupId(id);
@@ -126,7 +128,9 @@ public class RoleController {
     public ResponseEntity<UserRoleResource> put(@PathVariable("id") int id,
                                                  @RequestBody UserRoleResource roleResource) throws IOException{
 
-        if (userRoleService.existsByRole(roleResource.getName())){
+        UserRole userRole = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
+        boolean isIdenticalName = userRole.getName().equals(roleResource.getName());
+        if (!isIdenticalName && userRoleService.existsByRole(roleResource.getName())){
             throw new RoleExistsException(roleResource.getName());
         }
         roleResource.setGroupId(id);
