@@ -20,7 +20,9 @@ import {
 } from 'reactstrap';
 import Button from "@basic_components/buttons/Button";
 import styles from '@themes/default/general/basic_components.scss';
-import {getFocusableElements, setFocusById} from "@utils/app";
+import {getFocusableElements} from "@utils/app";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CDialogControl from "@classes/voice_control/CDialogControl";
 
 
 /**
@@ -40,17 +42,30 @@ class Dialog extends Component{
         if(this.state.isOpen){
             this.setFocus();
         }
+        if(this.props.active) {
+            CVoiceControl.initCommands({component: this}, CDialogControl);
+        }
     }
 
     componentDidUpdate(prevProps){
         const {active} = this.props;
         if(prevProps.active !== active){
+            if(active){
+                CVoiceControl.removeCommands({component:this}, CDialogControl);
+                CVoiceControl.initCommands({component: this}, CDialogControl);
+            } else{
+                CVoiceControl.removeCommands({component:this}, CDialogControl);
+            }
             this.setState({
                 isOpen: active,
             }, () => {
                 this.setFocus();
             });
         }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CDialogControl);
     }
 
     setFocus(){

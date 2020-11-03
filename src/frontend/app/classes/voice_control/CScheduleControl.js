@@ -12,6 +12,10 @@ class CScheduleControl{
         if (data && data.component) {
             const props = data.hasOwnProperty('props') ? data.props : data.component.props;
             const state = data.hasOwnProperty('state') ? data.state : data.component.state;
+            if(typeof data.component.openPage === 'function'){
+                navigationCommands[`${PREFIX_COMMAND_NAME} next page`] = () => data.component.openPage(null, state.currentPage + 1);
+                navigationCommands[`${PREFIX_COMMAND_NAME} previous page`] = () => data.component.openPage(null, state.currentPage - 1);
+            }
             if(typeof props.checkAllSchedules === 'function'){
                 navigationCommands[`${PREFIX_COMMAND_NAME} select jobs`] = () => {
                     const props = data.hasOwnProperty('props') ? data.props : data.component.props;
