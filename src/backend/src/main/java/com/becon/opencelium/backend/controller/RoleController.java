@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.exception.RoleExistsException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.mysql.entity.Component;
 import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
 import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
@@ -115,16 +116,10 @@ public class RoleController {
         userRoleResource.setGroupId(id);
 
         // First of all we need to delete old relations between user_group and component
-        for (ComponentResource component : userRoleResource.getComponents()) {
-            int componentId = component.getComponentId();
-            for (String permission : component.getPermissions()) {
-                int permissionId = permissionService.findByName(permission).get().getId();
-                RoleHasPermission.RoleHasPermissionId permissionId1 = new RoleHasPermission.RoleHasPermissionId(id, componentId, permissionId);
-                if (roleHasPermissionServiceImp.existsById(permissionId1)) {
-                    roleHasPermissionServiceImp.delete(permissionId1);
-                }
-            }
-        }
+//        for (RoleHasPermission roleHasPermission : userRole.getComponents()) {
+//            roleHasPermissionServiceImp.delete(roleHasPermission.getId());
+            roleHasPermissionServiceImp.deleteByUserRole(userRole);
+//        }
         // Creating new UserGroup object from groupJson
         UserRole role = userRoleService.toEntity(userRoleResource);
         role.setIcon(userRoleService.findById(id).get().getIcon());
@@ -191,5 +186,11 @@ public class RoleController {
                             return ResponseEntity.noContent().build();
                         })
                 .orElseThrow(() -> new RoleNotFoundException(id));
+    }
+
+    @DeleteMapping("/{id}/icon/{icon}")
+    public ResponseEntity<?> deleteIcon(@PathVariable("id") int id, @PathVariable("icon") String icon) {
+        storageService.delete(icon);
+        return ResponseEntity.noContent().build();
     }
 }

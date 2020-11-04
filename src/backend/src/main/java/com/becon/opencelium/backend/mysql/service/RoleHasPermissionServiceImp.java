@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.mysql.service;
 
 import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
+import com.becon.opencelium.backend.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mysql.repository.RoleHasPermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,12 @@ public class RoleHasPermissionServiceImp implements RoleHasPermissionService {
     @Override
     public void delete(RoleHasPermission.RoleHasPermissionId id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByUserRole(UserRole roleId) {
+        repository.deleteByUserRole(roleId);
     }
 
     public boolean existsById(RoleHasPermission.RoleHasPermissionId id) {
