@@ -16,7 +16,9 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
+import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
+
 public interface RoleHasPermissionService {
 
-    void delete(int roleId);
+    void delete(RoleHasPermission.RoleHasPermissionId roleId);
 }
