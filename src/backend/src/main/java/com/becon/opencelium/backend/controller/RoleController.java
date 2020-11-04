@@ -188,9 +188,18 @@ public class RoleController {
                 .orElseThrow(() -> new RoleNotFoundException(id));
     }
 
-    @DeleteMapping("/{id}/icon/{icon}")
-    public ResponseEntity<?> deleteIcon(@PathVariable("id") int id, @PathVariable("icon") String icon) {
-        storageService.delete(icon);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable("id") int id) {
+        return userRoleService
+                .findById(id)
+                .map(
+                        p -> {
+
+                            if (p.getIcon() != null){
+                                storageService.delete(p.getIcon());
+                            }
+                            return ResponseEntity.noContent().build();
+                        })
+                .orElseThrow(() -> new RoleNotFoundException(id));
     }
 }
