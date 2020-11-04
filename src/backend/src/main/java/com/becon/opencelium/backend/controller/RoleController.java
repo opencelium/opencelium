@@ -197,6 +197,8 @@ public class RoleController {
 
                             if (p.getIcon() != null){
                                 storageService.delete(p.getIcon());
+                                p.setIcon(null);
+                                userRoleService.save(p);
                             }
                             return ResponseEntity.noContent().build();
                         })
