@@ -37,4 +37,6 @@ public interface TemplateService {
     void deleteById(String templateId);
 
     Optional<Template> findById(String id);
+
+    boolean existsById(String templateId);
 }
