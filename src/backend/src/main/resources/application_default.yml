@@ -85,6 +85,7 @@ elasticsearch:
   port: 9300
 
 opencelium:
+  version: 1.0.1
   mail:
     from: OC_Application
 
