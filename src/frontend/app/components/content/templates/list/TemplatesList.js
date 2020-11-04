@@ -105,16 +105,13 @@ class TemplatesList extends Component{
         const {appVersion, templates, convertTemplates, convertTemplatesRejected} = this.props;
         let convertingTemplates = [];
         for(let i = 0; i < templates.length; i++){
-            /*
-            * TODO: Change comparison from description to version
-            */
-            if(templates[i].description !== appVersion){
-                const {jsonData, error} = CExecution.executeConfig({fromVersion: templates[i].description, toVersion: appVersion}, templates[i].connection);
+            if(templates[i].version !== appVersion){
+                const {jsonData, error} = CExecution.executeConfig({fromVersion: templates[i].version, toVersion: appVersion}, templates[i].connection);
                 if(error.message !== ''){
                     convertTemplatesRejected(error);
                     return;
                 } else {
-                    convertingTemplates.push({...templates[i], connection: jsonData, description: appVersion});
+                    convertingTemplates.push({...templates[i], connection: jsonData, version: appVersion});
                 }
             }
         }

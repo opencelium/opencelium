@@ -256,7 +256,7 @@ class FormMode extends Component{
         let result = [];
         const {entity, templates} = this.props;
         for(let i = 0; i < templates.length; i++){
-            result.push({value: templates[i].templateId, label: templates[i].name, description: templates[i].description, content: templates[i].connection, template: templates[i]});
+            result.push({version: templates[i].version, value: templates[i].templateId, label: templates[i].name, description: templates[i].description, content: templates[i].connection, template: templates[i]});
         }
         entity.allTemplates = templates;
         return result;
