@@ -155,8 +155,10 @@ public class TemplateController {
     @PutMapping("/{id}")
     public ResponseEntity<?> modify(@RequestBody TemplateResource templateResource) throws JsonProcessingException {
         Template template = templateService.toEntity(templateResource);
+        if (templateService.existsById(template.getTemplateId())) {
+            templateService.deleteById(templateResource.getTemplateId());
+        }
         templateService.save(template);
-
         final Resource<TemplateResource> resource = new Resource<>(templateService.toResource(template));
         return ResponseEntity.ok().body(resource);
     }

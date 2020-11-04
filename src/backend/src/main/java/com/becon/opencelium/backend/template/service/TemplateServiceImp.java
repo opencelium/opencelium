@@ -105,6 +105,12 @@ public class TemplateServiceImp implements TemplateService {
     }
 
     @Override
+    public boolean existsById(String templateId) {
+        List<Template> templates = getAll();
+        return templates.stream().anyMatch(t -> t.getTemplateId().equals(templateId));
+    }
+
+    @Override
     public void deleteById(String templateId) {
         String path = PathConstant.TEMPLATE + templateId.concat(".json");
         File file = new File(path);
