@@ -40,15 +40,14 @@ class FormInputImage extends Component{
 
     onChangeCheckbox(e){
         let {checkboxLabel} = this.state;
-        const {name} = this.props.data;
         const {entity, updateEntity} = this.props;
         let hasImage = e.target.checked;
         if(!hasImage) {
             checkboxLabel = 'Set Image';
-            entity[name] = '';
+            entity.shouldDeleteImage = true;
         } else{
             checkboxLabel = '';
-            entity[name] = null;
+            entity.shouldDeleteImage = false;
         }
         this.setState({hasImage, checkboxLabel}, updateEntity(entity));
     }

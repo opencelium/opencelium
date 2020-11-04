@@ -32,6 +32,7 @@ const initialState = fromJS({
     updatingGroupIcon: API_REQUEST_STATE.INITIAL,
     fetchingUserGroups: API_REQUEST_STATE.INITIAL,
     deletingUserGroup: API_REQUEST_STATE.INITIAL,
+    deletingUserGroupIcon: API_REQUEST_STATE.INITIAL,
     userGroup: {},
     userGroups: List([]),
     error: null,
@@ -123,6 +124,12 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingUserGroup', API_REQUEST_STATE.FINISH);
         case UserGroupsAction.DELETE_USERGROUP_REJECTED:
             return state.set('deletingUserGroup', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UserGroupsAction.DELETE_USERGROUPICON:
+            return state.set('deletingUserGroupIcon', API_REQUEST_STATE.START).set('error', null);
+        case UserGroupsAction.DELETE_USERGROUPICON_FULFILLED:
+            return state.set('deletingUserGroupIcon', API_REQUEST_STATE.FINISH);
+        case UserGroupsAction.DELETE_USERGROUPICON_REJECTED:
+            return state.set('deletingUserGroupIcon', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

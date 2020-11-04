@@ -24,6 +24,7 @@ import {
 import {
     addUserGroupEpic, addGroupIconEpic, deleteUserGroupEpic, fetchUserGroupEpic,
     fetchUserGroupsEpic, updateUserGroupEpic, updateGroupIconEpic, checkUserGroupNameEpic,
+    deleteUserGroupIconEpic,
 } from '@epics/usergroups';
 import {
     loginUserEpic, logoutUserEpic, updateAuthUserLanguageEpic, updateDashboardSettingsEpic,
@@ -98,6 +99,7 @@ export default combineEpics(
     addUserGroupEpic,
     addGroupIconEpic,
     checkUserGroupNameEpic,
+    deleteUserGroupIconEpic,
     updateProfilePictureEpic,
     deleteUserGroupEpic,
     fetchUserGroupEpic,

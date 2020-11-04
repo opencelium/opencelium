@@ -27,7 +27,10 @@ import {
     updateUserGroupFulfilled, updateUserGroupRejected,
     updateGroupIcon, updateGroupIconFulfilled, updateGroupIconRejected,
 } from '@actions/usergroups/update';
-import {deleteUserGroupFulfilled, deleteUserGroupRejected} from '@actions/usergroups/delete';
+import {
+    deleteUserGroupFulfilled, deleteUserGroupRejected,
+    deleteUserGroupIcon, deleteUserGroupIconFulfilled, deleteUserGroupIconRejected,
+} from '@actions/usergroups/delete';
 import {doRequest} from "@utils/auth";
 import {isString} from "@utils/app";
 import {API_METHOD} from "@utils/constants/app";
@@ -142,6 +145,10 @@ const updateUserGroupEpic = (action$, store) => {
                 successResponse = updateGroupIcon;
                 delete data.icon;
             }
+            if(data.shouldDeleteImage){
+                successResponse = deleteUserGroupIcon;
+                delete data.icon;
+            }
             return doRequest({url, method: API_METHOD.PUT, data},{
                     success: successResponse,
                     reject: updateUserGroupRejected,},
@@ -185,6 +192,22 @@ const deleteUserGroupEpic = (action$, store) => {
         });
 };
 
+/**
+ * delete one usergroup icon by usergroup id
+ */
+const deleteUserGroupIconEpic = (action$, store) => {
+    return action$.ofType(UserGroupsAction.DELETE_USERGROUPICON)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.groupId}/icon`;
+            return doRequest({url, method: API_METHOD.DELETE},{
+                    success: deleteUserGroupIconFulfilled,
+                    reject: deleteUserGroupIconRejected,},
+                res => {return {...action.payload};}
+            );
+        });
+};
+
 
 export {
     fetchUserGroupEpic,
@@ -195,4 +218,5 @@ export {
     deleteUserGroupEpic,
     addGroupIconEpic,
     updateGroupIconEpic,
+    deleteUserGroupIconEpic,
 };
