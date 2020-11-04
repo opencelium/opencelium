@@ -15,12 +15,10 @@
 
 import {AppAction, ComponentsAction} from '@utils/actions';
 import {
-    addErrorTicketFulfilled, addErrorTicketRejected
+    addErrorTicketFulfilled, addErrorTicketRejected, fetchAppVersionFulfilled, fetchAppVersionRejected
 } from '@actions/app';
 import {doRequest} from "@utils/auth";
 import {API_METHOD} from "@utils/constants/app";
-import {fetchComponentsFulfilled, fetchComponentsRejected} from "@actions/components/fetch";
-import {fetchAppsFulfilled, fetchAppsRejected} from "@actions/apps/fetch";
 
 
 /**
@@ -57,8 +55,8 @@ const fetchAppVersionEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `application/oc/version`;
             return doRequest({url},{
-                success: fetchAppsFulfilled,
-                reject: fetchAppsRejected,
+                success: fetchAppVersionFulfilled,
+                reject: fetchAppVersionRejected,
             });
         });
 };
