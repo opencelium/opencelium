@@ -60,6 +60,7 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public Template toEntity(TemplateResource templateResource) {
         Template template = new Template();
+        template.setTemplateId(templateResource.getTemplateId());
         template.setName(templateResource.getName());
         template.setTemplateId(templateResource.getTemplateId());
         template.setDescription(templateResource.getDescription());
@@ -71,7 +72,7 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public void save(Template template) {
         try {
-            String id = UUID.randomUUID().toString();
+            String id = template.getTemplateId();
             String filename = id + ".json";
             ObjectMapper objectMapper = new ObjectMapper();
             template.setTemplateId(id);

@@ -122,6 +122,8 @@ public class TemplateController {
 
         String templateId = "";
         try {
+            String id = UUID.randomUUID().toString();
+            templateResource.setTemplateId(id);
             Template template = templateService.toEntity(templateResource);
             templateService.save(template);
             templateId = template.getTemplateId();
