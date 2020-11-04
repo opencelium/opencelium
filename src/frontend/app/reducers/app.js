@@ -28,7 +28,7 @@ const initialState = fromJS({
     addingErrorTicket: API_REQUEST_STATE.INITIAL,
     fetchingAppVersion: API_REQUEST_STATE.INITIAL,
     currentPageItems: [],
-    appVersion: '2',
+    appVersion: '',
     currentMenu: {},
     error: null,
     message: {},
@@ -54,7 +54,7 @@ const reducer = (state = initialState, action) => {
         case AppAction.FETCH_APPVERSION:
             return state.set('fetchingAppVersion', API_REQUEST_STATE.START).set('error', null);
         case AppAction.FETCH_APPVERSION_FULFILLED:
-            return state.set('fetchingAppVersion', API_REQUEST_STATE.FINISH).set('appVersion', action.payload);
+            return state.set('fetchingAppVersion', API_REQUEST_STATE.FINISH).set('appVersion', action.payload.version);
         case AppAction.FETCH_APPVERSION_REJECTED:
             return state.set('fetchingAppVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case AppAction.SET_CURRENT_PAGE_ITEMS:

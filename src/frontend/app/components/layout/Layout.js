@@ -19,7 +19,7 @@ import { withRouter } from 'react-router';
 import {connect} from "react-redux";
 import Header from "./header/Header";
 import Footer from "./footer/Footer";
-import {changeLanguage} from "@actions/app";
+import {changeLanguage, fetchAppVersion} from "@actions/app";
 import {defaultLanguage} from "@utils/constants/languages";
 import {addUserInStore} from '@actions/users/add';
 
@@ -35,8 +35,10 @@ import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 
 function mapStateToProps(state){
+    const app = state.get('app');
     const auth = state.get('auth');
     return {
+        appVersion: app.get('appVersion'),
         authUser: auth.get('authUser'),
         isAuth: auth.get('isAuth'),
         currentLanguage: auth.get('authUser') ? auth.get('authUser').current_language : defaultLanguage.code,
@@ -49,7 +51,7 @@ function mapStateToProps(state){
  * Layout of the app(OC)
  */
 @withTranslation('notifications')
-@connect(mapStateToProps, {changeLanguage, addUserInStore, checkOCConnection, logoutUserFulfilled})
+@connect(mapStateToProps, {changeLanguage, addUserInStore, checkOCConnection, logoutUserFulfilled, fetchAppVersion})
 class Layout extends Component{
 
     constructor(props){
@@ -63,10 +65,13 @@ class Layout extends Component{
     }
 
     componentDidMount(){
-        const {addUserInStore} = this.props;
+        const {addUserInStore, appVersion, fetchAppVersion} = this.props;
         addUserListener(addUserInStore);
         setInterval(::this.checkOCConnection, 15000000);
         CVoiceControl.initCommands({component: this}, CAppVoiceControl);
+        if(appVersion === ''){
+            fetchAppVersion();
+        }
     }
 
     componentDidUpdate(){

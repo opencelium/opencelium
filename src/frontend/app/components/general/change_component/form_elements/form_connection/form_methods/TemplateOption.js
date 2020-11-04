@@ -18,10 +18,7 @@ class TemplateOption extends React.Component{
 
     render(){
         const { innerProps, isDisabled, isSelected, appVersion,...props } = this.props;
-        /*
-        * TODO: Change comparison from description to version
-        */
-        let invalidVersion = props.data.description !== appVersion;
+        let invalidVersion = props.data.version !== appVersion;
         return !isDisabled
             ?
             (

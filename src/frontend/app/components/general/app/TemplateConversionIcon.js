@@ -34,16 +34,13 @@ class TemplateConversionIcon extends React.Component{
     }
 
     convert(){
-        /*
-        * TODO: Change from description to version
-        */
         let {appVersion, data, convertTemplate, convertTemplateRejected} = this.props;
         let {template} = data;
-        const {jsonData, error} = CExecution.executeConfig({fromVersion: template.description, toVersion: appVersion}, template.connection);
+        const {jsonData, error} = CExecution.executeConfig({fromVersion: template.version, toVersion: appVersion}, template.connection);
         if(error.message !== ''){
             convertTemplateRejected(error);
         } else {
-            template = {...template, connection: jsonData, description: appVersion};
+            template = {...template, connection: jsonData, version: appVersion};
             convertTemplate({...template});
         }
     }
@@ -51,11 +48,8 @@ class TemplateConversionIcon extends React.Component{
     render(){
         const {appVersion, convertingTemplates, data} = this.props;
         let {classNameIcon} = this.props;
-        /*
-        * TODO: Change comparison from description to version
-        */
-        let invalidVersion = data.template.description !== appVersion;
-        let convertUp = invalidVersion && data.template.description < appVersion;
+        let invalidVersion = data.template.version !== appVersion;
+        let convertUp = invalidVersion && data.template.version < appVersion;
         const isLoading = convertingTemplates.findIndex(t => t.templateId === data.template.templateId) !== -1;
         let styleIcon = {verticalAlign: 'sub', cursor: 'pointer'};
         if(convertUp){

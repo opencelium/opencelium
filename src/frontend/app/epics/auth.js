@@ -62,9 +62,6 @@ const updateAuthUserLanguageEpic = (action$, store) => {
             let data = {email, password};
             return doRequest({url, isApi: false, hasPlainText: true, method: API_METHOD.POST, data},{
                 success: (({xhr, response}) => {
-                    /*
-                    * TODO: request for the ApplicationVersion
-                    */
                     const token = xhr.getResponseHeader('authorization');
                     if(response !== null && response.hasOwnProperty('error')){
                         return loginUserFulfilled(response);
