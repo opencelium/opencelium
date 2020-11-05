@@ -168,6 +168,6 @@ public class TemplateController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id){
         templateService.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
