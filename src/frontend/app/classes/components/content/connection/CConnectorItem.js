@@ -526,7 +526,7 @@ export default class CConnectorItem{
                 break;
             case OPERATOR_ITEM:
                 if(newItem.type === LOOP_OPERATOR){
-                    newItem.iterator = this._getIterator(newItem, key);
+                    newItem.iterator = CConnectorItem.getIterator(this._operators, newItem, key);
                 }
                 if (this._operators.length === 0) {
                     this._operators.push(newItem);
@@ -541,9 +541,9 @@ export default class CConnectorItem{
     }
 
     // max can be 18 depth of loop operators
-    _getIterator(operator, prevIndex){
+    static getIterator(operators, operator, prevIndex){
         let result = ITERATOR_NAMES[0];
-        let prevOperator = this._operators[prevIndex];
+        let prevOperator = operators[prevIndex];
         if(typeof prevOperator !== "undefined"){
             let reservedIterators = [];
             let splitOperatorIndex = operator.index.split('_');
@@ -551,15 +551,15 @@ export default class CConnectorItem{
                 let indexForIteratedIndex = 0;
                 let iteratedIndex = splitOperatorIndex[0];
                 for(let i = 0; i <= prevIndex; i++){
-                    if(this._operators[i].index === iteratedIndex && this._operators[i].type === LOOP_OPERATOR){
-                        reservedIterators.push(this._operators[i].iterator);
+                    if(operators[i].index === iteratedIndex && operators[i].type === LOOP_OPERATOR){
+                        reservedIterators.push(operators[i].iterator);
                         indexForIteratedIndex++;
                         iteratedIndex += `_${splitOperatorIndex[indexForIteratedIndex]}`;
                     }
                 }
             }
-            for(let i = prevIndex + 1; i < this._operators.length; i++){
-                let iteratedOperator = this._operators[i];
+            for(let i = prevIndex + 1; i < operators.length; i++){
+                let iteratedOperator = operators[i];
                 if(iteratedOperator.type === LOOP_OPERATOR) {
                     if (iteratedOperator.index.length >= operator.index) {
                         if (iteratedOperator.index.substr(0, operator.index.length) === operator.index) {

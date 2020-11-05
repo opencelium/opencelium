@@ -28,13 +28,11 @@ import {tour} from "@decorators/tour";
 import {LIST_TOURS} from "@utils/constants/tours";
 import TemplateImport from "../import/TemplateImport";
 import styles from '@themes/default/content/templates/list.scss';
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import FontIcon from "@basic_components/FontIcon";
 import TemplateConversionIcon from "@components/general/app/TemplateConversionIcon";
-import Button from "@basic_components/buttons/Button";
-import CExecution from "@classes/components/content/template_converter/CExecutions";
+import CExecution from "@classes/components/content/template_converter/CExecution";
 import TemplateDownloadIcon from "@components/content/templates/list/TemplateDownloadIcon";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
@@ -146,7 +144,10 @@ class TemplatesList extends Component{
             return result;
         };
         mapEntity.AddButton = TemplateImport;
-        mapEntity.AdditionalButton = <Button className={styles.convert_all} authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
+        /*
+        * TODO: uncomment when backend will be ready
+        */
+        //mapEntity.AdditionalButton = <Button className={styles.convert_all} authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
         mapEntity.onDelete = deleteTemplate;
         return <List
             entities={templates}

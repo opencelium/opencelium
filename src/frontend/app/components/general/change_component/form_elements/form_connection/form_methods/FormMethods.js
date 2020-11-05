@@ -71,6 +71,9 @@ class FormMethods extends Component{
                 tourClassNames.push(tourSteps[i].selector.substr(1));
             }
         }
+        /*
+        * TODO: uncomment AddParam when backend will be ready
+        */
         return (
             <div style={{margin: '0 65px', padding: '20px 0'}}>
                 {!readOnly &&
@@ -78,7 +81,7 @@ class FormMethods extends Component{
                         {!isDraft && <Draft connection={entity} updateEntity={::this.updateEntity}/>}
                         <div style={{float: 'right'}}>
                             <AddTemplate data={data} entity={entity} authUser={authUser}/>
-                            <AddParam data={data} entity={entity} authUser={authUser}/>
+                            {/*<AddParam data={data} entity={entity} authUser={authUser}/>*/}
                         </div>
                     </React.Fragment>
                 }

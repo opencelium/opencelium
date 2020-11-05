@@ -2,6 +2,8 @@ import React from 'react';
 
 import {isArray, isNumber} from "@utils/app";
 import {getConfig} from "@utils/execution_config";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import {LOOP_OPERATOR} from "@classes/components/content/connection/operator/COperatorItem";
 
 const SELECTED_PARAM = "$SELECTED_PARAM$";
 
@@ -11,6 +13,7 @@ export const RULE_TYPES = {
     REMOVE_PARAM: 'REMOVE_PARAM',
     ADD_PARAM: 'ADD_PARAM',
     MOVE_PARAM: 'MOVE_PARAM',
+    SET_ITERATORS: 'SET_ITERATORS',
 };
 
 export default class CExecution{
@@ -35,6 +38,9 @@ export default class CExecution{
                         break;
                     case RULE_TYPES.MOVE_PARAM:
                         executionResult = CExecution.moveParam(config[i], executionResult.jsonData);
+                        break;
+                    case RULE_TYPES.SET_ITERATORS:
+                        executionResult = CExecution.setIteratorsForLoopOperators(config[i], executionResult.jsonData);
                         break;
                 }
                 if(executionResult.error.message !== ''){
@@ -106,7 +112,7 @@ export default class CExecution{
                 if(CExecution.checkOnExistence(pieceOfJson, path[i], error)) {
                     pieceOfJson = pieceOfJson[path[i]];
                 } else{
-                    return {jsonData: pieceOfJson, error};
+                    break;
                 }
             }
             setValue({json: pieceOfJson, newParamValue, error});
@@ -119,7 +125,7 @@ export default class CExecution{
                     if(CExecution.checkOnExistence(pieceOfJson, path[i], error)) {
                         pieceOfJson = pieceOfJson[path[i]];
                     } else{
-                        return {jsonData: pieceOfJson, error};
+                        break;
                     }
                 }
                 let arrayPieceOfJson = pieceOfJson;
@@ -130,7 +136,7 @@ export default class CExecution{
                             if(CExecution.checkOnExistence(arrayPieceOfJson, arrayPath[j], error)) {
                                 arrayPieceOfJson = arrayPieceOfJson[arrayPath[j]];
                             } else{
-                                return {jsonData: arrayPieceOfJson, error};
+                                break;
                             }
                         }
                         newParamValue = CExecution.getValue(json, error, rule, i);
@@ -218,6 +224,20 @@ export default class CExecution{
         const path = rule.setData.path;
         return CExecution.executeRule(rule, jsonData, path, ({json, error, newParamValue}) => {
             json[newParamName] = newParamValue;
+        });
+    }
+
+    static setIteratorsForLoopOperators(rule, jsonData){
+        const oldParamName = rule.selectedParam.name;
+        const path = rule.selectedParam.path;
+        return CExecution.executeRule(rule, jsonData, path, ({json}) => {
+            if(json.hasOwnProperty(oldParamName)) {
+                for(let i = 0; i < json[oldParamName].length; i++){
+                    if(json[oldParamName][i].type === LOOP_OPERATOR){
+                        json[oldParamName][i].iterator = CConnectorItem.getIterator(json[oldParamName], json[oldParamName][i], i > 0 ? i - 1 : 0);
+                    }
+                }
+            }
         });
     }
 }

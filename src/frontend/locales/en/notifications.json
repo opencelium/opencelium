@@ -40,6 +40,7 @@
     "CONVERT_TEMPLATE": "Template was successfully converted",
     "CONVERT_TEMPLATES": "Templates were successfully converted",
     "IMPORT_TEMPLATE": "Template was successfully imported",
+    "EXPORT_TEMPLATE": "Template was successfully downloaded",
     "DELETE_TEMPLATE": "The template was successfully removed",
     "ADD_WEBHOOK": "The webhook was successfully created",
     "DELETE_WEBHOOK": "The webhook was successfully removed",
@@ -154,6 +155,7 @@
     "CONVERT_TEMPLATE": "Template was not converted",
     "CONVERT_TEMPLATES": "Templates were not converted",
     "IMPORT_TEMPLATE": "Template was not imported",
+    "EXPORT_TEMPLATE": "Template was not downloaded",
     "DELETE_TEMPLATE": "The template was not removed",
     "ADD_WEBHOOK": {
       "__DEFAULT__": "The webhook was not created",
