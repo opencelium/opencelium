@@ -194,7 +194,6 @@ public class RoleController {
                 .findById(id)
                 .map(
                         p -> {
-
                             if (p.getIcon() != null){
                                 storageService.delete(p.getIcon());
                                 p.setIcon(null);
