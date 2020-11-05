@@ -127,9 +127,9 @@ const reducer = (state = initialState, action) => {
         case UserGroupsAction.DELETE_USERGROUPICON:
             return state.set('deletingUserGroupIcon', API_REQUEST_STATE.START).set('error', null);
         case UserGroupsAction.DELETE_USERGROUPICON_FULFILLED:
-            return state.set('deletingUserGroupIcon', API_REQUEST_STATE.FINISH);
+            return state.set('updatingUserGroup', API_REQUEST_STATE.FINISH).set('deletingUserGroupIcon', API_REQUEST_STATE.FINISH);
         case UserGroupsAction.DELETE_USERGROUPICON_REJECTED:
-            return state.set('deletingUserGroupIcon', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('updatingUserGroup', API_REQUEST_STATE.ERROR).set('deletingUserGroupIcon', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

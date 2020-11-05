@@ -127,7 +127,13 @@ export default class CBody{
     }
 
     _addFoundedProperty(result, fields, property){
-        let type = isString(fields[property]) ? FIELD_TYPE_STRING ? isArray(fields[property]) : FIELD_TYPE_ARRAY : FIELD_TYPE_OBJECT;
+        let type = FIELD_TYPE_OBJECT;
+        if(isString(fields[property])){
+            type = FIELD_TYPE_STRING
+        }
+        if(isArray(fields[property])){
+            type = FIELD_TYPE_ARRAY;
+        }
         if (this._isAttributeProperty(property)) {
             property = ATTRIBUTES_MARK;
             type = FIELD_TYPE_STRING;
@@ -208,9 +214,9 @@ export default class CBody{
                     * TODO: implement converter from invoker structure to xml string
                     *  depending on property and paste it in value
                     */
-                    if(this._format === BODY_FORMAT.XML){
+                    /*if(this._format === BODY_FORMAT.XML){
                         result.unshift({label: `<${properties[i]}/>`, value: `<xml/>`})
-                    }
+                    }*/
                 }
             }
         }

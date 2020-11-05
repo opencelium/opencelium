@@ -229,6 +229,9 @@ class ConnectionUpdate extends Component{
                 },
             ],
             hint: {text: t('UPDATE.FORM.HINT_2'), openTour: ::this.openTour},
+            /*
+            * TODO: uncomment when backend will be ready
+            */
             //extraAction: 'CHECK_CONNECTION',
         },
         ];

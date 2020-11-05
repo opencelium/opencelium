@@ -47,10 +47,10 @@ const convertTemplateFulfilled = (template) => {
  * @returns {promise}
  */
 const convertTemplateRejected = (error) => {
-    return Rx.Observable.of({
+    return {
         type: TemplatesAction.CONVERT_TEMPLATE_REJECTED,
         payload: error
-    });
+    };
 };
 
 
@@ -84,10 +84,10 @@ const convertTemplatesFulfilled = (templates) => {
  * @returns {promise}
  */
 const convertTemplatesRejected = (error) => {
-    return Rx.Observable.of({
+    return {
         type: TemplatesAction.CONVERT_TEMPLATES_REJECTED,
         payload: error
-    });
+    };
 };
 
 

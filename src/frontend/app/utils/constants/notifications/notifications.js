@@ -73,6 +73,7 @@ export const EntitiesWithNotification = [
     {name: TemplatesAction.CONVERT_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.CONVERT_TEMPLATES, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.IMPORT_TEMPLATE, types: ['FULFILLED', 'REJECTED',]},
+    {name: TemplatesAction.EXPORT_TEMPLATE, types: ['FULFILLED', 'REJECTED',]},
     {name: TemplatesAction.DELETE_TEMPLATE, types: ['FULFILLED', 'REJECTED',]},
     {name: WebHooksAction.ADD_WEBHOOK, types: ['FULFILLED', 'REJECTED',]},
     {name: WebHooksAction.DELETE_WEBHOOK, types: ['FULFILLED', 'REJECTED',]},

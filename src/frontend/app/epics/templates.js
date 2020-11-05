@@ -32,7 +32,6 @@ import {
     convertTemplatesFulfilled,
     convertTemplatesRejected
 } from "@actions/templates/update";
-import {checkConnectionFulfilled} from "@actions/connections/check";
 
 
 /*
@@ -93,7 +92,7 @@ const convertTemplateEpic = (action$, store) => {
             let {...data} = action.payload;
             return doRequest({url, method: API_METHOD.PUT, data},{
                 success: convertTemplateFulfilled,
-                reject: convertTemplateRejected,},
+                reject: (ajax) => Rx.Observable.of(convertTemplateRejected(ajax))},
                 res => {return {newTemplate: res.response, oldTemplate: data};}
             );
         });
@@ -114,7 +113,7 @@ const convertTemplatesEpic = (action$, store) => {
             return Rx.Observable.of(convertTemplatesFulfilled({newTemplates: data, oldTemplates: data}));
             /*return doRequest({url, method: API_METHOD.PUT, data: {templates:data}},{
                     success: convertTemplatesFulfilled,
-                    reject: convertTemplatesRejected,},
+                reject: (ajax) => Rx.Observable.of(convertTemplatesRejected(ajax))},
                 res => {return {newTemplates: data, oldTemplates: data};}
             );*/
         });

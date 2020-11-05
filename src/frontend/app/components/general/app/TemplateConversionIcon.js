@@ -4,7 +4,7 @@ import {connect} from "react-redux";
 import {convertTemplate, convertTemplateRejected} from "@actions/templates/update";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {Spinner} from "reactstrap";
-import CExecution from "@classes/components/content/template_converter/CExecutions";
+import CExecution from "@classes/components/content/template_converter/CExecution";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
 
