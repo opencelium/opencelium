@@ -145,11 +145,18 @@ public class MessageContainer {
 
             Pattern pattern = Pattern.compile(RegExpression.arrayWithLetterIndex);
             Matcher m = pattern.matcher(part);
-            boolean hasIndex = m.find();
-
+            boolean hasIndex = false;
+            String condIndexArr = "";
+            while (m.find()) {
+                hasIndex = true;
+                condIndexArr = m.group(1);
+            }
             int xmlIndex = index + 1;
             if ((part.contains("[]") || hasIndex) && hasLoop){
                 part = part.replace("[]", ""); // removed [index] and put []
+                if (hasIndex) {
+                    part = part.replace("[" + condIndexArr + "]", "");
+                }
                 part = part + "[" + xmlIndex + "]";
             } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
                 part = part.replace("[]", "");
@@ -253,9 +260,17 @@ public class MessageContainer {
             // TODO added size and index i. for checking is next element after an array
             Pattern pattern = Pattern.compile(RegExpression.arrayWithLetterIndex);
             Matcher m = pattern.matcher(part);
-            boolean hasIndex = m.find();
+            boolean hasIndex = false;
+            String condIndexArr = "";
+            while (m.find()) {
+                hasIndex = true;
+                condIndexArr = m.group(1);
+            }
             if ((part.contains("[]") || hasIndex) && hasLoop){
                 part = part.replace("[]", ""); // removed [index] and put []
+                if (hasIndex) {
+                    part = part.replace("[" + condIndexArr + "]", "");
+                }
                 part = part + "[" + index + "]";
             } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
                 part = part.replace("[]", "");

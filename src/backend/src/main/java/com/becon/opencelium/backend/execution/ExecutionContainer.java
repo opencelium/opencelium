@@ -86,7 +86,7 @@ public class ExecutionContainer {
         outFieldPath = outFieldPath.replace("__oc__attributes.", "@").replace(".__oc__value", "");
         expertVarProperties.put(outFieldPath, outFieldValue);
 
-        List<String> incomeRef = Arrays.asList(outgoingFiled.getValue().split(","));
+        List<String> incomeRef = Arrays.asList(outgoingFiled.getValue().split(";"));
         String format = outMethod.getRequestNode().getBodyNode().getFormat();
         incomeRef.forEach(ref -> {
             try {

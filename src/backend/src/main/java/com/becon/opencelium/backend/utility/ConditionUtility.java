@@ -83,6 +83,8 @@ public class ConditionUtility {
     }
 
     public static String getLastArray(String condition){
+        Pattern pattern = Pattern.compile(RegExpression.arrayWithLetterIndex);
+
         List<String> refParts = Arrays.asList(condition.split("\\."));
         int size = refParts.size();
 
@@ -92,6 +94,12 @@ public class ConditionUtility {
         for (String part : refParts) {
             if (!part.contains("[") && !part.contains("]") && currentSize == size){
                 continue;
+            }
+
+            Matcher m = pattern.matcher(part);
+            while (m.find()) {
+                String c = m.group(1);
+                part = part.replace("[" + c + "]", "[]");
             }
             result = result + "." + part;
             currentSize++;
