@@ -32,6 +32,7 @@ import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.VariableNodeServiceImp;
 import com.becon.opencelium.backend.execution.statement.operator.Operator;
+import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -563,7 +564,8 @@ public class ConnectorExecutor {
 
         for (int i = 0; i < array.size(); i++) {
             System.out.println("Loop " + condition + "-------- index : " + i);
-            loopIndex.put(condition, i);
+            String arr = ConditionUtility.getLastArray(condition);
+            loopIndex.put(arr, i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
         }
