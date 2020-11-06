@@ -273,8 +273,10 @@ public class MessageContainer {
                 }
                 part = part + "[" + index + "]";
             } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
-                part = part.replace("[]", "");
-                part = part + "[*]";
+                if (part.contains("[]")){
+                    part = part.replace("[]", "");
+                    part = part + "[*]";
+                }
             }
 
             jsonPath = jsonPath + "." + part;

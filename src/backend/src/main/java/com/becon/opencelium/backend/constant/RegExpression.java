@@ -6,7 +6,7 @@ public interface RegExpression {
     String responsePointer = "\\{%(.*?)%\\}";
 
     // Another one
-    String arrayWithLetterIndex = "\\[([a-z]+)\\]";
+    String arrayWithLetterIndex = "\\[([a-z,*]+)\\]";
     String arrayWithNumberIndex = "\\[([0-9]+)\\]";
     String wholeArray = "\\[([*]){1}\\]";
 }
