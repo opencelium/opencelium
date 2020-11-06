@@ -133,7 +133,7 @@ public class MessageContainer {
             if(part.isEmpty()){
                 continue;
             }
-            condition = condition + "/" + part;
+            condition = condition + "." + part;
             String array = ConditionUtility.getLastArray(condition);// need to find index
             int index = 0;
             boolean hasLoop = false;
@@ -176,7 +176,7 @@ public class MessageContainer {
             XPath xpath = xpathfactory.newXPath();
             List<String> cpart =  Arrays.asList(xpathQuery.split("/"));
             String lastElem = cpart.get(cpart.size() - 1);
-            if (!lastElem.contains("@")){
+            if (!lastElem.contains("@") && !(lastElem.contains("[") && lastElem.contains("]"))){
                 xpathQuery = xpathQuery + "/text()";
             }
             XPathExpression expr = xpath.compile(xpathQuery); // //book[@year>2001]/title/text()
