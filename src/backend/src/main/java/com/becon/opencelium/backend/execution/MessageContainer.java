@@ -266,7 +266,7 @@ public class MessageContainer {
                 hasIndex = true;
                 condIndexArr = m.group(1);
             }
-            if ((part.contains("[]") || hasIndex) && hasLoop){
+            if ((part.contains("[]") || hasIndex) && hasLoop && !part.contains("[*]")){
                 part = part.replace("[]", ""); // removed [index] and put []
                 if (hasIndex) {
                     part = part.replace("[" + condIndexArr + "]", "");
