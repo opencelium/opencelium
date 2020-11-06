@@ -509,9 +509,7 @@ public class ConnectorExecutor {
         if (rightStatement != null){
             System.out.println("Right Statement: " + rightStatement.toString());
         }
-
-        if (leftVariable instanceof NodeList)
-
+//        if (leftVariable instanceof NodeList)
         if (operator.compare(leftVariable, rightStatement)){
             executeMethod(ifStatement.getBodyFunction());
             executeDecisionStatement(ifStatement.getBodyOperator());
