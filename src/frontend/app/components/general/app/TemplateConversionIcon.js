@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import {convertTemplate, convertTemplateRejected} from "@actions/templates/update";
@@ -20,7 +20,7 @@ function mapStateToProps(state){
 }
 
 @connect(mapStateToProps, {convertTemplate, convertTemplateRejected})
-class TemplateConversionIcon extends React.Component{
+class TemplateConversionIcon extends Component{
     constructor(props) {
         super(props);
     }

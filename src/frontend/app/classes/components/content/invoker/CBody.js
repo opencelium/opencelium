@@ -168,9 +168,27 @@ export default class CBody{
         return label;
     }
 
+    _cleanSearchValue(searchValue){
+        let result = searchValue;
+        while(true) {
+            let indexOfOpenBracket = result.indexOf('[');
+            if(indexOfOpenBracket === -1){
+                return result;
+            } else{
+                let indexOfCloseBracket = result.indexOf(']');
+                if(indexOfCloseBracket === -1){
+                    result = result.substr(0, indexOfOpenBracket);
+                } else {
+                    result = result.substr(0, indexOfOpenBracket) + result.substr(indexOfCloseBracket + 1);
+                }
+            }
+        }
+    }
+
     getFieldsForSelectSearch(searchValue){
         let result = [];
-        let properties = searchValue.split('.');
+        let cleanedSearchValue = this._cleanSearchValue(searchValue);
+        let properties = cleanedSearchValue.split('.');
         let fields = this._fields;
         if(fields) {
             for (let i = 0; i < properties.length; i++) {

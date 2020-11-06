@@ -212,7 +212,7 @@ class ConnectionAdd extends Component{
      */
     addTemplate(template){
         const {addTemplate} = this.props;
-        addTemplate({name: template.name, description: template.description, connection: template.entity.getObject()});
+        addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObject()});
     }
 
     doAction(connection){
