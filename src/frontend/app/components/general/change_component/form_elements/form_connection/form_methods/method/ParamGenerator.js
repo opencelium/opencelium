@@ -29,6 +29,7 @@ import {findTopLeft} from "@utils/app";
 import ReactDOM from "react-dom";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import Select from "@basic_components/inputs/Select";
+import {addCloseParamGeneratorNavigation, removeCloseParamGeneratorNavigation} from "@utils/key_navigation";
 
 
 class ParamGenerator extends Component {
@@ -40,10 +41,15 @@ class ParamGenerator extends Component {
             color: '',
             field: '',
             responseType: RESPONSE_SUCCESS,
+            shouldClose: false,
         };
         const {top, left} = findTopLeft(props.parent);
         this.top = top;
         this.left = left;
+    }
+
+    componentDidMount(){
+        addCloseParamGeneratorNavigation(this);
     }
 
     componentWillUnmount(){
@@ -52,6 +58,7 @@ class ParamGenerator extends Component {
         if(elem){
             elem.innerText = '';
         }
+        removeCloseParamGeneratorNavigation(this);
     }
 
     /**
@@ -343,6 +350,10 @@ class ParamGenerator extends Component {
     }
 
     render(){
+        const {shouldClose} = this.state;
+        if(shouldClose){
+            return null;
+        }
         const {parent} = this.props;
         if(parent){
             return ReactDOM.createPortal(this.renderGenerator(),
