@@ -181,6 +181,12 @@ public class ConditionUtility {
             return (float) (Object) val;
         } else if (val instanceof  Double) {
             return (double) (Object) val;
+        } else if (val instanceof String) {
+            String number = (String) val;
+            if (number.contains(".")) {
+                return Double.parseDouble(number);
+            }
+            return Integer.parseInt(number);
         } else {
             throw  new RuntimeException("Operands '>, <, >=, <=' don't work with String");
         }
