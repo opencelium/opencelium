@@ -823,6 +823,39 @@ function removeFocusDocumentNavigation(that){
 }
 
 /**
+ * pressing Esc focus on the document
+ */
+let CloseParamGenerator = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keydown':
+                closeParamGenerator(event, this.that);
+                break;
+        }
+
+    }
+};
+function closeParamGenerator(e, that){
+    let key = e.keyCode;
+    switch (key) {
+        //esc
+        case 27:
+            if(that.state.showGenerator || that.props.isVisible){
+                that.setState({
+                    shouldClose: true,
+                });
+            }
+            break;
+    }
+}
+function addCloseParamGeneratorNavigation(that){
+    addNavigationListener(that, CloseParamGenerator);
+}
+function removeCloseParamGeneratorNavigation(that){
+    removeNavigationListener(that, CloseParamGenerator);
+}
+
+/**
  * pressing LeftArrow open previous page of the List component
  */
 let PrevPageKeyNavigation = {
@@ -975,4 +1008,6 @@ export{
     removeMenuDashboardKeyNavigation,
     addMenuAdminCardsKeyNavigation,
     removeMenuAdminCardsKeyNavigation,
+    addCloseParamGeneratorNavigation,
+    removeCloseParamGeneratorNavigation,
 };

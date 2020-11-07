@@ -15,6 +15,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 
 import Input from "@basic_components/inputs/Input";
 import styles from '@themes/default/general/change_component.scss';
@@ -22,9 +23,17 @@ import Button from "@basic_components/buttons/Button";
 import Dialog from "@basic_components/Dialog";
 
 
+function mapStateToProps(state){
+    const app = state.get('app');
+    return{
+        appVersion: app.get('appVersion'),
+    };
+}
+
 /**
  * Add Template Component
  */
+@connect(mapStateToProps, {})
 class AddTemplate extends Component{
 
     constructor(props){
@@ -64,10 +73,10 @@ class AddTemplate extends Component{
      */
     addTemplate(){
         const {addTemplateName, addTemplateDescription} = this.state;
-        const {data, entity} = this.props;
+        const {data, entity, appVersion} = this.props;
         const {actions} = data;
         if(actions && actions.hasOwnProperty('addTemplate')){
-            actions.addTemplate({name: addTemplateName, description: addTemplateDescription, entity});
+            actions.addTemplate({name: addTemplateName, description: addTemplateDescription, entity, version: appVersion});
         }
         this.toggleAddTemplateDialog();
     }

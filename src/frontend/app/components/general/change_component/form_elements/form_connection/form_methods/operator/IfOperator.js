@@ -236,7 +236,7 @@ class IfOperator extends Component{
     updateRightPropertyValue(){
         const {rightProperty} = this.state;
         const {operator, updateEntity} = this.props;
-        operator.setRightStatementPropertyValue(rightProperty);
+        operator.setRightStatementRightPropertyValue(rightProperty);
         updateEntity();
     }
 

@@ -128,6 +128,10 @@ export default class COperatorItem{
         this._condition.rightStatement.rightPropertyValue = '';
     }
 
+    setLeftStatementRightPropertyValue(rightPropertyValue){
+        this._condition.leftStatement.rightPropertyValue = rightPropertyValue;
+    }
+
     setRelationalOperator(relationalOperator){
         this._condition.relationalOperator = relationalOperator;
         this._condition.rightStatement = CStatement.createStatement();
@@ -145,7 +149,7 @@ export default class COperatorItem{
         this._condition.rightStatement.field = field;
     }
 
-    setRightStatementPropertyValue(rightPropertyValue){
+    setRightStatementRightPropertyValue(rightPropertyValue){
         this._condition.rightStatement.rightPropertyValue = rightPropertyValue;
     }
 
