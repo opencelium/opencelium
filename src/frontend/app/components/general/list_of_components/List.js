@@ -16,6 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
+import { withRouter } from 'react-router';
 import { Container, Row, Col } from "react-grid-system";
 
 import ListHeader from './Header';
@@ -131,14 +132,16 @@ class List extends Component{
     }
 
     componentDidUpdate(prevProps){
-        if(this.props.page.pageNumber !== prevProps.page.pageNumber || this.props.entities.length !== prevProps.entities.length){
+        if(this.props.page.pageNumber !== prevProps.page.pageNumber || this.props.entities.length !== prevProps.entities.length || this.props.rerenderDependency !== prevProps.rerenderDependency){
             this.setCurrentPageItems();
         }
     }
 
     changeSearchValue(searchValue){
-        this.setState({searchValue});
-        this.setCurrentPageItems();
+        this.setState({searchValue}, () => {
+            this.setCurrentPageItems();
+            this.props.router.push(this.props.page.link + '1');
+        });
     }
 
     setCurrentPageItems(){
@@ -365,4 +368,4 @@ List.defaultProps = {
     noSearchField: false,
 };
 
-export default List;
+export default withRouter(List);
