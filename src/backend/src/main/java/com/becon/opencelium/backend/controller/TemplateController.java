@@ -165,6 +165,21 @@ public class TemplateController {
         return ResponseEntity.ok().body(resource);
     }
 
+    @PutMapping("/all")
+    public ResponseEntity<?> modifyAll(@RequestBody List<TemplateResource> templateResources) throws JsonProcessingException {
+
+        templateResources.forEach(tr -> {
+            Template template = templateService.toEntity(tr);
+            if (templateService.existsById(template.getTemplateId())) {
+                templateService.deleteById(tr.getTemplateId());
+            }
+            templateService.save(template);
+        });
+
+        final Resources<TemplateResource> resource = new Resources<>(templateResources);
+        return ResponseEntity.ok().body(resource);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id){
         templateService.deleteById(id);
