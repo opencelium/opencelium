@@ -29,7 +29,7 @@ public class TemplateResource extends ResourceSupport {
     private String description;
     private String version;
     private String link;
-    private ConnectionResource connection;
+    private CtionTemplateResource connection;
 
     public String getTemplateId() {
         return templateId;
@@ -71,11 +71,11 @@ public class TemplateResource extends ResourceSupport {
         this.link = link;
     }
 
-    public ConnectionResource getConnection() {
+    public CtionTemplateResource getConnection() {
         return connection;
     }
 
-    public void setConnection(ConnectionResource connection) {
+    public void setConnection(CtionTemplateResource connection) {
         this.connection = connection;
     }
 }

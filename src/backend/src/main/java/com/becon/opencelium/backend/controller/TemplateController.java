@@ -62,6 +62,8 @@ public class TemplateController {
         Template template = templateService
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("TEMPLATE_NOT_FOUND"));
+        TemplateResource templateResource = templateService.toResource(template);
+        final Resource<TemplateResource> resource = new Resource<>(templateResource);
         return ResponseEntity.ok().body(template);
     }
 

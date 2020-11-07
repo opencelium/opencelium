@@ -110,7 +110,7 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void deleteById(String templateId) {
-        Map<String, Template> templates = getAllAsMapl();
+        Map<String, Template> templates = getAllAsMap();
         String fileName = templates.entrySet().stream().filter(entry -> entry.getValue().getTemplateId().equals(templateId))
                 .findFirst().map(entry -> entry.getKey()).orElse(null);
 //        String path = PathConstant.TEMPLATE + templateId.concat(".json");
@@ -167,7 +167,7 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
-    private Map<String, Template> getAllAsMapl() throws WrongEncode {
+    private Map<String, Template> getAllAsMap() throws WrongEncode {
         try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Template> files = new HashMap<>();
