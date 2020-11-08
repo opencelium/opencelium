@@ -22,7 +22,7 @@ export const FIELD_TYPE_ARRAY = 'array';
 export const FIELD_TYPE_OBJECT = 'object';
 
 /**
- * (not used)
+ * Method Item class for Connector Item class
  */
 export default class CMethodItem{
 
@@ -38,6 +38,7 @@ export default class CMethodItem{
         this._isToggled = isToggled;
         this._intend = 0;
         this._isDisabled = false;
+        this._bodyFormat = this._request.body.format;
     }
 
     static createMethodItem(methodItem){
@@ -160,24 +161,8 @@ export default class CMethodItem{
         this._request._affix = affix;
     }
 
-    setRequestBody(body){
-        this._request._body = body;
-    }
-
-    setResponseFailStatus(status){
-        this._response._fail._status = status;
-    }
-
-    setResponseFailStatus(body){
-        this._response._fail._body = body;
-    }
-
-    setResponseSuccessStatus(status){
-        this._response._success._status = status;
-    }
-
-    setResponseSuccessStatus(body){
-        this._response._success._body = body;
+    setRequestBodyFields(fields){
+        this._request.body.fields = fields;
     }
 
     get error(){
@@ -210,6 +195,10 @@ export default class CMethodItem{
 
     set isDisabled(isDisabled){
         this._isDisabled = isDisabled;
+    }
+
+    get bodyFormat(){
+        return this._bodyFormat;
     }
 
     getObject(){

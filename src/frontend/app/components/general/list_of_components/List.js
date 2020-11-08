@@ -15,6 +15,8 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
+import { withRouter } from 'react-router';
 import { Container, Row, Col } from "react-grid-system";
 
 import ListHeader from './Header';
@@ -22,6 +24,7 @@ import Card from './Card';
 import Pagination, {ENTITIES_PRO_PAGE} from "@basic_components/pagination/Pagination";
 import CardError from "./CardError";
 import AddButton from "./AddButton";
+import {setCurrentPageItems} from "@actions/app";
 import {
     addAddEntityKeyNavigation,
     addDeleteCardKeyNavigation,
@@ -41,14 +44,28 @@ import {
     addFocusDocumentNavigation,
     removeFocusDocumentNavigation,
 } from "@utils/key_navigation";
-import {getThemeClass, isString, searchByNameFunction, setFocusById, sortByNameFunction} from "@utils/app";
+import {
+    componentAppear,
+    getThemeClass,
+    isString,
+    searchByNameFunction,
+    setFocusById,
+    sortByNameFunction
+} from "@utils/app";
 import styles from '@themes/default/general/list_of_components.scss';
 import Input from "@basic_components/inputs/Input";
 
 
+function mapStateToProps(state){
+    const app = state.get('app');
+    return {
+        currentPageItems: app.get('currentPageItems').toJS(),
+    };
+}
 /**
  * List Component
  */
+@connect(mapStateToProps, {setCurrentPageItems})
 class List extends Component{
 
     constructor(props){
@@ -64,6 +81,7 @@ class List extends Component{
 
     componentDidMount(){
         const {mapEntity} = this.props;
+        this.setCurrentPageItems();
         addSelectCardKeyNavigation(this);
         if(this.hasNoActions()){
             addEnterKeyNavigation(this);
@@ -85,12 +103,7 @@ class List extends Component{
         }
         addFocusDocumentNavigation(this);
         setFocusById('search_field');
-        setTimeout(function(){
-            const app_list = document.getElementById("app_list");
-            if(app_list !== null) {
-                app_list.style.opacity = 1;
-            }
-        }, 500);
+        componentAppear('app_list');
     }
 
     componentWillUnmount(){
@@ -118,8 +131,23 @@ class List extends Component{
         switchUserListKeyNavigation(false);
     }
 
+    componentDidUpdate(prevProps){
+        if(this.props.page.pageNumber !== prevProps.page.pageNumber || this.props.entities.length !== prevProps.entities.length || this.props.rerenderDependency !== prevProps.rerenderDependency){
+            this.setCurrentPageItems();
+        }
+    }
+
     changeSearchValue(searchValue){
-        this.setState({searchValue});
+        this.setState({searchValue}, () => {
+            this.setCurrentPageItems();
+            this.props.router.push(this.props.page.link + '1');
+        });
+    }
+
+    setCurrentPageItems(){
+        const {mapEntity, setCurrentPageItems} = this.props;
+        let filteredEntities = this.filterEntities().map((entity, key) => {let data = entity.getObject ? entity.getObject() : entity; return {...data, mappedEntity: mapEntity.map(entity, key)};});
+        setCurrentPageItems(filteredEntities);
     }
 
     /**
@@ -226,37 +254,32 @@ class List extends Component{
     }
 
     render(){
-        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField} = this.props;
+        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems} = this.props;
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue} = this.state;
         let {page, translations} = this.props;
         let classNames = ['empty_list'];
-        let filteredEntities = this.filterEntities();
         classNames = getThemeClass({classNames, authUser, styles});
         page.entitiesLength = this.searchEntities().length;
         return(
             <Row id={'app_list'}>
                 <Col xl={8} lg={10} md={12} sm={12} offset={{ xl: 2, lg: 1 }} >
-                    <Container style={containerStyles} style={{marginBottom: '70px'}}>
+                    <Container style={{...containerStyles, marginBottom: '70px'}}>
                         <ListHeader header={translations.header} authUser={authUser}/>
                         {
-                            entities.length > 0 && !noSearchField
-                            ?
+                            entities.length > 0 && !noSearchField &&
                                 <div className={'tour-step-search-1'}>
                                     <Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'} id={'search_field'}/>
                                 </div>
-                            :
-                                null
                         }
                         <Row>
                             {
-                                filteredEntities.length > 0
+                                currentPageItems.length > 0
                                     ?
-                                        filteredEntities.map((entity, key) => {
-                                            let mappedEntity = mapEntity.map(entity, key);
+                                        currentPageItems.map((entity, key) => {
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
                                             let graphLink = mapEntity.hasOwnProperty('getGraphLink') ? mapEntity.getGraphLink(entity) : '';
-                                            let onCardClickLink = mapEntity.hasOwnProperty('getOnCardClickLink') ? mapEntity.getOnCardClickLink(entity) : '';
+                                            let onCardClickLink = mapEntity.hasOwnProperty('getOnCardClickLink') ? mapEntity.getOnCardClickLink(entity.mappedEntity) : '';
                                             let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
                                             let hasView = isString(viewLink) && viewLink !== '';
                                             let hasUpdate = isString(updateLink) && updateLink !== '';
@@ -273,8 +296,8 @@ class List extends Component{
                                                             hasTour={translations.header.hasOwnProperty('onHelpClick') && (key === 0 || key === 1)}
                                                             index={key}
                                                             keyNavigateType={keyNavigateType}
-                                                            entity={mappedEntity}
-                                                            isException={exceptionEntities.exceptions.indexOf(mappedEntity.id) !== -1}
+                                                            entity={entity.mappedEntity}
+                                                            isException={exceptionEntities.exceptions.indexOf(entity.mappedEntity.id) !== -1}
                                                             exceptionLabel={exceptionEntities.label}
                                                             viewLink={viewLink}
                                                             updateLink={updateLink}
@@ -290,6 +313,7 @@ class List extends Component{
                                                             onCardClickLink={onCardClickLink}
                                                             keyNavigate={::this.keyNavigate}
                                                             load={load}
+                                                            isButton={onCardClickLink !== ''}
                                                         />
                                                     </CardError>
                                                 </Col>
@@ -314,10 +338,11 @@ class List extends Component{
                                     authUser={authUser}
                                 />
                                 :
-                                    mapEntity.hasOwnProperty('getAddComponent') ?
-                                        <mapEntity.getAddComponent/>
-                                    :
-                                        null
+                                    mapEntity.hasOwnProperty('AddButton') &&
+                                        <mapEntity.AddButton/>
+                        }
+                        {
+                            mapEntity.hasOwnProperty('AdditionalButton') && mapEntity.AdditionalButton
                         }
                     </Container>
                 </Col>
@@ -343,4 +368,4 @@ List.defaultProps = {
     noSearchField: false,
 };
 
-export default List;
+export default withRouter(List);

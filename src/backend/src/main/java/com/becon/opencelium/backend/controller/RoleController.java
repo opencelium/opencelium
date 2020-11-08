@@ -18,9 +18,14 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.exception.RoleExistsException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.mysql.entity.Component;
+import com.becon.opencelium.backend.mysql.entity.RoleHasPermission;
+import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserRole;
+import com.becon.opencelium.backend.mysql.service.PermissionServiceImpl;
 import com.becon.opencelium.backend.mysql.service.RoleHasPermissionServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.resource.user.ComponentResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +50,9 @@ public class RoleController {
 
     @Autowired
     private RoleHasPermissionServiceImp roleHasPermissionServiceImp;
+
+    @Autowired
+    private PermissionServiceImpl permissionService;
 
     @Autowired
     private StorageService storageService;
@@ -100,33 +108,44 @@ public class RoleController {
     public ResponseEntity<UserRoleResource> changeComponent(@PathVariable("id") int id,
                                                              @RequestBody UserRoleResource userRoleResource) throws IOException {
 
-        if (userRoleService.existsByRole(userRoleResource.getName())){
+        UserRole userRole = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
+        boolean isIdenticalName = userRole.getName().equals(userRoleResource.getName());
+        if (!isIdenticalName && userRoleService.existsByRole(userRoleResource.getName())){
             throw new RoleExistsException(userRoleResource.getName());
         }
         userRoleResource.setGroupId(id);
 
         // First of all we need to delete old relations between user_group and component
-        roleHasPermissionServiceImp.delete(id);
-
+//        for (RoleHasPermission roleHasPermission : userRole.getComponents()) {
+//            roleHasPermissionServiceImp.delete(roleHasPermission.getId());
+            roleHasPermissionServiceImp.deleteByUserRole(userRole);
+//        }
         // Creating new UserGroup object from groupJson
         UserRole role = userRoleService.toEntity(userRoleResource);
         role.setIcon(userRoleService.findById(id).get().getIcon());
+        UserRole userRole0 = userRoleService.findById(id).orElse(null);
         userRoleService.save(role);
 
-        UserRoleResource resource = userRoleService.toResource(role);
-        final URI uri = MvcUriComponentsBuilder
-                .fromController(getClass())
-                .path("/{id}")
-                .buildAndExpand(role.getId()).toUri();
+//        UserRole role1 = userRoleService.findById(id).get();
+//        UserRoleResource resource = userRoleService.toResource(role1);
+//        final URI uri = MvcUriComponentsBuilder
+//                .fromController(getClass())
+//                .path("/{id}")
+//                .buildAndExpand(role.getId()).toUri();
 
-        return ResponseEntity.created(uri).body(resource);
+        UserRole userRole1 = userRoleService.findById(id).orElse(null);
+        return userRoleService.findById(id)
+                .map(p -> ResponseEntity.ok(new UserRoleResource(p)))
+                .orElseThrow(() -> new RoleNotFoundException(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserRoleResource> put(@PathVariable("id") int id,
                                                  @RequestBody UserRoleResource roleResource) throws IOException{
 
-        if (userRoleService.existsByRole(roleResource.getName())){
+        UserRole userRole = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
+        boolean isIdenticalName = userRole.getName().equals(roleResource.getName());
+        if (!isIdenticalName && userRoleService.existsByRole(roleResource.getName())){
             throw new RoleExistsException(roleResource.getName());
         }
         roleResource.setGroupId(id);
@@ -164,6 +183,22 @@ public class RoleController {
                             }
 
                             userRoleService.deleteById(id);
+                            return ResponseEntity.noContent().build();
+                        })
+                .orElseThrow(() -> new RoleNotFoundException(id));
+    }
+
+    @DeleteMapping("/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable("id") int id) {
+        return userRoleService
+                .findById(id)
+                .map(
+                        p -> {
+                            if (p.getIcon() != null){
+                                storageService.delete(p.getIcon());
+                                p.setIcon(null);
+                                userRoleService.save(p);
+                            }
                             return ResponseEntity.noContent().build();
                         })
                 .orElseThrow(() -> new RoleNotFoundException(id));

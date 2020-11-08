@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Dialog from "@basic_components/Dialog";
@@ -70,13 +71,13 @@ class RequestIcon extends Component{
         this.setState({
             startSendingRequest: true,
         });
-        sendOperationRequest(request.getObject());
+        sendOperationRequest(request.getObject({bodyOnlyConvert: true}));
     }
 
     getRequest(){
         const {request, requestData} = this.props;
-        let endpoint = request.endpoint;
-        let body = JSON.stringify(request.body);
+        let endpoint = request.affix !== '' ? `${request.query}/${request.affix}` : request.query;
+        let body = JSON.stringify(request.getBodyFields());
         if(requestData){
             for(let param in requestData){
                 endpoint = endpoint.split(`{${param}}`).join(requestData[param]);
@@ -84,24 +85,29 @@ class RequestIcon extends Component{
             }
         }
         request.endpoint = endpoint;
-        request.body = JSON.parse(body);
+        request.setBodyFields(JSON.parse(body));
         return request;
     }
     
     render(){
         const {showRequestDialog, request, activeTab, startSendingRequest} = this.state;
-        const {isVisible, response, connectorType, requestData} = this.props;
-        //const responseEntity = response.success ? CSuccess.createSuccess(response) : CFail.createFail(response);
+        const {isVisible, response, connectorType, requestData, hasAddMethod} = this.props;
         const responseEntity = CSuccess.createSuccess(response);
+        const style = {};
+        if(connectorType === CONNECTOR_FROM){
+            style.right = hasAddMethod ? '40px' : '3px';
+        } else{
+            style.left = hasAddMethod ? '40px' : '3px';
+        }
         return(
-            <div className={connectorType === CONNECTOR_FROM ? styles.connection_request_icon_left : styles.connection_request_icon_right}>
-                {isVisible ? <TooltipFontIcon tooltip={'API Request'} value={'cloud_upload'} onClick={::this.toggleShowRequestDialog}/> : null}
+            <div className={connectorType === CONNECTOR_FROM ? styles.connection_request_icon_left : styles.connection_request_icon_right} style={style}>
+                {isVisible && <TooltipFontIcon tooltip={'API Request'} value={'cloud_upload'} onClick={::this.toggleShowRequestDialog}/>}
                 <Dialog
                     actions={[{label: 'Close', onClick: ::this.toggleShowRequestDialog, id: 'request_dialog_close'}]}
                     active={showRequestDialog}
-                    onEscKeyDown={::this.toggleShowRequestDialog}
-                    onOverlayClick={::this.toggleShowRequestDialog}
+                    toggle={::this.toggleShowRequestDialog}
                     title={'Request'}
+                    theme={{dialog: styles.request_icon_dialog}}
                 >
                     <UrlField requestData={requestData} request={request} update={::this.updateRequest} sendRequest={::this.sendRequest} isLoading={startSendingRequest}/>
                     <Tabs activeKey={activeTab} onSelect={::this.handleTabChange} className={styles.connection_request_tabs}>
@@ -118,8 +124,14 @@ class RequestIcon extends Component{
     }
 }
 
+RequestIcon.propTypes = {
+    request: PropTypes.instanceOf(CRequest).isRequired,
+    hasAddMethod: PropTypes.bool,
+};
+
 RequestIcon.defaultProps = {
     isVisible: false,
+    hasAddMethod: false,
 };
 
 export default RequestIcon;

@@ -74,14 +74,14 @@ class ChangeContent extends Component{
     componentDidMount(){
         addPrevPageChangeEntityKeyNavigation(this);
         addNextPageChangeEntityKeyNavigation(this);
-        addChangeContentActionNavigation(this);
+        //addChangeContentActionNavigation(this);
         addFocusDocumentNavigation(this);
     }
 
     componentWillUnmount(){
         removePrevPageChangeEntityKeyNavigation(this);
         removeNextPageChangeEntityKeyNavigation(this);
-        removeChangeContentActionNavigation(this);
+        //removeChangeContentActionNavigation(this);
         removeFocusDocumentNavigation(this);
     }
 

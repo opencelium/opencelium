@@ -13,24 +13,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 import {isArray, isObject, isString} from "@utils/app";
-import {
-    FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
-    FIELD_TYPE_STRING
-} from "@classes/components/content/connection/method/CMethodItem";
 
-/**
- * constants from backend
- */
+
 export const ARRAY_SIGN = '[]';
-
+export const WHOLE_ARRAY = '[*]';
 
 /**
  * circle with background color to select method
  */
-export const dotColor = (color = '#ccc') => ({
+export const dotColor = (color = '#ccc') => (color !== '#ccc' ? {
     alignItems: 'center',
     display: 'flex',
 
@@ -43,20 +35,19 @@ export const dotColor = (color = '#ccc') => ({
         height: 10,
         width: 10,
     },
-});
+} : {});
 
 /**
  * to mark field name as array
  */
-export function markFieldNameAsArray(fieldType, name){
-    if(fieldType === FIELD_TYPE_ARRAY){
-        return `${name}${ARRAY_SIGN}`;
-    } else{
-        return name;
+export function markFieldNameAsArray(fieldName){
+    if(isString(fieldName)) {
+        return `${fieldName}${ARRAY_SIGN}`;
     }
+    return fieldName;
 }
 
-export function convertFieldNameForBackend(invokerBody, fieldName, arrayCanBeEmpty = false){
+export function convertFieldNameForBackend(invokerBody, fieldName){
     let fieldNameSplitted = fieldName.split('.');
     let subValue = invokerBody;
     let result = '';
@@ -67,12 +58,12 @@ export function convertFieldNameForBackend(invokerBody, fieldName, arrayCanBeEmp
             if (isString(elem)) {
                 result += `${fieldNameSplitted[i]}`;
                 subValue = elem;
-            } else if (isArray(elem)) {
-                result += `${fieldNameSplitted[i]}[]`;
+            } else if (isArray(elem) && fieldNameSplitted[i] !== WHOLE_ARRAY) {
+                result += markFieldNameAsArray(fieldNameSplitted[i]);
                 subValue = elem[0];
             } else {
-                subValue = elem;
                 result += `${fieldNameSplitted[i]}`;
+                subValue = elem;
             }
         } else{
             result += `${fieldNameSplitted[i]}`;
@@ -84,58 +75,19 @@ export function convertFieldNameForBackend(invokerBody, fieldName, arrayCanBeEmp
     return result;
 }
 
-
-export function getFieldsForSelectSearch(invokerBody, searchField){
-    let result = [];
-    let splitValue = searchField.split('.');
-    let subValue = invokerBody;
-    if(subValue) {
-        for (let i = 0; i < splitValue.length; i++) {
-            let hasProperty = subValue.hasOwnProperty(splitValue[i]);
-            if (i < splitValue.length - 1) {
-                if (hasProperty) {
-                    let elem = subValue[splitValue[i]];
-                    if (isString(elem)) {
-                        subValue = elem;
-                    } else if (isArray(elem)) {
-                        subValue = elem[0];
-                    } else {
-                        subValue = elem;
-                    }
-                    if(!subValue){
-                        return [];
-                    }
-                } else {
-                    return [];
-                }
-            } else if (i === splitValue.length - 1) {
-                hasProperty = subValue.hasOwnProperty(splitValue[i]);
-                if (hasProperty) {
-                    let elem = subValue[splitValue[i]];
-                    if (isString(elem)) {
-                        result.push({value: splitValue[i], type: FIELD_TYPE_STRING});
-                    } else if (isArray(elem)) {
-                        result.push({value: splitValue[i], type: FIELD_TYPE_ARRAY});
-                    } else {
-                        result.push({value: splitValue[i], type: FIELD_TYPE_OBJECT});
-                    }
-                } else {
-                    for (let item in subValue) {
-                        if (item.toLowerCase().includes(splitValue[i].toLowerCase())) {
-                            if (isString(subValue[item])) {
-                                result.push({value: item, type: FIELD_TYPE_STRING});
-                            } else if (isArray(subValue[item])) {
-                                result.push({value: item, type: FIELD_TYPE_ARRAY});
-                            } else {
-                                result.push({value: item, type: FIELD_TYPE_OBJECT});
-                            }
-                        }
-                    }
+export function hasArrayMark(str){
+    let splitStr = str.split('.');
+    if(splitStr.length > 1){
+        let potentialArrayMark = splitStr[0];
+        if(potentialArrayMark.length > 2){
+            if(potentialArrayMark[0] === '[' && potentialArrayMark[potentialArrayMark.length - 1] === ']'){
+                if(potentialArrayMark.substring(1, potentialArrayMark.length - 1) !== '*'){
+                    return true;
                 }
             }
         }
     }
-    return result;
+    return false;
 }
 
 export function parseHeader(header){

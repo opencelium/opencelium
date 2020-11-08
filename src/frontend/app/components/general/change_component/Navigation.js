@@ -21,8 +21,10 @@ import {getThemeClass} from "@utils/app";
 import Button from "@basic_components/buttons/Button";
 import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import FontIcon from "@basic_components/FontIcon";
 import CheckConnection from "@change_component/extra_actions/check_connection/CheckConnection";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CChangeContentControl from "@classes/voice_control/CChangeContentControl";
 
 
 /**
@@ -34,15 +36,33 @@ class Navigation extends Component{
         super(props);
     }
 
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CChangeContentControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CChangeContentControl);
+    }
+
     renderPrevButton(){
         const {authUser, navigationPage} = this.props;
-        let classNames = ['navigation_prev_icon'];
+        let classNames = ['navigation_icon', 'navigation_prev_button'];
         classNames = getThemeClass({classNames, authUser, styles});
         const {page, prevPage} = navigationPage;
         if(page === 0 || prevPage === null){
             return null;
         }
-        return <FontIcon className={styles[classNames.navigation_prev_icon]} value={'arrow_back'} onClick={prevPage} id={'navigation_back'}/>;
+        return (
+            <TooltipFontIcon
+                tooltip={'Back'}
+                className={styles[classNames.navigation_prev_button]}
+                iconClassName={styles[classNames.navigation_icon]}
+                onClick={prevPage}
+                id={'navigation_back'}
+                value={'arrow_back'}
+                isButton={true}
+            />
+        );
     }
 
     renderNextButton(){
@@ -52,7 +72,8 @@ class Navigation extends Component{
             'navigation_icon_text',
             'navigation_action_icon',
             'navigation_icon_text',
-            'navigation_next_icon',
+            'navigation_next_button',
+            'navigation_icon',
             'navigation_loading',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
@@ -65,6 +86,7 @@ class Navigation extends Component{
         let extraButton = null;
         let isLastPage = false;
         let icon = 'arrow_forward';
+        let tooltip = 'Next';
         if(page === lastPage){
             isLastPage = true;
         }
@@ -72,16 +94,21 @@ class Navigation extends Component{
             switch(type){
                 case 'add':
                     icon = 'add';
+                    tooltip = 'Add';
                     break;
                 case 'update':
                     icon = 'autorenew';
+                    tooltip = 'Update';
                     break;
                 case 'view':
                     icon = '';
+                    tooltip = '';
+                    break;
             }
             if(isTested === -1 || isTested === 0){
                 icon = 'donut_large';
                 type = 'test';
+                tooltip = 'Test';
             }
             if(icon === ''){
                 return null;
@@ -106,7 +133,17 @@ class Navigation extends Component{
                 </React.Fragment>
             );
         }
-        return <FontIcon className={styles[classNames.navigation_next_icon]} value={icon} onClick={nextPage} id={'navigation_next'}/>;
+        return (
+            <TooltipFontIcon
+                tooltip={tooltip}
+                className={styles[classNames.navigation_next_button]}
+                iconClassName={styles[classNames.navigation_icon]}
+                onClick={nextPage}
+                id={'navigation_next'}
+                value={icon}
+                isButton={true}
+            />
+        );
     }
     
     render(){

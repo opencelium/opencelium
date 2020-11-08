@@ -26,6 +26,7 @@ import {
 
 import {doRequest} from '@utils/auth';
 import {setLS} from "@utils/LocalStorage";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -42,7 +43,7 @@ const updateAuthUserLanguageEpic = (action$, store) => {
             let userId = store.getState('auth').get('auth').get('authUser').id;
             let url = 'user/changeLanguage';
             let data = {userId, currentLanguage: action.payload.currentLanguage};
-            return doRequest({url, method: 'put', data}, {
+            return doRequest({url, method: API_METHOD.PUT, data}, {
                 success: updateAuthUserLanguageFulfilled,
                 reject: updateAuthUserLanguageRejected
             });
@@ -59,7 +60,7 @@ const updateAuthUserLanguageEpic = (action$, store) => {
             let url = 'login';
             const {email, password} = action.payload;
             let data = {email, password};
-            return doRequest({url, isApi: false, hasPlainText: true, method: 'post', data},{
+            return doRequest({url, isApi: false, hasPlainText: true, method: API_METHOD.POST, data},{
                 success: (({xhr, response}) => {
                     const token = xhr.getResponseHeader('authorization');
                     if(response !== null && response.hasOwnProperty('error')){
@@ -126,7 +127,7 @@ const updateThemeEpic = (action$, store) => {
             let url = `userDetail/${authUser.userId}`;
             let userDetail = Object.assign({}, authUser.userDetail, {theme: authUser.theme});
             authUser.userDetail = userDetail;
-            return doRequest({url, method: 'put', data: userDetail}, {
+            return doRequest({url, method: API_METHOD.PUT, data: userDetail}, {
                     success: updateThemeFulfilled,
                     reject: updateThemeRejected,},
                 res => {return authUser;}
@@ -143,7 +144,7 @@ const toggleAppTourEpic = (action$, store) => {
         .mergeMap((action) => {
             let {payload} = action;
             let url = `userDetail/${payload.userId}`;
-            return doRequest({url, method: 'put', data: payload.userDetail}, {
+            return doRequest({url, method: API_METHOD.PUT, data: payload.userDetail}, {
                 success: toggleAppTourFulfilled,
                 reject: toggleAppTourRejected,},
                 res => {return payload.userDetail;}
@@ -159,7 +160,7 @@ const checkOCConnectionEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = 'application/oc/test';
-            return doRequest({url, method: 'get'}, {
+            return doRequest({url}, {
                     success: checkOCConnectionFulfilled,
                     reject: checkOCConnectionRejected
             });

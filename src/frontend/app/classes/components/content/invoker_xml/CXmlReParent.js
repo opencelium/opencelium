@@ -16,6 +16,9 @@
 
 import {isEmptyObject, isString} from "@utils/app";
 
+/**
+ * XmlReParent Class for XmlRequest, XmlSuccess and XmlFail classes
+ */
 export default class CXmlReParent{
     constructor(reElement){
         this._header = this.getHeader(reElement.header);
@@ -85,5 +88,4 @@ export default class CXmlReParent{
         }
         return result;
     }
-
 }

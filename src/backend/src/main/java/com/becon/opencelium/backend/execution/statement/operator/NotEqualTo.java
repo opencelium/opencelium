@@ -21,6 +21,19 @@ public class NotEqualTo implements Operator {
 
     @Override
     public <T, S> boolean compare(T val1, S val2) {
-        return !val1.equals(val2);
+        String v1 = "";
+        String v2 = "";
+        if (val1 instanceof String) {
+            v1 = (String) val1;
+        } else {
+            v1 = val1.toString();
+        }
+
+        if (val2 instanceof String) {
+            v2 = (String) val2;
+        } else {
+            v2 = v2.toString();
+        }
+        return !v1.equals(v2);
     }
 }

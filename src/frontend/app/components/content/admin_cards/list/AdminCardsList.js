@@ -26,7 +26,7 @@ import {ADMINCARD_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 
 
-const prefixUrl = '/admin';
+const prefixUrl = '/admin_cards';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -73,6 +73,7 @@ class AdminCardsList extends Component{
             result.id = adminCard.id;
             result.title = adminCard.name;
             result.avatar = adminCard.icon;
+            result.link = adminCard.link;
             return result;
         };
         mapEntity.getOnCardClickLink = (adminCard) => {return `${adminCard.link}`;};

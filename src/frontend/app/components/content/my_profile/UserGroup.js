@@ -18,7 +18,6 @@ import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import { Row, Col, Visible, Hidden } from "react-grid-system";
 import Table from '@basic_components/table/Table';
-import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 
 import SubHeader from "../../general/view_component/SubHeader";
 
@@ -58,7 +57,6 @@ class UserGroup extends Component{
             'user_group_description',
             'user_group_row_table',
             'user_group_col_table',
-            'user_group_table',
             'header_cell',
             'row_cell'];
         classNames = getThemeClass({classNames, authUser, styles});
@@ -90,16 +88,19 @@ class UserGroup extends Component{
                         </Row>
                     <Row className={styles[classNames.user_group_row_table]}>
                         <Col md={12} className={styles[classNames.user_group_col_table]}>
-                            <Table authUser={authUser} selectable={false} className={styles[classNames.user_group_table]}>
-                                <TableHead>
-                                    <TableCell>{t('VIEW.TABLE_HEAD')}</TableCell>
-                                    {Permissions.map((permission, key) => (
-                                        <TableCell key={key} className={styles[classNames.header_cell]}>{t(`app:PERMISSIONS.${permission}`)}</TableCell>
-                                    ))}
-                                </TableHead>
-                                {components.map((component, key) => (
-                                    <TableRow key={key}>
-                                        <TableCell>{t(`app:COMPONENTS.${component.name}`)}</TableCell>
+                            <Table authUser={authUser} hover>
+                                <thead>
+                                    <tr>
+                                        <th>{t('VIEW.TABLE_HEAD')}</th>
+                                        {Permissions.map((permission, key) => (
+                                            <th key={key}>{t(`app:PERMISSIONS.${permission}`)}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {components.map((component, key) => (
+                                    <tr key={key}>
+                                        <td>{t(`app:COMPONENTS.${component.name}`)}</td>
                                         {
                                             Permissions.map((permission, key2) => {
                                                 let value = '-';
@@ -107,12 +108,13 @@ class UserGroup extends Component{
                                                     value = '+';
                                                 }
                                                 return (
-                                                    <TableCell key={key2} className={styles[classNames.row_cell]}>{value}</TableCell>
+                                                    <td key={key2}>{value}</td>
                                                 );
                                             })
                                         }
-                                    </TableRow>
-                                ))}
+                                    </tr>
+                                    ))}
+                                </tbody>
                             </Table>
                         </Col>
                     </Row>

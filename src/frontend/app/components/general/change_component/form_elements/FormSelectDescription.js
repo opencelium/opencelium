@@ -45,6 +45,7 @@ class FormSelectDescription extends Component{
             <div>
                 <FormSelect {...this.props} id={`input_${name}`}/>
                 <Input
+                    tabIndex={'-1'}
                     name={description.name}
                     type={'text'}
                     icon={'short_text'}

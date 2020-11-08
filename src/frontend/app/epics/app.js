@@ -13,11 +13,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AppAction} from '@utils/actions';
+import {AppAction, ComponentsAction} from '@utils/actions';
 import {
-    addErrorTicketFulfilled, addErrorTicketRejected
+    addErrorTicketFulfilled, addErrorTicketRejected, fetchAppVersionFulfilled, fetchAppVersionRejected
 } from '@actions/app';
 import {doRequest} from "@utils/auth";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -38,14 +39,30 @@ const addErrorTicketEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
-            return doRequest({url, method: 'post', data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                 success: addErrorTicketFulfilled,
                 reject: addErrorTicketRejected,},
             );
         });
 };
 
+/**
+ * fetch application version
+ */
+const fetchAppVersionEpic = (action$, store) => {
+    return action$.ofType(AppAction.FETCH_APPVERSION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `application/oc/version`;
+            return doRequest({url},{
+                success: fetchAppVersionFulfilled,
+                reject: fetchAppVersionRejected,
+            });
+        });
+};
+
 
 export {
     addErrorTicketEpic,
+    fetchAppVersionEpic,
 };

@@ -16,6 +16,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {FontIcon as ToolboxFontIcon} from "react-toolbox/lib/font_icon/FontIcon";
+import styles from "@themes/default/general/basic_components.scss";
+import Loading from "@components/general/app/Loading";
 
 
 /**
@@ -25,13 +27,61 @@ class FontIcon extends Component{
 
     constructor(props){
         super(props);
+        this.icon = React.createRef();
     }
 
     render(){
-        return (
-            <ToolboxFontIcon {...this.props}/>
-        );
+        const {onClick, id, className, iconClassName, isButton, darkTheme, blueTheme, value, size, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
+        let theme = darkTheme === true ? styles.dark_theme : '';
+        let sizeStyle = {width: `${size}px`, height: `${size}px`};
+        if(blueTheme === true){
+            theme = styles.blue_theme;
+        }
+        if(disabled){
+            theme = styles.disabled_item;
+        }
+        if(value === 'loading'){
+            return(
+                <Loading className={styles.loading_icon} spinnerStyle={{...sizeStyle}}/>
+            );
+        }
+        if (isButton) {
+            return (
+                <button ref={myRef ? myRef : this.icon} disabled={disabled} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
+                    <ToolboxFontIcon value={value} className={iconClassName} {...props} style={{...iconStyles, fontSize: `${size}px`}}/>
+                </button>
+            );
+        } else {
+            return (
+                <span ref={myRef ? myRef : this.icon} >
+                    <ToolboxFontIcon value={value} className={className} {...props} onClick={onClick} id={id}/>
+                </span>
+            );
+        }
     }
 }
+
+FontIcon.propTypes = {
+    size: PropTypes.number,
+    isButton: PropTypes.bool,
+    iconStyles: PropTypes.object,
+    darkTheme: PropTypes.bool,
+    blueTheme: PropTypes.bool,
+    onButtonBlur: PropTypes.func,
+    onButtonFocus: PropTypes.func,
+    disabled: PropTypes.bool,
+};
+
+FontIcon.defaultProps = {
+    size: 24,
+    isButton: false,
+    iconStyles: {},
+    darkTheme: true,
+    blueTheme: false,
+    myRef: null,
+    onButtonBlur: () => {},
+    onButtonFocus: () => {},
+    disabled: false,
+};
 
 export default FontIcon;

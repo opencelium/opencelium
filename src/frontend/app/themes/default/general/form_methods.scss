@@ -21,6 +21,7 @@
   font-size: $FONT_SIZE_SMALL;
   margin-top: 15px;
   overflow: initial !important;
+  color: black;
   .remove{
     color: #000000;
     font-size: $FONT_SIZE_MEDIUM;
@@ -58,6 +59,9 @@
   animation-duration: .3s;
   animation-fill-mode: forwards;
 }
+.form_mode_template{
+  width: 95%;
+}
 
 .item_delete_button{
   color: #000000;
@@ -65,12 +69,12 @@
   right: 0;
   position: absolute;
   cursor: pointer;
-  top: -12px;
+  top: 20px;
 }
 
 .item_title_arrow{
   margin-top: 4px;
-  width: 15%;
+  width: 25px;
   float: left;
 }
 
@@ -78,7 +82,7 @@
   vertical-align: super;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_MEDIUM !important;
-  width: 85%;
+  width: calc(100% - 25px);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -90,7 +94,7 @@
 }
 
 .item_card_title{
-  padding: 14px 0 14px 16px !important;
+  padding: 14px 2px 14px 2px !important;
 }
 .item_card_title>div{
   width: 100%;
@@ -137,6 +141,7 @@
   margin-top: 15px;
   font-family: $FONT_FAMILY;
   position: relative;
+  color: black;
   .remove{
     color: #000000;
     font-size: $FONT_SIZE_MEDIUM;
@@ -201,13 +206,19 @@
 .input_method_add{
   cursor: pointer;
   text-align: center;
-  float: left;
-  line-height: 50px;
+  float: right;
+  height: 80px;
+  position: relative;
 }
 
 
 .input_method_add_icon{
   font-size: $FONT_SIZE_MEDIUM;
+  margin-top: 28px;
+}
+.input_method_add_icon_for_operator{
+  @extend .input_method_add_icon;
+  margin: 28px 9px 0;
 }
 
 .items_menu{
@@ -227,14 +238,35 @@
   height: 30px;
   line-height: 26px;
   font-weight: bold;
-  margin-left: 5px;
 }
-
-.item_menu:hover{
+.item_menu_hovered{
   cursor: pointer;
   transition: width 0.4s;
   width: 63px;
   font-size: $FONT_SIZE_TINY;
+}
+.item_menu:hover{
+  @extend .item_menu_hovered;
+}
+
+.item_button{
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-left: 5px;
+}
+.item_button:focus{
+  outline: none !important;
+  .item_menu_method::after{
+    @extend .item_menu_method_hovered;
+  }
+  .item_menu_operator::after{
+    @extend .item_menu_operator_hovered;
+  }
+  .item_menu{
+    @extend .item_menu_hovered;
+  }
 }
 
 .item_menu_method{
@@ -242,10 +274,12 @@
   margin-left: 0;
   background-color: #F5F5F5;
 }
-
-.item_menu_method:hover::after{
+.item_menu_method_hovered{
   font-family: $FONT_FAMILY;
   content: 'ethod';
+}
+.item_menu_method:hover::after{
+  @extend .item_menu_method_hovered;
 }
 
 .item_menu_param{
@@ -263,9 +297,13 @@
   background-color: #D5E8D4;
 }
 
-.item_menu_operator:hover::after{
+.item_menu_operator_hovered{
   font-family: $FONT_FAMILY;
   content: 'perator';
+}
+
+.item_menu_operator:hover::after{
+  @extend .item_menu_operator_hovered;
 }
 
 .item_menu_selected{
@@ -297,6 +335,10 @@
   }
 }
 
+.method_body_label{
+  padding-bottom: 0;
+}
+
 .methods_method_item{
   font-family: $FONT_FAMILY;
   cursor: pointer;
@@ -311,6 +353,7 @@
   margin: auto;
   width: 75%;
   height: 94px;
+  position: relative;
 }
 
 .mapping_area{
@@ -398,7 +441,6 @@
   padding: 0;
   border: none;
 }
-
 .multiselect_focused{
   color: rgb(63, 81, 181);
 }
@@ -417,7 +459,33 @@
   box-shadow: none;
   background-color: initial;
 }
-
+.dropdown_menu_radios{
+  display: block;
+  height: 80px;
+  float: left;
+  position: relative;
+  width: 50%;
+  .radio_in{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+  }
+  .label_in{
+    position: absolute;
+    top: 18px;
+    left: 20px;
+  }
+  .radio_out{
+    position: absolute;
+    top: 40px;
+    left: 20px;
+  }
+  .label_out{
+    position: absolute;
+    top: 38px;
+    left: 20px;
+  }
+}
 .method_radio_area{
   font-family: $FONT_FAMILY;
   float:left;
@@ -427,11 +495,7 @@
 }
 
 .enhancement_dialog{
-}
-
-.enhancement_dialog_title {
-  font-family: $FONT_FAMILY;
-  text-align: center;
+  min-width: 750px;
 }
 
 .operator_response_radio_area_loop{
@@ -637,19 +701,71 @@
 }
 
 .method_affix{
-  cursor: default;
   float: left;
   width: 10%;
-  padding-top: 10px;
   height: 41px;
   border-bottom: 1px solid rgba(33, 33, 33, 0.12);
+  padding-top: 10px;
+}
+.method_affix_placeholder{
+  width: auto !important;
+  height: auto !important;
+  >span{
+    font-size: 14px !important;
+  }
+  padding: 1px 2px;
+}
+.method_affix_placeholder:hover{
+  box-shadow: #9f9f9f 0 1px 3px 0;
+}
+.method_affix_placeholder:focus{
+  box-shadow: #9f9f9f 0 1px 3px 0;
+}
+.method_endpoint_label_has_error{
+  color: red;
+}
+.method_affix_delimiter{
+   width: 5%;
+   float: left;
+   padding-left: 3px;
+   color: black;
+   height: 41px;
+   border-bottom: 1px solid rgba(33, 33, 33, .12);
+   padding-top: 12px;
+ }
+.method_endpoint_content_editable{
+  background-color: transparent;
+  border-bottom: 1px solid rgba(33, 33, 33, 0.12);
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  border-top: 0;
+  color: rgb(33, 33, 33);
+  display: block;
+  font-size: 16px;
+  outline: none;
+  padding: 8px 0;
+}
+.endpoint_edit{
+  z-index: 5;
+  animation: APopupInputAppear .25s;
+  position: absolute;
+  top: 15px;
+  left: -35px;
+  transition: all 0.3s ease 0s;
+  border-radius: 3px;
+  padding: 8px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+  background: white;
 }
 
 .param_generator{
+  z-index: 100;
   position: absolute;
   margin-top: -26px;
   right: -20px;
   cursor: pointer;
+  width: 1px;
 }
 
 .param_generator_param{
@@ -664,8 +780,13 @@
   }
 }
 
+.param_generator_not_absolute{
+  float: left;
+  margin-bottom: 20px;
+}
+
 .param_generator_json{
-  z-index: 1;
+  z-index: 100;
   position: absolute;
   cursor: pointer;
   left: 0;
@@ -673,15 +794,12 @@
 
 .param_generator_form_parent{
   position: absolute;
-  width: 232px;
+  width: 244px;
   background: #fff;
   z-index: 100;
-  border: 1px solid #b7dedc;
   padding: 5px;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  box-shadow: rgba(0, 0, 0, 0.14) 0 0 0 0, rgb(105, 68, 47) 0 2px 11px 2px, rgba(0, 0, 0, 0.12) 0 1px 5px 0;
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
 }
 
 .param_generator_form{
@@ -697,10 +815,9 @@
 }
 
 .param_generator_form_add{
-  width: 20px;
-  line-height: 40px;
-  text-align: center;
-  float: left;
+  position: absolute;
+  right: 8px;
+  top: 10px;
 }
 
 .body_label{
@@ -715,6 +832,17 @@
     font-family: $FONT_FAMILY;
     resize: none;
   }
+}
+.operator_iterator{
+  position: absolute;
+  top: 3px;
+  font-size: 12px;
+  padding: 0 4px;
+  cursor: default;
+  margin-left: -1px;
+}
+.operator_iterator{
+  box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
 }
 
 @keyframes APopupInputAppear {
@@ -804,10 +932,11 @@
 .body_close_menu_edit{
   position: sticky;
   cursor: pointer;
-  top: 3px;
+  bottom: 96%;
   left: 100%;
   color: black;
   font-size: $FONT_SIZE_SMALL;
+  z-index: 1;
 }
 
 .loop_placeholder{
@@ -866,12 +995,37 @@
   overflow: hidden auto;
 }
 
+.method_body_draft{
+  @extend .method_body;
+  width: 260px;
+}
+
+.method_body_xml{
+  @extend .method_body;
+  width: 500px;
+  max-height: 300px;
+  min-height: 64px;
+}
+.method_body_xml_draft{
+  @extend .method_body_xml;
+  width: 270px;
+  overflow-x: auto;
+}
+
 .method_body_placeholder{
-  padding: 6px 5px;
-  cursor: pointer;
+  width: auto !important;
+  height: auto !important;
+  >span{
+    font-size: 14px !important;
+  }
+  padding: 4px 3px;
 }
 .method_body_placeholder:hover{
-  padding: 6px 5px;
+  padding: 4px 3px;
+  box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
+}
+.method_body_placeholder:focus{
+  padding: 4px 3px;
   box-shadow: rgb(159, 159, 159) 0 1px 3px 0;
 }
 
@@ -885,4 +1039,7 @@
 }
 .method_body_has_error{
   color: #d14b4b;
+}
+.value_type:nth-child(2){
+  padding: 10px 0 !important;
 }

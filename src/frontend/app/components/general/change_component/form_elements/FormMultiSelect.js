@@ -15,11 +15,10 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
-import OCSelect from "@basic_components/inputs/Select";
-import FontIcon from "@basic_components/FontIcon";
+import Select from "@basic_components/inputs/Select";
+import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 
 
 /**
@@ -62,7 +61,7 @@ class FormMultiSelect extends Component{
 
     renderLabel(){
         let {label, required} = this.props.data;
-        let labelStyle = theme.label;
+        let labelStyle = '';
         if(this.state.focused){
             labelStyle += ' ' + styles.multiselect_focused;
         }
@@ -72,23 +71,27 @@ class FormMultiSelect extends Component{
         if(!required){
             return <label className={labelStyle}>{label}</label>;
         }
-        return <label className={labelStyle}>{label}<span className={theme.required}> *</span></label>;
+        return <span className={labelStyle}>{label}</span>;
     }
     
     render(){
         const {icon, source, name, placeholder, tourStep} = this.props.data;
         const {entity} = this.props;
         let value = entity[name];
-        let iconStyle = theme.icon;
+        let iconClassName = '';
         let selectStyle = styles.multiselect;
         if(this.state.focused){
-            iconStyle += ' ' + styles.multiselect_focused;
+            iconClassName = styles.icon_focused;
             selectStyle = styles.multiselect_focused;
         }
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${tourStep ? tourStep : ''}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
-                <OCSelect
+            <ToolboxThemeInput
+                icon={icon}
+                tourStep={tourStep}
+                label={::this.renderLabel()}
+                iconClassName={iconClassName}
+            >
+                <Select
                     id={`input_${name}`}
                     name={name}
                     value={value}
@@ -101,10 +104,7 @@ class FormMultiSelect extends Component{
                     placeholder={placeholder}
                     className={selectStyle}
                 />
-                <FontIcon value={icon} className={iconStyle}/>
-                <span className={theme.bar}/>
-                {this.renderLabel()}
-            </div>
+            </ToolboxThemeInput>
         );
     }
 }

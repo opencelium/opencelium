@@ -16,8 +16,10 @@
 
 package com.becon.opencelium.backend.invoker;
 
+import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
@@ -27,7 +29,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +86,7 @@ public class InvokerRequestBuilder{
         }
 
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
-        if (body.equals("null")){
+        if (body == null || body.equals("null")){
             httpEntity = new HttpEntity <Object> (header);
         }
         return restTemplate.exchange(url, method ,httpEntity, String.class);
@@ -149,19 +155,41 @@ public class InvokerRequestBuilder{
 
     private String buildBody() {
         try {
-            Map<String,Object> body = functionInvoker.getRequest().getBody();
+            Body body = functionInvoker.getRequest().getBody();
+            if (body == null) {
+                return null;
+            }
             ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(body);
+            String result = "";
+            if (body.getFormat().equals("xml")) {
+                Document document = createDocument();
+                XmlTransformer transformer = new XmlTransformer(document);
+                result = transformer.xmlToString(body.getFields());
+            } else {
+                result = objectMapper.writeValueAsString(body.getFields());
+            }
+
             for (RequestData data : requestData) {
                 String field = "{" + data.getField() + "}";
-                if (!json.contains(field)){
+                if (!result.contains(field)){
                     continue;
                 }
-                json = json.replace(field, data.getValue());
+                result = result.replace(field, data.getValue());
             }
-            return json;
+            return result;
         } catch (JsonProcessingException e){
             throw new RuntimeException(e);
+        }
+    }
+
+    private Document createDocument() {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.newDocument();
+        }catch (ParserConfigurationException parserException) {
+            parserException.printStackTrace();
+            throw new RuntimeException(parserException);
         }
     }
 }

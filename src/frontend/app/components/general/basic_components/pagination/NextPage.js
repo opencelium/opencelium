@@ -18,7 +18,8 @@ import { withRouter } from 'react-router';
 import Pagination from 'react-bootstrap/Pagination';
 import {addNextPageKeyNavigation, removeNextPageKeyNavigation} from '@utils/key_navigation';
 import styles from '@themes/default/general/pagination.scss';
-import FontIcon from "../FontIcon";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CPaginationControl from "@classes/voice_control/CPaginationControl";
 
 
 /**
@@ -34,10 +35,12 @@ class NextPage extends Component{
 
     componentDidMount(){
         addNextPageKeyNavigation(this);
+        CVoiceControl.initCommands({component:this}, CPaginationControl);
     }
 
     componentWillUnmount(){
         removeNextPageKeyNavigation(this);
+        CVoiceControl.removeCommands({component:this}, CPaginationControl);
     }
 
     /**

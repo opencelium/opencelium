@@ -1,20 +1,19 @@
 @import '../../constants';
 
-.input_file_label{
-  font-family: $FONT_FAMILY;
-  width: 69% !important;
-  float: left;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+.convert_all{
+  position: absolute;
+  bottom: 0;
+  left: 130px;
 }
-.input_file_browse{
-  font-family: $FONT_FAMILY;
-  width: 31%;
-  border-bottom: none;
-  padding: 1px 0 0 0 !important;
-  min-width: auto;
+.template_list_conversion{
+  display: flex;
+  float: right;
+  .loading{
+    margin-right: 5px;
+    width: 24px;
+    height: 24px;
+    vertical-align: baseline;
+  }
 }
 
 .export{

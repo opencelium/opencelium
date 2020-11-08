@@ -23,9 +23,9 @@ import {sessionExpired} from "@actions/auth";
 import {AuthAction} from "../utils/actions";
 
 import {history} from '@components/App';
-import {TOKEN_EXPIRED_MESSAGES} from "../utils/app";
 import Loading from "@components/general/app/Loading";
 import styles from "@themes/default/general/app";
+import {checkExpiredMessages} from "@utils/app";
 
 
 /**
@@ -69,7 +69,7 @@ export default function (store){
                         return;
                     }
                     if (action.payload
-                        && (action.payload.status === 403 || TOKEN_EXPIRED_MESSAGES.indexOf(action.payload.message) !== -1)
+                        && (action.payload.status === 403 || checkExpiredMessages(action.payload))
                     ) {
                         store.dispatch(sessionExpired({}));
                         history.push('/login');

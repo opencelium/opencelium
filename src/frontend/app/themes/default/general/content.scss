@@ -34,14 +34,9 @@
 
 .navigation_button_title{
   font-family: $FONT_FAMILY;
-  vertical-align: 5px;
-  margin-top: 15px;
   margin-left: 5px;
   font-size: $FONT_SIZE_MEDIUM;
   display: inline-block;
-}
-.navigation_button_title:hover{
-  text-decoration: underline;
 }
 .navigation_button_title_letter {
   text-decoration: underline;
@@ -49,7 +44,19 @@
 
 .content_header_breadcrumb{
   display: inline;
-  span:hover{
+  .title{
+    height: 100%;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: inline-block;
+  }
+  .title:focus{
+    text-decoration: underline;
+    outline: none !important;
+  }
+  .title:hover{
     cursor: pointer;
     text-decoration: underline;
   }

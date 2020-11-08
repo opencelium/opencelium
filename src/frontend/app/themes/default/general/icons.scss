@@ -1,0 +1,131 @@
+
+@import '../constants';
+
+@keyframes unlock-circle {
+  0% {
+    bottom: 37px;
+  }
+  100% {
+    bottom: 50px;
+  }
+}
+
+@keyframes unlock-box {
+  0% {
+    bottom: 57px;
+  }
+  100% {
+    bottom: 70px;
+  }
+}
+
+
+.wrapper {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-top: 20px;
+  left: 125px;
+  position: absolute;
+  height: 140px;
+  cursor: url('../../../../img/key.png'), auto !important;
+}
+.wrapper:focus{
+  //box-shadow: $FOCUS_BOX_SHADOW !important;
+  outline: none !important;
+}
+.wrapper:focus-within .base_bottom{
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+}
+.wrapper:focus-within .base{
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+}
+.wrapper:focus-within .lock_cirlce{
+  box-shadow: rgba(0, 0, 0, .14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, .22) 0 1px 1px 0;
+}
+
+.base {
+  width: 50px;
+  height: 42px;
+  border-radius: 5px;
+  top: 25px;
+  background-color: #ecf0f1;
+  margin: 0 auto;
+  position: relative;
+  z-index: 100;
+}
+
+.base_bottom {
+  width: 50px;
+  height: 21px;
+  border-radius: 0 0 5px 5px;
+  top: 21px;
+  background-color: #bdc3c7;
+  position: relative;
+  opacity: 0.4;
+}
+
+.lock_cirlce {
+  height: 45px;
+  width: 27px;
+  bottom: 37px;
+  border-radius: 11px;
+  z-index: 10;
+  background-color: #bdc3c7;
+  position: relative;
+  margin: 0 auto;
+}
+
+.unlock_circle{
+  animation-name: unlock-circle;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  box-shadow: none !important;
+}
+
+.lock_circle_inside {
+  height: 45px;
+  width: 12px;
+  border-radius: 10px;
+  top: 6px;
+  z-index: 20;
+  background-color: #fff;
+  position: relative;
+  margin: 0 auto;
+}
+.unlock_box{
+  animation-name: unlock-box;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+.lock_box {
+  height: 12px;
+  width: 12px;
+  bottom: 55px;
+  left: 27px;
+  position: relative;
+  background-color: #fff;
+  z-index: 80;
+}
+
+.lock_inside_top {
+  width: 12px;
+  height: 12px;
+  border-radius: 12px;
+  bottom: 11px;
+  left: 18px;
+  background-color: black;
+  z-index: 300;
+  position: relative;
+}
+
+.lock_inside_bottom {
+  width: 6px;
+  height: 20px;
+  bottom: 21px;
+  left: 21px;
+  background-color: black;
+  z-index: 300;
+  position: relative;
+}

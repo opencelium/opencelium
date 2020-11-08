@@ -16,10 +16,11 @@
 
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.constant.InvokerRegEx;
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
-import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorFactory;
+import com.becon.opencelium.backend.enums.OperatorType;
+import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
@@ -27,11 +28,12 @@ import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.*;
-import com.becon.opencelium.backend.neo4j.service.FieldNodeService;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
-import com.becon.opencelium.backend.neo4j.service.StatementNodeServiceImp;
+import com.becon.opencelium.backend.neo4j.service.VariableNodeServiceImp;
 import com.becon.opencelium.backend.execution.statement.operator.Operator;
+import com.becon.opencelium.backend.utility.ConditionUtility;
+import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
@@ -41,7 +43,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,12 +64,12 @@ public class ConnectorExecutor {
     private MethodNodeServiceImp methodNodeServiceImp;
     private ConnectorServiceImp connectorService;
     private LogMessageServiceImp logMessageService;
-    private StatementNodeServiceImp statementNodeService;
+    private VariableNodeServiceImp statementNodeService;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, RestTemplate restTemplate,
                              ExecutionContainer executionContainer, FieldNodeServiceImp fieldNodeService,
                              MethodNodeServiceImp methodNodeServiceImp, ConnectorServiceImp connectorService,
-                             LogMessageServiceImp logMessageService, StatementNodeServiceImp statementNodeService) {
+                             LogMessageServiceImp logMessageService, VariableNodeServiceImp statementNodeService) {
         this.invokerService = invokerService;
         this.restTemplate = restTemplate;
         this.executionContainer = executionContainer;
@@ -125,6 +132,7 @@ public class ConnectorExecutor {
                 responseContainer.put(loopIndex,responseEntity.getBody());
 
                 messageContainer.setMethodKey(methodNode.getColor());
+                messageContainer.setResponseFormat(methodNode.getResponseNode().getSuccess().getBody().getFormat());
                 messageContainer.setExchangeType("response");
                 messageContainer.setResult("success");
 //                if (responseHasError(responseEntity)){
@@ -315,15 +323,44 @@ public class ConnectorExecutor {
         if (bodyNode == null){
             return "null";
         }
-        Map<String, Object> body = replaceValues(bodyNode.getFields());
+        Map<String, Object> fields = replaceValues(bodyNode.getFields());
 //        body = fieldNodeService.deleteEmptyFields(body); // user should determine which fields should be in body.
+        Object content = new Object();
+        if (bodyNode.getType() != null && bodyNode.getType().equals("array")){
+            List<Object> c = new ArrayList<>();
+            c.add(fields);
+            content = c;
+        } else {
+            content = fields;
+        }
         String result = "";
         try {
-            result =  new ObjectMapper().writeValueAsString(body);
+            switch (bodyNode.getFormat()) {
+                case "xml" :
+                    Document document = createDocument();
+                    XmlTransformer transformer = new XmlTransformer(document);
+                    result = transformer.xmlToString(content);
+                    break;
+                case "json":
+                    result = new ObjectMapper().writeValueAsString(content);
+                    break;
+                default:
+            }
         } catch (JsonProcessingException e){
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    private Document createDocument() {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.newDocument();
+        }catch (ParserConfigurationException parserException) {
+            parserException.printStackTrace();
+            throw new RuntimeException(parserException);
+        }
     }
 
     public HttpHeaders buildHeader(FunctionInvoker functionInvoker){
@@ -349,8 +386,8 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String exp) {
         String result = exp;
-        String refRegex = InvokerRegEx.requiredData;
-        String refResRegex = InvokerRegEx.responsePointer;
+        String refRegex = RegExpression.requiredData;
+        String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(exp);
         List<String> refParts = new ArrayList<>();
@@ -440,60 +477,60 @@ public class ConnectorExecutor {
         return item;
     }
 // ======================================= OPERATOR =================================================== //
-    private void executeDecisionStatement(OperatorNode operatorNode) {
-        if (operatorNode == null){
+    private void executeDecisionStatement(StatementNode statementNode) {
+        if (statementNode == null){
             return;
         }
 
-        switch (operatorNode.getType()){
+        switch (statementNode.getType()){
             case "if":
-                executeIfStatement(operatorNode);
+                executeIfStatement(statementNode);
                 break;
             case "loop":
-                executeLoopStatement(operatorNode);
+                executeLoopStatement(statementNode);
                 break;
             default:
         }
-        executeMethod(operatorNode.getNextFunction());
-        executeDecisionStatement(operatorNode.getNextOperator());
+        executeMethod(statementNode.getNextFunction());
+        executeDecisionStatement(statementNode.getNextOperator());
     }
 
-    private void executeIfStatement(OperatorNode ifStatement){
-        OperatorFactory operatorFactory = new OperatorFactory();
-        Operator operator = operatorFactory.getOperator(ifStatement.getOperand());
-        Object leftStatement = getValue(ifStatement.getLeftStatement(), "");
+    private void executeIfStatement(StatementNode ifStatement){
+        OperatorAbstractFactory factory = new OperatorAbstractFactory();
+        Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());
+        Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
         System.out.println("=============== " + ifStatement.getOperand() + " =================");
-        if(leftStatement != null){
-            System.out.println("Left Statement: " + leftStatement.toString());
+        if(leftVariable != null){
+            System.out.println("Left Statement: " + leftVariable.toString());
         }
 
-        String ref = statementNodeService.convertToRef(ifStatement.getLeftStatement());
-        Object rightStatement = getValue(ifStatement.getRightStatement(), ref);
+        String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
+        Object rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
         if (rightStatement != null){
             System.out.println("Right Statement: " + rightStatement.toString());
         }
-
-        if (operator.compare(leftStatement, rightStatement)){
+//        if (leftVariable instanceof NodeList)
+        if (operator.compare(leftVariable, rightStatement)){
             executeMethod(ifStatement.getBodyFunction());
             executeDecisionStatement(ifStatement.getBodyOperator());
         }
     }
 
-    private Object getValue(StatementNode statementNode, String leftStatement) {
-        if (statementNode == null) {
+    private Object getValue(StatementVariable statementVariable, String leftVariableRef) {
+        if (statementVariable == null) {
             return null;
         }
 
-        if (statementNode.getRightPropertyValue() != null && !statementNode.getRightPropertyValue().isEmpty()) {
+        if (statementVariable.getRightPropertyValue() != null && !statementVariable.getRightPropertyValue().isEmpty()) {
             List<Object> result = new ArrayList<>();
-            String ref = statementNodeService.convertToRef(statementNode);
-            String rightPropertyValueRef = leftStatement + "." + statementNode.getRightPropertyValue();
+            String ref = statementNodeService.convertToRef(statementVariable);
+            String rightPropertyValueRef = leftVariableRef + "." + statementVariable.getRightPropertyValue();
             Object value;
             if (fieldNodeService.hasReference(ref)){
                 value = executionContainer.getValueFromResponseData(ref);
                 result.add(value);
             } else {
-                result.add(statementNode.getFiled());
+                result.add(statementVariable.getFiled());
             }
 
             value = executionContainer.getValueFromResponseData(rightPropertyValueRef);
@@ -501,39 +538,40 @@ public class ConnectorExecutor {
             return result;
         }
 
-        String ref = statementNodeService.convertToRef(statementNode);
+        String ref = statementNodeService.convertToRef(statementVariable);
         if (!fieldNodeService.hasReference(ref)){
-            return statementNode.getFiled();
+            return statementVariable.getFiled();
         }
         return executionContainer.getValueFromResponseData(ref);
     }
 
-    private void executeLoopStatement(OperatorNode operatorNode){
-        StatementNode leftStatement = operatorNode.getLeftStatement();
+    private void executeLoopStatement(StatementNode statementNode){
+        StatementVariable leftStatement = statementNode.getLeftStatementVariable();
         String methodKey = leftStatement.getColor();
         String condition = leftStatement.getColor() + ".(" + leftStatement.getType() + ")." + leftStatement.getFiled();
 //        // TODO: Need to rework for "request" types too.
 //        String exchangeType = ConditionUtility.getExchangeType(condition);
 
-        Map<String, Integer> loopStack = executionContainer.getLoopIndex();
+        Map<String, Integer> loopIndex = executionContainer.getLoopIndex();
         MessageContainer message = executionContainer.getResponseData().stream()
                 .filter(m -> m.getMethodKey().equals(methodKey))
                 .findFirst()
                 .orElse(null);
-        List<Map<String, Object>> array =
-                (List<Map<String, Object>>) message.getValue(condition, loopStack);
+        List<Object> array =
+                (List<Object>) message.getValue(condition, loopIndex);
 
         for (int i = 0; i < array.size(); i++) {
             System.out.println("Loop " + condition + "-------- index : " + i);
-            loopStack.put(condition, i);
-            executeMethod(operatorNode.getBodyFunction());
-            executeDecisionStatement(operatorNode.getBodyOperator());
+            String arr = ConditionUtility.getLastArray(condition);
+            loopIndex.put(arr, i);
+            executeMethod(statementNode.getBodyFunction());
+            executeDecisionStatement(statementNode.getBodyOperator());
         }
 
-        if (loopStack.containsKey(condition)){
-            loopStack.remove(condition);
+        if (loopIndex.containsKey(condition)){
+            loopIndex.remove(condition);
         }
-        executeMethod(operatorNode.getNextFunction());
-        executeDecisionStatement(operatorNode.getNextOperator());
+        executeMethod(statementNode.getNextFunction());
+        executeDecisionStatement(statementNode.getNextOperator());
     }
 }

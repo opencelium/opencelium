@@ -15,7 +15,7 @@
 
 import {consoleLog, isId, sortByIndex, subArrayToString} from "@utils/app";
 import CMethodItem from "./method/CMethodItem";
-import COperatorItem from "./operator/COperatorItem";
+import COperatorItem, {LOOP_OPERATOR} from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
 import CConnectorPagination from "./CConnectorPagination";
 
@@ -29,6 +29,8 @@ export const METHOD_ITEM = 'method';
 export const OPERATOR_ITEM = 'operator';
 
 export const CONNECTOR_DEPTH_LIMIT = 7;
+
+export const ITERATOR_NAMES = ['i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 /**
  * Connector class for manipulating data in the Connector Component
@@ -113,7 +115,7 @@ export default class CConnectorItem{
 
     convertOperator(operator){
         if(!(operator instanceof COperatorItem)) {
-            return COperatorItem.createOperatorItem(operator);
+            return COperatorItem.createOperatorItem(operator, this);
         }
         return operator;
     }
@@ -340,7 +342,7 @@ export default class CConnectorItem{
     }
 
     setCurrentItem(item){
-        this._currentItem = item;
+        this._currentItem = item ? item : null;
         this.reloadOperatorsHistory();
     }
 
@@ -523,6 +525,9 @@ export default class CConnectorItem{
                 this._methods = sortByIndex(this._methods);
                 break;
             case OPERATOR_ITEM:
+                if(newItem.type === LOOP_OPERATOR){
+                    newItem.iterator = CConnectorItem.getIterator(this._operators, newItem, key);
+                }
                 if (this._operators.length === 0) {
                     this._operators.push(newItem);
                 } else {
@@ -533,6 +538,44 @@ export default class CConnectorItem{
         }
         this.setCurrentItem(newItem);
         this.reloadPagination({newItem});
+    }
+
+    // max can be 18 depth of loop operators
+    static getIterator(operators, operator, prevIndex){
+        let result = ITERATOR_NAMES[0];
+        let prevOperator = operators[prevIndex];
+        if(typeof prevOperator !== "undefined"){
+            let reservedIterators = [];
+            let splitOperatorIndex = operator.index.split('_');
+            if(splitOperatorIndex.length > 0) {
+                let indexForIteratedIndex = 0;
+                let iteratedIndex = splitOperatorIndex[0];
+                for(let i = 0; i <= prevIndex; i++){
+                    if(operators[i].index === iteratedIndex && operators[i].type === LOOP_OPERATOR){
+                        reservedIterators.push(operators[i].iterator);
+                        indexForIteratedIndex++;
+                        iteratedIndex += `_${splitOperatorIndex[indexForIteratedIndex]}`;
+                    }
+                }
+            }
+            for(let i = prevIndex + 1; i < operators.length; i++){
+                let iteratedOperator = operators[i];
+                if(iteratedOperator.type === LOOP_OPERATOR) {
+                    if (iteratedOperator.index.length >= operator.index) {
+                        if (iteratedOperator.index.substr(0, operator.index.length) === operator.index) {
+                            reservedIterators.push(iteratedOperator.iterator);
+                        }
+                    }
+                }
+            }
+            result = ITERATOR_NAMES.filter(name => reservedIterators.indexOf(name) === -1);
+            if(result.length > 0){
+                result = result[0];
+            } else{
+                result = 'ii';
+            }
+        }
+        return result;
     }
 
     addMethod(method, mode = OUTSIDE_ITEM){

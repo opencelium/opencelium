@@ -31,7 +31,7 @@ import SchedulesMenuItem from "./SchedulesMenuItem";
 
 import AdminCardsMenuItem from "./AdminCardsMenuItem";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {getThemeClass} from "@utils/app";
+import {componentAppear, getThemeClass} from "@utils/app";
 import styles from '@themes/default/layout/header.scss';
 import LogoMenuItem from "./LogoMenuItem";
 
@@ -40,6 +40,7 @@ function mapStateToProps(state){
     const auth = state.get('auth');
     return {
         isAuth: auth.get('isAuth'),
+        fromLogin: auth.get('fromLogin'),
         authUser: auth.get('authUser'),
         role: auth.get('authUser') ? auth.get('authUser').role : Roles.GUEST,
         logining: auth.get('logining'),
@@ -58,9 +59,18 @@ class Header extends Component{
         super(props);
 
         this.state = {
+            visible: !props.fromLogin,
             expanded: false,
             currentPath: props.router.getCurrentLocation().pathname,
         };
+    }
+
+    componentDidMount(){
+        if(!this.state.visible) {
+            setTimeout(() => this.setState({visible: true},() => componentAppear('app_header')), 1000);
+        } else{
+            componentAppear('app_header');
+        }
     }
 
     componentDidUpdate(){
@@ -85,14 +95,18 @@ class Header extends Component{
     }
 
     render(){
-        const {expanded} = this.state;
+        const {expanded, visible} = this.state;
         const {authUser, t} = this.props;
+        if(!visible){
+            return null;
+        }
         let classNames = ['header'];
         if(authUser) {
             classNames = getThemeClass({classNames, authUser, styles});
         }
         return (
             <Navbar
+                id={'app_header'}
                 className={styles[classNames.header]}
                 expand={"lg"}
                 expanded={expanded}

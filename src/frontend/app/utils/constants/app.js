@@ -40,6 +40,9 @@ export const ERROR_TYPE = {
     BACKEND: 'BACKEND',
 };
 
+export const ENABLE_VOICE_CONTROL = false;
+
+export const ENABLE_DEBUG_VOICE_CONTROL = false;
 
 export const API_REQUEST_STATE = {
     INITIAL:    -1,
@@ -50,3 +53,10 @@ export const API_REQUEST_STATE = {
 };
 
 export const NO_DATA = '-';
+
+export const API_METHOD = {
+    POST: 'POST',
+    GET: 'GET',
+    PUT: 'PUT',
+    DELETE: 'DELETE'
+};

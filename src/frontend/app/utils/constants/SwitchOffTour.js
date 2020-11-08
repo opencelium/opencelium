@@ -62,8 +62,11 @@ class SwitchOffTour extends Component{
             <div>
                 <div className={styles.switch_off_tour_text}>{this.props.children}</div>
                 <div className={styles.switch_off_tour_check}>
-                    <span className={styles.switch_off_tour_do_not_show}>Do not show again</span>
-                    <Checkbox checked={!this.state.checked} onChange={::this.handleCheck} theme={{check: styles.switch_off_tour_checkbox, field: styles.switch_off_tour_field}}/>
+                    <Checkbox
+                        label={'Do not show again'}
+                        checked={!this.state.checked}
+                        onChange={::this.handleCheck}
+                    />
                 </div>
             </div>
         );

@@ -54,9 +54,48 @@ const deleteUserGroupRejected = (error) => {
     });
 };
 
+/**
+ * delete user group icon
+ * @param usergroup
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteUserGroupIcon = (usergroup) => {
+    return {
+        type: UserGroupsAction.DELETE_USERGROUPICON,
+        payload: usergroup,
+    };
+};
+
+/**
+ * delete user group icon fulfilled
+ * @param status
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteUserGroupIconFulfilled = (status) => {
+    return {
+        type: UserGroupsAction.DELETE_USERGROUPICON_FULFILLED,
+        payload: status,
+    };
+};
+
+/**
+ * delete user group icon rejected
+ * @param error
+ * @returns {promise}
+ */
+const deleteUserGroupIconRejected = (error) => {
+    return Rx.Observable.of({
+        type: UserGroupsAction.DELETE_USERGROUPICON_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteUserGroup,
     deleteUserGroupFulfilled,
-    deleteUserGroupRejected
+    deleteUserGroupRejected,
+    deleteUserGroupIcon,
+    deleteUserGroupIconFulfilled,
+    deleteUserGroupIconRejected
 };

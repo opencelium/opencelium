@@ -33,7 +33,6 @@ public class ConnectionResource extends ResourceSupport {
     private String description;
     private ConnectorNodeResource fromConnector;
     private ConnectorNodeResource toConnector;
-
     private List<FieldBindingResource> fieldBinding;
 
     public Long getNodeId() {

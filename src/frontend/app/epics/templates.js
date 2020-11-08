@@ -13,6 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Rx from 'rxjs/Rx';
 import {TemplatesAction} from '@utils/actions';
 import {
     fetchTemplatesFulfilled, fetchTemplatesRejected,
@@ -24,6 +25,13 @@ import {
 } from '@actions/templates/add';
 import {deleteTemplateFulfilled, deleteTemplateRejected} from '@actions/templates/delete';
 import {doRequest} from "@utils/auth";
+import {API_METHOD} from "@utils/constants/app";
+import {
+    convertTemplateFulfilled,
+    convertTemplateRejected,
+    convertTemplatesFulfilled,
+    convertTemplatesRejected
+} from "@actions/templates/update";
 
 
 /*
@@ -66,12 +74,48 @@ const addTemplateEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
-            return doRequest({url, method: 'post', data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                 success: addTemplateFulfilled,
                 reject: addTemplateRejected,},
             );
         });
 };
+
+/**
+ * convert one template
+ */
+const convertTemplateEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.CONVERT_TEMPLATE)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.templateId}`;
+            let {...data} = action.payload;
+            return doRequest({url, method: API_METHOD.PUT, data},{
+                success: convertTemplateFulfilled,
+                reject: (ajax) => Rx.Observable.of(convertTemplateRejected(ajax))},
+                res => {return {newTemplate: res.response, oldTemplate: data};}
+            );
+        });
+};
+
+/**
+ * convert templates
+ */
+const convertTemplatesEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.CONVERT_TEMPLATES)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            let data = action.payload;
+            //return Rx.Observable.of(convertTemplatesFulfilled({newTemplates: data, oldTemplates: data}));
+            return doRequest({url, method: API_METHOD.PUT, data},{
+                success: convertTemplatesFulfilled,
+                reject: convertTemplatesRejected},
+                res => {return {newTemplates: res.response._embedded.templateResourceList, oldTemplates: data};}
+            );
+        });
+};
+
 
 /**
  * delete one template by id
@@ -82,7 +126,7 @@ const deleteTemplateEpic = (action$, store) => {
         .mergeMap((action) => {
             let id = action.payload.hasOwnProperty('templateId') ? action.payload.templateId : action.payload.id;
             let url = `${urlPrefix}/${id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteTemplateFulfilled,
                     reject: deleteTemplateRejected,},
                 res => {return {...res.response, templateId: id};}
@@ -100,7 +144,7 @@ const importTemplateEpic = (action$, store) => {
             let url = `storage/${urlPrefix}`;
             let data = new FormData();
             data.append('file', action.payload.template);
-            return doRequest({url, method: 'post', data, contentType: 'multipart/form-data'},{
+            return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
                 success: importTemplateFulfilled,
                 reject: importTemplateRejected,},
             );
@@ -128,6 +172,8 @@ const exportTemplateEpic = (action$, store) => {
 export {
     fetchTemplatesEpic,
     addTemplateEpic,
+    convertTemplateEpic,
+    convertTemplatesEpic,
     deleteTemplateEpic,
     importTemplateEpic,
     exportTemplateEpic,

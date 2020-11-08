@@ -40,15 +40,6 @@
   text-decoration: underline;
 }
 
-.input_file_label{
-  width: 70% !important;
-  float: left;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
 .schedule_list_actions{
   text-align: center;
 }
@@ -77,18 +68,9 @@
   font-family: $FONT_FAMILY;
 }
 
-.schedule_list_status_cell_loading{
-  font-family: $FONT_FAMILY;
-  margin: 0 !important;
-  min-height: 0 !important;
-  >div {
-    height: 20px;
-    width: 20px;
-  }
-}
-
 .schedule_list_status{
   transition: all 0.5s;
+  vertical-align: middle !important;
 }
 
 .schedule_list_status_green{
@@ -148,6 +130,16 @@
   font-size: $INPUT_TEXT_SIZE;
   height: 38px;
 }
+.schedule_bar::before{
+  background-color: $INPUT_SELECT_COLOR !important;
+}
+.schedule_bar::after{
+  background-color: $INPUT_SELECT_COLOR !important;
+}
+
+.schedule_connection{
+  padding: 20px 0;
+}
 
 .select_connection{
   font-size: $INPUT_TEXT_SIZE;
@@ -155,7 +147,7 @@
 
 .schedule_cron_exp{
   font-size: $INPUT_TEXT_SIZE;
-  height: 38px;
+  height: 38px !important;
 }
 
 .date_time_picker{
@@ -190,11 +182,16 @@
   margin-top: 20px;
   .action_item{
     margin-right: 15px;
+    margin-bottom: 5px;
   }
 }
 
-.checkbox{
-  margin-top: 10px;
+.checkbox_label{
+  margin: 0;
+}
+.checkbox_field{
+  margin: 0;
+  position: relative;
 }
 
 .date_cell_cron{
@@ -299,6 +296,12 @@
 }
 
 /*webhook*/
+.webhook_icon{
+  color: #2e75b6;
+  :hover{
+    color: #3f51b5;
+  }
+}
 .webhook_tools{
   font-family: $FONT_FAMILY;
   cursor: pointer;
@@ -339,27 +342,6 @@
   padding: 8px 12px;
 }
 
-.schedule_delete_loading{
-  min-height: 0 !important;
-  display: inline-block;
-  margin-top: 0 !important;
-}
-.schedule_delete_loading>div{
-  width: 24px;
-  height: 20px;
-  display: inline-flex;
-}
-.schedule_start_loading{
-  min-height: 0 !important;
-  display: inline-block;
-  margin-top: 0 !important;
-}
-.schedule_start_loading>div{
-  width: 24px;
-  height: 20px;
-  display: inline-flex;
-}
-
 .schedule_list_title{
   text-overflow: ellipsis;
   overflow: hidden;
@@ -385,7 +367,9 @@
     padding-left: 5px;
   }
 }
-
+.notification_dialog{
+  min-width: 750px;
+}
 .notifications{
   tr{
     th{
@@ -400,22 +384,6 @@
   margin-top: 20px;
 }
 
-.notification_select_label{
-  font-family: $FONT_FAMILY;
-  padding: 0;
-  border: none !important;
-}
-
-.notification_select_focused{
-  color: rgb(63, 81, 181) !important;
-}
-.notification_select_focused>div{
-  border-radius: 0;
-  border: none;
-  border-bottom: 1px solid rgb(63, 81, 181);
-  box-shadow: none;
-  box-sizing: content-box;
-}
 
 .notification_select>div{
   color: black;
@@ -621,26 +589,4 @@
 .notification_input_appear{
   animation-name: $ANIMATION_FADE_IN_DOWN;
   animation-duration: .3s;
-}
-.notification_input_loading{
-  width: 18px;
-  height: 18px;
-  margin-top: 0;
-  position: absolute;
-  left: -52px;
-  top: 25px;
-}
-.notification_input_loading>div{
-  width: 14px;
-  height: 14px;
-}
-.notifications_loading{
-  min-height: 0 !important;
-  display: inline-block;
-  margin-top: 0 !important;
-}
-.notifications_loading>div{
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
 }

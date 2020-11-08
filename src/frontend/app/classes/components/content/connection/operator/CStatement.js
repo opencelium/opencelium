@@ -13,8 +13,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isString} from "@utils/app";
+import {consoleLog, isNumber, isString} from "@utils/app";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../../invoker/response/CResponse";
+import {ARRAY_SIGN, WHOLE_ARRAY} from "@classes/components/content/invoker/response/CResponseResult";
+import {markFieldNameAsArray} from "@change_component/form_elements/form_connection/form_methods/help";
 
 export const STATEMENT_REQUEST = 'request';
 export const STATEMENT_RESPONSE = 'response';
@@ -22,7 +24,7 @@ export const STATEMENT_STATIC = 'static';
 export const DEFAULT_COLOR = '#ffffff';
 
 /**
- * (not used)
+ * Statement class for Condition class
  */
 export default class CStatement{
 
@@ -41,6 +43,9 @@ export default class CStatement{
         let rightPropertyValue = statement && statement.hasOwnProperty('rightPropertyValue') && statement.rightPropertyValue ? statement.rightPropertyValue : '';
         let parent = statement && statement.hasOwnProperty('parent') ? statement.parent : null;
         let type = statement && statement.hasOwnProperty('type') && statement.type ? statement.type : '';
+        if(isNumber(field)){
+            field = `${field}`;
+        }
         let fieldSplitted = field !== '' ? field.split('.') : [];
         let responseType = '';
         if(fieldSplitted.length > 0){
@@ -54,11 +59,11 @@ export default class CStatement{
     }
 
     getFieldWithoutArrayBrackets(){
-        return this._field.replace('[]', '');
+        return this._field.replace(ARRAY_SIGN, '');
     }
 
     getRightPropertyValueWithoutArrayBrackets(){
-        return this._rightPropertyValue.replace('[]', '');
+        return this._rightPropertyValue.replace(ARRAY_SIGN, '');
     }
 
     checkType(type){
@@ -134,27 +139,30 @@ export default class CStatement{
                 let tmpField = '';
                 let newField = '';
                 for(let i = 0; i < fieldSplit.length; i++){
-                    tmpField += tmpField !== '' ? `.${fieldSplit[i]}` : fieldSplit[i];
-                    let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplit[i]);
-                    let arrayAffix = '';
-                    if(findField && findField.type === 'array'){
-                        arrayAffix = '[]';
+                    let fieldSplitValue = fieldSplit[i];
+                    tmpField += tmpField !== '' ? `.${fieldSplitValue}` : fieldSplitValue;
+                    let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
+                    if(findField && findField.value !== WHOLE_ARRAY && findField.type === 'array'){
+                        fieldSplitValue = markFieldNameAsArray(fieldSplitValue);
                     }
-                    newField += newField !== '' ? `.${fieldSplit[i]}${arrayAffix}` : `${fieldSplit[i]}${arrayAffix}`;
+                    newField += newField !== '' ? `.${fieldSplitValue}` : `${fieldSplitValue}`;
                 }
                 field = newField;
             }
             if(this._color === DEFAULT_COLOR){         //for static values
+                if(isNumber(field)){
+                    field = parseInt(field);
+                }
                 return {
                     color: '',
                     field: field !== '""' ? field : '',
-                    rightPropertyValue: '',
+                    rightPropertyValue: this._rightPropertyValue !== '""' ? this._rightPropertyValue : '',
                     type: '',
                 };
             } else {
                 return {
                     color: this._color,
-                    field: field ? `${this.responseType}.${field}` : this.responseType,
+                    field: field ? `${this._responseType}.${field}` : this._responseType,
                     type: this._type,
                     rightPropertyValue: this._rightPropertyValue,
                 };

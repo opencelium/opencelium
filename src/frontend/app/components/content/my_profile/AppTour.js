@@ -23,6 +23,8 @@ import SubHeader from "../../general/view_component/SubHeader";
 import {withTranslation} from "react-i18next";
 import {getThemeClass} from "@utils/app";
 import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CMyProfileControl from "@classes/voice_control/CMyProfileControl";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -41,7 +43,14 @@ class AppTour extends Component{
 
     constructor(props){
         super(props);
+    }
 
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CMyProfileControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CMyProfileControl);
     }
 
     /**
@@ -73,14 +82,14 @@ class AppTour extends Component{
                     <SubHeader title={'Application Tour'} authUser={authUser} className={styles[classNames.user_details_app_tour_header]}/>
                     <Row className={styles[classNames.user_details_app_tour]}>
                         <Col md={12}>
-                            <span className={styles[classNames.user_details_app_tour_title]}>{t('APP_TOUR.TITLE')}</span>
-                                <TooltipSwitch
-                                    id={'app_tour'}
-                                    authUser={authUser}
-                                    tooltip={appTour ? t('APP_TOUR.DISABLE') : t('APP_TOUR.ENABLE')}
-                                    checked={appTour}
-                                    onChange={::this.handleChangeAppTour}
-                                />
+                            <TooltipSwitch
+                                id={'app_tour'}
+                                authUser={authUser}
+                                tooltip={appTour ? t('APP_TOUR.DISABLE') : t('APP_TOUR.ENABLE')}
+                                checked={appTour}
+                                onChange={::this.handleChangeAppTour}
+                                label={t('APP_TOUR.TITLE')}
+                            />
                         </Col>
                     </Row>
                 </Col>

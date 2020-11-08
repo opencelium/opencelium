@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.constant;
 
 public interface SecurityConstant {
     public static final String SECRET = "becon.opencelium";
-    public static final long EXPIRATION_TIME = 100 * 60 * 60;
+    public static final long EXPIRATION_TIME = 24 * 60 * 60 * 1000;
     public static final int ACTIVITY_TIME = 5 * 60 * 60 * 1000;
     public static final String BEARER = "Bearer";
     public static final char LOCKED = '1';

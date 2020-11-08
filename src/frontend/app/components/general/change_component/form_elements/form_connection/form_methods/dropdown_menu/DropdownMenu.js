@@ -16,11 +16,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 import styles from '@themes/default/general/form_methods.scss';
 import ItemsMenu from "./ItemsMenu";
-import Select from 'react-select';
-import theme from "react-toolbox/lib/input/theme.css";
 import Button from "@basic_components/buttons/Button";
 import Dropdown from "./Dropdown";
 import CConnection from "@classes/components/content/connection/CConnection";
@@ -35,6 +32,9 @@ import {
     LOOP_OPERATOR
 } from "@classes/components/content/connection/operator/COperatorItem";
 import FontIcon from "@basic_components/FontIcon";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
+import Select from "@basic_components/inputs/Select";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
@@ -121,8 +121,8 @@ class DropdownMenu extends Component{
             switch (itemType) {
                 case METHOD_ITEM:
                     item.name = dropdownValue.value;
-                    item.request = operation.request.getObject();
-                    item.response = operation.response.getObject();
+                    item.request = operation.request.getObject({bodyOnlyConvert: true});
+                    item.response = operation.response.getObject({bodyOnlyConvert: true});
                     switch (connector.getConnectorType()) {
                         case CONNECTOR_FROM:
                             connection.addFromConnectorMethod(item, methodType);
@@ -180,18 +180,29 @@ class DropdownMenu extends Component{
 
     renderMethodRadio(isOperator){
         if(isOperator) {
-            return (
-                <RadioGroup
-                    name='method_type'
+            return(
+                <RadioButtons
+                    hasToolboxTheme={false}
+                    label={''}
                     value={this.state.methodType}
-                    onChange={::this.onChangeMethodType}
-                    className={styles.method_radio_area}
-                >
-                    <RadioButton label='in' value={INSIDE_ITEM}
-                                 theme={{field: styles.method_radio_field, radio: styles.method_radio_radio, radioChecked: styles.method_radio_radio_checked, text: styles.method_radio_text}}/>
-                    <RadioButton label='out' value={OUTSIDE_ITEM}
-                                 theme={{field: styles.method_radio_field, radio: styles.method_radio_radio, radioChecked: styles.method_radio_radio_checked, text: styles.method_radio_text}}/>
-                </RadioGroup>
+                    handleChange={::this.onChangeMethodType}
+                    name='method_type'
+                    className={styles.dropdown_menu_radios}
+                    radios={[
+                        {
+                            label: 'in',
+                            value: INSIDE_ITEM,
+                            inputClassName: styles.radio_in,
+                            labelClassName: styles.label_in,
+                        },
+                        {
+                            label: 'out',
+                            value: OUTSIDE_ITEM,
+                            inputClassName: styles.radio_out,
+                            labelClassName: styles.label_out,
+                        },
+                    ]}
+                />
             );
         }
         return null;
@@ -208,8 +219,7 @@ class DropdownMenu extends Component{
             inputStyle = {float: 'left', width: '70%'};
         }
         return (
-            <div className={`${theme.input}`} style={inputStyle}>
-                <div className={`${theme.inputElement} ${theme.filled}`} style={{borderBottom: 'none'}}/>
+            <div style={inputStyle}>
                 <Select
                     id={`items_menu_${connectorType}`}
                     name={name}
@@ -220,15 +230,8 @@ class DropdownMenu extends Component{
                     placeholder={name}
                     maxMenuHeight={200}
                     minMenuHeight={50}
-                    styles={{
-                        menu: (provided) => ({
-                            ...provided,
-                            width: '250px'
-                        })
-                    }}
+                    label={name}
                 />
-                <span className={theme.bar}/>
-                <label className={theme.label}>{name}</label>
             </div>
         );
     }
@@ -242,7 +245,7 @@ class DropdownMenu extends Component{
         let isOperator = false;
         let inputMethodAddStyle = {width: '20%'};
         let dropdownMenuMenuStyle = {};
-        let inputMethodAddIconStyle = {width: '100%', lineHeight: '105px'};
+        let inputMethodAddIconClassName = styles.input_method_add_icon;
         if(connector.methods.length > 0 || connector.operators.length > 0){
             dropdownMenuStyles.marginTop = '50px';
         }
@@ -252,7 +255,7 @@ class DropdownMenu extends Component{
         if(isOperator){
             inputMethodAddStyle.width = '30%';
             dropdownMenuMenuStyle.width = '100%';
-            inputMethodAddIconStyle.width = '50%';
+            inputMethodAddIconClassName = styles.input_method_add_icon_for_operator;
         }
 
         return (
@@ -270,7 +273,7 @@ class DropdownMenu extends Component{
                         {this.renderDropdown(isOperator)}
                         <div className={`${styles.input_method_add}`} style={inputMethodAddStyle}>
                             {this.renderMethodRadio(isOperator)}
-                            <FontIcon className={`${styles.input_method_add}`} style={inputMethodAddIconStyle} value={'check_circle_outline'} onClick={::this.onAdd}/>
+                            <TooltipFontIcon tooltip={'Create'} className={inputMethodAddIconClassName} value={'check_circle_outline'} onClick={::this.onAdd} isButton={true}/>
                         </div>
                     </div>
                 </Dropdown>

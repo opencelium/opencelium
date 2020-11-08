@@ -16,15 +16,14 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
-import {Table, TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 import {Permissions} from '@utils/constants/app';
-import theme from "react-toolbox/lib/input/theme.css";
 
 import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
-import FontIcon from "@basic_components/FontIcon";
 import Checkbox from "@basic_components/inputs/Checkbox";
 import {formatHtmlId} from "@utils/app";
+import Table from "@basic_components/table/Table";
+import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 
 
 /**
@@ -134,6 +133,7 @@ class FormPermissionTable extends Component{
     }
 
     render(){
+        const {focused} = this.state;
         const {label, name, dataSource, icon, tourStep} = this.props.data;
         const {t, entity} = this.props;
         let components = entity[dataSource];
@@ -172,83 +172,73 @@ class FormPermissionTable extends Component{
                 }
             }
         }
-        let iconStyle = theme.icon;
-        let labelStyle = theme.label;
-        if(this.state.focused){
-            iconStyle += ' ' + styles.multiselect_focused;
-            labelStyle += ' ' + styles.multiselect_focused;
-        }
         return (
-            <div className={`${theme.withIcon} ${theme.input} ${tourStep ? tourStep : ''}`} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <ToolboxThemeInput isFocused={focused} icon={icon} label={label} tourStep={tourStep} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} inputElementClassName={styles.multiselect_label}>
                 <div className={styles.permission_table}>
-                    <Table selectable={false} className={styles.user_group_table}>
-                        <TableHead>
-                            <TableCell><span/></TableCell>
-                            {
-                                Permissions.map((permission, key) => (
-                                    <TableCell key={key} className={styles.header_cell}>
-                                        <span>{t(`PERMISSIONS.${permission}`)}</span>
-                                        <Checkbox
-                                            id={key === 0 ? `input_${formatHtmlId(name)}` : `input_${formatHtmlId(permission)}`}
-                                            checked={permissionCheckValues[key]}
-                                            onChange={(e) => ::this.checkAllByPermission(e, permission)}
-                                            theme={{field: styles.checkbox_field}}
-                                        />
-                                    </TableCell>
-                                ))
-                            }
-                            <TableCell className={styles.header_cell}>
-                                <span>{t(`PERMISSIONS.ADMIN`)}</span>
-                                <Checkbox
-                                    id={'input_admin'}
-                                    checked={permissionCheckValues[4]}
-                                    onChange={::this.checkAll}
-                                    theme={{field: styles.checkbox_field}}
-                                />
-                            </TableCell>
-                        </TableHead>
-                        {components.map((component, key) => {
-                            return (
-                                <TableRow key={key}>
-                                    <TableCell>{component.label}</TableCell>
-                                    {
-                                        Permissions.map((permission, key2) => {
-                                            let checkValue = false;
-                                            if(values.hasOwnProperty(component.label)){
-                                                if(values[component.label].indexOf(permission) > -1){
-                                                    checkValue = true;
+                    <Table hover>
+                        <thead>
+                            <tr>
+                                <th><span/></th>
+                                {
+                                    Permissions.map((permission, key) => (
+                                        <th key={key}>
+                                            <Checkbox
+                                                label={t(`PERMISSIONS.${permission}`)}
+                                                id={key === 0 ? `input_${formatHtmlId(name)}` : `input_${formatHtmlId(permission)}`}
+                                                checked={permissionCheckValues[key]}
+                                                onChange={(e) => ::this.checkAllByPermission(e.target.checked, permission)}
+                                            />
+                                        </th>
+                                    ))
+                                }
+                                <th>
+                                    <Checkbox
+                                        label={t(`PERMISSIONS.ADMIN`)}
+                                        id={'input_admin'}
+                                        checked={permissionCheckValues[4]}
+                                        onChange={::this.checkAll}
+                                    />
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {components.map((component, key) => {
+                                return (
+                                    <tr key={key}>
+                                        <td>{component.label}</td>
+                                        {
+                                            Permissions.map((permission, key2) => {
+                                                let checkValue = false;
+                                                if(values.hasOwnProperty(component.label)){
+                                                    if(values[component.label].indexOf(permission) > -1){
+                                                        checkValue = true;
+                                                    }
                                                 }
-                                            }
-                                            return (
-                                                <TableCell key={key2} className={styles.row_cell}>
-                                                    <Checkbox
-                                                        id={formatHtmlId(`input_${component.label}_${permission}`)}
-                                                        checked={checkValue}
-                                                        onChange={(e) => ::this.setPermission(e, component, permission)}
-                                                        theme={{field: styles.checkbox_field_value}}
-                                                    />
-                                                </TableCell>
-                                            );
-                                        })
-                                    }
-                                    <TableCell className={styles.row_cell}>
-                                        <Checkbox
-                                            id={formatHtmlId(`input_${component.label}_admin`)}
-                                            checked={componentAdminValues[key]}
-                                            onChange={(e) => ::this.checkAllByComponent(e, component)}
-                                            theme={{field: styles.checkbox_field_value}}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
+                                                return (
+                                                    <td key={key2}>
+                                                        <Checkbox
+                                                            id={formatHtmlId(`input_${component.label}_${permission}`)}
+                                                            checked={checkValue}
+                                                            onChange={(e) => ::this.setPermission(e.target.checked, component, permission)}
+                                                        />
+                                                    </td>
+                                                );
+                                            })
+                                        }
+                                        <td>
+                                            <Checkbox
+                                                id={formatHtmlId(`input_${component.label}_admin`)}
+                                                checked={componentAdminValues[key]}
+                                                onChange={(e) => ::this.checkAllByComponent(e.target.checked, component)}
+                                            />
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
                     </Table>
                 </div>
-                <FontIcon value={icon} className={iconStyle}/>
-                <span className={theme.bar}/>
-                <label className={labelStyle}>{label}</label>
-            </div>
+            </ToolboxThemeInput>
         );
     }
 }

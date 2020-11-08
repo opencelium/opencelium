@@ -62,8 +62,8 @@ public class TemplateController {
         Template template = templateService
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("TEMPLATE_NOT_FOUND"));
-//        TemplateResource templateResource = templateService.toResource(template);
-//        final Resource<TemplateResource> resource = new Resource<>(templateResource);
+        TemplateResource templateResource = templateService.toResource(template);
+        final Resource<TemplateResource> resource = new Resource<>(templateResource);
         return ResponseEntity.ok().body(template);
     }
 
@@ -122,6 +122,8 @@ public class TemplateController {
 
         String templateId = "";
         try {
+            String id = UUID.randomUUID().toString();
+            templateResource.setTemplateId(id);
             Template template = templateService.toEntity(templateResource);
             templateService.save(template);
             templateId = template.getTemplateId();
@@ -153,19 +155,34 @@ public class TemplateController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> modify(@PathVariable String id,
-                                    @RequestBody TemplateResource templateResource) throws JsonProcessingException {
-        templateResource.setTemplateId(id);
+    public ResponseEntity<?> modify(@RequestBody TemplateResource templateResource) throws JsonProcessingException {
         Template template = templateService.toEntity(templateResource);
+        if (templateService.existsById(template.getTemplateId())) {
+            templateService.deleteById(templateResource.getTemplateId());
+        }
         templateService.save(template);
-
         final Resource<TemplateResource> resource = new Resource<>(templateService.toResource(template));
+        return ResponseEntity.ok().body(resource);
+    }
+
+    @PutMapping("/all")
+    public ResponseEntity<?> modifyAll(@RequestBody List<TemplateResource> templateResources) throws JsonProcessingException {
+
+        templateResources.forEach(tr -> {
+            Template template = templateService.toEntity(tr);
+            if (templateService.existsById(template.getTemplateId())) {
+                templateService.deleteById(tr.getTemplateId());
+            }
+            templateService.save(template);
+        });
+
+        final Resources<TemplateResource> resource = new Resources<>(templateResources);
         return ResponseEntity.ok().body(resource);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id){
         templateService.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

@@ -26,6 +26,8 @@ import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
 import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
 import {NO_DATA} from "@utils/constants/app";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -51,6 +53,21 @@ class StatusCell extends Component{
         super(props);
     }
 
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
+    }
+
     /**
      * to change status of the schedule
      */
@@ -64,7 +81,6 @@ class StatusCell extends Component{
         const {schedule, currentSchedule, updatingScheduleStatus, triggeringSchedule, triggeringScheduleSuccessfully, authUser, t, index} = this.props;
         let classNames = [
             'schedule_list_status',
-            'schedule_list_status_cell_loading',
             'schedule_list_status_red',
             'schedule_list_status_green',
             'schedule_list_status_created',
@@ -74,13 +90,7 @@ class StatusCell extends Component{
             'schedule_list_status_disable',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        if((updatingScheduleStatus || triggeringSchedule || triggeringScheduleSuccessfully) && currentSchedule.id === schedule.id){
-            return (
-                <TableCell>
-                    <Loading className={styles[classNames.schedule_list_status_cell_loading]} authUser={authUser}/>
-                </TableCell>
-            );
-        }
+        const isLoading = (updatingScheduleStatus || triggeringSchedule || triggeringScheduleSuccessfully) && currentSchedule.id === schedule.id;
         const {status, lastExecution} = schedule;
         let backgroundStyle = styles[classNames.schedule_list_status_created];
         if(lastExecution) {
@@ -102,15 +112,17 @@ class StatusCell extends Component{
         }
         backgroundStyle = `${backgroundStyle} ${styles[classNames.schedule_list_status]}`;
         return (
-            <TableCell className={backgroundStyle}>
+            <td className={backgroundStyle}>
                 <TooltipSwitch
                     id={`switch_status_${index}`}
+                    isLoading={isLoading}
                     authUser={authUser}
                     tooltip={schedule.status ? t('LIST.TOOLTIP_ENABLE_SWITCH_FALSE') : t('LIST.TOOLTIP_ENABLE_SWITCH_TRUE')}
                     checked={status}
                     onChange={::this.manageScheduleStatus}
+                    middle={true}
                 />
-            </TableCell>
+            </td>
         );
     }
 }

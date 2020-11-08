@@ -17,13 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import FontIcon from "@basic_components/FontIcon";
 import CNotification from "@classes/components/content/schedule/notification/CNotification";
-import OCSelect from "@basic_components/inputs/Select";
-import {getThemeClass} from "@utils/app";
-
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from '@themes/default/content/schedules/schedules.scss';
+import Select from "@basic_components/inputs/Select";
 
 
 function mapStateToProps(state){
@@ -73,32 +68,24 @@ class NotificationTypeInput extends Component{
 
     render(){
         const {focused} = this.state;
-        const {authUser, t, notification} = this.props;
+        const {t, notification} = this.props;
         const value = CNotification.getNotificationTypeForSelect(notification.notificationType, {translate: t});
         const options = CNotification.getAllNotificationTypesForSelect(t);
-        let classNames = ['notification_select', 'notification_select_label', 'notification_select_focused'];
-        classNames = getThemeClass({classNames, authUser, styles});
         return(
-            <div className={`${theme.withIcon} ${theme.input}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.notification_select_label]}`}/>
-                <OCSelect
-                    id={'input_notification_type'}
-                    name={'input_notification_type'}
-                    value={value}
-                    onChange={::this.onChangeNotificationType}
-                    onFocus={::this.focusNotificationType}
-                    onBlur={::this.blurNotificationType}
-                    options={options}
-                    placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_PLACEHOLDER')}
-                    className={`${styles[classNames.notification_select]}`}
-                />
-                <FontIcon value={'add_alert'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
-                <span className={theme.bar}/>
-                <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
-                    {t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_LABEL')}
-                    <span className={theme.required}> *</span>
-                </label>
-            </div>
+            <Select
+                id={'input_notification_type'}
+                name={'input_notification_type'}
+                value={value}
+                onChange={::this.onChangeNotificationType}
+                onFocus={::this.focusNotificationType}
+                onBlur={::this.blurNotificationType}
+                options={options}
+                placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_PLACEHOLDER')}
+                icon={'add_alert'}
+                label={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_LABEL')}
+                required={true}
+                isFocused={focused}
+            />
         );
     }
 }

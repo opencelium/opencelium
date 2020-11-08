@@ -24,20 +24,20 @@ let ls = new SecureLS({encodingType: 'des', isCompression: false, encryptionSecr
 /**
  * set local storage variable
  */
-function setLS(key, value){
-    let data = ls.get('d');
+function setLS(key, value, namespace = 'd'){
+    let data = ls.get(namespace);
     if(data === ''){
         data = {};
     }
     data[key] = value;
-    ls.set('d', data);
+    ls.set(namespace, data);
 }
 
 /**
  * get local storage variable
  */
-function getLS(key){
-    let data = ls.get('d');
+function getLS(key, namespace = 'd'){
+    let data = ls.get(namespace);
     if(data === ''){
         return null;
     }
@@ -47,21 +47,21 @@ function getLS(key){
 /**
  * remove local storage variable
  */
-function removeLS(key){
-    let data = ls.get('d');
+function removeLS(key, namespace = 'd'){
+    let data = ls.get(namespace);
     if(data !== ''){
         delete data[key];
-        ls.set('d', data);
+        ls.set(namespace, data);
     }
 }
 
 /**
  * remove all local storage variable
  */
-function removeAllLS(){
-    let data = ls.get('d');
+function removeAllLS(namespace = 'd'){
+    let data = ls.get(namespace);
     if(data !== '') {
-        ls.remove('d');
+        ls.remove(namespace);
     }
 }
 

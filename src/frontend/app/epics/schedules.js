@@ -56,6 +56,7 @@ import {
 import {doRequest} from "@utils/auth";
 
 import {validateAddSchedule} from "@validations/schedules";
+import {API_METHOD} from "@utils/constants/app";
 
 /**
  * main url for schedulers
@@ -250,7 +251,7 @@ const fetchSchedulesByIdsEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/ids`;
-            return doRequest({url, method: 'post', data: {schedulerIds: action.payload}},{
+            return doRequest({url, method: API_METHOD.POST, data: {schedulerIds: action.payload}},{
                 success: fetchSchedulesByIdsFulfilled,
                 reject: fetchSchedulesByIdsRejected,
             });
@@ -268,7 +269,7 @@ const addScheduleEpic = (action$, store) => {
             let data = action.payload;
             let validation = validateAddSchedule(action.payload);
             if(validation.success) {
-                return doRequest({url, method: 'post', data}, {
+                return doRequest({url, method: API_METHOD.POST, data}, {
                         success: addScheduleFulfilled,
                         reject: addScheduleRejected,
                     },
@@ -288,7 +289,7 @@ const addScheduleNotificationEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}/notification`;
             let data = action.payload;
-            return doRequest({url, method: 'post', data}, {
+            return doRequest({url, method: API_METHOD.POST, data}, {
                     success: addScheduleNotificationFulfilled,
                     reject: addScheduleNotificationRejected,
                 },
@@ -306,7 +307,7 @@ const updateScheduleEpic = (action$, store) => {
             let url = `${urlPrefix}/${action.payload.id}/title`;
             let {connection, ...data} = action.payload;
             data.connectionId = connection.id;
-            return doRequest({url, method: 'put', data},{
+            return doRequest({url, method: API_METHOD.PUT, data},{
                 success: updateScheduleFulfilled,
                 reject: updateScheduleRejected,},
             );
@@ -321,7 +322,7 @@ const updateScheduleNotificationEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
-            return doRequest({url, method: 'put', data: action.payload},{
+            return doRequest({url, method: API_METHOD.PUT, data: action.payload},{
                 success: updateScheduleNotificationFulfilled,
                 reject: updateScheduleNotificationRejected,},
             );
@@ -337,7 +338,7 @@ const updateScheduleStatusEpic = (action$, store) => {
         .mergeMap((action) => {
             let {id, status} = action.payload;
             let url = `${urlPrefix}/${id}/status`;
-            return doRequest({url, method: 'put', data: {status}},{
+            return doRequest({url, method: API_METHOD.PUT, data: {status}},{
                 success: updateScheduleStatusFulfilled,
                 reject: updateScheduleStatusRejected,},
                 res => {return {id, status};},
@@ -353,7 +354,7 @@ const deleteScheduleEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
-            return doRequest({url, method: 'delete'},{
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteScheduleFulfilled,
                     reject: deleteScheduleRejected,},
                 res => {return {...res.response, id: action.payload.id};}
@@ -370,7 +371,7 @@ const deleteScheduleNotificationEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
             let data = action.payload;
-            return doRequest({url, method: 'delete', data},{
+            return doRequest({url, method: API_METHOD.DELETE, data},{
                     success: deleteScheduleNotificationFulfilled,
                     reject: deleteScheduleNotificationRejected,},
                 res => {return {...res.response, id: action.payload.notificationId};}
@@ -387,7 +388,7 @@ const startSchedulesEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/startAll`;
             let data = action.payload;
-            return doRequest({url, method: 'put', data},{
+            return doRequest({url, method: API_METHOD.PUT, data},{
                 success: startSchedulesFulfilled,
                 reject: startSchedulesRejected,},
                 res => {return {schedulerIds: data.schedulerIds};}
@@ -404,7 +405,7 @@ const enableSchedulesEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/enableAll`;
             let data = action.payload;
-            return doRequest({url, method: 'put', data},{
+            return doRequest({url, method: API_METHOD.PUT, data},{
                 success: enableSchedulesFulfilled,
                 reject: enableSchedulesRejected,},
                 res => {return {schedulerIds: data.schedulerIds};}
@@ -421,7 +422,7 @@ const disableSchedulesEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/disableAll`;
             let data = action.payload;
-            return doRequest({url, method: 'put', data},{
+            return doRequest({url, method: API_METHOD.PUT, data},{
                 success: disableSchedulesFulfilled,
                 reject: disableSchedulesRejected,},
                 res => {return {schedulerIds: data.schedulerIds};}
@@ -438,7 +439,7 @@ const deleteSchedulesEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             let data = action.payload;
-            return doRequest({url, method: 'delete', data},{
+            return doRequest({url, method: API_METHOD.DELETE, data},{
                 success: deleteSchedulesFulfilled,
                 reject: deleteSchedulesRejected,},
                 res => {return {schedulerIds: data.schedulerIds};}

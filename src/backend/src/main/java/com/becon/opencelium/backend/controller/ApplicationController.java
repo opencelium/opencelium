@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.controller;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,9 @@ public class ApplicationController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private Environment env;
+
     @GetMapping("/all")
     public List<String> getAll(){
         DataSource dataSource = (DataSource) jdbcTemplate.getDataSource();
@@ -46,6 +50,13 @@ public class ApplicationController {
     @GetMapping("/oc/test")
     public ResponseEntity<?> ocTest(){
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/oc/version")
+    public ResponseEntity<?> ocCurrentVersion(){
+        String version = env.getProperty("opencelium.version");
+        String result = "{" + "\"version\": \"" + version + "\"}";
+        return ResponseEntity.ok(result);
     }
 
     public String get(){

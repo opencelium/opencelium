@@ -18,7 +18,7 @@ import CConnectorItem, {INSIDE_ITEM} from "../../../../../app/classes/components
 import {ALL_COLORS} from "../../../../../app/classes/components/content/connection/CConnection";
 
 
-describe('Add Method', () => {
+describe.skip('Add Method', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     beforeEach(() => {
         connectorItem.title = 'i-doit';
@@ -64,7 +64,7 @@ describe('Add Method', () => {
 });
 
 
-describe('Check OperatorsHistory', () => {
+describe.skip('Check OperatorsHistory', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     beforeEach(() => {
         connectorItem.methods = [];
@@ -99,5 +99,38 @@ describe('Check OperatorsHistory', () => {
         expect(connectorItem.operatorsHistory.length).toBe(2);
         expect(connectorItem.operatorsHistory[0].index).toBe('1');
         expect(connectorItem.operatorsHistory[1].index).toBe('1_1');
+    });
+});
+
+describe.skip('Check Iterators', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    beforeEach(() => {
+        connectorItem.methods = [];
+        connectorItem.operators = [];
+    });
+
+    it('first operator should be \'i\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        expect(connectorItem.operators[0].iterator).toBe('i');
+    });
+
+    it('second operator should be \'i\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        connectorItem.addOperator({type: 'loop'});
+        expect(connectorItem.operators[1].iterator).toBe('i');
+    });
+
+    it('second operator should be \'j\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        connectorItem.addOperator({type: 'loop'}, INSIDE_ITEM);
+        expect(connectorItem.operators[1].iterator).toBe('j');
+    });
+
+    it('third operator should be \'k\'', () => {
+        connectorItem.addOperator({type: 'loop'});
+        connectorItem.addOperator({type: 'loop'}, INSIDE_ITEM);
+        connectorItem.addOperator({type: 'loop'}, INSIDE_ITEM);
+        console.log(connectorItem.operators[2].iterator);
+        expect(connectorItem.operators[2].iterator).toBe('k');
     });
 });

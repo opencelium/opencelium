@@ -33,16 +33,24 @@ export default function (data){
         let {text, index} = data.label;
         label = generateLabel(text, index, {keyNavigationTitle: `key_navigation_title ${navigationTitleClass}`, keyNavigationLetter: 'key_navigation_letter'});
     }
-    let onClick = !data.hasOwnProperty('to') || data.to === '' ? data.onClick : null;
+    let onClick = !data.hasOwnProperty('to') || data.to === '' || data.to === '#' ? (e) => {e.preventDefault(); data.onClick();} : null;
+    let to = data.hasOwnProperty('to') ? data.to : '';
+    let linkClassName = styles.list_item;
+    if(data.className){
+        linkClassName = `${data.className} ${linkClassName}`;
+    }
+    if(data.icon){
+        linkClassName += ` ${styles.list_item_icon}`;
+    }
     return(
         <NavItem className={data.itemClassName ? data.itemClassName : ''}>
             <NavLink
                 id={data.id}
                 tag={Link}
-                to={data.to}
+                to={to}
                 onClick={onClick}
-                activeClassName={styles.selected_list_item}
-                className={data.className ? data.className + ' ' + styles.list_item : styles.list_item}>
+                activeClassName={data.to === '#' ? '' : styles.selected_list_item}
+                className={linkClassName}>
                 {
                     data.icon
                     ?

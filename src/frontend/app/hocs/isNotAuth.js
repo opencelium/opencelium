@@ -29,14 +29,14 @@ export default function(ComposedComponent, store){
         componentDidMount (){
             const auth = store.getState('auth').get('auth');
             if(auth.get('isAuth')){
-                this.context.router.push('/');
+                setTimeout(() => this.context.router.push('/'), 1000);
             }
         }
 
         componentDidUpdate (){
             const auth = store.getState('auth').get('auth');
             if(auth.get('isAuth')){
-                this.context.router.push('/');
+                setTimeout(() => this.context.router.push('/'), 1000);
             }
         }
 

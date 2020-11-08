@@ -44,6 +44,9 @@
     float: right;
     border: 1px solid #dbdbdb;
   }
+  .button_connect::first-letter{
+    text-decoration: underline;
+  }
 }
 
 .input {
@@ -74,7 +77,7 @@
   bottom: -24px !important;
   padding: 0 !important;
   .message{
-    color: #d42222;
+    color: $ERROR_COLOR;
     position: relative;
   }
 }

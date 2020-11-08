@@ -29,6 +29,8 @@ import styles from '@themes/default/content/schedules/schedules.scss';
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Loading from "@loading";
 import CNotification from "@classes/components/content/schedule/notification/CNotification";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -60,7 +62,11 @@ class ScheduleNotification extends Component{
         };
     }
 
-    componentDidUpdate(){
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
         const {startFetchingScheduleNotifications, showScheduleNotifications, animationName} = this.state;
         const {fetchingScheduleNotifications, stateSchedule, schedule} = this.props;
         if(startFetchingScheduleNotifications && fetchingScheduleNotifications !== API_REQUEST_STATE.START) {
@@ -73,6 +79,14 @@ class ScheduleNotification extends Component{
         if(showScheduleNotifications && animationName === styles.AScaleAppear && stateSchedule && stateSchedule.schedulerId !== schedule.id){
             this.closeNotificationList();
         }
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     /**
@@ -109,9 +123,10 @@ class ScheduleNotification extends Component{
 
     renderDialogScheduleNotification(){
         const {animationName, showScheduleNotifications} = this.state;
-        const {schedule, notifications} = this.props;
+        const {schedule, notifications, index} = this.props;
         if(showScheduleNotifications) {
             return <NotificationList
+                index={index}
                 schedule={schedule}
                 notifications={notifications}
                 closeNotificationList={::this.closeNotificationList}
@@ -126,20 +141,21 @@ class ScheduleNotification extends Component{
         const {t, authUser, index} = this.props;
         let classNames = ['schedule_list_action', 'notifications_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
+        let icon = 'mail';
+        if(startFetchingScheduleNotifications){
+            icon = 'loading';
+        }
         return (
-            <span className={styles[classNames.schedule_list_action]}>
-                {
-                    startFetchingScheduleNotifications
-                    ?
-                        <Loading className={styles[classNames.notifications_loading]}/>
-                    :
-                        <TooltipFontIcon
-                            id={`schedule_update_${index}`}
-                            value={'mail'}
-                            tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
-                            onClick={::this.toggleScheduleNotification}
-                        />
-                }
+            <span style={{position: 'relative'}}>
+                <TooltipFontIcon
+                    isButton={true}
+                    iconClassName={styles[classNames.schedule_list_action]}
+                    id={`schedule_update_${index}`}
+                    value={icon}
+                    tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
+                    onClick={::this.toggleScheduleNotification}
+                    blueTheme={true}
+                />
                 {this.renderDialogScheduleNotification()}
             </span>
         );

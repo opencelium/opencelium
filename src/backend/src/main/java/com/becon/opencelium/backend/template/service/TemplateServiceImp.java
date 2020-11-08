@@ -33,10 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +48,7 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setName(template.getName());
         templateResource.setTemplateId(template.getTemplateId());
         templateResource.setDescription(template.getDescription());
+        templateResource.setVersion(template.getVersion());
         templateResource.setConnection(template.getConnection());
         templateResource.setLink(templatePath + template.getTemplateId());
         return templateResource;
@@ -59,17 +57,19 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public Template toEntity(TemplateResource templateResource) {
         Template template = new Template();
+        template.setTemplateId(templateResource.getTemplateId());
         template.setName(templateResource.getName());
         template.setTemplateId(templateResource.getTemplateId());
         template.setDescription(templateResource.getDescription());
         template.setConnection(templateResource.getConnection());
+        template.setVersion(templateResource.getVersion());
         return template;
     }
 
     @Override
     public void save(Template template) {
         try {
-            String id = UUID.randomUUID().toString();
+            String id = template.getTemplateId();
             String filename = id + ".json";
             ObjectMapper objectMapper = new ObjectMapper();
             template.setTemplateId(id);
@@ -103,8 +103,21 @@ public class TemplateServiceImp implements TemplateService {
     }
 
     @Override
+    public boolean existsById(String templateId) {
+        List<Template> templates = getAll();
+        return templates.stream().anyMatch(t -> t.getTemplateId().equals(templateId));
+    }
+
+    @Override
     public void deleteById(String templateId) {
-        String path = PathConstant.TEMPLATE + templateId.concat(".json");
+        Map<String, Template> templates = getAllAsMap();
+        String fileName = templates.entrySet().stream().filter(entry -> entry.getValue().getTemplateId().equals(templateId))
+                .findFirst().map(entry -> entry.getKey()).orElse(null);
+//        String path = PathConstant.TEMPLATE + templateId.concat(".json");
+        if (fileName == null) {
+            throw new RuntimeException("FILE_NOT_FOUND");
+        }
+        String path = PathConstant.TEMPLATE + fileName;
         File file = new File(path);
         if (!file.delete()){
             throw new RuntimeException("FILE_NOT_DELETED");
@@ -131,7 +144,7 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
-    private List<Template> getAll() throws WrongEncode{
+    private List<Template> getAll() throws WrongEncode {
         try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
             ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)
@@ -142,12 +155,39 @@ public class TemplateServiceImp implements TemplateService {
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
+                            System.out.println(Paths.get(path.toString()).getFileName().toString());
                             return objectMapper.readValue(contentBuilder.toString(), Template.class);
                         } catch (Exception e) {
                             e.printStackTrace();
                             throw new WrongEncode("UTF8");
                         }
                     }).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Map<String, Template> getAllAsMap() throws WrongEncode {
+        try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Template> files = new HashMap<>();
+            walk.filter(Files::isRegularFile).forEach(path -> {
+                if(!FilenameUtils.getExtension(path.toString()).equals("json")){
+                    return;
+                }
+                StringBuilder contentBuilder = new StringBuilder();
+                Path filePath = Paths.get(path.toString());
+                try (Stream<String> stream = Files.lines(filePath, StandardCharsets.UTF_8)) {
+                    stream.forEach(s -> contentBuilder.append(s).append("\n"));
+                    files.put(filePath.getFileName().toString(), objectMapper.readValue(contentBuilder.toString(), Template.class));
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new WrongEncode("UTF8");
+                }
+            });
+
+            return files;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

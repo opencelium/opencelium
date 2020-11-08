@@ -77,7 +77,7 @@ class MenuLanguages extends Component{
 
     render(){
         return (
-            <IconMenu icon='language' position='topRight' menuRipple>
+            <IconMenu icon='language' position='topRight'>
                 {this.renderMenuLanguages()}
             </IconMenu>
         );

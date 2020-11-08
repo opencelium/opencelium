@@ -13,7 +13,8 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
 -->
-<invoker type="RESTful">
+<invoker>
+    <web_service>rest</web_service>
     <name>openNMS</name>
     <description>Open Network Monitoring System: built for scalability, integration, and high levels of configuration since 2000.</description>
     <hint>Open Network Monitoring System. Read api documentation https://docs.opennms.org/opennms/releases/17.0.0/guide-development/guide-development.html</hint>
@@ -56,7 +57,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="foreign-source" type="string"/>
                     <field name="node" type="array"/>
                 </body>
@@ -86,7 +87,7 @@
             <response>
                 <success status="200">
                     <header/>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="count" type="number"/>
                         <field name="offset" type="number"/>
                         <field name="totalCount" type="number"/>
@@ -118,7 +119,7 @@
             <response>
                 <success status="200">
                     <header/>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="model-import" type="array">
                             <field name="date-stamp" type="number"/>
                             <field name="foreign-source" type="string"/>
@@ -150,7 +151,7 @@
             <response>
                 <success status="200">
                     <header/>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="date-stamp" type="number"/>
                         <field name="foreign-source" type="string"/>
                         <field name="last-import" type="number"/>
@@ -175,7 +176,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="rescanExisting" type="boolean"/>
                 </body>
             </request>
@@ -199,7 +200,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/x-www-form-urlencoded</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="nodeCheck" type="number"/>
                     <field name="nodeData" type="number"/>
                 </body>
@@ -334,7 +335,7 @@
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="foreign-id" type="string"/>
                     <field name="node-label" type="string"/>
                     <field name="interface" type="array">

@@ -22,6 +22,8 @@ import styles from '@themes/default/content/schedules/schedules.scss';
 import {formatHtmlId, getThemeClass} from "@utils/app";
 import {connect} from "react-redux";
 import Loading from "@loading";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 
 function mapStateToProps(state){
@@ -44,6 +46,21 @@ class WebHookTools extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     /**
@@ -80,7 +97,7 @@ class WebHookTools extends Component{
     
     render(){
         const {authUser, addingWebHook, deletingWebHook, t, stateSchedule, schedule, index} = this.props;
-        let classNames = ['webhook_tools', 'webhook_loading'];
+        let classNames = ['webhook_tools', 'webhook_loading', 'webhook_icon'];
         classNames = getThemeClass({classNames, authUser, styles});
         let icon = 'link';
         let tooltip = t('LIST.WEBHOOK_TOOLS_TOOLTIP_CREATE');
@@ -88,20 +105,20 @@ class WebHookTools extends Component{
             icon = 'link_off';
             tooltip = t('LIST.WEBHOOK_TOOLS_TOOLTIP_DELETE');
         }
+        if(stateSchedule && stateSchedule.schedulerId === schedule.id && (addingWebHook || deletingWebHook)){
+            icon = 'loading';
+        }
         return (
             <span className={styles[classNames.webhook_tools]}>
-                {
-                    stateSchedule && stateSchedule.schedulerId === schedule.id && (addingWebHook || deletingWebHook)
-                        ?
-                            <Loading authUser={authUser} className={styles[classNames.webhook_loading]}/>
-                        :
-                            <TooltipFontIcon
-                                id={`webhook_tools_${index}`}
-                                value={icon}
-                                tooltip={tooltip}
-                                onClick={::this.onClick}
-                            />
-                }
+                <TooltipFontIcon
+                    iconClassName={styles[classNames.webhook_icon]}
+                    isButton={true}
+                    id={`webhook_tools_${index}`}
+                    value={icon}
+                    tooltip={tooltip}
+                    onClick={::this.onClick}
+                    blueTheme={true}
+                />
             </span>
         );
     }

@@ -23,6 +23,7 @@ class InputHierarchy extends Component{
             searchValue: '',
             inputClassName: '',
             searchClassName: '',
+            searchStyles: {},
             hierarchyStyle: {},
             searchLabel: '',
             selectedItemKey: 0,
@@ -149,7 +150,7 @@ class InputHierarchy extends Component{
         if(typeof onAppear === 'function') {
             this.props.onAppear();
         }
-        this.setState({isVisibleHierarchy: true, searchLabel: 'Type method name or operator type'});
+        this.setState({isVisibleHierarchy: true, searchLabel: 'Type method name or operator'});
     }
 
     hideHierarchy(){
@@ -161,6 +162,7 @@ class InputHierarchy extends Component{
         this.setState({
             isVisibleHierarchy: false,
             inputClassName: styles.input_disappear,
+            searchStyles: {right: '5px'},
             searchClassName: styles.search_icon_appear,
             searchLabel: '',
         });
@@ -173,18 +175,20 @@ class InputHierarchy extends Component{
 
     showSearch(){
         const {id} = this.props;
-        this.setState({inputClassName: styles.input_appear, searchClassName: styles.search_icon_disappear, hierarchyStyle: {zIndex: 100}});
+        const inputHierarchyWidth = document.getElementById(`${id}_parent`).offsetWidth;
+        this.setState({inputClassName: styles.input_appear, searchStyles: {right: `${inputHierarchyWidth - 15}px`}, searchClassName: styles.search_icon_disappear, hierarchyStyle: {zIndex: 100}});
         setTimeout(() => {::this.showHierarchy(); setFocusById(id);}, 700);
     }
 
     render(){
-        const {hierarchy, inputClassName, searchClassName, hierarchyStyle, searchValue, isVisibleHierarchy, searchLabel, selectedItem} = this.state;
+        const {hierarchy, inputClassName, searchStyles, searchClassName, hierarchyStyle, searchValue, isVisibleHierarchy, searchLabel, selectedItem} = this.state;
         const {currentItem, id} = this.props;
         let isNotEmpty = hierarchy.methods.length !== 0 || hierarchy.operators.length !== 0;
         const searchDisable = hierarchy.operators.length === 0 && hierarchy.methods.length === 0;
         return(
-            <div className={styles.input_hierarchy} style={hierarchyStyle}>
+            <div className={styles.input_hierarchy} style={hierarchyStyle} id={`${id}_parent`}>
                 <Input
+                    disabled={inputClassName === styles.input_disappear || inputClassName === ''}
                     onChange={::this.handleChange}
                     onKeyDown={::this.onKeyDown}
                     name={id}
@@ -194,7 +198,7 @@ class InputHierarchy extends Component{
                     value={searchValue}
                     theme={{input: `${styles.input} ${inputClassName}`, inputElement: styles.input_element}}
                 />
-                <TooltipFontIcon tooltip={'Search'} value={'search'} className={`${styles.search_icon} ${searchClassName} ${searchDisable ? styles.search_icon_disabled : ''}`} onClick={searchDisable ? null : ::this.showSearch}/>
+                <TooltipFontIcon isButton={!searchDisable} tooltip={'Search'} value={'search'} style={searchStyles} className={`${styles.search_icon} ${searchClassName} ${searchDisable ? styles.search_icon_disabled : ''}`} onClick={searchDisable ? null : ::this.showSearch}/>
                 {
                     isVisibleHierarchy && isNotEmpty
                     ?

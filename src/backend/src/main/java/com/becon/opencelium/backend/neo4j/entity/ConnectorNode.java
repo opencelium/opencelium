@@ -30,12 +30,13 @@ public class ConnectorNode {
 
     private Integer connectorId;
     private String name;
+    private String webService;
 
     @Relationship(type = "start_action", direction = Relationship.OUTGOING)
     private MethodNode startMethod;
 
     @Relationship(type = "start_action", direction = Relationship.OUTGOING)
-    private OperatorNode startOperator;
+    private StatementNode startOperator;
 
     public ConnectorNode() {
     }
@@ -64,6 +65,14 @@ public class ConnectorNode {
         this.connectorId = connectorId;
     }
 
+    public String getWebService() {
+        return webService;
+    }
+
+    public void setWebService(String webService) {
+        this.webService = webService;
+    }
+
     public MethodNode getStartMethod() {
         return startMethod;
     }
@@ -72,11 +81,11 @@ public class ConnectorNode {
         this.startMethod = startMethod;
     }
 
-    public OperatorNode getStartOperator() {
+    public StatementNode getStartOperator() {
         return startOperator;
     }
 
-    public void setStartOperator(OperatorNode startOperator) {
+    public void setStartOperator(StatementNode startOperator) {
         this.startOperator = startOperator;
     }
 }

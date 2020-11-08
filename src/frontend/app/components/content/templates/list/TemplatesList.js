@@ -16,7 +16,8 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchTemplates, exportTemplate} from '@actions/templates/fetch';
+import {fetchTemplates} from '@actions/templates/fetch';
+import {convertTemplates, convertTemplatesRejected} from "@actions/templates/update";
 import {deleteTemplate} from '@actions/templates/delete';
 
 import List from '../../../general/list_of_components/List';
@@ -27,22 +28,30 @@ import {tour} from "@decorators/tour";
 import {LIST_TOURS} from "@utils/constants/tours";
 import TemplateImport from "../import/TemplateImport";
 import styles from '@themes/default/content/templates/list.scss';
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import FontIcon from "@basic_components/FontIcon";
+import TemplateConversionIcon from "@components/general/app/TemplateConversionIcon";
+import CExecution from "@classes/components/content/template_converter/CExecution";
+import TemplateDownloadIcon from "@components/content/templates/list/TemplateDownloadIcon";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
+import Button from "@basic_components/buttons/Button";
 
 const prefixUrl = '/templates';
 
 function mapStateToProps(state){
+    const app = state.get('app');
     const auth = state.get('auth');
     const templates = state.get('templates');
     return {
+        appVersion: app.get('appVersion'),
         authUser: auth.get('authUser'),
         fetchingTemplates: templates.get('fetchingTemplates'),
         deletingTemplate: templates.get('deletingTemplate'),
         exportedTemplate: templates.get('exportedTemplate'),
         exportingTemplate: templates.get('exportingTemplate'),
+        convertingTemplates: templates.get('convertingTemplates').toJS(),
         templates: templates.get('templates').toJS(),
         isCanceled: templates.get('isCanceled'),
         isRejected: templates.get('isRejected'),
@@ -73,7 +82,7 @@ function filterTemplateSteps(tourSteps){
 /**
  * List of the Templates
  */
-@connect(mapStateToProps, {fetchTemplates, deleteTemplate, exportTemplate})
+@connect(mapStateToProps, {fetchTemplates, deleteTemplate, convertTemplates, convertTemplatesRejected})
 @permission(TemplatePermissions.READ, true)
 @withTranslation('templates')
 @ListComponent('templates')
@@ -84,14 +93,35 @@ class TemplatesList extends Component{
         super(props);
     }
 
-    exportTemplate(e, template){
-        this.props.exportTemplate(template);
+    componentDidMount(){
+        CVoiceControl.initCommands({component:this}, CTemplateVoiceControl);
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component:this}, CTemplateVoiceControl);
+    }
+
+    convertAll(){
+        const {appVersion, templates, convertTemplates, convertTemplatesRejected} = this.props;
+        let convertingTemplates = [];
+        for(let i = 0; i < templates.length; i++){
+            if(templates[i].version !== appVersion){
+                const {jsonData, error} = CExecution.executeConfig({fromVersion: templates[i].version, toVersion: appVersion}, templates[i].connection);
+                if(error.message !== ''){
+                    convertTemplatesRejected(error);
+                    return;
+                } else {
+                    convertingTemplates.push({...templates[i], connection: jsonData, version: appVersion});
+                }
+            }
+        }
+        convertTemplates(convertingTemplates);
     }
 
     render(){
-        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate} = this.props;
+        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates} = this.props;
         let translations = {};
-        translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
+        translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}]};
         translations.add_button = t('LIST.IMPORT_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         let mapEntity = {};
@@ -99,11 +129,15 @@ class TemplatesList extends Component{
             let result = {};
             let fromInvokerName = template.connection.fromConnector.invoker.name;
             let toInvokerName = template.connection.toConnector.invoker.name;
-            let avatarElement = null;
+            let avatarElement;
             if(exportedTemplate.templateId === template.templateId && exportingTemplate === API_REQUEST_STATE.START){
                 avatarElement = <Loading authUser={authUser} className={styles.export_loading}/>;
             } else{
-                avatarElement = <TooltipFontIcon id={`template_download_${key}`} className={styles.export} value={'get_app'} tooltip={'Download'} onClick={(e) => ::this.exportTemplate(e, template)}/>;
+                avatarElement =
+                    <span className={styles.template_list_conversion}>
+                        <TemplateConversionIcon data={{template}} classNameIcon={styles.loading}/>
+                        <TemplateDownloadIcon index={key} template={template}/>
+                    </span>;
             }
             result.id = template.templateId;
             result.title = template.name;
@@ -111,9 +145,11 @@ class TemplatesList extends Component{
             result.avatar = avatarElement;
             return result;
         };
-        mapEntity.getAddComponent = TemplateImport;
+        mapEntity.AddButton = TemplateImport;
+        mapEntity.AdditionalButton = <Button className={styles.convert_all} authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
         mapEntity.onDelete = deleteTemplate;
         return <List
+            rerenderDependency={convertingTemplates.length}
             entities={templates}
             translations={translations}
             mapEntity={mapEntity}

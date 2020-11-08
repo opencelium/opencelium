@@ -55,6 +55,7 @@ function mapUserGroup(userGroup){
     mappedUserGroup.name = userGroup.role;
     mappedUserGroup.description = userGroup.description;
     mappedUserGroup.icon = userGroup.icon;
+    mappedUserGroup.shouldDeleteImage = userGroup.shouldDeleteImage;
     mappedUserGroup.components = userGroup.components.map((component) => {
         return {componentId: component.value, permissions: userGroup.permissions[component.label]};
     });

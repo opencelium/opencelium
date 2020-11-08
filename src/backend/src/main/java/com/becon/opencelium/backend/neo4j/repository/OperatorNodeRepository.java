@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.neo4j.repository;
 
-import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
@@ -24,13 +24,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OperatorNodeRepository extends Neo4jRepository<OperatorNode, Long> {
+public interface OperatorNodeRepository extends Neo4jRepository<StatementNode, Long> {
 
-    @Query("MATCH (:Connection{connectionId:{0}})-[:from_connector]->(c:Connector{connectorId:{1}})-[*]->(m:Operator) " +
-           "MATCH p=((m)-[:left|:right]->(:Statement)) RETURN p")
-    List<OperatorNode> findFromOperatorByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
+    @Query("MATCH (:Connection{connectionId:{0}})-[:from_connector]->(c:Connector{connectorId:{1}})-[*]->(m:Statement) " +
+           "MATCH p=((m)-[:left|:right]->(:Variable)) RETURN p")
+    List<StatementNode> findFromOperatorByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
 
-    @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector]->(c:Connector{connectorId:{1}})-[*]->(m:Operator) " +
-            "MATCH p=((m)-[:left|:right]->(:Statement)) RETURN p")
-    List<OperatorNode> findToOperatorByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
+    @Query("MATCH (:Connection{connectionId:{0}})-[:to_connector]->(c:Connector{connectorId:{1}})-[*]->(m:Statement) " +
+            "MATCH p=((m)-[:left|:right]->(:Variable)) RETURN p")
+    List<StatementNode> findToOperatorByConnectionIdAndConnectorId(Long connectionId, Integer connectorId);
 }

@@ -14,7 +14,7 @@
  */
 
 import React, {Component, Suspense} from 'react';
-import {Container} from 'react-grid-system';
+import {Container, Row} from 'react-grid-system';
 
 import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";

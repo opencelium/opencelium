@@ -14,37 +14,20 @@
  */
 
 import React, {Component, Suspense} from 'react';
-import {Container} from 'react-grid-system';
-
-import Loading from '@loading';
-import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "@utils/constants/app";
 import {checkConnection} from "@decorators/checkConnection";
-
+import {LayoutComponent} from "@decorators/LayoutComponent";
 
 
 /**
  * Layout for Admin
  */
 
+@LayoutComponent('card', 'cards', '')
 @checkConnection()
 class AdminLayout extends Component{
 
-    constructor(props){
-        super(props);
-    }
-
     render(){
-        const {authUser, children} = this.props;
-        return (
-            <Container>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
-                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {children}
-                    </ComponentError>
-                </Suspense>
-            </Container>
-        );
+        return null;
     }
 }
 

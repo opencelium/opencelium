@@ -15,12 +15,8 @@
 
 
 import React, {Component} from 'react';
-import Select from 'react-select';
-import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/form_methods.scss';
-import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 import SelectSearch from "@basic_components/inputs/SelectSearch";
 import {
     RESPONSE_FAIL,
@@ -29,8 +25,11 @@ import {
 import Input from "@basic_components/inputs/Input";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CStatement, {STATEMENT_RESPONSE} from "@classes/components/content/connection/operator/CStatement";
-import {dotColor} from "../help";
-
+import {findTopLeft} from "@utils/app";
+import ReactDOM from "react-dom";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
+import Select from "@basic_components/inputs/Select";
+import {addCloseParamGeneratorNavigation, removeCloseParamGeneratorNavigation} from "@utils/key_navigation";
 
 
 class ParamGenerator extends Component {
@@ -42,7 +41,15 @@ class ParamGenerator extends Component {
             color: '',
             field: '',
             responseType: RESPONSE_SUCCESS,
+            shouldClose: false,
         };
+        const {top, left} = findTopLeft(props.parent);
+        this.top = top;
+        this.left = left;
+    }
+
+    componentDidMount(){
+        addCloseParamGeneratorNavigation(this);
     }
 
     componentWillUnmount(){
@@ -51,6 +58,7 @@ class ParamGenerator extends Component {
         if(elem){
             elem.innerText = '';
         }
+        removeCloseParamGeneratorNavigation(this);
     }
 
     /**
@@ -82,7 +90,7 @@ class ParamGenerator extends Component {
      * to change field value
      */
     onChangeField(field){
-        this.setState({field});
+        this.setState({field}, this.setIdValue());
     }
 
     /**
@@ -146,7 +154,7 @@ class ParamGenerator extends Component {
 
     renderMethodSelect(){
         const {color} = this.state;
-        const {connection, readOnly, isVisible} = this.props;
+        const {connection, readOnly, selectId} = this.props;
         let method = connection.toConnector.getMethodByColor(color);
         let connector = connection.toConnector;
         if(!method){
@@ -154,13 +162,13 @@ class ParamGenerator extends Component {
             connector = connection.fromConnector;
         }
         let value = method ? method.getValueForSelectInput(connector) : null;
-        let selectThemeInputStyle = {width: isVisible ? '25%' : '70px', float: 'left'};
+        let selectThemeInputStyle = {width: '70px', float: 'left'};
         let source = this.getOptionsForMethods();
         selectThemeInputStyle.padding = 0;
         return (
-            <div className={`${theme.input}`} style={selectThemeInputStyle}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <div style={selectThemeInputStyle}>
                 <Select
+                    id={selectId}
                     name={'...'}
                     value={value}
                     onChange={::this.updateColor}
@@ -177,14 +185,6 @@ class ParamGenerator extends Component {
                             fontSize: '12px',
                             borderBottom: isFocused && !isDisabled ? '2px solid #3f51b5 !important' : 'none',
                         }),
-                        control: styles => ({
-                            ...styles,
-                            borderRadius: 0,
-                            border: 'none',
-                            borderBottom: '1px solid rgba(33, 33, 33, 0.12)',
-                            boxShadow: 'none',
-                            backgroundColor: 'initial'
-                        }),
                         dropdownIndicator: () => ({display: 'none'}),
                         menu: (styles, {isDisabled}) => {
                             let s = {
@@ -192,7 +192,6 @@ class ParamGenerator extends Component {
                                 top: 'auto',
                                 marginTop: '-16px',
                                 marginBottom: '8px',
-                                width: '200px',
                                 zIndex: '1',
                             };
                             if(isDisabled || source.length === 0){
@@ -203,24 +202,24 @@ class ParamGenerator extends Component {
                             }
                             return s;
                         },
-                        option: (styles, {data, isDisabled,}) => {
-                            return {
-                                ...styles,
-                                ...dotColor(data.color),
-                                cursor: isDisabled ? 'not-allowed' : 'default',
-                            };
-                        },
                         singleValue: (styles, {data}) => {
                             return {
                                 ...styles,
+                                margin: '0 5%',
+                                maxWidth: '100%',
                                 color: data.color,
                                 background: data.color,
-                                width: '65%'
+                                width: '90%'
                             };
+                        },
+                        placeholder: (styles) => {
+                            return{
+                                ...styles,
+                                left: `calc(50% - 10px)`,
+                            }
                         }
                     }}
                 />
-                <span className={theme.bar}/>
             </div>
         );
     }
@@ -229,27 +228,35 @@ class ParamGenerator extends Component {
         const {color, responseType} = this.state;
         let hasMethod = color !== '';
         return (
-            <RadioGroup
-                name='response_type'
+            <RadioButtons
+                label={''}
                 value={responseType}
-                onChange={::this.onChangeResponseType}
-                className={styles.operator_response_radio_area_loop}
+                handleChange={::this.onChangeResponseType()}
                 disabled={!hasMethod}
-            >
-                <RadioButton label='s' value={RESPONSE_SUCCESS}
-                             theme={{field: styles.operator_radio_field, radio: styles.operator_radio_radio, disabled: styles.operator_radio_field_disabled, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-                <RadioButton label='f' value={RESPONSE_FAIL}
-                             theme={{field: `${styles.operator_radio_field} ${styles.operator_radio_field_fail}`, radio: styles.operator_radio_radio, disabled: `${styles.operator_radio_field_disabled} ${styles.operator_radio_field_fail}`, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-            </RadioGroup>
+                radios={[
+                    {
+                        value: RESPONSE_SUCCESS,
+                        label: 's',
+                    },
+                    {
+                        value: RESPONSE_FAIL,
+                        label: 'f',
+                    }
+                ]}
+            />
         );
+    }
+
+    submitEdit(){
+        this.props.submitEdit();
     }
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method, isVisible, submitEdit} = this.props;
+        let {method, submitEdit} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
-        let divStyles = {float: 'left', width: isVisible ? '75%' : '130px'};
+        let divStyles = {float: 'left', width: '130px'};
         inputTheme.input = styles.param_generator_param;
         return (
             <div style={divStyles}>
@@ -263,6 +270,7 @@ class ParamGenerator extends Component {
                     readOnly={readOnly || !hasMethod}
                     theme={inputTheme}
                     isPopupInput={true}
+                    disabled={!hasMethod}
                 >
                     <SelectSearch
                         id={`param_generator_${method.index}`}
@@ -290,36 +298,49 @@ class ParamGenerator extends Component {
         if(!isVisible) {
             if (showGenerator) {
                 return (
-                    <TooltipFontIcon key={1} value={'keyboard_arrow_left'} tooltip={'Hide Param Generator'}
-                                     onClick={::this.toggleShowGenerator}/>
+                    <TooltipFontIcon
+                        isButton={true}
+                        value={'keyboard_arrow_left'}
+                        tooltip={'Hide Param Generator'}
+                        onClick={::this.toggleShowGenerator}/>
                 );
             } else {
                 return (
-                    <TooltipFontIcon value={'keyboard_arrow_right'}
-                                     tooltip={showGenerator ? 'Hide Param Generator' : 'Show Param Generator'}
-                                     onClick={::this.toggleShowGenerator}/>
+                    <TooltipFontIcon
+                        isButton={true}
+                        value={'keyboard_arrow_right'}
+                        tooltip={showGenerator ? 'Hide Param Generator' : 'Show Param Generator'}
+                        onClick={::this.toggleShowGenerator}/>
                 );
             }
         }
         return null;
     }
 
-    render(){
-        const {showGenerator} = this.state;
-        const {isVisible} = this.props;
+    renderGenerator(){
+        const {showGenerator, color} = this.state;
+        const {isVisible, isAbsolute, parent, submitEdit} = this.props;
+        let hasMethod = color !== '';
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
         return(
-            <div className={isVisible ? styles.param_generator_json : styles.param_generator}>
+            <div className={isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} style={parent ? {left: this.left, top: this.top} : {}}>
                 {::this.renderArrowIcon()}
                 {
                     showGenerator || isVisible
                         ?
-                        <div key={2} className={isVisible ? styles.param_generator_form_json : styles.param_generator_form}>
+                        <div key={2} className={isAbsolute ? styles.param_generator_form : ''}>
                             {this.renderMethodSelect()}
                             {this.renderParamInput()}
-                            {!isVisible ? <TooltipFontIcon tooltip={'Add'} value={'add'} className={styles.param_generator_form_add} onClick={::this.addParam}/> : null}
+                            <TooltipFontIcon
+                                isButton={true}
+                                tooltip={'Add'}
+                                value={'add'}
+                                disabled={!hasMethod}
+                                className={styles.param_generator_form_add}
+                                onClick={submitEdit ? submitEdit : ::this.addParam}
+                            />
                         </div>
                         :
                         null
@@ -327,6 +348,25 @@ class ParamGenerator extends Component {
             </div>
         );
     }
+
+    render(){
+        const {shouldClose} = this.state;
+        if(shouldClose){
+            return null;
+        }
+        const {parent} = this.props;
+        if(parent){
+            return ReactDOM.createPortal(this.renderGenerator(),
+                document.getElementById('oc_generator_modal'));
+        }
+        return this.renderGenerator();
+    }
 }
+
+ParamGenerator.defaultProps = {
+    isAbsolute: true,
+    parent: null,
+    submitEdit: null,
+};
 
 export default ParamGenerator;

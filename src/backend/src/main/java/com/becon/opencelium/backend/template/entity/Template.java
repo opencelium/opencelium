@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.template.entity;
 
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 
 public class Template {
 
@@ -24,7 +25,8 @@ public class Template {
     private String name;
     private String description;
     private String license;
-    private ConnectionResource connection;
+    private String version;
+    private CtionTemplateResource connection;
 
     public String getTemplateId() {
         return templateId;
@@ -58,11 +60,19 @@ public class Template {
         this.license = license;
     }
 
-    public ConnectionResource getConnection() {
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public CtionTemplateResource getConnection() {
         return connection;
     }
 
-    public void setConnection(ConnectionResource connection) {
+    public void setConnection(CtionTemplateResource connection) {
         this.connection = connection;
     }
 }

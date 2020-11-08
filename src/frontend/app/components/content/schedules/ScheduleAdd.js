@@ -16,8 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import { Row, Col, Visible } from "react-grid-system";
-import theme from "react-toolbox/lib/input/theme.css";
+import { Row, Col } from "react-grid-system";
 import {addSchedule} from '@actions/schedules/add';
 import {fetchConnections} from '@actions/connections/fetch';
 
@@ -157,9 +156,12 @@ class ScheduleAdd extends Component{
             'navigation_button',
             'navigation_button_title',
             'schedule_title',
+            'schedule_connection',
+            'schedule_bar',
             'select_connection',
             'select_iteration',
-            'schedule_add_loading'
+            'schedule_add_loading',
+            'schedule_cron_exp'
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         const {connection, cronExp, title} = this.state;
@@ -174,37 +176,22 @@ class ScheduleAdd extends Component{
                         type={'text'}
                         onChange={::this.onChangeLabel}
                         value={title}
-                        theme={{inputElement: styles[classNames.schedule_title]}}
+                        theme={{inputElement: styles[classNames.schedule_title], bar: styles[classNames.schedule_bar]}}
                     />
                 </Col>
                 <Col xl={4} lg={3} md={3} sm={12} xs={12} style={{overflow: 'visible !important', paddingRight: currentWidth < 768 ? '15px' : 0, flex: '0 0 18.6667%', maxWidth: '18.6667%'}}>
-                    <div className={`${theme.input}`}>
-                        <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.multiselect_label]}`}/>
-                            <Select
-                                id={'input_connection'}
-                                name={'connection'}
-                                value={connection}
-                                onChange={::this.onChangeConnections}
-                                options={connections}
-                                closeOnSelect={false}
-                                placeholder={t('ADD.CONNECTION_PLACEHOLDER')}
-                                className={`${styles[classNames.multiselect]} ${styles[classNames.select_connection]}`}
-                                maxMenuHeight={200}
-                                minMenuHeight={50}
-                                styles={{
-                                    menu: (styles, {}) => {
-                                        return {
-                                            ...styles,
-                                            top: 'auto',
-                                            marginTop: '0',
-                                            marginBottom: '8px',
-                                            zIndex: '1',
-                                        };
-                                    },
-                                }}
-                            />
-                        <span className={theme.bar}/>
-                    </div>
+                    <Select
+                        id={'input_connection'}
+                        className={styles[classNames.schedule_connection]}
+                        name={'connection'}
+                        value={connection}
+                        onChange={::this.onChangeConnections}
+                        options={connections}
+                        closeOnSelect={false}
+                        placeholder={t('ADD.CONNECTION_PLACEHOLDER')}
+                        maxMenuHeight={200}
+                        minMenuHeight={50}
+                    />
                 </Col>
                 <Col xl={2} lg={3} md={3} sm={9} xs={9} style={{zIndex: '0', paddingRight: 0}}>
                     <Input
@@ -214,7 +201,7 @@ class ScheduleAdd extends Component{
                         type={'text'}
                         onChange={::this.onChangeCronExp}
                         value={cronExp}
-                        theme={{inputElement: styles[classNames.schedule_cron_exp]}}
+                        theme={{inputElement: styles[classNames.schedule_cron_exp], bar: styles[classNames.schedule_bar]}}
                     />
                 </Col>
                 <Col xl={2} lg={2} md={2} sm={3} xs={3} style={{lineHeight: '75px', textAlign: 'center'}}>

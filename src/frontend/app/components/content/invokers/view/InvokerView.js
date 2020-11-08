@@ -23,9 +23,6 @@ import {fetchInvoker} from '@actions/invokers/fetch';
 import {InvokerPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {INPUTS} from "@utils/constants/inputs";
-import {INVOKER_TOURS} from "@utils/constants/tours";
-import OCTour from "@basic_components/OCTour";
-import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {SingleComponent} from "@decorators/SingleComponent";
 import CInvoker from "@classes/components/content/invoker/CInvoker";
 

@@ -23,7 +23,9 @@ import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.factory.AuthenticationFactory;
+import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -35,6 +37,7 @@ import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.Resources;
@@ -44,11 +47,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -128,7 +134,7 @@ public class ConnectorController {
     }
 
     @PostMapping("/check")
-    public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException {
+    public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException, IOException {
         Connector connector = connectorService.toEntity(connectorResource);
         Invoker invoker = invokerService.findByName(connector.getInvoker());
         AuthenticationFactory authFactory = new AuthenticationFactory(invokerService.findAll(), restTemplate);
@@ -142,8 +148,22 @@ public class ConnectorController {
             throw new CommunicationFailedException();
         }
 
-        if ((responseEntity.getStatusCode() == HttpStatus.OK) && (responseEntity.getBody().toString().contains("Error") ||
-                                                                  responseEntity.getBody().toString().contains("error"))){
+        ObjectMapper mapper = new ObjectMapper();
+        FunctionInvoker functionInvoker =  invokerService.getTestFunction(connector.getInvoker());
+
+        Map<String, Object> failBody = null;
+        String formatType = "";
+        if (functionInvoker.getResponse().getFail().getBody() != null) {
+            formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
+            failBody = functionInvoker.getResponse().getFail().getBody().getFields();
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        if (formatType.equals("json")) {
+            response = mapper.readValue(responseEntity.getBody().toString(), Map.class);
+        }
+
+        if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(failBody, response)){
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
 
@@ -151,6 +171,26 @@ public class ConnectorController {
             return ResponseEntity.ok().body("{\"status\":\"" + responseEntity.getStatusCode() + "\",\"error\":\"Error in remote system\"}");
         }
         return ResponseEntity.ok().body("{\"status\":\"200\"}");
+    }
+
+    private boolean hasError(Map<String, Object> failBody, Map<String, Object> response) {
+
+        if (failBody == null) {
+            return false;
+        }
+
+        for (Map.Entry<String, Object> failEntry : failBody.entrySet()) {
+            if (!response.containsKey(failEntry.getKey())){
+                return false;
+            }
+
+            if (failEntry.getValue() instanceof Map) {
+                if(!hasError((Map<String, Object>) failEntry.getValue(),(Map<String, Object>) response.get(failEntry.getKey()))){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 

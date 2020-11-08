@@ -16,26 +16,15 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styles from '@themes/default/general/form_methods.scss';
-import {consoleLog, isString} from "@utils/app";
 import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
-
-import theme from "react-toolbox/lib/input/theme.css";
-import {
-    STATEMENT_REQUEST,
-    STATEMENT_RESPONSE
-} from "@classes/components/content/connection/operator/CStatement";
-import {
-    RESPONSE_FAIL,
-    RESPONSE_SUCCESS
-} from "@classes/components/content/invoker/response/CResponse";
-import {CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import CBindingItem from "@classes/components/content/connection/field_binding/CBindingItem";
 import CardText from "@basic_components/card/CardText";
 import Endpoint from "./Endpoint";
 import CConnection from "@classes/components/content/connection/CConnection";
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
-import {convertFieldNameForBackend} from "../help";
-import Body from "./Body";
+import JsonBody from "./JsonBody";
+import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
+import {BODY_FORMAT} from "@classes/components/content/invoker/CBody";
+import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
 
 
 class MethodRequest extends Component{
@@ -59,135 +48,35 @@ class MethodRequest extends Component{
         }, 200);
     }
 
-    //2 - clear; 1 - update; 0 - not update
-    shouldUpdateFieldBinding(reactJson){
-        const {connector} = this.props;
-        let result = 0;
-        if(connector.getConnectorType() === CONNECTOR_TO && reactJson.hasOwnProperty('namespace')
-            && reactJson.hasOwnProperty('name')
-            && reactJson.hasOwnProperty('new_value')){
-            if(isString(reactJson.existing_value)) {
-                let existingValueSplitted = reactJson.existing_value.split('.');
-                if (existingValueSplitted.length > 3) {
-                    if (existingValueSplitted[1] === `(${STATEMENT_REQUEST})`
-                        || existingValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
-                        if (existingValueSplitted[2] === RESPONSE_SUCCESS
-                            || existingValueSplitted[2] === RESPONSE_FAIL) {
-                            result = 2;
-                        }
-                    }
-                }
-            }
-            if(isString(reactJson.new_value)) {
-                let newValueSplitted = reactJson.new_value.split('.');
-                if (newValueSplitted.length > 3) {
-                    if (newValueSplitted[1] === `(${STATEMENT_REQUEST})`
-                        || newValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
-                        if (newValueSplitted[2] === RESPONSE_SUCCESS
-                            || newValueSplitted[2] === RESPONSE_FAIL) {
-                            result = 1;
-                        }
-                    }
-                }
-            } else{
-                result = 0;
-            }
-        } else{
-            consoleLog('Type json should be reworked to do mapping');
+    renderBody(){
+        const {id, readOnly, method, connector, connection, updateEntity, isDraft} = this.props;
+        switch(method.bodyFormat){
+            case BODY_FORMAT.JSON:
+                return (
+                    <JsonBody
+                        id={id}
+                        isDraft={isDraft}
+                        readOnly={readOnly}
+                        method={method}
+                        connection={connection}
+                        connector={connector}
+                        updateEntity={updateEntity}
+                    />
+                );
+            case BODY_FORMAT.XML:
+                return (
+                    <XmlBody
+                        id={id}
+                        isDraft={isDraft}
+                        readOnly={readOnly}
+                        method={method}
+                        connection={connection}
+                        connector={connector}
+                        updateEntity={updateEntity}
+                    />
+                );
         }
-        return result;
-    }
-
-    parseFieldOnArrays(field){
-        const {method} = this.props;
-        let invokerBody = method.request.invokerBody;
-        return convertFieldNameForBackend(invokerBody, field, true);
-    }
-
-    updateFieldBinding(reactJson){
-        const checkReactJson = this.shouldUpdateFieldBinding(reactJson);
-        if(checkReactJson !== 0){
-            const {connection} = this.props;
-            let parents = reactJson.namespace;
-            let newValue = reactJson.new_value;
-            let currentItem = connection.toConnector.getCurrentItem();
-            let item = {};
-            item.color = currentItem.color;
-            if(parents.length === 0){
-                item.field = reactJson.name;
-            } else {
-                item.field = `${parents.join('.')}.${reactJson.name}`;
-            }
-            item.field = this.parseFieldOnArrays(item.field);
-            item.type = 'request';
-            let toBindingItems = [CBindingItem.createBindingItem(item)];
-            let fromBindingItems = [];
-            switch(checkReactJson) {
-                case 1:
-                    let newValueSplitted = newValue.split(';');
-                    for (let i = 0; i < newValueSplitted.length; i++) {
-                        let bindingItemSplitted = newValueSplitted[i].split('.');
-                        let newItem = {};
-                        newItem.color = bindingItemSplitted[0];
-                        newItem.type = bindingItemSplitted[1].substr(1, bindingItemSplitted[1].length - 2);
-                        newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
-                        fromBindingItems.push(CBindingItem.createBindingItem(newItem));
-                    }
-                    break;
-                case 2:
-                    break;
-            }
-            connection.updateFieldBinding(CONNECTOR_TO, {from: fromBindingItems, to: toBindingItems});
-        }
-    }
-
-    cleanFieldBinding(reactJson){
-        if(reactJson.new_value === '' || typeof reactJson.new_value === 'undefined') {
-            if (isString(reactJson.existing_value)) {
-                let existingValueSplitted = reactJson.existing_value.split('.');
-                if (existingValueSplitted.length > 3) {
-                    if (existingValueSplitted[1] === `(${STATEMENT_REQUEST})`
-                        || existingValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
-                        if (existingValueSplitted[2] === RESPONSE_SUCCESS
-                            || existingValueSplitted[2] === RESPONSE_FAIL) {
-                            const {connection} = this.props;
-                            let parents = reactJson.namespace;
-                            let currentItem = connection.toConnector.getCurrentItem();
-                            let item = {};
-                            if(currentItem) {
-                                item.color = currentItem.color;
-                                if (parents.length === 0) {
-                                    item.field = reactJson.name;
-                                } else {
-                                    item.field = `${parents.join('.')}.${reactJson.name}`;
-                                }
-                                item.type = 'request';
-                                connection.cleanFieldBinding(CONNECTOR_TO, {to: [CBindingItem.createBindingItem(item)]});
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    updateBody(reactJson){
-        const {method, updateEntity} = this.props;
-        let body = reactJson.updated_src;
-        this.setCurrentItem();
-        this.updateFieldBinding(reactJson);
-        this.cleanFieldBinding(reactJson);
-        method.setRequestBody(body);
-        updateEntity();
-    }
-
-    /**
-     * to set current item
-     */
-    setCurrentItem(){
-        const {connector, method, updateEntity} = this.props;
-        connector.setCurrentItem(method);
-        updateEntity();
+        return null;
     }
 
     render(){
@@ -207,20 +96,11 @@ class MethodRequest extends Component{
                             connector={connector}
                             connection={connection}
                             readOnly={readOnly}
-                            setCurrentItem={::this.setCurrentItem}
                             updateEntity={updateEntity}
                         />
-                        <label className={`${theme.label} ${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</label>
-                        <Body
-                            id={id}
-                            readOnly={readOnly}
-                            method={method}
-                            connection={connection}
-                            connector={connector}
-                            updateBody={::this.updateBody}
-                            updateEntity={updateEntity}
-                            setCurrentItem={::this.setCurrentItem}
-                        />
+                        <ToolboxThemeInput className={styles.method_body_label} label={<span className={`${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</span>}>
+                            {this.renderBody()}
+                        </ToolboxThemeInput>
                     </div>
                 </CardText>
             </div>
@@ -239,6 +119,7 @@ MethodRequest.propTypes = {
 
 MethodRequest.defaultProps = {
     readOnly: false,
+    isDraft: false,
 };
 
 export default MethodRequest;

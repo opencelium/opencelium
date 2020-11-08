@@ -103,6 +103,14 @@ public class ConnectorServiceImp implements ConnectorService{
     }
 
     @Override
+    public List<RequestData> getRequestData(Integer ctorId) {
+        Connector fromConnector = findById(ctorId)
+                .orElseThrow(() -> new RuntimeException("Connector " + ctorId + " not found when getting RequestData")) ;
+        return fromConnector.getRequestData();
+    }
+
+
+    @Override
     public List<Connector> findAll() {
         return connectorRepository.findAll();
     }

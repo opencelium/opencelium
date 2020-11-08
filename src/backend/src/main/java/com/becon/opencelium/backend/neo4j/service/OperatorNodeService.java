@@ -16,11 +16,11 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
-import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 
 import java.util.List;
 
 public interface OperatorNodeService {
 
-    List<OperatorNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer connectorId);
+    List<StatementNode> findOperatorsByConnectionIdAndConnectorId(Long connectionId, String direction, Integer connectorId);
 }

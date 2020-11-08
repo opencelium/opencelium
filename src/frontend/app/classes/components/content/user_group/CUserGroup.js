@@ -18,7 +18,7 @@ import {consoleLog, isId} from "@utils/app";
 import CComponent from "./CComponent";
 
 /**
- * (not used)
+ * UserGroup class
  */
 export default class CUserGroup{
 

@@ -71,7 +71,7 @@
 }
 .key_navigation_letter_delete{
   font-family: $FONT_FAMILY;
-  color: #d42222;
+  color: $ERROR_COLOR;
   margin-left: 0;
   text-decoration: underline;
   animation-name: Aselected_letter;
@@ -163,13 +163,13 @@
 
 .button_delete{
   font-family: $FONT_FAMILY;
-  color: #d42222;
+  color: $ERROR_COLOR;
   float: right;
 }
 
 .only_button_delete{
   font-family: $FONT_FAMILY;
-  color: #d42222;
+  color: $ERROR_COLOR;
 }
 
 .add_button{
@@ -233,4 +233,33 @@
 .loading>div{
   width: 15px;
   height: 15px;
+}
+
+.card_button{
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  height: 100%;
+}
+.card_button:focus{
+  text-decoration: underline;
+  outline: none !important;
+}
+
+.card_as_button{
+  width: 100%;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  height: 100%;
+  outline: none !important;
+  text-align: left;
+}
+.card_as_button:focus>div{
+  font-family: $FONT_FAMILY;
+  animation-name: Aselected_card;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+  animation-timing-function:ease-in;
+  outline: none !important;
 }

@@ -12,7 +12,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 import {List, fromJS} from 'immutable';
 
 import {TemplatesAction} from '../utils/actions';
@@ -22,6 +21,7 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
 
 const initialState = fromJS({
     addingTemplate: API_REQUEST_STATE.INITIAL,
+    updatingTemplate: API_REQUEST_STATE.INITIAL,
     fetchingTemplates: API_REQUEST_STATE.INITIAL,
     deletingTemplate: API_REQUEST_STATE.INITIAL,
     exportingTemplate: API_REQUEST_STATE.INITIAL,
@@ -29,12 +29,14 @@ const initialState = fromJS({
     template: {},
     exportedTemplate: {},
     templates: List([]),
+    convertingTemplates: List([]),
     error: null,
     message: {},
     notificationData: {},
 });
 
 let templates = [];
+let convertingTemplates = [];
 let index = 0;
 
 /**
@@ -42,6 +44,7 @@ let index = 0;
  */
 const reducer = (state = initialState, action) => {
     templates = state.get('templates');
+    convertingTemplates = state.get('convertingTemplates');
     switch (action.type) {
         case TemplatesAction.ADD_TEMPLATE:
             return state.set('addingTemplate', API_REQUEST_STATE.START).set('error', null);
@@ -49,6 +52,44 @@ const reducer = (state = initialState, action) => {
             return state.set('addingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.set(templates.size, action.payload));
         case TemplatesAction.ADD_TEMPLATE_REJECTED:
             return state.set('addingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case TemplatesAction.CONVERT_TEMPLATE:
+            return state.set('isRejected', false).set('isCanceled', false).set('error', null).set('convertingTemplates', convertingTemplates.set(convertingTemplates.size, action.payload));
+        case TemplatesAction.CONVERT_TEMPLATE_FULFILLED:
+            index = templates.findIndex(function (template) {
+                return template.templateId === action.payload.oldTemplate.templateId;
+            });
+            if(index >= 0) {
+                templates = templates.set(index, action.payload.newTemplate);
+            }
+            index = convertingTemplates.findIndex(function (template) {
+                return template.templateId === action.payload.oldTemplate.templateId;
+            });
+            if(index >= 0) {
+                convertingTemplates = convertingTemplates.delete(index);
+            }
+            return state.set('templates', templates).set('convertingTemplates', convertingTemplates);
+        case TemplatesAction.CONVERT_TEMPLATE_REJECTED:
+            return state.set('isRejected', true).set('error', action.payload).set('convertingTemplates', List([]));
+        case TemplatesAction.CONVERT_TEMPLATES:
+            return state.set('isRejected', false).set('isCanceled', false).set('error', null).set('convertingTemplates', List(action.payload));
+        case TemplatesAction.CONVERT_TEMPLATES_FULFILLED:
+            for(let i = 0; i < action.payload.oldTemplates.length; i++){
+                index = templates.findIndex(function (template) {
+                    return template.templateId === action.payload.oldTemplates[i].templateId;
+                });
+                if(index >= 0) {
+                    templates = templates.set(index, action.payload.newTemplates[i]);
+                }
+                index = convertingTemplates.findIndex(function (template) {
+                    return template.templateId === action.payload.oldTemplates[i].templateId;
+                });
+                if(index >= 0) {
+                    convertingTemplates = convertingTemplates.delete(index);
+                }
+            }
+            return state.set('templates', templates).set('convertingTemplates', convertingTemplates);
+        case TemplatesAction.CONVERT_TEMPLATES_REJECTED:
+            return state.set('isRejected', true).set('error', action.payload).set('convertingTemplates', List([]));
         case TemplatesAction.FETCH_TEMPLATES:
             return state.set('fetchingTemplates', API_REQUEST_STATE.START).set('error', null);
         case TemplatesAction.FETCH_TEMPLATES_FULFILLED:
@@ -82,7 +123,6 @@ const reducer = (state = initialState, action) => {
         case TemplatesAction.EXPORT_TEMPLATE:
             return state.set('exportingTemplate', API_REQUEST_STATE.START).set('error', null).set('exportedTemplate', action.payload);
         case TemplatesAction.EXPORT_TEMPLATE_FULFILLED:
-            console.log(action.payload.templateContent);
             let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(action.payload.templateContent));
             let downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href",     dataStr);

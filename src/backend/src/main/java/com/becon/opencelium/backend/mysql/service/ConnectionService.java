@@ -36,7 +36,7 @@ public interface ConnectionService {
 
     boolean existsByName(String name);
 
-    void execute(Long connectionId, int schedulerId);
+    void run(Long connectionId) throws Exception;
 
     List<Connection> findAllByConnectorId(int connectorId);
 

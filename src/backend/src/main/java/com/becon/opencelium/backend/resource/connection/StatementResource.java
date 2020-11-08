@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
-import com.becon.opencelium.backend.neo4j.entity.StatementNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
@@ -32,11 +32,11 @@ public class StatementResource extends ResourceSupport {
     public StatementResource() {
     }
 
-    public StatementResource(StatementNode statementNode) {
-        this.color = statementNode.getColor();
-        this.field = statementNode.getFiled();
-        this.type = statementNode.getType();
-        this.rightPropertyValue = statementNode.getRightPropertyValue();
+    public StatementResource(StatementVariable statementVariable) {
+        this.color = statementVariable.getColor();
+        this.field = statementVariable.getFiled();
+        this.type = statementVariable.getType();
+        this.rightPropertyValue = statementVariable.getRightPropertyValue();
     }
 
     public String getColor() {

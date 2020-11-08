@@ -13,6 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import ReactDOM from 'react-dom';
 import React from 'react';
 import CUserGroup from "@classes/components/content/user_group/CUserGroup";
 import CComponent from "@classes/components/content/user_group/CComponent";
@@ -29,6 +30,93 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
+
+export function checkExpiredMessages(data){
+    let result = false;
+    if(isString(data)){
+        result = TOKEN_EXPIRED_MESSAGES.indexOf(data) !== -1;
+    } else{
+        if(data && data.hasOwnProperty('message')){
+            result = TOKEN_EXPIRED_MESSAGES.indexOf(data.message) !== -1;
+        }
+        if(!result && data && data.hasOwnProperty('response') && data.response.hasOwnProperty('message')){
+            result = TOKEN_EXPIRED_MESSAGES.indexOf(data.response.message) !== -1;
+        }
+    }
+    return result;
+}
+
+/**
+ * to check the references format in connections
+ */
+export function checkReferenceFormat(value, isStrict = false){
+    let result = false;
+    let pointers = [];
+    let counter = 0;
+    if(value !== '#' && typeof value === 'string') {
+        pointers = value.split(';');
+        if(pointers.length > 0) {
+            for(let i = 0; i < pointers.length; i++) {
+                let pointer = pointers[i];
+                let splitPointer = pointer.split('.');
+                if (splitPointer.length > 3) {
+                    if (splitPointer[0][0] === '#') {
+                        if (splitPointer[0].length === 7) {
+                            if (splitPointer[1].substring(1, splitPointer[1].length - 1) === 'response'
+                                || splitPointer[1].substring(1, splitPointer[1].length - 1) === 'request') {
+                                if (splitPointer[2] === 'success' || splitPointer[2] === 'fail') {
+                                    if (splitPointer[3].length > 0) {
+                                        result = true;
+                                        counter++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else{
+        if(value === '#' && !isStrict){
+            result = true;
+        } else{
+            result = false;
+        }
+    }
+    if(result && counter === pointers.length){
+        return true;
+    } else{
+        return false;
+    }
+}
+
+/**
+ * to get top and left value of the element according to window
+ */
+export function findTopLeft(elem) {
+    if(isString(elem)){
+        elem = document.getElementById(elem);
+    }
+    if(elem) {
+        let rec = elem.getBoundingClientRect();
+        return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+    } else{
+        return {top: 0, left: 0};
+    }
+}
+
+/**
+ * to get all focusable elements inside element
+ *
+ * @param elem - target element
+ */
+export function getFocusableElements(elem = document){
+    if(elem) {
+        return elem.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    }
+    return [];
+}
+
 /**
  * to format html id
  *
@@ -36,7 +124,7 @@ export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPP
  */
 export function formatHtmlId(id){
     if(isString(id)) {
-        return id.replace(' ', '_').toLowerCase();
+        return id.replace(' ', '_').toLowerCase().trim();
     }
     return 'no_id';
 }
@@ -182,28 +270,41 @@ export function shuffle(array) {
 }
 
 /**
+ * to show component setting opacity to 1
+ *
+ * @param elementId - id of the html element
+ */
+export function componentAppear(elementId){
+    setTimeout(function(){
+        const element = document.getElementById(elementId);
+        if(element !== null) {
+            element.style.opacity = 1;
+        }
+    }, 500);
+}
+
+/**
  * to focus on input by id
  *
  * @param id - id of the html element
+ * @param timeout - timout before focus
  */
 export function setFocusById(id, timeout = 100){
-    let element = document.getElementById(id);
-    const inputs = ['input', 'select', 'button', 'textarea'];
-    if (element) {
-        let inputElement = null;
-        if(inputs.indexOf(element.tagName.toLowerCase()) === -1){
-            inputElement = element.querySelector('input');
-        }
-        if(inputElement) {
-            setTimeout(() => {
+    setTimeout(() => {
+        let element = document.getElementById(id);
+        const inputs = ['input', 'select', 'button', 'textarea'];
+        if (element) {
+            let inputElement = null;
+            if(inputs.indexOf(element.tagName.toLowerCase()) === -1){
+                inputElement = element.querySelector('input');
+            }
+            if(inputElement) {
                 inputElement.focus();
-            }, timeout);
-        } else{
-            setTimeout(() => {
+            } else{
                 element.focus();
-            }, timeout);
+            }
         }
-    }
+    }, timeout);
 }
 
 /**
@@ -255,13 +356,31 @@ export function consoleError(value){
     }
 }
 
+export function checkXmlTagFormat(tagName){
+    if(isNumber(tagName[0])){
+        alert('Name cannot start with a number');
+        return false;
+    }
+    if(tagName.substring(0, 3) === 'xml'){
+        alert('Name cannot start with \'xml\'');
+        return false;
+    }
+    if(!tagName[0].toLowerCase().match(/[a-z]/i)){
+        if(tagName[0] !== '_') {
+            alert('Name should start from letter or underscore');
+            return false
+        }
+    }
+    return true;
+}
+
 /**
  * to check if element is Number
  *
  * @param number - number itself
  */
 export function isNumber(number){
-    return !isNaN(parseInt(number));
+    return !isNaN(number);
 }
 
 /**
@@ -283,6 +402,38 @@ export function isInteger(number) {
     Number.isInteger(number);
 }
 
+export function findTopLeftPosition(elem) {
+    if(typeof elem  === 'string'){
+        elem = document.getElementById(elem);
+    }
+    if(elem) {
+        elem = ReactDOM.findDOMNode(elem);
+        let rec = elem.getBoundingClientRect();
+        return {top: rec.top + window.scrollY, left: rec.left + window.scrollX};
+    } else{
+        return {top: 0, left: 0};
+    }
+}
+function isClassComponent(component) {
+    return (
+        typeof component === 'function' &&
+        !!component.prototype.isReactComponent
+    )
+}
+
+function isFunctionComponent(component) {
+    return (
+        typeof component === 'function' &&
+        String(component).includes('return React.createElement')
+    )
+}
+
+export function isReactComponent(component) {
+    return (
+        isClassComponent(component) ||
+        isFunctionComponent(component)
+    )
+}
 /**
  * to check if element is String
  *
@@ -423,7 +574,7 @@ export function getThemeClass({classNames, authUser, styles}){
 }
 
 /**
- * tp copy text to a clipboard
+ * to copy text to a clipboard
  *
  * @param text - text that is going to be copied
  */
@@ -436,6 +587,18 @@ export function copyStringToClipboard(text) {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
+}
+
+/**
+ * to get text from a clipboard
+ */
+export async function getStringFromClipboard() {
+    try {
+        const text = await navigator.clipboard.readText();
+        return text;
+    } catch (err) {
+        console.error('Failed to read clipboard contents: ', err);
+    }
 }
 
 /**

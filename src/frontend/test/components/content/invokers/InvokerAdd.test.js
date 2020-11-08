@@ -4,7 +4,7 @@ import configureStore from 'redux-mock-store';
 import {BrowserRouter as Router} from "react-router-dom";
 import renderer from 'react-test-renderer';
 import {fromJS} from "immutable";
-import InvokerAdd from "../../../../app/components/content/invokers/add/InvokerAdd";
+import InvokerAdd from "@components/content/invokers/add/InvokerAdd_nosub";
 
 //const mockStore = configureStore([]);
 

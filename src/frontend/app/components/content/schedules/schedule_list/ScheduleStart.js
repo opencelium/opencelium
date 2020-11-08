@@ -24,6 +24,8 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import Loading from "@loading";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -49,6 +51,21 @@ class ScheduleStart extends Component{
         this.enableTriggerSchedule = true;
     }
 
+    componentDidMount(){
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(this.props.schedule.title !== prevProps.schedule.title){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+    }
+
+    componentWillUnmount(){
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
+    }
+
     /**
      * to trigger schedule
      */
@@ -63,25 +80,23 @@ class ScheduleStart extends Component{
         const {t, authUser, stateSchedule, schedule, triggeringSchedule, index} = this.props;
         let classNames = ['schedule_list_action', 'trigger_schedule_start_off', 'schedule_start_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
-        let trigger_schedule_start = '';
+        let trigger_schedule_start = styles[classNames.schedule_list_action];
         if(!this.enableTriggerSchedule){
             trigger_schedule_start = styles[classNames.trigger_schedule_start_off];
         }
+        let icon = 'play_arrow';
+        if(stateSchedule && stateSchedule.id === schedule.id && triggeringSchedule){
+            icon = 'loading';
+        }
         return (
-            <span className={styles[classNames.schedule_list_action]}>
-                {
-                    stateSchedule && stateSchedule.id === schedule.id && triggeringSchedule
-                        ?
-                        <Loading authUser={authUser} className={styles[classNames.schedule_start_loading]}/>
-                        :
-                        <TooltipFontIcon
-                            id={`schedule_start_${index}`}
-                            className={trigger_schedule_start}
-                            value={'play_arrow'}
-                            tooltip={t('LIST.TOOLTIP_START_ICON')}
-                            onClick={::this.triggerSchedule}/>
-                }
-            </span>
+            <TooltipFontIcon
+                isButton={true}
+                id={`schedule_start_${index}`}
+                iconClassName={trigger_schedule_start}
+                value={icon}
+                tooltip={t('LIST.TOOLTIP_START_ICON')}
+                blueTheme={true}
+                onClick={::this.triggerSchedule}/>
         );
     }
 }

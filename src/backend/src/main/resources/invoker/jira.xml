@@ -44,7 +44,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="values" type="array">
                            <field name="id" type="string"/>
                            <field name="key" type="string"/>
@@ -103,7 +103,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="values" type="array">
                            <field name="id" type="string"/>
                            <field name="key" type="string"/>
@@ -192,7 +192,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="values" type="array">
                            <field name="rendered" type="object">
                              <field name="message" type="object">

@@ -19,10 +19,9 @@ import CXmlRequest from "./request/CXmlRequest";
 import CXmlResponse from "./response/CXmlResponse";
 import COperation from "../invoker/COperation";
 
-export const METHOD_TYPE_TEST = 'test';
 
 /**
- * (not used)
+ * XmlOperation Class
  */
 export default class CXmlOperation{
 

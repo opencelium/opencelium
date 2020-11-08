@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
@@ -25,6 +26,7 @@ import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.utility.ConditionUtility;
+import com.becon.opencelium.backend.utility.StringUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +69,7 @@ public class ExecutionContainer {
         List<FieldNode> incomingFields = fieldNodeService.findIncoming(outgoingFiled.getId());
 
         // var_result : #456osdk.(response).success.result[];
-        Map<String, String> expertVars = parseExpertVars(enhancement.getExpertVar());
+        Map<String, String> enhVars = parseExpertVars(enhancement.getExpertVar());
 
         boolean isObject = outgoingFiled.getType().equals("object");
         // TODO: for array case need to make it
@@ -81,21 +83,26 @@ public class ExecutionContainer {
                 .orElseThrow(() -> new RuntimeException("Method not found"));
         String outFieldPath = fieldNodeService.getPath(outMethod, outgoingFiled);
         String outFieldValue = fieldNodeService.getFieldValue(outgoingFiled);
+        outFieldPath = outFieldPath.replace("__oc__attributes.", "@").replace(".__oc__value", "");
         expertVarProperties.put(outFieldPath, outFieldValue);
 
-        incomingFields.forEach(f -> {
+        List<String> incomeRef = Arrays.asList(outgoingFiled.getValue().split(";"));
+        String format = outMethod.getRequestNode().getBodyNode().getFormat();
+        incomeRef.forEach(ref -> {
             try {
-                MethodNode inMethod = methodNodeService.getByFieldNodeId(f.getId())
-                        .orElseThrow(() -> new RuntimeException("Method not found"));
-
-                String inFieldPath = fieldNodeService.getPath(inMethod, f);
+                String incRef = ref;
+                if (format.equals("xml")) {
+                    incRef = incrementIndexes(ref);
+                }
+                String methodKey = ConditionUtility.getMethodKey(incRef);
                 MessageContainer messageContainer = responseData
                         .stream()
-                        .filter(m -> m.getMethodKey().equals(inMethod.getColor()))
+                        .filter(m -> m.getMethodKey().equals(methodKey))
                         .findFirst().orElse(null);
-                Object o = messageContainer.getValue(inFieldPath, getLoopIndex());
+                Object o = messageContainer.getValue(incRef, getLoopIndex());
                 String inFieldValue = o instanceof String ? o.toString() : mapperObj.writeValueAsString(o);
-                expertVarProperties.put(inFieldPath, inFieldValue);
+                inFieldValue = inFieldValue.replace("__oc__attributes.", "@").replace(".__oc__value", "");
+                expertVarProperties.put(ref, inFieldValue);
             } catch (JsonProcessingException e){
                 throw new RuntimeException(e);
             }
@@ -104,8 +111,10 @@ public class ExecutionContainer {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         expertVarProperties.forEach((k,v) -> {
             try {
-                String var = expertVars.get(k);
-
+                String var = enhVars.get(k);
+                if(var == null) {
+                    throw new RuntimeException(k + "not found in enhancement variables");
+                }
                 if (fieldNodeService.valueIsJSON(v)){
                     engine.put("dataModel", v);
                     JSObject obj = (JSObject)engine.eval("JSON.parse(dataModel)");
@@ -121,7 +130,7 @@ public class ExecutionContainer {
         try {
             engine.eval(enhancement.getExpertCode());
 
-            String v = expertVars.get(outFieldPath);
+            String v = enhVars.get(outFieldPath);
             Object o = engine.get(v);
             ScriptObjectMirror JSON = (ScriptObjectMirror) engine.eval("JSON");
             Object stringified = JSON.callMember("stringify", o);
@@ -139,11 +148,39 @@ public class ExecutionContainer {
                 return convertToArray(result);
             } else {
                 result = result.replace("\"", "");
-                return result;
+                if(o.getClass() == Double.class) {
+                    Double dd = (Double) o;
+                    return dd.intValue();
+                }
+                return o;
             }
         } catch (ScriptException | IOException e){
             throw new RuntimeException(e);
         }
+    }
+
+    private static String incrementIndexes(String path){
+        String result = "";
+        List<String> pathParts = Arrays.asList( path.split("\\."));
+
+        for (String part : pathParts) {
+            final Pattern pattern = Pattern.compile(RegExpression.arrayWithNumberIndex, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(part);
+
+            int intIndex = 0;
+            while (matcher.find()) {
+                String index = matcher.group(1);
+                intIndex = Integer.parseInt(index) + 1;
+                part = part.replaceFirst("\\[" + index + "\\]", "[" + intIndex + "]");
+            }
+
+            if (!result.isEmpty()) {
+                result = result + "." + part;
+            } else {
+                result = result + part;
+            }
+        }
+        return result;
     }
 
     public Object getValueFromResponseData(String ref){

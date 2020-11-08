@@ -17,13 +17,8 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {RadioButton, RadioGroup} from "react-toolbox/lib/radio";
-import FontIcon from "@basic_components/FontIcon";
 import CNotification, {EVENT_TYPE} from "@classes/components/content/schedule/notification/CNotification";
-import {getThemeClass} from "@utils/app";
-
-import theme from "react-toolbox/lib/input/theme.css";
-import styles from '@themes/default/content/schedules/schedules.scss';
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 
 function mapStateToProps(state){
@@ -71,54 +66,32 @@ class EventTypeInput extends Component{
         changeNotification(notification);
     }
 
-    renderRadioButtons(){
-        const {t, authUser} = this.props;
-        let classNames = [
-            'radio_button',
-            'radio_text',
-        ];
-        classNames = getThemeClass({classNames, authUser, styles});
+    getRadios(){
+        const {t} = this.props;
         let radioButtons = [];
         for(let key in EVENT_TYPE){
-            radioButtons.push(
-                <RadioButton
-                    key={key}
-                    id={`input_event_${EVENT_TYPE[key]}`}
-                    onFocus={::this.focusEventTypeRadio}
-                    onBlur={::this.blurEventTypeRadio}
-                    label={`${t(`NOTIFICATION.EVENT_${key}`)}`}
-                    value={EVENT_TYPE[key]}
-                    className={`${styles[classNames.radio_button]}`}
-                    theme={{text: styles[classNames.radio_text]}}/>
-            );
+            radioButtons.push({
+                id: `input_event_${EVENT_TYPE[key]}`,
+                onFocus: ::this.focusEventTypeRadio,
+                onBlur: ::this.blurEventTypeRadio,
+                label: `${t(`NOTIFICATION.EVENT_${key}`)}`,
+                value: EVENT_TYPE[key],
+            });
         }
         return radioButtons;
     }
 
     render(){
-        const {focused} = this.state;
-        const {t, authUser, notification} = this.props;
-        let classNames = [
-            'notification_change_event_type',
-            'label',
-            'radio_group',
-            'first_radio_button',
-            'notification_select_focused',
-        ];
-        classNames = getThemeClass({classNames, authUser, styles});
+        const {t, notification} = this.props;
+        const radios = ::this.getRadios();
         return(
-            <div className={`${theme.withIcon} ${theme.input} ${styles[classNames.notification_change_event_type]}`}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles[classNames.label]}`}/>
-                <RadioGroup name='theme' value={notification.eventType} onChange={::this.onChangeEventType} className={`${styles[classNames.radio_group]}`}>
-                    {this.renderRadioButtons()}
-                </RadioGroup>
-                <FontIcon value={'event'} className={`${theme.icon} ${focused ? styles[classNames.notification_select_focused] : ''}`}/>
-                <span className={theme.bar}/>
-                <label className={`${theme.label} ${focused ? styles[classNames.notification_select_focused] : ''}`}>
-                    {t('NOTIFICATION.NOTIFICATION_CHANGE.EVENT_TYPE_LABEL')}
-                    <span className={theme.required}> *</span>
-                </label>
-            </div>
+            <RadioButtons
+                label={t('NOTIFICATION.NOTIFICATION_CHANGE.EVENT_TYPE_LABEL')}
+                value={notification.eventType}
+                handleChange={::this.onChangeEventType}
+                icon={'event'}
+                radios={radios}
+            />
         );
     }
 }

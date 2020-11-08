@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.execution.statement;
 
-import com.becon.opencelium.backend.neo4j.entity.OperatorNode;
+import com.becon.opencelium.backend.neo4j.entity.StatementNode;
 
 public interface Statement {
-     void execute(OperatorNode operatorNode);
+     void execute(StatementNode statementNode);
 }

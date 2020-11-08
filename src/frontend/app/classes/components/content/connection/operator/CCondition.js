@@ -18,21 +18,23 @@ import CStatement from "./CStatement";
 
 export const FUNCTIONAL_OPERATORS = [
     {value: 'IsNull', hasValue: false},
+    {value: 'PropertyExists', hasValue: true, isRightStatementText: true},
+    {value: 'PropertyNotExists', hasValue: true, isRightStatementText: true},
     {value: 'Contains', label: 'Contains(⊂)', hasValue: true},
     {value: 'NotContains', label: 'NotContains(⊄)', hasValue: true},
-    {value: '>=', hasValue: true},
-    {value: '>', hasValue: true},
-    {value: '<=', hasValue: true},
-    {value: '<', hasValue: true},
-    {value: '=', hasValue: true},
-    {value: '!=', hasValue: true},
+    {value: '>=', hasValue: true, isRightStatementText: true},
+    {value: '>', hasValue: true, isRightStatementText: true},
+    {value: '<=', hasValue: true, isRightStatementText: true},
+    {value: '<', hasValue: true, isRightStatementText: true},
+    {value: '=', hasValue: true, isRightStatementText: true},
+    {value: '!=', hasValue: true, isRightStatementText: true},
     {value: 'NotNull', hasValue: false},
     {value: 'IsEmpty', hasValue: false},
     {value: 'NotEmpty', hasValue: false},
 ];
 
 /**
- * (not used)
+ * Condition class for Operator Item class
  */
 export default class CCondition{
 

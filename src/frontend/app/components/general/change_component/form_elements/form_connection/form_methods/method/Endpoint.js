@@ -19,10 +19,11 @@ import PropTypes from 'prop-types';
 import ContentEditable from 'react-contenteditable';
 
 import styles from '@themes/default/general/form_methods.scss';
-import theme from "react-toolbox/lib/input/theme.css";
 import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
-import TooltipText from "@basic_components/tooltips/TooltipText";
 import ParamGenerator from "./ParamGenerator";
+import Input from "@basic_components/inputs/Input";
+import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
@@ -39,6 +40,25 @@ class Endpoint extends Component{
         super(props);
         this.affixValue = React.createRef();
         this.hasAdded = false;
+        this.state = {
+            isEndpointEditOpen: false,
+            endpointEditValue: props.method.request ? props.method.request.query : '',
+        };
+    }
+
+    openEndpointEdit(){
+        const {method} = this.props;
+        this.setState({isEndpointEditOpen: true});
+    }
+
+    closeEndpointEdit(){
+        this.setState({isEndpointEditOpen: false});
+    }
+
+    onChangeEndpointEditValue(endpointEditValue){
+        this.setState({
+            endpointEditValue,
+        });
     }
 
     onChangeEndpoint(e){
@@ -95,6 +115,14 @@ class Endpoint extends Component{
         }
     }
 
+    saveEndpointValue(){
+        const {endpointEditValue} = this.state;
+        const {method, updateEntity} = this.props;
+        method.request.query = endpointEditValue;
+        updateEntity();
+        this.closeEndpointEdit();
+    }
+
     addParam(param){
         const {method, updateEntity} = this.props;
         method.setRequestEndpointAffix(`${method.request.affix}{%${param}%} `);
@@ -148,7 +176,16 @@ class Endpoint extends Component{
         }
     }
 
+    renderEndpointEdit(){
+        const {endpointEditValue} = this.state;
+        const {method} = this.props;
+        return (
+            <Input className={styles.endpoint_edit} autoFocus id={`${method.index}_endpoint`} value={endpointEditValue} onChange={::this.onChangeEndpointEditValue} onBlur={::this.saveEndpointValue}/>
+        );
+    }
+
     render(){
+        const {isEndpointEditOpen} = this.state;
         const {authUser, connection, connector, method, readOnly} = this.props;
         const endpoint = method.request ? method.request.query : '';
         let hasError = false;
@@ -159,31 +196,33 @@ class Endpoint extends Component{
         }
         let depth = method.getDepth();
         let tooltipTextStyles = {width: depth < 4 ? '10%' : depth < 6 ? '12%' : depth < 8 ? '15%' : '18%' };
-        let contentEditableStyles = {width: depth < 4 ? '85%' : depth < 6 ? '83%' : depth < 8 ? '80%' : '77%', overflow: 'hidden', whiteSpace: 'nowrap', height: '41px', color: hasError ? 'red' : 'black'};
+        let contentEditableStyles = {width: depth < 4 ? '85%' : depth < 6 ? '83%' : depth < 8 ? '80%' : '78%', overflow: 'hidden', whiteSpace: 'nowrap', height: '41px', color: hasError ? 'red' : 'black'};
         return (
             <div>
-                <div className={`${theme.input}`}>
-                    <TooltipText
-                        authUser={authUser}
-                        tooltip={endpoint}
-                        text={'[...]'}
-                        className={styles.method_affix}
-                        style={hasError ? {...tooltipTextStyles, color: 'red'} : tooltipTextStyles}
-                    />
-                    <div
-                        className={`${theme.inputElement} ${theme.filled}`}
-                        style={{width: '5%', float: 'left', paddingLeft: '3px', color: hasError ? 'red' : 'black'}}>
-                        {`/ `}
-                    </div>
-                    <ContentEditable
-                        id={`endpoint_${method.index}`}
-                        innerRef={this.affixValue}
-                        html={::this.parseEndpoint()}
-                        disabled={readOnly}
-                        onChange={::this.onChangeEndpoint}
-                        className={`${theme.inputElement} ${theme.filled}`}
-                        style={contentEditableStyles}
-                    />
+                <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
+                    <span className={styles.method_affix}>
+                        <TooltipFontIcon
+                            size={14}
+                            isButton={true}
+                            tooltip={endpoint}
+                            value={<span>[...]</span>}
+                            onClick={::this.openEndpointEdit}
+                            className={styles.method_affix_placeholder}
+                        />
+                        {
+                            isEndpointEditOpen && !readOnly && this.renderEndpointEdit()
+                        }
+                    </span>
+                    <span className={styles.method_affix_delimiter}>{`/ `}</span>
+                        <ContentEditable
+                            id={`endpoint_${method.index}`}
+                            innerRef={this.affixValue}
+                            html={::this.parseEndpoint()}
+                            disabled={readOnly}
+                            onChange={::this.onChangeEndpoint}
+                            className={`${styles.method_endpoint_content_editable}`}
+                            style={contentEditableStyles}
+                        />
                     <ParamGenerator
                         connection={connection}
                         connector={connector}
@@ -191,9 +230,7 @@ class Endpoint extends Component{
                         addParam={::this.addParam}
                         readOnly={readOnly}
                     />
-                    <span className={theme.bar}/>
-                    <label className={theme.label} style={hasError ? {color: 'red'} : {}}>{'Query'}</label>
-                </div>
+                </ToolboxThemeInput>
             </div>
         );
     }

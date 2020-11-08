@@ -13,36 +13,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Component, Suspense }  from 'react';
-import {Container} from 'react-grid-system';
+import React, { Component }  from 'react';
+import {connect} from 'react-redux';
 
-import Loading from '@loading';
-import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "@utils/constants/app";
 import {checkConnection} from "@decorators/checkConnection";
+import {deleteUserGroup} from "@actions/usergroups/delete";
+import LayoutComponent from "@decorators/LayoutComponent";
 
 
 /**
  * Layout for UserGroup
  */
+@connect(null, {deleteUserGroup})
+@LayoutComponent('group', 'groups', 'usergroups', 'deleteUserGroup')
 @checkConnection()
 class UserGroupLayout extends Component{
 
-    constructor(props){
-        super(props);
-    }
-
     render(){
-        const {authUser, children} = this.props;
-        return (
-            <Container>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
-                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        {children}
-                    </ComponentError>
-                </Suspense>
-            </Container>
-        );
+        return null;
     }
 }
 

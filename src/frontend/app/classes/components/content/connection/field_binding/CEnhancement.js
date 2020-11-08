@@ -17,7 +17,7 @@
 import {consoleLog, isId} from "@utils/app";
 
 /**
- * (not used)
+ * Enhancement class for Field Binding class
  */
 export default class CEnhancement{
 

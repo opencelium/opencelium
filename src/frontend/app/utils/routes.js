@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import {Route, IndexRoute, DefaultRoute} from 'react-router';
+import {Route, IndexRoute} from 'react-router';
 
 import isAuth from '../hocs/isAuth';
 import isNotAuth from '../hocs/isNotAuth';
@@ -23,12 +23,10 @@ import PageNotFound from "@components/general/app/PageNotFound";
 import LoadableRouteComponents from './LoadableRouteComponents';
 
 
-
 /**
  * create routes for app
  */
 export const createRoutes = (store) => {
-
     return (
         <Route path='/' component={Layout}>
             <IndexRoute component={isAuth(LoadableRouteComponents.DashboardLayout, store)}/>
@@ -91,7 +89,10 @@ export const createRoutes = (store) => {
                 <Route path='/notification_templates/:id/view' component={LoadableRouteComponents.NotificationTemplateView}/>
                 <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
-            <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfile, store)}/>
+            <Route path='/template_converter' component={isAuth(LoadableRouteComponents.TemplateConverterLayout, store)}/>
+            <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfileLayout, store)}>
+                <IndexRoute component={LoadableRouteComponents.MyProfile}/>
+            </Route>
             <Route path='/login' component={isNotAuth(LoadableRouteComponents.Login, store)}/>
             <Route path='/*' component={PageNotFound}/>
         </Route>

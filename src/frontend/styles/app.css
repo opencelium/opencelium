@@ -12,7 +12,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+html{
+  scroll-behavior: smooth;
+}
 body{
   margin: 0;
   display: block;
@@ -45,6 +47,22 @@ body{
 }
 
 #app_list{
+  opacity: 0;
+  -webkit-transition: all .3s ease-in-out;
+  -moz-transition: all .3s ease-in-out;
+  -o-transition: all .3s ease-in-out;
+  transition: all .3s ease-in-out;
+}
+
+#app_header{
+  opacity: 0;
+  -webkit-transition: all .3s ease-in-out;
+  -moz-transition: all .3s ease-in-out;
+  -o-transition: all .3s ease-in-out;
+  transition: all .3s ease-in-out;
+}
+
+#app_footer{
   opacity: 0;
   -webkit-transition: all .3s ease-in-out;
   -moz-transition: all .3s ease-in-out;
@@ -95,6 +113,10 @@ textarea{
 
 #atlwdg-trigger{
   top: 15% !important;
+}
+#atlwdg-trigger:focus{
+  box-shadow: 0 0 0 0.2rem rgba(38,143,255,.5) !important;
+  outline: none !important;
 }
 
 .clearfix:before,

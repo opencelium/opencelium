@@ -810,7 +810,7 @@ function focusDocument(e, that){
         //esc
         case 27:
             if (document.activeElement) {
-                document.activeElement.blur();
+                setTimeout(() => document.activeElement.blur(), 300);
             }
             break;
     }
@@ -820,6 +820,39 @@ function addFocusDocumentNavigation(that){
 }
 function removeFocusDocumentNavigation(that){
     removeNavigationListener(that, FocusDocumentNavigation);
+}
+
+/**
+ * pressing Esc focus on the document
+ */
+let CloseParamGenerator = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keydown':
+                closeParamGenerator(event, this.that);
+                break;
+        }
+
+    }
+};
+function closeParamGenerator(e, that){
+    let key = e.keyCode;
+    switch (key) {
+        //esc
+        case 27:
+            if(that.state.showGenerator || that.props.isVisible){
+                that.setState({
+                    shouldClose: true,
+                });
+            }
+            break;
+    }
+}
+function addCloseParamGeneratorNavigation(that){
+    addNavigationListener(that, CloseParamGenerator);
+}
+function removeCloseParamGeneratorNavigation(that){
+    removeNavigationListener(that, CloseParamGenerator);
 }
 
 /**
@@ -975,4 +1008,6 @@ export{
     removeMenuDashboardKeyNavigation,
     addMenuAdminCardsKeyNavigation,
     removeMenuAdminCardsKeyNavigation,
+    addCloseParamGeneratorNavigation,
+    removeCloseParamGeneratorNavigation,
 };

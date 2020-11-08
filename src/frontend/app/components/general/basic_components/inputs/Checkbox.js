@@ -14,7 +14,10 @@
  */
 
 import React, {Component} from 'react';
-import {Checkbox as ToolboxCheckbox} from 'react-toolbox/lib/checkbox';
+import PropTypes from 'prop-types';
+import {Label, Input} from 'reactstrap';
+
+import styles from '@themes/default/general/basic_components.scss';
 
 
 /**
@@ -27,12 +30,46 @@ class Checkbox extends Component{
     }
 
     render(){
-        return (
-            <ToolboxCheckbox {...this.props}>
-                {this.props.children}
-            </ToolboxCheckbox>
-        );
+        const {className, labelClassName, inputClassName, checked, label, inputPosition, ...props} = this.props;
+        if(label !== ''){
+            return (
+                <Label style={{margin: 0}} className={className}>
+                    {inputPosition === 'right'
+                        ?
+                            <React.Fragment>
+                                <span className={`${styles.checkbox_label} ${labelClassName}`}>{label}</span>
+                                <Input type = "checkbox" {...props} checked={checked} className={`${inputClassName} ${styles.checkbox}`}/>
+                            </React.Fragment>
+                        :
+                            <React.Fragment>
+                                <Input type = "checkbox" {...props} checked={checked} className={`${inputClassName} ${styles.checkbox}`}/>
+                                <span className={`${styles.checkbox_label} ${labelClassName}`}>{label}</span>
+                            </React.Fragment>
+                    }
+                </Label>
+            );
+        } else{
+            return(
+                <Input type="checkbox" {...props} checked={checked} className={`${inputClassName !== '' ? inputClassName : className} ${styles.checkbox}`}/>
+            );
+        }
     }
 }
+
+Checkbox.propTypes = {
+    className: PropTypes.string,
+    labelClassName: PropTypes.string,
+    inputClassName: PropTypes.string,
+    inputPosition: PropTypes.oneOf(['right', 'left']),
+};
+
+Checkbox.defaultProps = {
+    label: '',
+    checked: false,
+    className: '',
+    labelClassName: '',
+    inputClassName: '',
+    inputPosition: 'right',
+};
 
 export default Checkbox;

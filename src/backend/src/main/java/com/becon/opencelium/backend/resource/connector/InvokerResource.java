@@ -55,8 +55,6 @@ public class InvokerResource extends ResourceSupport {
         this.requiredData = invoker.getRequiredData().stream().filter(d->!d.getVisibility().equals("private"))
                 .map(RequiredData::getName).collect(Collectors.toList());
         this.operations = invoker.getOperations().stream().map(FunctionResource::new).collect(Collectors.toList());
-
-
     }
 
     public String getName() {

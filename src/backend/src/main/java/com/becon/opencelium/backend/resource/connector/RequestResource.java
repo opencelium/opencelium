@@ -29,7 +29,7 @@ public class RequestResource extends ResourceSupport {
     private String endpoint;
     private String method;
     private Map<String, String> header;
-    private Map<String, Object> body;
+    private BodyResource body;
 
     public RequestResource() {
     }
@@ -38,7 +38,9 @@ public class RequestResource extends ResourceSupport {
         this.endpoint = requestInv.getEndpoint();
         this.method = requestInv.getMethod();
         this.header = requestInv.getHeader();
-        this.body = requestInv.getBody();
+        if (requestInv.getBody() != null) {
+            this.body = new BodyResource(requestInv.getBody());
+        }
     }
 
     public Long getNodeId() {
@@ -73,11 +75,11 @@ public class RequestResource extends ResourceSupport {
         this.header = header;
     }
 
-    public Map<String, Object> getBody() {
+    public BodyResource getBody() {
         return body;
     }
 
-    public void setBody(Map<String, Object> body) {
+    public void setBody(BodyResource body) {
         this.body = body;
     }
 }

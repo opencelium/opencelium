@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.test;
 
-import com.becon.opencelium.backend.constant.InvokerRegEx;
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.neo4j.entity.*;
 import com.becon.opencelium.backend.neo4j.service.FieldNodeService;
@@ -82,8 +82,6 @@ public class TMethodExecutor implements TExecutor {
         operatorExecutor.execute(methodNode.getNextOperator());
     }
 
-
-
     private String createEndpoint(String endpoint) {
 
         String requiredField;
@@ -134,8 +132,8 @@ public class TMethodExecutor implements TExecutor {
 
     private String replaceRefValue(String exp) {
         String result = exp;
-        String refRegex = InvokerRegEx.requiredData;
-        String refResRegex = InvokerRegEx.responsePointer;
+        String refRegex = RegExpression.requiredData;
+        String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(exp);
         List<String> refParts = new ArrayList<>();

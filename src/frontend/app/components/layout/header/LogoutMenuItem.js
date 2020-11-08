@@ -25,6 +25,8 @@ import {
     addLogoutKeyNavigation, removeLogoutKeyNavigation,
 } from '@utils/key_navigation';
 import styles from '@themes/default/layout/header.scss';
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CLogoutControl from "@classes/voice_control/CLogoutControl";
 
 
 function mapStateToProps(state){
@@ -78,18 +80,20 @@ class LogoutMenuItem extends Component{
         const {logoutUserFulfilled} = this.props;
         logoutUserFulfilled({});
         history.push('/login');
+        CVoiceControl.removeCommands(null, CLogoutControl);
     }
 
     render(){
         const {t} = this.props;
         return [
             <ListItemLink
+                to='#'
                 id={'menu_logout'}
                 label={{text: '', index: 4}}
                 onClick={::this.wantLogout}
                 tooltip={t('HEADER.LOGOUT.TITLE')}
                 icon='exit_to_app'
-                style={{paddingRight: '30px', height: '40px', paddingTop: '8px'}}
+                style={{paddingRight: '30px', height: '40px', paddingTop: '8px', cursor: 'pointer'}}
                 className={`tour-step-logout`}
                 itemClassName={styles.logout_header}
                 key={1}

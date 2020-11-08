@@ -1,6 +1,6 @@
 import CFields from '../../../../../../app/classes/components/general/change_component/extra_actions/CFields';
 
-describe('Get LoopLength for Fields. Three loops', () => {
+describe.skip('Get LoopLength for Fields. Three loops', () => {
 
     it('Middle value', () => {
         const received = CFields.getLoopLength(68, [3, 6, 4]);
@@ -34,7 +34,7 @@ describe('Get LoopLength for Fields. Three loops', () => {
     });
 });
 
-describe('Get LoopLength for Fields. Two loops', () => {
+describe.skip('Get LoopLength for Fields. Two loops', () => {
 
     it('Middle value', () => {
         const received = CFields.getLoopLength(16, [3, 6]);

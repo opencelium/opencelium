@@ -16,7 +16,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
 import Content from "../../../general/content/Content";
 
 import {checkConnectionTitle} from '@actions/connections/fetch';
@@ -33,6 +32,7 @@ import CConnection, {ALL_COLORS} from "@classes/components/content/connection/CC
 import ChangeContent from "@change_component/ChangeContent";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
+import {removeLS} from "@utils/LocalStorage";
 
 
 const connectionPrefixURL = '/connections';
@@ -64,7 +64,7 @@ function mapConnection(connection){
  */
 @connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle})
 @permission(ConnectionPermissions.CREATE, true)
-@withTranslation(['connections', 'app'])
+@withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'adding', ['connectors'], mapConnection)
 class ConnectionAdd extends Component{
 
@@ -212,14 +212,19 @@ class ConnectionAdd extends Component{
      */
     addTemplate(template){
         const {addTemplate} = this.props;
-        addTemplate({name: template.name, description: template.description, connection: template.entity.getObject()});
+        addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObject()});
     }
 
+    doAction(connection){
+        const {authUser} = this.props;
+        removeLS(`${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`, `connection_${authUser.userId}`);
+        this.props.doAction(connection);
+    }
 
     render(){
         const {
             t, connectors, authUser, checkingConnectionTitle, checkTitleResult,
-            addingConnection, doAction, error,
+            addingConnection, error,
         } = this.props;
         let {connection} = this.state;
         connection.setError(error);
@@ -303,7 +308,10 @@ class ConnectionAdd extends Component{
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
-            //extraAction: 'CHECK_CONNECTION',
+            /*
+            * TODO: uncomment when backend will be ready
+            */
+           // extraAction: 'CHECK_CONNECTION',
         },
         ];
         return (
@@ -312,7 +320,7 @@ class ConnectionAdd extends Component{
                     breadcrumbsItems={breadcrumbsItems}
                     contents={contents}
                     translations={changeContentTranslations}
-                    action={doAction}
+                    action={::this.doAction}
                     entity={connection}
                     isActionInProcess={addingConnection}
                     authUser={authUser}

@@ -50,12 +50,12 @@ class TitleCell extends Component{
         const {appearClassName} = this.state;
         const {schedule, index} = this.props;
         return (
-            <TableCell style={{position: 'relative'}}>
+            <td style={{position: 'relative'}}>
                 <WebHook index={index} schedule={schedule}/>
                 <div className={`${styles.title_cell} ${styles.schedule_list_title} ${appearClassName}`} style={{animationDelay: '0.5s'}} title={schedule.title}>
                     <span>{schedule.title}</span>
                 </div>
-            </TableCell>
+            </td>
         );
     }
 }

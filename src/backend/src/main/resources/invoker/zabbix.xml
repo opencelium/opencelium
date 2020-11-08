@@ -33,7 +33,7 @@
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="jsonrpc" type="string">2.0</field>
                     <field name="method" type="string">user.login</field>
                     <field name="params" type="object">
@@ -49,7 +49,7 @@
                     <header>
                         <item name="Authorization" type="string"/>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="jsonrpc" type="string">2.0</field>
                         <field name="result" type="string"/>
                         <field name="id" type="int">1</field>
@@ -74,7 +74,7 @@
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="jsonrpc" type="string">2.0</field>
                     <field name="method" type="string">host.get</field>
                     <field name="params" type="object">
@@ -92,7 +92,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="result" type="array">
                             <field name="hostid" type="string"/>
                             <field name="proxy_hostid" type="string"/>
@@ -155,7 +155,7 @@
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="jsonrpc" type="string">2.0</field>
                     <field name="method" type="string">host.create</field>
                     <field name="params" type="object">
@@ -183,7 +183,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="result" type="array">
                             <field name="code" type="string"/>
                             <field name="status" type="string"/>
@@ -203,7 +203,7 @@
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body>
+                <body type="object" format="json" data="raw">
                     <field name="jsonrpc" type="string">2.0</field>
                     <field name="method" type="string">host.delete</field>
                     <field name="params" type="array"/>
@@ -215,7 +215,7 @@
                 <success status="200">
                     <header>
                     </header>
-                    <body>
+                    <body type="object" format="json" data="raw">
                         <field name="result" type="object">
                             <field name="hostids" type="array"/>
                         </field>

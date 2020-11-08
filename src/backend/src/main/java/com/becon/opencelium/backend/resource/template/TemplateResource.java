@@ -27,8 +27,9 @@ public class TemplateResource extends ResourceSupport {
     private String templateId;
     private String name;
     private String description;
+    private String version;
     private String link;
-    private ConnectionResource connection;
+    private CtionTemplateResource connection;
 
     public String getTemplateId() {
         return templateId;
@@ -54,6 +55,14 @@ public class TemplateResource extends ResourceSupport {
         this.description = description;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     public String getLink() {
         return link;
     }
@@ -62,11 +71,11 @@ public class TemplateResource extends ResourceSupport {
         this.link = link;
     }
 
-    public ConnectionResource getConnection() {
+    public CtionTemplateResource getConnection() {
         return connection;
     }
 
-    public void setConnection(ConnectionResource connection) {
+    public void setConnection(CtionTemplateResource connection) {
         this.connection = connection;
     }
 }

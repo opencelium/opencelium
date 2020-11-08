@@ -15,13 +15,9 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {RadioGroup, RadioButton} from 'react-toolbox/lib/radio';
-import Select from 'react-select';
 import Input from '@basic_components/inputs/Input';
 
-import theme from "react-toolbox/lib/input/theme.css";
 import styles from '@themes/default/general/form_methods.scss';
-import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 import {DEFAULT_COLOR} from "@classes/components/content/connection/operator/CStatement";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
@@ -33,7 +29,8 @@ import {
     RESPONSE_FAIL,
     RESPONSE_SUCCESS
 } from "@classes/components/content/invoker/response/CResponse";
-import {dotColor} from "../help";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
+import Select from "@basic_components/inputs/Select";
 
 
 /**
@@ -130,8 +127,18 @@ class IfOperator extends Component{
     getOperatorLabel(){
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
-        return value === 'Contains' ? '⊂' : value === 'NotContains' ? '⊄' : value;
-
+        switch(value){
+            case 'Contains':
+                return '⊂';
+            case 'NotContains':
+                return '⊄';
+            case 'PropertyExists':
+                return '∃';
+            case 'PropertyNotExists':
+                return '∄';
+            default:
+                return value;
+        }
     }
 
     checkIfOperatorHasThreeParams(){
@@ -229,7 +236,7 @@ class IfOperator extends Component{
     updateRightPropertyValue(){
         const {rightProperty} = this.state;
         const {operator, updateEntity} = this.props;
-        operator.setRightStatementPropertyValue(rightProperty);
+        operator.setRightStatementRightPropertyValue(rightProperty);
         updateEntity();
     }
 
@@ -240,19 +247,21 @@ class IfOperator extends Component{
     }
 
     isOperatorHasValue(){
+        let hasValue = false;
+        let isRightStatementText = false;
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
         let hasValueItem = FUNCTIONAL_OPERATORS.find(fo => fo.value === value);
-        let hasValue = false;
         if(hasValueItem){
             hasValue = hasValueItem.hasValue;
+            isRightStatementText = hasValueItem.isRightStatementText;
         }
-        return hasValue;
+        return {hasValue, isRightStatementText} ;
     }
 
     renderPlaceholder(){
         let {rightField, rightProperty} = this.state;
-        let hasValue = this.isOperatorHasValue();
+        let {hasValue} = this.isOperatorHasValue();
         let title = this.state.leftField;
         const {operator, toggleIsVisibleMenuEdit} = this.props;
         let relationalOperator = operator.condition.relationalOperator;
@@ -304,7 +313,7 @@ class IfOperator extends Component{
     }
 
     renderMethodSelectLeft(){
-        let hasValue = this.isOperatorHasValue();
+        let {hasValue} = this.isOperatorHasValue();
         const {connection, operator, readOnly} = this.props;
         let indexSplitted = operator.index.split('_');
         let pointerWidthValue = indexSplitted.length > 0 ? 260 - ((indexSplitted.length - 1) * 20) + 'px' : '260px';
@@ -322,8 +331,7 @@ class IfOperator extends Component{
         generalStyles.width = pointerWidthValue;
         selectThemeInputStyle.padding = 0;
         return (
-            <div className={`${theme.input}`} style={selectThemeInputStyle}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <div style={selectThemeInputStyle}>
                 <Select
                     name={'method'}
                     value={value}
@@ -367,13 +375,6 @@ class IfOperator extends Component{
                             }
                             return s;
                         },
-                        option: (styles, {data, isDisabled,}) => {
-                            return {
-                                ...styles,
-                                ...dotColor(data.color),
-                                cursor: isDisabled ? 'not-allowed' : 'default',
-                            };
-                        },
                         valueContainer: (styles) => {
                             return{
                                 ...styles,
@@ -385,7 +386,9 @@ class IfOperator extends Component{
                                 ...styles,
                                 color: data.color,
                                 background: data.color,
-                                width: hasValue ? '100%' : '70%',
+                                margin: '0 10%',
+                                width: '80%',
+                                maxWidth: 'none',
                             };
                         },
                         placeholder: (styles) => {
@@ -397,7 +400,6 @@ class IfOperator extends Component{
                         }
                     }}
                 />
-                <span className={theme.bar}/>
             </div>
         );
     }
@@ -406,25 +408,30 @@ class IfOperator extends Component{
         const {responseType} = this.state;
         const {operator} = this.props;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
-        return (
-            <RadioGroup
+        return(
+            <RadioButtons
                 name='response_type'
+                label={''}
                 value={responseType}
-                onChange={::this.onChangeResponseType}
-                className={styles.operator_response_radio_area_if}
+                handleChange={::this.onChangeResponseType}
                 disabled={!hasMethod}
-            >
-                <RadioButton label='s' value={RESPONSE_SUCCESS}
-                             theme={{field: styles.operator_radio_field, radio: styles.operator_radio_radio, disabled: styles.operator_radio_field_disabled, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-                <RadioButton label='f' value={RESPONSE_FAIL}
-                             theme={{field: `${styles.operator_radio_field} ${styles.operator_radio_field_fail}`, radio: styles.operator_radio_radio, disabled: `${styles.operator_radio_field_disabled} ${styles.operator_radio_field_fail}`, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-            </RadioGroup>
+                radios={[
+                    {
+                        label: 's',
+                        value: RESPONSE_SUCCESS,
+                    },
+                    {
+                        label: 'f',
+                        value: RESPONSE_FAIL,
+                    },
+                ]}
+            />
         );
     }
 
     renderParamInputLeft(){
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
-        let hasValue = this.isOperatorHasValue();
+        let {hasValue} = this.isOperatorHasValue();
         let {leftField} = this.state;
         const {operator, readOnly} = this.props;
         let inputTheme = {};
@@ -463,7 +470,7 @@ class IfOperator extends Component{
         const {operator, readOnly} = this.props;
         let value = operator.condition.relationalOperator;
         let operators = FUNCTIONAL_OPERATORS.map(operator => {return {value: operator.value, label: operator.hasOwnProperty('label') ? operator.label : operator.value};});
-        let hasValue = this.isOperatorHasValue();
+        let {hasValue} = this.isOperatorHasValue();
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
         let inputTheme = {inputElement: styles.input_element_pointer_compare_statement_visible};
         let divStyles = {float: 'left', width: hasValue ? '10%' : '25%', transition: 'width 0.3s ease 0s',};
@@ -472,7 +479,6 @@ class IfOperator extends Component{
         return (
             <div style={divStyles}>
                 <span className={styles.if_relational_operator_separator}/>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
                 <Select
                     name={'relational_operators'}
                     value={value !== '' ? {value, label} : null}
@@ -526,8 +532,9 @@ class IfOperator extends Component{
                                 ...styles,
                                 color: data.color,
                                 background: data.color,
-                                marginLeft: '4px',
-                                width: '100%',
+                                margin: '0 10%',
+                                width: '80%',
+                                maxWidth: 'none',
                             };
                         },
                         placeholder: (styles, {data}) => {
@@ -545,7 +552,6 @@ class IfOperator extends Component{
                         }
                     }}
                 />
-                <span className={theme.bar}/>
                 <span className={styles.if_relational_operator_separator}/>
             </div>
         );
@@ -570,6 +576,7 @@ class IfOperator extends Component{
                         readOnly={readOnly}
                         theme={inputTheme}
                         isPopupInput={true}
+                        disabled={!isOperatorHasThreeParams}
                     >
                         <SelectSearch
                             id={`if_operator_${operator.type}_${operator.index}`}
@@ -592,7 +599,7 @@ class IfOperator extends Component{
     }
 
     renderMethodSelectRight(){
-        let hasValue = this.isOperatorHasValue();
+        let {hasValue, isRightStatementText} = this.isOperatorHasValue();
         const {rightField} = this.state;
         const {connection, operator, readOnly} = this.props;
         let indexSplitted = operator.index.split('_');
@@ -606,14 +613,16 @@ class IfOperator extends Component{
         }
         let value = method ? method.getValueForSelectInput(connector) : null;
         let isVisible = hasValue && !(rightField !== '' && value === null);
+        if(isRightStatementText){
+            isVisible = false;
+        }
         let selectThemeInputStyle = {width: isVisible ? '10%' : '0', float: 'left', transition: isVisible ? 'width 0.3s ease 0s' : 'none',};
         let generalStyles = {width: '95%', float: 'right'};
         let source = this.getOptionsForMethods('rightStatement');
         generalStyles.width = pointerWidthValue;
         selectThemeInputStyle.padding = 0;
         return (
-            <div className={`${theme.input}`} style={selectThemeInputStyle}>
-                <div className={`${theme.inputElement} ${theme.filled} ${styles.multiselect_label}`}/>
+            <div style={selectThemeInputStyle}>
                 <Select
                     name={'method'}
                     value={value}
@@ -621,7 +630,7 @@ class IfOperator extends Component{
                     options={source.length > 0 ? source : [{label: 'No params', value: 0, color: 'white'}]}
                     closeOnSelect={false}
                     placeholder={rightField !== '' && value === null ? '' : '...'}
-                    isDisabled={readOnly}
+                    isDisabled={readOnly || !isVisible}
                     isSearchable={!readOnly}
                     openMenuOnClick={true}
                     maxMenuHeight={200}
@@ -657,19 +666,14 @@ class IfOperator extends Component{
                             }
                             return s;
                         },
-                        option: (styles, {data, isDisabled,}) => {
-                            return {
-                                ...styles,
-                                ...dotColor(data.color),
-                                cursor: isDisabled ? 'not-allowed' : 'default',
-                            };
-                        },
                         singleValue: (styles, {data}) => {
                             return {
                                 ...styles,
                                 color: data.color,
                                 background: data.color,
-                                width: hasValue ? '100%' : '70%',
+                                margin: '0 10%',
+                                width: '80%',
+                                maxWidth: 'none',
                             };
                         },
                         valueContainer: (styles) => {
@@ -694,7 +698,6 @@ class IfOperator extends Component{
                         },
                     }}
                 />
-                <span className={theme.bar}/>
             </div>
         );
     }
@@ -703,24 +706,29 @@ class IfOperator extends Component{
         const {responseType} = this.state;
         const {operator} = this.props;
         let hasMethod = operator.condition.rightStatement.color !== '' && operator.condition.rightStatement.color !== DEFAULT_COLOR;
-        return (
-            <RadioGroup
+        return(
+            <RadioButtons
                 name='response_type'
+                label={''}
                 value={responseType}
-                onChange={::this.onChangeResponseTypeRight}
-                className={styles.operator_response_radio_area_if}
+                handleChange={::this.onChangeResponseTypeRight}
                 disabled={!hasMethod}
-            >
-                <RadioButton label='s' value={RESPONSE_SUCCESS}
-                             theme={{field: styles.operator_radio_field, radio: styles.operator_radio_radio, disabled: styles.operator_radio_field_disabled, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-                <RadioButton label='f' value={RESPONSE_FAIL}
-                             theme={{field: `${styles.operator_radio_field} ${styles.operator_radio_field_fail}`, radio: styles.operator_radio_radio, disabled: `${styles.operator_radio_field_disabled} ${styles.operator_radio_field_fail}`, radioChecked: styles.operator_radio_radio_checked, text: styles.operator_radio_text}}/>
-            </RadioGroup>
+                radios={[
+                    {
+                        label: 's',
+                        value: RESPONSE_SUCCESS,
+                    },
+                    {
+                        label: 'f',
+                        value: RESPONSE_FAIL,
+                    },
+                ]}
+            />
         );
     }
 
     renderParamInputRight(){
-        let hasValue = this.isOperatorHasValue();
+        let {hasValue, isRightStatementText} = this.isOperatorHasValue();
         let {rightField} = this.state;
         const {connection, operator, readOnly} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
@@ -730,8 +738,9 @@ class IfOperator extends Component{
             method = connection.fromConnector.getMethodByColor(statement.color);
         }
         let methodValue = method ? {label: method.name, value: method.index, color: method.color} : null;
+        let isMethodSelectRightInvisible = methodValue === null && rightField !== '' || isRightStatementText;
         let inputTheme = {inputElement: hasValue ? styles.input_element_pointer_compare_statement_visible : styles.input_element_pointer_compare_statement_not_visible};
-        let divStyles = {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? methodValue === null && rightField !== '' ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '17.5%' : '35%' : '0', float: 'left'};
+        let divStyles = {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '17.5%' : '35%' : '0', float: 'left'};
         inputTheme.input = styles.input_pointer_compare_statement;
         return (
             <div style={divStyles}>
@@ -745,6 +754,7 @@ class IfOperator extends Component{
                     readOnly={readOnly}
                     theme={inputTheme}
                     isPopupInput={true}
+                    disabled={!hasValue}
                 >
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}

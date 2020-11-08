@@ -152,10 +152,11 @@ public class FileController {
 
         try {
             //Generate new file name
-            String newFilename = UUID.randomUUID().toString() + "." + extension;
+            String id = UUID.randomUUID().toString();
             // Save file in storage
             ObjectMapper objectMapper = new ObjectMapper();
             Template template = objectMapper.readValue(file.getBytes(), Template.class);
+            template.setTemplateId(id);
             templateService.save(template);
             final org.springframework.hateoas.Resource<TemplateResource> resource
                     = new org.springframework.hateoas.Resource<>(templateService.toResource(template));

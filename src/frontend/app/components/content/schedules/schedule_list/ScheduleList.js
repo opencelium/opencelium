@@ -18,7 +18,6 @@ import PropTypes from 'prop-types';
 import {connect} from'react-redux';
 import { Row, Col } from "react-grid-system";
 import Table from '@basic_components/table/Table';
-import {TableHead, TableRow, TableCell} from 'react-toolbox/lib/table';
 import Pagination from 'react-bootstrap/Pagination';
 
 import styles from '@themes/default/content/schedules/schedules.scss';
@@ -44,9 +43,11 @@ import LastFailureCell from "./LastFailureCell";
 import LastDurationCell from "./LastDurationCell";
 import Checkbox from "@basic_components/inputs/Checkbox";
 import Input from "@basic_components/inputs/Input";
-import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
+import {APP_STATUS_UP} from "@utils/constants/url";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import ScheduleNotification from "./notification/ScheduleNotification";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
 export const EMPHASIZE_DURATION_ANIMATION = 900;
 
@@ -85,14 +86,19 @@ class ScheduleList extends Component{
     }
 
     componentDidMount(){
-        setFocusById('filter_title');
+        setFocusById('add_title');
         this.checkElasticSearch();
+        CVoiceControl.initCommands({component: this}, CScheduleControl);
     }
 
-    componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps, prevState){
         let prevSchedules = prevProps.schedules;
         let curSchedules = this.props.schedules;
         let notEqualedSchedules = false;
+        if(prevState.currentPage !== this.state.currentPage){
+            CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
+            CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
         if(prevSchedules.length !== curSchedules.length){
             notEqualedSchedules = true;
             this.notEmphasize = true;
@@ -143,6 +149,7 @@ class ScheduleList extends Component{
         if(this.props.checkingApp === API_REQUEST_STATE.START){
             this.props.checkAppCanceled();
         }
+        CVoiceControl.removeCommands({component: this}, CScheduleControl);
     }
 
     onChangeFilterTitle(filterTitle){
@@ -247,10 +254,18 @@ class ScheduleList extends Component{
      * to open a page
      */
     openPage(e, pageNumber){
-        this.setState({
-            currentPage: pageNumber,
-            currentSchedules: this.filterCurrentSchedules({pageNumber, allCurrentSchedules: this.state.allCurrentSchedules}),
-        });
+        const {allCurrentSchedules} = this.state;
+        let amount = allCurrentSchedules.length;
+        let pageAmount = amount % SCHEDULES_PER_PAGE === 0 ? parseInt(amount / SCHEDULES_PER_PAGE) : parseInt(amount / SCHEDULES_PER_PAGE) + 1;
+        if(pageNumber >= 1 && pageNumber <= pageAmount) {
+            this.setState({
+                currentPage: pageNumber,
+                currentSchedules: this.filterCurrentSchedules({
+                    pageNumber,
+                    allCurrentSchedules: this.state.allCurrentSchedules
+                }),
+            });
+        }
     }
 
     renderPagination(){
@@ -305,9 +320,9 @@ class ScheduleList extends Component{
         }
         return(
             <Input
-                id={'filter_title'}
-                name={'filter_title'}
-                label={t('ADD.FILTER_PLACEHOLDER')}
+                id={'search_title'}
+                name={'search_title'}
+                label={t('ADD.SEARCH_PLACEHOLDER')}
                 type={'text'}
                 onChange={::this.onChangeFilterTitle}
                 value={filterTitle}
@@ -321,7 +336,8 @@ class ScheduleList extends Component{
         const {allChecked, checks, checkAllSchedules, checkOneSchedule, deleteCheck} = this.props;
         let classNames = [
             'schedule_list',
-            'checkbox',
+            'checkbox_label',
+            'checkbox_field',
             'table_head',
             'table_row',
             'schedule_list_empty',
@@ -336,63 +352,68 @@ class ScheduleList extends Component{
             return <div className={styles[classNames.schedule_list_empty]}>{t('LIST.EMPTY_LIST')}</div>;
         }
         return(
-            <Table authUser={authUser} selectable={false}>
-                <TableHead>
-                    <TableCell><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} theme={{check: styles[classNames.checkbox]}}/></TableCell>
-                    <TableCell><span>{t('LIST.TITLE')}</span></TableCell>
-                    <TableCell><span>{t('LIST.CONNECTION')}</span></TableCell>
-                    <TableCell className={'tour-step-3'}><span>{t('LIST.CRON')}</span></TableCell>
-                    <TableCell className={'tour-step-4'}><span>{t('LIST.LAST_SUCCESS')}</span></TableCell>
-                    <TableCell className={'tour-step-5'}><span>{t('LIST.LAST_FAILURE')}</span></TableCell>
-                    <TableCell className={'tour-step-6'}><span>{t('LIST.LAST_DURATION')}</span></TableCell>
-                    <TableCell className={'tour-step-7'}><span>{t('LIST.STATUS')}</span></TableCell>
-                    <TableCell><span>{t('LIST.ACTION')}</span></TableCell>
-                </TableHead>
-                {
-                    currentSchedules.map((s, key) => {
-                        let schedule = CSchedule.createSchedule(s);
-                        let index = checks.findIndex(c => c.id === schedule.id && c.value);
-                        let checked = index !== -1;
-                        let backgroundColorStyle = null;
-                        if(!schedule.status){
-                            backgroundColorStyle = {};
-                            backgroundColorStyle.backgroundColor = '#d7c9c92e';
-                            backgroundColorStyle.color = '#a28e8e';
-                        }
-                        return (
-                            <TableRow key={key} style={backgroundColorStyle}>
-                                <TableCell style={{padding: "8px 18px 8px 24px"}}>
-                                    <Checkbox
-                                        id={`input_check_${key}`}
-                                        checked={checked}
-                                        onChange={(e) => checkOneSchedule(e, {key, id: schedule.id})}
-                                        theme={{check: styles[classNames.checkbox]}}
-                                    />
-                                </TableCell>
-                                <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>
-                                <TableCell className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></TableCell>
-                                <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
-                                <LastSuccessCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
-                                <LastFailureCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
-                                <LastDurationCell schedule={schedule} t={t}/>
-                                <StatusCell index={key} schedule={schedule}/>
-                                <TableCell style={{padding: '5px'}}>
-                                    <div className={styles[classNames.schedule_list_actions]}>
-                                        <div>
-                                            <WebHookTools index={key} schedule={schedule} t={t}/>
-                                            <ScheduleNotification schedule={schedule} index={key}/>
-                                            <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
+            <Table authUser={authUser}>
+                <thead>
+                    <tr>
+                        <th><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} labelClassName={styles[classNames.checkbox_label]} inputClassName={styles[classNames.checkbox_field]}/></th>
+                        <th><span>{t('LIST.TITLE')}</span></th>
+                        <th><span>{t('LIST.CONNECTION')}</span></th>
+                        <th className={'tour-step-3'}><span>{t('LIST.CRON')}</span></th>
+                        <th className={'tour-step-4'}><span>{t('LIST.LAST_SUCCESS')}</span></th>
+                        <th className={'tour-step-5'}><span>{t('LIST.LAST_FAILURE')}</span></th>
+                        <th className={'tour-step-6'}><span>{t('LIST.LAST_DURATION')}</span></th>
+                        <th className={'tour-step-7'}><span>{t('LIST.STATUS')}</span></th>
+                        <th><span>{t('LIST.ACTION')}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        currentSchedules.map((s, key) => {
+                            let schedule = CSchedule.createSchedule(s);
+                            let index = checks.findIndex(c => c.id === schedule.id && c.value);
+                            let checked = index !== -1;
+                            let backgroundColorStyle = null;
+                            if(!schedule.status){
+                                backgroundColorStyle = {};
+                                backgroundColorStyle.backgroundColor = '#d7c9c92e';
+                                backgroundColorStyle.color = '#a28e8e';
+                            }
+                            return (
+                                <tr key={key} style={backgroundColorStyle}>
+                                    <td>
+                                        <Checkbox
+                                            id={`input_check_${key}`}
+                                            checked={checked}
+                                            onChange={(e) => checkOneSchedule(e, {key, id: schedule.id})}
+                                            labelClassName={styles[classNames.checkbox_label]}
+                                            inputClassName={styles[classNames.checkbox_field]}
+                                        />
+                                    </td>
+                                    <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>
+                                    <td className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></td>
+                                    <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
+                                    <LastSuccessCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
+                                    <LastFailureCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
+                                    <LastDurationCell schedule={schedule} t={t}/>
+                                    <StatusCell index={key} schedule={schedule}/>
+                                    <td style={{padding: '5px'}}>
+                                        <div className={styles[classNames.schedule_list_actions]}>
+                                            <div>
+                                                <WebHookTools index={key} schedule={schedule} t={t}/>
+                                                <ScheduleNotification schedule={schedule} index={key}/>
+                                                <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
+                                            </div>
+                                            <div>
+                                                <ScheduleStart index={key} schedule={schedule}/>
+                                                <ScheduleUpdate index={key} schedule={schedule}/>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <ScheduleStart index={key} schedule={schedule}/>
-                                            <ScheduleUpdate index={key} schedule={schedule}/>
-                                        </div>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        );
-                    })
-                }
+                                    </td>
+                                </tr>
+                            );
+                        })
+                    }
+                </tbody>
             </Table>
         );
     }
@@ -418,9 +439,7 @@ class ScheduleList extends Component{
                     {this.renderFilter()}
                     {this.renderTable()}
                     {
-                        currentSchedules.length === 0
-                            ? null
-                            :
+                        currentSchedules.length !== 0 &&
                             <div className={styles[classNames.bulk_actions]}>
                                 <Button authUser={authUser} title={'Start'} className={styles[classNames.action_item]}
                                         onClick={::this.startSelectedSchedules} disabled={!this.isOneChecked()}/>

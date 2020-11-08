@@ -24,6 +24,7 @@ import {
 import {
     addUserGroupEpic, addGroupIconEpic, deleteUserGroupEpic, fetchUserGroupEpic,
     fetchUserGroupsEpic, updateUserGroupEpic, updateGroupIconEpic, checkUserGroupNameEpic,
+    deleteUserGroupIconEpic,
 } from '@epics/usergroups';
 import {
     loginUserEpic, logoutUserEpic, updateAuthUserLanguageEpic, updateDashboardSettingsEpic,
@@ -48,7 +49,8 @@ import {
 } from '@epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
-    importTemplateEpic, exportTemplateEpic,
+    importTemplateEpic, exportTemplateEpic, convertTemplateEpic,
+    convertTemplatesEpic
 } from '@epics/templates';
 import {
     fetchScheduleEpic, fetchSchedulesEpic, addScheduleEpic,
@@ -70,7 +72,7 @@ import {
     fetchAdminCardsEpic, loadAdminCardsLinkEpic,
 } from "@epics/admin_cards";
 import {
-    addErrorTicketEpic,
+    addErrorTicketEpic, fetchAppVersionEpic,
 } from "@epics/app";
 import {
     fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
@@ -97,6 +99,7 @@ export default combineEpics(
     addUserGroupEpic,
     addGroupIconEpic,
     checkUserGroupNameEpic,
+    deleteUserGroupIconEpic,
     updateProfilePictureEpic,
     deleteUserGroupEpic,
     fetchUserGroupEpic,
@@ -152,6 +155,8 @@ export default combineEpics(
     deleteTemplateEpic,
     fetchTemplatesEpic,
     addTemplateEpic,
+    convertTemplateEpic,
+    convertTemplatesEpic,
     importTemplateEpic,
     exportTemplateEpic,
     fetchAppsEpic,
@@ -165,6 +170,7 @@ export default combineEpics(
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,
+    fetchAppVersionEpic,
     fetchNotificationTemplatesEpic,
     fetchNotificationTemplateEpic,
     addNotificationTemplateEpic,

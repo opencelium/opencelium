@@ -29,6 +29,7 @@ import {doRequest} from "@utils/auth";
 import {
     validateAddWebHook, validateUpdateWebHook, validateDeleteWebHook,
 } from "@validations/webhooks";
+import {API_METHOD} from "@utils/constants/app";
 
 
 /**
@@ -73,7 +74,7 @@ const updateWebHookEpic = (action$, store) => {
             let data = action.payload;
             let validation = validateUpdateWebHook(action.payload);
             if(validation.success) {
-                return doRequest({url, isApi: false, method: 'put', data}, {
+                return doRequest({url, isApi: false, method: API_METHOD.PUT, data}, {
                         success: updateWebHookFulfilled,
                         reject: updateWebHookRejected,
                     },
@@ -95,7 +96,7 @@ const deleteWebHookEpic = (action$, store) => {
             if(validation.success) {
                 let {id, schedulerId} = action.payload;
                 let url = `${urlPrefix}/${id}`;
-                return doRequest({url, method: 'delete'}, {
+                return doRequest({url, method: API_METHOD.DELETE}, {
                         success: deleteWebHookFulfilled,
                         reject: deleteWebHookRejected,},
                     res => {return {schedulerId};}

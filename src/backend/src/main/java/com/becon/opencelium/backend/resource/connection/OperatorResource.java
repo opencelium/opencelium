@@ -26,6 +26,7 @@ public class OperatorResource extends ResourceSupport {
     private Long nodeId;
     private String type;
     private String index;
+    private String iterator;
     private ConditionResource condition;
 
     public Long getNodeId() {
@@ -58,5 +59,13 @@ public class OperatorResource extends ResourceSupport {
 
     public void setIndex(String index) {
         this.index = index;
+    }
+
+    public String getIterator() {
+        return iterator;
+    }
+
+    public void setIterator(String iterator) {
+        this.iterator = iterator;
     }
 }

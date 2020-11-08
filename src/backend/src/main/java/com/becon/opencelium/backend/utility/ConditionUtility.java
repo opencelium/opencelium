@@ -16,7 +16,8 @@
 
 package com.becon.opencelium.backend.utility;
 
-import com.becon.opencelium.backend.neo4j.entity.StatementNode;
+import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.neo4j.entity.StatementVariable;
 import com.becon.opencelium.backend.resource.connection.StatementResource;
 
 import java.util.Arrays;
@@ -40,20 +41,20 @@ public class ConditionUtility {
         return matcher.group();
     }
 
-    public static StatementResource buildStatement(StatementNode statementNode){
-        if (statementNode == null){
+    public static StatementResource buildStatement(StatementVariable statementVariable){
+        if (statementVariable == null){
             return null;
         }
-        return new StatementResource(statementNode);
+        return new StatementResource(statementVariable);
     }
 
     //TODO: should be in StatementNodeService class;
-    public static StatementNode buildStringStatement(StatementResource statementResource){
+    public static StatementVariable buildStringStatement(StatementResource statementResource){
         if (statementResource == null){
             return null;
         }
 
-        return new StatementNode(statementResource);
+        return new StatementVariable(statementResource);
     }
 
     public static String getArray(String condition) {
@@ -82,6 +83,8 @@ public class ConditionUtility {
     }
 
     public static String getLastArray(String condition){
+        Pattern pattern = Pattern.compile(RegExpression.arrayWithLetterIndex);
+
         List<String> refParts = Arrays.asList(condition.split("\\."));
         int size = refParts.size();
 
@@ -91,6 +94,12 @@ public class ConditionUtility {
         for (String part : refParts) {
             if (!part.contains("[") && !part.contains("]") && currentSize == size){
                 continue;
+            }
+
+            Matcher m = pattern.matcher(part);
+            while (m.find()) {
+                String c = m.group(1);
+                part = part.replace("[" + c + "]", "[]");
             }
             result = result + "." + part;
             currentSize++;
@@ -151,6 +160,18 @@ public class ConditionUtility {
         return pathParts[2];
     }
 
+
+    public static boolean compareRegEx(String path, String regEx){
+        final Pattern pattern = Pattern.compile(regEx, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(path);
+
+        while (matcher.find()) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static <T> double convertToDouble(T val){
         if (val instanceof Integer){
             return  (int) (Object) val;
@@ -160,6 +181,12 @@ public class ConditionUtility {
             return (float) (Object) val;
         } else if (val instanceof  Double) {
             return (double) (Object) val;
+        } else if (val instanceof String) {
+            String number = (String) val;
+            if (number.contains(".")) {
+                return Double.parseDouble(number);
+            }
+            return Integer.parseInt(number);
         } else {
             throw  new RuntimeException("Operands '>, <, >=, <=' don't work with String");
         }

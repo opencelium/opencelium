@@ -14,7 +14,6 @@
  */
 
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {connect} from 'react-redux';
 import Tour from 'reactour';

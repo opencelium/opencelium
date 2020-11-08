@@ -29,7 +29,7 @@ class ResponseField extends Component{
     }
 
     render(){
-        const {response} = this.props
+        const {response} = this.props;
         let entity = response.success ? CSuccess.createSuccess(response) : CFail.createFail(response);
         return (
             <Body entity={entity} data={{icon: '', readOnly: true}}/>

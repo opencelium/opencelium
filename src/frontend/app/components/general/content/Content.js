@@ -21,7 +21,7 @@ import ListButton from "../view_component/ListButton";
 
 import styles from '@themes/default/general/view_component.scss';
 import UpdateButton from "../list_of_components/UpdateButton";
-import {getThemeClass} from "@utils/app";
+import {componentAppear, getThemeClass} from "@utils/app";
 import EmptyButton from "../view_component/EmptyButton";
 
 
@@ -35,12 +35,7 @@ class Content extends Component{
     }
 
     componentDidMount(){
-        setTimeout(function(){
-            const app_content = document.getElementById("app_content");
-            if(app_content !== null) {
-                app_content.style.opacity = 1;
-            }
-        }, 500);
+        componentAppear('app_content');
     }
 
     renderNavigationButton(){

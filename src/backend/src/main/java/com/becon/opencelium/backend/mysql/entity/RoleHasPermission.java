@@ -56,6 +56,14 @@ public class RoleHasPermission {
         component.getPermissions().add(this);
     }
 
+    public RoleHasPermissionId getId() {
+        return id;
+    }
+
+    public void setId(RoleHasPermissionId id) {
+        this.id = id;
+    }
+
     public UserRole getUserRole() {
         return userRole;
     }
