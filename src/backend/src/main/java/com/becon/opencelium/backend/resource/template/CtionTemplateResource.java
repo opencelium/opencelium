@@ -1,7 +1,10 @@
 package com.becon.opencelium.backend.resource.template;
 
 import com.becon.opencelium.backend.resource.connection.ConnectorNodeResource;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CtionTemplateResource {
@@ -12,6 +15,7 @@ public class CtionTemplateResource {
     private String description;
     private CtorTemplateResource fromConnector;
     private CtorTemplateResource toConnector;
+    private Object fieldBinding;
 
     public Long getNodeId() {
         return nodeId;
@@ -59,5 +63,13 @@ public class CtionTemplateResource {
 
     public void setToConnector(CtorTemplateResource toConnector) {
         this.toConnector = toConnector;
+    }
+
+    public Object getFieldBinding() {
+        return fieldBinding;
+    }
+
+    public void setFieldBinding(Object fieldBinding) {
+        this.fieldBinding = fieldBinding;
     }
 }
