@@ -13,7 +13,7 @@ OC Changelog
 [Connector]			                CSV2API (Microsoft SQL Server)
 [Business template][PRTG][i-doit]	Status update
 [Improvement]                       Autoupdate changeset of application yaml configuration
-[Improvement]                       Autoupdate changeset of database structur
+[Improvement]                       Autoupdate changeset of database structure
 [Improvement]                       Better overview of the connection with the integration of history and tree view functionality
 [Improvement]                       Supporting of notification templates via GUI
 [Bug][OC-238]					    Sorting of the items in Connection (Add/Update) is wrong if the amount is more than 10
