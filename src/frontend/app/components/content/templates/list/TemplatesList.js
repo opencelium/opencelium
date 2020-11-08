@@ -36,6 +36,7 @@ import CExecution from "@classes/components/content/template_converter/CExecutio
 import TemplateDownloadIcon from "@components/content/templates/list/TemplateDownloadIcon";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
+import Button from "@basic_components/buttons/Button";
 
 const prefixUrl = '/templates';
 
@@ -50,6 +51,7 @@ function mapStateToProps(state){
         deletingTemplate: templates.get('deletingTemplate'),
         exportedTemplate: templates.get('exportedTemplate'),
         exportingTemplate: templates.get('exportingTemplate'),
+        convertingTemplates: templates.get('convertingTemplates').toJS(),
         templates: templates.get('templates').toJS(),
         isCanceled: templates.get('isCanceled'),
         isRejected: templates.get('isRejected'),
@@ -117,7 +119,7 @@ class TemplatesList extends Component{
     }
 
     render(){
-        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate} = this.props;
+        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}]};
         translations.add_button = t('LIST.IMPORT_BUTTON');
@@ -144,12 +146,10 @@ class TemplatesList extends Component{
             return result;
         };
         mapEntity.AddButton = TemplateImport;
-        /*
-        * TODO: uncomment when backend will be ready
-        */
-        //mapEntity.AdditionalButton = <Button className={styles.convert_all} authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
+        mapEntity.AdditionalButton = <Button className={styles.convert_all} authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
         mapEntity.onDelete = deleteTemplate;
         return <List
+            rerenderDependency={convertingTemplates.length}
             entities={templates}
             translations={translations}
             mapEntity={mapEntity}

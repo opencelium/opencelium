@@ -105,17 +105,14 @@ const convertTemplatesEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.CONVERT_TEMPLATES)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.templateId}`;
+            let url = `${urlPrefix}/all`;
             let data = action.payload;
-            /*
-            * TODO: Rework when backend will be done
-            */
-            return Rx.Observable.of(convertTemplatesFulfilled({newTemplates: data, oldTemplates: data}));
-            /*return doRequest({url, method: API_METHOD.PUT, data: {templates:data}},{
-                    success: convertTemplatesFulfilled,
-                reject: (ajax) => Rx.Observable.of(convertTemplatesRejected(ajax))},
-                res => {return {newTemplates: data, oldTemplates: data};}
-            );*/
+            //return Rx.Observable.of(convertTemplatesFulfilled({newTemplates: data, oldTemplates: data}));
+            return doRequest({url, method: API_METHOD.PUT, data},{
+                success: convertTemplatesFulfilled,
+                reject: convertTemplatesRejected},
+                res => {return {newTemplates: res.response._embedded.templateResourceList, oldTemplates: data};}
+            );
         });
 };
 

@@ -73,9 +73,6 @@ const reducer = (state = initialState, action) => {
         case TemplatesAction.CONVERT_TEMPLATES:
             return state.set('isRejected', false).set('isCanceled', false).set('error', null).set('convertingTemplates', List(action.payload));
         case TemplatesAction.CONVERT_TEMPLATES_FULFILLED:
-            /*
-            * TODO: Rework when backend will be done
-            */
             for(let i = 0; i < action.payload.oldTemplates.length; i++){
                 index = templates.findIndex(function (template) {
                     return template.templateId === action.payload.oldTemplates[i].templateId;
