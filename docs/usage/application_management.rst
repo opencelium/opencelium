@@ -39,7 +39,7 @@ to view, to update, to graph or to delete the item. For example, ***U***
 to update the element. To undo the selection, just press **Esc** or
 **5** on the keyboard.
 
-If you want go get a hint, just click on the |image5| icon.
+If you want to get a hint, just click on the |image5| icon.
 
 View Element
 =========
