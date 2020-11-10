@@ -50,9 +50,12 @@ The method consists of *Query* and *Body*.
 *Query* is a URL that can be modified during the request. It has a prefix,
 that is defined in invoker xml file. Mouseover here
 
-|image7| |image7.1|
+|image7|
 
 you can see it. Clicking on this icon popped up an input to modify the *query*.
+
+|image7.1|
+
 There is a possibility to add a parameter into the *Query* (except the first
 method in *from connector*). This parameter is a reference to the response of
 the  previously created method.
@@ -161,7 +164,9 @@ button and the response will appear in the *Response* tab.
 .. |image6| image:: ../img/connection/6.png
    :align: middle
 .. |image7| image:: ../img/connection/7.png
+   :align: middle
 .. |image7.1| image:: ../img/connection/7.1.png
+   :align: middle
 .. |image8| image:: ../img/connection/8.png
    :align: middle
 .. |image9| image:: ../img/connection/9.png
