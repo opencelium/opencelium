@@ -58,9 +58,20 @@ Click on the arrow again to use the template.
 **You, as a user, want to upgrade the template in OpenCelium.**
 
 Starting from OpenCelium 1.3 version, there is a changed structure inside on the template. It means, to use the older templates in a new version, you need to upgrade them. There are two ways to perform that.
-First, you can go to the *Templates* page using *Admin*, as it is described above. There you can upgrade one specific template clicking on the icon |image12| or pressing on the Convert All button to convert all
-templates to the latest version |image13|.
-Second option is to convert the template directly when you use it in *Connections*. If the template has older version it will be disabled and with conversion icon |image14|. Clicking on it, you will convert the template.
+First, you can go to the *Templates* page using *Admin*, as it is described above. There you can upgrade one specific template clicking on the icon
+
+|image12|
+
+or pressing on the Convert All button to convert all
+templates to the latest version.
+
+|image13|
+
+Second option is to convert the template directly when you use it in *Connections*. If the template has older version it will be disabled and with conversion icon.
+
+|image14|
+
+Clicking on it, you will convert the template.
 
 **You, as a user, want to change the template in OpenCelium.**
 
