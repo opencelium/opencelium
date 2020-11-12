@@ -20,11 +20,10 @@ import {
     logoutUserFulfilled,
     updateAuthUserLanguageFulfilled, updateAuthUserLanguageRejected,
     updateDashboardSettingsFulfilled,
-    updateThemeFulfilled, toggleAppTourFulfilled, toggleAppTourRejected, updateThemeRejected,
-    checkOCConnectionFulfilled, checkOCConnectionRejected,
+    updateThemeFulfilled, toggleAppTourFulfilled, toggleAppTourRejected, updateThemeRejected, sessionExpired,
 } from '@actions/auth';
 
-import {doRequest} from '@utils/auth';
+import {doRequest, sessionTimeout} from '@utils/auth';
 import {setLS} from "@utils/LocalStorage";
 import {API_METHOD} from "@utils/constants/app";
 
@@ -68,13 +67,10 @@ const updateAuthUserLanguageEpic = (action$, store) => {
                     }
                     if(token !== null) {
                         const decodedData = jwt.decode(token.slice(7));
-                        const expTime = decodedData.exp - decodedData.iat;
-                        console.log(`Now: ${new Date()}`);
-                        console.log(`Expiration Time: ${new Date(decodedData.exp * 1000)}`);
-                        console.log(`Activity Time: ${new Date(decodedData.iat * 1000)}`);
                         setLS("token", token);
-                        setLS("exp_time", expTime);
-                        setLS("last_login", Date.now());
+                        setLS("exp_time", decodedData.exp * 1000);
+                        setLS("session_time", decodedData.sessionTime);
+                        setLS("last_login", decodedData.iat * 1000);
                         setLS("userGroup", response.userGroup);
                         setLS("userDetail", response.userDetail);
                         decodedData['userGroup'] = response.userGroup;
@@ -155,21 +151,6 @@ const toggleAppTourEpic = (action$, store) => {
         });
 };
 
-/**
- * check OC connection
- */
-const checkOCConnectionEpic = (action$, store) => {
-    return action$.ofType(AuthAction.CHECK_OCCONNECTION)
-        .debounceTime(500)
-        .mergeMap((action) => {
-            let url = 'application/oc/test';
-            return doRequest({url}, {
-                    success: checkOCConnectionFulfilled,
-                    reject: checkOCConnectionRejected
-            });
-        });
-};
-
 
 export {
     updateAuthUserLanguageEpic,
@@ -178,5 +159,4 @@ export {
     updateDashboardSettingsEpic,
     updateThemeEpic,
     toggleAppTourEpic,
-    checkOCConnectionEpic,
 };

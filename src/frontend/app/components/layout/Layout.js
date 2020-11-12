@@ -28,9 +28,7 @@ import { addUserListener,
 import LayoutError from "./LayoutError";
 import Notification from "../general/app/Notification";
 import {NotificationType} from "@utils/constants/notifications/notifications";
-import {checkOCConnection, logoutUserFulfilled} from "@actions/auth";
-import {API_REQUEST_STATE} from "@utils/constants/app";
-import {removeAllLS} from "@utils/LocalStorage";
+import {logoutUserFulfilled, sessionNotExpired} from "@actions/auth";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 
@@ -41,9 +39,8 @@ function mapStateToProps(state){
         appVersion: app.get('appVersion'),
         authUser: auth.get('authUser'),
         isAuth: auth.get('isAuth'),
+        isSessionExpired: auth.get('isSessionExpired'),
         currentLanguage: auth.get('authUser') ? auth.get('authUser').current_language : defaultLanguage.code,
-        checkOCConnectionResult: auth.get('checkOCConnectionResult'),
-        checkingOCConnection: auth.get('checkingOCConnection'),
     };
 }
 
@@ -51,7 +48,7 @@ function mapStateToProps(state){
  * Layout of the app(OC)
  */
 @withTranslation('notifications')
-@connect(mapStateToProps, {changeLanguage, addUserInStore, checkOCConnection, logoutUserFulfilled, fetchAppVersion})
+@connect(mapStateToProps, {changeLanguage, addUserInStore, logoutUserFulfilled, fetchAppVersion, sessionNotExpired})
 class Layout extends Component{
 
     constructor(props){
@@ -60,50 +57,30 @@ class Layout extends Component{
             isMenuVisible: false,
             authUser: props.authUser,
             showLoginAgain: false,
-            isNotAuthButStayInSystem: false,
         };
     }
 
     componentDidMount(){
         const {isAuth, addUserInStore, appVersion, fetchAppVersion} = this.props;
         addUserListener(addUserInStore);
-        setInterval(::this.checkOCConnection, 15000000);
         CVoiceControl.initCommands({component: this}, CAppVoiceControl);
         if(isAuth && !appVersion){
             fetchAppVersion();
         }
     }
 
-    componentDidUpdate(){
-        const {isNotAuthButStayInSystem} = this.state;
-        const {checkOCConnectionResult, checkingOCConnection} = this.props;
+    componentDidUpdate(prevProps){
+        const {isAuth, sessionNotExpired} = this.props;
         if(CVoiceControl.isListening() === false){
             CVoiceControl.initCommands({component: this}, CAppVoiceControl);
         }
-        if(checkingOCConnection === API_REQUEST_STATE.FINISH) {
-            if (checkOCConnectionResult !== null && !isNotAuthButStayInSystem) {
-                removeAllLS();
-                let elem = document.getElementById('notification');
-                if(elem){
-                    elem.innerHTML = '';
-                }
-                this.setState({isNotAuthButStayInSystem: true});
-            }
-            if (checkOCConnectionResult === null && isNotAuthButStayInSystem) {
-                this.setState({isNotAuthButStayInSystem: false});
-            }
+        if(prevProps.isSessionExpired && isAuth){
+            sessionNotExpired();
         }
     }
 
     componentWillUnmount(){
         CVoiceControl.removeCommands({component: this}, CAppVoiceControl);
-    }
-
-    checkOCConnection(){
-        const {checkOCConnection} = this.props;
-        if(location.pathname !== '/login') {
-            checkOCConnection({background: true});
-        }
     }
 
     toggleMenu(){
@@ -115,8 +92,8 @@ class Layout extends Component{
     }
 
     renderLoginAgain(){
-        const {location} = this.props;
-        if(this.state.isNotAuthButStayInSystem && location.pathname !== '/login') {
+        const {isSessionExpired} = this.props;
+        if(location.pathname !== '/login' && isSessionExpired) {
             const {t} = this.props;
             const message = <span>Your session is expired, please <a target={'_blank'}
                                                                      href={'/login'}>login</a> again</span>;

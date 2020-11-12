@@ -17,18 +17,18 @@ import Rx from 'rxjs/Rx';
 import jwt from 'jsonwebtoken';
 
 import store from '@utils/store';
-import {loginUserFulfilled, sessionExpired} from '@actions/auth';
+import {loginUserFulfilled, logoutUserFulfilled, sessionExpired} from '@actions/auth';
 import {doRequestRejected} from '@actions/app';
 import {updateMenu} from '@actions/app';
 
 import {setLS, getLS} from '@utils/LocalStorage';
-import {baseUrl, baseUrlApi} from '@utils/constants/url';
 import {history} from '@components/App';
-import {AuthAction} from "@utils/actions";
+import {baseUrl, baseUrlApi} from '@utils/constants/url';
 import {API_METHOD} from "@utils/constants/app";
 
 const {ajax} = Rx.Observable;
 
+export let sessionTimeout = null;
 
 /**
  * set settings for each request
@@ -101,7 +101,6 @@ export function doRequest(requestParams, callbacks, mapping = null){
     if(check !== false){
         return check;
     }
-
     if(!requestParams.hasOwnProperty('url')){
         return doRequestRejected({'message': 'BAD_REQUEST', systemMessage: "There is no \'url param\' for the request"});
     }
@@ -136,19 +135,21 @@ export function doRequest(requestParams, callbacks, mapping = null){
  */
 function checkExpTime(){
     const lastLogin = getLS("last_login");
-    const expTime = getLS("exp_time");
+    const expTime = getLS("exp_time") + 500;
+    const sessionTime = getLS("session_time") + 500;
     if (lastLogin !== null) {
         const currentLogin = Date.now();
-        if(currentLogin - lastLogin < expTime) {
-            setLS("last_login", Date.now());
-            return false;
-        } else{
-            store.dispatch(sessionExpired({}));
+        if(currentLogin - lastLogin >= sessionTime || currentLogin >= expTime) {
+            store.dispatch(sessionExpired());
             history.push('/login');
-            return Rx.Observable.of({
-                type: AuthAction.INITIAL_STATE,
-                payload: {},
-            });
+            return Rx.Observable.of(logoutUserFulfilled({}));
+        } else{
+            setLS("last_login", Date.now());
+            if(sessionTimeout){
+                clearTimeout(sessionTimeout);
+            }
+            sessionTimeout = setTimeout(() => store.dispatch(sessionExpired({background: true})), sessionTime);
+            return false;
         }
     }
     return false;
