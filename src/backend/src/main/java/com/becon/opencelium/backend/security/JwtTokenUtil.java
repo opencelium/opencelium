@@ -22,7 +22,8 @@ import com.becon.opencelium.backend.mysql.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -60,9 +61,9 @@ public class JwtTokenUtil {
         Map<String, Object> claims = new HashMap<>();
         User user = userDetails.getUser();
         String token = UUID.randomUUID().toString();
-
         claims.put("userId", user.getId());
         claims.put("role", user.getUserRole().getName());
+        claims.put("sessionTime", SecurityConstant.ACTIVITY_TIME);
 
         return doGenerateToken(claims, user.getEmail(), token);
     }
