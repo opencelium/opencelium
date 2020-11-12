@@ -8,6 +8,7 @@ After launching the application you will see the login page. As a default admin 
 - **login:** admin@opencelium.io
 - **password:** 1234
 
-Login into the system! You will see the menu on top: Dashboard, Users, Groups, Connectors, Connections, Schedulers. 
+Login into the system! You will see the menu on top: Dashboard, Users, Groups, Connectors, Connections, Schedulers,
+Admin.
 
 See next section, explaining the usage of this system.

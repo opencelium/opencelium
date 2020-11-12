@@ -19,7 +19,7 @@ First step is to provide *name* and *type*.
 
 |image2|
 
-On the second step you enter subject and body of the template.
+On the second step you enter *subject* and *body* of the template.
 
 |image3|
 

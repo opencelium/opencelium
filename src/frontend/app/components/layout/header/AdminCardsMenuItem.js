@@ -19,7 +19,10 @@ import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 
 import ListItemLink from "@basic_components/ListItemLink";
-import {addMenuAdminCardsKeyNavigation, removeMenuAdminCardsKeyNavigation} from "@utils/key_navigation";
+import {
+    addMenuAdminCardsKeyNavigation, removeMenuAdminCardsKeyNavigation,
+    addMenuInvokersKeyNavigation, removeMenuInvokersKeyNavigation,
+} from "@utils/key_navigation";
 import {permission} from "@decorators/permission";
 import {AppPermissions} from "@utils/constants/permissions";
 
@@ -45,10 +48,12 @@ class AdminCardsMenuItem extends Component{
 
     componentDidMount(){
         addMenuAdminCardsKeyNavigation(this);
+        addMenuInvokersKeyNavigation(this);
     }
 
     componentWillUnmount(){
         removeMenuAdminCardsKeyNavigation(this);
+        removeMenuInvokersKeyNavigation(this);
     }
 
     render(){

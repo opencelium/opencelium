@@ -1,6 +1,9 @@
 import CCommonControl, {VOICE_CONTROL_REPLACE_COMMAND_SYMBOL} from "@classes/voice_control/CCommonControl";
 import CVoiceControl, {PREFIX_COMMAND_NAME} from "@classes/voice_control/CVoiceControl";
 
+/**
+ * Class for AppVoiceControl for whole Application voice control
+ */
 class CAppVoiceControl extends CCommonControl {
 
     static getCommands(data) {

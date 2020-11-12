@@ -41,7 +41,7 @@ export default class CBody{
         if(bodyType === FIELD_TYPE_STRING || bodyType === FIELD_TYPE_OBJECT || bodyType === FIELD_TYPE_ARRAY){
             return true;
         }
-        consoleLog(`Body has a wrong type: ${bodyType}`);
+        //consoleLog(`Body has a wrong type: ${bodyType}`);
         return false;
     }
 
@@ -51,7 +51,7 @@ export default class CBody{
                 return true;
             }
         }
-        consoleLog(`Body has a wrong format: ${bodyFormat}`);
+        //consoleLog(`Body has a wrong format: ${bodyFormat}`);
         return false;
     }
 

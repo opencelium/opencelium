@@ -55,6 +55,24 @@ Selecting one of it you will see its short description.
 
 Click on the arrow again to use the template.
 
+**You, as a user, want to upgrade the template in OpenCelium.**
+
+Starting from OpenCelium 1.3 version, there is a changed structure inside on the template. It means, to use the older templates in a new version, you need to upgrade them. There are two ways to perform that.
+First, you can go to the *Templates* page using *Admin*, as it is described above. There you can upgrade one specific template clicking on the icon
+
+|image12|
+
+or pressing on the Convert All button to convert all
+templates to the latest version.
+
+|image13|
+
+Second option is to convert the template directly when you use it in *Connections*. If the template has older version it will be disabled and with conversion icon.
+
+|image14|
+
+Clicking on it, you will convert the template.
+
 **You, as a user, want to change the template in OpenCelium.**
 
 There is no way to change the template via UI for now, but you can change it directly on the server in *src/main/resources/templates* folder in *json* file. But strongly recommended to not do it! Slightly wrong changes in the file (json syntax, logic error) or saving with the incorrect encoding brings you to the error on the *Add Connection* page. We recommend you to create a new template as it is described above.
@@ -92,4 +110,10 @@ The second deletion is on the second step of adding connection, when you choose 
 .. |image10| image:: ../img/usecases/manage_templates/delete_0.png
    :align: middle
 .. |image11| image:: ../img/usecases/manage_templates/delete_1.png
+   :align: middle
+.. |image12| image:: ../img/usecases/manage_templates/list_upgrade_icon.png
+   :align: middle
+.. |image13| image:: ../img/usecases/manage_templates/list_convert_all_button.png
+   :align: middle
+.. |image14| image:: ../img/usecases/manage_templates/connection_convert_template.png
    :align: middle
