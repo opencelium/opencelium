@@ -22,7 +22,6 @@ import {ERROR_TYPE} from "@utils/constants/app";
 import DashboardView from "./view/DashboardView";
 import {OC_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
-import {checkConnection} from "@decorators/checkConnection";
 
 
 function filterOCSteps(tourSteps){
@@ -55,7 +54,6 @@ function filterOCSteps(tourSteps){
 /**
  * Layout for Connectors
  */
-@checkConnection()
 @tour(OC_TOURS, filterOCSteps)
 class DashboardLayout extends Component{
 

@@ -15,7 +15,6 @@
 
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import {checkConnection} from "@decorators/checkConnection";
 import {LayoutComponent} from "@decorators/LayoutComponent";
 import {deleteTemplate} from "@actions/templates/delete";
 
@@ -25,7 +24,6 @@ import {deleteTemplate} from "@actions/templates/delete";
  */
 @connect(null, {deleteTemplate})
 @LayoutComponent('template', 'templates', 'templates', '', ['add', 'update', 'view', 'open'])
-@checkConnection()
 class TemplateLayout extends Component{
 
     render(){

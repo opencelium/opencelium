@@ -65,11 +65,11 @@ class Layout extends Component{
     }
 
     componentDidMount(){
-        const {addUserInStore, appVersion, fetchAppVersion} = this.props;
+        const {isAuth, addUserInStore, appVersion, fetchAppVersion} = this.props;
         addUserListener(addUserInStore);
         setInterval(::this.checkOCConnection, 15000000);
         CVoiceControl.initCommands({component: this}, CAppVoiceControl);
-        if(appVersion === ''){
+        if(isAuth && !appVersion){
             fetchAppVersion();
         }
     }

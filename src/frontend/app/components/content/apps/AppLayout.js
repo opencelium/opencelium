@@ -14,7 +14,6 @@
  */
 
 import React, {Component} from 'react';
-import {checkConnection} from "@decorators/checkConnection";
 import {LayoutComponent} from "@decorators/LayoutComponent";
 
 
@@ -22,7 +21,6 @@ import {LayoutComponent} from "@decorators/LayoutComponent";
  * Layout for Applications
  */
 @LayoutComponent('application', 'applications', '')
-@checkConnection()
 class AppLayout extends Component{
 
     render(){

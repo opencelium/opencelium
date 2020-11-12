@@ -39,7 +39,7 @@ function mapStateToProps(state){
  * returns the same component
  * @constructor
  */
-export function checkConnection(){
+function checkConnection(){
     return function (Component) {
         return (
             @connect(mapStateToProps, {checkOCConnection, logoutUserFulfilled})
@@ -53,9 +53,9 @@ export function checkConnection(){
                 }
 
                 componentDidMount() {
-                    //this.checkOCConnection();
+                    this.checkOCConnection();
                 }
-/*
+
                 componentDidUpdate() {
                     const {checkingOCConnection, error, logoutUserFulfilled} = this.props;
                     if (checkingOCConnection === API_REQUEST_STATE.FINISH) {
@@ -67,7 +67,7 @@ export function checkConnection(){
                             history.push('/login');
                         }
                     }
-                }*/
+                }
 
                 checkOCConnection() {
                     this.props.checkOCConnection();

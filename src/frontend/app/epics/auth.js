@@ -69,6 +69,9 @@ const updateAuthUserLanguageEpic = (action$, store) => {
                     if(token !== null) {
                         const decodedData = jwt.decode(token.slice(7));
                         const expTime = decodedData.exp - decodedData.iat;
+                        console.log(`Now: ${new Date()}`);
+                        console.log(`Expiration Time: ${new Date(decodedData.exp * 1000)}`);
+                        console.log(`Activity Time: ${new Date(decodedData.iat * 1000)}`);
                         setLS("token", token);
                         setLS("exp_time", expTime);
                         setLS("last_login", Date.now());

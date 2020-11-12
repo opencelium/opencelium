@@ -15,7 +15,6 @@
 
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import {checkConnection} from "@decorators/checkConnection";
 import {deleteConnection} from "@actions/connections/delete";
 import LayoutComponent from "@decorators/LayoutComponent";
 
@@ -25,7 +24,6 @@ import LayoutComponent from "@decorators/LayoutComponent";
  */
 @connect(null, {deleteConnection})
 @LayoutComponent('connection', 'connections', 'connections')
-@checkConnection()
 class ConnectionLayout extends Component{
 
     render(){

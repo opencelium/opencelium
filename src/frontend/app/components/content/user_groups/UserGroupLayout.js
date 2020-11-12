@@ -16,7 +16,6 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 
-import {checkConnection} from "@decorators/checkConnection";
 import {deleteUserGroup} from "@actions/usergroups/delete";
 import LayoutComponent from "@decorators/LayoutComponent";
 
@@ -26,7 +25,6 @@ import LayoutComponent from "@decorators/LayoutComponent";
  */
 @connect(null, {deleteUserGroup})
 @LayoutComponent('group', 'groups', 'usergroups', 'deleteUserGroup')
-@checkConnection()
 class UserGroupLayout extends Component{
 
     render(){
