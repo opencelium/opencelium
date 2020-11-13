@@ -23,7 +23,7 @@ import {
     updateThemeFulfilled, toggleAppTourFulfilled, toggleAppTourRejected, updateThemeRejected, sessionExpired,
 } from '@actions/auth';
 
-import {doRequest, sessionTimeout} from '@utils/auth';
+import {doRequest} from '@utils/auth';
 import {setLS} from "@utils/LocalStorage";
 import {API_METHOD} from "@utils/constants/app";
 

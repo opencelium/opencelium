@@ -31,12 +31,18 @@ import {NotificationType} from "@utils/constants/notifications/notifications";
 import {logoutUserFulfilled, sessionNotExpired} from "@actions/auth";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
+import {getLS} from "@utils/LocalStorage";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+
+let checkTokenInterval;
+
 
 function mapStateToProps(state){
     const app = state.get('app');
     const auth = state.get('auth');
     return {
         appVersion: app.get('appVersion'),
+        fetchingAppVersion: app.get('fetchingAppVersion'),
         authUser: auth.get('authUser'),
         isAuth: auth.get('isAuth'),
         isSessionExpired: auth.get('isSessionExpired'),
@@ -61,21 +67,24 @@ class Layout extends Component{
     }
 
     componentDidMount(){
-        const {isAuth, addUserInStore, appVersion, fetchAppVersion} = this.props;
+        const {isAuth, addUserInStore, appVersion, fetchAppVersion, fetchingAppVersion} = this.props;
         addUserListener(addUserInStore);
         CVoiceControl.initCommands({component: this}, CAppVoiceControl);
-        if(isAuth && !appVersion){
+        if(isAuth && appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
             fetchAppVersion();
         }
     }
 
     componentDidUpdate(prevProps){
-        const {isAuth, sessionNotExpired} = this.props;
+        const {isAuth, sessionNotExpired, appVersion, fetchingAppVersion, fetchAppVersion} = this.props;
         if(CVoiceControl.isListening() === false){
             CVoiceControl.initCommands({component: this}, CAppVoiceControl);
         }
         if(prevProps.isSessionExpired && isAuth){
             sessionNotExpired();
+        }
+        if(isAuth && appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
+            fetchAppVersion();
         }
     }
 
@@ -92,9 +101,14 @@ class Layout extends Component{
     }
 
     renderLoginAgain(){
-        const {isSessionExpired} = this.props;
+        const {isSessionExpired, sessionNotExpired} = this.props;
         if(location.pathname !== '/login' && isSessionExpired) {
             const {t} = this.props;
+            checkTokenInterval = setInterval(() => {
+                if(getLS('token')){
+                    sessionNotExpired();
+                }
+            }, 2000);
             const message = <span>Your session is expired, please <a target={'_blank'}
                                                                      href={'/login'}>login</a> again</span>;
             let data = {type: NotificationType.WARNING, message: message, systemTitle: t(`SYSTEMS.OC`)};
@@ -107,6 +121,9 @@ class Layout extends Component{
                     />
                 </div>
             );
+        }
+        if(checkTokenInterval) {
+            clearInterval(checkTokenInterval);
         }
         return null;
     }
@@ -147,4 +164,5 @@ class Layout extends Component{
         );
     }
 }
+
 export default withRouter(Layout);

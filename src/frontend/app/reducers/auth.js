@@ -18,7 +18,7 @@ import {fromJS} from 'immutable';
 import {AuthAction} from '../utils/actions';
 import {updateDashboardSettingsSubscriber} from "../utils/socket/users";
 import {API_REQUEST_STATE} from "../utils/constants/app";
-import {getLS} from "@utils/LocalStorage";
+import {getLS, removeLS} from "@utils/LocalStorage";
 
 
 const initialState = fromJS({
@@ -66,6 +66,7 @@ const reducer = (state = initialState, action) => {
             if(!getLS('token')){
                 return state.set('isSessionExpired', true).set('logouting', false).set('authUser', action.payload).set('isAuth', false);
             }
+            removeLS('token');
             return state.set('isSessionExpired', true);
         case AuthAction.SESSION_NOTEXPIRED_FULFILLED:
             return state.set('isSessionExpired', false);
