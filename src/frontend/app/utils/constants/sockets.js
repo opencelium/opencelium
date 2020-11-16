@@ -15,12 +15,17 @@
 
 import openSocket from 'socket.io-client';
 import {socketServer} from "./url";
+import {SOCKET_IS_ON} from "@utils/constants/app";
 
 
 /**
  * open socket
  */
-export const socket = openSocket(socketServer);
+
+export const socket = SOCKET_IS_ON ? openSocket(socketServer) : {
+    on: () => {},
+    emit: () => {},
+};
 
 /**
  * socket messages for User actions
