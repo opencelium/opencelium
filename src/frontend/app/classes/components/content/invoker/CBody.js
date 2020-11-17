@@ -61,7 +61,6 @@ export default class CBody{
                 return true;
             }
         }
-        consoleLog(`Body has a wrong type: ${bodyData}`);
         return false;
     }
 

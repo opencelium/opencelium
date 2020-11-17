@@ -49,7 +49,7 @@ class TemplateConversionIcon extends Component{
         const {appVersion, convertingTemplates, data} = this.props;
         let {classNameIcon} = this.props;
         let invalidVersion = data.template.version !== appVersion;
-        let convertUp = invalidVersion && data.template.version < appVersion;
+        let convertUp = true /*invalidVersion && data.template.version < appVersion*/;
         const isLoading = convertingTemplates.findIndex(t => t.templateId === data.template.templateId) !== -1;
         let styleIcon = {verticalAlign: 'sub', cursor: 'pointer'};
         if(convertUp){
