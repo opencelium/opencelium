@@ -64,19 +64,17 @@ export default function (store){
                     break;
                 case 'REJECTED':
                     data.type = NotificationType.ERROR;
-                    if(data.message === AuthAction.CHECK_OCCONNECTION){
-                        next(action);
-                        return;
-                    }
                     if (action.payload
                         && (action.payload.status === 403 || checkExpiredMessages(action.payload))
                     ) {
-                        store.dispatch(sessionExpired({}));
+                        store.dispatch(sessionExpired());
                         history.push('/login');
                         next({type: AuthAction.INITIAL_STATE, payload: {}});
+                        return;
                     }
                     break;
                 case 'CANCELED':
+                case 'WARNED':
                     data.type = NotificationType.WARNING;
                     break;
                 case 'STORE':

@@ -20,13 +20,11 @@ import Loading from '@loading';
 import Greeting from "../home/Greeting";
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
-import {checkConnection} from "@decorators/checkConnection";
 
 
 /**
  * Home Component to load Greeting
  */
-@checkConnection()
 class Home extends Component{
 
     constructor(props){

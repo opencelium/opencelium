@@ -2,7 +2,7 @@
 Users
 ##################
 
-Users represents directly clients of the application. List of users
+Users represent directly clients of the application. List of users
 shows all user of the system including the authorized user, it has a
 label - *Current user.* Each element of the list display a first and a
 second name of the user and his email.
@@ -35,49 +35,28 @@ between 8 and 16 symbols. The last one should have the same value as the
 |image4|
 
 User Details step has next fields: *name, surname, phone number,
-organization, department, salutation, avatar.*
+organization, department, salutation, avatar.* *Name* and *surname* are
+required fields.
 
 |image5|
 
-*Name* and *surname* are required fields.
+User Group step has only one select field - *user group* and a textarea
+with a description to selected item. Meaning of the user group you can
+find in the chapter *Groups*.
 
 |image6|
 
-User Group step has only one select field - *user group* and a textarea
-with a description to selected item. Meaning of the user group you can
-find the the chapter *Groups*.
-
-|image7|
-
-.. |image0| image:: ../img/user/image7.png
-   :width: 6.27083in
-   :height: 3.80556in
+.. |image0| image:: ../img/user/image1.png
    :align: middle
-.. |image1| image:: ../img/user/image5.png
-   :width: 6.27083in
-   :height: 3.69444in
+.. |image1| image:: ../img/user/image2.png
    :align: middle
-.. |image2| image:: ../img/user/image6.png
-   :width: 6.27083in
-   :height: 3.15278in
+.. |image2| image:: ../img/user/image3.png
    :align: middle
-.. |image3| image:: ../img/user/image2.png
-   :width: 6.27083in
-   :height: 3.09722in
+.. |image3| image:: ../img/user/image4.png
    :align: middle
-.. |image4| image:: ../img/user/image4.png
-   :width: 6.27083in
-   :height: 3.11111in
+.. |image4| image:: ../img/user/image5.png
    :align: middle
-.. |image5| image:: ../img/user/image3.png
-   :width: 6.27083in
-   :height: 5.11111in
+.. |image5| image:: ../img/user/image6.png
    :align: middle
-.. |image6| image:: ../img/user/image8.png
-   :width: 6.27083in
-   :height: 5.05556in
-   :align: middle
-.. |image7| image:: ../img/user/image1.png
-   :width: 6.27083in
-   :height: 3.11111in
+.. |image6| image:: ../img/user/image7.png
    :align: middle

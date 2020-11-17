@@ -19,7 +19,9 @@ import { AdminCardsAction } from '@utils/actions';
 
 /**
  * fetch all adminCards
- * @returns {{type: string}}
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, settings: {}}}
  */
 const fetchAdminCards = (settings = {}) => {
     return {
@@ -30,10 +32,10 @@ const fetchAdminCards = (settings = {}) => {
 
 /**
  * fetch all adminCards fulfilled
- * @param adminCards
+ * @param adminCards = [{id: number, name: string, link: string}]
  * @param settings = {background: bool}
  *      background - if true -> does not show a notification; else -> show a notification
- * @returns {{type: string, payload: []}}
+ * @returns {promise}
  */
 const fetchAdminCardsFulfilled = (adminCards, settings = {}) => {
     return Rx.Observable.of({
@@ -58,7 +60,7 @@ const fetchAdminCardsRejected = (error) => {
 /**
  * fetch all adminCards canceled
  * @param message
- * @returns {{type: string, payload: []}}
+ * @returns {{type: string, payload: {}}}
  */
 const fetchAdminCardsCanceled = (message) => {
     return {
@@ -69,7 +71,10 @@ const fetchAdminCardsCanceled = (message) => {
 
 /**
  * load adminCards' link if exist
- * @returns {{type: string}}
+ * @param adminCard = {link: string}
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}, settings: {}}}
  */
 const loadAdminCardsLink = (adminCard, settings = {}) => {
     return {
@@ -81,15 +86,15 @@ const loadAdminCardsLink = (adminCard, settings = {}) => {
 
 /**
  * load adminCards' link if exist fulfilled
- * @param adminCard
+ * @param adminCards
  * @param settings = {background: bool}
  *      background - if true -> does not show a notification; else -> show a notification
- * @returns {{type: string, payload: []}}
+ * @returns {{type: string, payload: [], settings: {}}}
  */
-const loadAdminCardsLinkFulfilled = (adminCard, settings = {}) => {
+const loadAdminCardsLinkFulfilled = (adminCards, settings = {}) => {
     return {
         type: AdminCardsAction.LOAD_ADMINCARD_FULFILLED,
-        payload: adminCard,
+        payload: adminCards,
         settings
     };
 };

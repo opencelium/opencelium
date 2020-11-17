@@ -387,6 +387,43 @@ function removeMenuAdminCardsKeyNavigation(that){
 }
 
 /**
+ * pressing I open Invokers page
+ */
+let MenuInvokersKeyNavigation = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keydown':
+                menuInvokersNavigate(event, this.that);
+                break;
+        }
+
+    }
+};
+function menuInvokersNavigate(e, that){
+    let key = e.keyCode;
+    if(e.altKey) {
+        switch (key) {
+            //U
+            case 73:
+                if (!isSwitchedOffUserListKeyNavigation) {
+                    doAction(e, () => {
+                        if (that.props.hasOwnProperty('router')) {
+                            that.props.router.push('/invokers');
+                        }
+                    });
+                }
+                break;
+        }
+    }
+}
+function addMenuInvokersKeyNavigation(that){
+    addNavigationListener(that, MenuInvokersKeyNavigation);
+}
+function removeMenuInvokersKeyNavigation(that){
+    removeNavigationListener(that, MenuInvokersKeyNavigation);
+}
+
+/**
  * pressing Esc call cancel action
  */
 let CancelKeyNavigation = {
@@ -1008,6 +1045,8 @@ export{
     removeMenuDashboardKeyNavigation,
     addMenuAdminCardsKeyNavigation,
     removeMenuAdminCardsKeyNavigation,
+    addMenuInvokersKeyNavigation,
+    removeMenuInvokersKeyNavigation,
     addCloseParamGeneratorNavigation,
     removeCloseParamGeneratorNavigation,
 };

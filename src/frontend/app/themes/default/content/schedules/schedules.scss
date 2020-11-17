@@ -544,16 +544,17 @@
   .action{
     float: left;
     position: relative;
-    color: #2e75b6;
     cursor: pointer;
     transition: color;
     transition-duration: 0.3s;
     height: 18px;
-    :hover{
-      color: #3f51b5;
-    }
     span{
       font-size: 18px !important;
+      float: left !important;
+      button{
+        width: unset !important;
+        height: unset !important;
+      }
     }
     .loading{
       width: 18px;
@@ -569,21 +570,11 @@
     float: left;
     font-size: 18px;
     margin-top: -2px;
-    cursor: pointer;
-    color: #2e75b6;
-  }
-  .add_icon:hover{
-    color: #3f51b5;
   }
   .close_icon{
     float: right;
     font-size: 18px;
     margin-top: -2px;
-    cursor: pointer;
-    color: #2e75b6;
-  }
-  .close_icon:hover{
-    color: #3f51b5;
   }
 }
 .notification_input_appear{

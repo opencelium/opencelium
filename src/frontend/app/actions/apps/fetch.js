@@ -20,7 +20,9 @@ import { AppsAction } from '@utils/actions';
 
 /**
  * fetch all apps
- * @returns {{type: string}}
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, settings: {}}}
  */
 const fetchApps = (settings = {}) => {
     return {
@@ -34,7 +36,7 @@ const fetchApps = (settings = {}) => {
  * @param apps
  * @param settings = {background: bool}
  *      background - if true -> does not show a notification; else -> show a notification
- * @returns {{type: string, payload: []}}
+ * @returns {{type: string, payload: [], settings: {}}}
  */
 const fetchAppsFulfilled = (apps, settings = {}) => {
     return {
@@ -59,7 +61,7 @@ const fetchAppsRejected = (error) => {
 /**
  * fetch all apps canceled
  * @param message
- * @returns {{type: string, payload: []}}
+ * @returns {{type: string, payload: {}}}
  */
 const fetchAppsCanceled = (message) => {
     return {
@@ -71,7 +73,7 @@ const fetchAppsCanceled = (message) => {
 /**
  * check app
  * @param app
- * @returns {{type: string}}
+ * @returns {{type: string, payload: {}}}
  */
 const checkApp = (app) => {
     return {
@@ -83,7 +85,7 @@ const checkApp = (app) => {
 /**
  * check app fulfilled
  * @param result
- * @returns {{type: string, payload: []}}
+ * @returns {{type: string, payload: {}}}
  */
 const checkAppFulfilled = (result) => {
     return {

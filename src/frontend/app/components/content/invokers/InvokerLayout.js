@@ -15,7 +15,6 @@
 
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
-import {checkConnection} from "@decorators/checkConnection";
 import {deleteInvoker} from "@actions/invokers/delete";
 import {LayoutComponent} from "@decorators/LayoutComponent";
 
@@ -25,7 +24,6 @@ import {LayoutComponent} from "@decorators/LayoutComponent";
  */
 @connect(null, {deleteInvoker})
 @LayoutComponent('invoker', 'invokers', 'invokers')
-@checkConnection()
 class InvokerLayout extends Component{
 
     render(){

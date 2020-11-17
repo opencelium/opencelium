@@ -16,7 +16,6 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {deleteNotificationTemplate} from "@actions/notification_templates/delete";
-import {checkConnection} from "@decorators/checkConnection";
 import LayoutComponent from "@decorators/LayoutComponent";
 
 
@@ -25,7 +24,6 @@ import LayoutComponent from "@decorators/LayoutComponent";
  */
 @connect(null, {deleteNotificationTemplate})
 @LayoutComponent('template', 'templates', 'notification_templates')
-@checkConnection()
 class NotificationTemplateLayout extends Component{
 
     render(){

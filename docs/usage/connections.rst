@@ -48,12 +48,32 @@ The method consists of *Query* and *Body*.
 |image6|
 
 *Query* is a URL that can be modified during the request. It has a prefix,
-that is defined in invoker xml file. Mouseover here |image7| you can see it.
+that is defined in invoker xml file. Mouseover here
+
+|image7|
+
+you can see it. Clicking on this icon popped up an input to modify the *query*.
+
+|image7.1|
+
 There is a possibility to add a parameter into the *Query* (except the first
 method in *from connector*). This parameter is a reference to the response of
 the  previously created method.
 
 |image8| |image9|
+
+If the response is in json format and array, then you can choose the whole array
+or only a specific element in the array typing *[arrayIndex]*. It means to take
+the element with the specified index. To choose the whole array you need to type
+*[\*]*.
+
+|image9.1|
+
+If the response is in xml format then you can also reference to the attribute
+of the xml tag. Just type *@* and if the xml tag has attributes they will be
+popped up and you can select one.
+
+|image9.2|
 
 You choose method, fill out the parameter and click plus button. The parameter
 comes from the invoker. If it exists there, you will see it after typing the
@@ -144,9 +164,16 @@ button and the response will appear in the *Response* tab.
 .. |image6| image:: ../img/connection/6.png
    :align: middle
 .. |image7| image:: ../img/connection/7.png
+   :align: middle
+.. |image7.1| image:: ../img/connection/7.1.png
+   :align: middle
 .. |image8| image:: ../img/connection/8.png
    :align: middle
 .. |image9| image:: ../img/connection/9.png
+   :align: middle
+.. |image9.1| image:: ../img/connection/9.1.png
+   :align: middle
+.. |image9.2| image:: ../img/connection/9.2.png
    :align: middle
 .. |image10| image:: ../img/connection/10.png
 .. |image11| image:: ../img/connection/11.png

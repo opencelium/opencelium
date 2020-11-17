@@ -3,14 +3,25 @@ import {isString} from "@utils/app";
 const V10V11 = [];
 const V11V12 = [];
 const V12V13 = [
-    {"selectedParam":{"name":"body","path":["fromConnector","methods","0","request"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"array","fields":"$SELECTED_PARAM$"},"name":""},"id":1},
-    {"selectedParam":{"name":"body","path":["fromConnector","methods","0","response", "success"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"array","fields":"$SELECTED_PARAM$"},"name":""},"id":2},
-    {"selectedParam":{"name":"body","path":["fromConnector","methods","0","response", "fail"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"array","fields":"$SELECTED_PARAM$"},"name":""},"id":3},
-    {"selectedParam":{"name":"body","path":["toConnector","methods","0","request"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"array","fields":"$SELECTED_PARAM$"},"name":""},"id":4},
-    {"selectedParam":{"name":"body","path":["toConnector","methods","0","response", "success"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"array","fields":"$SELECTED_PARAM$"},"name":""},"id":5},
-    {"selectedParam":{"name":"body","path":["toConnector","methods","0","response", "fail"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"array","fields":"$SELECTED_PARAM$"},"name":""},"id":6},
+    {"selectedParam":{"name":"body","path":["fromConnector","methods","0","request"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"object","fields":"$SELECTED_PARAM$"},"name":""},"id":1},
+    {"selectedParam":{"name":"body","path":["fromConnector","methods","0","response", "success"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"object","fields":"$SELECTED_PARAM$"},"name":""},"id":2},
+    {"selectedParam":{"name":"body","path":["fromConnector","methods","0","response", "fail"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"object","fields":"$SELECTED_PARAM$"},"name":""},"id":3},
+    {"selectedParam":{"name":"body","path":["toConnector","methods","0","request"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"object","fields":"$SELECTED_PARAM$"},"name":""},"id":4},
+    {"selectedParam":{"name":"body","path":["toConnector","methods","0","response", "success"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"object","fields":"$SELECTED_PARAM$"},"name":""},"id":5},
+    {"selectedParam":{"name":"body","path":["toConnector","methods","0","response", "fail"]},"type":"REPLACE_VALUE","setData":{"value":{"data":"raw","format":"json","type":"object","fields":"$SELECTED_PARAM$"},"name":""},"id":6},
     {"selectedParam":{"name":"operators","path":["toConnector"]},"type":"SET_ITERATORS","setData":{"value":"","name":"","path":[]},"id":7},
-    {"selectedParam":{"name":"operators","path":["fromConnector"]},"type":"SET_ITERATORS","setData":{"value":"","name":"","path":[]},"id":8}
+    {
+        "selectedParam":{"name":"operators","path":["fromConnector"]},
+        "type":"SET_ITERATORS",
+        "setData":{"value":"","name":"","path":[]},
+        "id":8
+    }/*,
+    {
+        "selectedParam":{"name":"","path":[]},
+        "type":"SET_RESULT_ARRAY_FOR_IDOIT_SYSTEM",
+        "setData":{"value":"","name":"","path":[]},
+        "id":9
+    }*/
 ];
 const V13V12 = [
     {"selectedParam":{"name":"fields","path":["fromConnector","methods","0","request","body"]},"type":"MOVE_PARAM","setData":{"value":"","name":"body","path":["fromConnector","methods","0","request"]},"id":1},

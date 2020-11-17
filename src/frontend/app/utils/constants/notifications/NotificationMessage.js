@@ -45,8 +45,15 @@ class NotificationMessage extends Component{
     }
 
     renderDialogInDetails(){
-        const {showDialogInDetails, inDetailsMessage} = this.state;
+        const {showDialogInDetails} = this.state;
+        let {inDetailsMessage} = this.state;
         const {t} = this.props;
+        const regColor = RegExp('#[0-9|a-f|A-F]{6}', 'g');
+        const lastWord = inDetailsMessage.substr(inDetailsMessage.length - 7);
+        const hasColor = regColor.test(lastWord);
+        if(hasColor){
+            inDetailsMessage = inDetailsMessage.substr(0, inDetailsMessage.length - 7);
+        }
         return(
             <Dialog
                 actions={[{label: t('DIALOG_DETAILS.CLOSE'), onClick: ::this.toggleShowDialogInDetails, id: 'dialog_close'}]}
@@ -54,7 +61,10 @@ class NotificationMessage extends Component{
                 toggle={::this.toggleShowDialogInDetails}
                 title={t('DIALOG_DETAILS.TITLE')}
             >
-                <p>{inDetailsMessage}</p>
+                <p>
+                    <span>{inDetailsMessage}</span>
+                    {hasColor && <span style={{background: lastWord, width: '30px', height: '17px', verticalAlign: 'sub', display: 'inline-block', borderRadius: '2px', marginLeft: '5px'}}/>}
+                </p>
             </Dialog>
         );
     }
