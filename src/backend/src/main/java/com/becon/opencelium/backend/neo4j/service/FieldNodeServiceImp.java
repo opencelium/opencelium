@@ -95,6 +95,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
                 firstField = path.pop();
             }
             format = methodNode.getResponseNode().getSuccess().getBody().getFormat();
+            firstField = StringUtility.removeSquareBraces(firstField);
             currentField = fieldNodeRepository.findFirstFieldInResponse(connectionId,color,result,firstField);
         } else {
             String firstField;
