@@ -18,6 +18,7 @@ import {fromJS} from 'immutable';
 import {AuthAction} from '../utils/actions';
 import {updateDashboardSettingsSubscriber} from "../utils/socket/users";
 import {API_REQUEST_STATE} from "../utils/constants/app";
+import {getLS, removeLS} from "@utils/LocalStorage";
 
 
 const initialState = fromJS({
@@ -30,11 +31,10 @@ const initialState = fromJS({
     togglingAppTour: false,
     updatingTheme: false,
     updatingAuthUserLanguage: false,
-    checkingOCConnection: API_REQUEST_STATE.INITIAL,
-    checkOCConnectionResult: null,
     error: null,
     message: {},
     fromLogin: false,
+    isSessionExpired: true,
 });
 
 let authUser = null;
@@ -49,7 +49,7 @@ const reducer = (state = initialState, action) => {
         case AuthAction.LOG_IN:
             return state.set('logining', true).set('error', null).set('fromLogin', action.payload.fromLogin);
         case AuthAction.LOG_IN_FULFILLED:
-            return state.set('logining', false).set('authUser', action.payload).set('isAuth', true).set('checkOCConnectionResult', null);
+            return state.set('logining', false).set('authUser', action.payload).set('isAuth', true).set('isSessionExpired', false);
         case AuthAction.LOG_IN_REJECTED:
             return state.set('logining', false).set('error', action.payload).set('isAuth', false);
         case AuthAction.LOG_IN_CANCELED:
@@ -62,8 +62,14 @@ const reducer = (state = initialState, action) => {
             return state.set('logouting', false).set('error', action.payload).set('isAuth', true);
         case AuthAction.LOG_OUT_CANCELED:
             return state.set('logouting', false).set('message', action.payload).set('isAuth', true);
-        case AuthAction.SESSION_EXPIRED_CANCELED:
-            return state.set('logouting', false).set('authUser', action.payload).set('isAuth', false);
+        case AuthAction.SESSION_EXPIRED_WARNED:
+            if(!getLS('token')){
+                return state.set('isSessionExpired', true).set('logouting', false).set('authUser', action.payload).set('isAuth', false);
+            }
+            removeLS('token');
+            return state.set('isSessionExpired', true);
+        case AuthAction.SESSION_NOTEXPIRED_FULFILLED:
+            return state.set('isSessionExpired', false);
         case AuthAction.UPDATE_AUTH_USER_LANGUAGE:
             return state.set('updatingAuthUserLanguage', true).set('error', null);
         case AuthAction.UPDATE_AUTH_USER_LANGUAGE_FULFILLED:
@@ -93,12 +99,6 @@ const reducer = (state = initialState, action) => {
             return state.set('togglingAppTour', false).set('authUser', authUser);
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
             return state.set('togglingAppTour', false).set('error', fromJS(action.payload));
-        case AuthAction.CHECK_OCCONNECTION:
-            return state.set('checkingOCConnection', API_REQUEST_STATE.START).set('error', null).set('checkOCConnectionResult', null);
-        case AuthAction.CHECK_OCCONNECTION_FULFILLED:
-            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH);
-        case AuthAction.CHECK_OCCONNECTION_REJECTED:
-            return state.set('checkingOCConnection', API_REQUEST_STATE.FINISH).set('error', fromJS(action.payload)).set('checkOCConnectionResult', fromJS(action.payload));
         default:
             return state;
     }

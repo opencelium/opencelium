@@ -20,38 +20,6 @@ import {removeAllLS, setLS} from '@utils/LocalStorage';
 
 
 /**
- * check connection with oc
- */
-const checkOCConnection = (settings = {}) => {
-    return {
-        type: AuthAction.CHECK_OCCONNECTION,
-        settings,
-    };
-};
-
-/**
- * check connection with oc fulfilled
- * @returns {{type: string, payload: {}, data: {}}}
- */
-const checkOCConnectionFulfilled = () => {
-    return {
-        type: AuthAction.CHECK_OCCONNECTION_FULFILLED,
-    };
-};
-
-/**
- * check connection with oc rejected
- * @param error
- * @returns {promise}
- */
-const checkOCConnectionRejected = (error) => {
-    return Rx.Observable.of({
-        type: AuthAction.CHECK_OCCONNECTION_REJECTED,
-        payload: error
-    });
-};
-
-/**
  * toggle application tour
  * @param user
  */
@@ -186,14 +154,24 @@ const logoutUserFulfilled = (user) => {
 
 /**
  * session of the user was expired
- * @param user
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: {}}}
  */
-const sessionExpired = (user) => {
-    removeAllLS();
+const sessionExpired = (settings = {}) => {
     return {
-        type: AuthAction.SESSION_EXPIRED_CANCELED,
-        payload: user,
+        type: AuthAction.SESSION_EXPIRED_WARNED,
+        settings,
+    };
+};
+
+/**
+ * session of the user was not expired
+ * @returns {{type: string, payload: {}}}
+ */
+const sessionNotExpired = () => {
+    return {
+        type: AuthAction.SESSION_NOTEXPIRED_FULFILLED,
     };
 };
 
@@ -303,6 +281,7 @@ export {
     updateAuthUserLanguageFulfilled,
     updateAuthUserLanguageRejected,
     sessionExpired,
+    sessionNotExpired,
     updateTheme,
     updateThemeFulfilled,
     updateThemeRejected,
@@ -312,7 +291,4 @@ export {
     toggleAppTour,
     toggleAppTourFulfilled,
     toggleAppTourRejected,
-    checkOCConnection,
-    checkOCConnectionFulfilled,
-    checkOCConnectionRejected,
 };

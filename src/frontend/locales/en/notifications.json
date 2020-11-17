@@ -169,7 +169,6 @@
     "LOAD_ADMINCARD": "The link to this card does not work, please check your permissions",
     "ADD_INVOKER": "The invoker was not added",
     "DELETE_INVOKER": "The invoker was not deleted",
-    "CHECK_OCCONNECTION": "Your session is expired",
     "ADD_NOTIFICATIONTEMPLATE": "The template was not added",
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were not fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template was not updated",

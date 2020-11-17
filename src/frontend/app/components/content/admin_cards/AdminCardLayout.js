@@ -14,7 +14,6 @@
  */
 
 import React, {Component, Suspense} from 'react';
-import {checkConnection} from "@decorators/checkConnection";
 import {LayoutComponent} from "@decorators/LayoutComponent";
 
 
@@ -23,7 +22,6 @@ import {LayoutComponent} from "@decorators/LayoutComponent";
  */
 
 @LayoutComponent('card', 'cards', '')
-@checkConnection()
 class AdminLayout extends Component{
 
     render(){

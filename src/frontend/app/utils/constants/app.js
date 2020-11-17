@@ -40,6 +40,9 @@ export const ERROR_TYPE = {
     BACKEND: 'BACKEND',
 };
 
+
+export const SOCKET_IS_ON = false;
+
 export const ENABLE_VOICE_CONTROL = false;
 
 export const ENABLE_DEBUG_VOICE_CONTROL = false;

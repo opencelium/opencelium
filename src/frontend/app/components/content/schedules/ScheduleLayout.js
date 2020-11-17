@@ -19,13 +19,11 @@ import {Container} from 'react-grid-system';
 import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
-import {checkConnection} from "@decorators/checkConnection";
 
 
 /**
  * Layout for Schedule
  */
-@checkConnection()
 class ScheduleLayout extends Component{
 
     constructor(props){
