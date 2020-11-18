@@ -148,10 +148,11 @@ public class TemplateServiceImp implements TemplateService {
         try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
             ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)
+                    .filter(path -> FilenameUtils.getExtension(path.toString()).equals("json"))
                     .map(path -> {
-                        if(!FilenameUtils.getExtension(path.toString()).equals("json")){
-                            return null;
-                        }
+//                        if(!FilenameUtils.getExtension(path.toString()).equals("json")){
+//                            return null;
+//                        }
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
