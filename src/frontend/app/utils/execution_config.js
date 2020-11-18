@@ -15,13 +15,13 @@ const V12V13 = [
         "type":"SET_ITERATORS",
         "setData":{"value":"","name":"","path":[]},
         "id":8
-    }/*,
+    },
     {
         "selectedParam":{"name":"","path":[]},
-        "type":"SET_RESULT_ARRAY_FOR_IDOIT_SYSTEM",
+        "type":"SET_ITERATORS_IN_BRACKETS",
         "setData":{"value":"","name":"","path":[]},
         "id":9
-    }*/
+    }
 ];
 const V13V12 = [
     {"selectedParam":{"name":"fields","path":["fromConnector","methods","0","request","body"]},"type":"MOVE_PARAM","setData":{"value":"","name":"body","path":["fromConnector","methods","0","request"]},"id":1},
