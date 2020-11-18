@@ -14,6 +14,9 @@ export const RULE_TYPES = {
     ADD_PARAM: 'ADD_PARAM',
     MOVE_PARAM: 'MOVE_PARAM',
     SET_ITERATORS: 'SET_ITERATORS',
+    SET_RESULT_ARRAY_FOR_IDOIT_SYSTEM: 'SET_RESULT_ARRAY_FOR_IDOIT_SYSTEM',
+    CORRECT_BODY: 'CORRECT_BODY',
+    SET_ITERATORS_IN_BRACKETS: 'SET_ITERATORS_IN_BRACKETS',
 };
 
 export default class CExecution{
@@ -41,6 +44,12 @@ export default class CExecution{
                         break;
                     case RULE_TYPES.SET_ITERATORS:
                         executionResult = CExecution.setIteratorsForLoopOperators(config[i], executionResult.jsonData);
+                        break;
+                    case RULE_TYPES.SET_RESULT_ARRAY_FOR_IDOIT_SYSTEM:
+                        executionResult = CExecution.setResultArrayForIdoitSystem(config[i], executionResult.jsonData);
+                        break;
+                    case RULE_TYPES.SET_ITERATORS_IN_BRACKETS:
+                        executionResult = CExecution.setIteratorsInBrackets(config[i], executionResult.jsonData);
                         break;
                 }
                 if(executionResult.error.message !== ''){
@@ -239,5 +248,23 @@ export default class CExecution{
                 }
             }
         });
+    }
+    static setResultArrayForIdoitSystem(rule, json){
+        let jsonData = {...json};
+        let error = {message: '', data: null, messageData: {}};
+        if(json && json.hasOwnProperty('fromConnector') && json.fromConnector.invoker.name === 'i-doit'
+        || json && json.hasOwnProperty('toConnector') && json.toConnector.invoker.name === 'i-doit'){
+            let jsonString = JSON.stringify(jsonData);
+            jsonString = jsonString.replace(/success.result/g, 'success.[0].result');
+            jsonData = JSON.parse(jsonString);
+        }
+        return {jsonData, error};
+    }
+    static setIteratorsInBrackets(rule, json){
+        let error = {message: '', data: null, messageData: {}};
+        let jsonString = JSON.stringify(json);
+        jsonString = jsonString.replace(/\[]\./g, '[i].');
+        const jsonData = JSON.parse(jsonString);
+        return {jsonData, error};
     }
 }
