@@ -15,7 +15,6 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {TableCell} from 'react-toolbox/lib/table';
 import {convertTimeForSchedulerList, isNumber} from "@utils/app";
 import {NO_DATA} from "@utils/constants/app";
 
