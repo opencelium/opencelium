@@ -13,4 +13,3 @@ From OC 1 or earlier
 	root@shell> gradle build
 	root@shell> cd /opt/src/frontend
 	root@shell> yarn
-	root@shell> yarn upgrade

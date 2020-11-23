@@ -1,29 +1,36 @@
 OC Changelog
 --------------------------------------------------------------------------------
-
+1.3
+--------------------------------------------------------------------------------
+[Feature]							Supporting xml as a content-type
+[Feature]							Template converter. Converts old templates to newer version
+[Feature]							Adding operator "PropertyExists" and "PropertyNotExists" in connection editor
+[Improvement]						Improved layout elements like buttons and views
+[Bug][OC-257]						Added property "sessionTime" when generating token
+[Bug][OC-257]						Fixed bug where liquebase throw an exception
+[Bug][OC-160]						Fixed bug in TooltipFontIcon
 1.2
 --------------------------------------------------------------------------------
-[Feature]					        Send method test calls in connection view
-[Feature]					        Managing notifications for a job (PRE/POST/ALERT)
-[Connector]			                Jira
-[Connector]			                Bitbucket
-[Connector]			                Trello
-[Connector]			                PRTG Network Monitor
-[Connector]			                Aruba Clearpass
-[Connector]			                CSV2API (Microsoft SQL Server)
+[Feature]							Send method test calls in connection view
+[Feature]							Managing notifications for a job (PRE/POST/ALERT)
+[Connector]							Jira
+[Connector]							Bitbucket
+[Connector]							Trello
+[Connector]							PRTG Network Monitor
+[Connector]							Aruba Clearpass
+[Connector]							CSV2API (Microsoft SQL Server)
 [Business template][PRTG][i-doit]	Status update
-[Improvement]                       Autoupdate changeset of application yaml configuration
-[Improvement]                       Autoupdate changeset of database structure
-[Improvement]                       Better overview of the connection with the integration of history and tree view functionality
-[Improvement]                       Supporting of notification templates via GUI
-[Bug][OC-238]					    Sorting of the items in Connection (Add/Update) is wrong if the amount is more than 10
-[Bug][OC-239]					    Minimize(maximize) animation works not stable in Connection (Add/Update)
-[Bug][OC-240]					    The removing of last item in the subtree of Connector does not work correctly in Connection (Add/Update)
-[Bug][OC-241]					    Update from v1.0 to v1.1
-[Bug][OC-250]					    Scheduler saving
-[Bug][OC-251]					    Backend creates job even crontab entered wrong
-[Bug][OC-258]                       Fix bug when updating connector with null value of image property
-
+[Improvement]						Autoupdate changeset of application yaml configuration
+[Improvement]						Autoupdate changeset of database structure
+[Improvement]						Better overview of the connection with the integration of history and tree view functionality
+[Improvement]						Supporting of notification templates via GUI
+[Bug][OC-238]						Sorting of the items in Connection (Add/Update) is wrong if the amount is more than 10
+[Bug][OC-239]						Minimize(maximize) animation works not stable in Connection (Add/Update)
+[Bug][OC-240]						The removing of last item in the subtree of Connector does not work correctly in Connection (Add/Update)
+[Bug][OC-241]						Update from v1.0 to v1.1
+[Bug][OC-250]						Scheduler saving
+[Bug][OC-251]						Backend creates job even crontab entered wrong
+[Bug][OC-258]						Fix bug when updating connector with null value of image property
 1.1
 --------------------------------------------------------------------------------
 [New connector]                                 Azure
@@ -47,7 +54,6 @@ OC Changelog
 [Bug][OC-189]                                   No kibana link was created after triggering a job
 [Bug][OC-189]                                   Connection get error via notification
 [Bug][OC-225]                                   First execution job will not be updated on scheduler view
-
 1.0 Stable Release
 --------------------------------------------------------------------------------
 [New connector]                                 I-doit
