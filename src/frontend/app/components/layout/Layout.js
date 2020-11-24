@@ -69,22 +69,24 @@ class Layout extends Component{
     componentDidMount(){
         const {isAuth, addUserInStore, appVersion, fetchAppVersion, fetchingAppVersion} = this.props;
         addUserListener(addUserInStore);
-        CVoiceControl.initCommands({component: this}, CAppVoiceControl);
-        if(isAuth && appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
-            fetchAppVersion();
+        if(isAuth) {
+            CVoiceControl.initCommands({component: this}, CAppVoiceControl);
+            if( appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
+                fetchAppVersion();
+            }
         }
     }
 
     componentDidUpdate(prevProps){
         const {isAuth, sessionNotExpired, appVersion, fetchingAppVersion, fetchAppVersion} = this.props;
-        if(CVoiceControl.isListening() === false){
-            CVoiceControl.initCommands({component: this}, CAppVoiceControl);
-        }
         if(prevProps.isSessionExpired && isAuth){
             sessionNotExpired();
         }
-        if(isAuth && appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
-            fetchAppVersion();
+        if(isAuth){
+            CVoiceControl.initCommands({component: this}, CAppVoiceControl);
+            if(appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START) {
+                fetchAppVersion();
+            }
         }
     }
 

@@ -15,9 +15,11 @@
 
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
+import annyang from 'annyang';
 import {Input as ToolboxInput} from "react-toolbox/lib/input";
 import styles from '@themes/default/general/basic_components.scss';
 import {formatHtmlId, getThemeClass, setFocusById} from "@utils/app";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -65,9 +67,25 @@ class Input extends Component{
     /**
      * to hide popup input on blur
      */
-    onBlur(){
+    onBlur(e){
+        const {isVisiblePopupInput} = this.state;
         const {onBlur} = this.props;
-        this.hidePopupInput(onBlur);
+        if(isVisiblePopupInput) {
+            this.hidePopupInput(onBlur);
+        } else{
+            if(typeof onBlur === 'function'){
+                onBlur(e);
+            }
+        }
+        CVoiceControl.stopVoiceInput();
+    }
+
+    onFocus(e){
+        const {onFocus, value, onChange} = this.props;
+        if(typeof onFocus === 'function'){
+            onFocus(e);
+        }
+        CVoiceControl.initVoiceInput(value, onChange);
     }
 
     renderPopupElement(){
@@ -101,6 +119,7 @@ class Input extends Component{
                                 onBlur={::this.onBlur}
                                 onKeyDown={::this.onKeyDown}
                                 autoFocus
+                                onFocus={::this.onFocus}
                             >{null}</ToolboxInput>
                         :
                         children
@@ -136,7 +155,9 @@ class Input extends Component{
                     theme={theme}
                     onClick={null}
                     onChange={onChange}
-                    onBlur={onBlur}>{null}
+                    onBlur={::this.onBlur}
+                    onFocus={::this.onFocus}
+                >{null}
                 </ToolboxInput>
             );
         }

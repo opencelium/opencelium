@@ -16,6 +16,7 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
+import {withRouter} from 'react-router';
 import {history} from '@components/App';
 
 import ListItemLink from "@basic_components/ListItemLink";
@@ -26,7 +27,6 @@ import {
 } from '@utils/key_navigation';
 import styles from '@themes/default/layout/header.scss';
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
-import CLogoutControl from "@classes/voice_control/CLogoutControl";
 
 
 function mapStateToProps(state){
@@ -80,7 +80,7 @@ class LogoutMenuItem extends Component{
         const {logoutUserFulfilled} = this.props;
         logoutUserFulfilled({});
         history.push('/login');
-        CVoiceControl.removeCommands(null, CLogoutControl);
+        CVoiceControl.removeAll();
     }
 
     render(){
@@ -110,4 +110,4 @@ class LogoutMenuItem extends Component{
     }
 }
 
-export default LogoutMenuItem;
+export default withRouter(LogoutMenuItem);

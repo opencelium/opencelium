@@ -43,9 +43,9 @@ export const ERROR_TYPE = {
 
 export const SOCKET_IS_ON = false;
 
-export const ENABLE_VOICE_CONTROL = false;
+export const ENABLE_VOICE_CONTROL = true;
 
-export const ENABLE_DEBUG_VOICE_CONTROL = false;
+export const ENABLE_DEBUG_VOICE_CONTROL = true;
 
 export const API_REQUEST_STATE = {
     INITIAL:    -1,
