@@ -15,7 +15,6 @@
 
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import annyang from 'annyang';
 import {Input as ToolboxInput} from "react-toolbox/lib/input";
 import styles from '@themes/default/general/basic_components.scss';
 import {formatHtmlId, getThemeClass, setFocusById} from "@utils/app";

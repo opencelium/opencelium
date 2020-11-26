@@ -76,11 +76,11 @@ class CVoiceControl{
         }
     }
 
-    static initVoiceInput(currentValue, onChangeInput){
+    static initVoiceInput(currentValue, onInputChange){
         if (annyang && ENABLE_VOICE_CONTROL) {
             this.pauseAllCommands();
-            annyang.addCommands({'type *inputValue': (inputValue) => onChangeInput(`${currentValue}${inputValue}`)});
-            annyang.addCommands({'clear': () => onChangeInput('')});
+            annyang.addCommands({'type *inputValue': (inputValue) => onInputChange(`${currentValue}${inputValue.toLowerCase()}`)});
+            annyang.addCommands({'clear': () => onInputChange('')});
         }
     }
 
@@ -88,6 +88,41 @@ class CVoiceControl{
         if (annyang && ENABLE_VOICE_CONTROL) {
             CVoiceControl.unpauseAllCommands();
             annyang.removeCommands(['type *inputValue', 'clear']);
+        }
+    }
+
+    static initVoiceSelect(component){
+        if (annyang && ENABLE_VOICE_CONTROL) {
+            this.pauseAllCommands();
+            const change = (inputValue) => {
+                const numbers = {
+                    1: ['1', 'one', 'first'], 2: ['2', 'two', 'second'], 3: ['3', 'three', 'third'], 4: ['4', 'four', 'fourth'], 5: ['5', 'five', 'fifth'],
+                    6: ['6', 'six', 'sixth'], 7: ['7', 'seven', 'seventh'], 8: ['8', 'eight', 'eighth'], 9: ['9', 'nine', 'ninth'],
+                };
+                let number = -1;
+                for(let prop in numbers){
+                    if(numbers[prop].indexOf(inputValue) !== -1){
+                        number = parseInt(prop);
+                        break;
+                    }
+                }
+                const option = component.props.options.find((option, key) => {
+                    return key + 1 === number;
+                });
+                if(option) {
+                    component.props.onChange(option);
+                }
+            };
+            annyang.addCommands({'type *inputValue': (inputValue) => component.onInputChange(`${component.state.inputValue}${inputValue.toLowerCase()}`)});
+            annyang.addCommands({'clear': () => component.onInputChange('')});
+            annyang.addCommands({'select *inputValue': change});
+        }
+    }
+
+    static stopVoiceSelect(){
+        if (annyang && ENABLE_VOICE_CONTROL) {
+            CVoiceControl.unpauseAllCommands();
+            annyang.removeCommands(['type *inputValue', 'clear', 'select *inputValue']);
         }
     }
 
