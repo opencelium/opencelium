@@ -31,6 +31,25 @@ export const DEBUGGER_ERRORS = true;
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
+export function checkCronExpression(cronExp){
+    const timeParts = cronExp.split(' ');
+    let timePartsLength = timeParts.length;
+    if(timePartsLength > 0){
+        if(timeParts[timePartsLength - 1] === ''){
+            timePartsLength--;
+            cronExp = cronExp.substr(0, cronExp.length - 1);
+        }
+    }
+    const secRegExp = timePartsLength > 0 ? `^(\\*|([1-5]?[0-9]))` : '';
+    const minRegExp = timePartsLength > 1 ? ` (\\*|([1-5]?[0-9])|(([1-5]?[0-9])?|\\*)/([1-5]?[0-9])?)` : '';
+    const hourRegExp = timePartsLength > 2 ? ` (\\*|([0-1]?[0-9])|20|21|22|23|(([0-1]?[0-9])?|20|21|22|23|\\*)/(([0-1]?[0-9])|20|21|22|23)?)` : '';
+    const dayRegExp = timePartsLength > 3 ? ` (\\*|\\?|([0-2]?[0-9])|30|31|(([0-2]?[0-9])?|30|31|\\*)/(([0-2]?[0-9])|30|31)?)` : '';
+    const monthRegExp = timePartsLength > 4 ? ` (\\*|([0-9])|10|11|(([0-9])?|10|11|\\*)/(([0-9])|10|11)?)` : '';
+    const yearRegExp = timePartsLength > 5 ? ` \\?` : '';
+    const cronRegExp = new RegExp(`${secRegExp}${minRegExp}${hourRegExp}${dayRegExp}${monthRegExp}${yearRegExp}`+ '$');
+    return cronRegExp.test(cronExp);
+}
+
 export function checkExpiredMessages(data){
     let result = false;
     if(isString(data)){
@@ -486,6 +505,8 @@ export function capitalize(string){
 export function isObject (obj) {
     return obj && typeof obj === 'object' && obj.constructor === Object;
 }
+
+export const ALL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /**
  * to check if element is an Array

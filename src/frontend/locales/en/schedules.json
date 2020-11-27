@@ -94,7 +94,8 @@
     "TITLE_PLACEHOLDER": "Title",
     "SEARCH_PLACEHOLDER": "Search by title",
     "CONNECTION_PLACEHOLDER": "Connection",
-    "CRONEXP_PLACEHOLDER": "Cron Expression",
+    "CRONEXP_PLACEHOLDER": "Cron Job",
+    "CRON_ICON_TOOLTIP": "Generate cron expression",
     "ADD_BUTTON_TITLE": "Add Job",
     "ADD_BUTTON_TITLE_SHORT": "Add",
     "COLOR_TITLE": "Color"

@@ -16,6 +16,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
+import {withTranslation} from "react-i18next";
 import { Row, Col } from "react-grid-system";
 import {addSchedule} from '@actions/schedules/add';
 import {fetchConnections} from '@actions/connections/fetch';
@@ -23,13 +24,13 @@ import {fetchConnections} from '@actions/connections/fetch';
 import styles from '@themes/default/content/schedules/schedules.scss';
 import Input from '@basic_components/inputs/Input';
 import Select from '@basic_components/inputs/Select';
-import {getThemeClass} from "@utils/app";
+import {checkCronExpression, getThemeClass} from "@utils/app";
 import {SchedulePermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import Button from "@basic_components/buttons/Button";
-import {withTranslation} from "react-i18next";
 import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import CronExpGenerator from "@components/content/schedules/CronExpGenerator";
 
 
 function mapStateToProps(state){
@@ -110,7 +111,9 @@ class ScheduleAdd extends Component{
     }
 
     onChangeCronExp(cronExp){
-        this.setState({cronExp});
+        if(checkCronExpression(cronExp)) {
+            this.setState({cronExp});
+        }
     }
 
     parseBeforeAct(schedule){
@@ -203,6 +206,7 @@ class ScheduleAdd extends Component{
                         value={cronExp}
                         theme={{inputElement: styles[classNames.schedule_cron_exp], bar: styles[classNames.schedule_bar]}}
                     />
+                    <CronExpGenerator changeCronExp={::this.onChangeCronExp}/>
                 </Col>
                 <Col xl={2} lg={2} md={2} sm={3} xs={3} style={{lineHeight: '75px', textAlign: 'center'}}>
                     {
