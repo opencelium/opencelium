@@ -33,12 +33,12 @@ class TooltipFontIcon extends Component{
             top: 0,
         };
         this.icon = React.createRef();
-        this.tooltip = document.createElement('div');
-        document.body.appendChild(this.tooltip);
     }
 
     componentWillUnmount(){
-        document.body.removeChild(this.tooltip);
+        if(this.tooltip) {
+            document.body.removeChild(this.tooltip);
+        }
     }
 
     componentDidUpdate(){
@@ -61,16 +61,24 @@ class TooltipFontIcon extends Component{
     }
 
     show(){
+        if(!this.tooltip) {
+            this.tooltip = document.createElement('div');
+            document.body.appendChild(this.tooltip);
+        }
         this.setState({showTooltip: true});
     }
 
     hide(){
+        if(this.tooltip) {
+            document.body.removeChild(this.tooltip);
+            this.tooltip = null;
+        }
         this.setState({showTooltip: false});
     }
 
     render(){
         const {showTooltip, left, top} = this.state;
-        const {tooltip, tooltipPosition, ...props} = this.props;
+        const {tooltip, tooltipPosition, wrapClassName, ...props} = this.props;
         let position = '';
         switch (tooltipPosition) {
             case 'top':
@@ -84,8 +92,8 @@ class TooltipFontIcon extends Component{
                 break;
         }
         return (
-            <span onMouseOver={::this.show} onMouseLeave={::this.hide}>
-                {showTooltip && ReactDOM.createPortal(<span className={`${theme.tooltip} ${position} ${theme.tooltipActive}`} style={{left, top}}><span className={theme.tooltipInner}>{tooltip}</span></span>, this.tooltip)}
+            <span onMouseOver={::this.show} onMouseLeave={::this.hide} className={wrapClassName}>
+                {showTooltip && this.tooltip && ReactDOM.createPortal(<span className={`${theme.tooltip} ${position} ${theme.tooltipActive}`} style={{left, top}}><span className={theme.tooltipInner}>{tooltip}</span></span>, this.tooltip)}
                 <FontIcon myRef={this.icon} onButtonFocus={::this.show} onButtonBlur={::this.hide} {...props}/>
             </span>
         );
@@ -100,6 +108,7 @@ TooltipFontIcon.propTypes = {
 TooltipFontIcon.defaultProps = {
     tooltipPosition: 'top',
     isButton: false,
+    wrapClassName: '',
 };
 
 export default TooltipFontIcon;
