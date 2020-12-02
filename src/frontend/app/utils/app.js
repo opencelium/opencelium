@@ -40,13 +40,14 @@ export function checkCronExpression(cronExp){
             cronExp = cronExp.substr(0, cronExp.length - 1);
         }
     }
-    const secRegExp = timePartsLength > 0 ? `^(\\*|([1-5]?[0-9]))` : '';
-    const minRegExp = timePartsLength > 1 ? ` (\\*|([1-5]?[0-9])|(([1-5]?[0-9])?|\\*)/([1-5]?[0-9])?)` : '';
-    const hourRegExp = timePartsLength > 2 ? ` (\\*|([0-1]?[0-9])|20|21|22|23|(([0-1]?[0-9])?|20|21|22|23|\\*)/(([0-1]?[0-9])|20|21|22|23)?)` : '';
-    const dayRegExp = timePartsLength > 3 ? ` (\\*|\\?|([0-2]?[0-9])|30|31|(([0-2]?[0-9])?|30|31|\\*)/(([0-2]?[0-9])|30|31)?)` : '';
-    const monthRegExp = timePartsLength > 4 ? ` (\\*|([0-9])|10|11|(([0-9])?|10|11|\\*)/(([0-9])|10|11)?)` : '';
-    const yearRegExp = timePartsLength > 5 ? ` \\?` : '';
-    const cronRegExp = new RegExp(`${secRegExp}${minRegExp}${hourRegExp}${dayRegExp}${monthRegExp}${yearRegExp}`+ '$');
+    const secRegExp = timePartsLength > 0 ? `^(([1-5]?[0-9])|\\,|\\-|/|\\*)*` : '';
+    const minRegExp = timePartsLength > 1 ? ` (([1-5]?[0-9])|\\,|\\-|/|\\*)*` : '';
+    const hourRegExp = timePartsLength > 2 ? ` (([0-1]?[0-9])|20|21|22|23|\\,|\\-|/|\\*)*` : '';
+    const dayRegExp = timePartsLength > 3 ? ` (\\?|([0-2]?[0-9])|30|31|L|W|\\,|\\-|/|\\*)*` : '';
+    const monthRegExp = timePartsLength > 4 ? ` (([0-9])|([A-Z])|10|11|\\,|\\-|/|\\*)*` : '';
+    const dayOfWeekRegExp = timePartsLength > 5 ? ` (([0-7])|([A-Z])|L|#|\\,|\\-|/|\\?|\\*)*` : '';
+    const yearRegExp = timePartsLength > 6 ? ` (([0-9]*)|\\,|\\-|/|\\*)*` : '';
+    const cronRegExp = new RegExp(`${secRegExp}${minRegExp}${hourRegExp}${dayRegExp}${monthRegExp}${dayOfWeekRegExp}${yearRegExp}`+ '$');
     return cronRegExp.test(cronExp);
 }
 

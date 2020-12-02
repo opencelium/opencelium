@@ -111,6 +111,7 @@ class ScheduleAdd extends Component{
     }
 
     onChangeCronExp(cronExp){
+        cronExp = cronExp.toUpperCase();
         if(checkCronExpression(cronExp)) {
             this.setState({cronExp});
         }
