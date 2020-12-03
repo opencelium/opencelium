@@ -21,8 +21,9 @@ import { Row, Col } from "react-grid-system";
 import Dialog from "@basic_components/Dialog";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/schedules/schedules";
-import {ALL_MONTHS, getThemeClass} from "@utils/app";
+import {ALL_MONTHS, consoleLog, convertTimeForCronExpression, getThemeClass} from "@utils/app";
 import Select from "@basic_components/inputs/Select";
+import cronParser from 'cron-parser';
 
 
 function mapStateToProps(state){
@@ -45,7 +46,7 @@ class CronExpGenerator extends Component{
         const everyOptions = ::this.getEveryOptions('minute', true);
 
         this.state = {
-            show: false,
+            show: true,
             atOrEach: {label: 'At', value: 'at'},
             startAtShow: false,
             dayShow: false,
@@ -57,21 +58,32 @@ class CronExpGenerator extends Component{
             everyOptions,
             startAtHour: {label: 12, value: 12},
             startAtMinute: {label: '00', value: 0},
+            examples: [],
         };
     }
-
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(prevState.atOrEach.value !== this.state.atOrEach.value){
-            const timeStampOptions = ::this.getTimeStampOptions();
-            const everyOptions = ::this.getEveryOptions();
-            const dayForMonthOptions = ::this.getEveryOptions('day');
+        const {atOrEach, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
+        if(atOrEach.value !== prevState.atOrEach.value || dayForMonth.value !== prevState.dayForMonth.value
+            || timeStamp.value !== prevState.timeStamp.value || everyValue.value !== prevState.everyValue.value
+            || startAtHour.value !== prevState.startAtHour.value || startAtMinute.value !== prevState.startAtMinute.value
+        ){
             this.setState({
-                timeStamp: timeStampOptions.find(option => option.value === this.state.timeStamp.value),
-                timeStampOptions,
-                dayForMonth: dayForMonthOptions.find(option => option.value === this.state.dayForMonth.value),
-                everyValue: everyOptions.find(option => option.value === this.state.everyValue.value),
-                everyOptions,
-            })
+                examples: ::this.defineExamples(),
+            });
+        }
+    }
+
+    defineExamples() {
+        try {
+            const cronExp = ::this.getCronExp();
+            const interval = cronParser.parseExpression(cronExp);
+            let examples = [];
+            for(let i = 0; i < 5; i++){
+                examples.push(convertTimeForCronExpression(interval.next().toString()));
+            }
+            return examples;
+        } catch (err) {
+            consoleLog(err.message);
         }
     }
 
@@ -139,8 +151,16 @@ class CronExpGenerator extends Component{
     }
 
     setAtOrEach(atOrEach){
+        const timeStampOptions = ::this.getTimeStampOptions(atOrEach.value);
+        const everyOptions = ::this.getEveryOptions(null, atOrEach.value === 'at');
+        const dayForMonthOptions = ::this.getEveryOptions('day', atOrEach.value === 'at');
         this.setState({
             atOrEach,
+            timeStamp: timeStampOptions.find(option => option.value === this.state.timeStamp.value),
+            timeStampOptions,
+            dayForMonth: dayForMonthOptions.find(option => option.value === this.state.dayForMonth.value),
+            everyValue: everyOptions.find(option => option.value === this.state.everyValue.value),
+            everyOptions,
         });
     }
 
@@ -240,6 +260,26 @@ class CronExpGenerator extends Component{
         return options;
     }
 
+    renderExample(){
+        const {examples} = this.state;
+        const {authUser} = this.props;
+        let classNames = [
+            'cron_exp_example',
+        ];
+        classNames = getThemeClass({classNames, authUser, styles});
+        return (
+            <ol className={styles[classNames.cron_exp_example]}>
+                {
+                    examples.map(example => {
+                        return(
+                            <li>{example}</li>
+                        );
+                    })
+                }
+            </ol>
+        );
+    }
+
     render(){
         const {
             show, timeStamp, everyValue, startAtHour, startAtMinute, startAtShow,
@@ -334,6 +374,9 @@ class CronExpGenerator extends Component{
                                 <span className={styles[classNames.cron_suffix_minute]}>m.</span>
                             </Col>
                         }
+                        <Col md={12}>
+                            {this.renderExample()}
+                        </Col>
                     </Row>
                 </Dialog>
                 <TooltipFontIcon onClick={::this.toggleShowGenerator} tooltip={t('ADD.CRON_ICON_TOOLTIP')} value={'schedule'} isButton={true} wrapClassName={styles[classNames.cron_icon_tooltip]} blueTheme={true}/>
