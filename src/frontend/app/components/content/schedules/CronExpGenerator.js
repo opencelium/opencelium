@@ -58,7 +58,7 @@ class CronExpGenerator extends Component{
             everyOptions,
             startAtHour: {label: 12, value: 12},
             startAtMinute: {label: '00', value: 0},
-            examples: [],
+            examples: ::this.defineExamples('0 1 * * * ?'),
         };
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -73,9 +73,9 @@ class CronExpGenerator extends Component{
         }
     }
 
-    defineExamples() {
+    defineExamples(cronExp = null) {
         try {
-            const cronExp = ::this.getCronExp();
+            cronExp = cronExp === null ? ::this.getCronExp() : cronExp;
             const interval = cronParser.parseExpression(cronExp);
             let examples = [];
             for(let i = 0; i < 5; i++){
