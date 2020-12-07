@@ -46,7 +46,7 @@ class CronExpGenerator extends Component{
         const everyOptions = ::this.getEveryOptions('minute', true);
 
         this.state = {
-            show: true,
+            show: false,
             atOrEach: {label: 'At', value: 'at'},
             startAtShow: false,
             dayShow: false,
