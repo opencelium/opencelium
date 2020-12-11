@@ -33,6 +33,8 @@ public interface InvokerService {
 
     FunctionInvoker getTestFunction(String invokerName);
 
+    FunctionInvoker getAuthFunction(String invokerName);
+
     Invoker findByName(String name);
 
     boolean existsByName(String name);

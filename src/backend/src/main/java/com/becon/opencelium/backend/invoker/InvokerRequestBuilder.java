@@ -22,18 +22,26 @@ import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +52,7 @@ public class InvokerRequestBuilder{
     private RestTemplate restTemplate;
     private FunctionInvoker functionInvoker;
     private List<RequestData> requestData;
+    private String invokerName;
 
     public InvokerRequestBuilder(RestTemplate restTemplate){
         this.restTemplate = restTemplate;
@@ -56,6 +65,11 @@ public class InvokerRequestBuilder{
 
     public InvokerRequestBuilder setFunction(FunctionInvoker function){
         this.functionInvoker = function;
+        return this;
+    }
+
+    public InvokerRequestBuilder setInvokerName(String invokerName) {
+        this.invokerName = invokerName;
         return this;
     }
 
@@ -89,7 +103,32 @@ public class InvokerRequestBuilder{
         if (body == null || body.equals("null")){
             httpEntity = new HttpEntity <Object> (header);
         }
+
+        if (invokerName.equals("igel")){
+            ClientHttpRequestFactory requestFactory =
+                    new HttpComponentsClientHttpRequestFactory(getHttpClient());
+            restTemplate.setRequestFactory(requestFactory);
+        }
         return restTemplate.exchange(url, method ,httpEntity, String.class);
+    }
+
+    private HttpClient getHttpClient() {
+
+        try {
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            HttpClient httpClient = HttpClients.custom()
+                    .setSSLContext(sslContext)
+                    .setSSLHostnameVerifier(new DefaultHostnameVerifier())
+                    .build();
+
+            return httpClient;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private HttpMethod getMethod(){

@@ -68,6 +68,13 @@ public class InvokerServiceImp implements InvokerService{
     }
 
     @Override
+    public FunctionInvoker getAuthFunction(String invokerName) {
+        return invokerContainer.getByName(invokerName).getOperations()
+                .stream().filter(f -> f.getType().equals("auth"))
+                .findFirst().orElse(null);
+    }
+
+    @Override
     public Invoker findByName(String name) {
         return invokerContainer.getByName(name);
     }

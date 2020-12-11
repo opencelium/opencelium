@@ -52,5 +52,7 @@ public interface ConnectorService {
 
     ResponseEntity<?> checkCommunication(Connector connector) throws JsonProcessingException;
 
+    ResponseEntity<?> getAuthorization(Connector connector);
+
     List<RequestData> buildRequestData(Connector connector);
 }

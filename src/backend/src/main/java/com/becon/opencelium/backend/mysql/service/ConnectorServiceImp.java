@@ -192,7 +192,21 @@ public class ConnectorServiceImp implements ConnectorService{
     public ResponseEntity<?> checkCommunication(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
         FunctionInvoker function = invokerServiceImp.getTestFunction(connector.getInvoker());
-        return invokerRequestBuilder.setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
+        List<RequestData> requestData = new ArrayList<>();
+        FunctionInvoker authFunc = invokerServiceImp.getAuthFunction(connector.getInvoker());
+        if (authFunc != null) {
+            requestData = buildRequestData(connector);
+        } else {
+            requestData = connector.getRequestData();
+        }
+        return invokerRequestBuilder.setInvokerName(connector.getInvoker()).setFunction(function).setRequestData(requestData).sendRequest();
+    }
+
+    @Override
+    public ResponseEntity<?> getAuthorization(Connector connector) {
+        InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
+        FunctionInvoker function = invokerServiceImp.getAuthFunction(connector.getInvoker());
+        return invokerRequestBuilder.setInvokerName(connector.getInvoker()).setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
     }
 
     @Override
@@ -200,7 +214,14 @@ public class ConnectorServiceImp implements ConnectorService{
         Invoker invoker = invokerService.findByName(connector.getInvoker());
         AuthenticationFactory authFactory = new AuthenticationFactory(invokerService.findAll(), restTemplate);
         AuthenticationType authenticationType = authFactory.getAuthType(invoker.getAuthType());
-        if (invoker.getAuthType().equals("token")){
+        FunctionInvoker authFunc = invokerServiceImp.getAuthFunction(connector.getInvoker());
+        if (invoker.getAuthType().equals("token") || authFunc != null){
+            InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
+            FunctionInvoker function = invokerServiceImp.getTestFunction(connector.getInvoker());
+            if (authFunc != null) {
+                function = authFunc;
+            }
+            invokerRequestBuilder.setInvokerName(connector.getInvoker()).setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
             ResponseEntity<?> responseEntity = checkCommunication(connector);
             return authenticationType.getAccessCredentials(connector, responseEntity);
         }
