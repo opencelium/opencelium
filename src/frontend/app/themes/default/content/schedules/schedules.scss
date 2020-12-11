@@ -148,6 +148,7 @@
 .schedule_cron_exp{
   font-size: $INPUT_TEXT_SIZE;
   height: 38px !important;
+  padding-right: 25px !important;
 }
 
 .date_time_picker{
@@ -342,6 +343,75 @@
   padding: 8px 12px;
 }
 
+.cron_icon_tooltip{
+  position: absolute;
+  top: 24px;
+  right: 0;
+}
+
+.cron_every{
+  float: left;
+  width: 22%;
+  margin-right: 1%;
+}
+.cron_every_short{
+  float: left;
+  width: 15%;
+  margin-right: 1%;
+}
+
+.cron_select_day_for_month{
+  float: left;
+  margin-right: 1%;
+  width: 18%;
+}
+
+.cron_suffix_day_for_month{
+  text-align: center;
+  font-size: 14px;
+  line-height: 38px;
+  float: left;
+  margin-right: 1%;
+  width: 12%;
+}
+
+.cron_select_every {
+  float: left;
+  width: 23%;
+  margin-right: 1%;
+}
+.cron_select_every_short {
+  float: left;
+  width: 20%;
+  margin-right: 1%;
+}
+
+.cron_select_timestamp{
+  float: left;
+  width: 32%;
+  margin-right: 1%;
+}
+.cron_select_timestamp_short{
+  float: left;
+  width: 30%;
+  margin-right: 1%;
+}
+
+.cron_suffix{
+  float: left;
+  width: 20%;
+  text-align: center;
+  font-size: 18px;
+  line-height: 32px;
+}
+.cron_suffix_short{
+  float: left;
+  width: 0;
+  text-align: center;
+  font-size: 18px;
+  line-height: 32px;
+}
+
 .schedule_list_title{
   text-overflow: ellipsis;
   overflow: hidden;
@@ -349,6 +419,48 @@
   max-width: 60px;
 }
 
+.cron_start_at{
+  float: left;
+  width: 17%;
+  margin-right: 1%;
+  text-align: center;
+  font-size: 18px;
+  line-height: 32px;
+}
+
+.cron_select_start_hour{
+  float: left;
+  width: 33%;
+}
+
+.cron_suffix_hour{
+  text-align: center;
+  font-size: 14px;
+  line-height: 38px;
+  float: left;
+  width: 6%;
+}
+
+.cron_select_start_minute{
+  float: left;
+  width: 33%;
+}
+
+.cron_suffix_minute{
+  text-align: center;
+  font-size: 14px;
+  line-height: 38px;
+  float: left;
+  width: 5%;
+}
+
+.cron_exp_example{
+  text-align: center;
+  font-size: 16px;
+  list-style-position: inside;
+  margin-top: 30px;
+  padding: 0;
+}
 
 .notification_change_event_type{
   .label{

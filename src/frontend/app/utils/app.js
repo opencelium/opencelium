@@ -31,6 +31,26 @@ export const DEBUGGER_ERRORS = true;
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
 
+export function checkCronExpression(cronExp){
+    const timeParts = cronExp.split(' ');
+    let timePartsLength = timeParts.length;
+    if(timePartsLength > 0){
+        if(timeParts[timePartsLength - 1] === ''){
+            timePartsLength--;
+            cronExp = cronExp.substr(0, cronExp.length - 1);
+        }
+    }
+    const secRegExp = timePartsLength > 0 ? `^(([1-5]?[0-9])|\\,|\\-|/|\\*)*` : '';
+    const minRegExp = timePartsLength > 1 ? ` (([1-5]?[0-9])|\\,|\\-|/|\\*)*` : '';
+    const hourRegExp = timePartsLength > 2 ? ` (([0-1]?[0-9])|20|21|22|23|\\,|\\-|/|\\*)*` : '';
+    const dayRegExp = timePartsLength > 3 ? ` (\\?|([0-2]?[0-9])|30|31|L|W|\\,|\\-|/|\\*)*` : '';
+    const monthRegExp = timePartsLength > 4 ? ` (([0-9])|([A-Z])|10|11|\\,|\\-|/|\\*)*` : '';
+    const dayOfWeekRegExp = timePartsLength > 5 ? ` (([0-7])|([A-Z])|L|#|\\,|\\-|/|\\?|\\*)*` : '';
+    const yearRegExp = timePartsLength > 6 ? ` (([0-9]*)|\\,|\\-|/|\\*)*` : '';
+    const cronRegExp = new RegExp(`${secRegExp}${minRegExp}${hourRegExp}${dayRegExp}${monthRegExp}${dayOfWeekRegExp}${yearRegExp}`+ '$');
+    return cronRegExp.test(cronExp);
+}
+
 export function checkExpiredMessages(data){
     let result = false;
     if(isString(data)){
@@ -487,6 +507,8 @@ export function isObject (obj) {
     return obj && typeof obj === 'object' && obj.constructor === Object;
 }
 
+export const ALL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 /**
  * to check if element is an Array
  *
@@ -503,6 +525,29 @@ export function isArray(array){
  */
 export function convertCronExpForSchedulerlist(cronExp){
     return cronExp;
+}
+
+/**
+ * to convert time for cron expression
+ *
+ * @param timeStamp - time
+ */
+export function convertTimeForCronExpression(timeStamp){
+    let date = new Date(timeStamp);
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let dateValue = date.getDate();
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    let day = date.getDay();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+    seconds = seconds < 10 ? '0'+seconds : seconds;
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    hours = hours < 10 ? '0'+hours : hours;
+    dateValue = dateValue < 10 ? '0'+dateValue : dateValue;
+    month = month < 10 ? '0'+month : month;
+    return <span><span style={{width: '60px', display: 'inline-block', textAlign: 'right'}}>{`${hours}:${minutes}:${seconds}`}</span><span style={{width: '40px', display: 'inline-block'}}>{days[day]}</span><span style={{width: '55px', display: 'inline-block'}}>{`${dateValue}.${month}.${year}`}</span></span>;
 }
 
 /**

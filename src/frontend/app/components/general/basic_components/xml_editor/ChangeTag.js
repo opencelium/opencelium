@@ -155,8 +155,12 @@ class ChangeTag extends Component{
                 CXmlEditor.setLastEditElement(tag, text, tag.tags, mode);
             }
         }
-        let referenceDiv = document.getElementById(ReferenceComponent.id);
-        referenceDiv.innerText = '';
+        if(ReferenceComponent) {
+            let referenceDiv = document.getElementById(ReferenceComponent.id);
+            if (referenceDiv) {
+                referenceDiv.innerText = '';
+            }
+        }
         change();
         close();
     }

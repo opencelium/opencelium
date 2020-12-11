@@ -27,7 +27,7 @@ This documentation is organized into a couple of sections:
    usage/connectors
    usage/connections
    usage/schedules
-   usage/apps
+   usage/admin
 
 .. toctree::
    :caption: Use Cases

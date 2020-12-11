@@ -19,6 +19,7 @@ import ReactSelect from 'react-select';
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 import basicStyles from '@themes/default/general/basic_components.scss';
 import {dotColor} from "@change_component/form_elements/form_connection/form_methods/help";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
 
 /**
  * Select Component
@@ -27,9 +28,47 @@ class Select extends Component{
 
     constructor(props){
         super(props);
+
+        this.state = {
+            inputValue: props.inputValue ? props.inputValue : '',
+        };
+    }
+
+    componentDidUpdate(prevProps){
+        if(prevProps.inputValue !== this.props.inputValue){
+            this.setState({
+                inputValue: this.props.inputValue,
+            });
+        }
+    }
+
+    onInputChange(inputValue){
+        const {onInputChange} = this.props;
+        if(typeof onInputChange === 'function'){
+            onInputChange(inputValue);
+        } else {
+            this.setState({inputValue});
+        }
+    }
+
+    onFocus(e){
+        const {onFocus} = this.props;
+        if(typeof onFocus === 'function'){
+            onFocus(e);
+        }
+        CVoiceControl.initVoiceSelect(this);
+    }
+
+    onBlur(e){
+        const {onBlur, value, onChange} = this.props;
+        if(typeof onBlur === 'function'){
+            onBlur(e);
+        }
+        CVoiceControl.stopVoiceSelect(value, onChange);
     }
 
     render(){
+        const {inputValue} = this.state;
         const {styles, tourStep, icon, iconTooltip, label, required, isFocused, hasFocusStyle, className, tooltipTourStep, ...props} = this.props;
         let {selectClassName} = this.props;
         return (
@@ -51,6 +90,10 @@ class Select extends Component{
                     maxMenuHeight={200}
                     minMenuHeight={50}
                     className={`${selectClassName}`}
+                    onFocus={::this.onFocus}
+                    onBlur={::this.onBlur}
+                    onInputChange={::this.onInputChange}
+                    inputValue={inputValue}
                     styles={{
                         ...styles,
                         option: (provided, {data, isDisabled,}) => ({
