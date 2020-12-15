@@ -107,7 +107,7 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
 
     public ConnectionNode toEntity(ConnectionResource resource) {
         ConnectionNode connectionNode = new ConnectionNode();
-        connectionNode.setId(resource.getNodeId());
+//        connectionNode.setId(resource.getNodeId());
         connectionNode.setConnectionId(resource.getConnectionId());
         connectionNode.setName(resource.getTitle());
         connectionNode.setFromConnector(connectorNodeServiceImp.toEntity(resource.getFromConnector(), resource.getTitle()));

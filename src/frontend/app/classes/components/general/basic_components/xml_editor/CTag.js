@@ -253,7 +253,14 @@ export default class CTag{
                 break;
             case TAG_VALUE_TYPES.ITEM:
                 for(let i = 0; i < this._tags.length; i++){
-                    tag[this._tags[i].name] = this._tags[i].convertToBackendXml();
+                    if(tag.hasOwnProperty(this._tags[i].name)) {
+                        if(!isArray(tag[this._tags[i].name])) {
+                            tag[this._tags[i].name] = [tag[this._tags[i].name]];
+                        }
+                        tag[this._tags[i].name].push(this._tags[i].convertToBackendXml());
+                    } else{
+                        tag[this._tags[i].name] = this._tags[i].convertToBackendXml();
+                    }
                 }
                 break;
         }
