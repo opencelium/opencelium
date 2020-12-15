@@ -109,7 +109,7 @@ public class ActionUtility {
     private ResponseNode buildResponse(ResponseResource responseResource){
         this.exchangeType = "response";
         ResponseNode responseNode = new ResponseNode();
-        responseNode.setId(responseResource.getNodeId());
+//        responseNode.setId(responseResource.getNodeId());
         responseNode.setFail(buildResult(responseResource.getFail(), "fail"));
         responseNode.setSuccess(buildResult(responseResource.getSuccess(), "success"));
         return responseNode;
@@ -120,7 +120,7 @@ public class ActionUtility {
     private ResultNode buildResult(ResultResource resultResource, String result){
         this.result = result;
         ResultNode resultNode = new ResultNode();
-        resultNode.setId(resultResource.getNodeId());
+//        resultNode.setId(resultResource.getNodeId());
         resultNode.setName(result);
         resultNode.setStatus(resultResource.getStatus());
         if (resultResource.getBody() != null){
@@ -133,7 +133,7 @@ public class ActionUtility {
         this.exchangeType = "request";
         this.result = "";
         RequestNode requestNode = new RequestNode();
-        requestNode.setId(requestResource.getNodeId());
+//        requestNode.setId(requestResource.getNodeId());
         requestNode.setEndpoint(requestResource.getEndpoint());
         requestNode.setMethod(requestResource.getMethod());
         if (requestResource.getHeader() != null){
@@ -348,7 +348,7 @@ public class ActionUtility {
 
     private MethodNode toNodeEntity(MethodResource methodResource){
         MethodNode methodNode = new MethodNode();
-        methodNode.setId(methodResource.getNodeId());
+//        methodNode.setId(methodResource.getNodeId());
         methodNode.setIndex(methodResource.getIndex());
         methodNode.setName(methodResource.getName());
         methodNode.setColor(methodResource.getColor());
@@ -357,7 +357,7 @@ public class ActionUtility {
 
     private StatementNode toOperatorNode(OperatorResource operatorResource){
         StatementNode statementNode = new StatementNode();
-        statementNode.setId(operatorResource.getNodeId());
+//        statementNode.setId(operatorResource.getNodeId());
         statementNode.setIndex(operatorResource.getIndex());
         statementNode.setType(operatorResource.getType());
         statementNode.setOperand(operatorResource.getCondition().getRelationalOperator());
