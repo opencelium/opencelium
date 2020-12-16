@@ -30,7 +30,7 @@ import {permission} from "@decorators/permission";
 import Button from "@basic_components/buttons/Button";
 import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import CronExpGenerator from "@components/content/schedules/CronExpGenerator";
+//import CronExpGenerator from "@components/content/schedules/CronExpGenerator";
 
 
 function mapStateToProps(state){
@@ -207,7 +207,7 @@ class ScheduleAdd extends Component{
                         value={cronExp}
                         theme={{inputElement: styles[classNames.schedule_cron_exp], bar: styles[classNames.schedule_bar]}}
                     />
-                    <CronExpGenerator changeCronExp={::this.onChangeCronExp}/>
+                    {/*<CronExpGenerator changeCronExp={::this.onChangeCronExp}/>*/}
                 </Col>
                 <Col xl={2} lg={2} md={2} sm={3} xs={3} style={{lineHeight: '75px', textAlign: 'center'}}>
                     {

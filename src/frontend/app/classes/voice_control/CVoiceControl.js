@@ -1,4 +1,4 @@
-import annyang from 'annyang';
+//import annyang from 'annyang';
 import {ENABLE_DEBUG_VOICE_CONTROL, ENABLE_VOICE_CONTROL} from "@utils/constants/app";
 
 export const PREFIX_COMMAND_NAME = "(please) (let\'s)";
@@ -39,20 +39,20 @@ class CVoiceControl{
     }
 
     static initCommands(data, VoiceControl){
-        if (annyang && ENABLE_VOICE_CONTROL && this.allRegisteredControls.indexOf(VoiceControl.name) === -1) {
+        if (ENABLE_VOICE_CONTROL && this.allRegisteredControls.indexOf(VoiceControl.name) === -1) {
             annyang.debug(ENABLE_DEBUG_VOICE_CONTROL);
             annyang.addCommands({...VoiceControl.getCommands(data)});
             this.registerCommands(data, VoiceControl);
-            this.start();
+            this.start()
         }
     }
 
     static removeCommands(data, VoiceControl){
-        if (annyang && ENABLE_VOICE_CONTROL) {
+        if (ENABLE_VOICE_CONTROL) {
             const commandNames = [...VoiceControl.getCommandsNames(data)];
             annyang.removeCommands(commandNames);
             this.unregisterCommands(data, VoiceControl);
-            if(commandNames.length === 0) {
+            if (commandNames.length === 0) {
                 this.stop();
             }
         }
@@ -65,19 +65,19 @@ class CVoiceControl{
     }
 
     static pauseAllCommands(){
-        if (annyang && ENABLE_VOICE_CONTROL) {
+        if (ENABLE_VOICE_CONTROL) {
             annyang.removeCommands();
         }
     }
 
     static unpauseAllCommands(){
-        if (annyang && ENABLE_VOICE_CONTROL) {
+        if (ENABLE_VOICE_CONTROL) {
             annyang.addCommands({...this.allRegisteredCommands});
         }
     }
 
     static initVoiceInput(currentValue, onInputChange){
-        if (annyang && ENABLE_VOICE_CONTROL) {
+        if (ENABLE_VOICE_CONTROL) {
             this.pauseAllCommands();
             annyang.addCommands({'type *inputValue': (inputValue) => onInputChange(`${currentValue}${inputValue.toLowerCase()}`)});
             annyang.addCommands({'clear': () => onInputChange('')});
@@ -85,14 +85,14 @@ class CVoiceControl{
     }
 
     static stopVoiceInput(){
-        if (annyang && ENABLE_VOICE_CONTROL) {
+        if (ENABLE_VOICE_CONTROL) {
             CVoiceControl.unpauseAllCommands();
             annyang.removeCommands(['type *inputValue', 'clear']);
         }
     }
 
     static initVoiceSelect(component){
-        if (annyang && ENABLE_VOICE_CONTROL) {
+        if (ENABLE_VOICE_CONTROL) {
             this.pauseAllCommands();
             const change = (inputValue) => {
                 const numbers = {
@@ -120,7 +120,7 @@ class CVoiceControl{
     }
 
     static stopVoiceSelect(){
-        if (annyang && ENABLE_VOICE_CONTROL) {
+        if (ENABLE_VOICE_CONTROL) {
             CVoiceControl.unpauseAllCommands();
             annyang.removeCommands(['type *inputValue', 'clear', 'select *inputValue']);
         }
