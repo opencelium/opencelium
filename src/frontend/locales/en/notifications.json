@@ -50,7 +50,8 @@
     "ADD_NOTIFICATIONTEMPLATE": "The template was successfully added",
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were successfully fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template was successfully updated",
-    "DELETE_NOTIFICATIONTEMPLATE": "The template was successfully removed"
+    "DELETE_NOTIFICATIONTEMPLATE": "The template was successfully removed",
+    "FETCH_APPVERSION": "OC Update <0>{{version}}</0> available"
   },
   "ERROR": {
     "ADD_USER": {
