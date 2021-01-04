@@ -29,8 +29,6 @@ module.exports = {
         HOSTNAME: '0.0.0.0',
         OPTIONS: {
             open: NodeParams.IS_DEV && !NodeParams.HAS_BROWSER_SYNC,
-            hot: NodeParams.HAS_HMR,
-            inline: NodeParams.HAS_HMR,
             liveReload: false,
             headers: {
                 "Access-Control-Allow-Origin": "*"

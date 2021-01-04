@@ -25,7 +25,7 @@ import { combinedReducers } from './reducers';
 import epics from './epics';
 
 import {responsiveStoreEnhancer} from 'redux-responsive';
-import {AppSettings, hasHMR} from "./constants/app";
+import {AppSettings} from "./constants/app";
 
 
 const initialEnhancers  = [responsiveStoreEnhancer];
@@ -72,8 +72,5 @@ const store = createStore(
         ...enhancers
     )
 );
-if (hasHMR && module.hot) {
-    module.hot.accept('./reducers', () => store.replaceReducer(combinedReducers))
-}
 
 export default store;

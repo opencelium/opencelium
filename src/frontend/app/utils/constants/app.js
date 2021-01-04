@@ -18,8 +18,6 @@
  */
 export const isProd = process.env.NODE_ENV === 'production';
 export const isDev = process.env.NODE_ENV === 'development';
-export const hasHMR = process.env.NODE_HMR === 'true';
-const nodeEnv = process.env.NODE_ENV;
 export const Roles = {
     USER: 'ROLE_USER',
     ADMIN: 'ROLE_ADMIN'
