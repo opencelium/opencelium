@@ -30,12 +30,12 @@ class Endpoint extends Component{
         super(props);
 
         this.state = {
-            endpoint: props.operation.request.query,
+            endpoint: props.operation.request.endpoint,
         };
     }
 
     componentDidMount(){
-        let endpoint = this.props.operation.request.query;
+        let endpoint = this.props.operation.request.endpoint;
         if(endpoint === ''){
             this.setState({
                 endpoint,
@@ -50,8 +50,8 @@ class Endpoint extends Component{
     onBlur(){
         const {operation, updateEntity} = this.props;
         const {endpoint} = this.state;
-        if(operation.request.query !== endpoint) {
-            operation.request.query = endpoint;
+        if(operation.request.endpoint !== endpoint) {
+            operation.request.endpoint = endpoint;
             updateEntity();
         }
     }

@@ -38,32 +38,24 @@ class Endpoint extends Component{
 
     constructor(props){
         super(props);
-        this.affixValue = React.createRef();
+        this.endpointValue = React.createRef();
         this.hasAdded = false;
         this.state = {
-            isEndpointEditOpen: false,
-            endpointEditValue: props.method.request ? props.method.request.query : '',
-        };
+            contentEditableValue: props.method.request.endpoint,
+        }
     }
 
-    openEndpointEdit(){
+    componentDidUpdate(){
         const {method} = this.props;
-        this.setState({isEndpointEditOpen: true});
-    }
-
-    closeEndpointEdit(){
-        this.setState({isEndpointEditOpen: false});
-    }
-
-    onChangeEndpointEditValue(endpointEditValue){
-        this.setState({
-            endpointEditValue,
-        });
+        if(this.hasAdded){
+            this.hasAdded = false;
+            let el = document.getElementById(`endpoint_${method.index}`);
+            this.setFocusToTheEnd(el);
+        }
     }
 
     onChangeEndpoint(e){
         const value = e.target.value;
-        const {method, updateEntity} = this.props;
         let result = '';
         let elements = value.split('</span>');
         for(let i = 0; i < elements.length; i++){
@@ -84,17 +76,15 @@ class Endpoint extends Component{
                 }
             }
         }
-        method.setRequestEndpointAffix(result);
-        updateEntity();
+        this.setState({
+            contentEditableValue: result,
+        });
     }
 
-    componentDidUpdate(){
-        const {method} = this.props;
-        if(this.hasAdded){
-            this.hasAdded = false;
-            let el = document.getElementById(`endpoint_${method.index}`);
-            this.setFocusToTheEnd(el);
-        }
+    saveEndpoint(){
+        const {method, updateEntity} = this.props;
+        method.setRequestEndpoint(this.state.contentEditableValue);
+        updateEntity();
     }
 
     setFocusToTheEnd(el) {
@@ -115,25 +105,15 @@ class Endpoint extends Component{
         }
     }
 
-    saveEndpointValue(){
-        const {endpointEditValue} = this.state;
-        const {method, updateEntity} = this.props;
-        method.request.query = endpointEditValue;
-        updateEntity();
-        this.closeEndpointEdit();
-    }
-
     addParam(param){
-        const {method, updateEntity} = this.props;
-        method.setRequestEndpointAffix(`${method.request.affix}{%${param}%} `);
-        updateEntity();
+        this.setState({
+            contentEditableValue: `${this.state.contentEditableValue}{%${param}%} `
+        })
         this.hasAdded = true;
     }
 
-    parseEndpoint(){
-        const {method} = this.props;
-        let affix = method.request.affix;
-        let params = affix.split('{%');
+    parseEndpoint(endpoint){
+        let params = endpoint.split('{%');
         let isParams = [];
         let result = '';
         if(params.length > 1) {
@@ -152,9 +132,9 @@ class Endpoint extends Component{
             for(let i = 0; i < params.length; i++){
                 if(params[i] !== '' && params[i] !== ' ') {
                     if (isParams.indexOf(i) !== -1) {
-                        let index = affix.indexOf(params[i]);
-                        let substring = affix.substring(0, index - 2);
-                        affix = affix.substring(index + params[i].length, affix.length - 1);
+                        let index = endpoint.indexOf(params[i]);
+                        let substring = endpoint.substring(0, index - 2);
+                        endpoint = endpoint.substring(index + params[i].length, endpoint.length - 1);
                         let pArray = params[i].split('.');
                         let color = pArray[0];
                         let fieldName = pArray.slice(3, pArray.length).join('.');
@@ -167,7 +147,7 @@ class Endpoint extends Component{
                 }
             }
         } else{
-            result = affix;
+            result = endpoint;
         }
         if(result !== '') {
             return `${result}`;
@@ -176,53 +156,29 @@ class Endpoint extends Component{
         }
     }
 
-    renderEndpointEdit(){
-        const {endpointEditValue} = this.state;
-        const {method} = this.props;
-        return (
-            <Input className={styles.endpoint_edit} autoFocus id={`${method.index}_endpoint`} value={endpointEditValue} onChange={::this.onChangeEndpointEditValue} onBlur={::this.saveEndpointValue}/>
-        );
-    }
-
     render(){
-        const {isEndpointEditOpen} = this.state;
-        const {authUser, connection, connector, method, readOnly} = this.props;
-        const endpoint = method.request ? method.request.query : '';
+        const {connection, connector, method, readOnly} = this.props;
+        const {contentEditableValue} = this.state;
         let hasError = false;
         if(method.error.hasError){
             if(method.error.location === 'query'){
                 hasError = true;
             }
         }
-        let depth = method.getDepth();
-        let tooltipTextStyles = {width: depth < 4 ? '10%' : depth < 6 ? '12%' : depth < 8 ? '15%' : '18%' };
-        let contentEditableStyles = {width: depth < 4 ? '85%' : depth < 6 ? '83%' : depth < 8 ? '80%' : '78%', overflow: 'hidden', whiteSpace: 'nowrap', height: '41px', color: hasError ? 'red' : 'black'};
+        let contentEditableStyles = {color: hasError ? 'red' : 'black'};
         return (
             <div>
                 <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
-                    <span className={styles.method_affix}>
-                        <TooltipFontIcon
-                            size={14}
-                            isButton={true}
-                            tooltip={endpoint}
-                            value={<span>[...]</span>}
-                            onClick={::this.openEndpointEdit}
-                            className={styles.method_affix_placeholder}
-                        />
-                        {
-                            isEndpointEditOpen && !readOnly && this.renderEndpointEdit()
-                        }
-                    </span>
-                    <span className={styles.method_affix_delimiter}>{`/ `}</span>
-                        <ContentEditable
-                            id={`endpoint_${method.index}`}
-                            innerRef={this.affixValue}
-                            html={::this.parseEndpoint()}
-                            disabled={readOnly}
-                            onChange={::this.onChangeEndpoint}
-                            className={`${styles.method_endpoint_content_editable}`}
-                            style={contentEditableStyles}
-                        />
+                    <ContentEditable
+                        id={`endpoint_${method.index}`}
+                        innerRef={this.endpointValue}
+                        html={::this.parseEndpoint(contentEditableValue)}
+                        disabled={readOnly}
+                        onChange={::this.onChangeEndpoint}
+                        onBlur={::this.saveEndpoint}
+                        className={`${styles.method_endpoint_content_editable}`}
+                        style={contentEditableStyles}
+                    />
                     <ParamGenerator
                         connection={connection}
                         connector={connector}

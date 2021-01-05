@@ -24,7 +24,7 @@ export default class CXmlRequest extends  CXmlReParent{
     constructor(request = CRequest.createRequest()){
         super(request);
         this._method = request.method;
-        this._endpoint = request.query;
+        this._endpoint = request.endpoint;
     }
 
     static createRequest(request){
