@@ -14,7 +14,6 @@
  */
 
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 
 import ContentHeader from '../content/ContentHeader';
 
@@ -29,16 +28,12 @@ class ViewHeader extends Component{
     }
 
     render(){
-        const {authUser, header} = this.props;
+        const {header} = this.props;
         return (
-            <ContentHeader header={header} authUser={authUser}/>
+            <ContentHeader header={header}/>
         );
     }
 }
-
-ViewHeader.propTypes = {
-    authUser: PropTypes.object.isRequired,
-};
 
 
 export default ViewHeader;
