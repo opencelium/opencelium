@@ -23,12 +23,14 @@ import com.becon.opencelium.backend.mysql.repository.WebhookRepository;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
+import com.becon.opencelium.backend.utility.TokenUtility;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import sun.tools.jstat.Token;
 
 import java.net.URI;
 import java.util.Optional;
@@ -49,11 +51,14 @@ public class WebhookServiceImp implements WebhookService {
     @Autowired
     private SchedulerServiceImp schedulerService;
 
+    @Autowired
+    private TokenUtility tokenUtility;
+
     //TODO: rename method - gets some info from token
     @Override
     public Optional<WebhookTokenResource> getTokenObject(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(SecurityConstant.SECRET.getBytes())
+                .setSigningKey(tokenUtility.getSecret().getBytes())
                 .parseClaimsJws(token.replace(SecurityConstant.BEARER, ""))
                 .getBody();
 
@@ -99,7 +104,7 @@ public class WebhookServiceImp implements WebhookService {
                 .claim("uuid", uuid)
                 .claim("schedulerId", schedulerId)
                 .setId(Long.toString(schedulerId))
-                .signWith(SignatureAlgorithm.HS256, SecurityConstant.SECRET.getBytes())
+                .signWith(SignatureAlgorithm.HS256, tokenUtility.getSecret().getBytes())
                 .compact();
     }
 
