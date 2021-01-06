@@ -11,7 +11,7 @@ class AvailableUpdate extends React.Component{
     render(){
         const {version} = this.props;
         return (
-            <Translate i18nKey="notifications:SUCCESS.FETCH_APPVERSION"
+            <Translate i18nKey="notifications:SUCCESS.FETCH_UPDATEAPPVERSION"
                        values={{version}}
                        components={[
                            <a href={'#'} onClick={() => history.push('/update_assistant')} children={version} />
