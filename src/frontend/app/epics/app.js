@@ -13,12 +13,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AppAction, ComponentsAction} from '@utils/actions';
+import {AppAction} from '@utils/actions';
 import {
     addErrorTicketFulfilled, addErrorTicketRejected, fetchAppVersionFulfilled, fetchAppVersionRejected
 } from '@actions/app';
 import {doRequest} from "@utils/auth";
 import {API_METHOD} from "@utils/constants/app";
+import {fetchTemplatesFulfilled} from "@actions/templates/fetch";
 
 
 /**
@@ -55,7 +56,7 @@ const fetchAppVersionEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `application/oc/version`;
             return doRequest({url},{
-                success: fetchAppVersionFulfilled,
+                success: (data) => fetchAppVersionFulfilled(data, {...action.settings}),
                 reject: fetchAppVersionRejected,
             });
         });

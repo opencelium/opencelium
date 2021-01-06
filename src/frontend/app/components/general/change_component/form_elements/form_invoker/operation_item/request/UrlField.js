@@ -31,18 +31,18 @@ class UrlField extends Component{
     constructor(props){
         super(props);
         this.state = {
-            query: props.request.query,
+            endpoint: props.request.endpoint,
         };
     }
 
     changeUrl(){
         let {request} = this.props;
-        request.query = this.state.query;
+        request.endpoint = this.state.endpoint;
         this.props.update();
     }
 
-    updateUrl(query){
-        this.setState({query});
+    updateUrl(endpoint){
+        this.setState({endpoint});
     }
 
     changeMethod(method){
@@ -52,7 +52,7 @@ class UrlField extends Component{
     }
 
     render(){
-        const {query} = this.state;
+        const {endpoint} = this.state;
         const {request, sendRequest, isLoading} = this.props;
         return (
             <div className={styles.url_field}>
@@ -75,7 +75,7 @@ class UrlField extends Component{
                         placeholder={'Url'}
                         type={'text'}
                         maxLength={2048}
-                        value={query}
+                        value={endpoint}
                         theme={{input: styles.input}}
                     />
                 </div>

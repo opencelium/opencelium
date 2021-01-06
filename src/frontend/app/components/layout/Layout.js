@@ -19,7 +19,7 @@ import { withRouter } from 'react-router';
 import {connect} from "react-redux";
 import Header from "./header/Header";
 import Footer from "./footer/Footer";
-import {changeLanguage, fetchAppVersion} from "@actions/app";
+import {changeLanguage} from "@actions/app";
 import {defaultLanguage} from "@utils/constants/languages";
 import {addUserInStore} from '@actions/users/add';
 
@@ -32,17 +32,13 @@ import {logoutUserFulfilled, sessionNotExpired} from "@actions/auth";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 import {getLS} from "@utils/LocalStorage";
-import {API_REQUEST_STATE} from "@utils/constants/app";
 
 let checkTokenInterval;
 
 
 function mapStateToProps(state){
-    const app = state.get('app');
     const auth = state.get('auth');
     return {
-        appVersion: app.get('appVersion'),
-        fetchingAppVersion: app.get('fetchingAppVersion'),
         authUser: auth.get('authUser'),
         isAuth: auth.get('isAuth'),
         isSessionExpired: auth.get('isSessionExpired'),
@@ -54,7 +50,7 @@ function mapStateToProps(state){
  * Layout of the app(OC)
  */
 @withTranslation('notifications')
-@connect(mapStateToProps, {changeLanguage, addUserInStore, logoutUserFulfilled, fetchAppVersion, sessionNotExpired})
+@connect(mapStateToProps, {changeLanguage, addUserInStore, logoutUserFulfilled, sessionNotExpired})
 class Layout extends Component{
 
     constructor(props){
@@ -67,26 +63,20 @@ class Layout extends Component{
     }
 
     componentDidMount(){
-        const {isAuth, addUserInStore, appVersion, fetchAppVersion, fetchingAppVersion} = this.props;
+        const {isAuth, addUserInStore} = this.props;
         addUserListener(addUserInStore);
         if(isAuth) {
             CVoiceControl.initCommands({component: this}, CAppVoiceControl);
-            if( appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
-                fetchAppVersion();
-            }
         }
     }
 
     componentDidUpdate(prevProps){
-        const {isAuth, sessionNotExpired, appVersion, fetchingAppVersion, fetchAppVersion} = this.props;
+        const {isAuth, sessionNotExpired} = this.props;
         if(prevProps.isSessionExpired && isAuth){
             sessionNotExpired();
         }
         if(isAuth){
             CVoiceControl.initCommands({component: this}, CAppVoiceControl);
-            if(appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START) {
-                fetchAppVersion();
-            }
         }
     }
 

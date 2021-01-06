@@ -700,14 +700,14 @@
   position: relative;
 }
 
-.method_affix{
+.method_endpoint{
   float: left;
   width: 10%;
   height: 41px;
   border-bottom: 1px solid rgba(33, 33, 33, 0.12);
   padding-top: 10px;
 }
-.method_affix_placeholder{
+.method_endpoint_placeholder{
   width: auto !important;
   height: auto !important;
   >span{
@@ -715,16 +715,16 @@
   }
   padding: 1px 2px;
 }
-.method_affix_placeholder:hover{
+.method_endpoint_placeholder:hover{
   box-shadow: #9f9f9f 0 1px 3px 0;
 }
-.method_affix_placeholder:focus{
+.method_endpoint_placeholder:focus{
   box-shadow: #9f9f9f 0 1px 3px 0;
 }
 .method_endpoint_label_has_error{
   color: red;
 }
-.method_affix_delimiter{
+.method_endpoint_delimiter{
    width: 5%;
    float: left;
    padding-left: 3px;
@@ -734,6 +734,10 @@
    padding-top: 12px;
  }
 .method_endpoint_content_editable{
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 41px;
   background-color: transparent;
   border-bottom: 1px solid rgba(33, 33, 33, 0.12);
   border-left: 0;
@@ -745,6 +749,22 @@
   font-size: 16px;
   outline: none;
   padding: 8px 0;
+  overflow-x: scroll;
+  cursor: auto;
+}
+.method_endpoint_content_editable::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.method_endpoint_content_editable::-webkit-scrollbar-track {
+  background: #888;
+}
+.method_endpoint_content_editable::-webkit-scrollbar-thumb {
+  background: #464646;
+}
+.method_endpoint_content_editable::-webkit-scrollbar-thumb:hover {
+  cursor: default;
+  background: #111;
 }
 .endpoint_edit{
   z-index: 5;

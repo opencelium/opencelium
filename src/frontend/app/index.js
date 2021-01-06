@@ -13,17 +13,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {hot} from 'react-hot-loader/root';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from '@components/App';
 import Favicon from "react-favicon";
-import {hasHMR} from "@utils/constants/app";
-
-const HotApp = hot(App);
 
 const getApp = () => {
-    return hasHMR ? <HotApp/> : <App/>;
+    return <App/>;
 };
 
 /**
@@ -37,11 +33,5 @@ const renderApp = () =>
         </React.Fragment>, document.getElementById('app')
     );
 
-/**
- * hot module replacement case
- */
-if (hasHMR && module.hot) {
-    module.hot.accept('@components/App', renderApp)
-}
 
 renderApp();

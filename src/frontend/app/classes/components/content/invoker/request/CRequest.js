@@ -32,11 +32,9 @@ export const METHOD_TYPES = [
  */
 export default class CRequest{
 
-    constructor(query = '', affix = '', body = null, method = '', header = [], operation = null){
+    constructor(endpoint = '', body = null, method = '', header = [], operation = null){
         this._operation = operation ? operation : null;
-        const parsedQuery = this.parseQuery(query);
-        this._query = parsedQuery.query;
-        this._affix = parsedQuery.affix;
+        this._endpoint = endpoint;
         this._body = CBody.createBody(body);
         this._invokerBody = CBody.createBody(body);
         this._method = method;
@@ -44,57 +42,27 @@ export default class CRequest{
     }
 
     static createRequest(request = null){
-        let query = request && request.hasOwnProperty('endpoint') ? request.endpoint : '';
-        let affix = '';
+        let endpoint = request && request.hasOwnProperty('endpoint') ? request.endpoint : '';
         let body = request && request.hasOwnProperty('body') ? request.body : null;
         let method = request && request.hasOwnProperty('method') ? request.method : '';
         let header = request && request.hasOwnProperty('header') ? request.header : [];
         let operation = request && request.hasOwnProperty('operation') ? request.operation : null;
-        return new CRequest(query, affix, body, method, header, operation);
-    }
-
-    parseQuery(query){
-        let result = {
-            query,
-            affix: '',
-        };
-        if(this._operation){
-            let endpoint = this._operation.request ? this._operation.request.query : '';
-            if(endpoint){
-                result.affix = query.substring(endpoint.length + 1, query.length);
-                result.query = endpoint;
-            }
-        }
-        return result;
+        return new CRequest(endpoint, body, method, header, operation);
     }
 
     checkHeaderItem(headerItem){
         return headerItem && headerItem.hasOwnProperty('name') && headerItem.hasOwnProperty('value');
     }
 
-    updateQueryAndAffix(){
-        const parsedQuery = this.parseQuery(this._query);
-        this._query = parsedQuery.query;
-        this._affix = parsedQuery.affix;
+    get endpoint(){
+        return this._endpoint;
     }
 
-    get query(){
-        return this._query;
-    }
-
-    set query(query){
-        this._query = query;
-    }
-
-    get affix(){
-        return this._affix;
-    }
-
-    set affix(affix){
-        if(isString(affix)) {
-            this._affix = affix;
+    set endpoint(endpoint){
+        if(isString(endpoint)) {
+            this._endpoint = endpoint;
         } else{
-            consoleError(`CRequest has a wrong set of affix: ${affix}`);
+            consoleError(`CRequest has a wrong set of endpoint: ${endpoint}`);
         }
     }
 
@@ -140,7 +108,6 @@ export default class CRequest{
 
     set operation(operation){
         this._operation = operation;
-        this.updateQueryAndAffix();
     }
 
     get invokerBody(){
@@ -181,7 +148,7 @@ export default class CRequest{
      */
     getObject(params = {bodyOnlyConvert: false}){
         let obj = {
-            endpoint: this._affix !== '' ? `${this._query}/${this._affix}` : this._query,
+            endpoint: this._endpoint,
             body: params.bodyOnlyConvert ? this._body.convertToObject() : this._body.getObject(),
             method: this._method,
         };

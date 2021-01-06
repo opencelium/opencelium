@@ -24,7 +24,6 @@ import styles from '@themes/default/general/app.scss';
 import FontIcon from "@basic_components/FontIcon";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
-
 /**
  * Notification Component
  */
@@ -36,7 +35,7 @@ class Notification extends Component{
 
         this.state = {
             returnNull: false,
-            hasCloseButton: false,
+            hasCloseButton: props.hasCloseButton,
         };
         this.data = this.selectData();
     }
@@ -143,6 +142,7 @@ class Notification extends Component{
 
 Notification.defaultProps = {
     timeOfBeing: 3500,
+    hasCloseButton: false,
 };
 
 export default Notification;

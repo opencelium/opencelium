@@ -33,10 +33,14 @@ import {checkExpiredMessages} from "@utils/app";
  */
 export default function (store){
     return next => action => {
+        const hasCloseButton = action.settings && action.settings.hasOwnProperty('hasCloseButton') ? !!action.settings.hasCloseButton : false;
         let systemTitle = action.payload && action.payload.hasOwnProperty('systemTitle') ? action.payload.systemTitle : 'OC';
         let notificationType = action.payload && action.payload.hasOwnProperty('notificationType') ? action.payload.notificationType : '';
         let shortMessage = action.payload && action.payload.hasOwnProperty('shortMessage') ? action.payload.shortMessage : '';
         let data = {type: '', message: '', systemTitle, shortMessage};
+        if(action.settings && action.settings.hasOwnProperty('notificationMessage')){
+            data.message = notificationMessage;
+        }
         const dividedState = divideState(action.type);
         const notification = document.getElementById('notification');
         for(let i = notification.children.length - 1; i >= 0; i--){
@@ -57,7 +61,9 @@ export default function (store){
             }
         }
         if(hasNotification(dividedState) && isNotBackground(action)) {
-            data.message = dividedState.prefix;
+            if(data.message === '') {
+                data.message = dividedState.prefix;
+            }
             switch (dividedState.postfix) {
                 case 'FULFILLED':
                     data.type = NotificationType.SUCCESS;
@@ -78,6 +84,7 @@ export default function (store){
                     data.type = NotificationType.WARNING;
                     break;
                 case 'STORE':
+                case 'NOTE':
                     data.type = NotificationType.NOTE;
                     break;
             }
@@ -97,7 +104,7 @@ export default function (store){
             }
             ReactDOM.render(
                 <Suspense fallback={(<Loading/>)}>
-                    <Notification data={data} id={idName} params={action.payload}/>
+                    <Notification data={data} id={idName} params={action.payload} hasCloseButton={hasCloseButton}/>
                 </Suspense>, domElem);
         }
         next(action);

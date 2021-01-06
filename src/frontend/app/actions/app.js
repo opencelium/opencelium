@@ -90,22 +90,29 @@ const addErrorTicketRejected = (error) => {
 
 /**
  * fetch application version
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: {}}}
  */
-const fetchAppVersion = () => {
+const fetchAppVersion = (settings = {background: false}) => {
     return {
         type: AppAction.FETCH_APPVERSION,
+        settings,
     };
 };
 
 /**
  * fetch application version fulfilled
+ * @param app = application
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: {}}}
  */
-const fetchAppVersionFulfilled = (app) => {
+const fetchAppVersionFulfilled = (app, settings = {background: false}) => {
     return {
         type: AppAction.FETCH_APPVERSION_FULFILLED,
         payload: app,
+        settings: {...settings, hasCloseButton: true},
     };
 };
 

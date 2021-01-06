@@ -157,8 +157,8 @@ export default class CMethodItem{
         this.updateOperation();
     }
 
-    setRequestEndpointAffix(affix){
-        this._request._affix = affix;
+    setRequestEndpoint(endpoint){
+        this._request.endpoint = endpoint;
     }
 
     setRequestBodyFields(fields){
