@@ -561,6 +561,45 @@ export const NOTIFICATION_TEMPLATE_UPDATE_TOURS = {
     ],
 };
 
+
+export const UPDATE_ASSISTANT_TOURS = {
+    page_1: [
+        {
+            selector: '.tour-page-1-step-1',
+            content:
+                <SwitchOffTour>
+                    All system requirements should be met
+                </SwitchOffTour>,},
+    ],
+    page_2: [
+        {
+            selector: '.tour-page-2-step-1',
+            content:
+                <SwitchOffTour>
+                    Select the required update
+                </SwitchOffTour>,
+        },
+    ],
+    page_3: [
+        {
+            selector: '.tour-page-3-step-1',
+            content:
+                <SwitchOffTour>
+                    Update connections
+                </SwitchOffTour>,
+        },
+    ],
+    page_4: [
+        {
+            selector: '.tour-page-3-step-1',
+            content:
+                <SwitchOffTour>
+                    Migrate Templates and Invokers
+                </SwitchOffTour>,
+        },
+    ]
+};
+
 export function automaticallyShowTour(authUser){
     if(authUser && authUser.hasOwnProperty('userDetail') && authUser.userDetail && authUser.userDetail.hasOwnProperty('appTour')){
         return authUser.userDetail.appTour;
