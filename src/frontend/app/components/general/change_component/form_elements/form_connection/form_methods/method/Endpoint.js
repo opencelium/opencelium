@@ -55,7 +55,10 @@ class Endpoint extends Component{
     }
 
     onChangeEndpoint(e){
-        const value = e.target.value;
+        const encodedValue = e.target.value;
+        const div = document.createElement('div');
+        div.innerHTML = encodedValue;
+        const value = div.firstChild.nodeValue;
         let result = '';
         let elements = value.split('</span>');
         for(let i = 0; i < elements.length; i++){

@@ -132,8 +132,15 @@ class List extends Component{
     }
 
     componentDidUpdate(prevProps){
-        if(this.props.page.pageNumber !== prevProps.page.pageNumber || this.props.entities.length !== prevProps.entities.length || this.props.rerenderDependency !== prevProps.rerenderDependency){
+        if(this.props.page.pageNumber !== prevProps.page.pageNumber || this.props.entities.length !== prevProps.entities.length
+            || this.props.rerenderDependency !== prevProps.rerenderDependency){
             this.setCurrentPageItems();
+        }
+        for(let dependency in prevProps.mapDependencies){
+            if(prevProps.mapDependencies[dependency] !== this.props.mapDependencies[dependency]){
+                this.setCurrentPageItems();
+                break;
+            }
         }
     }
 
@@ -264,7 +271,7 @@ class List extends Component{
             <Row id={'app_list'}>
                 <Col xl={8} lg={10} md={12} sm={12} offset={{ xl: 2, lg: 1 }} >
                     <Container style={{...containerStyles, marginBottom: '70px'}}>
-                        <ListHeader header={translations.header} authUser={authUser}/>
+                        <ListHeader header={translations.header}/>
                         {
                             entities.length > 0 && !noSearchField &&
                                 <div className={'tour-step-search-1'}>
@@ -359,6 +366,7 @@ List.propTypes = {
     load: PropTypes.object,
     containerStyles: PropTypes.object,
     noSearchField: PropTypes.bool,
+    mapDependencies: PropTypes.object,
 };
 
 List.defaultProps = {
@@ -366,6 +374,7 @@ List.defaultProps = {
     load: null,
     containerStyles: {},
     noSearchField: false,
+    mapDependencies: {},
 };
 
 export default withRouter(List);

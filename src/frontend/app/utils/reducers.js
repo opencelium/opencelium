@@ -30,6 +30,7 @@ import {apps} from '../reducers/apps';
 import {templates} from "../reducers/templates";
 import {admincards} from '../reducers/admin_cards';
 import {notificationTemplates} from '../reducers/notification_templates';
+import {update_assistant} from '../reducers/update_assistant';
 
 
 /**
@@ -51,6 +52,7 @@ const combinedReducers = combineReducers({
     templates,
     admincards,
     notificationTemplates,
+    update_assistant,
 });
 
 export {combinedReducers};

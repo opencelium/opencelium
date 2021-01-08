@@ -20,23 +20,23 @@ import MonitoringBoards from "./MonitoringBoards";
 import Content from "../../../general/content/Content";
 import styles from '@themes/default/content/dashboard/dashboard.scss';
 import {getThemeClass} from "@utils/app";
-import {fetchAppVersion} from "@actions/app";
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import {fetchUpdateAppVersion} from "@actions/update_assistant/fetch";
 
 
 function mapStateToProps(state){
-    const app = state.get('app');
+    const updateAssistant = state.get('update_assistant');
     const auth = state.get('auth');
     return {
         authUser: auth.get('authUser'),
-        fetchingAppVersion: app.get('fetchingAppVersion'),
+        fetchingUpdateAppVersion: updateAssistant.get('fetchingUpdateAppVersion'),
     };
 }
 
 /**
  * Dashboard component
  */
-@connect(mapStateToProps, {fetchAppVersion})
+@connect(mapStateToProps, {fetchUpdateAppVersion})
 @withTranslation('dashboard')
 class DashboardView extends Component{
 
@@ -45,9 +45,9 @@ class DashboardView extends Component{
     }
 
     componentDidMount() {
-        const {fetchingAppVersion, fetchAppVersion} = this.props;
-        if(fetchingAppVersion !== API_REQUEST_STATE.START) {
-            fetchAppVersion({showNotification: true});
+        const {fetchingUpdateAppVersion, fetchUpdateAppVersion} = this.props;
+        if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START) {
+            fetchUpdateAppVersion();
         }
     }
 

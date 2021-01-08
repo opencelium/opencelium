@@ -14,7 +14,7 @@
  */
 
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 import {history} from '@components/App';
 
 import styles from '@themes/default/general/content.scss';
@@ -22,9 +22,17 @@ import {getThemeClass} from "@utils/app";
 import HelpIcon from "../app/HelpIcon";
 
 
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return {
+        authUser: auth.get('authUser'),
+    };
+}
 /**
  * Header Component for Content
  */
+@connect(mapStateToProps, {})
 class ContentHeader extends Component{
 
     constructor(props){
@@ -79,9 +87,5 @@ class ContentHeader extends Component{
         );
     }
 }
-
-ContentHeader.propTypes = {
-    authUser: PropTypes.object.isRequired,
-};
 
 export default ContentHeader;

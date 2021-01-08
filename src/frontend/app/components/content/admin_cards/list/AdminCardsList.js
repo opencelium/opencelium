@@ -17,20 +17,28 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchAdminCards, loadAdminCardsLink} from '@actions/admin_cards/fetch';
+import {fetchAppVersion} from "@actions/app";
+import {fetchUpdateAppVersion} from "@actions/update_assistant/fetch";
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
-import {AppPermissions, AdminCardPermissions} from "@utils/constants/permissions";
+import {AppPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {ADMINCARD_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
+import Loading from "@components/general/app/Loading";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+
+import styles from "@themes/default/content/admin_cards/admin_cards.scss";
 
 
 const prefixUrl = '/admin_cards';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     const adminCards = state.get('admincards');
+    const updateAssistant = state.get('update_assistant');
     return {
         authUser: auth.get('authUser'),
         fetchingAdminCards: adminCards.get('fetchingAdminCards'),
@@ -38,13 +46,17 @@ function mapStateToProps(state){
         adminCards: adminCards.get('adminCards').toJS(),
         isCanceled: adminCards.get('isCanceled'),
         isRejected: adminCards.get('isRejected'),
+        updateAppVersion: updateAssistant.get('updateAppVersion'),
+        fetchingUpdateAppVersion: updateAssistant.get('fetchingUpdateAppVersion'),
+        appVersion: app.get('appVersion'),
+        fetchingAppVersion: app.get('fetchingAppVersion'),
     };
 }
 
 /**
  * List of the Admin Cards
  */
-@connect(mapStateToProps, {fetchAdminCards, loadAdminCardsLink})
+@connect(mapStateToProps, {fetchAdminCards, loadAdminCardsLink, fetchAppVersion, fetchUpdateAppVersion})
 @permission(AppPermissions.READ, true)
 @withTranslation('admin_cards')
 @ListComponent('adminCards')
@@ -55,6 +67,16 @@ class AdminCardsList extends Component{
         super(props);
     }
 
+    componentDidMount() {
+        const {appVersion, fetchAppVersion, updateAppVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion, fetchingAppVersion} = this.props;
+        if(appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
+            fetchAppVersion();
+        }
+        if(updateAppVersion === '' && fetchingUpdateAppVersion !== API_REQUEST_STATE.START){
+            fetchUpdateAppVersion({background: true});
+        }
+    }
+
     redirect(data){
         if(data && data.hasOwnProperty('link')) {
             this.props.router.push(data.link);
@@ -62,7 +84,9 @@ class AdminCardsList extends Component{
     }
 
     render(){
-        const {authUser, t, adminCards, params, setTotalPages, openTour, loadAdminCardsLink, loadingAdminCardsLink, router} = this.props;
+        const {
+            authUser, t, adminCards, params, setTotalPages, openTour, loadAdminCardsLink, loadingAdminCardsLink,
+            updateAppVersion, appVersion, fetchingUpdateAppVersion, fetchingAppVersion} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -74,6 +98,13 @@ class AdminCardsList extends Component{
             result.title = adminCard.name;
             result.avatar = adminCard.icon;
             result.link = adminCard.link;
+            if(adminCard.link === '/update_assistant'){
+                if(fetchingUpdateAppVersion !== API_REQUEST_STATE.FINISH || fetchingAppVersion !== API_REQUEST_STATE.FINISH){
+                    result.subtitle = <Loading className={styles.update_loading}/>;
+                } else {
+                    result.subtitle = appVersion !== updateAppVersion ? t('LIST.NO_UPDATES') : t('LIST.UPDATES');
+                }
+            }
             return result;
         };
         mapEntity.getOnCardClickLink = (adminCard) => {return `${adminCard.link}`;};
@@ -88,6 +119,7 @@ class AdminCardsList extends Component{
             load={{loadLink: loadAdminCardsLink, loadingLink: loadingAdminCardsLink, callback: ::this.redirect}}
             containerStyles={{marginBottom: '70px'}}
             noSearchField={true}
+            mapDependencies={{fetchingUpdateAppVersion, fetchingAppVersion}}
         />;
     }
 }

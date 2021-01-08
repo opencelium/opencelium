@@ -74,7 +74,7 @@ class Content extends Component{
             <Row style={style} id={'app_content'}>
                 <Col xl={10} lg={10} md={12} sm={12} offset={{ xl: 1, lg: 1 }} >
                     <Container sm>
-                        <ViewHeader header={translations.header} authUser={authUser}/>
+                        <ViewHeader header={translations.header}/>
                         <Row style={{...contentStyle, marginLeft: 0, marginRight: 0}}>
                             <Col md={12} className={`${contentColClass} ${styles[classNames.content]}`}>
                                 {this.props.children}

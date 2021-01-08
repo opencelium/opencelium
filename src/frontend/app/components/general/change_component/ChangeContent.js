@@ -178,17 +178,19 @@ class ChangeContent extends Component{
      * to focus on the first input when switch the page
      */
     setFocusOnInput(inputs){
-        if(inputs[0].readOnly === true){
-            return;
-        }
-        let name = inputs[0].name;
-        if(inputs[0].hasOwnProperty('visible')){
-            let elem = inputs.find(i => i.visible === true);
-            if(elem){
-                name = elem.name;
+        if(inputs.length > 0) {
+            if (inputs[0].readOnly === true) {
+                return;
             }
+            let name = inputs[0].name;
+            if (inputs[0].hasOwnProperty('visible')) {
+                let elem = inputs.find(i => i.visible === true);
+                if (elem) {
+                    name = elem.name;
+                }
+            }
+            setFocusById(`input_${name}`);
         }
-        setFocusById(`input_${name}`);
     }
 
     /**

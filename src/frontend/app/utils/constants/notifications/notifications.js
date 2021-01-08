@@ -19,8 +19,8 @@ import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
     ConnectionsAction, SchedulesAction, TemplatesAction, WebHooksAction,
     AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
+    UpdateAssistantAction,
 } from '@utils/actions';
-import {Link} from 'react-router';
 import Translate from "@components/general/app/Translate";
 import AvailableUpdate from "@basic_components/translations/AvailableUpdate";
 
@@ -46,7 +46,6 @@ export const EntitiesWithNotification = [
     {name: AuthAction.SESSION_EXPIRED, types: ['WARNED']},
     {name: AuthAction.UPDATE_AUTH_USER_LANGUAGE, types: ['FULFILLED', 'REJECTED']},
     {name: AppAction.DO_REQUEST, types: ['REJECTED']},
-    {name: AppAction.FETCH_APPVERSION, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.TEST_CONNECTOR, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.ADD_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectorsAction.FETCH_CONNECTORS, types: ['FULFILLED', 'REJECTED']},
@@ -88,6 +87,7 @@ export const EntitiesWithNotification = [
     {name: NotificationTemplatesAction.ADD_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**
@@ -120,7 +120,7 @@ const SuccessInterpolates = {
             </Translate>
         );
     },
-    FETCH_APPVERSION: (params) => {
+    FETCH_UPDATEAPPVERSION: (params) => {
         return <AvailableUpdate {...params}/>
     },
     CHANGE_LANGUAGE: '',
