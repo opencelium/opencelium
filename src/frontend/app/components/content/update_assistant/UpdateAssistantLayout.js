@@ -14,29 +14,128 @@
  */
 
 import React, {Component, Suspense} from 'react';
+import {connect} from 'react-redux';
+import {withTranslation} from "react-i18next";
 import {Container} from 'react-grid-system';
 
 import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
-import ViewHeader from "@components/general/view_component/Header";
+import {UserGroupPermissions} from "@utils/constants/permissions";
+import ChangeContent from "@change_component/ChangeContent";
+import OCTour from "@basic_components/OCTour";
+import {automaticallyShowTour, UPDATE_ASSISTANT_TOURS} from "@utils/constants/tours";
+import Content from "@components/general/content/Content";
+import {INPUTS} from "@utils/constants/inputs";
+import SystemOverview from "@components/content/update_assistant/SystemOverview";
+
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return{
+        authUser: auth.get('authUser'),
+    };
+}
 
 /**
  * Layout for UpdateAssistant
  */
+@connect(mapStateToProps, {})
+//@permission(UserGroupPermissions.CREATE, true)
+@withTranslation(['update_assistant', 'app'])
 class UpdateAssistantLayout extends Component{
 
     constructor(props){
         super(props);
+        const {authUser} = this.props;
+        this.state = {
+            currentTour: 'page_1',
+            isTourOpen: automaticallyShowTour(authUser),
+        };
+    }
+
+    /**
+     * to set appropriate Tour
+     */
+    setCurrentTour(pageNumber){
+        const {authUser} = this.props;
+        this.startCheckingName = false;
+        this.setState({
+            currentTour: `page_${pageNumber}`,
+            isTourOpen: automaticallyShowTour(authUser),
+        });
+    }
+
+    /**
+     * to close current Tour
+     */
+    closeTour(){
+        this.setState({
+            isTourOpen: false,
+        });
+    }
+
+    /**
+     * to open current Tour
+     */
+    openTour(){
+        this.setState({
+            isTourOpen: true,
+        });
     }
 
     render(){
-        let header = {title: 'Update Assistant', breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
+        const {t, authUser} = this.props;
+        let header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
+        let contentTranslations = {};
+        contentTranslations.header = t('FORM.HEADER');
+        contentTranslations.list_button = '';
+        let changeContentTranslations = {};
+        changeContentTranslations.addButton = '';
+        let getListLink = ``;
+        let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5')];
+        let contents = [{
+            inputs: [
+                {...INPUTS.MESSAGE, label: t('FORM.SYSTEM_CHECK'), defaultValue: <SystemOverview/>},
+            ],
+            hint: {text: t('FORM.HINT_1'), openTour: ::this.openTour},
+        },{
+            inputs:[
+            ],
+            hint: {text: t('FORM.HINT_2'), openTour: ::this.openTour},
+        },{
+            inputs:[
+            ],
+            hint: {text: t('FORM.HINT_3'), openTour: ::this.openTour},
+        },{
+            inputs:[
+            ],
+            hint: {text: t('FORM.HINT_4'), openTour: ::this.openTour},
+        },{
+            inputs:[
+            ],
+            hint: {text: t('FORM.HINT_5'), openTour: ::this.openTour},
+        },
+        ];
         return (
             <Container>
                 <Suspense fallback={(<Loading/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        <ViewHeader header={header}/>
+                        <Content translations={contentTranslations} getListLink={getListLink} permissions={UserGroupPermissions} authUser={authUser}>
+                            <ChangeContent
+                                breadcrumbsItems={breadcrumbsItems}
+                                contents={contents}
+                                translations={changeContentTranslations}
+                                action={() => {}}
+                                authUser={authUser}
+                                onPageSwitch={::this.setCurrentTour}
+                            />
+                            <OCTour
+                                steps={UPDATE_ASSISTANT_TOURS[this.state.currentTour]}
+                                isOpen={this.state.isTourOpen}
+                                onRequestClose={::this.closeTour}
+                            />
+                        </Content>
                     </ComponentError>
                 </Suspense>
             </Container>
