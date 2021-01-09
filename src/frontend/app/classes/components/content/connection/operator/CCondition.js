@@ -16,18 +16,21 @@
 
 import CStatement from "./CStatement";
 
+//value - operator name for backend
+//hasValue = false -> the right statement is absent (default: true)
+//isRightStatementText = true -> the right statement is only text(constant) (default: false)
 export const FUNCTIONAL_OPERATORS = [
     {value: 'IsNull', hasValue: false},
     {value: 'PropertyExists', hasValue: true, isRightStatementText: true},
     {value: 'PropertyNotExists', hasValue: true, isRightStatementText: true},
     {value: 'Contains', label: 'Contains(⊂)', hasValue: true},
     {value: 'NotContains', label: 'NotContains(⊄)', hasValue: true},
-    {value: '>=', hasValue: true, isRightStatementText: true},
-    {value: '>', hasValue: true, isRightStatementText: true},
-    {value: '<=', hasValue: true, isRightStatementText: true},
-    {value: '<', hasValue: true, isRightStatementText: true},
-    {value: '=', hasValue: true, isRightStatementText: true},
-    {value: '!=', hasValue: true, isRightStatementText: true},
+    {value: '>=', hasValue: true},
+    {value: '>', hasValue: true},
+    {value: '<=', hasValue: true},
+    {value: '<', hasValue: true},
+    {value: '=', hasValue: true},
+    {value: '!=', hasValue: true},
     {value: 'NotNull', hasValue: false},
     {value: 'IsEmpty', hasValue: false},
     {value: 'NotEmpty', hasValue: false},

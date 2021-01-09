@@ -616,7 +616,7 @@ class IfOperator extends Component{
         if(isRightStatementText){
             isVisible = false;
         }
-        let selectThemeInputStyle = {width: isVisible ? '10%' : '0', float: 'left', transition: isVisible ? 'width 0.3s ease 0s' : 'none',};
+        let selectThemeInputStyle = {width: isVisible ? '10%' : '0', float: 'left', maxHeight: '38px', transition: isVisible ? 'width 0.3s ease 0s' : 'none',};
         let generalStyles = {width: '95%', float: 'right'};
         let source = this.getOptionsForMethods('rightStatement');
         generalStyles.width = pointerWidthValue;
