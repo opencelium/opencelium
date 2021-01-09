@@ -24,6 +24,7 @@ import ParamGenerator from "./ParamGenerator";
 import Input from "@basic_components/inputs/Input";
 import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {freeStringFromAmp} from "@utils/app";
 
 
 function mapStateToProps(state){
@@ -55,33 +56,32 @@ class Endpoint extends Component{
     }
 
     onChangeEndpoint(e){
-        const encodedValue = e.target.value;
-        const div = document.createElement('div');
-        div.innerHTML = encodedValue;
-        const value = div.firstChild.nodeValue;
-        let result = '';
-        let elements = value.split('</span>');
-        for(let i = 0; i < elements.length; i++){
-            if(elements[i] !== ''){
-                let index = elements[i].indexOf('>');
-                if(elements[i].indexOf('data-value="param"') === -1) {
-                    result += elements[i].substring(index + 1, elements[i].length);
-                } else{
-                    let param = elements[i].split('data-main="')[1].split('"')[0];
-                    let paramName = param.split('.').slice(3).join('.').slice(0, -2);
-                    let checkParamName = elements[i].substring(elements[i].indexOf('>') + 1);
-                    if(checkParamName.indexOf(paramName) === 0){
-                        result += param;
-                        if(checkParamName.length > paramName.length){
-                            result += checkParamName.substring(paramName.length);
+        const value = e.target.value;
+        if(value) {
+            let result = '';
+            let elements = value.split('</span>');
+            for (let i = 0; i < elements.length; i++) {
+                if (elements[i] !== '') {
+                    let index = elements[i].indexOf('>');
+                    if (elements[i].indexOf('data-value="param"') === -1) {
+                        result += freeStringFromAmp(elements[i].substring(index + 1, elements[i].length));
+                    } else {
+                        let param = elements[i].split('data-main="')[1].split('"')[0];
+                        let paramName = param.split('.').slice(3).join('.').slice(0, -2);
+                        let checkParamName = elements[i].substring(elements[i].indexOf('>') + 1);
+                        if (checkParamName.indexOf(paramName) === 0) {
+                            result += freeStringFromAmp(param);
+                            if (checkParamName.length > paramName.length) {
+                                result += freeStringFromAmp(checkParamName.substring(paramName.length));
+                            }
                         }
                     }
                 }
             }
+            this.setState({
+                contentEditableValue: result,
+            });
         }
-        this.setState({
-            contentEditableValue: result,
-        });
     }
 
     saveEndpoint(){
