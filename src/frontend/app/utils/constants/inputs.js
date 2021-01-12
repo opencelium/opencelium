@@ -18,9 +18,11 @@
  */
 const TITLE = {name: 'title', type: 'text', maxLength: 256, icon: 'text_fields'};
 const DESCRIPTION = {name: 'description', type: 'textarea', maxLength: 1024, icon: 'short_text'};
+const MESSAGE = {name: 'message', type: 'message', icon: 'short_text'};
 const ICOMMON = {
     TITLE,
     DESCRIPTION,
+    MESSAGE,
 };
 
 //CONNECTION

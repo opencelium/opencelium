@@ -32,7 +32,7 @@ import {logoutUserFulfilled, sessionNotExpired} from "@actions/auth";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 import {getLS} from "@utils/LocalStorage";
-import {API_REQUEST_STATE} from "@utils/constants/app";
+import {API_REQUEST_STATE, TEST} from "@utils/constants/app";
 
 let checkTokenInterval;
 
@@ -54,7 +54,7 @@ function mapStateToProps(state){
  * Layout of the app(OC)
  */
 @withTranslation('notifications')
-@connect(mapStateToProps, {changeLanguage, addUserInStore, logoutUserFulfilled, fetchAppVersion, sessionNotExpired})
+@connect(mapStateToProps, {changeLanguage, addUserInStore, logoutUserFulfilled, sessionNotExpired, fetchAppVersion})
 class Layout extends Component{
 
     constructor(props){
@@ -74,7 +74,9 @@ class Layout extends Component{
             if( appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
                 fetchAppVersion();
             }
-        }
+        }/*
+        console.log(TEST.connection.toConnector.methods.map(method => method.index));
+        console.log(TEST.connection.toConnector.operators.map(operator => operator.index));*/
     }
 
     componentDidUpdate(prevProps){

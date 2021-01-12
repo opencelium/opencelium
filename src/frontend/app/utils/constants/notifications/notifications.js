@@ -14,13 +14,15 @@
  */
 
 import React from 'react';
-import { Trans } from 'react-i18next';
 
 import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
     ConnectionsAction, SchedulesAction, TemplatesAction, WebHooksAction,
     AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
+    UpdateAssistantAction,
 } from '@utils/actions';
+import Translate from "@components/general/app/Translate";
+import AvailableUpdate from "@basic_components/translations/AvailableUpdate";
 
 
 /**
@@ -85,6 +87,7 @@ export const EntitiesWithNotification = [
     {name: NotificationTemplatesAction.ADD_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**
@@ -112,10 +115,13 @@ const SuccessInterpolates = {
     ADD_USER: (params) => {
         const {name} = params.userDetail;
         return (
-            <Trans i18nKey="notifications:SUCCESS.ADD_USER" name={name}>
+            <Translate i18nKey="notifications:SUCCESS.ADD_USER" name={name}>
                 The user <strong>{name}</strong> was successfully added.
-            </Trans>
+            </Translate>
         );
+    },
+    FETCH_UPDATEAPPVERSION: (params) => {
+        return <AvailableUpdate {...params}/>
     },
     CHANGE_LANGUAGE: '',
 };

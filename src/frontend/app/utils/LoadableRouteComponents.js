@@ -266,6 +266,14 @@ const TemplateConverterLayout = Loadable({
     loading: Loading,
 });
 
+/**
+ * Loadable Update Assistant
+ */
+const UpdateAssistantLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'template_converter_layout' */ '@components/content/update_assistant/UpdateAssistantLayout'),
+    loading: Loading,
+});
+
 export default {
     UserLayout,
     UserAdd,
@@ -314,4 +322,5 @@ export default {
     NotificationTemplateView,
     NotificationTemplateUpdate,
     TemplateConverterLayout,
+    UpdateAssistantLayout,
 };

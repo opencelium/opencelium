@@ -15,12 +15,12 @@
 
 import {fromJS, List} from 'immutable';
 
-import {AppAction} from '../utils/actions';
+import {AppAction} from '@utils/actions';
 import i18n from '../utils/i18n';
-import {defaultLanguage} from "../utils/constants/languages";
+import {defaultLanguage} from "@utils/constants/languages";
 
-import {setLS} from '../utils/LocalStorage';
-import {API_REQUEST_STATE} from "../utils/constants/app";
+import {setLS} from '@utils/LocalStorage';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const initialState = fromJS({
@@ -35,7 +35,7 @@ const initialState = fromJS({
 });
 
 /**
- * (not used) redux reducer for app
+ * redux reducer for app
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {

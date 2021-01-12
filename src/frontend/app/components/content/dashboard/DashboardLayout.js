@@ -18,7 +18,7 @@ import {Container, Row} from 'react-grid-system';
 
 import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "@utils/constants/app";
+import {API_REQUEST_STATE, ERROR_TYPE} from "@utils/constants/app";
 import DashboardView from "./view/DashboardView";
 import {OC_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";

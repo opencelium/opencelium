@@ -16,14 +16,13 @@
 
 package com.becon.opencelium.backend.security;
 
-import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.mysql.entity.Activity;
 import com.becon.opencelium.backend.mysql.entity.User;
+import com.becon.opencelium.backend.utility.TokenUtility;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -34,6 +33,9 @@ import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil {
+
+    @Autowired
+    private TokenUtility tokenUtility;
 
     public String getEmailFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
@@ -63,7 +65,7 @@ public class JwtTokenUtil {
         String token = UUID.randomUUID().toString();
         claims.put("userId", user.getId());
         claims.put("role", user.getUserRole().getName());
-        claims.put("sessionTime", SecurityConstant.ACTIVITY_TIME);
+        claims.put("sessionTime", tokenUtility.getActitvityTime());
 
         return doGenerateToken(claims, user.getEmail(), token);
     }
@@ -77,7 +79,7 @@ public class JwtTokenUtil {
         final String email = getEmailFromToken(token);
 
         long inactiveTime = new Date().getTime() - activity.getRequestTime().getTime();
-        if (inactiveTime > SecurityConstant.ACTIVITY_TIME){
+        if (inactiveTime > tokenUtility.getActitvityTime()){
             return false;
         }
 
@@ -87,7 +89,7 @@ public class JwtTokenUtil {
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(SecurityConstant.SECRET.getBytes()).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(tokenUtility.getSecret().getBytes()).parseClaimsJws(token).getBody();
     }
 
     private Boolean isTokenExpired(String token) {
@@ -102,7 +104,7 @@ public class JwtTokenUtil {
                 .setId(id)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstant.EXPIRATION_TIME * 1000))
-                .signWith(SignatureAlgorithm.HS512, SecurityConstant.SECRET.getBytes()).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + tokenUtility.getExpirationTime() * 1000))
+                .signWith(SignatureAlgorithm.HS512, tokenUtility.getSecret().getBytes()).compact();
     }
 }

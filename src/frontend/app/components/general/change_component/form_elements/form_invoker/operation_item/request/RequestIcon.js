@@ -76,7 +76,7 @@ class RequestIcon extends Component{
 
     getRequest(){
         const {request, requestData} = this.props;
-        let endpoint = request.affix !== '' ? `${request.query}/${request.affix}` : request.query;
+        let endpoint = request.endpoint;
         let body = JSON.stringify(request.getBodyFields());
         if(requestData){
             for(let param in requestData){

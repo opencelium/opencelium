@@ -20,24 +20,35 @@ import MonitoringBoards from "./MonitoringBoards";
 import Content from "../../../general/content/Content";
 import styles from '@themes/default/content/dashboard/dashboard.scss';
 import {getThemeClass} from "@utils/app";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {fetchUpdateAppVersion} from "@actions/update_assistant/fetch";
 
 
 function mapStateToProps(state){
+    const updateAssistant = state.get('update_assistant');
     const auth = state.get('auth');
     return {
         authUser: auth.get('authUser'),
+        fetchingUpdateAppVersion: updateAssistant.get('fetchingUpdateAppVersion'),
     };
 }
 
 /**
  * Dashboard component
  */
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {fetchUpdateAppVersion})
 @withTranslation('dashboard')
 class DashboardView extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    componentDidMount() {
+        const {fetchingUpdateAppVersion, fetchUpdateAppVersion} = this.props;
+        if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START) {
+            //fetchUpdateAppVersion();
+        }
     }
 
     render(){

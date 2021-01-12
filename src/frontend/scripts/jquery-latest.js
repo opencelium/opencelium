@@ -1,3 +1,17 @@
+/*!
+ * jQuery JavaScript Library v1.11.1
+ * http://jquery.com/
+ *
+ * Includes Sizzle.js
+ * http://sizzlejs.com/
+ *
+ * Copyright 2005, 2014 jQuery Foundation, Inc. and other contributors
+ * Released under the MIT license
+ * http://jquery.org/license
+ *
+ * Date: 2014-05-01T17:42Z
+ */
+
 (function( global, factory ) {
 
     if ( typeof module === "object" && typeof module.exports === "object" ) {
@@ -7401,7 +7415,7 @@
     jQuery.speed = function( speed, easing, fn ) {
         var opt = speed && typeof speed === "object" ? jQuery.extend( {}, speed ) : {
             complete: fn || !fn && easing ||
-            jQuery.isFunction( speed ) && speed,
+                jQuery.isFunction( speed ) && speed,
             duration: speed,
             easing: fn && easing || easing && !jQuery.isFunction( easing ) && easing
         };
@@ -7436,7 +7450,7 @@
             // show any hidden elements after setting opacity to 0
             return this.filter( isHidden ).css( "opacity", 0 ).show()
 
-            // animate to the value specified
+                // animate to the value specified
                 .end().animate({ opacity: to }, speed, easing, callback );
         },
         animate: function( prop, speed, easing, callback ) {

@@ -16,6 +16,7 @@
 import React from 'react';
 import CConnectorItem, {INSIDE_ITEM} from "../../../../../app/classes/components/content/connection/CConnectorItem";
 import {ALL_COLORS} from "../../../../../app/classes/components/content/connection/CConnection";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 
 
 describe.skip('Add Method', () => {
@@ -132,5 +133,31 @@ describe.skip('Check Iterators', () => {
         connectorItem.addOperator({type: 'loop'}, INSIDE_ITEM);
         console.log(connectorItem.operators[2].iterator);
         expect(connectorItem.operators[2].iterator).toBe('k');
+    });
+});
+
+describe('Check Get All Previous Methods for defined item (Operator component. Select Box)', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    const item = COperatorItem.createOperatorItem({index: '2_0_0_0_1', type: 'if'})
+    beforeEach(() => {
+        connectorItem.methods = [
+            {"index":"0","name":"TicketGet","color":"#C77E7E"},
+            {"index":"1_0","name":"ConfigItemCreate","color":"#6477AB"},
+            {"index":"1_1_0","name":"ConfigItemUpdate","color":"#98BEC7"},
+            {"index":"1_1_1_0","name":"ConfigItemSearch","color":"#9EC798"},
+            {"index":"1_1_1_1","name":"ConfigItemDelete","color":"#BFC798"},
+            {"index":"1_1_2_0_0_0","name":"ConfigItemGet","color":"#E6E6EA"},
+            {"index":"2_0_0_0_0","name":"ConfigItemGet","color":"#F4B6C2"}
+        ];
+        connectorItem.operators = [{"index":"1","type":"if"},{"index":"1_1","type":"loop"},{"index":"1_1_1","type":"if"},{"index":"1_1_2","type":"if"},{"index":"1_1_2_0","type":"if"},{"index":"1_1_2_0_0","type":"if"},{"index":"2","type":"if"},{"index":"2_0","type":"if"},{"index":"2_0_0","type":"if"},{"index":"2_0_0_0","type":"if"},{"index":"2_0_0_0_1","type":"if"}];
+    });
+
+    it('should have two elements', () => {
+        const expected = [
+            {"label":"TicketGet","value":"t_0","color":"#C77E7E"},
+            {"label":"ConfigItemGet","value":"t_2_0_0_0_0","color":"#F4B6C2"},
+        ];
+        const received = connectorItem.getAllPrevMethods(item);
+        expect(received).toEqual(expected);
     });
 });

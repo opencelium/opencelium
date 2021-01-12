@@ -129,6 +129,8 @@ const checkConnectionTitleRejected = (error) => {
 /**
  * fetch connection
  * @param connection
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: {}}}
  */
 const fetchConnection = (connection, settings) => {

@@ -22,46 +22,41 @@
     <title>OpenCelium</title>
     <link rel="icon" href="fav_icon.png" type="image/png">
     <link rel="shortcut icon" href="fav_icon.png" type="image/png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/css/swiper.min.css">
-    <link rel="stylesheet" type="text/css" charset="UTF-8" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
-    <link
-            rel="stylesheet"
-            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-            crossorigin="anonymous"
-    />
   </head>
   <body>
 	<div id="app"></div>
     <div id="notification"></div>
     <div id="oc_xml_modal"></div>
     <div id="oc_generator_modal"></div>
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script>
       var hrefs = [
+          "./styles/swiper.min.css",
+          "./styles/slick.min.css",
+          "./styles/slick-theme.min.css",
           "./styles/app.css",
+          "./styles/bootstrap.min.css",
           "node_modules/storm-react-diagrams/dist/style.min.css",
           "./styles/react-select.css",
           "./styles/material_icons.css",
           "./oc_modules/template_converter/src/styles/awesome/css/all.min.css"
       ];
       var srcs = [
+          './scripts/jquery-latest.js',
           'bundle.js',
           'jira_integration.js'
       ];
       var host = '/';
+      for(var i = 0; i < hrefs.length; i++) {
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = host + hrefs[i];
+        document.getElementsByTagName("head")[0].appendChild(link);
+      }
       for(var i = 0; i < srcs.length; i++) {
           var script = document.createElement('script');
           script.type='text/javascript';
           script.src = host + srcs[i];
           document.getElementsByTagName("head")[0].appendChild(script);
-      }
-      for(var i = 0; i < hrefs.length; i++) {
-          var link = document.createElement("link");
-          link.rel = "stylesheet";
-          link.href = host + hrefs[i];
-          document.getElementsByTagName("head")[0].appendChild(link);
       }
 
       var socketLink = document.createElement("link");

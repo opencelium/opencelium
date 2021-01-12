@@ -14,7 +14,6 @@
  */
 
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 
 import ContentHeader from '../content/ContentHeader';
 
@@ -28,15 +27,12 @@ class ListHeader extends Component{
     }
 
     render(){
-        const {authUser, header} = this.props;
+        const {header} = this.props;
         return (
-            <ContentHeader header={header} authUser={authUser}/>
+            <ContentHeader header={header}/>
         );
     }
 }
-ListHeader.propTypes = {
-    authUser: PropTypes.object.isRequired,
-};
 
 
 export default ListHeader;
