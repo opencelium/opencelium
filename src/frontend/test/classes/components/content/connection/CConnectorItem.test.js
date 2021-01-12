@@ -158,8 +158,6 @@ describe('Check Get All Previous Methods for defined item (Operator component. S
             {"label":"ConfigItemGet","value":"t_2_0_0_0_0","color":"#F4B6C2"},
         ];
         const received = connectorItem.getAllPrevMethods(item);
-        console.log(connectorItem.methods.length);
-        console.log(received);
         expect(received).toEqual(expected);
     });
 });

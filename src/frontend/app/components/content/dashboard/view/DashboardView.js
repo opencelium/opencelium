@@ -47,7 +47,7 @@ class DashboardView extends Component{
     componentDidMount() {
         const {fetchingUpdateAppVersion, fetchUpdateAppVersion} = this.props;
         if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START) {
-            fetchUpdateAppVersion();
+            //fetchUpdateAppVersion();
         }
     }
 
