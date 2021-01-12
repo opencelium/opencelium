@@ -30,7 +30,9 @@ export const OPERATOR_ITEM = 'operator';
 
 export const CONNECTOR_DEPTH_LIMIT = 7;
 
-export const ITERATOR_NAMES = ['i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+export const ITERATOR_NAMES = [
+    'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+];
 
 /**
  * Connector class for manipulating data in the Connector Component

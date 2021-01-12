@@ -28,6 +28,7 @@ import {automaticallyShowTour, UPDATE_ASSISTANT_TOURS} from "@utils/constants/to
 import Content from "@components/general/content/Content";
 import {INPUTS} from "@utils/constants/inputs";
 import SystemOverview from "@components/content/update_assistant/SystemOverview";
+import AvailableUpdates from "@components/content/update_assistant/AvailableUpdates";
 
 
 function mapStateToProps(state){
@@ -96,11 +97,12 @@ class UpdateAssistantLayout extends Component{
         let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5')];
         let contents = [{
             inputs: [
-                {...INPUTS.MESSAGE, label: t('FORM.SYSTEM_CHECK'), defaultValue: <SystemOverview/>},
+                {...INPUTS.COMPONENT, tourStep: UPDATE_ASSISTANT_TOURS.page_1[0].selector, name: 'system_check', label: t('FORM.SYSTEM_CHECK'), defaultValue: <SystemOverview/>},
             ],
             hint: {text: t('FORM.HINT_1'), openTour: ::this.openTour},
         },{
             inputs:[
+                {...INPUTS.COMPONENT, tourStep: UPDATE_ASSISTANT_TOURS.page_2[0].selector, icon: 'backup', name: 'available_updates', label: t('FORM.AVAILABLE_UPDATES'), defaultValue: <AvailableUpdates/>},
             ],
             hint: {text: t('FORM.HINT_2'), openTour: ::this.openTour},
         },{

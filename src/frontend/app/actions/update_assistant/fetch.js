@@ -57,9 +57,93 @@ const fetchUpdateAppVersionRejected = (error) => {
     });
 };
 
+/**
+ * fetch online updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOnlineUpdates = (settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES,
+        settings,
+    };
+};
+
+/**
+ * fetch online updates fulfilled
+ * @param updates = available updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOnlineUpdatesFulfilled = (updates, settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_FULFILLED,
+        payload: updates,
+        settings: {...settings, hasCloseButton: true},
+    };
+};
+
+/**
+ * fetch online updates rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchOnlineUpdatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_REJECTED,
+        payload: error
+    });
+};
+/**
+ * fetch offline updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOfflineUpdates = (settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES,
+        settings,
+    };
+};
+
+/**
+ * fetch offline updates fulfilled
+ * @param updates = available updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOfflineUpdatesFulfilled = (updates, settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_FULFILLED,
+        payload: updates,
+        settings: {...settings, hasCloseButton: true},
+    };
+};
+
+/**
+ * fetch offline updates rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchOfflineUpdatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_REJECTED,
+        payload: error
+    });
+};
 
 export {
     fetchUpdateAppVersion,
     fetchUpdateAppVersionRejected,
     fetchUpdateAppVersionFulfilled,
+    fetchOnlineUpdates,
+    fetchOnlineUpdatesRejected,
+    fetchOnlineUpdatesFulfilled,
+    fetchOfflineUpdates,
+    fetchOfflineUpdatesRejected,
+    fetchOfflineUpdatesFulfilled,
 };

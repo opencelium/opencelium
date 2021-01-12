@@ -78,7 +78,9 @@ import {
     fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
     updateNotificationTemplateEpic, deleteNotificationTemplateEpic,
 } from '@epics/notification_templates';
-import {fetchUpdateAppVersionEpic} from "@epics/update_assistant";
+import {
+    fetchUpdateAppVersionEpic, fetchOfflineUpdatesEpic, fetchOnlineUpdatesEpic,
+} from "@epics/update_assistant";
 
 
 /**
@@ -178,4 +180,6 @@ export default combineEpics(
     deleteNotificationTemplateEpic,
     checkConnectionEpic,
     fetchUpdateAppVersionEpic,
+    fetchOfflineUpdatesEpic,
+    fetchOnlineUpdatesEpic,
 );
