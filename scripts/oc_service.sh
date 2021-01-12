@@ -61,7 +61,7 @@ restart_backend(){
 
 stop_frontend()
 {
-        /usr/lib/klibc/bin/kill $(pgrep -f "/usr/bin/node dev_server.js --mode development")
+        /usr/lib/klibc/bin/kill $(pgrep -f "/usr/local/bin/node dev_server.js --mode development")
 }
 
 start_frontend(){
