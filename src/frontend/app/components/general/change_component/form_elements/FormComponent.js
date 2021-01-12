@@ -15,17 +15,14 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '@basic_components/inputs/Input';
-
-import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 
 /**
- * Component for Form Input
+ * Form Component
  */
 @FormElement()
-class FormMessage extends Component{
+class FormComponent extends Component{
 
     constructor(props){
         super(props);
@@ -48,10 +45,10 @@ class FormMessage extends Component{
     }
 }
 
-FormMessage.propTypes = {
+FormComponent.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
 };
 
 
-export default FormMessage;
+export default FormComponent;
