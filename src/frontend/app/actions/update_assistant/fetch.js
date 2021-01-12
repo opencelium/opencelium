@@ -104,7 +104,7 @@ const fetchOnlineUpdatesRejected = (error) => {
  */
 const fetchOfflineUpdates = (settings = {background: false}) => {
     return {
-        type: UpdateAssistantAction.FETCH_ONLINEUPDATES,
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES,
         settings,
     };
 };
@@ -118,7 +118,7 @@ const fetchOfflineUpdates = (settings = {background: false}) => {
  */
 const fetchOfflineUpdatesFulfilled = (updates, settings = {background: false}) => {
     return {
-        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_FULFILLED,
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES_FULFILLED,
         payload: updates,
         settings: {...settings, hasCloseButton: true},
     };
@@ -131,7 +131,7 @@ const fetchOfflineUpdatesFulfilled = (updates, settings = {background: false}) =
  */
 const fetchOfflineUpdatesRejected = (error) => {
     return Rx.Observable.of({
-        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_REJECTED,
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES_REJECTED,
         payload: error
     });
 };
