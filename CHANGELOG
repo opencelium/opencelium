@@ -34,7 +34,7 @@ OC Changelog
 [Connector]							PRTG Network Monitor
 [Connector]							Aruba Clearpass
 [Connector]							CSV2API (Microsoft SQL Server)
-[Business template][PRTG][i-doit]			Status update
+[Business template][PRTG][i-doit]	Status update
 [Improvement]						Autoupdate changeset of application yaml configuration
 [Improvement]						Autoupdate changeset of database structure
 [Improvement]						Better overview of the connection with the integration of history and tree view functionality
