@@ -28,10 +28,11 @@ export const CONNECTOR_TO = 'toConnector';
 export const METHOD_ITEM = 'method';
 export const OPERATOR_ITEM = 'operator';
 
-export const CONNECTOR_DEPTH_LIMIT = 7;
+export const CONNECTOR_DEPTH_LIMIT = 1000;
 
 export const ITERATOR_NAMES = [
     'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    'ii', 'ij', 'ik', 'il', 'im', 'in', 'io', 'ip', 'iq', 'ir', 'is', 'it', 'iu', 'iv', 'iw', 'ix', 'iy', 'iz'
 ];
 
 /**
