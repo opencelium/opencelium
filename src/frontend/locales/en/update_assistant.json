@@ -13,6 +13,10 @@
     "PAGE_4": "Migration",
     "HINT_4": "Migrate your connections and invokers",
     "PAGE_5": "Done",
-    "HINT_5": "Update successfully completed"
+    "HINT_5": "Update successfully completed",
+    "VALIDATION_MESSAGES": {
+      "NO_UPDATE_MODE": "Please, select how do you want to update",
+      "NO_SELECTED_VERSION": "Please, select an available version"
+    }
   }
 }

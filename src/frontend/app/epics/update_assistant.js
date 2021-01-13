@@ -24,20 +24,20 @@ import Rx from "rxjs";
 
 
 const ONLINE_UPDATES = [
-    {id: 1, name: 'v1.2', changeLogLink: '', status: 'old'},
-    {id: 2, name: 'v1.2.1', changeLogLink: '', status: 'old'},
-    {id: 3, name: 'v1.2.2', changeLogLink: '', status: 'old'},
     {id: 4, name: 'v1.3', changeLogLink: '', status: 'current'},
     {id: 5, name: 'v1.3.1', changeLogLink: '', status: 'available'},
     {id: 6, name: 'v1.3.2', changeLogLink: '', status: 'available'},
     {id: 7, name: 'v1.4', changeLogLink: '', status: 'not_available'},
 ];
 const OFFLINE_UPDATES = [
+    {id: 0, name: 'v1.1', changeLogLink: '', status: 'old'},
     {id: 1, name: 'v1.2', changeLogLink: '', status: 'old'},
     {id: 2, name: 'v1.2.2', changeLogLink: '', status: 'old'},
     {id: 3, name: 'v1.3', changeLogLink: '', status: 'current'},
     {id: 4, name: 'v1.3.2', changeLogLink: '', status: 'available'},
     {id: 5, name: 'v1.4', changeLogLink: '', status: 'not_available'},
+    {id: 6, name: 'v1.4.1', changeLogLink: '', status: 'not_available'},
+    {id: 7, name: 'v1.4.2', changeLogLink: '', status: 'not_available'},
 ];
 
 /**

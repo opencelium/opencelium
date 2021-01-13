@@ -29,6 +29,8 @@ import Content from "@components/general/content/Content";
 import {INPUTS} from "@utils/constants/inputs";
 import SystemOverview from "@components/content/update_assistant/SystemOverview";
 import AvailableUpdates from "@components/content/update_assistant/AvailableUpdates";
+import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
+import {setFocusById} from "@utils/app";
 
 
 function mapStateToProps(state){
@@ -52,6 +54,13 @@ class UpdateAssistantLayout extends Component{
         this.state = {
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
+            updateData: {
+                systemCheck: {},
+                availableUpdates: {
+                    mode: '',
+                    selectedVersion: '',
+                },
+            },
         };
     }
 
@@ -84,12 +93,25 @@ class UpdateAssistantLayout extends Component{
             isTourOpen: true,
         });
     }
+    /**
+     * to validate mode
+     */
+    validateAvailableUpdates(entity){
+        const {t} = this.props;
+        if (entity.availableUpdates && entity.availableUpdates.mode === '') {
+            return {value: false, message: t('FORM.VALIDATION_MESSAGES.NO_UPDATE_MODE')};
+        }
+        if(entity.availableUpdates && entity.availableUpdates.selectedVersion === ''){
+            return {value: false, message: t('FORM.VALIDATION_MESSAGES.NO_SELECTED_VERSION')};
+        }
+        return {value: true, message: ''};
+    }
 
     render(){
+        const {updateData} = this.state;
         const {t, authUser} = this.props;
-        let header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         let contentTranslations = {};
-        contentTranslations.header = t('FORM.HEADER');
+        contentTranslations.header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         contentTranslations.list_button = '';
         let changeContentTranslations = {};
         changeContentTranslations.addButton = '';
@@ -97,12 +119,26 @@ class UpdateAssistantLayout extends Component{
         let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5')];
         let contents = [{
             inputs: [
-                {...INPUTS.COMPONENT, tourStep: UPDATE_ASSISTANT_TOURS.page_1[0].selector, name: 'system_check', label: t('FORM.SYSTEM_CHECK'), defaultValue: <SystemOverview/>},
+                {
+                    ...INPUTS.COMPONENT,
+                    tourStep: UPDATE_ASSISTANT_TOURS.page_1[0].selector,
+                    name: 'systemCheck',
+                    label: t('FORM.SYSTEM_CHECK'),
+                    Component: SystemOverview
+                },
             ],
             hint: {text: t('FORM.HINT_1'), openTour: ::this.openTour},
         },{
             inputs:[
-                {...INPUTS.COMPONENT, tourStep: UPDATE_ASSISTANT_TOURS.page_2[0].selector, icon: 'backup', name: 'available_updates', label: t('FORM.AVAILABLE_UPDATES'), defaultValue: <AvailableUpdates/>},
+                {
+                    ...INPUTS.COMPONENT,
+                    tourStep: UPDATE_ASSISTANT_TOURS.page_2[0].selector,
+                    icon: 'backup',
+                    name: 'availableUpdates',
+                    label: t('FORM.AVAILABLE_UPDATES'),
+                    Component: AvailableUpdates,
+                    check: (e, entity) => ::this.validateAvailableUpdates(e, entity),
+                },
             ],
             hint: {text: t('FORM.HINT_2'), openTour: ::this.openTour},
         },{
@@ -131,6 +167,7 @@ class UpdateAssistantLayout extends Component{
                                 action={() => {}}
                                 authUser={authUser}
                                 onPageSwitch={::this.setCurrentTour}
+                                entity={updateData}
                             />
                             <OCTour
                                 steps={UPDATE_ASSISTANT_TOURS[this.state.currentTour]}

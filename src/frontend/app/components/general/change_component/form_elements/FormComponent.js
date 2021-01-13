@@ -30,8 +30,8 @@ class FormComponent extends Component{
 
     render(){
         const {name, label, icon} = this.props.data;
-        const {entity} = this.props;
-        let {tourStep} = this.props.data;
+        const {entity, updateEntity} = this.props;
+        let {tourStep, Component} = this.props.data;
         let value = entity[name];
         return (
             <ToolboxThemeInput
@@ -39,7 +39,7 @@ class FormComponent extends Component{
                 tourStep={tourStep}
                 label={label}
             >
-                {value}
+                <Component entity={entity} updateEntity={updateEntity}/>
             </ToolboxThemeInput>
         );
     }

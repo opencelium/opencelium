@@ -7,6 +7,7 @@ import Loading from "@components/general/app/Loading";
 import {fetchOnlineUpdates, fetchOfflineUpdates} from "@actions/update_assistant/fetch";
 import Table from "@basic_components/table/Table";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 const ONLINE_UPDATE = 'ONLINE_UPDATE';
 const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
@@ -25,8 +26,8 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingOnlineUpdates: updateAssistant.get('fetchingOnlineUpdates'),
         fetchingOfflineUpdates: updateAssistant.get('fetchingOfflineUpdates'),
-        onlineUpdates: updateAssistant.get('onlineUpdates'),
-        offlineUpdates: updateAssistant.get('offlineUpdates'),
+        onlineUpdates: updateAssistant.get('onlineUpdates').toJS(),
+        offlineUpdates: updateAssistant.get('offlineUpdates').toJS(),
     };
 }
 
@@ -40,6 +41,8 @@ class AvailableUpdates extends React.Component{
             startFetchingOnlineUpdates: false,
             startFetchingOfflineUpdates: false,
             selectedVersion: '',
+            isOldVersionsExtended: false,
+            isNewVersionsExtended: false,
         }
     }
 
@@ -57,13 +60,34 @@ class AvailableUpdates extends React.Component{
         }
     }
 
+    componentWillUnmount(){
+        const {entity, updateEntity} = this.props;
+        entity.availableUpdates = {selectedVersion: '', mode: ''};
+        updateEntity(entity);
+    }
+
+    toggleOldVersions(){
+        this.setState({
+            isOldVersionsExtended: !this.state.isOldVersionsExtended,
+        });
+    }
+
+    toggleNewVersions(){
+        this.setState({
+            isNewVersionsExtended: !this.state.isNewVersionsExtended,
+        });
+    }
+
     selectVersion(selectedVersion){
+        const {entity, updateEntity} = this.props;
+        entity.availableUpdates = {...entity.availableUpdates, selectedVersion};
+        updateEntity(entity)
         this.setState({selectedVersion});
     }
 
     selectMode(e, activeMode){
         let {startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
-        const {fetchOnlineUpdates, fetchOfflineUpdates} = this.props;
+        const {fetchOnlineUpdates, fetchOfflineUpdates, entity, updateEntity} = this.props;
         switch (activeMode){
             case ONLINE_UPDATE:
                 fetchOnlineUpdates({background: true});
@@ -74,6 +98,8 @@ class AvailableUpdates extends React.Component{
                 startFetchingOfflineUpdates = true;
                 break;
         }
+        entity.availableUpdates = {...entity.availableUpdates, mode: activeMode};
+        updateEntity(entity)
         this.setState({
             selectedVersion: '',
             activeMode,
@@ -82,26 +108,73 @@ class AvailableUpdates extends React.Component{
         });
     }
 
-    renderUpdates(){
-        const {activeMode, selectedVersion} = this.state;
-        const {authUser, onlineUpdates, offlineUpdates, fetchingOnlineUpdates, fetchingOfflineUpdates} = this.props;
+    getUpdates(){
+        const {activeMode} = this.state;
+        const {onlineUpdates, offlineUpdates, fetchingOnlineUpdates, fetchingOfflineUpdates} = this.props;
         let selectedUpdates = [];
-        console.log(selectedVersion);
         switch (activeMode){
             case ONLINE_UPDATE:
                 if(fetchingOnlineUpdates !== API_REQUEST_STATE.FINISH){
-                    return null;
+                    return [];
                 }
                 selectedUpdates = onlineUpdates;
                 break;
             case OFFLINE_UPDATE:
                 if(fetchingOfflineUpdates !== API_REQUEST_STATE.FINISH){
-                    return null;
+                    return [];
                 }
                 selectedUpdates = offlineUpdates;
                 break;
         }
-        if(selectedUpdates.length === 0){
+        return selectedUpdates;
+    }
+
+    renderOldUpdates(){
+        const {isOldVersionsExtended} = this.state;
+        let updates = ::this.getUpdates();
+        updates = updates.filter(update => update.status === VERSION_STATUS.OLD);
+        if(updates.length === 0){
+            return null;
+        }
+        return(
+            <React.Fragment>
+                {updates.map((version, key) => {
+                    if(updates.length > 1 && !isOldVersionsExtended){
+                        if(key === updates.length - 2){
+                            return (
+                                <tr key={'extend'}>
+                                    <td/>
+                                    <td>
+                                        <TooltipFontIcon onClick={::this.toggleOldVersions} tooltip={'More Old Versions'} isButton={true} value={<span>...</span>}/>
+                                    </td>
+                                    <td/>
+                                </tr>
+                            );
+                        }
+                        if(key < updates.length - 1){
+                            return null;
+                        }
+                    }
+                    return (
+                        <tr key={version.name} className={styles.disable_version_entry}>
+                            <td>{version.name}</td>
+                            <td><a href={'#'}>Changelog</a></td>
+                            <td>
+                                <span>old</span>
+                            </td>
+                        </tr>
+                    );
+                })}
+            </React.Fragment>
+        )
+    }
+
+    renderUpdates(){
+        const {selectedVersion} = this.state;
+        const {authUser} = this.props;
+        let updates = ::this.getUpdates();
+        updates = updates.filter(update => update.status === VERSION_STATUS.CURRENT || update.status === VERSION_STATUS.AVAILABLE);
+        if(updates.length === 0){
             return null;
         }
         return(
@@ -114,33 +187,85 @@ class AvailableUpdates extends React.Component{
                 </tr>
                 </thead>
                 <tbody>
-                {selectedUpdates.map((version, key) => (
-                    <tr key={version.name} className={version.status === VERSION_STATUS.OLD ? styles.disable_version_entry : ''}>
-                        <td>{version.name}</td>
-                        <td><a href={'#'}>Changelog</a></td>
-                        <td>
-                            {version.status !== VERSION_STATUS.OLD && version.status !== VERSION_STATUS.CURRENT && <RadioButtons
-                                label={''}
-                                value={selectedVersion}
-                                handleChange={::this.selectVersion}
-                                style={{textAlign: 'center'}}
-                                radios={[{
-                                    disabled: version.status === VERSION_STATUS.NOT_AVAILABLE,
-                                    label: '',
-                                    value: version.name,
-                                    inputClassName: styles.radio_input,
-                                    labelClassName: styles.radio_label,
-                                }]}
-                            />}
-                            {version.status === VERSION_STATUS.OLD &&
-                            <span>old</span>}
-                            {version.status === VERSION_STATUS.CURRENT &&
-                            <span>current</span>}
-                        </td>
-                    </tr>
-                ))}
+                    {::this.renderOldUpdates()}
+                    {updates.map(version => (
+                        <tr key={version.name}>
+                            <td>{version.name}</td>
+                            <td><a href={'#'}>Changelog</a></td>
+                            <td>
+                                {version.status !== VERSION_STATUS.CURRENT
+                                    ?
+                                        <RadioButtons
+                                            label={''}
+                                            value={selectedVersion}
+                                            handleChange={::this.selectVersion}
+                                            style={{textAlign: 'center'}}
+                                            radios={[{
+                                                label: '',
+                                                value: version.name,
+                                                inputClassName: styles.radio_input,
+                                                labelClassName: styles.radio_label,
+                                            }]}/>
+                                    :
+                                        <span>current</span>
+                                }
+                            </td>
+                        </tr>
+                    ))}
+                    {::this.renderNewUpdates()}
                 </tbody>
             </Table>
+        )
+    }
+
+    renderNewUpdates(){
+        const {isNewVersionsExtended, selectedVersion} = this.state;
+        let updates = ::this.getUpdates();
+        updates = updates.filter(update => update.status === VERSION_STATUS.NOT_AVAILABLE);
+        if(updates.length === 0){
+            return null;
+        }
+        return(
+            <React.Fragment>
+                {updates.map((version, key) => {
+                    if(updates.length > 1 && !isNewVersionsExtended){
+                        if(key === 1){
+                            return (
+                                <tr key={'extend'}>
+                                    <td/>
+                                    <td>
+                                        <TooltipFontIcon onClick={::this.toggleNewVersions} tooltip={'More New Versions'} isButton={true} value={<span>...</span>}/>
+                                    </td>
+                                    <td/>
+                                </tr>
+                            );
+                        }
+                        if(key > 1){
+                            return null;
+                        }
+                    }
+                    return (
+                        <tr key={version.name}>
+                            <td>{version.name}</td>
+                            <td><a href={'#'}>Changelog</a></td>
+                            <td>
+                                <RadioButtons
+                                    label={''}
+                                    value={selectedVersion}
+                                    handleChange={() => {}}
+                                    style={{textAlign: 'center'}}
+                                    radios={[{
+                                        disabled: true,
+                                        label: '',
+                                        value: version.name,
+                                        inputClassName: styles.radio_input,
+                                        labelClassName: styles.radio_label,
+                                    }]}/>
+                            </td>
+                        </tr>
+                    );
+                })}
+            </React.Fragment>
         )
     }
 
