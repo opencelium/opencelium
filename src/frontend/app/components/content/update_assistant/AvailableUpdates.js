@@ -5,9 +5,12 @@ import styles from "@themes/default/content/available_updates/main";
 import {API_REQUEST_STATE, Permissions} from "@utils/constants/app";
 import Loading from "@components/general/app/Loading";
 import {fetchOnlineUpdates, fetchOfflineUpdates} from "@actions/update_assistant/fetch";
+import {uploadVersion} from "@actions/update_assistant/add";
 import Table from "@basic_components/table/Table";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import OldVersionEntry from "@components/content/update_assistant/OldVersionEntry";
+import BrowseButton from "@basic_components/buttons/BrowseButton";
 
 const ONLINE_UPDATE = 'ONLINE_UPDATE';
 const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
@@ -26,12 +29,13 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingOnlineUpdates: updateAssistant.get('fetchingOnlineUpdates'),
         fetchingOfflineUpdates: updateAssistant.get('fetchingOfflineUpdates'),
+        uploadingVersion: updateAssistant.get('uploadingVersion'),
         onlineUpdates: updateAssistant.get('onlineUpdates').toJS(),
         offlineUpdates: updateAssistant.get('offlineUpdates').toJS(),
     };
 }
 
-@connect(mapStateToProps, {fetchOnlineUpdates, fetchOfflineUpdates})
+@connect(mapStateToProps, {fetchOnlineUpdates, fetchOfflineUpdates, uploadVersion})
 class AvailableUpdates extends React.Component{
     constructor(props) {
         super(props);
@@ -64,6 +68,10 @@ class AvailableUpdates extends React.Component{
         const {entity, updateEntity} = this.props;
         entity.availableUpdates = {selectedVersion: '', mode: ''};
         updateEntity(entity);
+    }
+
+    uploadVersion(){
+        this.props.uploadVersion({id: 10, name: 'v1.5', changeLogLink: '', status: 'not_available'},)
     }
 
     toggleOldVersions(){
@@ -105,6 +113,8 @@ class AvailableUpdates extends React.Component{
             activeMode,
             startFetchingOnlineUpdates,
             startFetchingOfflineUpdates,
+            isOldVersionsExtended: false,
+            isNewVersionsExtended: false,
         });
     }
 
@@ -112,27 +122,45 @@ class AvailableUpdates extends React.Component{
         const {activeMode} = this.state;
         const {onlineUpdates, offlineUpdates, fetchingOnlineUpdates, fetchingOfflineUpdates} = this.props;
         let selectedUpdates = [];
+        let updates = {
+            old: [],
+            available: [],
+            veryNew: [],
+        };
         switch (activeMode){
             case ONLINE_UPDATE:
                 if(fetchingOnlineUpdates !== API_REQUEST_STATE.FINISH){
-                    return [];
+                    return updates;
                 }
                 selectedUpdates = onlineUpdates;
                 break;
             case OFFLINE_UPDATE:
                 if(fetchingOfflineUpdates !== API_REQUEST_STATE.FINISH){
-                    return [];
+                    return updates;
                 }
                 selectedUpdates = offlineUpdates;
                 break;
         }
-        return selectedUpdates;
+        for(let i = 0; i < selectedUpdates.length; i++){
+            switch(selectedUpdates[i].status){
+                case VERSION_STATUS.OLD:
+                    updates.old.push(selectedUpdates[i]);
+                    break;
+                case VERSION_STATUS.CURRENT:
+                case VERSION_STATUS.AVAILABLE:
+                    updates.available.push(selectedUpdates[i]);
+                    break;
+                case VERSION_STATUS.NOT_AVAILABLE:
+                    updates.veryNew.push(selectedUpdates[i]);
+                    break;
+            }
+        }
+        return updates;
     }
 
     renderOldUpdates(){
         const {isOldVersionsExtended} = this.state;
-        let updates = ::this.getUpdates();
-        updates = updates.filter(update => update.status === VERSION_STATUS.OLD);
+        let updates = ::this.getUpdates().old;
         if(updates.length === 0){
             return null;
         }
@@ -144,8 +172,8 @@ class AvailableUpdates extends React.Component{
                             return (
                                 <tr key={'extend'}>
                                     <td/>
-                                    <td>
-                                        <TooltipFontIcon onClick={::this.toggleOldVersions} tooltip={'More Old Versions'} isButton={true} value={<span>...</span>}/>
+                                    <td style={{padding: 0}}>
+                                        <TooltipFontIcon className={styles.more_icon} size={20} onClick={::this.toggleOldVersions} tooltip={'More Old Versions'} isButton={true} value={<span>...</span>}/>
                                     </td>
                                     <td/>
                                 </tr>
@@ -156,13 +184,7 @@ class AvailableUpdates extends React.Component{
                         }
                     }
                     return (
-                        <tr key={version.name} className={styles.disable_version_entry}>
-                            <td>{version.name}</td>
-                            <td><a href={'#'}>Changelog</a></td>
-                            <td>
-                                <span>old</span>
-                            </td>
-                        </tr>
+                        <OldVersionEntry version={version}/>
                     );
                 })}
             </React.Fragment>
@@ -170,58 +192,84 @@ class AvailableUpdates extends React.Component{
     }
 
     renderUpdates(){
-        const {selectedVersion} = this.state;
+        const {selectedVersion, isOldVersionsExtended, isNewVersionsExtended} = this.state;
         const {authUser} = this.props;
         let updates = ::this.getUpdates();
-        updates = updates.filter(update => update.status === VERSION_STATUS.CURRENT || update.status === VERSION_STATUS.AVAILABLE);
-        if(updates.length === 0){
+        if(updates.available.length === 0){
             return null;
         }
+        let numberOfVisibleEntries = updates.available.length;
+        if(isOldVersionsExtended){
+            numberOfVisibleEntries += updates.old.length;
+        } else{
+            if(updates.old.length > 0){
+                numberOfVisibleEntries++;
+            }
+            if(updates.old.length > 1){
+                numberOfVisibleEntries++;
+            }
+        }
+        if(isNewVersionsExtended){
+            numberOfVisibleEntries += updates.veryNew.length;
+        } else{
+            if(updates.veryNew.length > 0){
+                numberOfVisibleEntries++;
+            }
+            if(updates.veryNew.length > 1){
+                numberOfVisibleEntries++;
+            }
+        }
         return(
-            <Table className={styles.updates_table} authUser={authUser}>
-                <thead>
-                <tr>
-                    <th>Version</th>
-                    <th>Changelog</th>
-                    <th>Select</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {::this.renderOldUpdates()}
-                    {updates.map(version => (
-                        <tr key={version.name}>
-                            <td>{version.name}</td>
-                            <td><a href={'#'}>Changelog</a></td>
-                            <td>
-                                {version.status !== VERSION_STATUS.CURRENT
-                                    ?
-                                        <RadioButtons
-                                            label={''}
-                                            value={selectedVersion}
-                                            handleChange={::this.selectVersion}
-                                            style={{textAlign: 'center'}}
-                                            radios={[{
-                                                label: '',
-                                                value: version.name,
-                                                inputClassName: styles.radio_input,
-                                                labelClassName: styles.radio_label,
-                                            }]}/>
-                                    :
-                                        <span>current</span>
-                                }
-                            </td>
-                        </tr>
-                    ))}
-                    {::this.renderNewUpdates()}
-                </tbody>
-            </Table>
+            <React.Fragment>
+                <Table className={styles.updates_table} authUser={authUser}>
+                    <thead>
+                    <tr>
+                        <th>Version</th>
+                        <th>Changelog</th>
+                        <th style={{paddingRight: numberOfVisibleEntries > 6 ? '35px' : ''}}>Select</th>
+                    </tr>
+                    </thead>
+                </Table>
+                <div className={styles.updates_table_content}>
+                    <Table authUser={authUser}>
+                        <tbody>
+                            {::this.renderOldUpdates()}
+                            {updates.available.map(version => (
+                                <tr key={version.name}>
+                                    <td>{version.name}</td>
+                                    <td><a href={'#'}>Changelog</a></td>
+                                    <td>
+                                        {version.status !== VERSION_STATUS.CURRENT
+                                            ?
+                                                <RadioButtons
+                                                    label={''}
+                                                    value={selectedVersion}
+                                                    handleChange={::this.selectVersion}
+                                                    style={{textAlign: 'center'}}
+                                                    radios={[{
+                                                        label: '',
+                                                        value: version.name,
+                                                        inputClassName: styles.radio_input,
+                                                        labelClassName: styles.radio_label,
+                                                    }]}/>
+                                            :
+                                                <span>current</span>
+                                        }
+                                    </td>
+                                </tr>
+                            ))}
+                            {::this.renderNewUpdates()}
+                        </tbody>
+                    </Table>
+                </div>
+                {::this.renderUploadButton()}
+            </React.Fragment>
         )
     }
 
     renderNewUpdates(){
         const {isNewVersionsExtended, selectedVersion} = this.state;
-        let updates = ::this.getUpdates();
-        updates = updates.filter(update => update.status === VERSION_STATUS.NOT_AVAILABLE);
+        let updates = ::this.getUpdates().veryNew;
         if(updates.length === 0){
             return null;
         }
@@ -233,8 +281,8 @@ class AvailableUpdates extends React.Component{
                             return (
                                 <tr key={'extend'}>
                                     <td/>
-                                    <td>
-                                        <TooltipFontIcon onClick={::this.toggleNewVersions} tooltip={'More New Versions'} isButton={true} value={<span>...</span>}/>
+                                    <td style={{padding: 0}}>
+                                        <TooltipFontIcon className={styles.more_icon} size={20} onClick={::this.toggleNewVersions} tooltip={'More New Versions'} isButton={true} value={<span>...</span>}/>
                                     </td>
                                     <td/>
                                 </tr>
@@ -267,6 +315,29 @@ class AvailableUpdates extends React.Component{
                 })}
             </React.Fragment>
         )
+    }
+
+    renderUploadButton(){
+        const {uploadingVersion} = this.props;
+        const {activeMode} = this.state;
+        if(activeMode === OFFLINE_UPDATE) {
+            if(uploadingVersion !== API_REQUEST_STATE.START) {
+                return <BrowseButton
+                    onlyButton={true}
+                    browseTitle={''}
+                    browseProps={{
+                        icon: 'attach_file',
+                        label: "Upload update",
+                        accept: ".zip",
+                        style: {margin: '15px 0 40px 0', float: 'right'},
+                        onChange: ::this.uploadVersion,
+                    }}
+                />;
+            } else{
+                return <Loading className={styles.upload_version_loading}/>;
+            }
+        }
+        return null;
     }
 
     render(){

@@ -60,7 +60,7 @@ class ChangeContent extends Component{
         }
         this.state = {
             entity,
-            page: 0,
+            page: 1,
             hasError: false,
             hasRequired: false,
             isValidated: true,

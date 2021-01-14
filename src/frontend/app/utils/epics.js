@@ -80,6 +80,7 @@ import {
 } from '@epics/notification_templates';
 import {
     fetchUpdateAppVersionEpic, fetchOfflineUpdatesEpic, fetchOnlineUpdatesEpic,
+    deleteVersionEpic, uploadVersionEpic,
 } from "@epics/update_assistant";
 
 
@@ -182,4 +183,6 @@ export default combineEpics(
     fetchUpdateAppVersionEpic,
     fetchOfflineUpdatesEpic,
     fetchOnlineUpdatesEpic,
+    deleteVersionEpic,
+    uploadVersionEpic,
 );

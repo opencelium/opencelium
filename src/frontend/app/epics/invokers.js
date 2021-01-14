@@ -86,6 +86,7 @@ const addInvokerEpic = (action$, store) => {
             );
         });
 };
+
 /**
  * update one invoker
  */

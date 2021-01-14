@@ -1,7 +1,16 @@
 @import '../../constants';
 
 .updates_table{
+  margin-bottom: 0;
   margin-top: 20px;
+  th{
+    border-bottom: none !important;
+    width: 33.3%;
+  }
+}
+.updates_table_content{
+  max-height: 300px;
+  overflow-y: auto;
   .radio_input{
     margin: 0 !important;
   }
@@ -11,7 +20,28 @@
   .disable_version_entry{
     background: #d7c9c92e;
     color: #a28e8e;
+    .delete_icon{
+      position: absolute;
+      right: 5px;
+      top: 10px;
+    }
   }
+  .more_icon{
+    margin-bottom: 15px;
+  }
+  td{
+    width: 33.3%;
+  }
+}
+.upload_version_loading{
+  margin: 15px 100px 40px 0;
+  min-height: 36px;
+  float: right;
+}
+
+.upload_version_loading>div{
+  width: 24px;
+  height: 24px;
 }
 
 @media screen and (min-width: 992px) {
