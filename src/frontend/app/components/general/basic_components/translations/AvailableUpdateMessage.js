@@ -3,7 +3,7 @@ import {Link, withRouter} from "react-router";
 import React from "react";
 import {history} from "@components/App";
 
-class AvailableUpdate extends React.Component{
+class AvailableUpdateMessage extends React.Component{
     constructor(props) {
         super(props);
     }
@@ -20,4 +20,4 @@ class AvailableUpdate extends React.Component{
     }
 }
 
-export default withRouter(AvailableUpdate);
+export default withRouter(AvailableUpdateMessage);

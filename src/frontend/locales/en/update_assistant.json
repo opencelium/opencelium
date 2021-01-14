@@ -7,11 +7,16 @@
     "SYSTEM_CHECK": "System Overview",
     "PAGE_2": "Available Updates",
     "HINT_2": "Select desirable update",
+    "AVAILABLE_UPDATES": "Available Updates",
     "PAGE_3": "File-Update",
     "HINT_3": "Please, update your templates",
     "PAGE_4": "Migration",
     "HINT_4": "Migrate your connections and invokers",
     "PAGE_5": "Done",
-    "HINT_5": "Update successfully completed"
+    "HINT_5": "Update successfully completed",
+    "VALIDATION_MESSAGES": {
+      "NO_UPDATE_MODE": "Please, select how do you want to update",
+      "NO_SELECTED_VERSION": "Please, select an available version"
+    }
   }
 }

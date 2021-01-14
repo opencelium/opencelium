@@ -15,17 +15,14 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from '@basic_components/inputs/Input';
-
-import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
 
 /**
- * Component for Form Input
+ * Form Component
  */
 @FormElement()
-class FormMessage extends Component{
+class FormComponent extends Component{
 
     constructor(props){
         super(props);
@@ -33,8 +30,8 @@ class FormMessage extends Component{
 
     render(){
         const {name, label, icon} = this.props.data;
-        const {entity} = this.props;
-        let {tourStep} = this.props.data;
+        const {entity, updateEntity} = this.props;
+        let {tourStep, Component} = this.props.data;
         let value = entity[name];
         return (
             <ToolboxThemeInput
@@ -42,16 +39,16 @@ class FormMessage extends Component{
                 tourStep={tourStep}
                 label={label}
             >
-                {value}
+                <Component entity={entity} updateEntity={updateEntity}/>
             </ToolboxThemeInput>
         );
     }
 }
 
-FormMessage.propTypes = {
+FormComponent.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
 };
 
 
-export default FormMessage;
+export default FormComponent;

@@ -16,7 +16,7 @@ export default (props) => {
             {
                 text.map(line => {
                     return(
-                        <Row>
+                        <Row key={line}>
                             <Col md={3}>{line[0]}</Col><Col md={9}>{line[1]}</Col>
                         </Row>
                     )

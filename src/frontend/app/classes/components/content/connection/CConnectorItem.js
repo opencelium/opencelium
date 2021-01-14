@@ -28,9 +28,12 @@ export const CONNECTOR_TO = 'toConnector';
 export const METHOD_ITEM = 'method';
 export const OPERATOR_ITEM = 'operator';
 
-export const CONNECTOR_DEPTH_LIMIT = 7;
+export const CONNECTOR_DEPTH_LIMIT = 1000;
 
-export const ITERATOR_NAMES = ['i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+export const ITERATOR_NAMES = [
+    'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    'ii', 'ij', 'ik', 'il', 'im', 'in', 'io', 'ip', 'iq', 'ir', 'is', 'it', 'iu', 'iv', 'iw', 'ix', 'iy', 'iz'
+];
 
 /**
  * Connector class for manipulating data in the Connector Component
@@ -719,42 +722,61 @@ export default class CConnectorItem{
         return this._currentProgress;
     }
 
+    decreaseIndex(index) {
+        let newIndex = '0';
+        if(index !== '0') {
+            let indexSplit = index.split('_');
+            if (indexSplit.length > 0) {
+                if (indexSplit[indexSplit.length - 1] !== '0') {
+                    indexSplit[indexSplit.length - 1] = parseInt(indexSplit[indexSplit.length - 1]) - 1;
+                    newIndex = subArrayToString(indexSplit, '_', 0, indexSplit.length);
+                } else{
+                    newIndex = subArrayToString(indexSplit, '_', 0, indexSplit.length - 1);
+                }
+            }
+        }
+        return newIndex;
+    }
+
     getAllPrevMethods(item, isKeyConsidered = true, exceptCurrent = true){
         let methods = [];
         let itemIndexSplitter = item.index.split('_');
-        let shouldStop = false;
-        for(let i = 0; i < this._methods.length; i++){
-            let methodIndex = this._methods[i].index;
-            if(exceptCurrent && methodIndex === item.index){
-                break;
-            }
-            let methodIndexSplitter = methodIndex.split('_');
-            let method = null;
-            if(isKeyConsidered) {
-                for (let j = 0; j < methodIndexSplitter.length; j++) {
-                    if ((parseInt(methodIndexSplitter[j]) <= parseInt(itemIndexSplitter[j]) && j === methodIndexSplitter.length - 1)) {
-                        method = this._methods[i];
+        if(isKeyConsidered){
+            let decreasedIndex = this.decreaseIndex(item.index);
+            for(let i = 0; i < itemIndexSplitter.length; i++){
+                let indexLimit = decreasedIndex.split('_').length - 1;
+                while(decreasedIndex.split('_').length > indexLimit){
+                    let method = this._methods.find(method => method.index === decreasedIndex);
+                    if (method) {
+                        methods.push({
+                            label: method.name,
+                            value: `${this.getPrefixForMethodOption()}${method.index}`,
+                            color: method.color,
+                        });
                     }
-                    if (parseInt(methodIndexSplitter[j]) > parseInt(itemIndexSplitter[j])) {
-                        shouldStop = true;
-                        break;
+                    if(decreasedIndex === '0'){
+                        return methods.reverse()
                     }
+                    decreasedIndex = this.decreaseIndex(decreasedIndex);
                 }
-            } else{
-                method = this._methods[i];
             }
-            if(method){
-                methods.push({
-                    label: method.name,
-                    value: `${this.getPrefixForMethodOption()}${method.index}`,
-                    color: method.color,
-                });
-            }
-            if(shouldStop){
-                break;
+        } else {
+            for (let i = 0; i < this._methods.length; i++) {
+                let methodIndex = this._methods[i].index;
+                if (exceptCurrent && methodIndex === item.index) {
+                    break;
+                }
+                let method = this._methods[i];
+                if (method) {
+                    methods.push({
+                        label: method.name,
+                        value: `${this.getPrefixForMethodOption()}${method.index}`,
+                        color: method.color,
+                    });
+                }
             }
         }
-        return methods;
+        return methods.reverse();
     }
 
     getObject(){

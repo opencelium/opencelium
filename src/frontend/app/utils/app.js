@@ -66,6 +66,17 @@ export function checkExpiredMessages(data){
     return result;
 }
 
+
+/**
+ * to replace &amp to amp in the text
+ * @param innerText - shoul be free html text
+ */
+export function freeStringFromAmp(innerText){
+    const div = document.createElement('div');
+    div.innerHTML = innerText;
+    return div.firstChild.nodeValue;
+}
+
 /**
  * to check the references format in connections
  */

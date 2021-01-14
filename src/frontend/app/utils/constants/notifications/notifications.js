@@ -22,7 +22,7 @@ import {
     UpdateAssistantAction,
 } from '@utils/actions';
 import Translate from "@components/general/app/Translate";
-import AvailableUpdate from "@basic_components/translations/AvailableUpdate";
+import AvailableUpdateMessage from "@basic_components/translations/AvailableUpdateMessage";
 
 
 /**
@@ -121,7 +121,7 @@ const SuccessInterpolates = {
         );
     },
     FETCH_UPDATEAPPVERSION: (params) => {
-        return <AvailableUpdate {...params}/>
+        return <AvailableUpdateMessage {...params}/>
     },
     CHANGE_LANGUAGE: '',
 };

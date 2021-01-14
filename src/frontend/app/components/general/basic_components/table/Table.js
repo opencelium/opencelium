@@ -14,7 +14,6 @@
  */
 
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import {Table as BootstrapTable} from 'reactstrap';
 import styles from '@themes/default/general/basic_components.scss';
 import {getThemeClass} from "@utils/app";

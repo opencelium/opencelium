@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {fromJS} from 'immutable';
+import {fromJS, List} from 'immutable';
 
 import {UpdateAssistantAction} from '@utils/actions';
 import {API_REQUEST_STATE} from "@utils/constants/app";
@@ -21,7 +21,11 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 
 const initialState = fromJS({
     fetchingUpdateAppVersion: API_REQUEST_STATE.INITIAL,
+    fetchingOnlineUpdates: API_REQUEST_STATE.INITIAL,
+    fetchingOfflineUpdates: API_REQUEST_STATE.INITIAL,
     updateAppVersion: '',
+    onlineUpdates: List([]),
+    offlineUpdates: List([]),
     error: null,
     message: {},
 });
@@ -37,6 +41,18 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.FINISH).set('updateAppVersion', action.payload.version);
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION_REJECTED:
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.FETCH_ONLINEUPDATES:
+            return state.set('fetchingOnlineUpdates', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.FETCH_ONLINEUPDATES_FULFILLED:
+            return state.set('fetchingOnlineUpdates', API_REQUEST_STATE.FINISH).set('onlineUpdates', List(action.payload));
+        case UpdateAssistantAction.FETCH_ONLINEUPDATES_REJECTED:
+            return state.set('fetchingOnlineUpdates', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.FETCH_OFFLINEUPDATES:
+            return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.FETCH_OFFLINEUPDATES_FULFILLED:
+            return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.FINISH).set('offlineUpdates', List(action.payload));
+        case UpdateAssistantAction.FETCH_OFFLINEUPDATES_REJECTED:
+            return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

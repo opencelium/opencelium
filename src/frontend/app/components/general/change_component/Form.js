@@ -40,7 +40,7 @@ import FormOperations from "./form_elements/form_invoker/FormOperations";
 import FormNotificationTemplateName from './form_elements/form_notification_template/FormName';
 import FormNotificationTemplateType from './form_elements/form_notification_template/FormType';
 import FormContent from "./form_elements/form_notification_template/FormContent";
-import FormMessage from "@change_component/form_elements/FormMessage";
+import FormComponent from "@change_component/form_elements/FormComponent";
 
 
 /**
@@ -100,8 +100,8 @@ class Form extends Component{
                     updateEntity={updateEntity}
                     data={data}
                 />;
-            case 'message':
-                return <FormMessage
+            case 'component':
+                return <FormComponent
                     key={key}
                     entity={entity}
                     updateEntity={updateEntity}
