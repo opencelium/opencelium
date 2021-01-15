@@ -1,5 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import {withTranslation} from "react-i18next";
 import Button from "@basic_components/buttons/Button";
 import styles from "@themes/default/content/available_updates/main";
 import {API_REQUEST_STATE, Permissions} from "@utils/constants/app";
@@ -36,6 +37,7 @@ function mapStateToProps(state){
 }
 
 @connect(mapStateToProps, {fetchOnlineUpdates, fetchOfflineUpdates, uploadVersion})
+@withTranslation('update_assistant')
 class AvailableUpdates extends React.Component{
     constructor(props) {
         super(props);
@@ -159,6 +161,7 @@ class AvailableUpdates extends React.Component{
     }
 
     renderOldUpdates(){
+        const {t} = this.props;
         const {isOldVersionsExtended} = this.state;
         let updates = ::this.getUpdates().old;
         if(updates.length === 0){
@@ -173,7 +176,14 @@ class AvailableUpdates extends React.Component{
                                 <tr key={'extend'}>
                                     <td/>
                                     <td style={{padding: 0}}>
-                                        <TooltipFontIcon className={styles.more_icon} size={20} onClick={::this.toggleOldVersions} tooltip={'More Old Versions'} isButton={true} value={<span>...</span>}/>
+                                        <TooltipFontIcon
+                                            className={styles.more_icon}
+                                            size={20}
+                                            onClick={::this.toggleOldVersions}
+                                            tooltip={t('FORM.MORE_OLD_VERSIONS')}
+                                            isButton={true}
+                                            value={<span>...</span>}
+                                        />
                                     </td>
                                     <td/>
                                 </tr>
@@ -193,7 +203,7 @@ class AvailableUpdates extends React.Component{
 
     renderUpdates(){
         const {selectedVersion, isOldVersionsExtended, isNewVersionsExtended} = this.state;
-        const {authUser} = this.props;
+        const {t, authUser} = this.props;
         let updates = ::this.getUpdates();
         if(updates.available.length === 0){
             return null;
@@ -224,9 +234,9 @@ class AvailableUpdates extends React.Component{
                 <Table className={styles.updates_table} authUser={authUser}>
                     <thead>
                     <tr>
-                        <th>Version</th>
-                        <th>Changelog</th>
-                        <th style={{paddingRight: numberOfVisibleEntries > 6 ? '35px' : ''}}>Select</th>
+                        <th>{t('FORM.VERSION_HEADER')}</th>
+                        <th>{t('FORM.CHANGELOG_HEADER')}</th>
+                        <th style={{paddingRight: numberOfVisibleEntries > 6 ? '35px' : ''}}>{t('FORM.SELECT_HEADER')}</th>
                     </tr>
                     </thead>
                 </Table>
@@ -237,7 +247,7 @@ class AvailableUpdates extends React.Component{
                             {updates.available.map(version => (
                                 <tr key={version.name}>
                                     <td>{version.name}</td>
-                                    <td><a href={'#'}>Changelog</a></td>
+                                    <td><a href={'#'}>{t('FORM.CHANGELOG')}</a></td>
                                     <td>
                                         {version.status !== VERSION_STATUS.CURRENT
                                             ?
@@ -253,7 +263,7 @@ class AvailableUpdates extends React.Component{
                                                         labelClassName: styles.radio_label,
                                                     }]}/>
                                             :
-                                                <span>current</span>
+                                                <span>{t('FORM.CURRENT_VERSION')}</span>
                                         }
                                     </td>
                                 </tr>
@@ -268,6 +278,7 @@ class AvailableUpdates extends React.Component{
     }
 
     renderNewUpdates(){
+        const {t} = this.props;
         const {isNewVersionsExtended, selectedVersion} = this.state;
         let updates = ::this.getUpdates().veryNew;
         if(updates.length === 0){
@@ -282,7 +293,13 @@ class AvailableUpdates extends React.Component{
                                 <tr key={'extend'}>
                                     <td/>
                                     <td style={{padding: 0}}>
-                                        <TooltipFontIcon className={styles.more_icon} size={20} onClick={::this.toggleNewVersions} tooltip={'More New Versions'} isButton={true} value={<span>...</span>}/>
+                                        <TooltipFontIcon
+                                            className={styles.more_icon}
+                                            size={20} onClick={::this.toggleNewVersions}
+                                            tooltip={t('FORM.MORE_NEW_VERSIONS')}
+                                            isButton={true}
+                                            value={<span>...</span>}
+                                        />
                                     </td>
                                     <td/>
                                 </tr>
@@ -295,7 +312,7 @@ class AvailableUpdates extends React.Component{
                     return (
                         <tr key={version.name}>
                             <td>{version.name}</td>
-                            <td><a href={'#'}>Changelog</a></td>
+                            <td><a href={'#'}>{t('FORM.CHANGELOG')}</a></td>
                             <td>
                                 <RadioButtons
                                     label={''}
@@ -318,7 +335,7 @@ class AvailableUpdates extends React.Component{
     }
 
     renderUploadButton(){
-        const {uploadingVersion} = this.props;
+        const {t, uploadingVersion} = this.props;
         const {activeMode} = this.state;
         if(activeMode === OFFLINE_UPDATE) {
             if(uploadingVersion !== API_REQUEST_STATE.START) {
@@ -327,7 +344,7 @@ class AvailableUpdates extends React.Component{
                     browseTitle={''}
                     browseProps={{
                         icon: 'attach_file',
-                        label: "Upload update",
+                        label: t('FORM.UPLOAD_UPDATE'),
                         accept: ".zip",
                         style: {margin: '15px 0 40px 0', float: 'right'},
                         onChange: ::this.uploadVersion,
@@ -342,21 +359,21 @@ class AvailableUpdates extends React.Component{
 
     render(){
         const {activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
-        const {authUser} = this.props;
+        const {t, authUser} = this.props;
         return(
             <div style={{margin: '20px 68px 0 0'}}>
                 <div style={{textAlign: 'center'}}>
                     <Button
                         isActive={activeMode === ONLINE_UPDATE}
                         authUser={authUser}
-                        title={'Online'}
+                        title={t('FORM.ONLINE')}
                         onClick={(e) => ::this.selectMode(e, ONLINE_UPDATE)}
                         className={styles.online_button}
                     />
                     <Button
                         isActive={activeMode === OFFLINE_UPDATE}
                         authUser={authUser}
-                        title={'Offline'}
+                        title={t('FORM.OFFLINE')}
                         onClick={(e) => ::this.selectMode(e, OFFLINE_UPDATE)}
                         className={styles.offline_button}
                     />
