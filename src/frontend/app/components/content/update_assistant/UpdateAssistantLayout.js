@@ -29,8 +29,6 @@ import Content from "@components/general/content/Content";
 import {INPUTS} from "@utils/constants/inputs";
 import SystemOverview from "@components/content/update_assistant/SystemOverview";
 import AvailableUpdates from "@components/content/update_assistant/AvailableUpdates";
-import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
-import {setFocusById} from "@utils/app";
 
 
 function mapStateToProps(state){

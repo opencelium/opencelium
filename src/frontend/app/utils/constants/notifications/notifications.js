@@ -88,6 +88,7 @@ export const EntitiesWithNotification = [
     {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPLOAD_VERSION, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**

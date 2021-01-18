@@ -23,6 +23,9 @@ const initialState = fromJS({
     fetchingUpdateAppVersion: API_REQUEST_STATE.INITIAL,
     fetchingOnlineUpdates: API_REQUEST_STATE.INITIAL,
     fetchingOfflineUpdates: API_REQUEST_STATE.INITIAL,
+    deletingVersion: API_REQUEST_STATE.INITIAL,
+    uploadingVersion: API_REQUEST_STATE.INITIAL,
+    currentVersion: null,
     updateAppVersion: '',
     onlineUpdates: List([]),
     offlineUpdates: List([]),
@@ -33,7 +36,10 @@ const initialState = fromJS({
 /**
  * redux reducer for update assistant
  */
+let index = -1;
+let offlineUpdates = [];
 const reducer = (state = initialState, action) => {
+    offlineUpdates = state.get('offlineUpdates');
     switch (action.type) {
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION:
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.START).set('error', null);
@@ -53,6 +59,24 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.FINISH).set('offlineUpdates', List(action.payload));
         case UpdateAssistantAction.FETCH_OFFLINEUPDATES_REJECTED:
             return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.DELETE_VERSION:
+            return state.set('deletingVersion', API_REQUEST_STATE.START).set('currentVersion', action.payload).set('error', null);
+        case UpdateAssistantAction.DELETE_VERSION_FULFILLED:
+            index = offlineUpdates.findIndex(function (version) {
+                return version.id === action.payload.id;
+            });
+            if(index >= 0) {
+                return state.set('deletingVersion', API_REQUEST_STATE.FINISH).set('currentVersion', null).set('offlineUpdates', offlineUpdates.delete(index));
+            }
+            return state.set('deletingVersion', API_REQUEST_STATE.FINISH).set('currentVersion', null);
+        case UpdateAssistantAction.DELETE_VERSION_REJECTED:
+            return state.set('deletingVersion', API_REQUEST_STATE.ERROR).set('currentVersion', null).set('error', action.payload);
+        case UpdateAssistantAction.UPLOAD_VERSION:
+            return state.set('uploadingVersion', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.UPLOAD_VERSION_FULFILLED:
+            return state.set('uploadingVersion', API_REQUEST_STATE.FINISH).set('offlineUpdates', offlineUpdates.set(offlineUpdates.size, action.payload));
+        case UpdateAssistantAction.UPLOAD_VERSION_REJECTED:
+            return state.set('uploadingVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

@@ -51,7 +51,8 @@
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were successfully fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template was successfully updated",
     "DELETE_NOTIFICATIONTEMPLATE": "The template was successfully removed",
-    "FETCH_UPDATEAPPVERSION": "OC Update <0>{{version}}</0> available"
+    "FETCH_UPDATEAPPVERSION": "OC Update <0>{{version}}</0> available",
+    "UPLOAD_VERSION": "New version was successfully uploaded"
   },
   "ERROR": {
     "ADD_USER": {
@@ -173,7 +174,10 @@
     "ADD_NOTIFICATIONTEMPLATE": "The template was not added",
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were not fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template was not updated",
-    "DELETE_NOTIFICATIONTEMPLATE": "The template was not removed"
+    "DELETE_NOTIFICATIONTEMPLATE": "The template was not removed",
+    "UPLOAD_VERSION": {
+      "__DEFAULT__": "New version was not uploaded"
+    }
   },
   "WARNING": {
     "ADD_USER": "The user was added, but ...",
