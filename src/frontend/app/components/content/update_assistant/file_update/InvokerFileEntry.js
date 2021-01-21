@@ -4,63 +4,86 @@ import FontIcon from "@basic_components/FontIcon";
 import styles from "@themes/default/content/update_assistant/main";
 import CExecution from "@classes/components/content/template_converter/CExecution";
 import {connect} from "react-redux";
-import {fetchTemplates} from "@actions/templates/fetch";
-import {convertTemplates, convertTemplatesRejected} from "@actions/templates/update";
 import Loading from "@components/general/app/Loading";
+import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
+import {withTranslation} from "react-i18next";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
     const app = state.get('app');
-    const templates = state.get('templates');
     return {
         authUser: auth.get('authUser'),
         appVersion: app.get('appVersion'),
-        fetchingTemplates: templates.get('fetchingTemplates'),
-        templates: templates.get('templates').toJS(),
     }
 }
 
-@connect(mapStateToProps, {fetchTemplates, convertTemplates, convertTemplatesRejected})
-class TemplateFileEntry extends React.Component{
+@connect(mapStateToProps, {})
+@withTranslation('update_assistant')
+class InvokerFileEntry extends React.Component{
     constructor(props) {
         super(props);
+
+        this.state = {
+            shouldUseNew: false,
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(!prevProps.isConverting && this.props.isConverting){
-            ::this.convertTemplate();
+            ::this.convertInvoker();
         }
     }
 
-    convertTemplate(){
-        const {index, template, entity, setTemplate} = this.props;
-        let convertedTemplate = null;
+    handleChangeMode(e){
+        this.setState({
+            shouldUseNew: e.target.checked,
+        })
+    }
+
+    convertInvoker(){
+        const {index, invoker, entity, setInvoker} = this.props;
+        let convertedInvokers = null;
         let status = null;
         const {jsonData, error} = CExecution.executeConfig({
-            fromVersion: template.version,
+            fromVersion: invoker.version,
             toVersion: entity.availableUpdates.selectedVersion
-        }, template.connection);
+        }, invoker.connection);
         //if (error.message !== '') {
         if(Math.floor(Math.random() * 2)){
             status = {error};
         }
-        convertedTemplate = {...template, connection: jsonData, version: entity.availableUpdates.selectedVersion};
+        convertedInvokers = {...invoker, connection: jsonData, version: entity.availableUpdates.selectedVersion};
         setTimeout(() => {
-            setTemplate(convertedTemplate, status, index);
+            setInvoker(convertedInvokers, status, index);
         }, 100);
     }
 
     render(){
-        const {convertedTemplates, index, isConverting, template} = this.props;
+        const {shouldUseNew} = this.state;
+        const {t, authUser, convertedInvokers, index, isConverting, invoker, defaultInvokers} = this.props;
         let isFail = false;
         let isSuccess = false;
-        if(typeof convertedTemplates[index] !== 'undefined'){
-            isFail = convertedTemplates[index].status !== null;
-            isSuccess = convertedTemplates[index].status === null;
+        if(typeof convertedInvokers[index] !== 'undefined'){
+            isFail = convertedInvokers[index].status !== null;
+            isSuccess = convertedInvokers[index].status === null;
         }
         return(
-            <tr key={template.name}>
-                <td>{template.name}</td>
+            <tr>
+                <td>{invoker.name}</td>
+                <td>
+                    {defaultInvokers.findIndex(defaultInvoker => defaultInvoker.name === invoker.name) !== -1
+                    ?
+                        <TooltipSwitch
+                            id={`mode_${invoker.name}`}
+                            authUser={authUser}
+                            tooltip={!shouldUseNew ? t('FORM.INVOKER_MINE') : t('FORM.INVOKER_NEW')}
+                            checked={shouldUseNew}
+                            onChange={::this.handleChangeMode}
+                        />
+                    :
+                        <span/>
+                    }
+                </td>
                 <td>
                     {!isConverting && !isFail && !isSuccess && <span>-</span>}
                     {isConverting && <Loading className={styles.convert_loading}/>}
@@ -72,16 +95,16 @@ class TemplateFileEntry extends React.Component{
     }
 }
 
-TemplateFileEntry.defaultProps = {
+InvokerFileEntry.defaultProps = {
     isConverting: false,
     status: null,
 };
 
-TemplateFileEntry.propTypes = {
+InvokerFileEntry.propTypes = {
     index: PropTypes.number.isRequired,
     isConverting: PropTypes.bool,
-    template: PropTypes.object.isRequired,
-    setTemplate: PropTypes.func.isRequired,
+    invoker: PropTypes.object.isRequired,
+    setInvoker: PropTypes.func.isRequired,
 };
 
-export default TemplateFileEntry;
+export default InvokerFileEntry;

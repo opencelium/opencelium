@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {InvokersAction, UpdateAssistantAction} from '@utils/actions';
+import {UpdateAssistantAction} from '@utils/actions';
 import {
     fetchUpdateAppVersionFulfilled, fetchUpdateAppVersionRejected,
     fetchOnlineUpdatesFulfilled, fetchOnlineUpdatesRejected,
@@ -23,8 +23,11 @@ import {doRequest} from "@utils/auth";
 import Rx from "rxjs";
 import {API_METHOD} from "@utils/constants/app";
 import {deleteVersionFulfilled, deleteVersionRejected} from "@actions/update_assistant/delete";
-import {addInvokerFulfilled, addInvokerRejected} from "@actions/invokers/add";
 import {uploadVersionFulfilled, uploadVersionRejected} from "@actions/update_assistant/add";
+import {
+    updateTemplatesFulfilled, updateTemplatesRejected,
+    updateInvokersFulfilled, updateInvokersRejected,
+} from "@actions/update_assistant/update";
 
 
 const ONLINE_UPDATES = [
@@ -126,11 +129,47 @@ const uploadVersionEpic = (action$, store) => {
         });
 };
 
+/**
+ * update templates
+ */
+const updateTemplatesForAssistantEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            let data = action.payload;
+            return Rx.Observable.of(updateTemplatesFulfilled({newTemplates: data, oldTemplates: data}));
+            /*return doRequest({url, method: API_METHOD.PUT, data},{
+                    success: convertTemplatesFulfilled,
+                    reject: convertTemplatesRejected},
+                res => {return {newTemplates: res.response._embedded.templateResourceList, oldTemplates: data};}
+            );*/
+        });
+};
 
+/**
+ * update invokers
+ */
+const updateInvokersForAssistantEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            let data = action.payload;
+            return Rx.Observable.of(updateInvokersFulfilled({newInvokers: data, oldInvokers: data}));
+            /*return doRequest({url, method: API_METHOD.PUT, data},{
+                    success: updateInvokersFulfilled,
+                    reject: updateInvokersRejected},
+                res => {return {newTemplates: res.response._embedded.templateResourceList, oldTemplates: data};}
+            );*/
+        });
+};
 export {
     fetchUpdateAppVersionEpic,
     fetchOnlineUpdatesEpic,
     fetchOfflineUpdatesEpic,
     deleteVersionEpic,
     uploadVersionEpic,
+    updateTemplatesForAssistantEpic,
+    updateInvokersForAssistantEpic,
 };

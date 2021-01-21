@@ -59,7 +59,7 @@ export function checkExpiredMessages(data){
         if(data && data.hasOwnProperty('message')){
             result = TOKEN_EXPIRED_MESSAGES.indexOf(data.message) !== -1;
         }
-        if(!result && data && data.hasOwnProperty('response') && data.response.hasOwnProperty('message')){
+        if(!result && data && data.hasOwnProperty('response') && data.response && data.response.hasOwnProperty('message')){
             result = TOKEN_EXPIRED_MESSAGES.indexOf(data.response.message) !== -1;
         }
     }

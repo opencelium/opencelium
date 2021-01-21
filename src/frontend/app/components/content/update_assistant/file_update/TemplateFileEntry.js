@@ -4,24 +4,19 @@ import FontIcon from "@basic_components/FontIcon";
 import styles from "@themes/default/content/update_assistant/main";
 import CExecution from "@classes/components/content/template_converter/CExecution";
 import {connect} from "react-redux";
-import {fetchTemplates} from "@actions/templates/fetch";
-import {convertTemplates, convertTemplatesRejected} from "@actions/templates/update";
 import Loading from "@components/general/app/Loading";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
     const app = state.get('app');
-    const templates = state.get('templates');
     return {
         authUser: auth.get('authUser'),
         appVersion: app.get('appVersion'),
-        fetchingTemplates: templates.get('fetchingTemplates'),
-        templates: templates.get('templates').toJS(),
     }
 }
 
-@connect(mapStateToProps, {fetchTemplates, convertTemplates, convertTemplatesRejected})
-class FileEntry extends React.Component{
+@connect(mapStateToProps, {})
+class TemplateFileEntry extends React.Component{
     constructor(props) {
         super(props);
     }
@@ -40,8 +35,8 @@ class FileEntry extends React.Component{
             fromVersion: template.version,
             toVersion: entity.availableUpdates.selectedVersion
         }, template.connection);
-        //if (error.message !== '') {
-        if(Math.floor(Math.random() * 2)){
+        if (error.message !== '') {
+        //if(Math.floor(Math.random() * 2)){
             status = {error};
         }
         convertedTemplate = {...template, connection: jsonData, version: entity.availableUpdates.selectedVersion};
@@ -72,16 +67,16 @@ class FileEntry extends React.Component{
     }
 }
 
-FileEntry.defaultProps = {
+TemplateFileEntry.defaultProps = {
     isConverting: false,
     status: null,
 };
 
-FileEntry.propTypes = {
+TemplateFileEntry.propTypes = {
     index: PropTypes.number.isRequired,
     isConverting: PropTypes.bool,
     template: PropTypes.object.isRequired,
     setTemplate: PropTypes.func.isRequired,
 };
 
-export default FileEntry;
+export default TemplateFileEntry;

@@ -20,6 +20,7 @@ import styles from '@themes/default/content/app/app.scss';
 import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 import {getThemeClass} from "@utils/app";
+import FontIcon from "@basic_components/FontIcon";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -42,13 +43,13 @@ class NoPermission extends Component{
 
     render(){
         const {authUser, t} = this.props;
-        let classNames = ['no_permission_image', 'no_permission_title'];
+        let classNames = ['no_permission', 'no_permission_image', 'no_permission_title'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <Container>
                 <Row>
-                    <Col md={6} offset={{md: 3}}>
-                        <img src='../../../../img/no_permission.png' className={styles[classNames.no_permission_image]}/>
+                    <Col md={6} offset={{md: 3}} className={styles[classNames.no_permission]}>
+                        <FontIcon value={'do_not_touch'} size={72}/>
                         <div className={styles[classNames.no_permission_title]}>{t('NO_PERMISSION.TITLE')}</div>
                     </Col>
                 </Row>

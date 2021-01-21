@@ -585,7 +585,7 @@ export const UPDATE_ASSISTANT_TOURS = {
             selector: '.tour-page-3-step-1',
             content:
                 <SwitchOffTour>
-                    Update connections
+                    Update Templates
                 </SwitchOffTour>,
         },
     ],

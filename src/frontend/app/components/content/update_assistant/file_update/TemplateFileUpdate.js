@@ -7,7 +7,7 @@ import Button from "@basic_components/buttons/Button";
 import {updateTemplates, updateTemplatesRejected} from "@actions/update_assistant/update";
 import {fetchTemplates} from "@actions/templates/fetch";
 import {ListComponent} from "@decorators/ListComponent";
-import FileEntry from "@components/content/update_assistant/FileEntry";
+import TemplateFileEntry from "@components/content/update_assistant/file_update/TemplateFileEntry";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
@@ -36,12 +36,6 @@ class TemplateFileUpdate extends React.Component{
         }
     }
 
-    componentWillUnmount(){
-        const {entity, updateEntity} = this.props;
-        entity.availableUpdates = {isFinishUpdate: false, updatedTemplates: [],};
-        updateEntity(entity);
-    }
-
     cancelConvert(){
         this.setState({
             isCanceledConvert: true,
@@ -56,7 +50,7 @@ class TemplateFileUpdate extends React.Component{
             });
         } else{
             const {convertedTemplates} = this.state;
-            let isFinishUpdate = convertedTemplates.filter(template => template.status === null).length === 0;
+            let isFinishUpdate = convertedTemplates.filter(template => template.status !== null).length === 0;
             const {entity, updateEntity} = this.props;
             entity.templateFileUpdate = {...entity.templateFileUpdate, updatedTemplates: convertedTemplates, isFinishUpdate};
             updateEntity(entity);
@@ -92,14 +86,14 @@ class TemplateFileUpdate extends React.Component{
 
     render(){
         const {currentTemplateIndex, convertedTemplates} = this.state;
-        const {t, authUser, templates} = this.props;
+        const {t, authUser, templates, appVersion, entity} = this.props;
         return(
             <div style={{margin: '20px 68px 0px 0px'}}>
                 <Table className={styles.table} authUser={authUser}>
                     <thead>
                         <tr>
-                            <th>{'v1.2'}</th>
-                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{'v1.3'}</th>
+                            <th>{`v${appVersion}`}</th>
+                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{entity.availableUpdates.selectedVersion}</th>
                         </tr>
                     </thead>
                 </Table>
@@ -107,13 +101,14 @@ class TemplateFileUpdate extends React.Component{
                     <Table authUser={authUser}>
                         <tbody>
                             {templates.map((template, key) => (
-                                <FileEntry
+                                <TemplateFileEntry
                                     key={template.templateId}
                                     index={key}
                                     template={template}
                                     setTemplate={::this.setTemplate}
                                     isConverting={currentTemplateIndex === key}
                                     convertedTemplates={convertedTemplates}
+                                    entity={entity}
                                 />
                             ))}
                         </tbody>

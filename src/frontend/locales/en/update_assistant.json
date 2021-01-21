@@ -22,15 +22,24 @@
     "OFFLINE": "Offline",
     "DELETE_CONFIRMATION_TITLE": "Confirmation",
     "DELETE_CONFIRMATION_MESSAGE": "Do you really want to remove?",
-    "PAGE_3": "File-Update",
+    "TEMPLATE_FILE_UPDATE": "Templates",
+    "PAGE_3": "Template-Update",
     "HINT_3": "Please, update your templates",
-    "PAGE_4": "Migration",
-    "HINT_4": "Migrate your connections and invokers",
+    "INVOKER_FILE_UPDATE": "Invokers",
+    "INVOKER_MINE": "My Version",
+    "INVOKER_NEW": "New Version",
+    "INVOKER_MODE": "Mode",
+    "PAGE_4": "Invoker-Update",
+    "HINT_4": "Please, update your invokers",
     "PAGE_5": "Done",
     "HINT_5": "Update successfully completed",
     "VALIDATION_MESSAGES": {
       "NO_UPDATE_MODE": "Please, select how do you want to update",
-      "NO_SELECTED_VERSION": "Please, select an available version"
+      "NO_SELECTED_VERSION": "Please, select an available version",
+      "TEMPLATE_UPDATE_ABSENT": "Please, update templates",
+      "TEMPLATES_HAVE_ERROR": "All templates should be updated",
+      "INVOKER_UPDATE_ABSENT": "Please, update invokers",
+      "INVOKERS_HAVE_ERROR": "All invokers should be updated"
     }
   }
 }

@@ -22,18 +22,21 @@ import {isArray} from "../utils/app";
 
 const initialState = fromJS({
     fetchingInvokers: API_REQUEST_STATE.INITIAL,
+    fetchingDefaultInvokers: API_REQUEST_STATE.INITIAL,
     fetchingInvoker: API_REQUEST_STATE.INITIAL,
     addingInvoker: API_REQUEST_STATE.INITIAL,
     updatingInvoker: API_REQUEST_STATE.INITIAL,
     deletingInvoker: API_REQUEST_STATE.INITIAL,
     invoker: null,
     invokers: List([]),
+    defaultInvokers: List([]),
     error: null,
     message: {},
     notificationData: {},
 });
 
 let invokers = [];
+let defaultInvokers = [];
 let invoker = {};
 let index = 0;
 /**
@@ -41,6 +44,7 @@ let index = 0;
  */
 const reducer = (state = initialState, action) => {
     invokers = state.get('invokers');
+    defaultInvokers = state.get('defaultInvokers');
     switch (action.type) {
         case InvokersAction.FETCH_INVOKERS:
             return state.set('fetchingInvokers', API_REQUEST_STATE.START).set('error', null);
@@ -59,6 +63,17 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingInvoker', API_REQUEST_STATE.FINISH).set('invoker', action.payload);
         case InvokersAction.FETCH_INVOKER_REJECTED:
             return state.set('fetchingInvoker', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case InvokersAction.FETCH_DEFAULTINVOKERS:
+            return state.set('fetchingDefaultInvokers', API_REQUEST_STATE.START).set('error', null);
+        case InvokersAction.FETCH_DEFAULTINVOKERS_FULFILLED:
+            if(isArray(action.payload)){
+                defaultInvokers = List(action.payload);
+            } else{
+                defaultInvokers = List([]);
+            }
+            return state.set('fetchingDefaultInvokers', API_REQUEST_STATE.FINISH).set('defaultInvokers', defaultInvokers);
+        case InvokersAction.FETCH_DEFAULTINVOKERS_REJECTED:
+            return state.set('fetchingDefaultInvokers', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case InvokersAction.ADD_INVOKER:
             return state.set('addingInvoker', API_REQUEST_STATE.START).set('error', null);
         case InvokersAction.ADD_INVOKER_FULFILLED:

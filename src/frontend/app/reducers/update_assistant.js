@@ -25,10 +25,12 @@ const initialState = fromJS({
     fetchingOfflineUpdates: API_REQUEST_STATE.INITIAL,
     deletingVersion: API_REQUEST_STATE.INITIAL,
     uploadingVersion: API_REQUEST_STATE.INITIAL,
+    updatingTemplates: API_REQUEST_STATE.INITIAL,
     currentVersion: null,
     updateAppVersion: '',
     onlineUpdates: List([]),
     offlineUpdates: List([]),
+    updatedTemplates: List([]),
     error: null,
     message: {},
 });
@@ -38,8 +40,16 @@ const initialState = fromJS({
  */
 let index = -1;
 let offlineUpdates = [];
+let templates = [];
+let updatedTemplates = [];
+let invokers = [];
+let updatedInvokers = [];
 const reducer = (state = initialState, action) => {
     offlineUpdates = state.get('offlineUpdates');
+    templates = state.get('templates');
+    updatedTemplates = state.get('updatedTemplates');
+    invokers = state.get('invokers');
+    updatedInvokers = state.get('updatedInvokers');
     switch (action.type) {
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION:
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.START).set('error', null);
@@ -77,6 +87,46 @@ const reducer = (state = initialState, action) => {
             return state.set('uploadingVersion', API_REQUEST_STATE.FINISH).set('offlineUpdates', offlineUpdates.set(offlineUpdates.size, action.payload));
         case UpdateAssistantAction.UPLOAD_VERSION_REJECTED:
             return state.set('uploadingVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT:
+            return state.set('updatingTemplates', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('updatedTemplates', List(action.payload));
+        case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT_FULFILLED:
+            for(let i = 0; i < action.payload.oldTemplates.length; i++){
+                index = templates.findIndex(function (template) {
+                    return template.templateId === action.payload.oldTemplates[i].templateId;
+                });
+                if(index >= 0) {
+                    templates = templates.set(index, action.payload.newTemplates[i]);
+                }
+                index = updatedTemplates.findIndex(function (template) {
+                    return template.templateId === action.payload.oldTemplates[i].templateId;
+                });
+                if(index >= 0) {
+                    updatedTemplates = updatedTemplates.delete(index);
+                }
+            }
+            return state.set('updatingTemplates', API_REQUEST_STATE.FINISH).set('templates', templates).set('updatedTemplates', updatedTemplates);
+        case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT_REJECTED:
+            return state.set('updatingTemplates', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('updatedTemplates', List([]));
+        case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT:
+            return state.set('updatingInvokers', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('updatedInvokers', List(action.payload));
+        case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT_FULFILLED:
+            for(let i = 0; i < action.payload.oldInvokers.length; i++){
+                index = templates.findIndex(function (template) {
+                    return template.templateId === action.payload.oldInvokers[i].templateId;
+                });
+                if(index >= 0) {
+                    templates = templates.set(index, action.payload.newInvokers[i]);
+                }
+                index = updatedInvokers.findIndex(function (template) {
+                    return template.templateId === action.payload.oldInvokers[i].templateId;
+                });
+                if(index >= 0) {
+                    updatedInvokers = updatedInvokers.delete(index);
+                }
+            }
+            return state.set('updatingInvokers', API_REQUEST_STATE.FINISH).set('templates', invokers).set('updatedTemplates', updatedInvokers);
+        case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT_REJECTED:
+            return state.set('updatingInvokers', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('updatedInvokers', List([]));
         default:
             return state;
     }

@@ -54,7 +54,7 @@ class FontIcon extends Component{
         } else {
             return (
                 <span ref={myRef ? myRef : this.icon} >
-                    <ToolboxFontIcon value={value} className={className} {...props} onClick={onClick} id={id}/>
+                    <ToolboxFontIcon value={value} className={className} style={{...iconStyles, fontSize: `${size}px`}} {...props} onClick={onClick} id={id}/>
                 </span>
             );
         }

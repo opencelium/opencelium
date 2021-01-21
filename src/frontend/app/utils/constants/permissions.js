@@ -132,3 +132,15 @@ export const NotificationTemplatePermissions = {
     UPDATE: {entity: 'SCHEDULE', permission: 'UPDATE'},
     DELETE: {entity: 'SCHEDULE', permission: 'DELETE'},
 };
+/**
+ * permission constants for update assistant
+ */
+/*
+* TODO: change entity when backend will be ready
+*/
+export const UpdateAssistantPermissions = {
+    CREATE: {entity: 'USERGROUP', permission: 'CREATE'},
+    READ: {entity: 'USERGROUP', permission: 'READ'},
+    UPDATE: {entity: 'USERGROUP', permission: 'UPDATE'},
+    DELETE: {entity: 'USERGROUP', permission: 'DELETE'},
+};

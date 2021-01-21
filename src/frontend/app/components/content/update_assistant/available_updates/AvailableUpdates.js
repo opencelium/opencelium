@@ -10,7 +10,7 @@ import {uploadVersion} from "@actions/update_assistant/add";
 import Table from "@basic_components/table/Table";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import OldVersionEntry from "@components/content/update_assistant/OldVersionEntry";
+import OldVersionEntry from "@components/content/update_assistant/available_updates/OldVersionEntry";
 import BrowseButton from "@basic_components/buttons/BrowseButton";
 
 const ONLINE_UPDATE = 'ONLINE_UPDATE';
@@ -64,12 +64,6 @@ class AvailableUpdates extends React.Component{
                 startFetchingOfflineUpdates: false,
             });
         }
-    }
-
-    componentWillUnmount(){
-        const {entity, updateEntity} = this.props;
-        entity.availableUpdates = {selectedVersion: '', mode: ''};
-        updateEntity(entity);
     }
 
     uploadVersion(){

@@ -112,7 +112,7 @@ export function ListComponent(pluralEntityName){
                 if(entities === null)
                     return <Loading cancelCallback={cancelFetching} authUser={authUser}/>;
 
-                if(params.pageNumber > this.totalPages && this.totalPages > 0){
+                if(params && params.pageNumber > this.totalPages && this.totalPages > 0){
                     if(params.pageNumber - 1 !== this.totalPages){
                         return <PageNotFound/>;
                     }
