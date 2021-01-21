@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import Button from "@basic_components/buttons/Button";
-import styles from "@themes/default/content/available_updates/main";
+import styles from "@themes/default/content/update_assistant/main";
 import {API_REQUEST_STATE, Permissions} from "@utils/constants/app";
 import Loading from "@components/general/app/Loading";
 import {fetchOnlineUpdates, fetchOfflineUpdates} from "@actions/update_assistant/fetch";
@@ -231,7 +231,7 @@ class AvailableUpdates extends React.Component{
         }
         return(
             <React.Fragment>
-                <Table className={styles.updates_table} authUser={authUser}>
+                <Table className={styles.table} authUser={authUser}>
                     <thead>
                     <tr>
                         <th>{t('FORM.VERSION_HEADER')}</th>
@@ -240,7 +240,7 @@ class AvailableUpdates extends React.Component{
                     </tr>
                     </thead>
                 </Table>
-                <div className={styles.updates_table_content}>
+                <div className={styles.table_content}>
                     <Table authUser={authUser}>
                         <tbody>
                             {::this.renderOldUpdates()}

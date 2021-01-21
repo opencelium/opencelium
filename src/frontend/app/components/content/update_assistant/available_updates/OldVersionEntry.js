@@ -2,7 +2,7 @@ import React from "react";
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {withTranslation} from "react-i18next";
-import styles from "@themes/default/content/available_updates/main";
+import styles from "@themes/default/content/update_assistant/main";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {deleteVersion} from "@actions/update_assistant/delete";
 import {API_REQUEST_STATE} from "@utils/constants/app";
