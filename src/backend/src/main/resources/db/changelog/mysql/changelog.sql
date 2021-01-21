@@ -157,3 +157,6 @@ alter table detail add column if not exists lang varchar(3) not null default 'en
 --changeset 1.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 
 alter table connector add column if not exists icon  varchar(128);
+
+--changeset 1.1:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE enhancement MODIFY expert_code varchar(30000);
