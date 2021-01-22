@@ -81,6 +81,7 @@ import {
 import {
     fetchUpdateAppVersionEpic, fetchOfflineUpdatesEpic, fetchOnlineUpdatesEpic,
     deleteVersionEpic, uploadVersionEpic, updateTemplatesForAssistantEpic, updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic,
 } from "@epics/update_assistant";
 
 
@@ -188,4 +189,5 @@ export default combineEpics(
     uploadVersionEpic,
     updateTemplatesForAssistantEpic,
     updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic,
 );

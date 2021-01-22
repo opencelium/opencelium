@@ -31,6 +31,7 @@ const initialState = fromJS({
     onlineUpdates: List([]),
     offlineUpdates: List([]),
     updatedTemplates: List([]),
+    systemRequirements: null,
     error: null,
     message: {},
 });
@@ -69,6 +70,12 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.FINISH).set('offlineUpdates', List(action.payload));
         case UpdateAssistantAction.FETCH_OFFLINEUPDATES_REJECTED:
             return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS:
+            return state.set('fetchingSystemRequirements', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS_FULFILLED:
+            return state.set('fetchingSystemRequirements', API_REQUEST_STATE.FINISH).set('systemRequirements', action.payload);
+        case UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS_REJECTED:
+            return state.set('fetchingSystemRequirements', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case UpdateAssistantAction.DELETE_VERSION:
             return state.set('deletingVersion', API_REQUEST_STATE.START).set('currentVersion', action.payload).set('error', null);
         case UpdateAssistantAction.DELETE_VERSION_FULFILLED:

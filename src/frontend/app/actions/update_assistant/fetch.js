@@ -96,6 +96,7 @@ const fetchOnlineUpdatesRejected = (error) => {
         payload: error
     });
 };
+
 /**
  * fetch offline updates
  * @param settings = {background: bool}
@@ -136,6 +137,47 @@ const fetchOfflineUpdatesRejected = (error) => {
     });
 };
 
+/**
+ * fetch system requirements
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchSystemRequirements = (settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS,
+        settings,
+    };
+};
+
+/**
+ * fetch system requirements fulfilled
+ * @param systemRequirements = available updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchSystemRequirementsFulfilled = (systemRequirements, settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS_FULFILLED,
+        payload: systemRequirements,
+        settings: {...settings, hasCloseButton: true},
+    };
+};
+
+/**
+ * fetch system requirements rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchSystemRequirementsRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS_REJECTED,
+        payload: error
+    });
+};
+
+
 export {
     fetchUpdateAppVersion,
     fetchUpdateAppVersionRejected,
@@ -146,4 +188,7 @@ export {
     fetchOfflineUpdates,
     fetchOfflineUpdatesRejected,
     fetchOfflineUpdatesFulfilled,
+    fetchSystemRequirements,
+    fetchSystemRequirementsRejected,
+    fetchSystemRequirementsFulfilled,
 };

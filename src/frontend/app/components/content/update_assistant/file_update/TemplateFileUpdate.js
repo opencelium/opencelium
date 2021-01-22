@@ -43,7 +43,7 @@ class TemplateFileUpdate extends React.Component{
     }
 
     convert(index){
-        const {templates} = this.props;
+        const {templates, updateTemplates} = this.props;
         if(templates.length > index){
             this.setState({
                 currentTemplateIndex: index,
@@ -57,15 +57,18 @@ class TemplateFileUpdate extends React.Component{
             this.setState({
                 currentTemplateIndex: -1,
             });
+            if(isFinishUpdate) {
+                //updateTemplates(convertedTemplates);
+            } else{
+
+            }
         }
     }
 
     updateTemplates(){
-        const {updateTemplates} = this.props;
         this.setState({
             convertedTemplates: [],
         }, () => ::this.convert(0));
-        //updateTemplates(convertedTemplates);
     }
 
     setTemplate(template, status, index){

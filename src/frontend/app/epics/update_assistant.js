@@ -18,6 +18,7 @@ import {
     fetchUpdateAppVersionFulfilled, fetchUpdateAppVersionRejected,
     fetchOnlineUpdatesFulfilled, fetchOnlineUpdatesRejected,
     fetchOfflineUpdatesFulfilled, fetchOfflineUpdatesRejected,
+    fetchSystemRequirementsFulfilled, fetchSystemRequirementsRejected,
 } from '@actions/update_assistant/fetch';
 import {doRequest} from "@utils/auth";
 import Rx from "rxjs";
@@ -30,21 +31,31 @@ import {
 } from "@actions/update_assistant/update";
 
 
+const SYSTEM_REQUIREMENTS = {
+    oc: 'Ubuntu 16.04 LTS',
+    java: '16.04.2',
+    nodeJS: '12.1',
+    neo4j: '12.4',
+    kibana: '10.43',
+    elasticSearch: '10.42',
+    mariaDB: '11.21',
+};
+
 const ONLINE_UPDATES = [
-    {id: 4, name: 'v1.3', changeLogLink: '', status: 'current'},
-    {id: 5, name: 'v1.3.1', changeLogLink: '', status: 'available'},
-    {id: 6, name: 'v1.3.2', changeLogLink: '', status: 'available'},
-    {id: 7, name: 'v1.4', changeLogLink: '', status: 'not_available'},
+    {id: 4, name: '1.3', changeLogLink: '', status: 'current'},
+    {id: 5, name: '1.3.1', changeLogLink: '', status: 'available'},
+    {id: 6, name: '1.3.2', changeLogLink: '', status: 'available'},
+    {id: 7, name: '1.4', changeLogLink: '', status: 'not_available'},
 ];
 const OFFLINE_UPDATES = [
-    {id: 0, name: 'v1.1', changeLogLink: '', status: 'old'},
-    {id: 1, name: 'v1.2', changeLogLink: '', status: 'old'},
-    {id: 2, name: 'v1.2.2', changeLogLink: '', status: 'old'},
-    {id: 3, name: 'v1.3', changeLogLink: '', status: 'current'},
-    {id: 4, name: 'v1.3.2', changeLogLink: '', status: 'available'},
-    {id: 5, name: 'v1.4', changeLogLink: '', status: 'not_available'},
-    {id: 6, name: 'v1.4.1', changeLogLink: '', status: 'not_available'},
-    {id: 7, name: 'v1.4.2', changeLogLink: '', status: 'not_available'},
+    {id: 0, name: '1.1', changeLogLink: '', status: 'old'},
+    {id: 1, name: '1.2', changeLogLink: '', status: 'old'},
+    {id: 2, name: '1.2.2', changeLogLink: '', status: 'old'},
+    {id: 3, name: '1.3', changeLogLink: '', status: 'current'},
+    {id: 4, name: '1.3.2', changeLogLink: '', status: 'available'},
+    {id: 5, name: '1.4', changeLogLink: '', status: 'not_available'},
+    {id: 6, name: '1.4.1', changeLogLink: '', status: 'not_available'},
+    {id: 7, name: '1.4.2', changeLogLink: '', status: 'not_available'},
 ];
 
 const urlPrefix = 'update_assistant';
@@ -164,6 +175,23 @@ const updateInvokersForAssistantEpic = (action$, store) => {
             );*/
         });
 };
+
+/**
+ * fetch system requirements
+ */
+const fetchSystemRequirementsEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/system_requirements`;
+            return Rx.Observable.of(fetchSystemRequirementsFulfilled(SYSTEM_REQUIREMENTS));
+            /*return doRequest({url},{
+                success: (data) => fetchSystemRequirementsFulfilled(data, {...action.settings}),
+                reject: fetchSystemRequirementsRejected,
+            });*/
+        });
+};
+
 export {
     fetchUpdateAppVersionEpic,
     fetchOnlineUpdatesEpic,
@@ -172,4 +200,5 @@ export {
     uploadVersionEpic,
     updateTemplatesForAssistantEpic,
     updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic,
 };

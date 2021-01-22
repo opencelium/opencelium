@@ -117,7 +117,6 @@ export function ListComponent(pluralEntityName){
                         return <PageNotFound/>;
                     }
                 }
-
                 return null;
             }
 
