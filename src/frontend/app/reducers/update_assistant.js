@@ -26,11 +26,16 @@ const initialState = fromJS({
     deletingVersion: API_REQUEST_STATE.INITIAL,
     uploadingVersion: API_REQUEST_STATE.INITIAL,
     updatingTemplates: API_REQUEST_STATE.INITIAL,
+    addingTemplatesLogs: API_REQUEST_STATE.INITIAL,
+    addingInvokersLogs: API_REQUEST_STATE.INITIAL,
     currentVersion: null,
     updateAppVersion: '',
     onlineUpdates: List([]),
     offlineUpdates: List([]),
     updatedTemplates: List([]),
+    updatedInvokers: List([]),
+    templatesLogs: List([]),
+    invokersLogs: List([]),
     systemRequirements: null,
     error: null,
     message: {},
@@ -97,43 +102,27 @@ const reducer = (state = initialState, action) => {
         case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT:
             return state.set('updatingTemplates', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('updatedTemplates', List(action.payload));
         case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT_FULFILLED:
-            for(let i = 0; i < action.payload.oldTemplates.length; i++){
-                index = templates.findIndex(function (template) {
-                    return template.templateId === action.payload.oldTemplates[i].templateId;
-                });
-                if(index >= 0) {
-                    templates = templates.set(index, action.payload.newTemplates[i]);
-                }
-                index = updatedTemplates.findIndex(function (template) {
-                    return template.templateId === action.payload.oldTemplates[i].templateId;
-                });
-                if(index >= 0) {
-                    updatedTemplates = updatedTemplates.delete(index);
-                }
-            }
-            return state.set('updatingTemplates', API_REQUEST_STATE.FINISH).set('templates', templates).set('updatedTemplates', updatedTemplates);
+            return state.set('updatingTemplates', API_REQUEST_STATE.FINISH).set('updatedTemplates', action.payload.newTemplates);
         case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT_REJECTED:
             return state.set('updatingTemplates', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('updatedTemplates', List([]));
         case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT:
             return state.set('updatingInvokers', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('updatedInvokers', List(action.payload));
         case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT_FULFILLED:
-            for(let i = 0; i < action.payload.oldInvokers.length; i++){
-                index = templates.findIndex(function (template) {
-                    return template.templateId === action.payload.oldInvokers[i].templateId;
-                });
-                if(index >= 0) {
-                    templates = templates.set(index, action.payload.newInvokers[i]);
-                }
-                index = updatedInvokers.findIndex(function (template) {
-                    return template.templateId === action.payload.oldInvokers[i].templateId;
-                });
-                if(index >= 0) {
-                    updatedInvokers = updatedInvokers.delete(index);
-                }
-            }
-            return state.set('updatingInvokers', API_REQUEST_STATE.FINISH).set('templates', invokers).set('updatedTemplates', updatedInvokers);
+            return state.set('updatingInvokers', API_REQUEST_STATE.FINISH).set('updatedInvokers', action.payload.newInvokers);
         case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT_REJECTED:
             return state.set('updatingInvokers', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('updatedInvokers', List([]));
+        case UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS:
+            return state.set('addingTemplatesLogs', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS_FULFILLED:
+            return state.set('addingTemplatesLogs', API_REQUEST_STATE.FINISH).set('templatesLogs', List(action.payload));
+        case UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS_REJECTED:
+            return state.set('addingTemplatesLogs', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS:
+            return state.set('addingInvokersLogs', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS_FULFILLED:
+            return state.set('addingInvokersLogs', API_REQUEST_STATE.FINISH).set('invokersLogs', List(action.payload));
+        case UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS_REJECTED:
+            return state.set('addingInvokersLogs', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

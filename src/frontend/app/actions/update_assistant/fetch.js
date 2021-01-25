@@ -152,7 +152,7 @@ const fetchSystemRequirements = (settings = {background: false}) => {
 
 /**
  * fetch system requirements fulfilled
- * @param systemRequirements = available updates
+ * @param systemRequirements     = available updates
  * @param settings = {background: bool}
  *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: {}}}

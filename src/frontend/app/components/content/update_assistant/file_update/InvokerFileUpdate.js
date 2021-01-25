@@ -5,6 +5,7 @@ import Table from "@basic_components/table/Table";
 import styles from "@themes/default/content/update_assistant/main";
 import Button from "@basic_components/buttons/Button";
 import {updateInvokers, updateInvokersRejected} from "@actions/update_assistant/update";
+import {addConvertInvokersLogs} from "@actions/update_assistant/add";
 import {fetchInvokers, fetchDefaultInvokers} from "@actions/invokers/fetch";
 import {ListComponent} from "@decorators/ListComponent";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
@@ -15,6 +16,7 @@ function mapStateToProps(state){
     const auth = state.get('auth');
     const app = state.get('app');
     const invokers = state.get('invokers');
+    const updateAssistant = state.get('update_assistant');
     return {
         authUser: auth.get('authUser'),
         appVersion: app.get('appVersion'),
@@ -22,19 +24,22 @@ function mapStateToProps(state){
         invokers: invokers.get('invokers').toJS(),
         fetchingDefaultInvokers: invokers.get('fetchingDefaultInvokers'),
         defaultInvokers: invokers.get('defaultInvokers').toJS(),
+        updatingInvokers: updateAssistant.get('updatingInvokers'),
+        addingInvokersLogs: updateAssistant.get('addingInvokersLogs'),
     }
 }
 
-@connect(mapStateToProps, {fetchInvokers, fetchDefaultInvokers, updateInvokers, updateInvokersRejected})
+@connect(mapStateToProps, {fetchInvokers, fetchDefaultInvokers, updateInvokers, updateInvokersRejected, addConvertInvokersLogs})
 @withTranslation('update_assistant')
 @ListComponent('invokers')
 @ListComponent('defaultInvokers')
 class InvokerFileUpdate extends React.Component{
     constructor(props) {
         super(props);
+        const {entity} = props;
         this.state = {
             currentInvokerIndex: -1,
-            convertedInvokers: [],
+            convertedInvokers: entity.invokerFileUpdate.updatedInvokers,
             isCanceledConvert: false,
         }
     }
@@ -46,38 +51,42 @@ class InvokerFileUpdate extends React.Component{
     }
 
     convert(index){
-        const {invokers} = this.props;
+        const {invokers, addConvertInvokersLogs, updateInvokers} = this.props;
         if(invokers.length > index){
             this.setState({
                 currentInvokerIndex: index,
             });
         } else{
             const {convertedInvokers} = this.state;
-            let isFinishUpdate = convertedInvokers.filter(invoker => invoker.status !== null).length === 0;
+            const invokersWithErrors = convertedInvokers.filter(invoker => invoker.status.error !== null);
+            const isFinishUpdate = invokersWithErrors.length === 0;
             const {entity, updateEntity} = this.props;
             entity.invokerFileUpdate = {...entity.invokerFileUpdate, updatedInvokers: convertedInvokers, isFinishUpdate};
             updateEntity(entity);
             this.setState({
                 currentInvokerIndex: -1,
             });
+            if(isFinishUpdate) {
+                updateInvokers(convertedInvokers);
+            } else{
+                addConvertInvokersLogs(invokersWithErrors.map(invoker => {return {invokerName: invoker.data.name, message: invoker.status.error.message, data: invoker.status.error.data};}));
+            }
         }
     }
 
     updateInvokers(){
-        const {updateInvokers} = this.props;
         this.setState({
             convertedInvokers: [],
         }, () => ::this.convert(0));
-        //updateInvokers(convertedInvokers);
     }
 
     setInvoker(invoker, status, index){
         this.setState({
             convertedInvokers: [...this.state.convertedInvokers, {data: invoker, status}]
         }, () => {
-            if(!this.state.isCanceledConvert) {
+            if (!this.state.isCanceledConvert) {
                 this.convert(index + 1)
-            } else{
+            } else {
                 this.setState({
                     convertedInvokers: [],
                     currentInvokerIndex: -1,

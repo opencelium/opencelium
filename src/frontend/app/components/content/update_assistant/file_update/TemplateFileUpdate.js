@@ -5,33 +5,39 @@ import Table from "@basic_components/table/Table";
 import styles from "@themes/default/content/update_assistant/main";
 import Button from "@basic_components/buttons/Button";
 import {updateTemplates, updateTemplatesRejected} from "@actions/update_assistant/update";
+import {addConvertTemplatesLogs} from "@actions/update_assistant/add";
 import {fetchTemplates} from "@actions/templates/fetch";
 import {ListComponent} from "@decorators/ListComponent";
 import TemplateFileEntry from "@components/content/update_assistant/file_update/TemplateFileEntry";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
     const app = state.get('app');
     const templates = state.get('templates');
+    const updateAssistant = state.get('update_assistant');
     return {
         authUser: auth.get('authUser'),
         appVersion: app.get('appVersion'),
         fetchingTemplates: templates.get('fetchingTemplates'),
         templates: templates.get('templates').toJS(),
+        updatingTemplates: updateAssistant.get('updatingTemplates'),
+        addingTemplatesLogs: updateAssistant.get('addingTemplatesLogs'),
     }
 }
 
-@connect(mapStateToProps, {fetchTemplates, updateTemplates, updateTemplatesRejected})
+@connect(mapStateToProps, {fetchTemplates, updateTemplates, updateTemplatesRejected, addConvertTemplatesLogs})
 @withTranslation('update_assistant')
 @ListComponent('templates')
 class TemplateFileUpdate extends React.Component{
     constructor(props) {
         super(props);
+        const {entity} = props;
         this.state = {
             currentTemplateIndex: -1,
-            convertedTemplates: [],
+            convertedTemplates: entity.templateFileUpdate.updatedTemplates,
             isCanceledConvert: false,
         }
     }
@@ -43,14 +49,15 @@ class TemplateFileUpdate extends React.Component{
     }
 
     convert(index){
-        const {templates, updateTemplates} = this.props;
+        const {templates, updateTemplates, addConvertTemplatesLogs} = this.props;
         if(templates.length > index){
             this.setState({
                 currentTemplateIndex: index,
             });
         } else{
             const {convertedTemplates} = this.state;
-            let isFinishUpdate = convertedTemplates.filter(template => template.status !== null).length === 0;
+            const templatesWithErrors = convertedTemplates.filter(template => template.status !== null);
+            const isFinishUpdate = templatesWithErrors.length === 0;
             const {entity, updateEntity} = this.props;
             entity.templateFileUpdate = {...entity.templateFileUpdate, updatedTemplates: convertedTemplates, isFinishUpdate};
             updateEntity(entity);
@@ -58,9 +65,9 @@ class TemplateFileUpdate extends React.Component{
                 currentTemplateIndex: -1,
             });
             if(isFinishUpdate) {
-                //updateTemplates(convertedTemplates);
+                updateTemplates(convertedTemplates);
             } else{
-
+                addConvertTemplatesLogs(templatesWithErrors.map(template => {return {templateId: template.data.templateId, templateName: template.data.name, message: template.status.error.message, data: template.status.error.data};}));
             }
         }
     }

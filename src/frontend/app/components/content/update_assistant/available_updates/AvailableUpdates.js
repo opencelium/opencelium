@@ -42,11 +42,13 @@ class AvailableUpdates extends React.Component{
     constructor(props) {
         super(props);
 
+        const {entity} = props;
+
         this.state = {
-            activeMode: '',
+            activeMode: entity.availableUpdates.mode,
             startFetchingOnlineUpdates: false,
             startFetchingOfflineUpdates: false,
-            selectedVersion: '',
+            selectedVersion: entity.availableUpdates.selectedVersion,
             isOldVersionsExtended: false,
             isNewVersionsExtended: false,
         }
@@ -188,7 +190,7 @@ class AvailableUpdates extends React.Component{
                         }
                     }
                     return (
-                        <OldVersionEntry version={version}/>
+                        <OldVersionEntry key={version.name} version={version}/>
                     );
                 })}
             </React.Fragment>

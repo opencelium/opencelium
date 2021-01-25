@@ -22,9 +22,11 @@ function mapStateToProps(state){
 class InvokerFileEntry extends React.Component{
     constructor(props) {
         super(props);
-
+        const {convertedInvokers, invoker} = props;
+        const convertedInvoker = convertedInvokers.find(invo => invo.data.name === invoker.name);
+        const shouldUseNew = convertedInvoker && convertedInvoker.status.hasOwnProperty('shouldUseNew') ? convertedInvoker.status.shouldUseNew : false;
         this.state = {
-            shouldUseNew: false,
+            shouldUseNew,
         }
     }
 
@@ -41,16 +43,20 @@ class InvokerFileEntry extends React.Component{
     }
 
     convertInvoker(){
-        const {index, invoker, entity, setInvoker} = this.props;
+        const {shouldUseNew} = this.state;
+        const {index, invoker, entity, setInvoker, defaultInvokers} = this.props;
         let convertedInvokers = null;
-        let status = null;
+        let status = {error: null};
         const {jsonData, error} = CExecution.executeConfig({
             fromVersion: invoker.version,
             toVersion: entity.availableUpdates.selectedVersion
         }, invoker.connection);
         //if (error.message !== '') {
         if(Math.floor(Math.random() * 2)){
-            status = {error};
+            //status = {error};
+        }
+        if(defaultInvokers.findIndex(defaultInvoker => defaultInvoker.name === invoker.name) !== -1) {
+            status.shouldUseNew = shouldUseNew;
         }
         convertedInvokers = {...invoker, connection: jsonData, version: entity.availableUpdates.selectedVersion};
         setTimeout(() => {
@@ -64,8 +70,8 @@ class InvokerFileEntry extends React.Component{
         let isFail = false;
         let isSuccess = false;
         if(typeof convertedInvokers[index] !== 'undefined'){
-            isFail = convertedInvokers[index].status !== null;
-            isSuccess = convertedInvokers[index].status === null;
+            isFail = convertedInvokers[index].status.error !== null;
+            isSuccess = convertedInvokers[index].status.error === null;
         }
         return(
             <tr>

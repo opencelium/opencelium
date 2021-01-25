@@ -24,7 +24,11 @@ import {doRequest} from "@utils/auth";
 import Rx from "rxjs";
 import {API_METHOD} from "@utils/constants/app";
 import {deleteVersionFulfilled, deleteVersionRejected} from "@actions/update_assistant/delete";
-import {uploadVersionFulfilled, uploadVersionRejected} from "@actions/update_assistant/add";
+import {
+    uploadVersionFulfilled, uploadVersionRejected,
+    addConvertTemplatesLogsFulfilled, addConvertTemplatesLogsRejected,
+    addConvertInvokersLogsFulfilled, addConvertInvokersLogsRejected,
+} from "@actions/update_assistant/add";
 import {
     updateTemplatesFulfilled, updateTemplatesRejected,
     updateInvokersFulfilled, updateInvokersRejected,
@@ -192,6 +196,39 @@ const fetchSystemRequirementsEpic = (action$, store) => {
         });
 };
 
+/**
+ * add logs after convert templates
+ */
+const addConvertTemplatesLogsEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            return Rx.Observable.of(addConvertTemplatesLogsFulfilled(action.payload));
+            /*return doRequest({url, method: API_METHOD.POST, data: action.payload},{
+                success: addConvertTemplatesLogsFulfilled,
+                reject: addConvertTemplatesLogsRejected,},
+            );*/
+        });
+};
+
+/**
+ * add logs after convert invokers
+ */
+const addConvertInvokersLogsEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            return Rx.Observable.of(addConvertInvokersLogsFulfilled(action.payload));
+            /*return doRequest({url, method: API_METHOD.POST, data: action.payload},{
+                success: addConvertInvokersLogsFulfilled,
+                reject: addConvertInvokersLogsRejected,},
+            );*/
+        });
+};
+
+
 export {
     fetchUpdateAppVersionEpic,
     fetchOnlineUpdatesEpic,
@@ -201,4 +238,6 @@ export {
     updateTemplatesForAssistantEpic,
     updateInvokersForAssistantEpic,
     fetchSystemRequirementsEpic,
+    addConvertTemplatesLogsEpic,
+    addConvertInvokersLogsEpic,
 };
