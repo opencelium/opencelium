@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import FontIcon from "@basic_components/FontIcon";
 import styles from "@themes/default/content/update_assistant/main";
-import CExecution from "@classes/components/content/template_converter/CExecution";
+import CExecution from "@classes/components/content/invoker_converter/CExecution";
 import {connect} from "react-redux";
 import Loading from "@components/general/app/Loading";
 import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
@@ -44,23 +44,24 @@ class InvokerFileEntry extends React.Component{
 
     convertInvoker(){
         const {shouldUseNew} = this.state;
-        const {index, invoker, entity, setInvoker, defaultInvokers} = this.props;
-        let convertedInvokers = null;
+        const {index, invoker, entity, setInvoker, defaultInvokers, appVersion} = this.props;
+        let convertedInvoker = null;
         let status = {error: null};
-        const {jsonData, error} = CExecution.executeConfig({
-            fromVersion: invoker.version,
+        const {invokerData, error} = CExecution.executeConfig({
+            fromVersion: appVersion,
             toVersion: entity.availableUpdates.selectedVersion
-        }, invoker.connection);
-        //if (error.message !== '') {
-        if(Math.floor(Math.random() * 2)){
-            //status = {error};
+        }, invoker);
+        if (error.message !== '') {
+        //if(Math.floor(Math.random() * 2)){
+            status = {error};
         }
         if(defaultInvokers.findIndex(defaultInvoker => defaultInvoker.name === invoker.name) !== -1) {
             status.shouldUseNew = shouldUseNew;
         }
-        convertedInvokers = {...invoker, connection: jsonData, version: entity.availableUpdates.selectedVersion};
+        convertedInvoker = invokerData;
+        console.log(convertedInvoker);
         setTimeout(() => {
-            setInvoker(convertedInvokers, status, index);
+            setInvoker(convertedInvoker, status, index);
         }, 100);
     }
 

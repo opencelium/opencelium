@@ -106,7 +106,7 @@ class InvokerFileUpdate extends React.Component{
                     <tr>
                         <th>{`v${appVersion}`}</th>
                         <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{'Mode'}</th>
-                        <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{entity.availableUpdates.selectedVersion}</th>
+                        <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
                     </tr>
                     </thead>
                 </Table>
