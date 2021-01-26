@@ -99,6 +99,39 @@ const fetchInvokerRejected = (error) => {
         payload: error
     });
 };
+/**
+ * fetch default invokers
+ * @returns {{type: string}}
+ */
+const fetchDefaultInvokers = () => {
+    return {
+        type: InvokersAction.FETCH_DEFAULTINVOKERS
+    };
+};
+
+/**
+ * fetch default invokers fulfilled
+ * @param invokers
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchDefaultInvokersFulfilled = (invokers) => {
+    return{
+        type: InvokersAction.FETCH_DEFAULTINVOKERS_FULFILLED,
+        payload: invokers
+    };
+};
+
+/**
+ * fetch default invokers rejected
+ * @param error
+ * @returns {*}
+ */
+const fetchDefaultInvokersRejected = (error) => {
+    return Rx.Observable.of({
+        type: InvokersAction.FETCH_DEFAULTINVOKERS_REJECTED,
+        payload: error
+    });
+};
 
 
 export {
@@ -109,4 +142,7 @@ export {
     fetchInvoker,
     fetchInvokerFulfilled,
     fetchInvokerRejected,
+    fetchDefaultInvokers,
+    fetchDefaultInvokersFulfilled,
+    fetchDefaultInvokersRejected,
 };

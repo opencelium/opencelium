@@ -39,7 +39,7 @@ import {
 } from '@epics/connectors';
 import {
     fetchInvokersEpic, fetchInvokerEpic, addInvokerEpic,
-    updateInvokerEpic, deleteInvokerEpic,
+    updateInvokerEpic, deleteInvokerEpic, fetchDefaultInvokersEpic,
 } from '@epics/invokers';
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
@@ -80,7 +80,8 @@ import {
 } from '@epics/notification_templates';
 import {
     fetchUpdateAppVersionEpic, fetchOfflineUpdatesEpic, fetchOnlineUpdatesEpic,
-    deleteVersionEpic, uploadVersionEpic,
+    deleteVersionEpic, uploadVersionEpic, updateTemplatesForAssistantEpic, updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic, addConvertTemplatesLogsEpic, addConvertInvokersLogsEpic,
 } from "@epics/update_assistant";
 
 
@@ -123,6 +124,7 @@ export default combineEpics(
     addInvokerEpic,
     updateInvokerEpic,
     deleteInvokerEpic,
+    fetchDefaultInvokersEpic,
     testConnectorEpic,
     fetchConnectionEpic,
     fetchConnectionsEpic,
@@ -185,4 +187,9 @@ export default combineEpics(
     fetchOnlineUpdatesEpic,
     deleteVersionEpic,
     uploadVersionEpic,
+    updateTemplatesForAssistantEpic,
+    updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic,
+    addConvertTemplatesLogsEpic,
+    addConvertInvokersLogsEpic,
 );

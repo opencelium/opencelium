@@ -20,12 +20,18 @@
   width: 100%;
 }
 
+.no_permission{
+  text-align: center;
+  padding-top: 100px;
+  color: $ERROR_COLOR;
+}
+
 .no_permission_title{
   font-family: $FONT_FAMILY;
   text-align: center;
   font-size: $FONT_SIZE_BIG;
   margin-top: 10px;
-  color: red;
+  color: $ERROR_COLOR;
 }
 
 .rejected_request_message{

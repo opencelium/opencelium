@@ -90,7 +90,9 @@ export const createRoutes = (store) => {
                 <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
             <Route path='/template_converter' component={isAuth(LoadableRouteComponents.TemplateConverterLayout, store)}/>
-            <Route path='/update_assistant' component={isAuth(LoadableRouteComponents.UpdateAssistantLayout, store)}/>
+            <Route path='/update_assistant' component={isAuth(LoadableRouteComponents.UpdateAssistantLayout, store)}>
+                <IndexRoute component={LoadableRouteComponents.UpdateAssistant}/>
+            </Route>
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfileLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.MyProfile}/>
             </Route>

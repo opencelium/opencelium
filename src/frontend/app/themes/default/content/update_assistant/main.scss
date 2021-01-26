@@ -1,16 +1,19 @@
 @import '../../constants';
 
-.updates_table{
-  margin-bottom: 0;
+.table{
+  margin-bottom: 0 !important;
   margin-top: 20px;
   th{
     border-bottom: none !important;
     width: 33.3%;
   }
 }
-.updates_table_content{
+.table_content{
   max-height: 300px;
   overflow-y: auto;
+  table{
+    margin-bottom: 0 !important;
+  }
   .radio_input{
     margin: 0 !important;
   }
@@ -32,6 +35,18 @@
   td{
     width: 33.3%;
   }
+  tr{
+    height: 50px;
+  }
+}
+.update_button{
+  float: right;
+  margin: 15px 0 40px;
+}
+.cancel_icon{
+  float: right;
+  margin: 20px 25px 35px;
+  min-height: 38px;
 }
 .upload_version_loading{
   margin: 15px 100px 40px 0;
@@ -42,6 +57,23 @@
 .upload_version_loading>div{
   width: 24px;
   height: 24px;
+}
+.convert_loading{
+  margin: 0;
+  min-height: 0;
+}
+
+.convert_loading>div{
+  width: 18px;
+  height: 18px;
+}
+
+.convert_success{
+  color: $SUCCESS_COLOR;
+}
+
+.convert_fail{
+  color: $ERROR_COLOR;
 }
 
 @media screen and (min-width: 992px) {

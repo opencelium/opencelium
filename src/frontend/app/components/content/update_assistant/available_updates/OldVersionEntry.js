@@ -2,7 +2,7 @@ import React from "react";
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {withTranslation} from "react-i18next";
-import styles from "@themes/default/content/available_updates/main";
+import styles from "@themes/default/content/update_assistant/main";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {deleteVersion} from "@actions/update_assistant/delete";
 import {API_REQUEST_STATE} from "@utils/constants/app";
@@ -74,7 +74,7 @@ class OldVersionEntry extends React.Component{
             icon = 'loading';
         }
         return(
-            <tr key={version.name} className={styles.disable_version_entry} onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon}>
+            <tr className={styles.disable_version_entry} onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon}>
                 <td onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon}>{version.name}</td>
                 <td onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon}><a href={'#'}>{t('FORM.CHANGELOG')}</a></td>
                 <td onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon} style={{position: 'relative'}}>

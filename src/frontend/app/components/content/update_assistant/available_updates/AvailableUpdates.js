@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import Button from "@basic_components/buttons/Button";
-import styles from "@themes/default/content/available_updates/main";
+import styles from "@themes/default/content/update_assistant/main";
 import {API_REQUEST_STATE, Permissions} from "@utils/constants/app";
 import Loading from "@components/general/app/Loading";
 import {fetchOnlineUpdates, fetchOfflineUpdates} from "@actions/update_assistant/fetch";
@@ -10,7 +10,7 @@ import {uploadVersion} from "@actions/update_assistant/add";
 import Table from "@basic_components/table/Table";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import OldVersionEntry from "@components/content/update_assistant/OldVersionEntry";
+import OldVersionEntry from "@components/content/update_assistant/available_updates/OldVersionEntry";
 import BrowseButton from "@basic_components/buttons/BrowseButton";
 
 const ONLINE_UPDATE = 'ONLINE_UPDATE';
@@ -42,11 +42,13 @@ class AvailableUpdates extends React.Component{
     constructor(props) {
         super(props);
 
+        const {entity} = props;
+
         this.state = {
-            activeMode: '',
+            activeMode: entity.availableUpdates.mode,
             startFetchingOnlineUpdates: false,
             startFetchingOfflineUpdates: false,
-            selectedVersion: '',
+            selectedVersion: entity.availableUpdates.selectedVersion,
             isOldVersionsExtended: false,
             isNewVersionsExtended: false,
         }
@@ -64,12 +66,6 @@ class AvailableUpdates extends React.Component{
                 startFetchingOfflineUpdates: false,
             });
         }
-    }
-
-    componentWillUnmount(){
-        const {entity, updateEntity} = this.props;
-        entity.availableUpdates = {selectedVersion: '', mode: ''};
-        updateEntity(entity);
     }
 
     uploadVersion(){
@@ -194,7 +190,7 @@ class AvailableUpdates extends React.Component{
                         }
                     }
                     return (
-                        <OldVersionEntry version={version}/>
+                        <OldVersionEntry key={version.name} version={version}/>
                     );
                 })}
             </React.Fragment>
@@ -231,7 +227,7 @@ class AvailableUpdates extends React.Component{
         }
         return(
             <React.Fragment>
-                <Table className={styles.updates_table} authUser={authUser}>
+                <Table className={styles.table} authUser={authUser}>
                     <thead>
                     <tr>
                         <th>{t('FORM.VERSION_HEADER')}</th>
@@ -240,7 +236,7 @@ class AvailableUpdates extends React.Component{
                     </tr>
                     </thead>
                 </Table>
-                <div className={styles.updates_table_content}>
+                <div className={styles.table_content}>
                     <Table authUser={authUser}>
                         <tbody>
                             {::this.renderOldUpdates()}

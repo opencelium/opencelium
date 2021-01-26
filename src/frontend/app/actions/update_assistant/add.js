@@ -54,10 +54,87 @@ const uploadVersionRejected = (error) => {
     });
 };
 
+/**
+ * add logs after convert templates
+ * @param logs
+ * @returns {{type: string, payload: {}}}
+ */
+const addConvertTemplatesLogs = (logs) => {
+    return {
+        type: UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS,
+        payload: logs,
+    };
+};
+
+/**
+ * add logs after convert templates fulfilled
+ * @param response
+ * @returns {{type: string, payload: {}}}
+ */
+const addConvertTemplatesLogsFulfilled = (response) => {
+    return {
+        type: UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS_FULFILLED,
+        payload: response,
+    };
+};
+
+/**
+ * add logs after convert templates rejected
+ * @param error
+ * @returns {*}
+ */
+const addConvertTemplatesLogsRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * add logs after convert invokers
+ * @param logs
+ * @returns {{type: string, payload: {}}}
+ */
+const addConvertInvokersLogs = (logs) => {
+    return {
+        type: UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS,
+        payload: logs,
+    };
+};
+
+/**
+ * add logs after convert invokers fulfilled
+ * @param response
+ * @returns {{type: string, payload: {}}}
+ */
+const addConvertInvokersLogsFulfilled = (response) => {
+    return {
+        type: UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS_FULFILLED,
+        payload: response,
+    };
+};
+
+/**
+ * add logs after convert invokers rejected
+ * @param error
+ * @returns {*}
+ */
+const addConvertInvokersLogsRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS_REJECTED,
+        payload: error
+    });
+};
 
 
 export{
     uploadVersion,
     uploadVersionFulfilled,
     uploadVersionRejected,
+    addConvertTemplatesLogs,
+    addConvertTemplatesLogsFulfilled,
+    addConvertTemplatesLogsRejected,
+    addConvertInvokersLogs,
+    addConvertInvokersLogsFulfilled,
+    addConvertInvokersLogsRejected,
 };
