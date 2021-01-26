@@ -156,14 +156,24 @@ public class InvokerServiceImp implements InvokerService{
         FunctionInvoker functionInvoker = invoker.getOperations().stream().filter(o -> o.getName().equals(methodName))
                 .findFirst().orElseThrow(() -> new RuntimeException("Method not found in invoker"));
 
-        String format = functionInvoker.getResponse().getSuccess().getBody().getFormat();
+        String format = "";
         Map<String, Object> fields;
         if (exchangeType.equals("response") && result.equals("success")){
             fields = functionInvoker.getResponse().getSuccess().getBody().getFields();
+
+            if (functionInvoker.getResponse().getSuccess().getBody() != null) {
+                format = functionInvoker.getResponse().getSuccess().getBody().getFormat();
+            }
         } else if (exchangeType.equals("response") && result.equals("fail")){
             fields = functionInvoker.getResponse().getFail().getBody().getFields();
+            if (functionInvoker.getResponse().getFail().getBody() != null) {
+                format = functionInvoker.getResponse().getFail().getBody().getFormat();
+            }
         } else {
             fields = functionInvoker.getRequest().getBody().getFields();
+            if (functionInvoker.getRequest().getBody() != null) {
+                format = functionInvoker.getRequest().getBody().getFormat();
+            }
         }
 
         String[] valueParts = ConditionUtility.getRefValue(path).split("\\.");
