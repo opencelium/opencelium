@@ -43,6 +43,7 @@ public class MessageContainer {
     private String responseFormat;
     private List<String> loopingArrays; // level of loops
     private HashMap<Integer, String> data; // data from last loop if loop is nested
+    private String currentLoopArr;
 
     public MessageContainer() {
     }
@@ -85,6 +86,14 @@ public class MessageContainer {
 
     public void setResult(String result) {
         this.result = result;
+    }
+
+    public String getCurrentLoopArr() {
+        return currentLoopArr;
+    }
+
+    public void setCurrentLoopArr(String currentLoopArr) {
+        this.currentLoopArr = currentLoopArr;
     }
 
     public String getResponseFormat() {

@@ -38,6 +38,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -55,7 +59,12 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -262,9 +271,7 @@ public class ConnectorExecutor {
         }
 
         if (invoker.getName().equals("igel")){
-            ClientHttpRequestFactory requestFactory =
-                    new HttpComponentsClientHttpRequestFactory(getHttpClient());
-            restTemplate.setRequestFactory(requestFactory);
+            restTemplate = getRestTemplate();
         }
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
@@ -297,23 +304,26 @@ public class ConnectorExecutor {
         return response;
     }
 
-    private HttpClient getHttpClient() {
+    private RestTemplate getRestTemplate() {
 
         try {
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
-            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            HttpClient httpClient = HttpClients.custom()
-                    .setSSLContext(sslContext)
-                    .setSSLHostnameVerifier(new DefaultHostnameVerifier())
-                    .build();
-
-            return httpClient;
+            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                    return true;
+                }
+            };
+            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+            requestFactory.setHttpClient(httpClient);
+            RestTemplate restTemplate = new RestTemplate(requestFactory);
+            return restTemplate;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -590,7 +600,7 @@ public class ConnectorExecutor {
                 .orElse(null);
         List<Object> array =
                 (List<Object>) message.getValue(condition, loopIndex);
-
+        message.setCurrentLoopArr(condition);
         for (int i = 0; i < array.size(); i++) {
             System.out.println("Loop " + condition + "-------- index : " + i);
             String arr = ConditionUtility.getLastArray(condition);
