@@ -24,6 +24,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,11 +39,14 @@ import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +110,7 @@ public class InvokerRequestBuilder{
         }
 
         if (invokerName.equalsIgnoreCase("IGEL")){
+            System.out.println("+++++++++++++ inside IGEL");
             ClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory(getHttpClient());
             restTemplate.setRequestFactory(requestFactory);
@@ -112,18 +118,30 @@ public class InvokerRequestBuilder{
         return restTemplate.exchange(url, method ,httpEntity, String.class);
     }
 
-    private HttpClient getHttpClient() {
+    private CloseableHttpClient getHttpClient() {
 
         try {
-////            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-//            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-////            trustManagerFactory.init(trustStore);
-            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-            sslContext.init(null, null, null);
-            HttpClient httpClient = HttpClients.custom()
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            CloseableHttpClient httpClient = HttpClients.custom()
                     .setSSLContext(sslContext)
-                    .setSSLHostnameVerifier(new DefaultHostnameVerifier())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
+
+
 
             return httpClient;
         } catch (Exception e) {
