@@ -15,6 +15,7 @@
 
 
 import {isEmptyObject, isString} from "@utils/app";
+import CBody from "@classes/components/content/invoker/CBody";
 
 /**
  * XmlReParent Class for XmlRequest, XmlSuccess and XmlFail classes
@@ -43,8 +44,16 @@ export default class CXmlReParent{
     }
 
     getBody(body){
-        let result = {field: []};
-        result.field = this.getSubBody(body);
+        let result = {field: [], };
+        switch (body.constructor){
+            case CBody:
+                result._attributes = {data: body.data, format: body.format, type: body.type};
+                result.field = this.getSubBody(body.fields);
+                break;
+            default:
+                result.field = this.getSubBody(body);
+                break;
+        }
         return result;
     }
 

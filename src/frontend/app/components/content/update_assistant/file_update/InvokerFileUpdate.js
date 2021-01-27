@@ -67,7 +67,10 @@ class InvokerFileUpdate extends React.Component{
                 currentInvokerIndex: -1,
             });
             if(isFinishUpdate) {
-                updateInvokers(convertedInvokers);
+                const invokersOnlyForConversion = convertedInvokers.filter(invoker => !invoker.status.shouldUseNew);
+                if(invokersOnlyForConversion.length > 0) {
+                    updateInvokers(invokersOnlyForConversion.map(invoker => {return {xml: invoker.data};}));
+                }
             } else{
                 addConvertInvokersLogs(invokersWithErrors.map(invoker => {return {invokerName: invoker.data.name, message: invoker.status.error.message, data: invoker.status.error.data};}));
             }
@@ -106,7 +109,7 @@ class InvokerFileUpdate extends React.Component{
                     <tr>
                         <th>{`v${appVersion}`}</th>
                         <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{'Mode'}</th>
-                        <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{entity.availableUpdates.selectedVersion}</th>
+                        <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
                     </tr>
                     </thead>
                 </Table>
@@ -136,7 +139,7 @@ class InvokerFileUpdate extends React.Component{
                     className={styles.update_button}
                 />
                 }
-                {currentInvokerIndex !== -1 && <TooltipFontIcon isButton={true} tooltip={'Cancel'} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
+                {currentInvokerIndex !== -1 && <TooltipFontIcon isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
             </div>
         );
     }

@@ -49,7 +49,8 @@ const ONLINE_UPDATES = [
     {id: 4, name: '1.3', changeLogLink: '', status: 'current'},
     {id: 5, name: '1.3.1', changeLogLink: '', status: 'available'},
     {id: 6, name: '1.3.2', changeLogLink: '', status: 'available'},
-    {id: 7, name: '1.4', changeLogLink: '', status: 'not_available'},
+    {id: 7, name: '1.4', changeLogLink: '', status: 'available'},
+    {id: 8, name: '1.4.1', changeLogLink: '', status: 'not_available'},
 ];
 const OFFLINE_UPDATES = [
     {id: 0, name: '1.1', changeLogLink: '', status: 'old'},
@@ -57,10 +58,12 @@ const OFFLINE_UPDATES = [
     {id: 2, name: '1.2.2', changeLogLink: '', status: 'old'},
     {id: 3, name: '1.3', changeLogLink: '', status: 'current'},
     {id: 4, name: '1.3.2', changeLogLink: '', status: 'available'},
-    {id: 5, name: '1.4', changeLogLink: '', status: 'not_available'},
+    {id: 5, name: '1.4', changeLogLink: '', status: 'available'},
     {id: 6, name: '1.4.1', changeLogLink: '', status: 'not_available'},
     {id: 7, name: '1.4.2', changeLogLink: '', status: 'not_available'},
 ];
+
+const NEW_UPDATE = {id: 100, name: 'v1.5', changeLogLink: '', status: 'not_available'};
 
 const urlPrefix = 'update_assistant';
 
@@ -136,7 +139,9 @@ const uploadVersionEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return Rx.Observable.of(uploadVersionFulfilled(action.payload));
+            let data = new FormData();
+            data.append('file', action.payload.versionFile);
+            return Rx.Observable.of(uploadVersionFulfilled(NEW_UPDATE));
             /*return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: uploadVersionFulfilled,
                 reject: uploadVersionRejected,},

@@ -63,7 +63,7 @@ class UpdateAssistant extends Component{
                 invokerFileUpdate:{
                     isFinishUpdate: false,
                     updatedInvokers: [],
-                }
+                },
             },
         };
     }

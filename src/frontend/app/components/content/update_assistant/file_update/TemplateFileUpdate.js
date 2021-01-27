@@ -10,7 +10,6 @@ import {fetchTemplates} from "@actions/templates/fetch";
 import {ListComponent} from "@decorators/ListComponent";
 import TemplateFileEntry from "@components/content/update_assistant/file_update/TemplateFileEntry";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
@@ -103,7 +102,7 @@ class TemplateFileUpdate extends React.Component{
                     <thead>
                         <tr>
                             <th>{`v${appVersion}`}</th>
-                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{entity.availableUpdates.selectedVersion}</th>
+                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
                         </tr>
                     </thead>
                 </Table>
@@ -132,7 +131,7 @@ class TemplateFileUpdate extends React.Component{
                         className={styles.update_button}
                     />
                 }
-                {currentTemplateIndex !== -1 && <TooltipFontIcon isButton={true} tooltip={'Cancel'} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
+                {currentTemplateIndex !== -1 && <TooltipFontIcon isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
             </div>
         );
     }

@@ -23,7 +23,7 @@ export default class CExecution{
 
     static executeConfig({fromVersion = '', toVersion = ''}, jsonData){
         let executionResult = {jsonData, error: {message: ''}};
-        const config = getConfig(fromVersion, toVersion);
+        const config = getConfig(fromVersion, toVersion, 'template');
         if(isArray(config) && config.length > 0) {
             for (let i = 0; i < config.length; i++) {
                 switch (config[i].type) {
