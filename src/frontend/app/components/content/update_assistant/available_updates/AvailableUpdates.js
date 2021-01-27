@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import Button from "@basic_components/buttons/Button";
 import styles from "@themes/default/content/update_assistant/main";
-import {API_REQUEST_STATE, Permissions} from "@utils/constants/app";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 import Loading from "@components/general/app/Loading";
 import {fetchOnlineUpdates, fetchOfflineUpdates} from "@actions/update_assistant/fetch";
 import {uploadVersion} from "@actions/update_assistant/add";
@@ -68,8 +68,11 @@ class AvailableUpdates extends React.Component{
         }
     }
 
-    uploadVersion(){
-        this.props.uploadVersion({id: 10, name: 'v1.5', changeLogLink: '', status: 'not_available'},)
+    uploadVersion(e){
+        const f = e.target.files[0];
+        if(f) {
+            this.props.uploadVersion({versionFile: f});
+        }
     }
 
     toggleOldVersions(){
@@ -104,7 +107,7 @@ class AvailableUpdates extends React.Component{
                 startFetchingOfflineUpdates = true;
                 break;
         }
-        entity.availableUpdates = {...entity.availableUpdates, mode: activeMode};
+        entity.availableUpdates = {...entity.availableUpdates, mode: activeMode, selectedVersion: ''};
         updateEntity(entity)
         this.setState({
             selectedVersion: '',

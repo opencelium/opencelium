@@ -2,6 +2,7 @@
   "FORM":{
     "HEADER": "Update Assistant",
     "UPDATE_BUTTON": "Update",
+    "CANCEL_TOOLTIP": "Cancel",
     "PAGE_1": "System Check",
     "HINT_1": "Please check your system properties",
     "SYSTEM_CHECK": "System Overview",

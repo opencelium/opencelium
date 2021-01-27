@@ -63,6 +63,8 @@ const OFFLINE_UPDATES = [
     {id: 7, name: '1.4.2', changeLogLink: '', status: 'not_available'},
 ];
 
+const NEW_UPDATE = {id: 100, name: 'v1.5', changeLogLink: '', status: 'not_available'};
+
 const urlPrefix = 'update_assistant';
 
 /**
@@ -137,7 +139,9 @@ const uploadVersionEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
-            return Rx.Observable.of(uploadVersionFulfilled(action.payload));
+            let data = new FormData();
+            data.append('file', action.payload.versionFile);
+            return Rx.Observable.of(uploadVersionFulfilled(NEW_UPDATE));
             /*return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: uploadVersionFulfilled,
                 reject: uploadVersionRejected,},

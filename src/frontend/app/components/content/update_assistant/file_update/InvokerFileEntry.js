@@ -59,7 +59,6 @@ class InvokerFileEntry extends React.Component{
             status.shouldUseNew = shouldUseNew;
         }
         convertedInvoker = invokerData;
-        console.log(convertedInvoker);
         setTimeout(() => {
             setInvoker(convertedInvoker, status, index);
         }, 100);

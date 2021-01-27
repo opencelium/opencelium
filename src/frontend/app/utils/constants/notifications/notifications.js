@@ -89,6 +89,9 @@ export const EntitiesWithNotification = [
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPLOAD_VERSION, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.DELETE_VERSION, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**
