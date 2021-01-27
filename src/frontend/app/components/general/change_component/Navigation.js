@@ -120,6 +120,9 @@ class Navigation extends Component{
                         break;
                 }
             }
+            if(type === 'onlyText'){
+                icon = '';
+            }
             return (
                 <React.Fragment>
                     <Button

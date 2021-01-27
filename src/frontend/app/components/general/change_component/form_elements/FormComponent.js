@@ -33,6 +33,9 @@ class FormComponent extends Component{
         const {entity, updateEntity} = this.props;
         let {tourStep, Component} = this.props.data;
         let value = entity[name];
+        if(!icon){
+            return <Component entity={entity} updateEntity={updateEntity}/>;
+        }
         return (
             <ToolboxThemeInput
                 icon={icon}
