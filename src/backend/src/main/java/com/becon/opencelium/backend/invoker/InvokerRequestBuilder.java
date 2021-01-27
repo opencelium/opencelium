@@ -24,12 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,8 +42,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,33 +104,31 @@ public class InvokerRequestBuilder{
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        if (invokerName.equals("IGEL")){
-            restTemplate = getRestTemplate();
+        if (invokerName.equalsIgnoreCase("IGEL")){
+            ClientHttpRequestFactory requestFactory =
+                    new HttpComponentsClientHttpRequestFactory(getHttpClient());
+            restTemplate.setRequestFactory(requestFactory);
         }
         return restTemplate.exchange(url, method ,httpEntity, String.class);
     }
 
-    private RestTemplate getRestTemplate() {
+    private HttpClient getHttpClient() {
 
         try {
-            TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-                    .loadTrustMaterial(null, acceptingTrustStrategy)
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            HttpClient httpClient = HttpClients.custom()
+                    .setSSLContext(sslContext)
+                    .setSSLHostnameVerifier(new DefaultHostnameVerifier())
                     .build();
-            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-            CloseableHttpClient httpClient = HttpClients.custom()
-                    .setSSLSocketFactory(csf)
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                    .build();
-            HttpComponentsClientHttpRequestFactory requestFactory =
-                    new HttpComponentsClientHttpRequestFactory();
-            requestFactory.setHttpClient(httpClient);
-            RestTemplate restTemplate = new RestTemplate(requestFactory);
-            return restTemplate;
+
+            return httpClient;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private HttpMethod getMethod(){
