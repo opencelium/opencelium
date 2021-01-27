@@ -115,11 +115,11 @@ public class InvokerRequestBuilder{
     private HttpClient getHttpClient() {
 
         try {
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
+////            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+//            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+////            trustManagerFactory.init(trustStore);
             SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            sslContext.init(null, null, null);
             HttpClient httpClient = HttpClients.custom()
                     .setSSLContext(sslContext)
                     .setSSLHostnameVerifier(new DefaultHostnameVerifier())
