@@ -29,6 +29,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -126,6 +127,7 @@ public class InvokerRequestBuilder{
             SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
             CloseableHttpClient httpClient = HttpClients.custom()
                     .setSSLSocketFactory(csf)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
             HttpComponentsClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory();
