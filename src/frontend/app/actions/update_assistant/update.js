@@ -72,6 +72,42 @@ const updateInvokersRejected = (error) => {
     };
 };
 
+/**
+ * update connections for update assistant
+ * @param connections
+ * @returns {{type: string, payload: {}}}
+ */
+const updateConnections = (connections) => {
+    return {
+        type: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT,
+        payload: connections,
+    };
+};
+
+/**
+ * update connections for update assistant fulfilled
+ * @param connections
+ * @returns {{type: string, payload: {}}}
+ */
+const updateConnectionsFulfilled = (connections) => {
+    return {
+        type: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT_FULFILLED,
+        payload: connections,
+    };
+};
+
+/**
+ * update connections for update assistant rejected
+ * @param error
+ * @returns {promise}
+ */
+const updateConnectionsRejected = (error) => {
+    return {
+        type: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT_REJECTED,
+        payload: error
+    };
+};
+
 export {
     updateTemplates,
     updateTemplatesFulfilled,
@@ -79,4 +115,7 @@ export {
     updateInvokers,
     updateInvokersFulfilled,
     updateInvokersRejected,
+    updateConnections,
+    updateConnectionsFulfilled,
+    updateConnectionsRejected,
 };

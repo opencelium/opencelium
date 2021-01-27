@@ -16,46 +16,46 @@ function mapStateToProps(state){
 }
 
 @connect(mapStateToProps, {})
-class TemplateFileEntry extends React.Component{
+class ConnectionFileEntry extends React.Component{
     constructor(props) {
         super(props);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(!prevProps.isConverting && this.props.isConverting){
-            ::this.convertTemplate();
+            ::this.convertConnection();
         }
     }
 
-    convertTemplate(){
-        const {index, template, entity, setTemplate} = this.props;
-        let convertedTemplate = null;
+    convertConnection(){
+        const {index, connection, entity, setConnection} = this.props;
+        let convertedConnection = null;
         let status = null;
         const {jsonData, error} = CExecution.executeConfig({
-            fromVersion: template.version,
+            fromVersion: connection.version,
             toVersion: entity.availableUpdates.selectedVersion
-        }, template.connection);
+        }, connection.connection);
         if (error.message !== '') {
         //if(Math.floor(Math.random() * 2)){
             status = {error};
         }
-        convertedTemplate = {...template, connection: jsonData, version: entity.availableUpdates.selectedVersion};
+        convertedConnection = {...connection, connection: jsonData, version: entity.availableUpdates.selectedVersion};
         setTimeout(() => {
-            setTemplate(convertedTemplate, status, index);
+            setConnection(convertedConnection, status, index);
         }, 100);
     }
 
     render(){
-        const {convertedTemplates, index, isConverting, template} = this.props;
+        const {convertedConnections, index, isConverting, connection} = this.props;
         let isFail = false;
         let isSuccess = false;
-        if(typeof convertedTemplates[index] !== 'undefined'){
-            isFail = convertedTemplates[index].status !== null;
-            isSuccess = convertedTemplates[index].status === null;
+        if(typeof convertedConnections[index] !== 'undefined'){
+            isFail = convertedConnections[index].status !== null;
+            isSuccess = convertedConnections[index].status === null;
         }
         return(
-            <tr key={template.name}>
-                <td>{template.name}</td>
+            <tr key={connection.name}>
+                <td>{connection.name}</td>
                 <td>
                     {!isConverting && !isFail && !isSuccess && <span>-</span>}
                     {isConverting && <Loading className={styles.convert_loading}/>}
@@ -67,16 +67,16 @@ class TemplateFileEntry extends React.Component{
     }
 }
 
-TemplateFileEntry.defaultProps = {
+ConnectionFileEntry.defaultProps = {
     isConverting: false,
     status: null,
 };
 
-TemplateFileEntry.propTypes = {
+ConnectionFileEntry.propTypes = {
     index: PropTypes.number.isRequired,
     isConverting: PropTypes.bool,
-    template: PropTypes.object.isRequired,
-    setTemplate: PropTypes.func.isRequired,
+    connection: PropTypes.object.isRequired,
+    setConnection: PropTypes.func.isRequired,
 };
 
-export default TemplateFileEntry;
+export default ConnectionFileEntry;

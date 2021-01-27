@@ -26,16 +26,21 @@ const initialState = fromJS({
     deletingVersion: API_REQUEST_STATE.INITIAL,
     uploadingVersion: API_REQUEST_STATE.INITIAL,
     updatingTemplates: API_REQUEST_STATE.INITIAL,
+    updatingInvokers: API_REQUEST_STATE.INITIAL,
+    updatingConnections: API_REQUEST_STATE.INITIAL,
     addingTemplatesLogs: API_REQUEST_STATE.INITIAL,
     addingInvokersLogs: API_REQUEST_STATE.INITIAL,
+    addingConnectionsLogs: API_REQUEST_STATE.INITIAL,
     currentVersion: null,
     updateAppVersion: '',
     onlineUpdates: List([]),
     offlineUpdates: List([]),
     updatedTemplates: List([]),
     updatedInvokers: List([]),
+    updatedConnections: List([]),
     templatesLogs: List([]),
     invokersLogs: List([]),
+    connectionsLogs: List([]),
     systemRequirements: null,
     error: null,
     message: {},
@@ -100,17 +105,23 @@ const reducer = (state = initialState, action) => {
         case UpdateAssistantAction.UPLOAD_VERSION_REJECTED:
             return state.set('uploadingVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT:
-            return state.set('updatingTemplates', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('updatedTemplates', List(action.payload));
+            return state.set('updatingTemplates', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT_FULFILLED:
-            return state.set('updatingTemplates', API_REQUEST_STATE.FINISH).set('updatedTemplates', action.payload.newTemplates);
+            return state.set('updatingTemplates', API_REQUEST_STATE.FINISH).set('updatedTemplates', List(action.payload.newTemplates));
         case UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT_REJECTED:
             return state.set('updatingTemplates', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('updatedTemplates', List([]));
         case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT:
-            return state.set('updatingInvokers', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('updatedInvokers', List(action.payload));
+            return state.set('updatingInvokers', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT_FULFILLED:
-            return state.set('updatingInvokers', API_REQUEST_STATE.FINISH).set('updatedInvokers', action.payload.newInvokers);
+            return state.set('updatingInvokers', API_REQUEST_STATE.FINISH).set('updatedInvokers', List(action.payload.newInvokers));
         case UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT_REJECTED:
             return state.set('updatingInvokers', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('updatedInvokers', List([]));
+        case UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT:
+            return state.set('updatingConnections', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT_FULFILLED:
+            return state.set('updatingConnections', API_REQUEST_STATE.FINISH).set('updatedConnections', List(action.payload.newConnections));
+        case UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT_REJECTED:
+            return state.set('updatingConnections', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('updatedConnections', List([]));
         case UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS:
             return state.set('addingTemplatesLogs', API_REQUEST_STATE.START).set('error', null);
         case UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS_FULFILLED:
@@ -123,6 +134,12 @@ const reducer = (state = initialState, action) => {
             return state.set('addingInvokersLogs', API_REQUEST_STATE.FINISH).set('invokersLogs', List(action.payload));
         case UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS_REJECTED:
             return state.set('addingInvokersLogs', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS:
+            return state.set('addingConnectionsLogs', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS_FULFILLED:
+            return state.set('addingConnectionsLogs', API_REQUEST_STATE.FINISH).set('connectionsLogs', List(action.payload));
+        case UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS_REJECTED:
+            return state.set('addingConnectionsLogs', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

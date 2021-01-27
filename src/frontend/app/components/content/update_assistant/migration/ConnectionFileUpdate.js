@@ -4,40 +4,48 @@ import {withTranslation} from "react-i18next";
 import Table from "@basic_components/table/Table";
 import styles from "@themes/default/content/update_assistant/main";
 import Button from "@basic_components/buttons/Button";
-import {updateTemplates, updateTemplatesRejected} from "@actions/update_assistant/update";
-import {addConvertTemplatesLogs} from "@actions/update_assistant/add";
-import {fetchTemplates} from "@actions/templates/fetch";
+import {updateConnections, updateConnectionsRejected} from "@actions/update_assistant/update";
+import {addConvertConnectionsLogs} from "@actions/update_assistant/add";
+import {fetchConnections} from "@actions/connections/fetch";
 import {ListComponent} from "@decorators/ListComponent";
-import TemplateFileEntry from "@components/content/update_assistant/file_update/TemplateFileEntry";
+import ConnectionFileEntry from "@components/content/update_assistant/migration/ConnectionFileEntry";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
     const app = state.get('app');
-    const templates = state.get('templates');
+    const connections = state.get('connections');
     const updateAssistant = state.get('update_assistant');
     return {
         authUser: auth.get('authUser'),
         appVersion: app.get('appVersion'),
-        fetchingTemplates: templates.get('fetchingTemplates'),
-        templates: templates.get('templates').toJS(),
-        updatingTemplates: updateAssistant.get('updatingTemplates'),
-        addingTemplatesLogs: updateAssistant.get('addingTemplatesLogs'),
+        fetchingConnections: connections.get('fetchingConnections'),
+        connections: connections.get('connections').toJS(),
+        updatingConnections: updateAssistant.get('updatingConnections'),
+        addingConnectionsLogs: updateAssistant.get('addingConnectionsLogs'),
     }
 }
 
-@connect(mapStateToProps, {fetchTemplates, updateTemplates, updateTemplatesRejected, addConvertTemplatesLogs})
+@connect(mapStateToProps, {fetchConnections, updateConnections, updateConnectionsRejected, addConvertConnectionsLogs})
 @withTranslation('update_assistant')
-@ListComponent('templates')
-class TemplateFileUpdate extends React.Component{
+@ListComponent('connections')
+class ConnectionFileUpdate extends React.Component{
     constructor(props) {
         super(props);
         const {entity} = props;
         this.state = {
-            currentTemplateIndex: -1,
-            convertedTemplates: entity.templateFileUpdate.updatedTemplates,
+            currentConnectionIndex: -1,
+            convertedConnections: entity.connectionMigration.updatedConnections,
             isCanceledConvert: false,
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.connections.length === 0 && !this.props.entity.connectionMigration.isFinishUpdate){
+            const {entity, updateEntity} = this.props;
+            entity.connectionMigration = {...entity.connectionMigration, isFinishUpdate: true};
+            updateEntity(entity);
         }
     }
 
@@ -48,45 +56,45 @@ class TemplateFileUpdate extends React.Component{
     }
 
     convert(index){
-        const {templates, updateTemplates, addConvertTemplatesLogs} = this.props;
-        if(templates.length > index){
+        const {connections, updateConnections, addConvertConnectionsLogs} = this.props;
+        if(connections.length > index){
             this.setState({
-                currentTemplateIndex: index,
+                currentConnectionIndex: index,
             });
         } else{
-            const {convertedTemplates} = this.state;
-            const templatesWithErrors = convertedTemplates.filter(template => template.status !== null);
-            const isFinishUpdate = templatesWithErrors.length === 0;
+            const {convertedConnections} = this.state;
+            const connectionsWithErrors = convertedConnections.filter(connection => connection.status !== null);
+            const isFinishUpdate = connectionsWithErrors.length === 0;
             const {entity, updateEntity} = this.props;
-            entity.templateFileUpdate = {...entity.templateFileUpdate, updatedTemplates: convertedTemplates, isFinishUpdate};
+            entity.connectionMigration = {...entity.connectionMigration, updatedConnections: convertedConnections, isFinishUpdate};
             updateEntity(entity);
             this.setState({
-                currentTemplateIndex: -1,
+                currentConnectionIndex: -1,
             });
             if(isFinishUpdate) {
-                updateTemplates(convertedTemplates);
+                updateConnections(convertedConnections);
             } else{
-                addConvertTemplatesLogs(templatesWithErrors.map(template => {return {templateId: template.data.templateId, templateName: template.data.name, message: template.status.error.message, data: template.status.error.data};}));
+                addConvertConnectionsLogs(connectionsWithErrors.map(connection => {return {connectionId: connection.data.connectionId, connectionName: connection.data.name, message: connection.status.error.message, data: connection.status.error.data};}));
             }
         }
     }
 
-    updateTemplates(){
+    updateConnections(){
         this.setState({
-            convertedTemplates: [],
+            convertedConnections: [],
         }, () => ::this.convert(0));
     }
 
-    setTemplate(template, status, index){
+    setConnection(connection, status, index){
         this.setState({
-            convertedTemplates: [...this.state.convertedTemplates, {data: template, status}]
+            convertedConnections: [...this.state.convertedConnections, {data: connection, status}]
         }, () => {
             if(!this.state.isCanceledConvert) {
                 this.convert(index + 1)
             } else{
                 this.setState({
-                    convertedTemplates: [],
-                    currentTemplateIndex: -1,
+                    convertedConnections: [],
+                    currentConnectionIndex: -1,
                     isCanceledConvert: false,
                 })
             }
@@ -94,47 +102,54 @@ class TemplateFileUpdate extends React.Component{
     }
 
     render(){
-        const {currentTemplateIndex, convertedTemplates} = this.state;
-        const {t, authUser, templates, appVersion, entity} = this.props;
+        const {currentConnectionIndex, convertedConnections} = this.state;
+        const {t, authUser, connections, appVersion, entity} = this.props;
+        if(connections.length === 0){
+            return(
+                <div>
+                    {t('FORM.NO_CONNECTIONS')}
+                </div>
+            )
+        }
         return(
             <div style={{margin: '20px 68px 0px 0px'}}>
                 <Table className={styles.table} authUser={authUser}>
                     <thead>
                         <tr>
                             <th>{`v${appVersion}`}</th>
-                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
+                            <th style={{paddingRight: connections.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
                         </tr>
                     </thead>
                 </Table>
                 <div className={styles.table_content}>
                     <Table authUser={authUser}>
                         <tbody>
-                            {templates.map((template, key) => (
-                                <TemplateFileEntry
-                                    key={template.templateId}
+                            {connections.map((connection, key) => (
+                                <ConnectionFileEntry
+                                    key={connection.connectionId}
                                     index={key}
-                                    template={template}
-                                    setTemplate={::this.setTemplate}
-                                    isConverting={currentTemplateIndex === key}
-                                    convertedTemplates={convertedTemplates}
+                                    connection={connection}
+                                    setConnection={::this.setConnection}
+                                    isConverting={currentConnectionIndex === key}
+                                    convertedConnections={convertedConnections}
                                     entity={entity}
                                 />
                             ))}
                         </tbody>
                     </Table>
                 </div>
-                {currentTemplateIndex === -1 &&
+                {currentConnectionIndex === -1 &&
                     <Button
                         authUser={authUser}
                         title={t('FORM.UPDATE_BUTTON')}
-                        onClick={::this.updateTemplates}
+                        onClick={::this.updateConnections}
                         className={styles.update_button}
                     />
                 }
-                {currentTemplateIndex !== -1 && <TooltipFontIcon isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
+                {currentConnectionIndex !== -1 && <TooltipFontIcon isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
             </div>
         );
     }
 }
 
-export default TemplateFileUpdate;
+export default ConnectionFileUpdate;

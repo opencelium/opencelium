@@ -18,7 +18,7 @@
  */
 const TITLE = {name: 'title', type: 'text', maxLength: 256, icon: 'text_fields'};
 const DESCRIPTION = {name: 'description', type: 'textarea', maxLength: 1024, icon: 'short_text'};
-const COMPONENT = {type: 'component', icon: 'short_text'};
+const COMPONENT = {type: 'component'};
 const ICOMMON = {
     TITLE,
     DESCRIPTION,
