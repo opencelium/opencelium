@@ -110,7 +110,7 @@ public class InvokerRequestBuilder{
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        if (invokerName.equals("igel")){
+        if (invokerName.equals("IGEL")){
             restTemplate = getRestTemplate();
         }
         return restTemplate.exchange(url, method ,httpEntity, String.class);
