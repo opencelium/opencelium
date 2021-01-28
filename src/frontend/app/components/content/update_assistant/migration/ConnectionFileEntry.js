@@ -34,12 +34,12 @@ class ConnectionFileEntry extends React.Component{
         const {jsonData, error} = CExecution.executeConfig({
             fromVersion: connection.version,
             toVersion: entity.availableUpdates.selectedVersion
-        }, connection.connection);
+        }, connection);
         if (error.message !== '') {
         //if(Math.floor(Math.random() * 2)){
             status = {error};
         }
-        convertedConnection = {...connection, connection: jsonData, version: entity.availableUpdates.selectedVersion};
+        convertedConnection = {name: connection.title, description: '', connection: jsonData, version: entity.availableUpdates.selectedVersion};
         setTimeout(() => {
             setConnection(convertedConnection, status, index);
         }, 100);
@@ -54,8 +54,8 @@ class ConnectionFileEntry extends React.Component{
             isSuccess = convertedConnections[index].status === null;
         }
         return(
-            <tr key={connection.name}>
-                <td>{connection.name}</td>
+            <tr key={connection.title}>
+                <td>{connection.title}</td>
                 <td>
                     {!isConverting && !isFail && !isSuccess && <span>-</span>}
                     {isConverting && <Loading className={styles.convert_loading}/>}

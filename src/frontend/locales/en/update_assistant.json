@@ -42,11 +42,11 @@
     "PAGE_6": "Done",
     "FINISH": {
       "HEADER": "Congratulations!",
-      "NEW_VERSION": "Your OC installation has been successfully updated to a newer version.",
+      "NEW_VERSION": "Your OC application has been successfully updated to a newer version.",
       "LOG_MESSAGE": "Detailed debug information can be found in <0>{{logsLinkText}}</0> on your oc web-server.",
       "LOGS_LINK_TEXT": "logs",
       "HINT": "Hint",
-      "CLEAR_CACHE": "Don't forget to clear browser cache (especially the javascript cache)"
+      "CLEAR_CACHE": "Don't forget to clear browser cache (especially the javascript cache)."
     },
     "VALIDATION_MESSAGES": {
       "NO_UPDATE_MODE": "Please, select how do you want to update",
