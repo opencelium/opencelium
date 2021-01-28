@@ -128,11 +128,26 @@ public class MessageContainer {
         int loopIndex = 0;
 
         String message = "";
+//        if (loopingArrays == null || loopingArrays.isEmpty()){
+//            message = data.get(loopIndex);
+//        } else {
+//            String arr = loopingArrays.stream().reduce((f,s)->s).get();
+//            loopIndex = loopStack.get(arr);
+//            message = data.get(loopIndex);
+//        }
+
         if (loopingArrays == null || loopingArrays.isEmpty()){
             message = data.get(loopIndex);
         } else {
+//            if (currentLoopArr == null) {
+//                currentLoopArr = loopingArrays.stream().reduce((f,s)->s).get();
+//            }
+//            String arr = currentLoopArr.replaceAll("\\[([a-z,*]+)\\]", "[]");
+//            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
+//            message = data.get(loopIndex);
+
             String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            loopIndex = loopStack.get(arr);
+            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
             message = data.get(loopIndex);
         }
 
@@ -245,8 +260,12 @@ public class MessageContainer {
         if (loopingArrays == null || loopingArrays.isEmpty()){
             message = data.get(loopIndex);
         } else {
+//            if (currentLoopArr == null) {
+//                currentLoopArr = loopingArrays.stream().reduce((f,s)->s).get();
+//            }
+//            String arr = currentLoopArr.replaceAll("\\[([a-z,*]+)\\]", "[]");
             String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            loopIndex = loopStack.get(arr);
+            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
             message = data.get(loopIndex);
         }
 
