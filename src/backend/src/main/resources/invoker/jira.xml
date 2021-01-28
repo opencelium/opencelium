@@ -45,41 +45,44 @@
                     <header>
                     </header>
                     <body type="object" format="json" data="raw">
-                        <field name="values" type="array">
-                           <field name="id" type="string"/>
-                           <field name="key" type="string"/>
+                        <field name="issues" type="array">
+                            <field name="id" type="string"/>
+                            <field name="key" type="string"/>
+                            <field name="renderedFields" type="object">
+                                <field name="description" type="string"/>
+                            </field>
                             <field name="fields" type="object">
-                              <field name="summary" type="string"/>
-                              <field name="statuscategorychangedate" type="string"/>
-                              <field name="timespent" type="string"/>
-                              <field name="aggregatetimespent" type="string"/>
-                              <field name="timeoriginalestimate" type="string"/>
-                              <field name="aggregatetimeestimate" type="string"/>
-                              <field name="labels" type="array"/>
-                              <field name="status" type="object">
-                                <field name="id" type="string"/>
-                                <field name="name" type="string"/>                                
-                              </field>
-                              <field name="description" type="object">
-                                <field name="content" type="array">
+                                <field name="summary" type="string"/>
+                                <field name="statuscategorychangedate" type="string"/>
+                                <field name="timespent" type="string"/>
+                                <field name="aggregatetimespent" type="string"/>
+                                <field name="timeoriginalestimate" type="string"/>
+                                <field name="aggregatetimeestimate" type="string"/>
+                                <field name="labels" type="array"/>
+                                <field name="status" type="object">
+                                    <field name="id" type="string"/>
+                                    <field name="name" type="string"/>
+                                </field>
+                                <field name="description" type="object">
                                     <field name="content" type="array">
-                                        <field name="text" type="string"/>
-                                   </field>                                
-                                </field>                                                                     
-                              </field>                                                                 
-                              <field name="assignee" type="object">
-                                <field name="displayName" type="string"/>
-                              </field>                                
-                              <field name="components" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                
-                              <field name="versions" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                                         
-                              <field name="fixVersions" type="array">
-                                <field name="name" type="string"/>
-                              </field>
-                            </field>                              
+                                        <field name="content" type="array">
+                                            <field name="text" type="string"/>
+                                        </field>
+                                    </field>
+                                </field>
+                                <field name="assignee" type="object">
+                                    <field name="displayName" type="string"/>
+                                </field>
+                                <field name="components" type="array">
+                                    <field name="name" type="string"/>
+                                </field>
+                                <field name="versions" type="array">
+                                    <field name="name" type="string"/>
+                                </field>
+                                <field name="fixVersions" type="array">
+                                    <field name="name" type="string"/>
+                                </field>
+                            </field>
                         </field>
                     </body>
                 </success>
@@ -105,48 +108,51 @@
                     </header>
                     <body type="object" format="json" data="raw">
                         <field name="values" type="array">
-                           <field name="id" type="string"/>
-                           <field name="key" type="string"/>
+                            <field name="id" type="string"/>
+                            <field name="key" type="string"/>
+                            <field name="renderedFields" type="object">
+                                <field name="description" type="string"/>
+                            </field>
                             <field name="fields" type="object">
-                              <field name="summary" type="string"/>
-                              <field name="statuscategorychangedate" type="string"/>
-                              <field name="timespent" type="string"/>
-                              <field name="aggregatetimespent" type="string"/>
-                              <field name="timeoriginalestimate" type="string"/>
-                              <field name="aggregatetimeestimate" type="string"/>
-                              <field name="labels" type="array"/>
-                              <field name="status" type="object">
-                                <field name="id" type="string"/>
-                                <field name="name" type="string"/>                                
-                              </field>
-                              <field name="description" type="object">
-                                <field name="content" type="array">
+                                <field name="summary" type="string"/>
+                                <field name="statuscategorychangedate" type="string"/>
+                                <field name="timespent" type="string"/>
+                                <field name="aggregatetimespent" type="string"/>
+                                <field name="timeoriginalestimate" type="string"/>
+                                <field name="aggregatetimeestimate" type="string"/>
+                                <field name="labels" type="array"/>
+                                <field name="status" type="object">
+                                    <field name="id" type="string"/>
+                                    <field name="name" type="string"/>
+                                </field>
+                                <field name="description" type="object">
                                     <field name="content" type="array">
-                                        <field name="text" type="string"/>
-                                   </field>                                
-                                </field>                                                                     
-                              </field>                                                                 
-                              <field name="assignee" type="object">
-                                <field name="displayName" type="string"/>
-                              </field>                                
-                              <field name="components" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                
-                              <field name="versions" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                                         
-                              <field name="fixVersions" type="array">
-                                <field name="name" type="string"/>
-                              </field>
-                              <field name="attachment" type="object">
-                                <field name="id" type="string"/>
-                                <field name="created" type="string"/>
-                                <field name="filename" type="string"/>
-                                <field name="size" type="string"/>
-                                <field name="content" type="string"/>
-                                <field name="thumbnail" type="string"/>                                
-                              </field>                              
-                            </field>                               
+                                        <field name="content" type="array">
+                                            <field name="text" type="string"/>
+                                        </field>
+                                    </field>
+                                </field>
+                                <field name="assignee" type="object">
+                                    <field name="displayName" type="string"/>
+                                </field>
+                                <field name="components" type="array">
+                                    <field name="name" type="string"/>
+                                </field>
+                                <field name="versions" type="array">
+                                    <field name="name" type="string"/>
+                                </field>
+                                <field name="fixVersions" type="array">
+                                    <field name="name" type="string"/>
+                                </field>
+                                <field name="attachment" type="object">
+                                    <field name="id" type="string"/>
+                                    <field name="created" type="string"/>
+                                    <field name="filename" type="string"/>
+                                    <field name="size" type="string"/>
+                                    <field name="content" type="string"/>
+                                    <field name="thumbnail" type="string"/>
+                                </field>
+                            </field>
                         </field>
                     </body>
                 </success>
@@ -155,8 +161,8 @@
                     <body/>
                 </fail>
             </response>
-        </operation>                        
-        <operation name="project" type="">
+        </operation>
+        <operation name="projects" type="">
             <request>
                 <method>GET</method>
                 <endpoint>{url}/project</endpoint>
@@ -194,15 +200,15 @@
                     </header>
                     <body type="object" format="json" data="raw">
                         <field name="values" type="array">
-                           <field name="rendered" type="object">
-                             <field name="message" type="object">
-                               <field name="raw" type="string"/>
-                             </field>   
-                           </field>                  
-                           <field name="author" type="string">
-                             <field name="raw" type="string"/>
-                           </field>                          
-                           <field name="hash" type="string"/>
+                            <field name="rendered" type="object">
+                                <field name="message" type="object">
+                                    <field name="raw" type="string"/>
+                                </field>
+                            </field>
+                            <field name="author" type="string">
+                                <field name="raw" type="string"/>
+                            </field>
+                            <field name="hash" type="string"/>
                         </field>
                     </body>
                 </success>
@@ -211,6 +217,6 @@
                     <body/>
                 </fail>
             </response>
-        </operation>       
+        </operation>
     </operations>
 </invoker>
