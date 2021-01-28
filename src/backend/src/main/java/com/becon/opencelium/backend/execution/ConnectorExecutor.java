@@ -55,14 +55,11 @@ import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -178,7 +175,7 @@ public class ConnectorExecutor {
         String taId = executionContainer.getTaId();
 
         System.out.println("============================================================");
-        System.out.println("Function: " + methodNode.getName());
+        System.out.println("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
 
         HttpMethod method = getMethod(methodNode); // done
         System.out.println("Method: " + method.name());
@@ -270,8 +267,14 @@ public class ConnectorExecutor {
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        if (invoker.getName().equals("igel")){
-            restTemplate = getRestTemplate();
+//        f (invoker.getName().equalsIgnoreCase("igel")){
+//            restTemplate = getRestTemplate();
+//        }i
+
+        if (invoker.getName().equalsIgnoreCase("IGEL")){
+            ClientHttpRequestFactory requestFactory =
+                    new HttpComponentsClientHttpRequestFactory(getHttpClient());
+            restTemplate.setRequestFactory(requestFactory);
         }
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
@@ -304,26 +307,57 @@ public class ConnectorExecutor {
         return response;
     }
 
-    private RestTemplate getRestTemplate() {
+//    private RestTemplate getRestTemplate() {
+//
+//        try {
+//            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+//                @Override
+//                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+//                    return true;
+//                }
+//            };
+//            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+//            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
+//            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+//            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+//            requestFactory.setHttpClient(httpClient);
+//            RestTemplate restTemplate = new RestTemplate(requestFactory);
+//            return restTemplate;
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//    }
+
+    private CloseableHttpClient getHttpClient() {
 
         try {
-            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-                @Override
-                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                    return true;
-                }
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
             };
-            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
-            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
-            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-            requestFactory.setHttpClient(httpClient);
-            RestTemplate restTemplate = new RestTemplate(requestFactory);
-            return restTemplate;
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setSSLContext(sslContext)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .build();
+
+
+
+            return httpClient;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private HttpMethod getMethod(MethodNode methodNode){
@@ -537,10 +571,11 @@ public class ConnectorExecutor {
     }
 
     private void executeIfStatement(StatementNode ifStatement){
+        System.out.println("=============== " + ifStatement.getOperand() + " ================= " + ifStatement.getIndex() );
         OperatorAbstractFactory factory = new OperatorAbstractFactory();
         Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());
         Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
-        System.out.println("=============== " + ifStatement.getOperand() + " =================");
+
         if(leftVariable != null){
             System.out.println("Left Statement: " + leftVariable.toString());
         }
@@ -600,15 +635,17 @@ public class ConnectorExecutor {
                 .orElse(null);
         List<Object> array =
                 (List<Object>) message.getValue(condition, loopIndex);
-        message.setCurrentLoopArr(condition);
+
+        System.out.println("============================= LOOP ======================== " + statementNode.getIndex());
         for (int i = 0; i < array.size(); i++) {
+//            executionContainer.setCurrentLoopCond(condition);
             System.out.println("Loop " + condition + "-------- index : " + i);
             String arr = ConditionUtility.getLastArray(condition);
             loopIndex.put(arr, i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
         }
-
+//        executionContainer.setCurrentLoopCond(null)
         if (loopIndex.containsKey(condition)){
             loopIndex.remove(condition);
         }

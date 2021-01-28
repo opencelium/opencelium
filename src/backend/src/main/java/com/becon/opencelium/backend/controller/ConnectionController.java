@@ -188,6 +188,7 @@ public class ConnectionController {
             final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
+            e.printStackTrace();
             connectionService.save(connectionClone);
             connectionNodeService.save(connectionNodeClone);
             ErrorMessageDataResource errorMessageDataResource =

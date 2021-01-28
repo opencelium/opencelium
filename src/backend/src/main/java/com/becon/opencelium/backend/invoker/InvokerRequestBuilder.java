@@ -110,7 +110,6 @@ public class InvokerRequestBuilder{
         }
 
         if (invokerName.equalsIgnoreCase("IGEL")){
-            System.out.println("+++++++++++++ inside IGEL");
             ClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory(getHttpClient());
             restTemplate.setRequestFactory(requestFactory);
