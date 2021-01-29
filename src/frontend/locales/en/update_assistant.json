@@ -1,5 +1,6 @@
 {
   "FORM":{
+    "UPDATE_OC": "Run OC",
     "HEADER": "Update Assistant",
     "UPDATE_BUTTON": "Update",
     "CANCEL_TOOLTIP": "Cancel",
@@ -25,22 +26,37 @@
     "DELETE_CONFIRMATION_MESSAGE": "Do you really want to remove?",
     "TEMPLATE_FILE_UPDATE": "Templates",
     "PAGE_3": "Template-Update",
+    "NO_TEMPLATES": "You do not need to update templates, because you do not have them.",
     "HINT_3": "Please, update your templates",
+    "PAGE_4": "Invoker-Update",
     "INVOKER_FILE_UPDATE": "Invokers",
     "INVOKER_MINE": "My Version",
     "INVOKER_NEW": "New Version",
     "INVOKER_MODE": "Mode",
-    "PAGE_4": "Invoker-Update",
+    "NO_INVOKERS": "You do not need to update invokers, because you do not have them.",
     "HINT_4": "Please, update your invokers",
-    "PAGE_5": "Done",
-    "HINT_5": "Update successfully completed",
+    "CONNECTION_MIGRATION": "Connections",
+    "PAGE_5": "Connection-Migration",
+    "NO_CONNECTIONS": "You do not need to update connections, because you do not have them.",
+    "HINT_5": "Please, update your connections",
+    "PAGE_6": "Done",
+    "FINISH": {
+      "HEADER": "Congratulations!",
+      "NEW_VERSION": "Your OC application has been successfully updated to a newer version.",
+      "LOG_MESSAGE": "Detailed debug information can be found in <0>{{logsLinkText}}</0> on your oc web-server.",
+      "LOGS_LINK_TEXT": "logs",
+      "HINT": "Hint",
+      "CLEAR_CACHE": "Don't forget to clear browser cache (especially the javascript cache)."
+    },
     "VALIDATION_MESSAGES": {
       "NO_UPDATE_MODE": "Please, select how do you want to update",
       "NO_SELECTED_VERSION": "Please, select an available version",
       "TEMPLATE_UPDATE_ABSENT": "Please, update templates",
       "TEMPLATES_HAVE_ERROR": "All templates should be updated",
       "INVOKER_UPDATE_ABSENT": "Please, update invokers",
-      "INVOKERS_HAVE_ERROR": "All invokers should be updated"
+      "INVOKERS_HAVE_ERROR": "All invokers should be updated",
+      "CONNECTION_UPDATE_ABSENT": "Please, update connections",
+      "CONNECTIONS_HAVE_ERROR": "All connections should be updated"
     }
   }
 }

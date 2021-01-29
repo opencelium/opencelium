@@ -28,10 +28,12 @@ import {
     uploadVersionFulfilled, uploadVersionRejected,
     addConvertTemplatesLogsFulfilled, addConvertTemplatesLogsRejected,
     addConvertInvokersLogsFulfilled, addConvertInvokersLogsRejected,
+    addConvertConnectionsLogsFulfilled, addConvertConnectionsLogsRejected,
 } from "@actions/update_assistant/add";
 import {
     updateTemplatesFulfilled, updateTemplatesRejected,
     updateInvokersFulfilled, updateInvokersRejected,
+    updateConnectionsFulfilled, updateConnectionsRejected,
 } from "@actions/update_assistant/update";
 
 
@@ -186,6 +188,24 @@ const updateInvokersForAssistantEpic = (action$, store) => {
 };
 
 /**
+ * update connections
+ */
+const updateConnectionsForAssistantEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            let data = action.payload;
+            return Rx.Observable.of(updateConnectionsFulfilled({newConnections: data, oldConnections: data}));
+            /*return doRequest({url, method: API_METHOD.PUT, data},{
+                    success: updateConnectionsFulfilled,
+                    reject: updateConnectionsRejected},
+                res => {return {newTemplates: res.response._embedded.templateResourceList, oldTemplates: data};}
+            );*/
+        });
+};
+
+/**
  * fetch system requirements
  */
 const fetchSystemRequirementsEpic = (action$, store) => {
@@ -233,6 +253,22 @@ const addConvertInvokersLogsEpic = (action$, store) => {
         });
 };
 
+/**
+ * add logs after convert connections
+ */
+const addConvertConnectionsLogsEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            return Rx.Observable.of(addConvertConnectionsLogsFulfilled(action.payload));
+            /*return doRequest({url, method: API_METHOD.POST, data: action.payload},{
+                success: addConvertConnectionsLogsFulfilled,
+                reject: addConvertConnectionsLogsRejected,},
+            );*/
+        });
+};
+
 
 export {
     fetchUpdateAppVersionEpic,
@@ -242,7 +278,9 @@ export {
     uploadVersionEpic,
     updateTemplatesForAssistantEpic,
     updateInvokersForAssistantEpic,
+    updateConnectionsForAssistantEpic,
     fetchSystemRequirementsEpic,
     addConvertTemplatesLogsEpic,
     addConvertInvokersLogsEpic,
+    addConvertConnectionsLogsEpic,
 };

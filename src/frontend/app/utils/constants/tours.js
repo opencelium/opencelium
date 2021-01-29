@@ -591,10 +591,19 @@ export const UPDATE_ASSISTANT_TOURS = {
     ],
     page_4: [
         {
-            selector: '.tour-page-3-step-1',
+            selector: '.tour-page-4-step-1',
             content:
                 <SwitchOffTour>
-                    Migrate Templates and Invokers
+                    Update Invokers
+                </SwitchOffTour>,
+        },
+    ],
+    page_5: [
+        {
+            selector: '.tour-page-5-step-1',
+            content:
+                <SwitchOffTour>
+                    Migrate Templates
                 </SwitchOffTour>,
         },
     ]

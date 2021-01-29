@@ -102,6 +102,13 @@ class InvokerFileUpdate extends React.Component{
     render(){
         const {currentInvokerIndex, convertedInvokers} = this.state;
         const {t, authUser, invokers, defaultInvokers, appVersion, entity} = this.props;
+        if(invokers.length === 0){
+            return(
+                <div>
+                    {t('FORM.NO_INVOKERS')}
+                </div>
+            )
+        }
         return(
             <div style={{margin: '20px 68px 0px 0px'}}>
                 <Table className={styles.table} authUser={authUser}>

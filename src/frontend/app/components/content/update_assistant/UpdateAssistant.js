@@ -27,6 +27,8 @@ import AvailableUpdates from "@components/content/update_assistant/available_upd
 import TemplateFileUpdate from "@components/content/update_assistant/file_update/TemplateFileUpdate";
 import {permission} from "@decorators/permission";
 import InvokerFileUpdate from "@components/content/update_assistant/file_update/InvokerFileUpdate";
+import ConnectionFileUpdate from "@components/content/update_assistant/migration/ConnectionFileUpdate";
+import FinishUpdate from "@components/content/update_assistant/FinishUpdate";
 
 
 function mapStateToProps(state){
@@ -63,6 +65,10 @@ class UpdateAssistant extends Component{
                 invokerFileUpdate:{
                     isFinishUpdate: false,
                     updatedInvokers: [],
+                },
+                connectionMigration:{
+                    isFinishUpdate: false,
+                    updatedConnections: [],
                 },
             },
         };
@@ -131,11 +137,27 @@ class UpdateAssistant extends Component{
      */
     validateInvokerFileUpdate(entity){
         const {t} = this.props;
-        if (entity.invokerFileUpdate && entity.invokerFileUpdate.updatedTemplates.length === 0) {
+        if (entity.invokerFileUpdate && entity.invokerFileUpdate.updatedInvokers.length === 0) {
             return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKER_UPDATE_ABSENT')};
         }
         if (entity.invokerFileUpdate && !entity.invokerFileUpdate.isFinishUpdate) {
             return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKERS_HAVE_ERROR')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
+     * to validate connection migration
+     */
+    validateConnectionMigration(entity){
+        const {t} = this.props;
+        if(!entity.connectionMigration.isFinishUpdate) {
+            if (entity.connectionMigration && entity.connectionMigration.updatedConnections.length === 0) {
+                return {value: false, message: t('FORM.VALIDATION_MESSAGES.CONNECTION_UPDATE_ABSENT')};
+            }
+            if (entity.connectionMigration && entity.connectionMigration.updatedConnections.length !== 0) {
+                return {value: false, message: t('FORM.VALIDATION_MESSAGES.CONNECTIONS_HAVE_ERROR')};
+            }
         }
         return {value: true, message: ''};
     }
@@ -147,13 +169,14 @@ class UpdateAssistant extends Component{
         contentTranslations.header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         contentTranslations.list_button = '';
         let changeContentTranslations = {};
-        changeContentTranslations.addButton = '';
+        changeContentTranslations.onlyTextButton = `${t('FORM.UPDATE_OC')} v${updateData.availableUpdates.selectedVersion}`;
         let getListLink = ``;
-        let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5')];
+        let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5'), t('FORM.PAGE_6')];
         let contents = [{
             inputs: [
                 {
                     ...INPUTS.COMPONENT,
+                    icon: 'short_text',
                     tourStep: UPDATE_ASSISTANT_TOURS.page_1[0].selector,
                     name: 'systemCheck',
                     label: t('FORM.SYSTEM_CHECK'),
@@ -202,8 +225,26 @@ class UpdateAssistant extends Component{
             hint: {text: t('FORM.HINT_4'), openTour: ::this.openTour},
         },{
             inputs:[
+                {
+                    ...INPUTS.COMPONENT,
+                    tourStep: UPDATE_ASSISTANT_TOURS.page_5[0].selector,
+                    icon: 'description',
+                    name: 'connectionMigration',
+                    label: t('FORM.CONNECTION_MIGRATION'),
+                    Component: ConnectionFileUpdate,
+                    check: (e, entity) => ::this.validateConnectionMigration(e, entity),
+                },
             ],
             hint: {text: t('FORM.HINT_5'), openTour: ::this.openTour},
+        },{
+            inputs:[
+                {
+                    ...INPUTS.COMPONENT,
+                    name: 'finishUpdate',
+                    label: t('FORM.FINISH_UPDATE'),
+                    Component: FinishUpdate,
+                },
+            ],
         },
         ];
         return (
@@ -216,6 +257,7 @@ class UpdateAssistant extends Component{
                     authUser={authUser}
                     onPageSwitch={::this.setCurrentTour}
                     entity={updateData}
+                    type={'onlyText'}
                 />
                 <OCTour
                     steps={UPDATE_ASSISTANT_TOURS[this.state.currentTour]}

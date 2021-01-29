@@ -126,6 +126,42 @@ const addConvertInvokersLogsRejected = (error) => {
     });
 };
 
+/**
+ * add logs after convert connections
+ * @param logs
+ * @returns {{type: string, payload: {}}}
+ */
+const addConvertConnectionsLogs = (logs) => {
+    return {
+        type: UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS,
+        payload: logs,
+    };
+};
+
+/**
+ * add logs after convert connections fulfilled
+ * @param response
+ * @returns {{type: string, payload: {}}}
+ */
+const addConvertConnectionsLogsFulfilled = (response) => {
+    return {
+        type: UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS_FULFILLED,
+        payload: response,
+    };
+};
+
+/**
+ * add logs after convert connections rejected
+ * @param error
+ * @returns {*}
+ */
+const addConvertConnectionsLogsRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     uploadVersion,
@@ -137,4 +173,7 @@ export{
     addConvertInvokersLogs,
     addConvertInvokersLogsFulfilled,
     addConvertInvokersLogsRejected,
+    addConvertConnectionsLogs,
+    addConvertConnectionsLogsFulfilled,
+    addConvertConnectionsLogsRejected,
 };

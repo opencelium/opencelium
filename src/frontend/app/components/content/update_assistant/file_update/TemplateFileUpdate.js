@@ -96,6 +96,13 @@ class TemplateFileUpdate extends React.Component{
     render(){
         const {currentTemplateIndex, convertedTemplates} = this.state;
         const {t, authUser, templates, appVersion, entity} = this.props;
+        if(templates.length === 0){
+            return(
+                <div>
+                    {t('FORM.NO_TEMPLATES')}
+                </div>
+            )
+        }
         return(
             <div style={{margin: '20px 68px 0px 0px'}}>
                 <Table className={styles.table} authUser={authUser}>

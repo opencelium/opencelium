@@ -79,9 +79,17 @@ import {
     updateNotificationTemplateEpic, deleteNotificationTemplateEpic,
 } from '@epics/notification_templates';
 import {
-    fetchUpdateAppVersionEpic, fetchOfflineUpdatesEpic, fetchOnlineUpdatesEpic,
-    deleteVersionEpic, uploadVersionEpic, updateTemplatesForAssistantEpic, updateInvokersForAssistantEpic,
-    fetchSystemRequirementsEpic, addConvertTemplatesLogsEpic, addConvertInvokersLogsEpic,
+    fetchUpdateAppVersionEpic,
+    fetchOfflineUpdatesEpic,
+    fetchOnlineUpdatesEpic,
+    deleteVersionEpic,
+    uploadVersionEpic,
+    updateTemplatesForAssistantEpic,
+    updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic,
+    addConvertTemplatesLogsEpic,
+    addConvertInvokersLogsEpic,
+    updateConnectionsForAssistantEpic,
 } from "@epics/update_assistant";
 
 
@@ -192,4 +200,5 @@ export default combineEpics(
     fetchSystemRequirementsEpic,
     addConvertTemplatesLogsEpic,
     addConvertInvokersLogsEpic,
+    updateConnectionsForAssistantEpic,
 );

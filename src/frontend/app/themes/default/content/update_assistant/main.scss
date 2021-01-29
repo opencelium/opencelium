@@ -1,5 +1,21 @@
 @import '../../constants';
 
+.finish_update{
+  padding: 0 40px;
+  div{
+    padding: 5px 0;
+  }
+  font-family: $FONT_FAMILY;
+  text-align: center;
+  font-size: 24px;
+  .header{
+    font-size: 30px;
+  }
+  .hint{
+    font-weight: bold;
+  }
+}
+
 .table{
   margin-bottom: 0 !important;
   margin-top: 20px;

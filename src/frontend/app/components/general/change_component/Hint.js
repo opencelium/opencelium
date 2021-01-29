@@ -36,6 +36,9 @@ class Hint extends Component{
         let text = '';
         let openTour = null;
         if(!isString(hint)){
+            if(!hint){
+                return null;
+            }
             if(hint.hasOwnProperty('text')){
                 text = hint.text;
             }
