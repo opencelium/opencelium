@@ -16,6 +16,9 @@
 
 package com.becon.opencelium.backend.neo4j.service;
 
+import com.becon.opencelium.backend.mysql.entity.Connector;
+import com.becon.opencelium.backend.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectorNode;
 import com.becon.opencelium.backend.resource.connection.ConnectorNodeResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +33,19 @@ public class ConnectorNodeServiceImp implements ConnectorNodeService {
     @Autowired
     private OperatorNodeServiceImp operatorNodeServiceImp;
 
+    @Autowired
+    private ConnectorServiceImp connectorServiceImp;
+
     public ConnectorNode toEntity(ConnectorNodeResource resource, String connectionName){
         ConnectorNode connectorNode = new ConnectorNode();
+        Connector connector = connectorServiceImp.findById(resource.getConnectorId())
+                .orElseThrow(() -> new RuntimeException("CONNECTOR WITH ID:" + resource.getConnectorId() + " NOT FOUND"));
+        if (!connector.getInvoker().equals(resource.getInvoker().getName())) {
+            throw new RuntimeException("WRONG CONNECTOR_ID("+resource.getConnectorId()+") " +
+                    "OR INVOKER NAME("+resource.getInvoker().getName()+") ARE DEFINED");
+        }
+
+
         connectorNode.setConnectorId(resource.getConnectorId());
         connectorNode.setName(resource.getInvoker().getName());
         connectorNode.setConnectorId(resource.getConnectorId());
