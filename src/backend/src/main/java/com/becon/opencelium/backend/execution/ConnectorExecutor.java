@@ -100,7 +100,7 @@ public class ConnectorExecutor {
         executionContainer.setConn(conn);
         executionContainer.setSupportRequestData(supportRequestData);
         executionContainer.setRequestData(requestData);
-        executionContainer.setLoopIndex(new HashMap<>());
+        executionContainer.setLoopIndex(new LinkedHashMap<>());
         executeMethod(connectorNode.getStartMethod());
         executeDecisionStatement(connectorNode.getStartOperator());
     }
@@ -138,10 +138,7 @@ public class ConnectorExecutor {
             else {
                 messageContainer = new MessageContainer();
                 responseContainer = new HashMap<>();
-                Integer loopIndex = loopStack.get(arrayContainer);
-                if(loopIndex == null){
-                    loopIndex = 0;
-                }
+                Integer loopIndex = loopStack.getOrDefault(arrayContainer, 0);
                 responseContainer.put(loopIndex,responseEntity.getBody());
 
                 messageContainer.setMethodKey(methodNode.getColor());
@@ -637,17 +634,15 @@ public class ConnectorExecutor {
                 (List<Object>) message.getValue(condition, loopIndex);
 
         System.out.println("============================= LOOP ======================== " + statementNode.getIndex());
+        String arr = ConditionUtility.getLastArray(condition);;
         for (int i = 0; i < array.size(); i++) {
-//            executionContainer.setCurrentLoopCond(condition);
             System.out.println("Loop " + condition + "-------- index : " + i);
-            String arr = ConditionUtility.getLastArray(condition);
             loopIndex.put(arr, i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
         }
-//        executionContainer.setCurrentLoopCond(null)
-        if (loopIndex.containsKey(condition)){
-            loopIndex.remove(condition);
+        if (loopIndex.containsKey(arr)){
+            loopIndex.remove(arr);
         }
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());

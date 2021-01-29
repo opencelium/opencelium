@@ -128,28 +128,28 @@ public class MessageContainer {
         int loopIndex = 0;
 
         String message = "";
-//        if (loopingArrays == null || loopingArrays.isEmpty()){
-//            message = data.get(loopIndex);
-//        } else {
-//            String arr = loopingArrays.stream().reduce((f,s)->s).get();
-//            loopIndex = loopStack.get(arr);
-//            message = data.get(loopIndex);
-//        }
-
         if (loopingArrays == null || loopingArrays.isEmpty()){
             message = data.get(loopIndex);
         } else {
-//            if (currentLoopArr == null) {
-//                currentLoopArr = loopingArrays.stream().reduce((f,s)->s).get();
-//            }
-//            String arr = currentLoopArr.replaceAll("\\[([a-z,*]+)\\]", "[]");
-//            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
-//            message = data.get(loopIndex);
-
             String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
+            loopIndex = loopStack.get(arr);
             message = data.get(loopIndex);
         }
+
+//        if (loopingArrays == null || loopingArrays.isEmpty()){
+//            message = data.get(loopIndex);
+//        } else {
+////            if (currentLoopArr == null) {
+////                currentLoopArr = loopingArrays.stream().reduce((f,s)->s).get();
+////            }
+////            String arr = currentLoopArr.replaceAll("\\[([a-z,*]+)\\]", "[]");
+////            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
+////            message = data.get(loopIndex);
+//
+//            String arr = loopingArrays.stream().reduce((f,s)->s).get();
+//            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
+//            message = data.get(loopIndex);
+//        }
 
         int size = conditionParts.size() - 1;
         int i = 0;
@@ -254,19 +254,16 @@ public class MessageContainer {
         String refValue = ConditionUtility.getRefValue(ref);
 
         List<String> conditionParts =  Arrays.asList(refValue.split("\\."));
-        int loopIndex = 0;
+        int responseIndex = 0;
 
         String message = "";
         if (loopingArrays == null || loopingArrays.isEmpty()){
-            message = data.get(loopIndex);
+            message = data.get(responseIndex);
         } else {
-//            if (currentLoopArr == null) {
-//                currentLoopArr = loopingArrays.stream().reduce((f,s)->s).get();
-//            }
-//            String arr = currentLoopArr.replaceAll("\\[([a-z,*]+)\\]", "[]");
+
             String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
-            message = data.get(loopIndex);
+            responseIndex = loopStack.get(arr); // determining index of response data
+            message = data.get(responseIndex);
         }
 
         int size = conditionParts.size() - 1;
@@ -276,6 +273,8 @@ public class MessageContainer {
                 continue;
             }
             condition = condition + "." + part;
+
+            // Getting current index of current loop
             String array = ConditionUtility.getLastArray(condition);// need to find index
             int index = 0;
             boolean hasLoop = false;
