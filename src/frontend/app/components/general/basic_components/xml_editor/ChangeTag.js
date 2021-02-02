@@ -170,7 +170,7 @@ class ChangeTag extends Component{
         const {translate, tag, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
-                <TooltipFontIcon size={16} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
+                <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
                 <TagType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}
                 {valueType === TAG_VALUE_TYPES.TEXT && <Value translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}

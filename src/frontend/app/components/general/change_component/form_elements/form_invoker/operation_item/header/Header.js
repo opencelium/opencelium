@@ -201,6 +201,7 @@ class Header extends Component{
                                 ?
                                 <div>
                                     <TooltipFontIcon
+                                        size={16}
                                         className={styles.invoker_item_delete_button}
                                         value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
                                         onMouseOver={::this.isOnDeleteButtonOver}

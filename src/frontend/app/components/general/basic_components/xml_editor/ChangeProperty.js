@@ -106,7 +106,7 @@ class ChangeProperty extends Component{
         const {translate, property, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={basicStyles.change_popup} style={{top: this.top, left: this.left}}>
-                <TooltipFontIcon size={16} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={basicStyles.close_icon} onClick={close}/>
+                <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={basicStyles.close_icon} onClick={close}/>
                 <Input id={`${property.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.PROPERTY.NAME')} theme={{input: basicStyles.change_tag_name}}/>
                 <Value translate={translate} value={value} changeValue={::this.changeValue} uniqueIndex={property.uniqueIndex} ReferenceComponent={ReferenceComponent} pressKey={::this.pressKey}/>
                 <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.PROPERTY.ADD') : translate('XML_EDITOR.PROPERTY.UPDATE')}/>
