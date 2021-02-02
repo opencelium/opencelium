@@ -10,6 +10,7 @@ import {fetchConnections} from "@actions/connections/fetch";
 import {ListComponent} from "@decorators/ListComponent";
 import ConnectionFileEntry from "@components/content/update_assistant/migration/ConnectionFileEntry";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
@@ -42,7 +43,7 @@ class ConnectionFileUpdate extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.props.connections.length === 0 && !this.props.entity.connectionMigration.isFinishUpdate){
+        if(this.props.connections.length === 0 && !this.props.entity.connectionMigration.isFinishUpdate && this.props.fetchingConnections === API_REQUEST_STATE.FINISH){
             const {entity, updateEntity} = this.props;
             entity.connectionMigration = {...entity.connectionMigration, isFinishUpdate: true};
             updateEntity(entity);
