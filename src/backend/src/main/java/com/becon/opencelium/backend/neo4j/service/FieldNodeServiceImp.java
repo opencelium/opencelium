@@ -310,15 +310,18 @@ public class FieldNodeServiceImp implements FieldNodeService {
                 if (child.equals("")){
                     result = "";
                     continue;
-                }
-            }
-            if (f.getId().equals(fieldNode.getId())){
-                if (f.getType().equals("array")){
-                    result = result + f.getName() + "[]";
                 } else {
-                    result = result + f.getName();
+                    break;
                 }
-                break;
+            } else {
+                if (f.getId().equals(fieldNode.getId())){
+                    if (f.getType().equals("array")){
+                        result = result + f.getName() + "[]";
+                    } else {
+                        result = result + f.getName();
+                    }
+                    break;
+                }
             }
         }
         return result;

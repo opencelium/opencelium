@@ -49,7 +49,7 @@ public class ExecutionContainer {
     private List<RequestData> requestData = new LinkedList<>();
     private List<RequestData> supportRequestData = new LinkedList<>();
     private ArrayList<MessageContainer> responseData = new ArrayList<>();
-    private Map<String, Integer> loopIndex = new HashMap<>();
+    private LinkedHashMap<String, Integer> loopIndex = new LinkedHashMap<>();
     private String taId;
     private String conn;
     private int order;
@@ -265,11 +265,11 @@ public class ExecutionContainer {
         this.responseData = responseData;
     }
 
-    public Map<String, Integer> getLoopIndex() {
+    public LinkedHashMap<String, Integer> getLoopIndex() {
         return loopIndex;
     }
 
-    public void setLoopIndex(Map<String, Integer> loopIndex) {
+    public void setLoopIndex(LinkedHashMap<String, Integer> loopIndex) {
         this.loopIndex = loopIndex;
     }
 
@@ -293,14 +293,8 @@ public class ExecutionContainer {
 
     private List<?> convertToArray(String stringifiedArray){
         try {
-//            List<String> array = new ArrayList<>();
             ObjectMapper mapper = new ObjectMapper();
             List jsonString = (List) mapper.readValue(stringifiedArray, Object.class);
-//            String withoutBrackets = stringifiedArray.replaceAll("[\\[\\](){}]", ""); // Remove all the brackets
-//            for (String word : withoutBrackets.split(",")) {
-//                String element = word.replaceAll("\"", "");
-//                array.add(element);
-//            }
             return jsonString;
         } catch (Exception e){
             throw new RuntimeException(e);
