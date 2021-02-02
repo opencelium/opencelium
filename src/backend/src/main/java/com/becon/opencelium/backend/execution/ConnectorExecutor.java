@@ -138,7 +138,12 @@ public class ConnectorExecutor {
             else {
                 messageContainer = new MessageContainer();
                 responseContainer = new HashMap<>();
-                Integer loopIndex = loopStack.getOrDefault(arrayContainer, 0);
+
+                Integer loopIndex = 0;
+                if (!arrayContainer.isEmpty()) {
+                    loopIndex = loopStack.getOrDefault(arrayContainer.get(sizeArrayContainer - 1), 0);
+                }
+
                 responseContainer.put(loopIndex,responseEntity.getBody());
 
                 messageContainer.setMethodKey(methodNode.getColor());
