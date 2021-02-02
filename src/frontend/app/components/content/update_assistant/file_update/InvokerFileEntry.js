@@ -5,7 +5,6 @@ import styles from "@themes/default/content/update_assistant/main";
 import CExecution from "@classes/components/content/invoker_converter/CExecution";
 import {connect} from "react-redux";
 import Loading from "@components/general/app/Loading";
-import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
 import {withTranslation} from "react-i18next";
 
 function mapStateToProps(state){
@@ -22,12 +21,6 @@ function mapStateToProps(state){
 class InvokerFileEntry extends React.Component{
     constructor(props) {
         super(props);
-        const {convertedInvokers, invoker} = props;
-        const convertedInvoker = convertedInvokers.find(invo => invo.data.name === invoker.name);
-        const shouldUseNew = convertedInvoker && convertedInvoker.status.hasOwnProperty('shouldUseNew') ? convertedInvoker.status.shouldUseNew : false;
-        this.state = {
-            shouldUseNew,
-        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -36,15 +29,8 @@ class InvokerFileEntry extends React.Component{
         }
     }
 
-    handleChangeMode(e){
-        this.setState({
-            shouldUseNew: e.target.checked,
-        })
-    }
-
     convertInvoker(){
-        const {shouldUseNew} = this.state;
-        const {index, invoker, entity, setInvoker, defaultInvokers, appVersion} = this.props;
+        const {index, invoker, entity, setInvoker, appVersion} = this.props;
         let convertedInvoker = null;
         let status = {error: null};
         const {invokerData, error} = CExecution.executeConfig({
@@ -55,9 +41,6 @@ class InvokerFileEntry extends React.Component{
         //if(Math.floor(Math.random() * 2)){
             status = {error};
         }
-        if(defaultInvokers.findIndex(defaultInvoker => defaultInvoker.name === invoker.name) !== -1) {
-            status.shouldUseNew = shouldUseNew;
-        }
         convertedInvoker = invokerData;
         setTimeout(() => {
             setInvoker(convertedInvoker, status, index);
@@ -65,8 +48,7 @@ class InvokerFileEntry extends React.Component{
     }
 
     render(){
-        const {shouldUseNew} = this.state;
-        const {t, authUser, convertedInvokers, index, isConverting, invoker, defaultInvokers} = this.props;
+        const {convertedInvokers, index, isConverting, invoker} = this.props;
         let isFail = false;
         let isSuccess = false;
         if(typeof convertedInvokers[index] !== 'undefined'){
@@ -76,20 +58,6 @@ class InvokerFileEntry extends React.Component{
         return(
             <tr>
                 <td>{invoker.name}</td>
-                <td>
-                    {defaultInvokers.findIndex(defaultInvoker => defaultInvoker.name === invoker.name) !== -1
-                    ?
-                        <TooltipSwitch
-                            id={`mode_${invoker.name}`}
-                            authUser={authUser}
-                            tooltip={!shouldUseNew ? t('FORM.INVOKER_MINE') : t('FORM.INVOKER_NEW')}
-                            checked={shouldUseNew}
-                            onChange={::this.handleChangeMode}
-                        />
-                    :
-                        <span/>
-                    }
-                </td>
                 <td>
                     {!isConverting && !isFail && !isSuccess && <span>-</span>}
                     {isConverting && <Loading className={styles.convert_loading}/>}

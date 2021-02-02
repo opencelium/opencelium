@@ -67,9 +67,8 @@ class InvokerFileUpdate extends React.Component{
                 currentInvokerIndex: -1,
             });
             if(isFinishUpdate) {
-                const invokersOnlyForConversion = convertedInvokers.filter(invoker => !invoker.status.shouldUseNew);
-                if(invokersOnlyForConversion.length > 0) {
-                    updateInvokers(invokersOnlyForConversion.map(invoker => {return {xml: invoker.data};}));
+                if(convertedInvokers.length > 0) {
+                    updateInvokers(convertedInvokers.map(invoker => {return {xml: invoker.data};}));
                 }
             } else{
                 addConvertInvokersLogs(invokersWithErrors.map(invoker => {return {invokerName: invoker.data.name, message: invoker.status.error.message, data: invoker.status.error.data};}));
@@ -115,7 +114,6 @@ class InvokerFileUpdate extends React.Component{
                     <thead>
                     <tr>
                         <th>{`v${appVersion}`}</th>
-                        <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{'Mode'}</th>
                         <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
                     </tr>
                     </thead>
