@@ -59,6 +59,13 @@ public class ApplicationController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/oc/requirements")
+    public ResponseEntity<?> getSystemRequirement() {
+        String version = env.getProperty("opencelium.version");
+        String result = "{" + "\"version\": \"" + version + "\"}";
+        return ResponseEntity.ok(result);
+    }
+
     public String get(){
         return null;
     }

@@ -51,6 +51,8 @@ public class ComparisonOperatorFactory implements OperatorFactory {
                 return new PropertyExists();
             case "PropertyNotExists":
                 return new PropertyNotExists();
+            case "ContainsSubStr":
+                return new ContainsSubStr();
             default:
                 throw new RuntimeException("Operator '" + type + "' not supported");
         }
