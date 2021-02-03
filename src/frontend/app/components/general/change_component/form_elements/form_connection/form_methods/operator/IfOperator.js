@@ -127,28 +127,21 @@ class IfOperator extends Component{
     getOperatorLabel(){
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
-        switch(value){
-            case 'Contains':
-                return '⊂';
-            case 'NotContains':
-                return '⊄';
-            case 'PropertyExists':
-                return '∃';
-            case 'PropertyNotExists':
-                return '∄';
-            default:
-                return value;
+        let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === value);
+        if(functionalOperator && functionalOperator.hasOwnProperty('operatorLabel')){
+            return functionalOperator.operatorLabel;
         }
+        return value;
     }
 
     checkIfOperatorHasThreeParams(){
         const {operator} = this.props;
         let relationalOperatorValue = operator.condition.relationalOperator;
-        let isContains = false;
-        if(relationalOperatorValue === 'Contains' || relationalOperatorValue === 'NotContains'){
-            isContains = true;
+        let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === relationalOperatorValue);
+        if(functionalOperator && functionalOperator.hasOwnProperty('hasThreeValues')){
+            return functionalOperator.hasThreeValues;
         }
-        return isContains;
+        return false;
     }
 
     getParamSource(statement){
@@ -437,7 +430,7 @@ class IfOperator extends Component{
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
-        let divStyles = {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '30%' : '35%' : '55%'};
+        let divStyles = {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '28%' : '35%' : '55%'};
         return (
             <div style={divStyles}>
                 {/*{::this.renderResponseTypeGroupLeft()}*/}
@@ -468,12 +461,13 @@ class IfOperator extends Component{
 
     renderOperatorInput(){
         const {operator, readOnly} = this.props;
+        let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let value = operator.condition.relationalOperator;
         let operators = FUNCTIONAL_OPERATORS.map(operator => {return {value: operator.value, label: operator.hasOwnProperty('label') ? operator.label : operator.value};});
         let {hasValue} = this.isOperatorHasValue();
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
         let inputTheme = {inputElement: styles.input_element_pointer_compare_statement_visible};
-        let divStyles = {float: 'left', width: hasValue ? '10%' : '25%', transition: 'width 0.3s ease 0s',};
+        let divStyles = {float: 'left', width: hasValue ? isOperatorHasThreeParams ? '14%' : '10%' : '25%', transition: 'width 0.3s ease 0s',};
         let label = this.getOperatorLabel();
         inputTheme.input = styles.input_pointer_compare_statement;
         return (
@@ -530,6 +524,7 @@ class IfOperator extends Component{
                         singleValue: (styles, {data}) => {
                             return {
                                 ...styles,
+                                textAlign: 'center',
                                 color: data.color,
                                 background: data.color,
                                 margin: '0 10%',
@@ -740,7 +735,7 @@ class IfOperator extends Component{
         let methodValue = method ? {label: method.name, value: method.index, color: method.color} : null;
         let isMethodSelectRightInvisible = methodValue === null && rightField !== '' || isRightStatementText;
         let inputTheme = {inputElement: hasValue ? styles.input_element_pointer_compare_statement_visible : styles.input_element_pointer_compare_statement_not_visible};
-        let divStyles = {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '17.5%' : '35%' : '0', float: 'left'};
+        let divStyles = {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0', float: 'left'};
         inputTheme.input = styles.input_pointer_compare_statement;
         return (
             <div style={divStyles}>
