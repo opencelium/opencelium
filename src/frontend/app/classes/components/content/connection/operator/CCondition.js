@@ -18,9 +18,12 @@ import CStatement from "./CStatement";
 import React from "react";
 
 const OPERATOR_LABELS = {
+    PROPERTY_EXISTS: <span>∃</span>,
+    PROPERTY_NOT_EXISTS: <span>∄</span>,
     CONTAINS: <span>⊂</span>,
     NOT_CONTAINS: <span>⊄</span>,
     CONTAINS_SUB_STR: <span style={{fontSize: '16px'}}>⊂<span style={{fontSize: '9px'}}>a-z</span></span>,
+    NOT_CONTAINS_SUB_STR: <span style={{fontSize: '16px'}}>⊄<span style={{fontSize: '9px'}}>a-z</span></span>,
 }
 
 //value - operator name for backend
@@ -30,11 +33,12 @@ const OPERATOR_LABELS = {
 //placeholderValue - placeholder of the selected operator (short view)
 export const FUNCTIONAL_OPERATORS = [
     {value: 'IsNull', hasValue: false},
-    {value: 'PropertyExists', hasValue: true, isRightStatementText: true, operatorLabel: <span>∃</span>},
-    {value: 'PropertyNotExists', hasValue: true, isRightStatementText: true, operatorLabel: <span>∄</span>},
+    {value: 'PropertyExists',label: <span>PropertyExists({OPERATOR_LABELS.PROPERTY_EXISTS})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.PROPERTY_EXISTS},
+    {value: 'PropertyNotExists',label: <span>PropertyNotExists({OPERATOR_LABELS.PROPERTY_NOT_EXISTS})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.PROPERTY_NOT_EXISTS},
     {value: 'Contains', label: <span>Contains({OPERATOR_LABELS.CONTAINS})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS},
     {value: 'NotContains', label: <span>NotContains({OPERATOR_LABELS.NOT_CONTAINS})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS},
     {value: 'ContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS_SUB_STR},
+    {value: 'NotContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.NOT_CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS_SUB_STR},
     {value: '>=', hasValue: true},
     {value: '>', hasValue: true},
     {value: '<=', hasValue: true},
