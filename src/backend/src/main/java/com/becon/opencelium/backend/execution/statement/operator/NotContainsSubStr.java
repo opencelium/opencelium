@@ -1,0 +1,45 @@
+package com.becon.opencelium.backend.execution.statement.operator;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class NotContainsSubStr implements Operator {
+
+    @Override
+    public <T, S> boolean compare(T val1, S val2) {
+
+        ArrayList arrayList = new ArrayList<>();
+        if (val2 instanceof List){
+            arrayList = (ArrayList) val2;
+            ArrayList values = (ArrayList) arrayList.get(1);
+            Object value = arrayList.get(0);
+
+            for (Object s : values) {
+                if (!(s instanceof String)) {
+                    System.err.println(s);
+                    throw new RuntimeException("Only String type allowed in NotContainsSubStr operator");
+                }
+
+                String str = (String) s;
+                if (str.contains((String)value)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            arrayList = (ArrayList) val1;
+            for (Object s : arrayList) {
+                if (!(s instanceof String)) {
+                    System.err.println(s);
+                    throw new RuntimeException("Only String type allowed in NotContainsSubStr operator");
+                }
+
+                String str = (String) s;
+                if (str.contains((String)val2)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+}
