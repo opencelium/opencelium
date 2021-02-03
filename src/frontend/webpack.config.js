@@ -105,10 +105,6 @@ const plugins = () => {
                     to: path.resolve(__dirname, 'dist/styles')
                 },
                 {
-                    from: path.resolve(__dirname, 'jira_integration.js'),
-                    to: path.resolve(__dirname, 'dist')
-                },
-                {
                     from: path.resolve(__dirname, 'locales'),
                     to: path.resolve(__dirname, 'dist/locales')
                 },

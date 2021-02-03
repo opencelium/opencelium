@@ -28,6 +28,7 @@ module.exports = {
         PORT: webpackDevServerPort,
         HOSTNAME: '0.0.0.0',
         OPTIONS: {
+            disableHostCheck: true,
             open: NodeParams.IS_DEV && !NodeParams.HAS_BROWSER_SYNC,
             liveReload: false,
             headers: {
