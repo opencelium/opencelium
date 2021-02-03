@@ -132,6 +132,17 @@ export default class CBody{
         }
         if(isArray(fields[property])){
             type = FIELD_TYPE_ARRAY;
+            result.push({
+                value: `${property}[0]`,
+                type,
+                label: `${property} (1-st element of array)`,
+            });
+            result.push({
+                value: property,
+                type,
+                label: `${property} (the whole array)`,
+            });
+            return;
         }
         if (this._isAttributeProperty(property)) {
             property = ATTRIBUTES_MARK;
@@ -160,7 +171,7 @@ export default class CBody{
     _getLabel(type, label){
         switch(type){
             case FIELD_TYPE_ARRAY:
-                return `${label} (Array)`;
+                return `${label}`;
             case FIELD_TYPE_OBJECT:
                 return `${label} (Object)`;
         }
