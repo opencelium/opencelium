@@ -44,7 +44,7 @@ class ReferenceValues extends Component{
                                         value={<span/>}
                                         style={{background: pointer[0], ...styles, ...extraStyles}}
                                     />
-                                    {hasDelete && <TooltipFontIcon tooltip={translate('XML_EDITOR.DELETE_ICON')} onClick={() => ::this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
+                                    {hasDelete && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_ICON')} onClick={() => ::this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
                                 </React.Fragment>
                             );
                         } else{

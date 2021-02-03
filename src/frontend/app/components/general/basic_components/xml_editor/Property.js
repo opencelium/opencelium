@@ -89,7 +89,7 @@ class Property extends Component{
                 <span id={`${property.uniqueIndex}_property`} className={`${styles.property} ${!readOnly ? styles.property_hovered : ''}`} onMouseOver={!readOnly ? ::this.showRemoveIcon : null} onMouseLeave={::this.hideRemoveIcon} onClick={!readOnly ? ::this.showUpdatePopup : null}>
                     <span className={styles.name}>{property.name}</span>
                     {this.renderValue()}
-                    {hasRemoveIcon && !readOnly && <TooltipFontIcon tooltip={translate('XML_EDITOR.DELETE_ATTRIBUTE')} value={'delete'} className={styles.remove_icon} onClick={::this.removeProperty}/>}
+                    {hasRemoveIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_ATTRIBUTE')} value={'delete'} className={styles.remove_icon} onClick={::this.removeProperty}/>}
                 </span>
                 {
                     hasUpdatePopup && !readOnly &&

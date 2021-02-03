@@ -269,10 +269,6 @@ class OperatorItem extends Component{
         let value = 'vertical_align_top';
         let tooltip = 'Minimize';
         let fontIconStyles = {};
-        if(operator.isMinimized) {
-            value = 'vertical_align_bottom';
-            tooltip = 'Maximize';
-        }
         return(
             <TooltipFontIcon value={value} tooltip={tooltip} className={styles.toggle_icon} style={fontIconStyles} onClick={::this.toggleItem}/>
         );
