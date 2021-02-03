@@ -351,7 +351,8 @@ class ParamGenerator extends Component {
 
     render(){
         const {shouldClose} = this.state;
-        if(shouldClose){
+        const {isVisible} = this.props;
+        if(shouldClose && isVisible){
             return null;
         }
         const {parent} = this.props;

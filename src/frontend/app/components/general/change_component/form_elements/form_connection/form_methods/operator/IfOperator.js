@@ -128,8 +128,8 @@ class IfOperator extends Component{
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
         let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === value);
-        if(functionalOperator && functionalOperator.hasOwnProperty('operatorLabel')){
-            return functionalOperator.operatorLabel;
+        if(functionalOperator && functionalOperator.hasOwnProperty('placeholderValue')){
+            return functionalOperator.placeholderValue;
         }
         return value;
     }

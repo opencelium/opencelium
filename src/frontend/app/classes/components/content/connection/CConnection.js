@@ -152,7 +152,9 @@ export default class CConnection{
         let exceptCurrent = settings && settings.hasOwnProperty('exceptCurrent') ? settings.exceptCurrent : true;
         switch(connector.getConnectorType()){
             case CONNECTOR_FROM:
-                result = connector.getAllPrevMethods(item);
+                if(item.index !== '0') {
+                    result = connector.getAllPrevMethods(item);
+                }
                 break;
             case CONNECTOR_TO:
                 if(statement === 'rightStatement'){
@@ -165,10 +167,12 @@ export default class CConnection{
                     label: 'From Connector',
                     options: this._fromConnector.getAllPrevMethods(item, isKeyConsidered, exceptCurrent),
                 });
-                result.push({
-                    label: 'To Connector',
-                    options: connector.getAllPrevMethods(item)
-                });
+                if(item.index !== '0') {
+                    result.push({
+                        label: 'To Connector',
+                        options: connector.getAllPrevMethods(item)
+                    });
+                }
                 break;
         }
         return result;
