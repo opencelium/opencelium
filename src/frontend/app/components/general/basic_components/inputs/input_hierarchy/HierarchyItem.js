@@ -62,7 +62,7 @@ class HierarchyItem extends Component{
                 {
                     isCurrentItem
                     ?
-                        <TooltipFontIcon tooltip={'Current Item'} value={'arrow_back'} className={styles.pointer}/>
+                        <TooltipFontIcon size={16} tooltip={'Current Item'} value={'arrow_back'} className={styles.pointer}/>
                     :
                         null
                 }

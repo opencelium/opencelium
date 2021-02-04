@@ -21,10 +21,8 @@ import ContentEditable from 'react-contenteditable';
 import styles from '@themes/default/general/form_methods.scss';
 import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 import ParamGenerator from "./ParamGenerator";
-import Input from "@basic_components/inputs/Input";
 import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {freeStringFromAmp} from "@utils/app";
+import {freeStringFromAmp, getCaretPositionOfDivEditable, setFocusByCaretPositionInDivEditable} from "@utils/app";
 
 
 function mapStateToProps(state){
@@ -43,19 +41,14 @@ class Endpoint extends Component{
         this.hasAdded = false;
         this.state = {
             contentEditableValue: props.method.request.endpoint,
-        }
-    }
-
-    componentDidUpdate(){
-        const {method} = this.props;
-        if(this.hasAdded){
-            this.hasAdded = false;
-            let el = document.getElementById(`endpoint_${method.index}`);
-            this.setFocusToTheEnd(el);
+            caretPosition: -1,
         }
     }
 
     onChangeEndpoint(e){
+        const {caretPosition, contentEditableValue} = this.state;
+        const {method} = this.props;
+        let endpointDiv = document.getElementById(`endpoint_${method.index}`);
         const value = e.target.value;
         if(value) {
             let result = '';
@@ -78,10 +71,54 @@ class Endpoint extends Component{
                     }
                 }
             }
+            const beforeValue = this.freeStringFromReferences(contentEditableValue);
+            const afterValue = this.freeStringFromReferences(result);
+            const caretDifference = beforeValue.length - afterValue.length;
+            const isRemovedReference = beforeValue.length - afterValue.length > 1;
+            const isRemovedCharacter = beforeValue.length - afterValue.length === 1;
+            const isAddedCharacter = afterValue.length - beforeValue.length === 1;
             this.setState({
                 contentEditableValue: result,
+            }, () => {
+                if(isRemovedReference) {
+                    setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition - caretDifference);
+                }
+                if(isAddedCharacter){
+                    setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition + 1);
+                }
+                if(isRemovedCharacter){
+                    setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition - 1);
+                }
             });
         }
+    }
+
+    freeStringFromReferences(str){
+        let result = '';
+        let stringsWithStartReferences = str.split('{%#');
+        for(let i = 0; i < stringsWithStartReferences.length; i++){
+            let stringsWithEndReferences = stringsWithStartReferences[i].split('%}');
+            if(stringsWithEndReferences.length > 0){
+                if(stringsWithEndReferences.length === 1){
+                    result += stringsWithEndReferences;
+                } else{
+                    let reference = stringsWithEndReferences[0].split('.');
+                    reference = reference.splice(3).join('.');
+                    result += reference;
+                    result += stringsWithEndReferences[1];
+                }
+            }
+        }
+        return result;
+    }
+
+    setCaretPosition(){
+        const {method} = this.props;
+        let editableEndpoint = document.getElementById(`endpoint_${method.index}`);
+        let caretPosition = getCaretPositionOfDivEditable(editableEndpoint);
+        this.setState({
+            caretPosition,
+        });
     }
 
     saveEndpoint(){
@@ -109,8 +146,56 @@ class Endpoint extends Component{
     }
 
     addParam(param){
+        let {contentEditableValue, caretPosition} = this.state;
+        if(caretPosition === -1){
+            contentEditableValue = `${contentEditableValue}{%${param}%}`;
+        } else{
+            let stringsWithStartReferences = contentEditableValue.split('{%#');
+            if(stringsWithStartReferences.length === 1){
+                contentEditableValue = `${contentEditableValue.substr(0, caretPosition)}{%${param}%}${contentEditableValue.substr(caretPosition)}`;
+            } else{
+                let valueDividedByReferences = [];
+                for(let i = 0; i < stringsWithStartReferences.length; i++){
+                    let stringsWithEndReferences = stringsWithStartReferences[i].split('%}');
+                    if(stringsWithEndReferences.length > 0) {
+                        if (stringsWithEndReferences.length === 1) {
+                            if (stringsWithEndReferences[0] !== '') {
+                                valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[0]});
+                            }
+                        } else {
+                            valueDividedByReferences.push({isReference: true, value:`{%#${stringsWithEndReferences[0]}%}`});
+                            if(stringsWithEndReferences[1] !== '') {
+                                valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[1]});
+                            }
+                        }
+                    }
+                }
+                let valueIndex = 0;
+                for(let i = 0; i < valueDividedByReferences.length; i++){
+                    if(valueDividedByReferences[i].isReference) {
+                        let reference = valueDividedByReferences[i].value.split('.');
+                        reference = reference.splice(3).join('.');
+                        reference = reference.substring(0, reference.length - 2);
+                        caretPosition -= reference.length;
+                        if(caretPosition < 0){
+                            caretPosition = reference + caretPosition + 3;
+                            break;
+                        }
+                    } else{
+                        caretPosition -= valueDividedByReferences[i].value.length;
+                        if(caretPosition < 0){
+                            caretPosition = valueDividedByReferences[i].value.length + caretPosition;
+                            break;
+                        }
+                    }
+                    valueIndex++;
+                }
+                valueDividedByReferences[valueIndex].value = `${valueDividedByReferences[valueIndex].value.substr(0, caretPosition)}{%${param}%}${valueDividedByReferences[valueIndex].value.substr(caretPosition)}`
+                contentEditableValue = valueDividedByReferences.map(elem => elem.value).join('');
+            }
+        }
         this.setState({
-            contentEditableValue: `${this.state.contentEditableValue}{%${param}%} `
+            contentEditableValue,
         })
         this.hasAdded = true;
     }
@@ -178,6 +263,10 @@ class Endpoint extends Component{
                         html={::this.parseEndpoint(contentEditableValue)}
                         disabled={readOnly}
                         onChange={::this.onChangeEndpoint}
+                        onMouseDown={::this.setCaretPosition}
+                        onMouseUp={::this.setCaretPosition}
+                        onKeyDown={::this.setCaretPosition}
+                        onKeyUp={::this.setCaretPosition}
                         onBlur={::this.saveEndpoint}
                         className={`${styles.method_endpoint_content_editable}`}
                         style={contentEditableStyles}
