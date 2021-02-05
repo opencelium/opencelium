@@ -118,7 +118,6 @@ export function getCaretPositionOfDivEditable(editableDiv) {
  * @param innerText - should be free html text
  */
 export function freeStringFromAmp(innerText){
-    console.log(innerText);
     const div = document.createElement('div');
     div.innerHTML = innerText;
     return div.firstChild.nodeValue;

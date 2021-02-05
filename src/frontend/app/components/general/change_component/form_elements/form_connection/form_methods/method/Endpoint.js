@@ -112,7 +112,7 @@ class Endpoint extends Component{
         return result;
     }
 
-    setCaretPosition(){
+    setCaretPosition(e){
         const {method} = this.props;
         let editableEndpoint = document.getElementById(`endpoint_${method.index}`);
         let caretPosition = getCaretPositionOfDivEditable(editableEndpoint);
