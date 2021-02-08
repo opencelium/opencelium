@@ -1,5 +1,10 @@
 import React from 'react';
 import {isString} from "@utils/app";
+import {
+    InvokerReference,
+    InvokerReferenceFromRequiredData,
+    LocalReference
+} from "@change_component/form_elements/form_connection/form_methods/method/query_string/SpanReferences";
 
 class QueryString extends React.Component{
     constructor(props) {
@@ -19,49 +24,25 @@ class QueryString extends React.Component{
     embraceWithSpans(queryString){
         if(isString(queryString)){
             if(queryString !== ''){
-                const {connector} = this.props;
+                const {divideEndpointValueByReferences} = this.props;
                 let spans = [];
-                const requiredInvokerData = connector.invoker.data;
-                let stringsWithStartReferences = queryString.split('{');
-                if(stringsWithStartReferences.length === 0){
-                    return;
-                }
-                if(stringsWithStartReferences.length > 1){
-                    let valueDividedByReferences = [];
-                    for(let i = 0; i < stringsWithStartReferences.length; i++){
-                        let stringsWithEndReferences = stringsWithStartReferences[i].split('}');
-                        if(stringsWithEndReferences.length > 0) {
-                            if (stringsWithEndReferences.length === 1) {
-                                if (stringsWithEndReferences[0] !== '') {
-                                    valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[0]});
-                                }
-                            } else {
-                                if(stringsWithEndReferences[0].length > 1 && stringsWithEndReferences[0][0] === '%' && stringsWithEndReferences[0][1] === '#'){
-                                    valueDividedByReferences.push({isReference: true, isLocalReference: true, value:`{${stringsWithEndReferences[0]}}`});
-                                } else{
-                                    if(requiredInvokerData.findIndex(item => item === stringsWithEndReferences[0]) === -1){
-                                        valueDividedByReferences.push({isReference: true, isFromInvoker: true, isRequiredData: false, value:`{${stringsWithEndReferences[0]}}`});
-                                    } else {
-                                        valueDividedByReferences.push({isReference: true, isFromInvoker: true, isRequiredData: true, value:`{${stringsWithEndReferences[0]}}`});
-                                    }
-                                }
-                                if(stringsWithEndReferences[1] !== '') {
-                                    valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[1]});
-                                }
-                            }
-                        }
-                    }
-                    spans = valueDividedByReferences.map(elem => {
+                let valueDividedByReferences = divideEndpointValueByReferences(queryString);
+                if(valueDividedByReferences.length > 1){
+                    spans = valueDividedByReferences.map((elem, key) => {
+                        let valueWithoutBrackets = elem.value.substring(1, elem.value.length - 1);
                         if (elem.isReference && elem.isFromInvoker && elem.isRequiredData) {
-                            return <span style={{color: 'red'}}>{elem.value}</span>;
+                            return <InvokerReferenceFromRequiredData key={key} value={valueWithoutBrackets}/>;
                         } else {
-                            if(elem.isReference && elem.isLocalReference){
+                            if(elem.isReference && elem.isFromInvoker && !elem.isRequiredData){
+                                return <InvokerReference key={key} value={valueWithoutBrackets}/>;
+                            } else if(elem.isReference && elem.isLocalReference){
                                 let pArray = elem.value.split('.');
-                                let color = pArray[0];
+                                let color = pArray[0].substr(2);
                                 let fieldName = pArray.slice(3, pArray.length).join('.');
-                                return <span style={{background:color, width: '20px', padding: '3px', borderRadius: '1px 3px', margin: '3px'}} data-value="param" data-main={`{%${elem.value}%}`}>{fieldName}</span>;
+                                fieldName = fieldName.substr(0, fieldName.length - 2);
+                                return <LocalReference key={key} color={color} fieldName={fieldName} value={elem.value}/>;
                             } else {
-                                return <span>{elem.value}</span>;
+                                return <span key={key}>{elem.value}</span>;
                             }
                         }
                     });

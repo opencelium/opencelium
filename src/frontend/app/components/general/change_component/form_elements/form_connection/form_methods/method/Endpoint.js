@@ -13,6 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {renderToString} from 'react-dom/server';
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
@@ -23,7 +24,14 @@ import CMethodItem from "@classes/components/content/connection/method/CMethodIt
 import ParamGenerator from "./ParamGenerator";
 import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
 import {freeStringFromAmp, getCaretPositionOfDivEditable, setFocusByCaretPositionInDivEditable} from "@utils/app";
+import QueryString from "@change_component/form_elements/form_connection/form_methods/method/query_string/QueryString";
+import {
+    InvokerReference,
+    InvokerReferenceFromRequiredData, LocalReference
+} from "@change_component/form_elements/form_connection/form_methods/method/query_string/SpanReferences";
 
+
+const PROHIBITED_ENDPOINT_CHARACTERS = ['{', '}', '<', '>'];
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -42,11 +50,12 @@ class Endpoint extends Component{
         this.state = {
             contentEditableValue: props.method.request.endpoint,
             caretPosition: -1,
+            currentKeyCode: '',
         }
     }
 
     onChangeEndpoint(e){
-        const {caretPosition, contentEditableValue} = this.state;
+        const {caretPosition, contentEditableValue, currentKeyCode} = this.state;
         const {method} = this.props;
         let endpointDiv = document.getElementById(`endpoint_${method.index}`);
         const value = e.target.value;
@@ -57,7 +66,17 @@ class Endpoint extends Component{
                 if (elements[i] !== '') {
                     let index = elements[i].indexOf('>');
                     if (elements[i].indexOf('data-value="param"') === -1) {
-                        result += freeStringFromAmp(elements[i].substring(index + 1, elements[i].length));
+                        const parsedValue = freeStringFromAmp(elements[i].substring(index + 1, elements[i].length));
+                        if(elements[i].indexOf('data-value="invoker_reference"') === -1) {
+                            result += parsedValue;
+                        } else{
+                            let hasLastSymbolSpace = !parsedValue[parsedValue.length - 1].trim();
+                            if(hasLastSymbolSpace){
+                                result += `{${parsedValue.substr(0, parsedValue.length - 1)}} `;
+                            } else {
+                                result += `{${parsedValue}}`;
+                            }
+                        }
                     } else {
                         let param = elements[i].split('data-main="')[1].split('"')[0];
                         let paramName = param.split('.').slice(3).join('.').slice(0, -2);
@@ -81,7 +100,13 @@ class Endpoint extends Component{
                 contentEditableValue: result,
             }, () => {
                 if(isRemovedReference) {
-                    setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition - caretDifference);
+                    //if user clicked on the delete
+                    let newCaretPosition = caretPosition;
+                    //if user clicked on the backspace
+                    if(currentKeyCode === 8) {
+                        newCaretPosition = caretPosition - caretDifference;
+                    }
+                    setFocusByCaretPositionInDivEditable(endpointDiv, newCaretPosition);
                 }
                 if(isAddedCharacter){
                     setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition + 1);
@@ -113,11 +138,16 @@ class Endpoint extends Component{
     }
 
     setCaretPosition(e){
+        let {currentKeyCode} = this.state;
         const {method} = this.props;
         let editableEndpoint = document.getElementById(`endpoint_${method.index}`);
         let caretPosition = getCaretPositionOfDivEditable(editableEndpoint);
+        if(e.keyCode){
+            currentKeyCode = e.keyCode;
+        }
         this.setState({
             caretPosition,
+            currentKeyCode,
         });
     }
 
@@ -127,21 +157,9 @@ class Endpoint extends Component{
         updateEntity();
     }
 
-    setFocusToTheEnd(el) {
-        el.focus();
-        if (typeof window.getSelection != "undefined"
-            && typeof document.createRange != "undefined") {
-            let range = document.createRange();
-            range.selectNodeContents(el);
-            range.collapse(false);
-            let sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-        } else if (typeof document.body.createTextRange != "undefined") {
-            let textRange = document.body.createTextRange();
-            textRange.moveToElementText(el);
-            textRange.collapse(false);
-            textRange.select();
+    limitEndpointInput(e){
+        if(PROHIBITED_ENDPOINT_CHARACTERS.indexOf(e.key) !== -1){
+            e.preventDefault();
         }
     }
 
@@ -150,49 +168,60 @@ class Endpoint extends Component{
         if(caretPosition === -1){
             contentEditableValue = `${contentEditableValue}{%${param}%}`;
         } else{
-            let stringsWithStartReferences = contentEditableValue.split('{%#');
-            if(stringsWithStartReferences.length === 1){
-                contentEditableValue = `${contentEditableValue.substr(0, caretPosition)}{%${param}%}${contentEditableValue.substr(caretPosition)}`;
-            } else{
-                let valueDividedByReferences = [];
-                for(let i = 0; i < stringsWithStartReferences.length; i++){
-                    let stringsWithEndReferences = stringsWithStartReferences[i].split('%}');
-                    if(stringsWithEndReferences.length > 0) {
-                        if (stringsWithEndReferences.length === 1) {
-                            if (stringsWithEndReferences[0] !== '') {
-                                valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[0]});
-                            }
-                        } else {
-                            valueDividedByReferences.push({isReference: true, value:`{%#${stringsWithEndReferences[0]}%}`});
-                            if(stringsWithEndReferences[1] !== '') {
-                                valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[1]});
-                            }
-                        }
-                    }
-                }
-                let valueIndex = 0;
-                for(let i = 0; i < valueDividedByReferences.length; i++){
-                    if(valueDividedByReferences[i].isReference) {
-                        let reference = valueDividedByReferences[i].value.split('.');
-                        reference = reference.splice(3).join('.');
-                        reference = reference.substring(0, reference.length - 2);
-                        caretPosition -= reference.length;
+            const dividedByReferences = this.divideEndpointValueByReferences(contentEditableValue);
+            let action = {index: -1, name: '', position: 0}
+            for(let i = 0; i < dividedByReferences.length; i++){
+                let iterableElem = dividedByReferences[i];
+                if(iterableElem.isReference){
+                    if(iterableElem.isLocalReference){
+                        let localReference = iterableElem.value.split('.');
+                        localReference = localReference.splice(3).join('.');
+                        localReference = localReference.substring(0, localReference.length - 2);
+                        caretPosition -= localReference.length;
                         if(caretPosition < 0){
-                            caretPosition = reference + caretPosition + 3;
+                            action.index = i + 1;
+                            action.name = 'after';
                             break;
                         }
-                    } else{
-                        caretPosition -= valueDividedByReferences[i].value.length;
+                    } else if(iterableElem.isFromInvoker){
+                        caretPosition -= (iterableElem.value.length - 2);
                         if(caretPosition < 0){
-                            caretPosition = valueDividedByReferences[i].value.length + caretPosition;
+                            action.index = i;
+                            if(iterableElem.isRequiredData){
+                                action.index++;
+                                action.name = 'after';
+                            } else{
+                                action.name = 'replace';
+                            }
                             break;
                         }
                     }
-                    valueIndex++;
+                } else{
+                    caretPosition -= iterableElem.value.length;
+                    if(caretPosition < 0){
+                        action.index = i;
+                        action.name = 'put';
+                        action.position = caretPosition + iterableElem.value.length;
+                        break;
+                    }
                 }
-                valueDividedByReferences[valueIndex].value = `${valueDividedByReferences[valueIndex].value.substr(0, caretPosition)}{%${param}%}${valueDividedByReferences[valueIndex].value.substr(caretPosition)}`
-                contentEditableValue = valueDividedByReferences.map(elem => elem.value).join('');
             }
+            switch(action.name){
+                case 'put':
+                    if(dividedByReferences[action.index].value.length === action.position){
+                        dividedByReferences.splice(action.index + 1, 0, {value: `{%${param}%}`});
+                    } else{
+                        dividedByReferences[action.index].value = `${dividedByReferences[action.index].value.substr(0, action.position)}{%${param}%}${dividedByReferences[action.index].value.substr(action.position)}`;
+                    }
+                    break;
+                case 'after':
+                    dividedByReferences.splice(action.index, 0, {value: `{%${param}%}`});
+                    break;
+                case 'replace':
+                    dividedByReferences[action.index].value = `{%${param}%}`;
+                    break;
+            }
+            contentEditableValue = dividedByReferences.map(ref => ref.value).join('');
         }
         this.setState({
             contentEditableValue,
@@ -200,48 +229,39 @@ class Endpoint extends Component{
         this.hasAdded = true;
     }
 
-    parseEndpoint(endpoint){
-        let params = endpoint.split('{%');
-        let isParams = [];
-        let result = '';
-        if(params.length > 1) {
-            for (let i = 1; i < params.length; i++) {
-                let paramEndIndex = params[i].indexOf('%}');
-                if(paramEndIndex !== -1) {
-                    let afterParam = params[i].substring(paramEndIndex + 2, params[i].length);
-                    params[i] = params[i].substring(0, paramEndIndex);
-                    isParams.push(i);
-                    if(afterParam !== ''){
-                        params.splice(i + 1, 0, afterParam);
-                        i++;
-                    }
-                }
-            }
-            for(let i = 0; i < params.length; i++){
-                if(params[i] !== '' && params[i] !== ' ') {
-                    if (isParams.indexOf(i) !== -1) {
-                        let index = endpoint.indexOf(params[i]);
-                        let substring = endpoint.substring(0, index - 2);
-                        endpoint = endpoint.substring(index + params[i].length, endpoint.length - 1);
-                        let pArray = params[i].split('.');
-                        let color = pArray[0];
-                        let fieldName = pArray.slice(3, pArray.length).join('.');
-                        if ((substring !== ' ' && fieldName !== '') || (params.length === 3 && params[0] === ' ' && params[2] === ' ')) {
-                            result += `<span style="background:${color}; width:20px; padding: 3px; border-radius: 1px 3px; margin: 3px;" data-value="param" data-main="{%${params[i]}%}">${fieldName}</span>`;
+    divideEndpointValueByReferences(endpointValue){
+        const requiredInvokerData = this.props.connector.invoker.data;
+        let valueDividedByReferences = [];
+        let stringsWithStartReferences = endpointValue.split('{');
+        if(stringsWithStartReferences.length === 0){
+            return [];
+        }
+        if(stringsWithStartReferences.length > 1){
+            for(let i = 0; i < stringsWithStartReferences.length; i++){
+                let stringsWithEndReferences = stringsWithStartReferences[i].split('}');
+                if(stringsWithEndReferences.length > 0) {
+                    if (stringsWithEndReferences.length === 1) {
+                        if (stringsWithEndReferences[0] !== '') {
+                            valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[0]});
                         }
                     } else {
-                        result += `<span>${params[i]}</span>`;
+                        if(stringsWithEndReferences[0].length > 1 && stringsWithEndReferences[0][0] === '%' && stringsWithEndReferences[0][1] === '#'){
+                            valueDividedByReferences.push({isReference: true, isLocalReference: true, value:`{${stringsWithEndReferences[0]}}`});
+                        } else{
+                            if(requiredInvokerData.findIndex(item => item === stringsWithEndReferences[0]) === -1){
+                                valueDividedByReferences.push({isReference: true, isFromInvoker: true, isRequiredData: false, value:`{${stringsWithEndReferences[0]}}`});
+                            } else {
+                                valueDividedByReferences.push({isReference: true, isFromInvoker: true, isRequiredData: true, value:`{${stringsWithEndReferences[0]}}`});
+                            }
+                        }
+                        if(stringsWithEndReferences[1] !== '') {
+                            valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[1]});
+                        }
                     }
                 }
             }
-        } else{
-            result = endpoint;
         }
-        if(result !== '') {
-            return `${result}`;
-        } else{
-            return '';
-        }
+        return valueDividedByReferences;
     }
 
     render(){
@@ -254,13 +274,14 @@ class Endpoint extends Component{
             }
         }
         let contentEditableStyles = {color: hasError ? 'red' : 'black'};
+        let htmlValue = renderToString(<QueryString query={contentEditableValue} divideEndpointValueByReferences={::this.divideEndpointValueByReferences}/>);
         return (
             <div>
                 <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
                     <ContentEditable
                         id={`endpoint_${method.index}`}
                         innerRef={this.endpointValue}
-                        html={::this.parseEndpoint(contentEditableValue)}
+                        html={htmlValue}
                         disabled={readOnly}
                         onChange={::this.onChangeEndpoint}
                         onMouseDown={::this.setCaretPosition}
@@ -268,6 +289,7 @@ class Endpoint extends Component{
                         onKeyDown={::this.setCaretPosition}
                         onKeyUp={::this.setCaretPosition}
                         onBlur={::this.saveEndpoint}
+                        onKeyPress={::this.limitEndpointInput}
                         className={`${styles.method_endpoint_content_editable}`}
                         style={contentEditableStyles}
                     />
