@@ -29,9 +29,10 @@ import {
     InvokerReference,
     InvokerReferenceFromRequiredData, LocalReference
 } from "@change_component/form_elements/form_connection/form_methods/method/query_string/SpanReferences";
+import CEndpoint from "@classes/components/general/change_component/form_elements/CEndpoint";
 
 
-const PROHIBITED_ENDPOINT_CHARACTERS = ['{', '}', '<', '>'];
+const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -112,7 +113,13 @@ class Endpoint extends Component{
                     setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition + 1);
                 }
                 if(isRemovedCharacter){
-                    setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition - 1);
+                    //if user clicked on the delete
+                    let newCaretPosition = caretPosition;
+                    //if user clicked on the backspace
+                    if(currentKeyCode === 8) {
+                        newCaretPosition = caretPosition - 1;
+                    }
+                    setFocusByCaretPositionInDivEditable(endpointDiv, newCaretPosition);
                 }
             });
         }
@@ -158,43 +165,38 @@ class Endpoint extends Component{
     }
 
     limitEndpointInput(e){
-        if(PROHIBITED_ENDPOINT_CHARACTERS.indexOf(e.key) !== -1){
+        let {contentEditableValue, caretPosition} = this.state;
+        if(CEndpoint.isChangingReference(caretPosition, contentEditableValue) || PROHIBITED_ENDPOINT_CHARACTERS.indexOf(e.key) !== -1){
             e.preventDefault();
         }
     }
 
     addParam(param){
         let {contentEditableValue, caretPosition} = this.state;
+        const requiredInvokerData = this.props.connector.invoker.data;
         if(caretPosition === -1){
             contentEditableValue = `${contentEditableValue}{%${param}%}`;
         } else{
-            const dividedByReferences = this.divideEndpointValueByReferences(contentEditableValue);
+            const dividedByReferences = CEndpoint.divideEndpointValueByReferences(contentEditableValue, requiredInvokerData);
             let action = {index: -1, name: '', position: 0}
             for(let i = 0; i < dividedByReferences.length; i++){
                 let iterableElem = dividedByReferences[i];
-                if(iterableElem.isReference){
-                    if(iterableElem.isLocalReference){
-                        let localReference = iterableElem.value.split('.');
-                        localReference = localReference.splice(3).join('.');
-                        localReference = localReference.substring(0, localReference.length - 2);
-                        caretPosition -= localReference.length;
-                        if(caretPosition < 0){
-                            action.index = i + 1;
-                            action.name = 'after';
-                            break;
-                        }
-                    } else if(iterableElem.isFromInvoker){
-                        caretPosition -= (iterableElem.value.length - 2);
-                        if(caretPosition < 0){
-                            action.index = i;
-                            if(iterableElem.isRequiredData){
-                                action.index++;
-                                action.name = 'after';
-                            } else{
-                                action.name = 'replace';
-                            }
-                            break;
-                        }
+                if(iterableElem.isLocalReference){
+                    let localReference = iterableElem.value.split('.');
+                    localReference = localReference.splice(3).join('.');
+                    localReference = localReference.substring(0, localReference.length - 2);
+                    caretPosition -= localReference.length;
+                    if(caretPosition < 0){
+                        action.index = i;
+                        action.name = 'replace';
+                        break;
+                    }
+                } else if(iterableElem.isInvokerReference){
+                    caretPosition -= (iterableElem.value.length - 2);
+                    if(caretPosition < 0){
+                        action.index = i;
+                        action.name = 'replace';
+                        break;
                     }
                 } else{
                     caretPosition -= iterableElem.value.length;
@@ -229,40 +231,7 @@ class Endpoint extends Component{
         this.hasAdded = true;
     }
 
-    divideEndpointValueByReferences(endpointValue){
-        const requiredInvokerData = this.props.connector.invoker.data;
-        let valueDividedByReferences = [];
-        let stringsWithStartReferences = endpointValue.split('{');
-        if(stringsWithStartReferences.length === 0){
-            return [];
-        }
-        if(stringsWithStartReferences.length > 1){
-            for(let i = 0; i < stringsWithStartReferences.length; i++){
-                let stringsWithEndReferences = stringsWithStartReferences[i].split('}');
-                if(stringsWithEndReferences.length > 0) {
-                    if (stringsWithEndReferences.length === 1) {
-                        if (stringsWithEndReferences[0] !== '') {
-                            valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[0]});
-                        }
-                    } else {
-                        if(stringsWithEndReferences[0].length > 1 && stringsWithEndReferences[0][0] === '%' && stringsWithEndReferences[0][1] === '#'){
-                            valueDividedByReferences.push({isReference: true, isLocalReference: true, value:`{${stringsWithEndReferences[0]}}`});
-                        } else{
-                            if(requiredInvokerData.findIndex(item => item === stringsWithEndReferences[0]) === -1){
-                                valueDividedByReferences.push({isReference: true, isFromInvoker: true, isRequiredData: false, value:`{${stringsWithEndReferences[0]}}`});
-                            } else {
-                                valueDividedByReferences.push({isReference: true, isFromInvoker: true, isRequiredData: true, value:`{${stringsWithEndReferences[0]}}`});
-                            }
-                        }
-                        if(stringsWithEndReferences[1] !== '') {
-                            valueDividedByReferences.push({isReference: false, value: stringsWithEndReferences[1]});
-                        }
-                    }
-                }
-            }
-        }
-        return valueDividedByReferences;
-    }
+
 
     render(){
         const {connection, connector, method, readOnly} = this.props;
@@ -274,7 +243,7 @@ class Endpoint extends Component{
             }
         }
         let contentEditableStyles = {color: hasError ? 'red' : 'black'};
-        let htmlValue = renderToString(<QueryString query={contentEditableValue} divideEndpointValueByReferences={::this.divideEndpointValueByReferences}/>);
+        let htmlValue = renderToString(<QueryString query={contentEditableValue} connector={connector}/>);
         return (
             <div>
                 <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>

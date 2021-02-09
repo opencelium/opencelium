@@ -1,10 +1,10 @@
 import React from 'react';
 import {isString} from "@utils/app";
 import {
-    InvokerReference,
     InvokerReferenceFromRequiredData,
     LocalReference
 } from "@change_component/form_elements/form_connection/form_methods/method/query_string/SpanReferences";
+import CEndpoint from "@classes/components/general/change_component/form_elements/CEndpoint";
 
 class QueryString extends React.Component{
     constructor(props) {
@@ -22,28 +22,24 @@ class QueryString extends React.Component{
     }
 
     embraceWithSpans(queryString){
+        const requiredInvokerData = this.props.connector.invoker.data;
         if(isString(queryString)){
             if(queryString !== ''){
-                const {divideEndpointValueByReferences} = this.props;
                 let spans = [];
-                let valueDividedByReferences = divideEndpointValueByReferences(queryString);
+                let valueDividedByReferences = CEndpoint.divideEndpointValueByReferences(queryString, requiredInvokerData);
                 if(valueDividedByReferences.length > 1){
                     spans = valueDividedByReferences.map((elem, key) => {
                         let valueWithoutBrackets = elem.value.substring(1, elem.value.length - 1);
-                        if (elem.isReference && elem.isFromInvoker && elem.isRequiredData) {
+                        if (elem.isInvokerReference) {
                             return <InvokerReferenceFromRequiredData key={key} value={valueWithoutBrackets}/>;
+                        } else if(elem.isLocalReference){
+                            let pArray = elem.value.split('.');
+                            let color = pArray[0].substr(2);
+                            let fieldName = pArray.slice(3, pArray.length).join('.');
+                            fieldName = fieldName.substr(0, fieldName.length - 2);
+                            return <LocalReference key={key} color={color} fieldName={fieldName} value={elem.value}/>;
                         } else {
-                            if(elem.isReference && elem.isFromInvoker && !elem.isRequiredData){
-                                return <InvokerReference key={key} value={valueWithoutBrackets}/>;
-                            } else if(elem.isReference && elem.isLocalReference){
-                                let pArray = elem.value.split('.');
-                                let color = pArray[0].substr(2);
-                                let fieldName = pArray.slice(3, pArray.length).join('.');
-                                fieldName = fieldName.substr(0, fieldName.length - 2);
-                                return <LocalReference key={key} color={color} fieldName={fieldName} value={elem.value}/>;
-                            } else {
-                                return <span key={key}>{elem.value}</span>;
-                            }
+                            return <span key={key}>{elem.value}</span>;
                         }
                     });
                 }
