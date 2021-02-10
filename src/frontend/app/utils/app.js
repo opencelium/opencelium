@@ -81,9 +81,17 @@ export function setFocusByCaretPositionInDivEditable(elem, caretPosition){
         }
         const childNode = elem.childNodes[childNodeIndex];
         if(childNode.nodeType === 1) {
-            range.setStart(childNode.firstChild, caretPosition);
+            if(caretPosition < childNode.firstChild.length) {
+                range.setStart(childNode.firstChild, caretPosition);
+            } else{
+                return;
+            }
         } else{
-            range.setStart(childNode, caretPosition);
+            if(caretPosition < childNode.length) {
+                range.setStart(childNode, caretPosition);
+            } else{
+                return;
+            }
         }
         range.collapse(true);
         sel.removeAllRanges();

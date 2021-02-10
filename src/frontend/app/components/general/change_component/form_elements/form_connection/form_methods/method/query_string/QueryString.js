@@ -27,10 +27,10 @@ class QueryString extends React.Component{
             if(queryString !== ''){
                 let spans = [];
                 let valueDividedByReferences = CEndpoint.divideEndpointValueByReferences(queryString, requiredInvokerData);
-                if(valueDividedByReferences.length > 1){
+                if(valueDividedByReferences.length > 0){
                     spans = valueDividedByReferences.map((elem, key) => {
-                        let valueWithoutBrackets = elem.value.substring(1, elem.value.length - 1);
                         if (elem.isInvokerReference) {
+                            let valueWithoutBrackets = elem.value.substring(1, elem.value.length - 1);
                             return <InvokerReferenceFromRequiredData key={key} value={valueWithoutBrackets}/>;
                         } else if(elem.isLocalReference){
                             let pArray = elem.value.split('.');

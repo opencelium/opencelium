@@ -25,12 +25,8 @@ import ParamGenerator from "./ParamGenerator";
 import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
 import {freeStringFromAmp, getCaretPositionOfDivEditable, setFocusByCaretPositionInDivEditable} from "@utils/app";
 import QueryString from "@change_component/form_elements/form_connection/form_methods/method/query_string/QueryString";
-import {
-    InvokerReference,
-    InvokerReferenceFromRequiredData, LocalReference
-} from "@change_component/form_elements/form_connection/form_methods/method/query_string/SpanReferences";
 import CEndpoint from "@classes/components/general/change_component/form_elements/CEndpoint";
-
+import {BACKSPACE_KEY_CODE} from "@utils/constants/inputs";
 
 const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
 
@@ -60,6 +56,8 @@ class Endpoint extends Component{
         const {method} = this.props;
         let endpointDiv = document.getElementById(`endpoint_${method.index}`);
         const value = e.target.value;
+        let newCaretPosition = 0;
+        let hasFoundNewCaretPosition = false;
         if(value) {
             let result = '';
             let elements = value.split('</span>');
@@ -70,12 +68,23 @@ class Endpoint extends Component{
                         const parsedValue = freeStringFromAmp(elements[i].substring(index + 1, elements[i].length));
                         if(elements[i].indexOf('data-value="invoker_reference"') === -1) {
                             result += parsedValue;
+                            if(!hasFoundNewCaretPosition) {
+                                newCaretPosition += parsedValue.length;
+                            }
                         } else{
                             let hasLastSymbolSpace = !parsedValue[parsedValue.length - 1].trim();
                             if(hasLastSymbolSpace){
                                 result += `{${parsedValue.substr(0, parsedValue.length - 1)}} `;
                             } else {
-                                result += `{${parsedValue}}`;
+                                let dataMainValue = elements[i].split('data-main="')[1].split('"')[0];
+                                if(dataMainValue === parsedValue) {
+                                    result += `{${parsedValue}}`;
+                                    if(!hasFoundNewCaretPosition) {
+                                        newCaretPosition += parsedValue.length;
+                                    }
+                                } else{
+                                    hasFoundNewCaretPosition = true;
+                                }
                             }
                         }
                     } else {
@@ -87,13 +96,17 @@ class Endpoint extends Component{
                             if (checkParamName.length > paramName.length) {
                                 result += freeStringFromAmp(checkParamName.substring(paramName.length));
                             }
+                            if(!hasFoundNewCaretPosition) {
+                                newCaretPosition += paramName.length;
+                            }
+                        } else{
+                            hasFoundNewCaretPosition = true;
                         }
                     }
                 }
             }
             const beforeValue = this.freeStringFromReferences(contentEditableValue);
             const afterValue = this.freeStringFromReferences(result);
-            const caretDifference = beforeValue.length - afterValue.length;
             const isRemovedReference = beforeValue.length - afterValue.length > 1;
             const isRemovedCharacter = beforeValue.length - afterValue.length === 1;
             const isAddedCharacter = afterValue.length - beforeValue.length === 1;
@@ -101,22 +114,14 @@ class Endpoint extends Component{
                 contentEditableValue: result,
             }, () => {
                 if(isRemovedReference) {
-                    //if user clicked on the delete
-                    let newCaretPosition = caretPosition;
-                    //if user clicked on the backspace
-                    if(currentKeyCode === 8) {
-                        newCaretPosition = caretPosition - caretDifference;
-                    }
                     setFocusByCaretPositionInDivEditable(endpointDiv, newCaretPosition);
                 }
                 if(isAddedCharacter){
                     setFocusByCaretPositionInDivEditable(endpointDiv, caretPosition + 1);
                 }
                 if(isRemovedCharacter){
-                    //if user clicked on the delete
-                    let newCaretPosition = caretPosition;
-                    //if user clicked on the backspace
-                    if(currentKeyCode === 8) {
+                    newCaretPosition = caretPosition;
+                    if(currentKeyCode === BACKSPACE_KEY_CODE) {
                         newCaretPosition = caretPosition - 1;
                     }
                     setFocusByCaretPositionInDivEditable(endpointDiv, newCaretPosition);
@@ -164,15 +169,20 @@ class Endpoint extends Component{
         updateEntity();
     }
 
-    limitEndpointInput(e){
+    limitEndpointInputOnKeyPress(e){
         let {contentEditableValue, caretPosition} = this.state;
-        if(CEndpoint.isChangingReference(caretPosition, contentEditableValue) || PROHIBITED_ENDPOINT_CHARACTERS.indexOf(e.key) !== -1){
+        const requiredInvokerData = this.props.connector.invoker.data;
+        if(CEndpoint.isChangingReference(caretPosition, contentEditableValue, requiredInvokerData) || PROHIBITED_ENDPOINT_CHARACTERS.indexOf(e.key) !== -1){
             e.preventDefault();
         }
     }
 
     addParam(param){
         let {contentEditableValue, caretPosition} = this.state;
+        const {method} = this.props;
+        let endpointDiv = document.getElementById(`endpoint_${method.index}`);
+        let newCaretPosition = 0;
+        let hasNewCaretPosition = false;
         const requiredInvokerData = this.props.connector.invoker.data;
         if(caretPosition === -1){
             contentEditableValue = `${contentEditableValue}{%${param}%}`;
@@ -186,24 +196,39 @@ class Endpoint extends Component{
                     localReference = localReference.splice(3).join('.');
                     localReference = localReference.substring(0, localReference.length - 2);
                     caretPosition -= localReference.length;
-                    if(caretPosition < 0){
+                    if(!hasNewCaretPosition){
+                        newCaretPosition += localReference.length;
+                    }
+                    if(caretPosition <= 0){
                         action.index = i;
                         action.name = 'replace';
+                        newCaretPosition -= localReference.length
+                        hasNewCaretPosition = true;
                         break;
                     }
                 } else if(iterableElem.isInvokerReference){
                     caretPosition -= (iterableElem.value.length - 2);
-                    if(caretPosition < 0){
+                    if(!hasNewCaretPosition){
+                        newCaretPosition += (iterableElem.value.length - 2);
+                    }
+                    if(caretPosition <= 0){
                         action.index = i;
                         action.name = 'replace';
+                        newCaretPosition -= (iterableElem.value.length - 2);
+                        hasNewCaretPosition = true;
                         break;
                     }
                 } else{
                     caretPosition -= iterableElem.value.length;
-                    if(caretPosition < 0){
+                    if(!hasNewCaretPosition){
+                        newCaretPosition += iterableElem.value.length;
+                    }
+                    if(caretPosition <= 0){
                         action.index = i;
                         action.name = 'put';
                         action.position = caretPosition + iterableElem.value.length;
+                        newCaretPosition = newCaretPosition - iterableElem.value.length + action.position;
+                        hasNewCaretPosition = true;
                         break;
                     }
                 }
@@ -225,8 +250,14 @@ class Endpoint extends Component{
             }
             contentEditableValue = dividedByReferences.map(ref => ref.value).join('');
         }
+        if(hasNewCaretPosition){
+            newCaretPosition += param.split('.').slice(3).join('.').length;
+        }
         this.setState({
             contentEditableValue,
+            caretPosition: newCaretPosition,
+        }, () => {
+            setFocusByCaretPositionInDivEditable(endpointDiv, newCaretPosition);
         })
         this.hasAdded = true;
     }
@@ -258,7 +289,7 @@ class Endpoint extends Component{
                         onKeyDown={::this.setCaretPosition}
                         onKeyUp={::this.setCaretPosition}
                         onBlur={::this.saveEndpoint}
-                        onKeyPress={::this.limitEndpointInput}
+                        onKeyPress={::this.limitEndpointInputOnKeyPress}
                         className={`${styles.method_endpoint_content_editable}`}
                         style={contentEditableStyles}
                     />

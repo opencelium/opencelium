@@ -2,7 +2,7 @@ import React from 'react';
 import styles from '@themes/default/general/form_methods.scss';
 
 export const InvokerReferenceFromRequiredData = (props) => {
-    return <span className={styles.span_reference_invoker_from_required_data} data-value="invoker_reference" >{props.value}</span>
+    return <span className={styles.span_reference_invoker_from_required_data} data-value="invoker_reference" data-main={`${props.value}`}>{props.value}</span>
 };
 
 export const LocalReference = (props) => {

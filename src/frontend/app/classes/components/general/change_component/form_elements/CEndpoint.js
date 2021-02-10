@@ -88,8 +88,31 @@ export default class CEndpoint{
         return splitResult;
     }
 
-    static isChangingReference(caretPosition = 0, endpointValue = ''){
-
+    static isChangingReference(caretPosition = 0, endpointValue = '', requiredInvokerData = []){
+        let dividedByReferences = CEndpoint.divideEndpointValueByReferences(endpointValue, requiredInvokerData);
+        for(let i = 0; i < dividedByReferences.length; i++){
+            if(caretPosition <= 0){
+                if(i === 0 && (dividedByReferences[0].isInvokerReference || dividedByReferences[0].isLocalReference)){
+                    return true;
+                }
+                break;
+            }
+            if(dividedByReferences[i].isInvokerReference){
+                caretPosition -= dividedByReferences[i].value.length - 2;
+                if(caretPosition <= 0){
+                    return true;
+                }
+            } else if(dividedByReferences[i].isLocalReference){
+                let value = dividedByReferences[i].value.split('.').slice(3).join('.');
+                value = value.substr(0, value.length - 2);
+                caretPosition -= value.length;
+                if(caretPosition <= 0){
+                    return true;
+                }
+            } else{
+                caretPosition -= dividedByReferences[i].value.length;
+            }
+        }
         return false;
     }
 }
