@@ -22,22 +22,24 @@ class QueryString extends React.Component{
     }
 
     embraceWithSpans(queryString){
-        const requiredInvokerData = this.props.connector.invoker.data;
+        const {connector, caretPosition} = this.props;
+        const requiredInvokerData = connector.invoker.data;
         if(isString(queryString)){
             if(queryString !== ''){
                 let spans = [];
                 let valueDividedByReferences = CEndpoint.divideEndpointValueByReferences(queryString, requiredInvokerData);
+                let selectedReferenceIndex = CEndpoint.isCaretPositionFocusedOnReference(caretPosition, queryString, requiredInvokerData, true);
                 if(valueDividedByReferences.length > 0){
                     spans = valueDividedByReferences.map((elem, key) => {
                         if (elem.isInvokerReference) {
                             let valueWithoutBrackets = elem.value.substring(1, elem.value.length - 1);
-                            return <InvokerReferenceFromRequiredData key={key} value={valueWithoutBrackets}/>;
+                            return <InvokerReferenceFromRequiredData isSelected={selectedReferenceIndex === key} key={key} value={valueWithoutBrackets}/>;
                         } else if(elem.isLocalReference){
                             let pArray = elem.value.split('.');
                             let color = pArray[0].substr(2);
                             let fieldName = pArray.slice(3, pArray.length).join('.');
                             fieldName = fieldName.substr(0, fieldName.length - 2);
-                            return <LocalReference key={key} color={color} fieldName={fieldName} value={elem.value}/>;
+                            return <LocalReference key={key} isSelected={selectedReferenceIndex === key} color={color} fieldName={fieldName} value={elem.value}/>;
                         } else {
                             return <span key={key}>{elem.value}</span>;
                         }

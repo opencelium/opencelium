@@ -319,7 +319,7 @@ class ParamGenerator extends Component {
 
     renderGenerator(){
         const {showGenerator, color} = this.state;
-        const {isVisible, isAbsolute, parent, submitEdit} = this.props;
+        const {isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
         let hasMethod = color !== '';
         if(this.getOptionsForMethods().length === 0){
             return null;
@@ -335,8 +335,8 @@ class ParamGenerator extends Component {
                             {this.renderParamInput()}
                             <TooltipFontIcon
                                 isButton={true}
-                                tooltip={'Add'}
-                                value={'add'}
+                                tooltip={actionButtonTooltip}
+                                value={actionButtonValue}
                                 disabled={!hasMethod}
                                 className={styles.param_generator_form_add}
                                 onClick={submitEdit ? submitEdit : ::this.addParam}
@@ -368,6 +368,8 @@ ParamGenerator.defaultProps = {
     isAbsolute: true,
     parent: null,
     submitEdit: null,
+    actionButtonTooltip: 'Add',
+    actionButtonValue: 'add',
 };
 
 export default ParamGenerator;

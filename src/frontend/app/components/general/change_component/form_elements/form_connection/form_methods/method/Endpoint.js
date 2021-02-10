@@ -48,6 +48,9 @@ class Endpoint extends Component{
             contentEditableValue: props.method.request.endpoint,
             caretPosition: -1,
             currentKeyCode: '',
+            actionButtonTooltip: 'Add',
+            actionButtonValue: 'add',
+            isCaretPositionFocusedOnReference: false,
         }
     }
 
@@ -150,16 +153,32 @@ class Endpoint extends Component{
     }
 
     setCaretPosition(e){
-        let {currentKeyCode} = this.state;
-        const {method} = this.props;
+        let {currentKeyCode, contentEditableValue, actionButtonTooltip, actionButtonValue, isCaretPositionFocusedOnReference} = this.state;
+        const {method, connector} = this.props;
+        const requiredInvokerData = connector.invoker.data;
         let editableEndpoint = document.getElementById(`endpoint_${method.index}`);
         let caretPosition = getCaretPositionOfDivEditable(editableEndpoint);
         if(e.keyCode){
             currentKeyCode = e.keyCode;
         }
+        if(CEndpoint.isCaretPositionFocusedOnReference(caretPosition, contentEditableValue, requiredInvokerData)){
+            isCaretPositionFocusedOnReference = true;
+            actionButtonTooltip = 'Replace';
+            actionButtonValue = 'autorenew';
+        } else{
+            actionButtonTooltip = 'Add';
+            actionButtonValue = 'add';
+        }
         this.setState({
             caretPosition,
             currentKeyCode,
+            actionButtonTooltip,
+            actionButtonValue,
+            isCaretPositionFocusedOnReference,
+        }, () => {
+            if(isCaretPositionFocusedOnReference){
+                setFocusByCaretPositionInDivEditable(editableEndpoint, caretPosition);
+            }
         });
     }
 
@@ -172,7 +191,7 @@ class Endpoint extends Component{
     limitEndpointInputOnKeyPress(e){
         let {contentEditableValue, caretPosition} = this.state;
         const requiredInvokerData = this.props.connector.invoker.data;
-        if(CEndpoint.isChangingReference(caretPosition, contentEditableValue, requiredInvokerData) || PROHIBITED_ENDPOINT_CHARACTERS.indexOf(e.key) !== -1){
+        if(CEndpoint.isCaretPositionFocusedOnReference(caretPosition, contentEditableValue, requiredInvokerData) || PROHIBITED_ENDPOINT_CHARACTERS.indexOf(e.key) !== -1){
             e.preventDefault();
         }
     }
@@ -262,11 +281,9 @@ class Endpoint extends Component{
         this.hasAdded = true;
     }
 
-
-
     render(){
         const {connection, connector, method, readOnly} = this.props;
-        const {contentEditableValue} = this.state;
+        const {contentEditableValue, actionButtonTooltip, actionButtonValue, caretPosition} = this.state;
         let hasError = false;
         if(method.error.hasError){
             if(method.error.location === 'query'){
@@ -274,7 +291,7 @@ class Endpoint extends Component{
             }
         }
         let contentEditableStyles = {color: hasError ? 'red' : 'black'};
-        let htmlValue = renderToString(<QueryString query={contentEditableValue} connector={connector}/>);
+        let htmlValue = renderToString(<QueryString query={contentEditableValue} connector={connector} caretPosition={caretPosition}/>);
         return (
             <div>
                 <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
@@ -299,6 +316,8 @@ class Endpoint extends Component{
                         method={method}
                         addParam={::this.addParam}
                         readOnly={readOnly}
+                        actionButtonTooltip={actionButtonTooltip}
+                        actionButtonValue={actionButtonValue}
                     />
                 </ToolboxThemeInput>
             </div>

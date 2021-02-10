@@ -88,11 +88,14 @@ export default class CEndpoint{
         return splitResult;
     }
 
-    static isChangingReference(caretPosition = 0, endpointValue = '', requiredInvokerData = []){
+    static isCaretPositionFocusedOnReference(caretPosition = 0, endpointValue = '', requiredInvokerData = [], shouldReturnIndex = false){
         let dividedByReferences = CEndpoint.divideEndpointValueByReferences(endpointValue, requiredInvokerData);
         for(let i = 0; i < dividedByReferences.length; i++){
             if(caretPosition <= 0){
                 if(i === 0 && (dividedByReferences[0].isInvokerReference || dividedByReferences[0].isLocalReference)){
+                    if(shouldReturnIndex){
+                        return 0;
+                    }
                     return true;
                 }
                 break;
@@ -100,6 +103,9 @@ export default class CEndpoint{
             if(dividedByReferences[i].isInvokerReference){
                 caretPosition -= dividedByReferences[i].value.length - 2;
                 if(caretPosition <= 0){
+                    if(shouldReturnIndex){
+                        return i;
+                    }
                     return true;
                 }
             } else if(dividedByReferences[i].isLocalReference){
@@ -107,11 +113,17 @@ export default class CEndpoint{
                 value = value.substr(0, value.length - 2);
                 caretPosition -= value.length;
                 if(caretPosition <= 0){
+                    if(shouldReturnIndex){
+                        return i;
+                    }
                     return true;
                 }
             } else{
                 caretPosition -= dividedByReferences[i].value.length;
             }
+        }
+        if(shouldReturnIndex){
+            return -1;
         }
         return false;
     }
