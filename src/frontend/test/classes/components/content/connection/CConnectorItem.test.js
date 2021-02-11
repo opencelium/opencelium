@@ -17,6 +17,7 @@ import React from 'react';
 import CConnectorItem, {INSIDE_ITEM} from "../../../../../app/classes/components/content/connection/CConnectorItem";
 import {ALL_COLORS} from "../../../../../app/classes/components/content/connection/CConnection";
 import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 
 
 describe.skip('Add Method', () => {
@@ -136,7 +137,7 @@ describe.skip('Check Iterators', () => {
     });
 });
 
-describe('Check Get All Previous Methods for defined item (Operator component. Select Box)', () => {
+describe.skip('Check Get All Previous Methods for defined item (Operator component. Select Box)', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     const item = COperatorItem.createOperatorItem({index: '2_0_0_0_1', type: 'if'})
     beforeEach(() => {
@@ -158,6 +159,56 @@ describe('Check Get All Previous Methods for defined item (Operator component. S
             {"label":"ConfigItemGet","value":"t_2_0_0_0_0","color":"#F4B6C2"},
         ];
         const received = connectorItem.getAllPrevMethods(item);
+        expect(received).toEqual(expected);
+    });
+});
+
+describe('Get Previous Iterators By Method', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    beforeEach(() => {
+        connectorItem.title = 'i-doit';
+        connectorItem.setConnectorType('fromConnector');
+        connectorItem.methods = [
+            {index: '0'},
+            {index: '1'},
+            {index: '2_0_0'},
+        ];
+        connectorItem.operators = [
+            {index: '2', type: 'loop', iterator: 'i'},
+            {index: '2_0', type: 'loop', iterator: 'j'},
+        ];
+    });
+
+    it('if loops depth is equal 2', () => {
+        const method = CMethodItem.createMethodItem({index: '2_0_0'});
+        connectorItem.setCurrentItem(method);
+        const received = connectorItem.getPreviousIteratorsByMethod(method);
+        const expected = ['i', 'j'];
+        expect(received).toEqual(expected);
+    });
+});
+
+describe('Get Next Iterator', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    beforeEach(() => {
+        connectorItem.title = 'i-doit';
+        connectorItem.setConnectorType('fromConnector');
+        connectorItem.methods = [
+            {index: '0'},
+            {index: '1'},
+            {index: '2_0_0'},
+        ];
+        connectorItem.operators = [
+            {index: '2', type: 'loop', iterator: 'i'},
+            {index: '2_0', type: 'loop', iterator: 'j'},
+        ];
+    });
+
+    it('if loops depth is equal 2', () => {
+        const method = CMethodItem.createMethodItem({index: '2_0_0'});
+        connectorItem.setCurrentItem(method);
+        const received = connectorItem.getPreviousIteratorsByMethod(method);
+        const expected = ['i', 'j'];
         expect(received).toEqual(expected);
     });
 });

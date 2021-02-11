@@ -595,6 +595,42 @@ export default class CConnectorItem{
         return operator ? operator : null;
     }
 
+    getPreviousIteratorsByMethod(){
+        let previousIterators = [];
+        let method = this._currentItem instanceof CMethodItem ? this._currentItem : null;
+        if(method) {
+            let splitMethodIndex = method.index.split('_');
+            let previousOperatorIndex = splitMethodIndex.length === 1 ? -1 : splitMethodIndex.slice(0, -1).join('_');
+            let previousOperatorArrayIndex = this.operators.findIndex(operator => operator.index === previousOperatorIndex);
+            if(previousOperatorArrayIndex !== -1) {
+                while (true) {
+                    if (this.operators[previousOperatorArrayIndex].type === LOOP_OPERATOR) {
+                        break;
+                    } else {
+                        if (previousOperatorArrayIndex === 0) {
+                            break;
+                        }
+                        previousOperatorArrayIndex--;
+                    }
+                }
+                const previousOperator = this.operators[previousOperatorArrayIndex];
+                if (previousOperator) {
+                    let iteratorName = previousOperator.iterator;
+                    if (ITERATOR_NAMES.indexOf(iteratorName) === -1) {
+                        return previousIterators;
+                    }
+                    for (let i = 0; i < ITERATOR_NAMES.length; i++) {
+                        previousIterators.push(ITERATOR_NAMES[i]);
+                        if (ITERATOR_NAMES[i] === iteratorName) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return previousIterators;
+    }
+
     getCloserItem(itemIndex){
         let result = null;
         let closerItemIndex = '';

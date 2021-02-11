@@ -125,7 +125,7 @@ export default class CBody{
         return fields;
     }
 
-    _addFoundedProperty(result, fields, property){
+    _addFoundedProperty(result, fields, property, connector = null){
         let type = FIELD_TYPE_OBJECT;
         if(isString(fields[property])){
             type = FIELD_TYPE_STRING
@@ -137,6 +137,17 @@ export default class CBody{
                 type,
                 label: `${property} (1-st element of array)`,
             });
+            if(connector !== null){
+                const previousIterators = connector.getPreviousIteratorsByMethod();
+                for(let i = 0; i < previousIterators.length; i++){
+                    result.push({
+                        value: `${property}[${previousIterators[i]}]`,
+                        type,
+                        label: `${property} (${previousIterators[i]} loop)`,
+                    });
+
+                }
+            }
             result.push({
                 value: property,
                 type,
@@ -158,9 +169,9 @@ export default class CBody{
         });
     }
 
-    _ifFoundAddProperty(result, fields, item, searchValue){
+    _ifFoundAddProperty(result, fields, item, searchValue, connector = null){
         if (item.toLowerCase().includes(searchValue.toLowerCase())) {
-            this._addFoundedProperty(result, fields, item);
+            this._addFoundedProperty(result, fields, item, connector);
         }
     }
 
@@ -195,7 +206,7 @@ export default class CBody{
         }
     }
 
-    getFieldsForSelectSearch(searchValue){
+    getFieldsForSelectSearch(searchValue, connector = null){
         let result = [];
         let cleanedSearchValue = this._cleanSearchValue(searchValue);
         let properties = cleanedSearchValue.split('.');
@@ -231,10 +242,10 @@ export default class CBody{
                         if(this._isValueProperty(property)){
                             return [];
                         }
-                        this._addFoundedProperty(result, fields, property);
+                        this._addFoundedProperty(result, fields, property, connector);
                     } else {
                         for (let item in fields) {
-                            this._ifFoundAddProperty(result, fields, item, property);
+                            this._ifFoundAddProperty(result, fields, item, property, connector);
                         }
                     }
                     /*

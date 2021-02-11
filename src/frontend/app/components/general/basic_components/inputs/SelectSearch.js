@@ -165,11 +165,11 @@ class SelectSearch extends Component{
      * to filter fields
      */
     filterFields(inputValue){
-        let {items, predicator} = this.props;
+        let {items, predicator, currentConnector} = this.props;
         if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
-        let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue) : [];
+        let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue, currentConnector) : [];
         if(result.length > 0) {
             result = result.map(field => {
                 let {value, type} = field;
@@ -275,6 +275,7 @@ SelectSearch.defaultProps = {
     placeholder: '',
     icon: '',
     predicator: '',
+    currentConnector: null,
 };
 
 export default SelectSearch;
