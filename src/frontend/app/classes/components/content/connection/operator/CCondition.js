@@ -38,7 +38,7 @@ export const FUNCTIONAL_OPERATORS = [
     {value: 'Contains', label: <span>Contains({OPERATOR_LABELS.CONTAINS})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS},
     {value: 'NotContains', label: <span>NotContains({OPERATOR_LABELS.NOT_CONTAINS})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS},
     {value: 'ContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS_SUB_STR},
-    {value: 'NotContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.NOT_CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS_SUB_STR},
+    {value: 'NotContainsSubStr', label: <span>NotContainsSubStr({OPERATOR_LABELS.NOT_CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS_SUB_STR},
     {value: '>=', hasValue: true},
     {value: '>', hasValue: true},
     {value: '<=', hasValue: true},
