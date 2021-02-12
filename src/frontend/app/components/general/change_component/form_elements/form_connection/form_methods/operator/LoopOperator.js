@@ -246,7 +246,7 @@ class LoopOperator extends Component{
 
     renderParamInput(){
         let {field} = this.state;
-        const {operator, readOnly} = this.props;
+        const {operator, connector, readOnly} = this.props;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
         let inputTheme = {};
         let divStyles = {float: 'left', width: '70%'};
@@ -273,6 +273,7 @@ class LoopOperator extends Component{
                         doAction={::this.onChangeField}
                         onInputChange={::this.onChangeField}
                         inputValue={field}
+                        currentConnector={connector}
                     />
                 </Input>
             </div>

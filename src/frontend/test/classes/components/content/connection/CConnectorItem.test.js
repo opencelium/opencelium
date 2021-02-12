@@ -182,7 +182,7 @@ describe('Get Previous Iterators By Method', () => {
     it('if loops depth is equal 2', () => {
         const method = CMethodItem.createMethodItem({index: '2_0_0'});
         connectorItem.setCurrentItem(method);
-        const received = connectorItem.getPreviousIteratorsByMethod(method);
+        const received = connectorItem.getPreviousIterators(method);
         const expected = ['i', 'j'];
         expect(received).toEqual(expected);
     });
@@ -207,7 +207,7 @@ describe('Get Next Iterator', () => {
     it('if loops depth is equal 2', () => {
         const method = CMethodItem.createMethodItem({index: '2_0_0'});
         connectorItem.setCurrentItem(method);
-        const received = connectorItem.getPreviousIteratorsByMethod(method);
+        const received = connectorItem.getPreviousIterators(method);
         const expected = ['i', 'j'];
         expect(received).toEqual(expected);
     });

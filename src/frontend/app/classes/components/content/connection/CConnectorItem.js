@@ -595,11 +595,11 @@ export default class CConnectorItem{
         return operator ? operator : null;
     }
 
-    getPreviousIteratorsByMethod(){
+    getPreviousIterators(){
         let previousIterators = [];
-        let method = this._currentItem instanceof CMethodItem ? this._currentItem : null;
-        if(method) {
-            let splitMethodIndex = method.index.split('_');
+        let currentItem = this._currentItem;
+        if(currentItem) {
+            let splitMethodIndex = currentItem.index.split('_');
             let previousOperatorIndex = splitMethodIndex.length === 1 ? -1 : splitMethodIndex.slice(0, -1).join('_');
             let previousOperatorArrayIndex = this.operators.findIndex(operator => operator.index === previousOperatorIndex);
             if(previousOperatorArrayIndex !== -1) {

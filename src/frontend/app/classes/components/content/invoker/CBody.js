@@ -138,7 +138,7 @@ export default class CBody{
                 label: `${property} (1-st element of array)`,
             });
             if(connector !== null){
-                const previousIterators = connector.getPreviousIteratorsByMethod();
+                const previousIterators = connector.getPreviousIterators();
                 for(let i = 0; i < previousIterators.length; i++){
                     result.push({
                         value: `${property}[${previousIterators[i]}]`,
