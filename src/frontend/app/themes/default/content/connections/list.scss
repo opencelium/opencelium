@@ -1,0 +1,38 @@
+
+@import '../../constants';
+
+.connection_card_title{
+  .icons{
+    .from{
+      padding: 0 !important;
+      min-height: 40px !important;
+      line-height: 38px;
+    }
+    .arrow{
+      padding: 0 !important;
+      text-align: center;
+      align-self: center;
+      .arrow_icon{
+        margin-top: 8px;
+      }
+    }
+    .to{
+      padding: 0 !important;
+      min-height: 40px !important;
+      line-height: 38px;
+    }
+    img{
+      width: 100%;
+    }
+  }
+  .title{
+    padding: 0 !important;
+    text-align: center;
+    font-size: $FONT_SIZE_MEDIUM;
+    font-family: $FONT_FAMILY;
+    margin-top: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
