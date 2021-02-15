@@ -7,7 +7,6 @@
         <item name="username" type="string" visibility="public"/>
         <item name="key" type="string" visibility="public"/>
         <item name="token" type="string" visibility="protected"/>
-        <item name="BOARDID" type="string" visibility="protected"/>
     </requiredData>
     <authType>endpointAuth</authType>
     <operations>
