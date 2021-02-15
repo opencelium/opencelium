@@ -66,10 +66,64 @@ export function checkExpiredMessages(data){
     return result;
 }
 
+export function setFocusByCaretPositionInDivEditable(elem, caretPosition){
+    if(elem && caretPosition >= 0) {
+        let range = document.createRange();
+        let sel = window.getSelection();
+        let childNodeIndex = 0;
+        for(let i = 0; i < elem.children.length; i++){
+            caretPosition -= elem.children[i].innerText.length;
+            if(caretPosition < 0){
+                caretPosition = elem.children[i].innerText.length + caretPosition;
+                break;
+            }
+            childNodeIndex++;
+        }
+        const childNode = elem.childNodes[childNodeIndex];
+        if(childNode.nodeType === 1) {
+            if(caretPosition < childNode.firstChild.length) {
+                range.setStart(childNode.firstChild, caretPosition);
+            } else{
+                return;
+            }
+        } else{
+            if(caretPosition < childNode.length) {
+                range.setStart(childNode, caretPosition);
+            } else{
+                return;
+            }
+        }
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        elem.focus();
+    }
+}
+
+export function getCaretPositionOfDivEditable(editableDiv) {
+    let caretOffset = 0;
+    if (window.getSelection) {
+        let range = window.getSelection().getRangeAt(0);
+        let preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(editableDiv);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        caretOffset = preCaretRange.toString().length;
+    }
+
+    else if (document.selection && document.selection.type != "Control") {
+        let textRange = document.selection.createRange();
+        let preCaretTextRange = document.body.createTextRange();
+        preCaretTextRange.moveToElementText(editableDiv);
+        preCaretTextRange.setEndPoint("EndToEnd", textRange);
+        caretOffset = preCaretTextRange.text.length;
+    }
+
+    return caretOffset;
+}
 
 /**
  * to replace &amp to amp in the text
- * @param innerText - shoul be free html text
+ * @param innerText - should be free html text
  */
 export function freeStringFromAmp(innerText){
     const div = document.createElement('div');

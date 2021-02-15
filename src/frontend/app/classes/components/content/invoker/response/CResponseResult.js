@@ -103,12 +103,12 @@ export default class CResponseResult{
         return convertFieldNameForBackend(this.getBodyFields(), fieldName);
     }
 
-    getFields(searchField){
+    getFields(searchField, connector = null){
         let type = this.getBodyType();
         if(type === FIELD_TYPE_ARRAY){
             if(hasArrayMark(searchField)){
                 let index = searchField.indexOf('.') + 1;
-                return this._body.getFieldsForSelectSearch(searchField.substring(index));
+                return this._body.getFieldsForSelectSearch(searchField.substring(index), connector);
             } else{
                 if(searchField.split('.').length <= 1) {
                     return [
@@ -120,7 +120,7 @@ export default class CResponseResult{
                 }
             }
         } else {
-            return this._body.getFieldsForSelectSearch(searchField);
+            return this._body.getFieldsForSelectSearch(searchField, connector);
         }
     }
 

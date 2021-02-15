@@ -160,9 +160,9 @@
     "webpack-stream": "5.2.1"
   },
   "scripts": {
-    "start_dev": "cross-env NODE_ENV=development NODE_SOCKET=false NODE_BSYNC=false node dev_server.js --mode development",
-    "start_dev_bsync": "cross-env NODE_ENV=development NODE_SOCKET=true NODE_BSYNC=true node dev_server.js --mode development",
-    "start_prod": "cross-env NODE_ENV=production NODE_SOCKET=true node dev_server.js --mode production",
+    "start_dev": "cross-env NODE_ENV=development NODE_SOCKET=false NODE_BSYNC=false node server.js --mode development",
+    "start_dev_bsync": "cross-env NODE_ENV=development NODE_SOCKET=true NODE_BSYNC=true node server.js --mode development",
+    "start_prod": "cross-env NODE_ENV=production NODE_SOCKET=true node server.js --mode production",
     "build_dev": "cross-env NODE_ENV=development webpack --mode development",
     "build_prod": "cross-env NODE_ENV=production webpack --mode production",
     "start_prod_server": "node prod_server.js",

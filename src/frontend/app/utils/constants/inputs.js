@@ -123,3 +123,6 @@ export const INPUTS = {
     ...IINVOKER,
     ...INOTIFICATION_TEMPLATE,
 };
+
+export const BACKSPACE_KEY_CODE = 8;
+export const DEL_KEY_CODE = 46;

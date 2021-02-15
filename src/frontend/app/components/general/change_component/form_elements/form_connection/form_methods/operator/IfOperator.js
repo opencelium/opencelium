@@ -128,8 +128,8 @@ class IfOperator extends Component{
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
         let functionalOperator = FUNCTIONAL_OPERATORS.find(o => o.value === value);
-        if(functionalOperator && functionalOperator.hasOwnProperty('operatorLabel')){
-            return functionalOperator.operatorLabel;
+        if(functionalOperator && functionalOperator.hasOwnProperty('placeholderValue')){
+            return functionalOperator.placeholderValue;
         }
         return value;
     }
@@ -426,7 +426,7 @@ class IfOperator extends Component{
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let {hasValue} = this.isOperatorHasValue();
         let {leftField} = this.state;
-        const {operator, readOnly} = this.props;
+        const {operator, readOnly, connector} = this.props;
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
@@ -453,6 +453,7 @@ class IfOperator extends Component{
                         doAction={::this.onChangeField}
                         onInputChange={::this.onChangeField}
                         inputValue={leftField}
+                        currentConnector={connector}
                     />
                 </Input>
             </div>
@@ -553,7 +554,7 @@ class IfOperator extends Component{
     }
 
     renderPropertyInputRight(){
-        const {operator, readOnly} = this.props;
+        const {connector, operator, readOnly} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let {leftField, rightProperty} = this.state;
         let divStyles = {transition: isOperatorHasThreeParams ? 'width 0.3s ease 0s' : 'none', width: isOperatorHasThreeParams ? '17.5%' : '0', float: 'left'};
@@ -583,6 +584,7 @@ class IfOperator extends Component{
                             onInputChange={::this.onChangeRightProperty}
                             inputValue={rightProperty}
                             predicator={leftField}
+                            currentConnector={connector}
                         />
                     </Input>
                 </div>
@@ -725,7 +727,7 @@ class IfOperator extends Component{
     renderParamInputRight(){
         let {hasValue, isRightStatementText} = this.isOperatorHasValue();
         let {rightField} = this.state;
-        const {connection, operator, readOnly} = this.props;
+        const {connection, connector, operator, readOnly} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let statement = operator.condition.rightStatement;
         let method = connection.toConnector.getMethodByColor(statement.color);
@@ -760,6 +762,7 @@ class IfOperator extends Component{
                         doAction={::this.onChangeRightField}
                         onInputChange={::this.onChangeRightField}
                         inputValue={rightField}
+                        currentConnector={connector}
                     />
                 </Input>
             </div>

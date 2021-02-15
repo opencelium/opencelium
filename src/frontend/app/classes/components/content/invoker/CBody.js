@@ -125,13 +125,35 @@ export default class CBody{
         return fields;
     }
 
-    _addFoundedProperty(result, fields, property){
+    _addFoundedProperty(result, fields, property, connector = null){
         let type = FIELD_TYPE_OBJECT;
         if(isString(fields[property])){
             type = FIELD_TYPE_STRING
         }
         if(isArray(fields[property])){
             type = FIELD_TYPE_ARRAY;
+            result.push({
+                value: `${property}[0]`,
+                type,
+                label: `${property} (1-st element of array)`,
+            });
+            if(connector !== null){
+                const previousIterators = connector.getPreviousIterators();
+                for(let i = 0; i < previousIterators.length; i++){
+                    result.push({
+                        value: `${property}[${previousIterators[i]}]`,
+                        type,
+                        label: `${property} (${previousIterators[i]} loop)`,
+                    });
+
+                }
+            }
+            result.push({
+                value: property,
+                type,
+                label: `${property} (the whole array)`,
+            });
+            return;
         }
         if (this._isAttributeProperty(property)) {
             property = ATTRIBUTES_MARK;
@@ -147,9 +169,9 @@ export default class CBody{
         });
     }
 
-    _ifFoundAddProperty(result, fields, item, searchValue){
+    _ifFoundAddProperty(result, fields, item, searchValue, connector = null){
         if (item.toLowerCase().includes(searchValue.toLowerCase())) {
-            this._addFoundedProperty(result, fields, item);
+            this._addFoundedProperty(result, fields, item, connector);
         }
     }
 
@@ -160,7 +182,7 @@ export default class CBody{
     _getLabel(type, label){
         switch(type){
             case FIELD_TYPE_ARRAY:
-                return `${label} (Array)`;
+                return `${label}`;
             case FIELD_TYPE_OBJECT:
                 return `${label} (Object)`;
         }
@@ -184,7 +206,7 @@ export default class CBody{
         }
     }
 
-    getFieldsForSelectSearch(searchValue){
+    getFieldsForSelectSearch(searchValue, connector = null){
         let result = [];
         let cleanedSearchValue = this._cleanSearchValue(searchValue);
         let properties = cleanedSearchValue.split('.');
@@ -220,10 +242,10 @@ export default class CBody{
                         if(this._isValueProperty(property)){
                             return [];
                         }
-                        this._addFoundedProperty(result, fields, property);
+                        this._addFoundedProperty(result, fields, property, connector);
                     } else {
                         for (let item in fields) {
-                            this._ifFoundAddProperty(result, fields, item, property);
+                            this._ifFoundAddProperty(result, fields, item, property, connector);
                         }
                     }
                     /*

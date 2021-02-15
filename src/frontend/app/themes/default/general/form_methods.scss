@@ -1063,3 +1063,22 @@
 .value_type:nth-child(2){
   padding: 10px 0 !important;
 }
+
+.span_reference_local{
+  cursor: pointer;
+  width: 20px;
+  padding: 3px;
+  border-radius: 1px 3px;
+  margin: 3px;
+}
+.span_reference_invoker_from_required_data{
+  cursor: pointer;
+  background: #eee;
+  border-radius: 1px 3px;
+  padding: 3px;
+  margin: 3px;
+}
+.span_reference_selected{
+  border: 2px solid #a4a4a4;
+  padding: 1px;
+}

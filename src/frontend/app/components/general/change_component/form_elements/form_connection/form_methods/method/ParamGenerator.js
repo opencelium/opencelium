@@ -253,7 +253,7 @@ class ParamGenerator extends Component {
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method, submitEdit} = this.props;
+        let {method, connector, submitEdit} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
         let divStyles = {float: 'left', width: '130px'};
@@ -282,6 +282,7 @@ class ParamGenerator extends Component {
                         onInputChange={::this.onChangeField}
                         inputValue={field}
                         submitEdit={submitEdit}
+                        currentConnector={connector}
                         autoFocus
                     />
                 </Input>
@@ -319,7 +320,7 @@ class ParamGenerator extends Component {
 
     renderGenerator(){
         const {showGenerator, color} = this.state;
-        const {isVisible, isAbsolute, parent, submitEdit} = this.props;
+        const {isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
         let hasMethod = color !== '';
         if(this.getOptionsForMethods().length === 0){
             return null;
@@ -335,8 +336,8 @@ class ParamGenerator extends Component {
                             {this.renderParamInput()}
                             <TooltipFontIcon
                                 isButton={true}
-                                tooltip={'Add'}
-                                value={'add'}
+                                tooltip={actionButtonTooltip}
+                                value={actionButtonValue}
                                 disabled={!hasMethod}
                                 className={styles.param_generator_form_add}
                                 onClick={submitEdit ? submitEdit : ::this.addParam}
@@ -351,7 +352,8 @@ class ParamGenerator extends Component {
 
     render(){
         const {shouldClose} = this.state;
-        if(shouldClose){
+        const {isVisible} = this.props;
+        if(shouldClose && isVisible){
             return null;
         }
         const {parent} = this.props;
@@ -367,6 +369,8 @@ ParamGenerator.defaultProps = {
     isAbsolute: true,
     parent: null,
     submitEdit: null,
+    actionButtonTooltip: 'Add',
+    actionButtonValue: 'add',
 };
 
 export default ParamGenerator;

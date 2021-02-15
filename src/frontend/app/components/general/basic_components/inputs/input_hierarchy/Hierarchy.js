@@ -59,7 +59,7 @@ class Hierarchy extends Component{
         const {close} = this.props;
         return(
             <div className={styles.hierarchy}>
-                <TooltipFontIcon tooltip={'Close search'} value={'close'} className={styles.close} onClick={close}/>
+                <TooltipFontIcon size={16} tooltip={'Close search'} value={'close'} className={styles.close} onClick={close}/>
                 {::this.renderItems()}
             </div>
         );
