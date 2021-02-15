@@ -75,10 +75,10 @@ public class ConnectionController {
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
         List<Connection> connections = connectionService.findAll();
-        List<ConnectionResource> connectionResources = connections.stream()
-                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
 //        List<ConnectionResource> connectionResources = connections.stream()
-//                .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
+//                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
+        List<ConnectionResource> connectionResources = connections.stream()
+                .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
         return ResponseEntity.ok().body(connectionResources);
     }
 
