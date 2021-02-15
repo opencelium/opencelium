@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import { withRouter } from 'react-router';
 
-import {formatHtmlId, generateLabel} from "@utils/app";
+import {formatHtmlId, generateLabel, isString} from "@utils/app";
 import {switchUserListKeyNavigation} from "@utils/key_navigation";
 import Confirmation from "../app/Confirmation";
 import CardButton from "./CardButton";
@@ -323,10 +323,15 @@ class ListCard extends Component{
         return (
             <div id={`list_card_${index}`} className={cardClassName} style={cardStyle} onClick={!isButton ? ::this.onCardClick : null} onMouseOver={::this.onMouseOverCard} onMouseLeave={::this.onMouseLeaveCard}>
                 <div className={styles[classNames.top_section]}>
-                    <div className={styles[classNames.card_title]}>
-                        <div className={styles[classNames.title]} title={entity.title}>{entity.title}</div>
-                        {this.renderSubtitle()}
-                    </div>
+                        {isString(entity.title) &&
+                            <div className={styles[classNames.card_title]}>
+                                <div className={styles[classNames.title]} title={entity.title}>{entity.title}</div>
+                                {this.renderSubtitle()}
+                            </div>
+                        }
+                        {!isString(entity.title) &&
+                            entity.title
+                        }
                     {this.renderAvatar()}
                 </div>
                 {this.renderActions()}
