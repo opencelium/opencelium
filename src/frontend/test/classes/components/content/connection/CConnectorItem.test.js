@@ -188,7 +188,7 @@ describe('Get Previous Iterators By Method', () => {
     });
 });
 
-describe('Get Next Iterator', () => {
+describe('Get Previous Iterator', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     beforeEach(() => {
         connectorItem.title = 'i-doit';
@@ -210,5 +210,35 @@ describe('Get Next Iterator', () => {
         const received = connectorItem.getPreviousIterators(method);
         const expected = ['i', 'j'];
         expect(received).toEqual(expected);
+    });
+});
+
+describe('Get Next Iterator', () => {
+
+    it('two loops. variant 1', () => {
+        const operators = [
+            COperatorItem.createOperatorItem({index: '1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1', type: 'loop', iterator: 'i'}),
+            COperatorItem.createOperatorItem({index: '1_1_1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1_3', type: 'if', iterator: null}),
+        ];
+        const newOperator = COperatorItem.createOperatorItem({index: '1_1_4'});
+        const prevIndex = 3;
+        const received = CConnectorItem.getIterator(operators, newOperator, prevIndex);
+        const expected = 'j';
+        expect(received).toBe(expected);
+    });
+    it('two loops. variant 2', () => {
+        const operators = [
+            COperatorItem.createOperatorItem({index: '1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1', type: 'loop', iterator: 'i'}),
+            COperatorItem.createOperatorItem({index: '1_1_1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1_3', type: 'if', iterator: null}),
+        ];
+        const newOperator = COperatorItem.createOperatorItem({index: '1_1_3_0'});
+        const prevIndex = 3;
+        const received = CConnectorItem.getIterator(operators, newOperator, prevIndex);
+        const expected = 'j';
+        expect(received).toBe(expected);
     });
 });
