@@ -544,7 +544,31 @@ export default class CConnectorItem{
     }
 
     // max can be 18 depth of loop operators
-    static getIterator(operators, operator, prevIndex){
+    static getIterator(operators, operator, prevIndex) {
+        let result = ITERATOR_NAMES[0];
+        let splitOperatorIndex = operator.index.split('_');
+        if(splitOperatorIndex.length > 1) {
+            let decreasedOperatorIndex = '';
+            let prevOperator = null;
+            let decreaseIterator = 1;
+            while (true) {
+                decreasedOperatorIndex = splitOperatorIndex.slice(0, splitOperatorIndex.length - decreaseIterator).join('_')
+                prevOperator = operators.find(op => op.index === decreasedOperatorIndex);
+                if (!prevOperator || prevOperator.type === LOOP_OPERATOR) {
+                    break;
+                }
+                decreaseIterator++;
+            }
+            if (prevOperator && prevOperator.iterator) {
+                let prevIteratorIndex = ITERATOR_NAMES.indexOf(prevOperator.iterator);
+                if (prevIteratorIndex >= 0) {
+                    result = ITERATOR_NAMES[prevIteratorIndex + 1];
+                }
+            }
+        }
+        return result;
+    }
+    /*static getIterator(operators, operator, prevIndex){
         let result = ITERATOR_NAMES[0];
         let prevOperator = operators[prevIndex];
         if(typeof prevOperator !== "undefined"){
@@ -579,7 +603,7 @@ export default class CConnectorItem{
             }
         }
         return result;
-    }
+    }*/
 
     addMethod(method, mode = OUTSIDE_ITEM){
         this.addItem(METHOD_ITEM, method, mode);

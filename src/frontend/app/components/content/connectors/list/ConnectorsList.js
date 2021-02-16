@@ -88,7 +88,7 @@ class ConnectorsList extends Component{
             let result = {};
             result.id = connector.id;
             result.title = connector.name;
-            result.avatar = connector.icon;
+            result.avatar = connector.invoker.icon;
             return result;
         };
         mapEntity.getViewLink = (connector) => {return `${prefixUrl}/${connector.id}/view`;};
