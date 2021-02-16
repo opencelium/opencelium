@@ -49,11 +49,11 @@ class CardIcon extends Component{
 
     renderIcon(){
         const {isCorrectIcon} = this.state;
-        const {authUser, icon} = this.props;
+        const {authUser, icon, title} = this.props;
         let classNames = ['avatar', 'avatar_default'];
         classNames = getThemeClass({classNames, authUser, styles});
         if(isCorrectIcon){
-            return <img src={icon} className={styles[classNames.avatar]} alt={'icon'}/>;
+            return <img src={icon} className={styles[classNames.avatar]} alt={title ? title : 'icon'}/>;
         } else{
             return <FontIcon value={'monochrome_photos'} className={styles[classNames.avatar_default]}/>;
         }
@@ -64,11 +64,11 @@ class CardIcon extends Component{
             return null;
         }
         const {isCorrectIcon} = this.state;
-        const {authUser, style} = this.props;
+        const {authUser, style, onClick} = this.props;
         let classNames = ['card_avatar', 'card_avatar_default'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <div className={isCorrectIcon ? styles[classNames.card_avatar] : styles[classNames.card_avatar_default]} style={style}>
+            <div className={isCorrectIcon ? styles[classNames.card_avatar] : styles[classNames.card_avatar_default]} style={style} onClick={onClick}>
                 {this.renderIcon()}
             </div>
         );
@@ -79,6 +79,7 @@ CardIcon.defaultProps = {
     authUser: PropTypes.object.isRequired,
     icon: '',
     style: {},
+    onClick: () => {},
 };
 
 export default CardIcon;
