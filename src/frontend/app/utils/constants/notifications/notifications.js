@@ -48,6 +48,7 @@ export const EntitiesWithNotification = [
     {name: AppAction.DO_REQUEST, types: ['REJECTED']},
     {name: ConnectorsAction.TEST_CONNECTOR, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.ADD_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
+    {name: ConnectorsAction.ADD_CONNECTORICON, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.FETCH_CONNECTORS, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.UPDATE_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectorsAction.UPDATE_CONNECTORICON, types: ['REJECTED']},

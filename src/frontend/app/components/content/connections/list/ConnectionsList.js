@@ -87,10 +87,8 @@ class ConnectionsList extends Component{
         let mapEntity = {};
         mapEntity.map = (connection, key) => {
             let result = {};
-            let fromInvoker = connection.fromConnector ? connection.fromConnector.invoker : null;
-            let toInvoker = connection.toConnector ? connection.toConnector.invoker : null;
             result.id = connection.connectionId;
-            result.title = <ConnectionCardTitle title={connection.title} fromInvoker={fromInvoker} toInvoker={toInvoker}/>;
+            result.title = <ConnectionCardTitle title={connection.title} fromConnector={connection.fromConnector} toConnector={connection.toConnector}/>;
             return result;
         };
         mapEntity.getViewLink = (connection) => {return `${prefixUrl}/${connection.connectionId}/view`;};

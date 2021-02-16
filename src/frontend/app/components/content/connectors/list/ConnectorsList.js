@@ -17,6 +17,7 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchConnectors, fetchConnectorsCanceled} from '@actions/connectors/fetch';
+import {addConnectorIcon} from "@actions/connectors/add";
 import {deleteConnector} from '@actions/connectors/delete';
 
 import List from '../../../general/list_of_components/List';
@@ -25,6 +26,9 @@ import {ConnectorPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {tour} from "@decorators/tour";
 import {LIST_TOURS} from "@utils/constants/tours";
+import ImageCropView from "@components/general/app/ImageCropView";
+import {isString} from "@utils/app";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
 
 
 const prefixUrl = '/connectors';
@@ -36,6 +40,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingConnectors: connectors.get('fetchingConnectors'),
         deletingConnector: connectors.get('deletingConnector'),
+        addingConnectorIcon: connectors.get('addingConnectorIcon'),
         connectors: connectors.get('connectors').toJS(),
         isCanceled: connectors.get('isCanceled'),
         isRejected: connectors.get('isRejected'),
@@ -66,7 +71,7 @@ function filterConnectorSteps(tourSteps){
 /**
  * List of the Connectors
  */
-@connect(mapStateToProps, {fetchConnectors, fetchConnectorsCanceled, deleteConnector})
+@connect(mapStateToProps, {fetchConnectors, fetchConnectorsCanceled, deleteConnector, addConnectorIcon})
 @permission(ConnectorPermissions.READ, true)
 @withTranslation('connectors')
 @ListComponent('connectors')
@@ -78,7 +83,7 @@ class ConnectorsList extends Component{
     }
 
     render(){
-        const {authUser, t, connectors, deleteConnector, params, setTotalPages, openTour} = this.props;
+        const {authUser, t, connectors, deleteConnector, params, setTotalPages, openTour, addConnectorIcon, addingConnectorIcon} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -86,9 +91,10 @@ class ConnectorsList extends Component{
         let mapEntity = {};
         mapEntity.map = (connector) => {
             let result = {};
+            const mapping = (data) => {return {connectorId: data.entityId, icon: data.croppedImage};};
             result.id = connector.id;
             result.title = connector.name;
-            result.avatar = connector.invoker.icon;
+            result.avatar = <ImageCropView entityId={connector.id} mapping={mapping} title={connector.name} icon={CConnectorItem.hasIcon(connector.icon) ? connector.icon : connector.invoker.icon} uploadIcon={addConnectorIcon} uploadingIcon={addingConnectorIcon}/>;
             return result;
         };
         mapEntity.getViewLink = (connector) => {return `${prefixUrl}/${connector.id}/view`;};
@@ -96,6 +102,7 @@ class ConnectorsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnector;
         return <List
+            rerenderDependency={addingConnectorIcon}
             entities={connectors}
             translations={translations}
             mapEntity={mapEntity}

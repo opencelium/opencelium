@@ -39,6 +39,7 @@
     "react-grid-system": "^4.4.2",
     "react-i18next": "v10.0.0",
     "react-iframe": "^1.5.0",
+    "react-image-crop": "^8.6.6",
     "react-json-view": "^1.19.1",
     "react-konva": "^1.7.14",
     "react-loadable": "^5.5.0",

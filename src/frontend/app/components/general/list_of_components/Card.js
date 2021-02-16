@@ -366,7 +366,7 @@ ListCard.propTypes = {
             PropTypes.string,
             PropTypes.number,
         ]),
-        title: PropTypes.string.isRequired,
+        title: PropTypes.any.isRequired,
     }).isRequired,
     isSelectedCard: PropTypes.bool,
     viewLink: PropTypes.string,

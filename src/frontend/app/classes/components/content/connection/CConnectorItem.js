@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, sortByIndex, subArrayToString} from "@utils/app";
+import {consoleLog, isId, isString, sortByIndex, subArrayToString} from "@utils/app";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem, {LOOP_OPERATOR} from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
@@ -41,9 +41,10 @@ export const ITERATOR_NAMES = [
  */
 export default class CConnectorItem{
 
-    constructor(connectorId = 0, title = '', invoker = null, methods = [], operators = [], connectorType = ''){
+    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = ''){
         this._id = isId(connectorId) ? connectorId : 0;
         this._title = title === '' ? 'Please, choose connector' : title;
+        this._icon = isString(icon) ? icon : '';
         this._invoker = this.convertInvoker(invoker);
         this._currentItem = null;
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
@@ -57,11 +58,16 @@ export default class CConnectorItem{
     static createConnectorItem(connectorItem){
         let connectorId = connectorItem && connectorItem.hasOwnProperty('connectorId') ? connectorItem.connectorId : 0;
         let title = connectorItem && connectorItem.hasOwnProperty('title') ? connectorItem.title : '';
+        let icon = connectorItem && connectorItem.hasOwnProperty('icon') ? connectorItem.icon : '';
         let invoker = connectorItem && connectorItem.hasOwnProperty('invoker') ? connectorItem.invoker : null;
         let methods = connectorItem && connectorItem.hasOwnProperty('methods') ? connectorItem.methods : [];
         let operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
         let connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
-        return new CConnectorItem(connectorId, title, invoker, methods, operators, connectorType);
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType);
+    }
+
+    static hasIcon(icon){
+        return isString(icon) && icon.substr(icon.length - 5) !== '/null';
     }
 
     convertItem(itemType, item){
@@ -300,6 +306,14 @@ export default class CConnectorItem{
 
     set title(title){
         this._title = title;
+    }
+
+    get icon(){
+        return this._icon;
+    }
+
+    set icon(icon){
+        this._icon = icon;
     }
 
     get invoker(){
@@ -852,6 +866,7 @@ export default class CConnectorItem{
             invoker: {name: this._invoker.name},
             connectorId: this._id,
             methods: methods,
+            icon: this._icon,
             operators: operators,
         };
         if(this.hasOwnProperty('_id')){

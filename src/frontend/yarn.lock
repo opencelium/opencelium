@@ -3551,6 +3551,11 @@ closest@^0.0.1:
   dependencies:
     matches-selector "0.0.1"
 
+clsx@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.1.1.tgz#98b3134f9abbdf23b2663491ace13c5c03a73188"
+  integrity sha512-6/bPho624p3S2pMyvP5kKBPXnI3ufHLObBFCfgx+LkeR5lg2XYy2hqZqUf45ypD8COn2bhgGJSUE+l5dhNBieA==
+
 co@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
@@ -3889,6 +3894,11 @@ core-js@^2.4.0, core-js@^2.4.1, core-js@^2.5.0, core-js@^2.6.5:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.12.tgz#d9333dfa7b065e347cc5682219d6f690859cc2ec"
   integrity sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==
+
+core-js@^3.6.5:
+  version "3.8.3"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.8.3.tgz#c21906e1f14f3689f93abcc6e26883550dd92dd0"
+  integrity sha512-KPYXeVZYemC2TkNEkX/01I+7yd+nX3KddKwZ1Ww7SKWdI2wQprSgLmrTddT8nw92AjEklTsPBoSdQBhbI1bQ6Q==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -11859,6 +11869,15 @@ react-iframe@^1.5.0:
   integrity sha512-NYi89+rEqREwQxW9sDf+akh6/dtwWd3bOjByoVEIQ7SicOxVawRMer3pLdWjFaHXpuxTB9NqobPf/Ohj2iAKkg==
   dependencies:
     object-assign "^4.1.1"
+
+react-image-crop@^8.6.6:
+  version "8.6.6"
+  resolved "https://registry.yarnpkg.com/react-image-crop/-/react-image-crop-8.6.6.tgz#326f85b4da63c2f39a610f8832abea5d551a338f"
+  integrity sha512-2iQHKp12dYb6Fu2iN/Mg19BeLMgrbdOuKkU9k0RH7CHX6ZZylOlhfCM3/RsECbKnjGJRtGpXniGF+/i9CGis1A==
+  dependencies:
+    clsx "^1.1.1"
+    core-js "^3.6.5"
+    prop-types "^15.7.2"
 
 react-input-autosize@^2.2.1:
   version "2.2.2"

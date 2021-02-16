@@ -16,6 +16,7 @@
     "DELETE_USERGROUP": "The user group was successfully removed.",
     "TEST_CONNECTOR": "Successfully tested!",
     "ADD_CONNECTOR": "The connector was successfully added",
+    "ADD_CONNECTORICON": "The icon was successfully uploaded",
     "FETCH_CONNECTORS": "Connectors were successfully fetched",
     "UPDATE_CONNECTOR": "The connector was successfully updated",
     "DELETE_CONNECTOR": "The connector was successfully removed",
@@ -88,6 +89,7 @@
       "CONNECTOR_EXISTS": "This connector with this name already exists",
       "__DEFAULT__": "The connection was not added"
     },
+    "ADD_CONNECTORICON": "The icon was not uploaded",
     "FETCH_CONNECTORS": "Connectors were not fetched",
     "UPDATE_CONNECTOR": {
       "CONNECTOR_EXISTS": "This connector with this name already exists",

@@ -57,24 +57,30 @@ const addConnectorRejected = (error) => {
 /**
  * add icon into connector
  * @param connector
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: {}}}
  */
-const addConnectorIcon = (connector) => {
+const addConnectorIcon = (connector, settings = {}) => {
     return {
         type: ConnectorsAction.ADD_CONNECTORICON,
         payload: connector,
+        settings,
     };
 };
 
 /**
  * add icon into connector fulfilled
  * @param connector
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: {}}}
  */
-const addConnectorIconFulfilled = (connector) => {
+const addConnectorIconFulfilled = (connector, settings = {}) => {
     return {
         type: ConnectorsAction.ADD_CONNECTORICON_FULFILLED,
         payload: connector,
+        settings,
     };
 };
 
