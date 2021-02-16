@@ -30,6 +30,7 @@ public class ConnectorNodeResource extends ResourceSupport {
     private Long nodeId;
     private Integer connectorId;
     private String title;
+    private String icon;
     private InvokerResource invoker; // due to front end asked sending object, normally should be name of invoker
     private List<MethodResource> methods;
     private List<OperatorResource> operators;
@@ -56,6 +57,14 @@ public class ConnectorNodeResource extends ResourceSupport {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     public InvokerResource getInvoker() {
