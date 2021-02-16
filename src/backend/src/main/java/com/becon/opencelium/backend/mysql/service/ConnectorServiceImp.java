@@ -168,11 +168,11 @@ public class ConnectorServiceImp implements ConnectorService{
     @Override
     public ConnectorNodeResource toNodeResource(Connector entity, Long connectionId, String direction) {
         ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
-
         connectorNodeResource.setConnectorId(entity.getId());
         InvokerResource invokerResource = invokerServiceImp.toResource(invokerServiceImp.findByName(entity.getInvoker()));
         connectorNodeResource.setInvoker(invokerResource);
         connectorNodeResource.setTitle(entity.getTitle());
+        connectorNodeResource.setIcon(entity.getIcon());
         List<MethodResource> methodResources = methodNodeService
                 .findMethodsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
                 .map(m -> {
