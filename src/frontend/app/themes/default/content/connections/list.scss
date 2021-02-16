@@ -5,24 +5,30 @@
   .icons{
     .from{
       padding: 0 !important;
-      min-height: 40px !important;
-      line-height: 38px;
+      min-height: 20px !important;
+      line-height: 20px;
+      text-align: right;
+      transition: all 0.3s;
     }
     .arrow{
       padding: 0 !important;
       text-align: center;
       align-self: center;
       .arrow_icon{
-        margin-top: 8px;
+        margin-top: 0px;
+        transition: all 0.3s;
       }
     }
     .to{
       padding: 0 !important;
-      min-height: 40px !important;
-      line-height: 38px;
+      min-height: 20px !important;
+      line-height: 20px;
+      text-align: left;
+      transition: all 0.3s;
     }
     img{
-      width: 100%;
+      max-height: 20px;
+      transition: all 0.3s;
     }
   }
   .title{
