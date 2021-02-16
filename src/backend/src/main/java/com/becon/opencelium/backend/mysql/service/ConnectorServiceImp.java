@@ -174,7 +174,7 @@ public class ConnectorServiceImp implements ConnectorService{
          InvokerResource invokerResource = invokerServiceImp.toResource(invokerServiceImp.findByName(entity.getInvoker()));
          connectorNodeResource.setInvoker(invokerResource);
          connectorNodeResource.setTitle(entity.getTitle());
-         connectorNodeResource.setIcon(imagePath + "/" + entity.getIcon());
+         connectorNodeResource.setIcon(imagePath + entity.getIcon());
          List<MethodResource> methodResources = methodNodeService
                 .findMethodsByConnectionIdAndConnectorId(connectionId, direction, entity.getId()).stream()
                 .map(m -> {
