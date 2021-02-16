@@ -2,10 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import ReactCrop from 'react-image-crop';
-import styles from "@themes/default/general/change_component";
+import styles from "@themes/default/general/app.scss";
 import Dialog from "@basic_components/Dialog";
 import CardIcon from "@components/icons/CardIcon";
 import {dataURLtoFile} from "@utils/app";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import BrowseButton from "@basic_components/buttons/BrowseButton";
 
 
 
@@ -22,6 +24,7 @@ class ImageCropView extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
+            browseTitle: 'Please, select an image...',
             isDialogVisible: false,
             isMouseOverImage: false,
             src: null,
@@ -52,6 +55,7 @@ class ImageCropView extends React.Component{
             isDialogVisible: !this.state.isDialogVisible,
             src: null,
             croppedImageUrl: '',
+            browseTitle: 'Please, select an image...',
         })
     }
 
@@ -63,14 +67,16 @@ class ImageCropView extends React.Component{
     }
 
     onSelectFile(e){
-        if (e.target.files && e.target.files.length > 0) {
+        const f = e.target.files[0];
+        if (f) {
             const reader = new FileReader();
             reader.addEventListener('load', () =>
                 this.setState({ src: reader.result })
             );
-            reader.readAsDataURL(e.target.files[0]);
+            reader.readAsDataURL(f);
             this.setState({
-                imageFile: e.target.files[0],
+                imageFile: f,
+                browseTitle: f.name,
             })
         }
     };
@@ -144,18 +150,27 @@ class ImageCropView extends React.Component{
     }
 
     renderDialog(){
-        const { crop, croppedImageUrl, src, isDialogVisible } = this.state;
+        const { crop, croppedImageUrl, src, isDialogVisible, browseTitle } = this.state;
         return(
             <Dialog
                 actions={[{label: 'Upload', onClick: ::this.uploadIcon, id: 'dialog_upload'}, {label: 'Cancel', onClick: ::this.toggleShowDialog, id: 'dialog_close'}]}
                 active={isDialogVisible}
                 toggle={::this.toggleShowDialog}
                 title={'Upload Image'}
-                theme={{dialog: styles.request_icon_dialog}}
+                theme={{dialog: styles.icon_dialog}}
             >
-                <div>
-                    <input type="file" accept="image/*" onChange={::this.onSelectFile} />
-                </div>
+                <BrowseButton
+                    label={'Image'}
+                    icon={'attach_file'}
+                    browseTitle={browseTitle}
+                    browseProps={{
+                        icon: "file_upload",
+                        label: "Select",
+                        onChange: ::this.onSelectFile,
+                        accept: "image/*",
+                        className: styles.input_file_browse,
+                    }}
+                />
                 {src && (
                     <ReactCrop
                         src={src}
@@ -174,10 +189,18 @@ class ImageCropView extends React.Component{
     }
 
     render(){
+        const {isMouseOverImage} = this.state;
         const {icon, title, authUser} = this.props;
+        let cardIconStyles = {opacity: 1};
+        if(isMouseOverImage){
+            cardIconStyles.opacity = 0.5;
+        }
         return(
             <div>
-                <CardIcon authUser={authUser} title={title} icon={icon} onClick={::this.toggleShowDialog} onMouseOverImage={::this.onMouseOverImage} onMouseLeaveImage={::this.onMouseLeaveImage}/>
+                <div className={styles.image_crop} onMouseOver={::this.onMouseOverImage} onMouseLeave={::this.onMouseLeaveImage}>
+                    <CardIcon authUser={authUser} title={title} icon={icon} onClick={::this.toggleShowDialog} style={cardIconStyles}/>
+                    {isMouseOverImage && <TooltipFontIcon onClick={::this.toggleShowDialog} className={styles.upload_icon} tooltip={'Upload'} value={'upload'}/>}
+                </div>
                 {::this.renderDialog()}
             </div>
         );
