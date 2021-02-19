@@ -15,12 +15,12 @@
 
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import SubHeader from "../../../general/view_component/SubHeader";
+import SubHeader from "../../../../general/view_component/SubHeader";
 import Iframe from 'react-iframe';
 import {updateDashboardSettings} from '@actions/auth';
 
 import styles from '@themes/default/content/dashboard/dashboard.scss';
-import {getThemeClass} from "@utils/app";
+import {componentAppear, getThemeClass} from "@utils/app";
 import {hostname, protocol} from '@utils/constants/url';
 import Loading from "@loading";
 
@@ -91,15 +91,13 @@ class MonitoringBoards extends Component{
         const {authUser} = this.props;
         let classNames = ['monitoring_boards', 'navigation_button', 'navigation_button_title', 'wrong_iframe_url'];
         classNames = getThemeClass({classNames, authUser, styles});
-        let iframeUrl = '';
-
         return (
             <div className={styles[classNames.monitoring_boards]}>
                 <SubHeader title={'Monitoring'} authUser={authUser}/>
                 <Iframe
                     url={url}
                     width="100%"
-                    height="500px"
+                    height="50%"
                     id="monitoringIframe"
                     display="initial"
                     position="relative"
