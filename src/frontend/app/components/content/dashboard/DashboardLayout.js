@@ -22,6 +22,7 @@ import {API_REQUEST_STATE, ERROR_TYPE} from "@utils/constants/app";
 import DashboardView from "./view/DashboardView";
 import {OC_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
+import styles from '@themes/default/content/dashboard/dashboard.scss'
 
 
 function filterOCSteps(tourSteps){
@@ -64,7 +65,7 @@ class DashboardLayout extends Component{
     render(){
         const {authUser} = this.props;
         return (
-            <Container>
+            <Container className={styles.dashboard_layout}>
                 <Suspense fallback={(<Loading authUser={authUser}/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
                         <DashboardView/>

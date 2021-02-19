@@ -38,7 +38,7 @@ function mapStateToProps(state){
  * Component for monitoring using iframe
  */
 @connect(mapStateToProps, {updateDashboardSettings})
-class MonitoringBoards extends Component{
+class MonitoringBoardsWidget extends Component{
 
     constructor(props){
         super(props);
@@ -111,4 +111,4 @@ class MonitoringBoards extends Component{
 }
 
 
-export default MonitoringBoards;
+export default MonitoringBoardsWidget;

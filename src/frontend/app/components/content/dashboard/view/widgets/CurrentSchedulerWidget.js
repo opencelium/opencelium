@@ -1,6 +1,6 @@
 import React from 'react';
 
-class LastSchedules extends React.Component{
+class CurrentSchedulerWidget extends React.Component{
     constructor(props) {
         super(props);
     }
@@ -12,4 +12,4 @@ class LastSchedules extends React.Component{
     }
 }
 
-export default LastSchedules;
+export default CurrentSchedulerWidget;
