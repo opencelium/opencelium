@@ -57,7 +57,7 @@ class Endpoint extends Component{
     onChangeEndpoint(e){
         const {caretPosition, contentEditableValue, currentKeyCode} = this.state;
         const {method} = this.props;
-        let endpointDiv = document.getElementById(`endpoint_${method.index}`);
+        let endpointDiv = this.getEndpointHtmlElement();
         const value = e.target.value;
         let newCaretPosition = 0;
         let hasFoundNewCaretPosition = false;
@@ -133,6 +133,16 @@ class Endpoint extends Component{
         }
     }
 
+    getEndpointIdName(){
+        const {connector, method} = this.props;
+        const connectorType = connector.getConnectorType();
+        return `endpoint_${connectorType}_${method.index}`;
+    }
+
+    getEndpointHtmlElement(){
+        return document.getElementById(this.getEndpointIdName());
+    }
+
     freeStringFromReferences(str){
         let result = '';
         let stringsWithStartReferences = str.split('{%#');
@@ -154,9 +164,9 @@ class Endpoint extends Component{
 
     setCaretPosition(e){
         let {currentKeyCode, contentEditableValue, actionButtonTooltip, actionButtonValue, isCaretPositionFocusedOnReference} = this.state;
-        const {method, connector} = this.props;
+        const {connector} = this.props;
         const requiredInvokerData = connector.invoker.data;
-        let editableEndpoint = document.getElementById(`endpoint_${method.index}`);
+        let editableEndpoint = this.getEndpointHtmlElement();
         let caretPosition = getCaretPositionOfDivEditable(editableEndpoint);
         if(e.keyCode){
             currentKeyCode = e.keyCode;
@@ -198,12 +208,11 @@ class Endpoint extends Component{
 
     addParam(param){
         let {contentEditableValue, caretPosition} = this.state;
-        const {method} = this.props;
-        let endpointDiv = document.getElementById(`endpoint_${method.index}`);
+        let endpointDiv = this.getEndpointHtmlElement();
         let newCaretPosition = 0;
         let hasNewCaretPosition = false;
         const requiredInvokerData = this.props.connector.invoker.data;
-        if(caretPosition === -1){
+        if(caretPosition === -1 || caretPosition === 0 && contentEditableValue === ''){
             contentEditableValue = `${contentEditableValue}{%${param}%}`;
         } else{
             const dividedByReferences = CEndpoint.divideEndpointValueByReferences(contentEditableValue, requiredInvokerData);
@@ -277,6 +286,7 @@ class Endpoint extends Component{
             caretPosition: newCaretPosition,
         }, () => {
             setFocusByCaretPositionInDivEditable(endpointDiv, newCaretPosition);
+            this.saveEndpoint();
         })
         this.hasAdded = true;
     }
@@ -296,7 +306,7 @@ class Endpoint extends Component{
             <div>
                 <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
                     <ContentEditable
-                        id={`endpoint_${method.index}`}
+                        id={this.getEndpointIdName()}
                         innerRef={this.endpointValue}
                         html={htmlValue}
                         disabled={readOnly}

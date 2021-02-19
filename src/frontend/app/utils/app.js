@@ -144,8 +144,13 @@ export function dataURLtoFile(dataurl, filename) {
  */
 export function freeStringFromAmp(innerText){
     const div = document.createElement('div');
-    div.innerHTML = innerText;
-    return div.firstChild.nodeValue;
+    if(div){
+        div.innerHTML = innerText;
+        if(div.firstChild) {
+            return div.firstChild.nodeValue;
+        }
+    }
+    return innerText;
 }
 
 /**
