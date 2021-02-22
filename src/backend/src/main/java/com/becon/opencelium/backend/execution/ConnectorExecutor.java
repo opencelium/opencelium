@@ -476,7 +476,7 @@ public class ConnectorExecutor {
             if (pointer.matches(refResRegex)) {
                 String ref = pointer.replace("{%", "").replace("%}", "");
                 Object responseValue = executionContainer.getValueFromResponseData(ref);
-                String value = (String) executionContainer.getValueFromResponseData(ref);
+                String value = "";
                 if (responseValue instanceof Integer) {
                     value = Integer.toString((int) responseValue);
                 } else if(responseValue instanceof Double) {
