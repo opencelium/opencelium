@@ -1,13 +1,38 @@
 import React from 'react';
+import {connect} from 'react-redux';
+import ScheduleList from "@components/content/schedules/schedule_list/ScheduleList";
+import {fetchSchedules, fetchSchedulesCanceled} from '@actions/schedules/fetch';
+import {ListComponent} from "@decorators/ListComponent";
+import SubHeader from "@components/general/view_component/SubHeader";
+import styles from "@themes/default/content/dashboard/dashboard";
 
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    const schedules = state.get('schedules');
+    return {
+        authUser: auth.get('authUser'),
+        schedules: schedules.get('schedules').toJS(),
+        fetchingSchedules: schedules.get('fetchingSchedules'),
+    };
+}
+
+@connect(mapStateToProps, {fetchSchedules, fetchSchedulesCanceled})
+@ListComponent('schedules', true)
 class CurrentSchedulerWidget extends React.Component{
     constructor(props) {
         super(props);
     }
 
     render(){
+        const {authUser, schedules} = this.props;
         return(
-            <div>Last Schedules</div>
+            <div>
+                <SubHeader title={'Current Scheduler'} authUser={authUser} className={styles.widget_subheader}/>
+                <ScheduleList
+                    schedules={schedules}
+                    readOnly={true}
+                />
+            </div>
         );
     }
 }

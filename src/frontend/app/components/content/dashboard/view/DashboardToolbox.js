@@ -21,9 +21,13 @@ class DashboardToolbox extends React.Component{
 
     render() {
         const {items, onTakeItem} = this.props;
+        let toolboxTitle = <span>{'Available Widgets:'}</span>;
+        if(items.length === 0){
+            toolboxTitle = <span>{'Available Widgets:'} <span style={{fontWeight: 'bold'}}>{'all being used.'}</span></span>;
+        }
         return (
             <div className={styles.dashboard_toolbox}>
-                {items.length === 0 && <div className={styles.dashboard_toolbox_title}>Toolbox</div>}
+                <div className={styles.dashboard_toolbox_title}>{toolboxTitle}</div>
                 <div className={styles.dashboard_toolbox_items}>
                     {items.map(item => (
                         <ToolboxItem

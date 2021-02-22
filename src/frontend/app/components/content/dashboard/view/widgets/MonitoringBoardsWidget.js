@@ -20,9 +20,8 @@ import Iframe from 'react-iframe';
 import {updateDashboardSettings} from '@actions/auth';
 
 import styles from '@themes/default/content/dashboard/dashboard.scss';
-import {componentAppear, getThemeClass} from "@utils/app";
+import {getThemeClass} from "@utils/app";
 import {hostname, protocol} from '@utils/constants/url';
-import Loading from "@loading";
 
 
 function mapStateToProps(state){
@@ -93,7 +92,7 @@ class MonitoringBoardsWidget extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <div className={styles[classNames.monitoring_boards]}>
-                <SubHeader title={'Monitoring'} authUser={authUser}/>
+                <SubHeader title={'Monitoring'} authUser={authUser} className={styles.widget_subheader}/>
                 <Iframe
                     url={url}
                     width="100%"

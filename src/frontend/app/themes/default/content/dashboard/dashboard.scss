@@ -68,7 +68,7 @@
 .dashboard_layout,.dashboard_view{
   width: 100%;
   max-width: 100% !important;
-  margin: 0 0 40px;
+  margin: 10px 0 40px;
 }
 .dashboard_grid_edit_on{
   padding: 0;
@@ -78,17 +78,23 @@
   padding: 1px;
 }
 .dashboard_widget_item{
-  background-color: #eee;
   background-clip: border-box;
-  border: 0 solid rgba(0,0,0,.125);
+  border: 1px solid #eee;
   border-radius: 4px;
   padding: 10px;
+}
+.dashboard_widget_item_edit_on{
+  cursor: move !important;
+}
+.dashboard_widget_item_edit_on:hover{
+  background-color: #f3f3f3;
 }
 
 .dashboard_edit_icon{
   position: absolute;
-  right: 16px;
+  right: 0;
   top: 0;
+  z-index: 1;
 }
 
 .dashboard_toolbox{
@@ -102,16 +108,33 @@
 
 .dashboard_toolbox_title{
   font-family: $FONT_FAMILY;
-  width: 100%;
+  display: inline-block;
   text-align: center;
-  line-height: 60px;
-  font-size: 34px;
-  letter-spacing: 5px;
-  opacity: 0.3;
+  line-height: 65px;
+  height: 65px;
+  border-radius: 3px;
+  float: left;
+  font-size: $FONT_SIZE_SMALL;
 }
 .dashboard_toolbox_items{
+  white-space: nowrap;
   display: block;
   overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.dashboard_toolbox_items::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.dashboard_toolbox_items::-webkit-scrollbar-track {
+  background: #888;
+}
+.dashboard_toolbox_items::-webkit-scrollbar-thumb {
+  background: #464646;
+}
+.dashboard_toolbox_items::-webkit-scrollbar-thumb:hover {
+  background: #111;
 }
 .dashboard_toolbox_item{
   display: inline-block;
@@ -131,4 +154,33 @@
   position: absolute;
   right: 2px;
   top: 2px;
+  z-index: 1;
+}
+
+.dashboard_no_widgets{
+  font-family: "Arial", sans-serif;
+  width: 100%;
+  text-align: center;
+  font-size: 34px;
+  letter-spacing: 5px;
+  opacity: 0.3;
+  height: 100px;
+  min-height: 100px;
+}
+.dashboard_no_widgets::before{
+  content: 'Widgets Area';
+  line-height: 100px;
+}
+
+.connection_overview_widget{
+  canvas{
+    width: 100% !important;
+    height:auto !important;
+  }
+}
+.widget_subheader{
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  z-index: 1;
 }
