@@ -125,23 +125,29 @@ const fetchScheduleCanceled = (message) => {
 
 /**
  * fetch schedules
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string}}
  */
-const fetchSchedules = () => {
+const fetchSchedules = (settings = {}) => {
     return {
-        type: SchedulesAction.FETCH_SCHEDULES
+        type: SchedulesAction.FETCH_SCHEDULES,
+        settings,
     };
 };
 
 /**
  * fetch schedules fulfilled
  * @param schedules
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, payload: []}}
  */
-const fetchSchedulesFulfilled = (schedules) => {
+const fetchSchedulesFulfilled = (schedules, settings = {}) => {
     return{
         type: SchedulesAction.FETCH_SCHEDULES_FULFILLED,
-        payload: schedules
+        payload: schedules,
+        settings,
     };
 };
 

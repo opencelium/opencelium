@@ -174,7 +174,7 @@ const fetchSchedulesEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
-                success: fetchSchedulesFulfilled,
+                success: (data) => fetchSchedulesFulfilled(data, action.settings),
                 reject: fetchSchedulesRejected,
                 cancel: action$.ofType(SchedulesAction.FETCH_SCHEDULES_CANCELED)
             });
