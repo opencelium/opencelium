@@ -25,7 +25,7 @@ import {Col, Container, Row} from "react-grid-system";
 import ViewHeader from "@components/general/view_component/Header";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {
-    DEFAULT_GRID_SETTINGS, HAS_DASHBOARD_WIDGET_ENGINE,
+    HAS_DASHBOARD_WIDGET_ENGINE,
     INITIAL_LAYOUT,
     INITIAL_TOOLBOX,
     WIDGET_LIST
@@ -101,11 +101,26 @@ class DashboardView extends Component{
         });
     };
 
+    onLayoutChange(layout){
+        this.setState(prevState => {
+            let updatedLayout = prevState.layout;
+            for(let i = 0; i < updatedLayout.length; i++){
+                let findLayout = layout.find(l => l.i === updatedLayout[i].i);
+                if(findLayout){
+                    updatedLayout[i] = {...updatedLayout[i], ...findLayout};
+                }
+            }
+            return {
+                layout: updatedLayout,
+            };
+        });
+    };
+
     renderWidgets(){
         const {layout, isWidgetEditOn} = this.state;
         return layout.map(layout => {
             return (
-                <div key={layout.i} className={styles.dashboard_widget_item}>
+                <div key={layout.i} className={`${styles.dashboard_widget_item} ${isWidgetEditOn && styles.dashboard_widget_item_edit_on}`}>
                     {isWidgetEditOn &&
                         <TooltipFontIcon size={20} isButton={true} tooltip={'Close'} value={'close'} className={styles.close_widget} onClick={(e) => ::this.onPutItem(e, layout)}/>
                     }
@@ -129,13 +144,16 @@ class DashboardView extends Component{
             isDraggable: false,
             isResizable: false,
             layout,
+            onLayoutChange: ::this.onLayoutChange,
         };
         if(isWidgetEditOn){
             gridSettings.className += ` ${styles.dashboard_grid_edit_on}`;
             gridSettings.isDraggable = true;
             gridSettings.isResizable = true;
         } else{
-            gridSettings.className += ` ${styles.dashboard_grid_edit_off}`;
+        }
+        if(layout.length === 0){
+            gridSettings.className += ` ${styles.dashboard_no_widgets}`;
         }
         return (
             <Row id={'app_content'}>

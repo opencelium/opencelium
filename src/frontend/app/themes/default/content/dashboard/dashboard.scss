@@ -84,6 +84,12 @@
   border-radius: 4px;
   padding: 10px;
 }
+.dashboard_widget_item_edit_on{
+  cursor: move !important;
+}
+.dashboard_widget_item_edit_on:hover{
+  background-color: #f6f5f5;
+}
 
 .dashboard_edit_icon{
   position: absolute;
@@ -112,6 +118,7 @@
 .dashboard_toolbox_items{
   display: block;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 .dashboard_toolbox_item{
   display: inline-block;
@@ -131,4 +138,19 @@
   position: absolute;
   right: 2px;
   top: 2px;
+}
+
+.dashboard_no_widgets{
+  font-family: "Arial", sans-serif;
+  width: 100%;
+  text-align: center;
+  font-size: 34px;
+  letter-spacing: 5px;
+  opacity: 0.3;
+  height: 100px;
+  min-height: 100px;
+}
+.dashboard_no_widgets::before{
+  content: 'Widgets';
+  line-height: 100px;
 }

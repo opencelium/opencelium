@@ -3,7 +3,7 @@ import MonitoringBoardsWidget from "@components/content/dashboard/view/widgets/M
 import CurrentSchedulerWidget from "@components/content/dashboard/view/widgets/CurrentSchedulerWidget";
 import ConnectionOverviewWidget from "@components/content/dashboard/view/widgets/ConnectionOverviewWidget";
 
-export const HAS_DASHBOARD_WIDGET_ENGINE = false;
+export const HAS_DASHBOARD_WIDGET_ENGINE = true;
 
 export const INITIAL_LAYOUT = [
     {icon: 'analytics', tooltip: 'Monitoring Boards', i: 'MONITORING_BOARDS', x: 2, y: 0, w: 8, h: 5, minW: 8, minH: 5},
