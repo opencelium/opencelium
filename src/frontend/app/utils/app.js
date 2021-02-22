@@ -80,18 +80,22 @@ export function setFocusByCaretPositionInDivEditable(elem, caretPosition){
             childNodeIndex++;
         }
         const childNode = elem.childNodes[childNodeIndex];
-        if(childNode.nodeType === 1) {
-            if(caretPosition < childNode.firstChild.length) {
-                range.setStart(childNode.firstChild, caretPosition);
-            } else{
-                return;
+        if(childNode) {
+            if (childNode.nodeType === 1) {
+                if (caretPosition < childNode.firstChild.length) {
+                    range.setStart(childNode.firstChild, caretPosition);
+                } else {
+                    return;
+                }
+            } else {
+                if (caretPosition < childNode.length) {
+                    range.setStart(childNode, caretPosition);
+                } else {
+                    return;
+                }
             }
         } else{
-            if(caretPosition < childNode.length) {
-                range.setStart(childNode, caretPosition);
-            } else{
-                return;
-            }
+            return;
         }
         range.collapse(true);
         sel.removeAllRanges();
@@ -140,8 +144,13 @@ export function dataURLtoFile(dataurl, filename) {
  */
 export function freeStringFromAmp(innerText){
     const div = document.createElement('div');
-    div.innerHTML = innerText;
-    return div.firstChild.nodeValue;
+    if(div){
+        div.innerHTML = innerText;
+        if(div.firstChild) {
+            return div.firstChild.nodeValue;
+        }
+    }
+    return innerText;
 }
 
 /**

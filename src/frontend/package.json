@@ -36,6 +36,7 @@
     "react-contenteditable": "^3.3.2",
     "react-dom": "16.14.0",
     "react-favicon": "^0.0.18",
+    "react-grid-layout": "^1.2.0",
     "react-grid-system": "^4.4.2",
     "react-i18next": "v10.0.0",
     "react-iframe": "^1.5.0",

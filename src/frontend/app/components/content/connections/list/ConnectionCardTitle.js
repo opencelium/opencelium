@@ -82,6 +82,7 @@ export default class ConnectionCardTitle extends React.Component{
         };
         let imgStyles = {
             maxHeight: '20px',
+            borderRadius: '5px',
         };
         if(isMouseOver){
             iconsStyles = {
@@ -100,6 +101,7 @@ export default class ConnectionCardTitle extends React.Component{
             };
             imgStyles = {
                 maxHeight: '40px',
+                borderRadius: '5px',
             };
         }
 
