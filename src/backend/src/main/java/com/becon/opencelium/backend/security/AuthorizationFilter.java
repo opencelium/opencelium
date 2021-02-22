@@ -61,7 +61,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
                                      FilterChain chain ) throws IOException, ServletException {
 
         String url  = request.getRequestURI();
-        if (url.contains("api/webhook/execute")){
+        if (url.contains("api/webhook/execute") || url.contains("api/storage/files")){
             chain.doFilter(request, response);
             return;
         }
