@@ -31,7 +31,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
  * @returns the same component with additional functionalities
  * @constructor
  */
-export function ListComponent(pluralEntityName){
+export function ListComponent(pluralEntityName, isBackground = false){
     return function (Component) {
         return class extends Component{
             constructor(props){
@@ -80,7 +80,7 @@ export function ListComponent(pluralEntityName){
                 let fetchName = 'fetch' + capitalize(pluralEntityName);
                 if(this.props.hasOwnProperty(fetchName)) {
                     this.setState({hasStartedFetchingEntities: true});
-                    this.props[fetchName]();
+                    this.props[fetchName]({background: isBackground});
                 } else{
                     consoleLog('The fetching function is absent');
                 }

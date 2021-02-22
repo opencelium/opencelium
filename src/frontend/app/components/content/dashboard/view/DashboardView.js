@@ -22,7 +22,6 @@ import {componentAppear, getThemeClass} from "@utils/app";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {fetchUpdateAppVersion} from "@actions/update_assistant/fetch";
 import {Col, Container, Row} from "react-grid-system";
-import ViewHeader from "@components/general/view_component/Header";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {
     HAS_DASHBOARD_WIDGET_ENGINE,
@@ -133,8 +132,6 @@ class DashboardView extends Component{
     render(){
         const {isWidgetEditOn, layout, toolbox} = this.state;
         const {t} = this.props;
-        let contentTranslations = {};
-        contentTranslations.header = `${t('HEADER')}`;
         let gridSettings = {
             className: `layout`,
             cols: 12,
@@ -159,8 +156,7 @@ class DashboardView extends Component{
             <Row id={'app_content'}>
                 <Col xl={12} lg={12} md={12} sm={12}>
                     <Container className={styles.dashboard_view}>
-                        <ViewHeader header={contentTranslations.header}/>
-                        {HAS_DASHBOARD_WIDGET_ENGINE && <TooltipFontIcon isButton={true} className={styles.dashboard_edit_icon} tooltip={isWidgetEditOn ? 'Apply' : 'Edit'} value={isWidgetEditOn ? 'check_circle_outline' : 'edit'} onClick={::this.toggleWidgetEdit}/>}
+                        {HAS_DASHBOARD_WIDGET_ENGINE && <TooltipFontIcon isButton={true} wrapClassName={styles.dashboard_edit_icon} tooltip={isWidgetEditOn ? 'Apply' : 'Edit'} value={isWidgetEditOn ? 'check_circle_outline' : 'edit'} onClick={::this.toggleWidgetEdit}/>}
                         <Row style={{ marginLeft: 0, marginRight: 0}}>
                             <Col md={12}>
                                 {isWidgetEditOn &&
