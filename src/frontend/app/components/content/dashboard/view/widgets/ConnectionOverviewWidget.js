@@ -7,6 +7,8 @@ import {ListComponent} from "@decorators/ListComponent";
 import {connect} from "react-redux";
 import {fetchConnections, fetchConnectionsCanceled} from "@actions/connections/fetch";
 import SubHeader from "@components/general/view_component/SubHeader";
+import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import {isString} from "@utils/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -23,38 +25,47 @@ function mapStateToProps(state){
 class ConnectionOverviewWidget extends React.Component{
     constructor(props) {
         super(props);
+
+        this.forceGraph3D = React.createRef();
+    }
+
+    componentDidMount() {
+        this.forceGraph3D.current.d3Force("link").distance(150);
     }
 
     render(){
         const {connections, authUser} = this.props;
-        let fromInvokerIcons = Array.from(new Set(connections.map(c => c.fromConnector.icon)));
-        let toInvokerIcons = Array.from(new Set(connections.map(c => c.toConnector.icon)));
+        let fromInvokerIcons = Array.from(new Set(connections.map((c, key) => CConnectorItem.hasIcon(c.fromConnector.icon) ? c.fromConnector.icon : CConnectorItem.hasIcon(c.fromConnector.invoker.icon) ? c.fromConnector.invoker.icon : key)));
+        let toInvokerIcons = Array.from(new Set(connections.map((c, key) => CConnectorItem.hasIcon(c.toConnector.icon) ? c.toConnector.icon : CConnectorItem.hasIcon(c.toConnector.invoker.icon) ? c.toConnector.invoker.icon : key)));
         let allIcons = [...fromInvokerIcons, ...toInvokerIcons];
         const gData = {
             nodes: [
-                {id: 0, img: '../../../../../../../img/open_celium_graph_icon.png'}
             ],
             links: [
             ]
         };
         for(let i = 0; i < allIcons.length; i++){
-            gData.nodes.push({id: i + 1, img: allIcons[i]});
-            gData.links.push({source: 0, target: i + 1});
+            gData.nodes.push({id: i, img: isString(allIcons[i]) ? allIcons[i] : '../../../../../../../img/default_connector.png'});
+            gData.links.push({source: i, target: allIcons.length});
         }
+        gData.nodes.push({id: allIcons.length, img: '../../../../../../../img/open_celium_graph_icon.png'});
         return(
             <div className={styles.connection_overview_widget}>
                 <SubHeader title={'Connection Overview'} authUser={authUser} className={styles.widget_subheader}/>
                 <ForceGraph3D
+                    ref={this.forceGraph3D}
+                    nodeRelSize={5}
                     backgroundColor={'white'}
+                    linkColor={() => '#000'}
+                    linkOpacity={0.3}
                     graphData={gData}
-                    nodeThreeObject={({ img }) => {
+                    nodeThreeObject={({ img, id }) => {
                         const loader = new THREE.TextureLoader();
-                        loader.setCrossOrigin('anonymous')
                         const imgTexture = loader.load(`${img}`);
-                        const material = new THREE.SpriteMaterial({ map: imgTexture });
-                        const sprite = new THREE.Sprite(material);
-                        sprite.scale.set(100, 100);
-                        return sprite;
+                        const material = new THREE.MeshBasicMaterial({ map: imgTexture, transparent: true, opacity: 1 });
+                        const circle = new THREE.CircleGeometry(30, 30)
+                        const mesh = new THREE.Mesh(circle, material);
+                        return mesh;
                     }}
                 />
             </div>

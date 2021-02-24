@@ -67,7 +67,7 @@ export default class CConnectorItem{
     }
 
     static hasIcon(icon){
-        return isString(icon) && icon.substr(icon.length - 5) !== '/null';
+        return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null';
     }
 
     convertItem(itemType, item){
