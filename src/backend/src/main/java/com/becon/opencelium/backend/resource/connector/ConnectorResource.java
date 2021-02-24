@@ -16,9 +16,12 @@
 
 package com.becon.opencelium.backend.resource.connector;
 
+import com.becon.opencelium.backend.constant.PathConstant;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Resource;
+import java.net.URI;
 import java.util.Map;
 
 @Resource
