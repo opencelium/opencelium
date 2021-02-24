@@ -16,6 +16,9 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.application.entity.SystemOverview;
+import com.becon.opencelium.backend.application.service.ApplicationServiceImp;
+import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,9 @@ public class ApplicationController {
 
     @Autowired
     private Environment env;
+
+    @Autowired
+    private ApplicationServiceImp applicationService;
 
     @GetMapping("/all")
     public List<String> getAll(){
@@ -68,9 +74,9 @@ public class ApplicationController {
 
     @GetMapping("/oc/system/overview")
     public ResponseEntity<?> getSystemOverview() {
-        String version = env.getProperty("opencelium.version");
-        String result = "{" + "\"version\": \"" + version + "\"}";
-        return ResponseEntity.ok(result);
+        SystemOverview systemOverview = applicationService.getSystemOverview();
+        SystemOverviewResource resource = applicationService.toResource(systemOverview);
+        return ResponseEntity.ok(resource);
     }
 
     public String get(){
