@@ -105,7 +105,7 @@ class Notification extends Component{
     renderCloseButton(){
         if(this.state.hasCloseButton){
             return (
-                <TooltipFontIcon iconStyles={{fontSize: '14px', color: 'black'}} isButton={true} id={'notification_close'} className={styles.close_icon} value={'close'} tooltip={'Close'} onClick={::this.closeNotification}/>
+                <TooltipFontIcon size={16} isButton={true} id={'notification_close'} className={styles.close_icon} value={'close'} tooltip={'Close'} onClick={::this.closeNotification}/>
             );
         }
         return null;

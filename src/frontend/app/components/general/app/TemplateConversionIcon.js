@@ -49,21 +49,15 @@ class TemplateConversionIcon extends Component{
         const {appVersion, convertingTemplates, data} = this.props;
         let {classNameIcon} = this.props;
         let invalidVersion = data.template.version !== appVersion;
-        let convertUp = true /*invalidVersion && data.template.version < appVersion*/;
         const isLoading = convertingTemplates.findIndex(t => t.templateId === data.template.templateId) !== -1;
         let styleIcon = {verticalAlign: 'sub', cursor: 'pointer'};
-        if(convertUp){
-            styleIcon.transform = 'rotateY(180deg) rotateZ(270deg)';
-            styleIcon.margin = 0;
-        } else{
-            styleIcon.transform = 'rotate(270deg)';
-            styleIcon.margin = '0px 2px 0 0';
-        }
+        styleIcon.transform = 'scaleX(-1) rotate(-45deg)';
+        styleIcon.margin = 0;
         return(
             <React.Fragment>
                 {
                     invalidVersion && !isLoading &&
-                    <TooltipFontIcon isButton={true} className={classNameIcon} style={styleIcon} tooltip={`${convertUp ? 'Upgrade' : 'Downgrade'}`} value={'replay'} onClick={::this.convert}/>
+                    <TooltipFontIcon isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={::this.convert}/>
                 }
                 {
                     isLoading &&

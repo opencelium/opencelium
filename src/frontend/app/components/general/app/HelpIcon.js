@@ -42,7 +42,8 @@ class HelpIcon extends Component{
         return (
             <sup>
                 <TooltipFontIcon
-                    style={{cursor: 'pointer', color: 'black', fontSize: '18px'}}
+                    style={{cursor: 'pointer', color: 'black'}}
+                    size={16}
                     value={'help_outline'}
                     tooltip={'Help'}
                     onClick={onClick}
