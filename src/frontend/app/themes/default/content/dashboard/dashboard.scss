@@ -173,9 +173,10 @@
 }
 
 .connection_overview_widget{
-  canvas{
-    width: 100% !important;
-    height:auto !important;
+  height: 100%;
+  position: relative;
+  :first-child:first-child:focus{
+    outline: none !important;
   }
 }
 .widget_subheader{

@@ -1,4 +1,4 @@
-import MonochromePhotosIconPath from "@icons/monochrome_photos.png";
+import MonochromePhotosIconPath from "@images/default_connector.png";
 
 export default {
     'add': 'add',

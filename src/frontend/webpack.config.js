@@ -161,7 +161,7 @@ module.exports = {
         alias: {
             'assets': path.resolve('./img'),
             '@styles': path.resolve('./styles'),
-            '@icons': path.resolve('./img/icons'),
+            '@images': path.resolve('./img'),
             '@actions': path.resolve(__dirname, 'app/actions'),
             '@classes': path.resolve(__dirname, 'app/classes'),
             '@components': path.resolve(__dirname, 'app/components'),
