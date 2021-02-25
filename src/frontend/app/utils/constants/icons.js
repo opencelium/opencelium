@@ -6,8 +6,8 @@ export default {
     'arrow_back': 'keyboard_arrow_left',
     'arrow_forward': 'keyboard_arrow_right',
     'assignment': 'assignment',
-    'autorenew': 'autorenew',//round
-    'call_split': 'call_split', //round
+    'autorenew': 'autorenew',
+    'call_split': 'call_split',
     'cancel': 'close',
     'check_circle_outline': 'check',
     'close': 'close',
@@ -16,7 +16,7 @@ export default {
     'delete_forever': 'delete_forever',
     'do_not_touch': 'lock',
     'done': 'check',
-    'donut_large': 'autorenew',//round
+    'donut_large': 'autorenew',
     'edit': 'create',
     'error': 'warning',
     'file_copy': 'file_copy',
@@ -30,8 +30,8 @@ export default {
     'keyboard_arrow_up': 'keyboard_arrow_up',
     'library_books': 'library_books',
     'link_off': 'link_off',
-    'loop': 'autorenew',//round
-    'mail': 'mail',//round
+    'loop': 'autorenew',
+    'mail': 'mail',
     'menu': 'menu',
     'monochrome_photos': MonochromePhotosIconPath,
     'play_arrow': 'play_arrow',
@@ -53,13 +53,11 @@ export default {
     'supervised_user_circle': 'people',
     'phone': 'phone',
     'perm_identity': 'person',
-    'domain': 'domain',//rounded
+    'domain': 'domain',
     'vpn_key': 'vpn_key',
     'email': 'mail',
     'pan_tool': 'lock_open',
     'photo': 'image',
     'device_hub': 'device_hub',
     'text_fields': 'notes',
-    //login, logout, person icons in header are style round
 }
-//web_asset, sentiment_very_satisfied, assignment, error

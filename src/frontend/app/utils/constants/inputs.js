@@ -66,7 +66,7 @@ const SURNAME = {name: 'surname', type: 'text', icon: 'perm_identity'};
 const PHONE_NUMBER = {name: 'phoneNumber', type: 'text', icon: 'phone'};
 const ORGANIZATION = {name: 'organisation', type: 'text', icon: 'domain'};
 const DEPARTMENT = {name: 'department', type: 'text', icon: 'group'};
-const USER_TITLE = {name: 'userTitle', type: 'user_title', icon: 'sentiment_very_satisfied'};
+const USER_TITLE = {name: 'userTitle', type: 'user_title', icon: 'title'};
 const PROFILE_PICTURE = {name: 'profilePicture', type: 'file', icon: 'photo'};
 const USER_GROUP = {name: 'userGroup', type: 'select+description', icon: 'supervised_user_circle'};
 
