@@ -176,7 +176,7 @@ class UpdateAssistant extends Component{
             inputs: [
                 {
                     ...INPUTS.COMPONENT,
-                    icon: 'short_text',
+                    icon: 'notes',
                     tourStep: UPDATE_ASSISTANT_TOURS.page_1[0].selector,
                     name: 'systemCheck',
                     label: t('FORM.SYSTEM_CHECK'),

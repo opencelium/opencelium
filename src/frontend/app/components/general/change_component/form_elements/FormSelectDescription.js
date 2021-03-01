@@ -48,7 +48,7 @@ class FormSelectDescription extends Component{
                     tabIndex={'-1'}
                     name={description.name}
                     type={'text'}
-                    icon={'short_text'}
+                    icon={'notes'}
                     value={descriptionValue}
                     multiline={true}
                     rows={4}

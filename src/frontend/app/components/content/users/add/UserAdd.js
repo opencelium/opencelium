@@ -298,6 +298,7 @@ class UserAdd extends Component{
                 hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
             },{
                 inputs:[
+                    {...INPUTS.USER_TITLE, label: t('ADD.FORM.USER_TITLE'), defaultValue: ''},
                     {...INPUTS.NAME,
                         label: t('ADD.FORM.NAME'),
                         tourStep: USER_TOURS.page_2[0].selector,
@@ -317,7 +318,6 @@ class UserAdd extends Component{
                     {...INPUTS.PHONE_NUMBER, label: t('ADD.FORM.PHONE_NUMBER'), defaultValue: ''},
                     {...INPUTS.DEPARTMENT, label: t('ADD.FORM.DEPARTMENT'), defaultValue: ''},
                     {...INPUTS.ORGANIZATION, label: t('ADD.FORM.ORGANISATION'), defaultValue: ''},
-                    {...INPUTS.USER_TITLE, label: t('ADD.FORM.USER_TITLE'), defaultValue: ''},
                     {...INPUTS.PROFILE_PICTURE, label: t('ADD.FORM.PROFILE_PICTURE'), browseTitle: t('ADD.FORM.PROFILE_PICTURE_PLACEHOLDER')},
                 ],
                 hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},

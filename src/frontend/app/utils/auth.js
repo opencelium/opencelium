@@ -36,22 +36,14 @@ export let sessionTimeout = null;
 export function getRequestSettings(params){
     let settings = {};
     let {url, method, data, isApi, contentType, fullUrl, isIframeUrl, hasAuthHeader, headers} = params;
-    if(typeof hasAuthHeader === 'undefined'){
-        hasAuthHeader = false;
-    }
-    if(typeof isApi === 'undefined'){
-        isApi = true;
-    }
-    if(typeof isIframeUrl === 'undefined'){
-        isIframeUrl = false;
-    }
+    hasAuthHeader = hasAuthHeader ?? false;
+    isApi = isApi ?? true;
+    isIframeUrl = isIframeUrl ?? false;
     if(fullUrl !== true){
         url = isApi ? baseUrlApi + url : baseUrl + url;
     }
-    method = typeof method === 'undefined' ? API_METHOD.GET : method;
-    if(typeof data === 'undefined'){
-        data = {};
-    }
+    method = method ?? API_METHOD.GET;
+    data = data ?? {};
     settings.url = url;
     settings.method = method;
     settings.crossDomain = true;

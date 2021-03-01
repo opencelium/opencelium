@@ -12,12 +12,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+import React from 'react';
 /**
  * constant values for input components
  */
-const TITLE = {name: 'title', type: 'text', maxLength: 256, icon: 'text_fields'};
-const DESCRIPTION = {name: 'description', type: 'textarea', maxLength: 1024, icon: 'short_text'};
+const TITLE = {name: 'title', type: 'text', maxLength: 256, icon: 'title'};
+const DESCRIPTION = {name: 'description', type: 'textarea', maxLength: 1024, icon: 'notes'};
 const COMPONENT = {type: 'component'};
 const ICOMMON = {
     TITLE,
@@ -26,7 +26,7 @@ const ICOMMON = {
 };
 
 //CONNECTION
-const CONNECTION_TITLE = {name: 'connection_title', type: 'connection_title', maxLength: 256, icon: 'text_fields'};
+const CONNECTION_TITLE = {name: 'connection_title', type: 'connection_title', maxLength: 256, icon: 'title'};
 const CONNECTOR = {name: 'connectors', type: 'connectors', icon: 'device_hub'};
 const CONNECTOR_READONLY = {name: 'connectors_readonly', type: 'connectors', icon: 'device_hub'};
 const MODE = {name: 'mode', type: 'connection_mode'};
@@ -49,7 +49,7 @@ const ICONNECTOR = {
 const ROLE = {name: 'role', type: 'text', maxLength: 256, icon: 'perm_identity'};
 const ICON = {name: 'icon', type: 'file', icon: 'photo'};
 const COMPONENTS = {name: 'components', type: 'multiselect', icon: 'view_carousel'};
-const PERMISSIONS = {name: 'permissions',type: 'permission_table', icon: 'pan_tool'};
+const PERMISSIONS = {name: 'permissions',type: 'permission_table', icon: 'lock_open'};
 const IUSER_GROUP = {
     ROLE,
     ICON,
@@ -65,8 +65,8 @@ const NAME = {name: 'name', type: 'text', icon: 'perm_identity'};
 const SURNAME = {name: 'surname', type: 'text', icon: 'perm_identity'};
 const PHONE_NUMBER = {name: 'phoneNumber', type: 'text', icon: 'phone'};
 const ORGANIZATION = {name: 'organisation', type: 'text', icon: 'domain'};
-const DEPARTMENT = {name: 'department', type: 'text', icon: 'group'};
-const USER_TITLE = {name: 'userTitle', type: 'user_title', icon: 'title'};
+const DEPARTMENT = {name: 'department', type: 'text', icon: 'people'};
+const USER_TITLE = {name: 'userTitle', type: 'user_title', icon: <span/>};
 const PROFILE_PICTURE = {name: 'profilePicture', type: 'file', icon: 'photo'};
 const USER_GROUP = {name: 'userGroup', type: 'select+description', icon: 'supervised_user_circle'};
 
@@ -85,8 +85,8 @@ const IUSER = {
 };
 
 //INVOKER
-const INVOKER_NAME = {name: 'name', type: 'invoker_name', maxLength: 256, icon: 'text_fields'};
-const INVOKER_DESCRIPTION = {name: 'description', type: 'invoker_description', maxLength: 1024, icon: 'short_text'};
+const INVOKER_NAME = {name: 'name', type: 'invoker_name', maxLength: 256, icon: 'title'};
+const INVOKER_DESCRIPTION = {name: 'description', type: 'invoker_description', maxLength: 1024, icon: 'notes'};
 const INVOKER_HINT = {name: 'hint', type: 'invoker_hint', icon: 'label'};
 const INVOKER_ICON = {name: 'icon', type: 'invoker_icon', icon: 'photo'};
 const INVOKER_AUTHENTICATION = {name: 'auth', type: 'invoker_authentication', icon: 'https'};
@@ -104,7 +104,7 @@ const IINVOKER = {
 };
 
 //NOTIFICATION TEMPLATE
-const NOTIFICATION_TEMPLATE_NAME = {name: 'name', type: 'notification_template_name', maxLength: 256, icon: 'text_fields'};
+const NOTIFICATION_TEMPLATE_NAME = {name: 'name', type: 'notification_template_name', maxLength: 256, icon: 'title'};
 const NOTIFICATION_TEMPLATE_TYPE = {name: 'type', type: 'notification_template_type', maxLength: 256, icon: 'mail'};
 const NOTIFICATION_TEMPLATE_CONTENT = {name: 'content', type: 'notification_template_content',};
 

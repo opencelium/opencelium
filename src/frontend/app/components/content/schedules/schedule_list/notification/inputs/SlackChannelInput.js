@@ -104,7 +104,7 @@ class SlackChannelInput extends Component{
                 options={allChannels}
                 placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.SLACK_CHANNEL_PLACEHOLDER')}
                 selectClassName={`${styles[classNames.notification_select]}`}
-                icon={startFetchingChannels ? 'loading' : 'add_alert'}
+                icon={startFetchingChannels ? 'loading' : 'bell'}
                 label={t('NOTIFICATION.NOTIFICATION_CHANGE.SLACK_CHANNEL_LABEL')}
                 isFocused={focused}
                 required={true}

@@ -44,7 +44,6 @@ export default {
     'attach_file': 'attach_file',
     'description': 'description',
     'backup': 'file_upload',
-    'short_text': 'notes',
     'group': 'people',
     'add_alert': 'bell',
     'event': 'insert_invitation',
@@ -59,5 +58,6 @@ export default {
     'pan_tool': 'lock_open',
     'photo': 'image',
     'device_hub': 'device_hub',
-    'text_fields': 'notes',
+    'text_fields': 'title',
+    'web_asset': 'description',
 }

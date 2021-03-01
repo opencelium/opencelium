@@ -147,7 +147,6 @@ class DashboardView extends Component{
             gridSettings.className += ` ${styles.dashboard_grid_edit_on}`;
             gridSettings.isDraggable = true;
             gridSettings.isResizable = true;
-        } else{
         }
         if(layout.length === 0){
             gridSettings.className += ` ${styles.dashboard_no_widgets}`;

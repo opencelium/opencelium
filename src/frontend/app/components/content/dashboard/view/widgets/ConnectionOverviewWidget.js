@@ -9,9 +9,11 @@ import {fetchConnections, fetchConnectionsCanceled} from "@actions/connections/f
 
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
 import DefaultConnectorImagePath from "@images/default_connector.png";
-import OpenCeliumImagePath from "@images/open_celium_graph_icon.png";
 import OCToast from "@basic_components/Toast";
 import {OC_DESCRIPTION, OC_NAME} from "@utils/constants/app";
+import SubHeader from "@components/general/view_component/SubHeader";
+import OpenCeliumBackgroundImagePath from "@images/oc_connection_widget_background.png"
+import OpenCeliumImagePath from "@images/logo.png";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -34,7 +36,7 @@ class ConnectionOverviewWidget extends React.Component{
     }
 
     render(){
-        const {connections} = this.props;
+        const {authUser, connections} = this.props;
         let usedConnectors = [...connections.map(connection => connection.fromConnector), ...connections.map(connection => connection.toConnector)];
         let nodes = [];
         for(let i = 0; i < usedConnectors.length; i++){
@@ -62,6 +64,7 @@ class ConnectionOverviewWidget extends React.Component{
             shape: 'circularImage',
             brokenImage: OpenCeliumImagePath,
             image: OpenCeliumImagePath,
+            size: 32,
         })
         const graph = {
             nodes,
@@ -82,11 +85,11 @@ class ConnectionOverviewWidget extends React.Component{
             },
             nodes:{
                 color: {
-                    border: "#fff",
-                    background: "#fff",
+                    border: "#ffffff00",
+                    background: "#ffffff00",
                     highlight:{
                         border: "#0062cc",
-                        background: "#fff",
+                        background: "#ffffff00",
                     }
                 },
             }
@@ -99,7 +102,16 @@ class ConnectionOverviewWidget extends React.Component{
         };
         return (
             <div className={styles.connection_overview_widget}>
+                <SubHeader title={'Connection Overview'} authUser={authUser} className={styles.widget_subheader}/>
                 <Graph
+                    style={{
+                        backgroundImage: `url("${OpenCeliumBackgroundImagePath}")`,
+                        backgroundPosition: 'center center',
+                        width: '100%',
+                        height: '100%',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: 'contain',
+                    }}
                     graph={graph}
                     options={options}
                     events={events}
