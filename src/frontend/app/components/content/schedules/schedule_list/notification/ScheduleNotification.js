@@ -27,7 +27,6 @@ import {fetchScheduleNotifications} from "@actions/schedules/fetch";
 
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import Loading from "@loading";
 import CNotification from "@classes/components/content/schedule/notification/CNotification";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";

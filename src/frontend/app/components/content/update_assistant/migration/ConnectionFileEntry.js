@@ -4,7 +4,7 @@ import FontIcon from "@basic_components/FontIcon";
 import styles from "@themes/default/content/update_assistant/main";
 import CExecution from "@classes/components/content/template_converter/CExecution";
 import {connect} from "react-redux";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 
 function mapStateToProps(state){
     const auth = state.get('auth');

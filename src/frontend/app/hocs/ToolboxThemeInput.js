@@ -4,7 +4,7 @@ import FontIcon from "@basic_components/FontIcon";
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/hocs.scss";
 import {isString} from "@utils/app";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 class ToolboxThemeInput extends React.Component{

@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import {setCurrentPageItems} from "@actions/app";
 import {Container} from "react-grid-system";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import ComponentError from "@components/general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
 import CListVoiceControl from "@classes/voice_control/CListVoiceControl";

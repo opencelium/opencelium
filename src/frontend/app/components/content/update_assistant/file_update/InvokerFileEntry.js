@@ -4,7 +4,7 @@ import FontIcon from "@basic_components/FontIcon";
 import styles from "@themes/default/content/update_assistant/main";
 import CExecution from "@classes/components/content/invoker_converter/CExecution";
 import {connect} from "react-redux";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import {withTranslation} from "react-i18next";
 
 function mapStateToProps(state){

@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {FontIcon as ToolboxFontIcon} from "react-toolbox/lib/font_icon/FontIcon";
 import styles from "@themes/default/general/basic_components.scss";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import {isString} from "@utils/app";
 import Icons from "@utils/constants/icons";
 

@@ -23,7 +23,6 @@ import {SchedulePermissions} from "@utils/constants/permissions";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
-import Loading from "@loading";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
 
