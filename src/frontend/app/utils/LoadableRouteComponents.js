@@ -278,6 +278,14 @@ const UpdateAssistant = Loadable({
     loading: Loading,
 });
 
+/**
+ * Loadable Connection Overview 2 Layout
+ */
+const ConnectionOverview2 = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_2' */ '@components/content/connection_overview_2/ConnectionLayout'),
+    loading: Loading,
+});
+
 export default {
     UserLayout,
     UserAdd,
@@ -328,4 +336,5 @@ export default {
     TemplateConverterLayout,
     UpdateAssistantLayout,
     UpdateAssistant,
+    ConnectionOverview2,
 };
