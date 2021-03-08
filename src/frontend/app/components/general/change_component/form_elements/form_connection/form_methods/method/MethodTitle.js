@@ -98,8 +98,12 @@ class MethodTitle extends Component{
         const {method, updateEntity} = this.props;
         let newInvokerData = method.invoker._operations.find(o => o.name === method.name);
         if(newInvokerData){
-            newInvokerData = {...newInvokerData.request.body.fields, ...method.request.body.fields};
-            method.setRequestBodyFields(newInvokerData);
+            let newRequestInvokerData = {...newInvokerData.request.body.fields, ...method.request.body.fields};
+            let newResponseSuccessInvokerData = {...newInvokerData.response.success.body.fields, ...method.response.success.body.fields};
+            let newResponseFailInvokerData = {...newInvokerData.response.fail.body.fields, ...method.response.fail.body.fields};
+            method.setRequestBodyFields(newRequestInvokerData);
+            method.setResponseSuccessBodyFields(newResponseSuccessInvokerData);
+            method.setResponseFailBodyFields(newResponseFailInvokerData);
             updateEntity();
             this.setState({
                 isRefreshingFromInvoker: true,
