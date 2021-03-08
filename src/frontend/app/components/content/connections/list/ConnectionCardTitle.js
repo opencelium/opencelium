@@ -34,7 +34,7 @@ export default class ConnectionCardTitle extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.fromConnector.icon !== this.props.fromConnector.icon || prevProps.toConnector.icon !== this.props.toConnector.icon){
-            this.state({
+            this.setState({
                 ...this.getIcons(this.props),
             })
         }
