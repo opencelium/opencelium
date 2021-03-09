@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from "@themes/default/content/connections/connection_overview_2.scss";
 
 class Details extends React.Component{
     constructor(props) {
@@ -7,7 +8,7 @@ class Details extends React.Component{
 
     render(){
         return(
-            <div>
+            <div className={styles.details}>
                 Details
             </div>
         );

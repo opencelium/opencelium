@@ -22,7 +22,7 @@ import {fetchConnection} from '@actions/connections/fetch';
 import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
-import ReactSVG from 'react-svg';
+import {ReactSVG} from 'react-svg';
 import styles from '@themes/default/content/connections/graph.scss';
 import {getThemeClass} from "@utils/app";
 

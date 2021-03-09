@@ -1,6 +1,7 @@
 import React from 'react';
-import Graph from "react-graph-vis";
-import {BUSINESS_NODES, BUSINESS_EDGES} from "@components/content/connection_overview_2/data";
+import Process from "@components/content/connection_overview_2/elements/Process";
+import styles from "@themes/default/content/connections/connection_overview_2.scss";
+import IfOperator from "@components/content/connection_overview_2/elements/IfOperator";
 
 class BusinessLayout extends React.Component{
     constructor(props) {
@@ -8,50 +9,12 @@ class BusinessLayout extends React.Component{
     }
 
     render(){
-        const graph = {
-            nodes: BUSINESS_NODES,
-            edges: BUSINESS_EDGES,
-        };
-        const options = {
-            manipulation: false,
-            height: "90%",
-            layout: {
-                hierarchical: {
-                    enabled: false,
-                    levelSeparation: 300,
-                },
-            },
-            physics: {
-                enabled: false,
-            },
-        };
-        const events = {};
         return(
-            <Graph
-                style={{
-                    backgroundPosition: 'center center',
-                    width: '100%',
-                    height: '100%',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'contain',
-                }}
-                graph={graph}
-                options={options}
-                events={events}
-                getNetwork={network => {
-                    const that = this;
-                    network.on("click", function(params) {
-                        console.log(params)
-
-                    });
-                    network.on("dragEnd", function(params) {
-                        console.log(params)
-                    });
-                    network.on("initRedrew", function(params) {
-                        console.log(params)
-                    });
-                }}
-            />
+            <svg className={styles.business_layout}>
+                <Process x={20} y={20} label={'Get Clients'}/>
+                <Process x={220} y={20} label={'Save Tickets'}/>
+                <IfOperator x={220} y={100}/>
+            </svg>
         );
     }
 }
