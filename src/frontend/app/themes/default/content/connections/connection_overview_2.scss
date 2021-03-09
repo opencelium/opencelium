@@ -90,8 +90,15 @@
     outline: none !important;
   }
 }
+.process{
+  //cursor: move;
+  text{
+    pointer-events: none;
+  }
+}
 
 .process_rect{
+  cursor: move;
   fill: #eee;
   stroke: #b2b2b2;
   stroke-width: 2;

@@ -26,7 +26,7 @@ class Arrow extends React.Component{
     }
 }
 
-Process.propTypes = {
+Arrow.propTypes = {
     x: PropTypes.number.isRequired,
     y: PropTypes.number.isRequired,
     label: PropTypes.string.isRequired,

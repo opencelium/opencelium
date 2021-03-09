@@ -20,7 +20,7 @@ class IfOperator extends React.Component{
         const textY = '50%';
         return(
             <svg x={x} y={y} width={width} height={height}>
-                <rect x={40} y={-20} rx={borderRadius} ry={borderRadius} width={rectWidth} height={rectHeight} className={styles.if_operator}/>
+                <rect x={40} y={-20} rx={borderRadius} ry={borderRadius} width={rectWidth} height={rectHeight} className={`${styles.if_operator} draggable`}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
                     {label}
                 </text>
@@ -32,7 +32,6 @@ class IfOperator extends React.Component{
 IfOperator.propTypes = {
     x: PropTypes.number.isRequired,
     y: PropTypes.number.isRequired,
-    label: PropTypes.string.isRequired,
 };
 
 export default IfOperator;

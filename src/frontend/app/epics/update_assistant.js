@@ -37,15 +37,6 @@ import {
 } from "@actions/update_assistant/update";
 
 
-const SYSTEM_REQUIREMENTS = {
-    oc: 'Ubuntu 16.04 LTS',
-    java: '16.04.2',
-    nodeJS: '12.1',
-    neo4j: '12.4',
-    kibana: '10.43',
-    elasticSearch: '10.42',
-    mariaDB: '11.21',
-};
 
 const ONLINE_UPDATES = [
     {id: 4, name: '1.3', changeLogLink: '', status: 'current'},
@@ -67,7 +58,7 @@ const OFFLINE_UPDATES = [
 
 const NEW_UPDATE = {id: 100, name: 'v1.5', changeLogLink: '', status: 'not_available'};
 
-const urlPrefix = 'update_assistant';
+const urlPrefix = 'application/oc';
 
 /**
  * fetch update application version
@@ -76,7 +67,7 @@ const fetchUpdateAppVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_UPDATEAPPVERSION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `application/oc/version`;
+            let url = `${urlPrefix}/version`;
             return doRequest({url},{
                 success: (data) => fetchUpdateAppVersionFulfilled(data, {...action.settings}),
                 reject: fetchUpdateAppVersionRejected,
@@ -212,12 +203,11 @@ const fetchSystemRequirementsEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/system_requirements`;
-            return Rx.Observable.of(fetchSystemRequirementsFulfilled(SYSTEM_REQUIREMENTS));
-            /*return doRequest({url},{
+            let url = `${urlPrefix}/system`;
+            return doRequest({url},{
                 success: (data) => fetchSystemRequirementsFulfilled(data, {...action.settings}),
                 reject: fetchSystemRequirementsRejected,
-            });*/
+            });
         });
 };
 
