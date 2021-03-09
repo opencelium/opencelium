@@ -171,6 +171,16 @@ class MethodTitle extends Component{
         if(marginLeftTimes > 1) {
             methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
         }
+        let hasRefreshIcon = false;
+
+        const newInvokerData = method.invoker._operations.find(o => o.name === method.name);
+        if(newInvokerData){
+            if(JSON.stringify(newInvokerData.request.body.fields) !== JSON.stringify(method.request.body.fields)
+            || JSON.stringify(newInvokerData.response.success.body.fields) !== JSON.stringify(method.response.success.body.fields)
+            || JSON.stringify(newInvokerData.response.fail.body.fields) !== JSON.stringify(method.response.fail.body.fields)){
+                hasRefreshIcon = true;
+            }
+        }
         return (
             <div>
                 <CardTitle
@@ -188,14 +198,14 @@ class MethodTitle extends Component{
                         {
                             !readOnly && (isCurrentItem || hasDeleteButton) ?
                                 <div>
-                                    <TooltipFontIcon
+                                    {(hasRefreshIcon || isRefreshingFromInvoker) && <TooltipFontIcon
                                         size={isRefreshingFromInvoker ? 16 : 20}
                                         isButton={true}
                                         className={styles.item_refresh_button}
                                         value={isRefreshingFromInvoker ? 'loading' : 'refresh'}
                                         onClick={::this.refreshInvoker}
                                         tooltip={'Refresh'}
-                                    />
+                                    />}
                                     <TooltipFontIcon
                                         size={20}
                                         isButton={true}
