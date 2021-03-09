@@ -28,6 +28,7 @@ import CMethodItem from "@classes/components/content/connection/method/CMethodIt
 import FontIcon from "@basic_components/FontIcon";
 import CardTitle from "@basic_components/card/CardTitle";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {deepObjectsMerge} from "@utils/app";
 
 
 /**
@@ -98,9 +99,9 @@ class MethodTitle extends Component{
         const {method, updateEntity} = this.props;
         let newInvokerData = method.invoker._operations.find(o => o.name === method.name);
         if(newInvokerData){
-            let newRequestInvokerData = {...newInvokerData.request.body.fields, ...method.request.body.fields};
-            let newResponseSuccessInvokerData = {...newInvokerData.response.success.body.fields, ...method.response.success.body.fields};
-            let newResponseFailInvokerData = {...newInvokerData.response.fail.body.fields, ...method.response.fail.body.fields};
+            let newRequestInvokerData = deepObjectsMerge(newInvokerData.request.body.fields, method.request.body.fields);
+            let newResponseSuccessInvokerData = deepObjectsMerge(newInvokerData.response.success.body.fields, method.response.success.body.fields);
+            let newResponseFailInvokerData = deepObjectsMerge(newInvokerData.response.fail.body.fields, method.response.fail.body.fields);
             method.setRequestBodyFields(newRequestInvokerData);
             method.setResponseSuccessBodyFields(newResponseSuccessInvokerData);
             method.setResponseFailBodyFields(newResponseFailInvokerData);
