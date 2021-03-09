@@ -111,10 +111,28 @@ export default class CResponseResult{
                 return this._body.getFieldsForSelectSearch(searchField.substring(index), connector);
             } else{
                 if(searchField.split('.').length <= 1) {
-                    return [
-                        {value: WHOLE_ARRAY, type: FIELD_TYPE_ARRAY, label: 'Whole Result'},
-                        {value: '[0]', type: FIELD_TYPE_ARRAY, label: 'First Element of Result'}
-                    ];
+                    let result = [];
+                    result.push({
+                        value: '[0]',
+                        type: FIELD_TYPE_ARRAY,
+                        label: '(1-st element of array)'
+                    });
+                    if(connector !== null){
+                        const previousIterators = connector.getPreviousIterators();
+                        for(let i = 0; i < previousIterators.length; i++){
+                            result.push({
+                                value: `[${previousIterators[i]}]`,
+                                type,
+                                label: `(${previousIterators[i]} loop)`,
+                            });
+
+                        }
+                    }
+                    result.push({
+                        value: WHOLE_ARRAY,
+                        type: FIELD_TYPE_ARRAY,
+                        label: '(the whole array)'
+                    });
                 } else{
                     return [];
                 }
