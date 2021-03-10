@@ -28,7 +28,8 @@ import CMethodItem from "@classes/components/content/connection/method/CMethodIt
 import FontIcon from "@basic_components/FontIcon";
 import CardTitle from "@basic_components/card/CardTitle";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {deepObjectsMerge} from "@utils/app";
+import {deepObjectsMerge, isEqualObjectParams} from "@utils/app";
+import _ from "lodash";
 
 
 /**
@@ -175,9 +176,9 @@ class MethodTitle extends Component{
 
         const newInvokerData = method.invoker._operations.find(o => o.name === method.name);
         if(newInvokerData){
-            if(JSON.stringify(newInvokerData.request.body.fields) !== JSON.stringify(method.request.body.fields)
-            || JSON.stringify(newInvokerData.response.success.body.fields) !== JSON.stringify(method.response.success.body.fields)
-            || JSON.stringify(newInvokerData.response.fail.body.fields) !== JSON.stringify(method.response.fail.body.fields)){
+            if(!isEqualObjectParams(newInvokerData.request.body.fields, method.request.body.fields)
+            || !isEqualObjectParams(newInvokerData.response.success.body.fields, method.response.success.body.fields)
+            || !isEqualObjectParams(newInvokerData.response.fail.body.fields, method.response.fail.body.fields)){
                 hasRefreshIcon = true;
             }
         }
