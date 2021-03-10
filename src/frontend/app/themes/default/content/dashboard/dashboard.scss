@@ -172,6 +172,13 @@
   line-height: 100px;
 }
 
+.current_scheduler_widget{
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
 .connection_overview_widget{
   height: 100%;
   position: relative;
