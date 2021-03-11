@@ -5,7 +5,7 @@ import styles from "@themes/default/general/change_component";
 import {getThemeClass} from "@utils/app";
 import {checkConnection} from "@actions/connections/check";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import Dialog from "@basic_components/Dialog";
 import Fields from "@change_component/extra_actions/check_connection/Fields";
 import Pagination from "@basic_components/pagination/Pagination";

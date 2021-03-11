@@ -34,7 +34,7 @@ export default class ConnectionCardTitle extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.fromConnector.icon !== this.props.fromConnector.icon || prevProps.toConnector.icon !== this.props.toConnector.icon){
-            this.state({
+            this.setState({
                 ...this.getIcons(this.props),
             })
         }
@@ -107,6 +107,9 @@ export default class ConnectionCardTitle extends React.Component{
 
         return (
             <Container className={styles.connection_card_title} onMouseOver={::this.handleMouseOver} onMouseLeave={::this.handleMouseLeave}>
+                <Row>
+                    <Col className={styles.title} md={12}>{title}</Col>
+                </Row>
                 <Row className={styles.icons} style={iconsStyles}>
                     <Col md={5} className={styles.from} style={fromStyles}>
                         {isCorrectFromIcon ?
@@ -125,9 +128,6 @@ export default class ConnectionCardTitle extends React.Component{
                             <DefaultIcon name={toConnector.title} isMouseOver={isMouseOver}/>
                         }
                     </Col>
-                </Row>
-                <Row>
-                    <Col className={styles.title} md={12}>{title}</Col>
                 </Row>
             </Container>
         )

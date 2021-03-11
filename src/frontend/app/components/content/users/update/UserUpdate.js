@@ -326,6 +326,7 @@ class UserUpdate extends Component{
                 hint: {text: t('UPDATE.FORM.HINT_1'), openTour: ::this.openTour},
             },{
                 inputs:[
+                    {...INPUTS.USER_TITLE, label: t('UPDATE.FORM.USER_TITLE')},
                     {
                         ...INPUTS.NAME,
                         tourStep: USER_TOURS.page_2[0].selector,
@@ -345,7 +346,6 @@ class UserUpdate extends Component{
                     {...INPUTS.PHONE_NUMBER, label: t('UPDATE.FORM.PHONE_NUMBER')},
                     {...INPUTS.DEPARTMENT, label: t('UPDATE.FORM.DEPARTMENT')},
                     {...INPUTS.ORGANIZATION, label: t('UPDATE.FORM.ORGANISATION')},
-                    {...INPUTS.USER_TITLE, label: t('UPDATE.FORM.USER_TITLE')},
                     {...INPUTS.PROFILE_PICTURE, label: t('UPDATE.FORM.PROFILE_PICTURE'), browseTitle: t('UPDATE.FORM.PROFILE_PICTURE_PLACEHOLDER')},
                 ],
                 hint: {text: t('UPDATE.FORM.HINT_2'), openTour: ::this.openTour},

@@ -23,7 +23,7 @@ import {sessionExpired} from "@actions/auth";
 import {AuthAction} from "../utils/actions";
 
 import {history} from '@components/App';
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import styles from "@themes/default/general/app";
 import {checkExpiredMessages} from "@utils/app";
 

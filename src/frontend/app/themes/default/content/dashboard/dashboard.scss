@@ -92,7 +92,7 @@
 
 .dashboard_edit_icon{
   position: absolute;
-  right: 0;
+  right: 5px;
   top: 0;
   z-index: 1;
 }
@@ -172,10 +172,18 @@
   line-height: 100px;
 }
 
+.current_scheduler_widget{
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+}
+
 .connection_overview_widget{
-  canvas{
-    width: 100% !important;
-    height:auto !important;
+  height: 100%;
+  position: relative;
+  :first-child:first-child:focus{
+    outline: none !important;
   }
 }
 .widget_subheader{

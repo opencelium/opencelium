@@ -104,7 +104,7 @@ class AddTemplate extends Component{
                             value={addTemplateName}
                             label={'Name'}
                             name={'template_name'}
-                            icon={'text_fields'}
+                            icon={'title'}
                             autoFocus
                         />
                         <Input
@@ -112,7 +112,7 @@ class AddTemplate extends Component{
                             value={addTemplateDescription}
                             label={'Description'}
                             name={'template_description'}
-                            icon={'short_text'}
+                            icon={'notes'}
                             multiline={true}
                             rows={4}
                         />

@@ -45,9 +45,10 @@ function mapStateToProps(state){
 
 /**
  * Dashboard component
+ * Important! schedules and app translations should be imported already here
  */
 @connect(mapStateToProps, {fetchUpdateAppVersion})
-@withTranslation('dashboard')
+@withTranslation(['dashboard', 'schedules', 'app'])
 class DashboardView extends Component{
 
     constructor(props){
@@ -131,7 +132,6 @@ class DashboardView extends Component{
 
     render(){
         const {isWidgetEditOn, layout, toolbox} = this.state;
-        const {t} = this.props;
         let gridSettings = {
             className: `layout`,
             cols: 12,
@@ -147,7 +147,6 @@ class DashboardView extends Component{
             gridSettings.className += ` ${styles.dashboard_grid_edit_on}`;
             gridSettings.isDraggable = true;
             gridSettings.isResizable = true;
-        } else{
         }
         if(layout.length === 0){
             gridSettings.className += ` ${styles.dashboard_no_widgets}`;

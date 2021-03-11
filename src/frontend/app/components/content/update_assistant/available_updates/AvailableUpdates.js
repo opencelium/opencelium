@@ -4,7 +4,7 @@ import {withTranslation} from "react-i18next";
 import Button from "@basic_components/buttons/Button";
 import styles from "@themes/default/content/update_assistant/main";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import {fetchOnlineUpdates, fetchOfflineUpdates} from "@actions/update_assistant/fetch";
 import {uploadVersion} from "@actions/update_assistant/add";
 import Table from "@basic_components/table/Table";

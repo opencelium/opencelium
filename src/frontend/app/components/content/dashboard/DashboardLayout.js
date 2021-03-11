@@ -24,7 +24,6 @@ import {OC_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 import styles from '@themes/default/content/dashboard/dashboard.scss'
 
-
 function filterOCSteps(tourSteps){
     const {authUser} = this.props;
     let steps = [];

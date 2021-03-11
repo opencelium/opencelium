@@ -170,7 +170,7 @@ class SelectSearch extends Component{
             return [];
         }
         let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue, currentConnector) : [];
-        if(result.length > 0) {
+        if(isArray(result) && result.length > 0) {
             result = result.map(field => {
                 let {value, type} = field;
                 let label = field.hasOwnProperty('label') ? field.label : field.value;

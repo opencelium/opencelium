@@ -1,0 +1,117 @@
+@import "../../constants";
+
+.connection_editor{
+  height: calc(100vh - 71px);
+}
+
+.top_panel{
+  overflow: auto;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  height: calc(52.8551% - 0.5px);
+}
+
+.left_panel{
+  width: calc(80% - 0.5px);
+  overflow: auto;
+  position: relative;
+  float: left;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.grab_vertical{
+  width: 1px;
+  cursor: ew-resize;
+  height: 100%;
+  float: left;
+  background: #2c2f34;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+.grab_vertical:after{
+  content: "";
+  display: block;
+  height: 100%;
+  width: 8px;
+  position: absolute;
+  left: -3px;
+  z-index: 10;
+}
+
+.right_panel{
+  width: calc(20% - 0.5px);
+  overflow: auto;
+  position: relative;
+  float: left;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.grab_horizontal{
+  height: 1px;
+  cursor: ns-resize;
+  background: #2c2f34;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.grab_horizontal:after{
+  content: "";
+  display: block;
+  height: 8px;
+  width: 100%;
+  position: absolute;
+  top: -3px;
+  z-index: 10;
+}
+
+.bottom_panel{
+  overflow: auto;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  height: calc(47.1449% - 0.5px);
+}
+
+
+.business_layout {
+  width: calc(80% - 0.5px);
+  height: 100%;
+  padding: 10px;
+}
+.program_layout{
+  :first-child:first-child:focus{
+    outline: none !important;
+  }
+}
+.process{
+  //cursor: move;
+  text{
+    pointer-events: none;
+  }
+}
+
+.process_rect{
+  cursor: move;
+  fill: #eee;
+  stroke: #b2b2b2;
+  stroke-width: 2;
+}
+.process_label{
+  font-family: $FONT_FAMILY;
+}
+.if_operator{
+  @extend .process_rect;
+  transform: rotate(45deg)  ;
+}
+
+.details{
+  text-align: center;
+  font-size: 32px;
+}

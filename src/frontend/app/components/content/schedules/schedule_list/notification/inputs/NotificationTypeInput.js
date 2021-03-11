@@ -81,7 +81,7 @@ class NotificationTypeInput extends Component{
                 onBlur={::this.blurNotificationType}
                 options={options}
                 placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_PLACEHOLDER')}
-                icon={'add_alert'}
+                icon={'bell'}
                 label={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_LABEL')}
                 required={true}
                 isFocused={focused}

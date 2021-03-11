@@ -1,6 +1,6 @@
-import {checkCronExpression} from "@utils/app";
+import {checkCronExpression, isEqualObjectParams} from "@utils/app";
 
-describe.only('Regular Expression for Cron Expression ', () => {
+describe('Regular Expression for Cron Expression ', () => {
     const truthyCronExpressions = [
         //test seconds
         '0/1 0 0 0 0 ?', '1-5 0 0 0 0 ?', '2,3 0 0 0 0 ?', '* 0 0 0 0 ?',
@@ -36,3 +36,18 @@ describe.only('Regular Expression for Cron Expression ', () => {
         });
     }
 });
+
+describe('Compare Object Params', () => {
+    test('same keys different values', () => {
+        let obj = {param1: {param3: 'a', param4: 'b'}, params2: '2'};
+        let anotherObj = {params2: '2', param1: {param4: 'b2', param3: 'a'}};
+        const received = isEqualObjectParams(obj, anotherObj);
+        expect(received).toBeTruthy();
+    })
+    test('different keys different values', () => {
+        let obj = {"test":"test","method":"idoit.version","id":"1","params":{"apikey":"{apikey}","language":"de"},"version":"2.0","one more test":"onemoretest"};
+        let anotherObj = {"test":"t","method":"idoit.version","id":"1","params":{"apikey":"{apikey}","language":"de"},"version":"2.0"};
+        const received = isEqualObjectParams(obj, anotherObj);
+        expect(received).toBeFalsy();
+    })
+})

@@ -24,7 +24,6 @@ import CNotification from "@classes/components/content/schedule/notification/CNo
 import Select from "@basic_components/inputs/Select";
 import {fetchScheduleNotificationTemplates} from "@actions/schedules/fetch";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import Loading from "@loading";
 import CNotificationTemplate
     from "@classes/components/content/schedule/notification/CNotificationTemplate";
 

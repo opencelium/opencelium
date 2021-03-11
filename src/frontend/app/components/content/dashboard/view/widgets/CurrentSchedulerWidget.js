@@ -5,6 +5,7 @@ import {fetchSchedules, fetchSchedulesCanceled} from '@actions/schedules/fetch';
 import {ListComponent} from "@decorators/ListComponent";
 import SubHeader from "@components/general/view_component/SubHeader";
 import styles from "@themes/default/content/dashboard/dashboard";
+import CurrentSchedules from "@components/content/schedules/current_schedules/CurrentSchedules";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -26,12 +27,13 @@ class CurrentSchedulerWidget extends React.Component{
     render(){
         const {authUser, schedules} = this.props;
         return(
-            <div>
+            <div className={styles.current_scheduler_widget}>
                 <SubHeader title={'Current Scheduler'} authUser={authUser} className={styles.widget_subheader}/>
                 <ScheduleList
                     schedules={schedules}
                     readOnly={true}
                 />
+                <CurrentSchedules/>
             </div>
         );
     }

@@ -33,12 +33,13 @@
   }
   .title{
     padding: 0 !important;
-    text-align: center;
-    font-size: $FONT_SIZE_MEDIUM;
+    text-align: left;
     font-family: $FONT_FAMILY;
-    margin-top: 15px;
+    margin-bottom: 15px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-left: 8px !important;
+    font-size: $FONT_SIZE_SMALL;
   }
 }

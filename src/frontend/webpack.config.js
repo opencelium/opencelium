@@ -160,6 +160,8 @@ module.exports = {
         extensions: ['.js', '.json', '.scss'],
         alias: {
             'assets': path.resolve('./img'),
+            '@styles': path.resolve('./styles'),
+            '@images': path.resolve('./img'),
             '@actions': path.resolve(__dirname, 'app/actions'),
             '@classes': path.resolve(__dirname, 'app/classes'),
             '@components': path.resolve(__dirname, 'app/components'),
@@ -197,19 +199,14 @@ module.exports = {
                 })
             },
             {
-                test: /\.(png|jpe?g|svg|gif)$/,
+                test: /\.(png|jpe?g|svg|gif|woff|woff2)$/,
                 use: [
                     {
-                        loader: 'file-loader',
-                        options: {
-                            name(file) {
-                                return '[sha512:hash:base64:7].[ext]';
-                            },
-                        },
-                    },
+                        loader: 'url-loader',
+                    }/*,
                     {
                         loader: 'image-webpack-loader'
-                    }
+                    }*/
                 ]
             },
             {

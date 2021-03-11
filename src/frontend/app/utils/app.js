@@ -17,6 +17,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import CUserGroup from "@classes/components/content/user_group/CUserGroup";
 import CComponent from "@classes/components/content/user_group/CComponent";
+import _ from 'lodash';
 
 
 /**
@@ -389,6 +390,60 @@ export function componentAppear(elementId){
         }
     }, 500);
 }
+
+/**
+ * to merge two objects deeply
+ *
+ * @param target - target object
+ * @param source - source object
+ */
+export function deepObjectsMerge(target, source){
+    // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
+    for (const key of Object.keys(source)) {
+        if (source[key] instanceof Object) Object.assign(source[key], deepObjectsMerge(target[key], source[key]))
+    }
+
+    // Join `target` and modified `source`
+    Object.assign(target || {}, source)
+    return target
+}
+
+/**
+ * to compare two arrays values
+ *
+ * @param arr1 - first array
+ * @param arr2 - second array
+ */
+function compareArrays(arr1, arr2){
+    return _.isEqual(_.sortBy(arr1), _.sortBy(arr2))
+}
+
+
+/**
+ * to compare two objects' params on equality
+ *
+ * @param obj1 - first object
+ * @param obj2 - second object
+ */
+export function isEqualObjectParams(obj1, obj2){
+    let result = false;
+    let obj1Keys = _.sortBy(Object.keys(obj1));
+    let obj2Keys = _.sortBy(Object.keys(obj2));
+    if(compareArrays(obj1Keys, obj2Keys)){
+        let hasObjects = false;
+        for(let param in obj1){
+            if(_.isPlainObject(obj1[param]) && _.isPlainObject(obj2[param])){
+                result = isEqualObjectParams(obj1[param], obj2[param]);
+                hasObjects = true;
+            }
+        }
+        if(!hasObjects){
+            result = true;
+        }
+    }
+    return result;
+}
+
 
 /**
  * to focus on input by id

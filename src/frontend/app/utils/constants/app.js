@@ -16,6 +16,9 @@
 /**
  * application constants
  */
+
+export const OC_NAME = 'OpenCelium';
+export const OC_DESCRIPTION = 'OpenCelium is super duper hub';
 export const isProd = process.env.NODE_ENV === 'production';
 export const isDev = process.env.NODE_ENV === 'development';
 export const Roles = {

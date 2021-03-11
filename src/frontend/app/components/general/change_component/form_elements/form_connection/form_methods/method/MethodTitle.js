@@ -28,6 +28,8 @@ import CMethodItem from "@classes/components/content/connection/method/CMethodIt
 import FontIcon from "@basic_components/FontIcon";
 import CardTitle from "@basic_components/card/CardTitle";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {deepObjectsMerge, isEqualObjectParams} from "@utils/app";
+import _ from "lodash";
 
 
 /**
@@ -44,6 +46,7 @@ class MethodTitle extends Component{
             openSettings: false,
             showConfirm: false,
             onDeleteButtonOver: false,
+            isRefreshingFromInvoker: false,
         };
     }
 
@@ -87,6 +90,27 @@ class MethodTitle extends Component{
      */
     toggleConfirm(){
         this.setState({showConfirm: !this.state.showConfirm});
+    }
+
+    /**
+     * to refresh data from invoker
+     */
+    refreshInvoker(){
+        const that = this;
+        const {method, updateEntity} = this.props;
+        let newInvokerData = method.invoker._operations.find(o => o.name === method.name);
+        if(newInvokerData){
+            let newRequestInvokerData = deepObjectsMerge(newInvokerData.request.body.fields, method.request.body.fields);
+            let newResponseSuccessInvokerData = deepObjectsMerge(newInvokerData.response.success.body.fields, method.response.success.body.fields);
+            let newResponseFailInvokerData = deepObjectsMerge(newInvokerData.response.fail.body.fields, method.response.fail.body.fields);
+            method.setRequestBodyFields(newRequestInvokerData);
+            method.setResponseSuccessBodyFields(newResponseSuccessInvokerData);
+            method.setResponseFailBodyFields(newResponseFailInvokerData);
+            updateEntity();
+            this.setState({
+                isRefreshingFromInvoker: true,
+            }, () => setTimeout(() => that.setState({isRefreshingFromInvoker: false}), 600));
+        }
     }
 
     /**
@@ -135,7 +159,7 @@ class MethodTitle extends Component{
 
     render(){
         const {connector, method, readOnly, showParams, toggleShowParams} = this.props;
-        const {showConfirm, onDeleteButtonOver, hasDeleteButton} = this.state;
+        const {showConfirm, onDeleteButtonOver, hasDeleteButton, isRefreshingFromInvoker} = this.state;
         let methodStyles = {};
         let methodTitleStyles = {backgroundColor: method.color, borderRadius: '3px'};
         let isCurrentItem = connector.getCurrentItem().index === method.index;
@@ -147,6 +171,16 @@ class MethodTitle extends Component{
         let marginLeftTimes = indexSplitter.length;
         if(marginLeftTimes > 1) {
             methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
+        }
+        let hasRefreshIcon = false;
+
+        const newInvokerData = method.invoker._operations.find(o => o.name === method.name);
+        if(newInvokerData){
+            if(!isEqualObjectParams(newInvokerData.request.body.fields, method.request.body.fields)
+            || !isEqualObjectParams(newInvokerData.response.success.body.fields, method.response.success.body.fields)
+            || !isEqualObjectParams(newInvokerData.response.fail.body.fields, method.response.fail.body.fields)){
+                hasRefreshIcon = true;
+            }
         }
         return (
             <div>
@@ -165,6 +199,14 @@ class MethodTitle extends Component{
                         {
                             !readOnly && (isCurrentItem || hasDeleteButton) ?
                                 <div>
+                                    {(hasRefreshIcon || isRefreshingFromInvoker) && <TooltipFontIcon
+                                        size={isRefreshingFromInvoker ? 16 : 20}
+                                        isButton={true}
+                                        className={styles.item_refresh_button}
+                                        value={isRefreshingFromInvoker ? 'loading' : 'refresh'}
+                                        onClick={::this.refreshInvoker}
+                                        tooltip={'Refresh'}
+                                    />}
                                     <TooltipFontIcon
                                         size={20}
                                         isButton={true}

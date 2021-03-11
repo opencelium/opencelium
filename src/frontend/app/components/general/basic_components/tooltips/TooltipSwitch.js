@@ -19,7 +19,7 @@ import {findTopLeftPosition, getThemeClass} from "@utils/app";
 import theme from "react-toolbox/lib/tooltip/theme.css";
 import {CustomInput} from "reactstrap";
 import styles from "@themes/default/general/basic_components";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 
 /**
  * Tooltip Component for FontIcon

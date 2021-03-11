@@ -26,7 +26,7 @@ import {AppPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {ADMINCARD_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 
 import styles from "@themes/default/content/admin_cards/admin_cards.scss";
