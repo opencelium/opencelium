@@ -17,20 +17,29 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
+import com.becon.opencelium.backend.application.entity.UpdatePackage;
 import com.becon.opencelium.backend.application.service.ApplicationServiceImp;
+import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
+import com.becon.opencelium.backend.resource.application.UpdatePackageResource;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/application", produces = "application/hal+json", consumes = {"application/json"})
@@ -44,6 +53,9 @@ public class ApplicationController {
 
     @Autowired
     private ApplicationServiceImp applicationService;
+
+    @Autowired
+    private UpdatePackageServiceImp packageServiceImp;
 
     @GetMapping("/all")
     public List<String> getAll(){
@@ -79,7 +91,44 @@ public class ApplicationController {
         return ResponseEntity.ok(resource);
     }
 
-    public String get(){
-        return null;
+    @GetMapping("/oc/offline/versions")
+    public ResponseEntity<?> getOfflineVersion() {
+
+        List<UpdatePackage> offVersions  = packageServiceImp.getOffVersions();
+        List<UpdatePackageResource> packageResource = offVersions.stream()
+                .map(p -> packageServiceImp.toResource(p)).collect(Collectors.toList());
+        return ResponseEntity.ok(packageResource);
+    }
+
+    @GetMapping("/oc/template/update/file/all/{version}")
+    public ResponseEntity<?> getAllUpdateTemplateFiles(@PathVariable String version) {
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/oc/invoker/update/file/all/{version}")
+    public ResponseEntity<?> getAllUpdateInvokerFiles(@PathVariable String version) {
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/changelog/file/{packageName}")
+    @ResponseBody
+    public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
+
+        try {
+            String path = PathConstant.APPLICATION_VERSION + packageName + PathConstant.RESOURCES;
+            Path rootLocation = Paths.get(path);
+            Path filePath = rootLocation.resolve("changelog.txt");
+            org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());
+            if (!file.exists() || !file.isReadable()) {
+                throw new StorageFileNotFoundException("Could not read file: " + packageName + "/changelog.txt");
+            }
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+        }
+        catch (MalformedURLException e) {
+            throw new StorageFileNotFoundException("Could not read file: " + packageName + "/changelog.txt", e);
+        }
     }
 }

@@ -84,14 +84,24 @@ elasticsearch:
   host: localhost
   port: 9300
 
+kibana:
+  host: localhost
+  port: 5601
+
 opencelium:
-  version: 1.3
+  version: v.1.3
   mail:
     from: OC_Application
   token:
     secret: any_secret_key
     activity-time: 18000
     experation-time: 86400
+  assistant:
+    repo:
+      url: bitbucket
+      username: uname
+      password: password
+
 
 
 #  ldap:
