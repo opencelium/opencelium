@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.application.entity;
 
-public class UpdatePackage {
+public class AvailableUpdate {
     private String name;
     private String version;
     private String changelogLink;

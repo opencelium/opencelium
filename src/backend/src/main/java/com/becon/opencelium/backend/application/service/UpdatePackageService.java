@@ -1,14 +1,15 @@
 package com.becon.opencelium.backend.application.service;
 
-import com.becon.opencelium.backend.application.entity.UpdatePackage;
-import com.becon.opencelium.backend.resource.application.UpdatePackageResource;
+import com.becon.opencelium.backend.application.entity.AvailableUpdate;
+import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 
 import java.util.List;
 
 public interface UpdatePackageService {
 
-    List<UpdatePackage> getOffVersions();
-    List<UpdatePackage> getOnVersions();
+    List<AvailableUpdate> getOffVersions();
+    List<AvailableUpdate> getOnVersions();
 
-    UpdatePackageResource toResource(UpdatePackage offVersions);
+    String[] getDirectories();
+    AvailableUpdateResource toResource(AvailableUpdate offVersions);
 }

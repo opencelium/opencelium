@@ -6,7 +6,7 @@ import javax.annotation.Resource;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UpdatePackageResource {
+public class AvailableUpdateResource {
     private String name;
     private String version;
     private String changelogLink;

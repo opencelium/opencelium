@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.application.service;
 
-import com.becon.opencelium.backend.application.entity.UpdatePackage;
+import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.resource.application.UpdatePackageResource;
+import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
@@ -27,20 +27,15 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     private Environment env;
 
     @Override
-    public List<UpdatePackage> getOffVersions() {
+    public List<AvailableUpdate> getOffVersions() {
 
-        File file = new File(PathConstant.APPLICATION_VERSION);
-        String[] directories = file.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File current, String name) {
-                return new File(current, name).isDirectory();
-            }
-        });
+
+        String[] directories = getDirectories();
 
         if (directories == null) {
             return null;
         }
-        List<UpdatePackage> versions;
+        List<AvailableUpdate> versions;
         try {
             versions = getAll(directories);
         } catch (Exception e) {
@@ -50,25 +45,36 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     }
 
     @Override
-    public List<UpdatePackage> getOnVersions() {
+    public List<AvailableUpdate> getOnVersions() {
         return null;
     }
 
     @Override
-    public UpdatePackageResource toResource(UpdatePackage offVersions) {
-        UpdatePackageResource updatePackageResource = new UpdatePackageResource();
-        updatePackageResource.setName(offVersions.getName());
-        updatePackageResource.setStatus(offVersions.getStatus());
-        updatePackageResource.setVersion(offVersions.getVersion());
-        updatePackageResource.setChangelogLink(offVersions.getChangelogLink());
-        return updatePackageResource;
+    public String[] getDirectories() {
+        File file = new File(PathConstant.APPLICATION_VERSION);
+        return file.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
     }
 
-    private List<UpdatePackage> getAll(String[] appDirectories) throws Exception {
+    @Override
+    public AvailableUpdateResource toResource(AvailableUpdate offVersions) {
+        AvailableUpdateResource availableUpdateResource = new AvailableUpdateResource();
+        availableUpdateResource.setName(offVersions.getName());
+        availableUpdateResource.setStatus(offVersions.getStatus());
+        availableUpdateResource.setVersion(offVersions.getVersion());
+        availableUpdateResource.setChangelogLink(offVersions.getChangelogLink());
+        return availableUpdateResource;
+    }
+
+    private List<AvailableUpdate> getAll(String[] appDirectories) throws Exception {
         ObjectMapper ymlOm = new ObjectMapper(new YAMLFactory());
-        List<UpdatePackage> packages = new LinkedList<>();
+        List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
-            UpdatePackage updatePackage = new UpdatePackage();
+            AvailableUpdate availableUpdate = new AvailableUpdate();
 
             String yamlPath = PathConstant.APPLICATION_VERSION + appDir + PathConstant.RESOURCES + "application_default.yml";
             File application_yml = Paths.get(yamlPath).toFile();
@@ -89,11 +95,11 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
             String status = getVersionStatus(version.toString());
             String c = PathConstant.APPLICATION_VERSION + appDir + PathConstant.RESOURCES + "changelog.txt";
-            updatePackage.setName(appDir);
-            updatePackage.setStatus(status);
-            updatePackage.setChangelogLink(getChangelogLink(appDir));
-            updatePackage.setVersion(version.toString());
-            packages.add(updatePackage);
+            availableUpdate.setName(appDir);
+            availableUpdate.setStatus(status);
+            availableUpdate.setChangelogLink(getChangelogLink(appDir));
+            availableUpdate.setVersion(version.toString());
+            packages.add(availableUpdate);
         }
         return packages;
     }

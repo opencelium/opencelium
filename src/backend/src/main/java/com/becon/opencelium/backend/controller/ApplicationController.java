@@ -17,13 +17,13 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
-import com.becon.opencelium.backend.application.entity.UpdatePackage;
+import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.service.ApplicationServiceImp;
 import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
-import com.becon.opencelium.backend.resource.application.UpdatePackageResource;
+import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,8 +94,8 @@ public class ApplicationController {
     @GetMapping("/oc/offline/versions")
     public ResponseEntity<?> getOfflineVersion() {
 
-        List<UpdatePackage> offVersions  = packageServiceImp.getOffVersions();
-        List<UpdatePackageResource> packageResource = offVersions.stream()
+        List<AvailableUpdate> offVersions  = packageServiceImp.getOffVersions();
+        List<AvailableUpdateResource> packageResource = offVersions.stream()
                 .map(p -> packageServiceImp.toResource(p)).collect(Collectors.toList());
         return ResponseEntity.ok(packageResource);
     }
