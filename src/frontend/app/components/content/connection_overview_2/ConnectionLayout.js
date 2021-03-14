@@ -32,7 +32,7 @@ class ConnectionLayout extends Component{
         return (
             <div className={styles.connection_editor}>
                 <div className={styles.top_panel}>
-                    <div className={`${styles.left_panel} ${styles.business_layout}`}>
+                    <div id={'business_layout'} className={`${styles.left_panel} ${styles.business_layout}`}>
                         <BusinessLayout/>
                     </div>
                     <div className={styles.grab_vertical}/>
@@ -41,7 +41,7 @@ class ConnectionLayout extends Component{
                     </div>
                 </div>
                 <div className={styles.grab_horizontal}/>
-                <div className={`${styles.bottom_panel} ${styles.program_layout}`}>
+                <div id={'program_layout'} className={`${styles.bottom_panel} ${styles.program_layout}`}>
                     <ProgramLayout/>
                 </div>
             </div>
