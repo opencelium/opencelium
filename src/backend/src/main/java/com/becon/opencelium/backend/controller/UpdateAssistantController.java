@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/application", produces = "application/hal+json", consumes = {"application/json"})
-public class ApplicationController {
+@RequestMapping(value = "/api/assistant", produces = "application/hal+json", consumes = {"application/json"})
+public class UpdateAssistantController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -100,14 +100,14 @@ public class ApplicationController {
         return ResponseEntity.ok(packageResource);
     }
 
-    @GetMapping("/oc/template/update/file/all/{version}")
-    public ResponseEntity<?> getAllUpdateTemplateFiles(@PathVariable String version) {
-
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/oc/invoker/update/file/all/{version}")
-    public ResponseEntity<?> getAllUpdateInvokerFiles(@PathVariable String version) {
+    @GetMapping("/oc/{resource}/{folder}")
+    public ResponseEntity<?> getAssistentResourceFiles(@PathVariable String resource, @PathVariable String folder) {
+        String path = PathConstant.APPLICATION_VERSION + folder + PathConstant.RESOURCES;
+        switch (resource) {
+            case "template":
+                break;
+            case "invoker":
+        }
 
         return ResponseEntity.ok().build();
     }
