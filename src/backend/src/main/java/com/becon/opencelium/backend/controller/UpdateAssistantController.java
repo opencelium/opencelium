@@ -24,6 +24,9 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
+import com.becon.opencelium.backend.resource.template.TemplateResource;
+import com.becon.opencelium.backend.template.entity.Template;
+import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,9 @@ public class UpdateAssistantController {
 
     @Autowired
     private UpdatePackageServiceImp packageServiceImp;
+
+    @Autowired
+    private TemplateServiceImp templateServiceImp;
 
     @GetMapping("/all")
     public List<String> getAll(){
@@ -100,14 +106,18 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
-    @GetMapping("/oc/{resource}/{folder}")
-    public ResponseEntity<?> getAssistentResourceFiles(@PathVariable String resource, @PathVariable String folder) {
-        String path = PathConstant.APPLICATION_VERSION + folder + PathConstant.RESOURCES;
-        switch (resource) {
-            case "template":
-                break;
-            case "invoker":
-        }
+    @GetMapping("/oc/offline/template/{folder}")
+    public ResponseEntity<?> getAssistentTemplateFiles(@PathVariable String folder) {
+        String path = PathConstant.APPLICATION_VERSION + folder + PathConstant.RESOURCES + "/templates/";
+        List<Template> templates = templateServiceImp.findAllByPath(path);
+        List<TemplateResource> templateResources = templates.stream()
+                .map(t -> templateServiceImp.toResource(t))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(templateResources);
+    }
+
+    @GetMapping("/oc/offline/invoker/{folder}")
+    public ResponseEntity<?> getAssistentInvokerFiles(@PathVariable String resource, @PathVariable String folder) {
 
         return ResponseEntity.ok().build();
     }

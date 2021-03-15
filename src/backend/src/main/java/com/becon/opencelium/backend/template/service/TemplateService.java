@@ -34,6 +34,8 @@ public interface TemplateService {
 
     List<Template> findAll();
 
+    List<Template> findAllByPath(String path);
+
     void deleteById(String templateId);
 
     Optional<Template> findById(String id);
