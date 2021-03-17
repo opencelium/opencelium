@@ -17,26 +17,39 @@
 package com.becon.opencelium.backend.invoker.service;
 
 import com.becon.opencelium.backend.exception.StorageException;
+import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.neo4j.entity.BodyNode;
+import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.storage.StorageService;
+import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.nio.file.Files.exists;
 
@@ -207,6 +220,43 @@ public class InvokerServiceImp implements InvokerService{
         return fieldValue;
     }
 
+    @Override
+    public Map<String, String> findAllByPathAsString(String path) {
+        return getAll(path);
+    }
+
+    @Override
+    public UpdateInvokerResource toUpdateInvokerResource(Map.Entry<String, String> entry) {
+        UpdateInvokerResource updateInvokerResource = new UpdateInvokerResource();
+        XPathFactory xpathfactory = XPathFactory.newInstance();
+        XPath xpath = xpathfactory.newXPath();
+        String xpathQuery = "/invoker/name";
+        String fileName = entry.getKey();
+        String inv = entry.getValue();
+
+        updateInvokerResource.setName(fileName);
+        updateInvokerResource.setContent(inv);
+
+        return updateInvokerResource;
+    }
+
+    private static Document convertStringToXMLDocument(String xmlString)
+    {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+        try
+        {
+            builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
+            return doc;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private Object findField(String field, Map<String, Object> body){
 
         if (body == null) {
@@ -233,5 +283,28 @@ public class InvokerServiceImp implements InvokerService{
         }
 
         return null;
+    }
+
+    private Map<String, String> getAll(String folder) throws WrongEncode {
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
+            return walk.filter(Files::isRegularFile)
+                    .filter(path -> FilenameUtils.getExtension(path.toString()).equals("xml"))
+                    .map(path -> {
+                        StringBuilder contentBuilder = new StringBuilder();
+                        try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
+                            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+                            System.out.println(Paths.get(path.toString()).getFileName().toString());
+                            Map.Entry<String, String> entry = Collections
+                                    .singletonMap(Paths.get(path.toString()).getFileName().toString(), contentBuilder.toString())
+                                    .entrySet().iterator().next();
+                            return entry;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            throw new WrongEncode("UTF8");
+                        }
+                    }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

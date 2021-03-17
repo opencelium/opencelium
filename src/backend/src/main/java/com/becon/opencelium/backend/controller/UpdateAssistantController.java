@@ -22,8 +22,10 @@ import com.becon.opencelium.backend.application.service.ApplicationServiceImp;
 import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
+import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
@@ -42,6 +44,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -62,6 +65,9 @@ public class UpdateAssistantController {
 
     @Autowired
     private TemplateServiceImp templateServiceImp;
+
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
 
     @GetMapping("/all")
     public List<String> getAll(){
@@ -117,9 +123,13 @@ public class UpdateAssistantController {
     }
 
     @GetMapping("/oc/offline/invoker/{folder}")
-    public ResponseEntity<?> getAssistentInvokerFiles(@PathVariable String resource, @PathVariable String folder) {
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> getAssistentInvokerFiles(@PathVariable String folder) {
+        String path = PathConstant.APPLICATION_VERSION + folder + PathConstant.RESOURCES + "invoker/";
+        Map<String, String> invokers = invokerServiceImp.findAllByPathAsString(path);
+        List<UpdateInvokerResource> invokerResources = invokers.entrySet().stream()
+                .map(inv -> invokerServiceImp.toUpdateInvokerResource(inv))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(invokerResources);
     }
 
     @GetMapping("/changelog/file/{packageName}")
