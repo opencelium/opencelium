@@ -51,7 +51,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     @Override
     public String[] getDirectories() {
-        File file = new File(PathConstant.APPLICATION_VERSION);
+        File file = new File(PathConstant.ASSISTANT);
         return file.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -76,7 +76,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         for (String appDir : appDirectories) {
             AvailableUpdate availableUpdate = new AvailableUpdate();
 
-            String yamlPath = PathConstant.APPLICATION_VERSION + appDir + PathConstant.RESOURCES + "application_default.yml";
+            String yamlPath = PathConstant.ASSISTANT + appDir + PathConstant.RESOURCES + "application_default.yml";
             File application_yml = Paths.get(yamlPath).toFile();
 
             Object obj = ymlOm.readValue(application_yml, Map.class);
@@ -94,7 +94,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
             }
 
             String status = getVersionStatus(version.toString());
-            String c = PathConstant.APPLICATION_VERSION + appDir + PathConstant.RESOURCES + "changelog.txt";
+            String c = PathConstant.ASSISTANT + appDir + PathConstant.RESOURCES + "changelog.txt";
             availableUpdate.setName(appDir);
             availableUpdate.setStatus(status);
             availableUpdate.setChangelogLink(getChangelogLink(appDir));

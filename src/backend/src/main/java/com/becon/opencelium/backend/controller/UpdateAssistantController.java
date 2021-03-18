@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
-import com.becon.opencelium.backend.application.service.ApplicationServiceImp;
+import com.becon.opencelium.backend.application.service.AssistantServiceImp;
 import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
@@ -38,6 +38,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.net.MalformedURLException;
@@ -58,7 +59,7 @@ public class UpdateAssistantController {
     private Environment env;
 
     @Autowired
-    private ApplicationServiceImp applicationService;
+    private AssistantServiceImp assistantServiceImp;
 
     @Autowired
     private UpdatePackageServiceImp packageServiceImp;
@@ -98,8 +99,8 @@ public class UpdateAssistantController {
 
     @GetMapping("/oc/system/overview")
     public ResponseEntity<?> getSystemOverview() {
-        SystemOverview systemOverview = applicationService.getSystemOverview();
-        SystemOverviewResource resource = applicationService.toResource(systemOverview);
+        SystemOverview systemOverview = assistantServiceImp.getSystemOverview();
+        SystemOverviewResource resource = assistantServiceImp.toResource(systemOverview);
         return ResponseEntity.ok(resource);
     }
 
@@ -112,9 +113,9 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
-    @GetMapping("/oc/offline/template/{folder}")
-    public ResponseEntity<?> getAssistentTemplateFiles(@PathVariable String folder) {
-        String path = PathConstant.APPLICATION_VERSION + folder + PathConstant.RESOURCES + "/templates/";
+    @GetMapping("/oc/offline/template")
+    public ResponseEntity<?> getAssistentTemplateFiles() {
+        String path = PathConstant.TEMPLATE;
         List<Template> templates = templateServiceImp.findAllByPath(path);
         List<TemplateResource> templateResources = templates.stream()
                 .map(t -> templateServiceImp.toResource(t))
@@ -122,9 +123,9 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(templateResources);
     }
 
-    @GetMapping("/oc/offline/invoker/{folder}")
-    public ResponseEntity<?> getAssistentInvokerFiles(@PathVariable String folder) {
-        String path = PathConstant.APPLICATION_VERSION + folder + PathConstant.RESOURCES + "invoker/";
+    @GetMapping("/oc/offline/invoker")
+    public ResponseEntity<?> getAssistentInvokerFiles() {
+        String path = PathConstant.INVOKER;
         Map<String, String> invokers = invokerServiceImp.findAllByPathAsString(path);
         List<UpdateInvokerResource> invokerResources = invokers.entrySet().stream()
                 .map(inv -> invokerServiceImp.toUpdateInvokerResource(inv))
@@ -137,7 +138,7 @@ public class UpdateAssistantController {
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
 
         try {
-            String path = PathConstant.APPLICATION_VERSION + packageName + PathConstant.RESOURCES;
+            String path = PathConstant.ASSISTANT + packageName + PathConstant.RESOURCES;
             Path rootLocation = Paths.get(path);
             Path filePath = rootLocation.resolve("changelog.txt");
             org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());

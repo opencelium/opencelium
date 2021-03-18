@@ -293,7 +293,6 @@ public class InvokerServiceImp implements InvokerService{
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
-                            System.out.println(Paths.get(path.toString()).getFileName().toString());
                             Map.Entry<String, String> entry = Collections
                                     .singletonMap(Paths.get(path.toString()).getFileName().toString(), contentBuilder.toString())
                                     .entrySet().iterator().next();

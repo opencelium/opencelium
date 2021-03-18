@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.application.service.AssistantServiceImp;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -62,6 +63,9 @@ public class FileController {
 
     @Autowired
     private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private AssistantServiceImp assistantServiceImp;
 
     private final UserStorageService storageService;
 
@@ -190,6 +194,12 @@ public class FileController {
         } catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    @PostMapping(value = "/assistant/zipfile")
+    public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
+        assistantServiceImp.uploadZipFile(file,"repository/zipfile/");
+        return ResponseEntity.ok().build();
     }
 
     private boolean checkJsonExtension(String extension){
