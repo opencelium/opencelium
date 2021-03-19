@@ -16,6 +16,8 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.application.service.AssistantServiceImp;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -42,6 +44,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Controller
@@ -62,6 +66,9 @@ public class FileController {
 
     @Autowired
     private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private AssistantServiceImp assistantServiceImp;
 
     private final UserStorageService storageService;
 
@@ -190,6 +197,23 @@ public class FileController {
         } catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    @PostMapping(value = "/assistant/zipfile")
+    public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
+        assistantServiceImp.uploadZipFile(file,"repository/zipfile/");
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping(value = "/assistant/zipfile/{filename}")
+    public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
+
+        Path zipPath = Paths.get(PathConstant.ASSISTANT + filename);
+        assistantServiceImp.deleteZipFile(zipPath);
+
+        Path folderPath = Paths.get(PathConstant.REPOSITORY + "zipfile/" + filename + ".zip");
+        assistantServiceImp.deleteZipFile(folderPath);
+        return ResponseEntity.noContent().build();
     }
 
     private boolean checkJsonExtension(String extension){

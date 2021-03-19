@@ -18,12 +18,17 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
-import com.becon.opencelium.backend.application.service.ApplicationServiceImp;
+import com.becon.opencelium.backend.application.service.AssistantServiceImp;
 import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
+import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
+import com.becon.opencelium.backend.resource.template.TemplateResource;
+import com.becon.opencelium.backend.template.entity.Template;
+import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +38,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/application", produces = "application/hal+json", consumes = {"application/json"})
-public class ApplicationController {
+@RequestMapping(value = "/api/assistant", produces = "application/hal+json", consumes = {"application/json"})
+public class UpdateAssistantController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -52,10 +59,16 @@ public class ApplicationController {
     private Environment env;
 
     @Autowired
-    private ApplicationServiceImp applicationService;
+    private AssistantServiceImp assistantServiceImp;
 
     @Autowired
     private UpdatePackageServiceImp packageServiceImp;
+
+    @Autowired
+    private TemplateServiceImp templateServiceImp;
+
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
 
     @GetMapping("/all")
     public List<String> getAll(){
@@ -86,8 +99,8 @@ public class ApplicationController {
 
     @GetMapping("/oc/system/overview")
     public ResponseEntity<?> getSystemOverview() {
-        SystemOverview systemOverview = applicationService.getSystemOverview();
-        SystemOverviewResource resource = applicationService.toResource(systemOverview);
+        SystemOverview systemOverview = assistantServiceImp.getSystemOverview();
+        SystemOverviewResource resource = assistantServiceImp.toResource(systemOverview);
         return ResponseEntity.ok(resource);
     }
 
@@ -100,16 +113,24 @@ public class ApplicationController {
         return ResponseEntity.ok(packageResource);
     }
 
-    @GetMapping("/oc/template/update/file/all/{version}")
-    public ResponseEntity<?> getAllUpdateTemplateFiles(@PathVariable String version) {
-
-        return ResponseEntity.ok().build();
+    @GetMapping("/oc/template")
+    public ResponseEntity<?> getAssistentTemplateFiles() {
+        String path = PathConstant.TEMPLATE;
+        List<Template> templates = templateServiceImp.findAllByPath(path);
+        List<TemplateResource> templateResources = templates.stream()
+                .map(t -> templateServiceImp.toResource(t))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(templateResources);
     }
 
-    @GetMapping("/oc/invoker/update/file/all/{version}")
-    public ResponseEntity<?> getAllUpdateInvokerFiles(@PathVariable String version) {
-
-        return ResponseEntity.ok().build();
+    @GetMapping("/oc/invoker")
+    public ResponseEntity<?> getAssistentInvokerFiles() {
+        String path = PathConstant.INVOKER;
+        Map<String, String> invokers = invokerServiceImp.findAllByPathAsString(path);
+        List<UpdateInvokerResource> invokerResources = invokers.entrySet().stream()
+                .map(inv -> invokerServiceImp.toUpdateInvokerResource(inv))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(invokerResources);
     }
 
     @GetMapping("/changelog/file/{packageName}")
@@ -117,7 +138,7 @@ public class ApplicationController {
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
 
         try {
-            String path = PathConstant.APPLICATION_VERSION + packageName + PathConstant.RESOURCES;
+            String path = PathConstant.ASSISTANT + packageName + PathConstant.RESOURCES;
             Path rootLocation = Paths.get(path);
             Path filePath = rootLocation.resolve("changelog.txt");
             org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());

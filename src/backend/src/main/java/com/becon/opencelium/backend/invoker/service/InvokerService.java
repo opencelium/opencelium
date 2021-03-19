@@ -20,8 +20,10 @@ import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 
+import javax.xml.xpath.XPathExpressionException;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +48,10 @@ public interface InvokerService {
     String findFieldType(String name, String methodName, String exchangeType, String result, String fieldName);
 
     String findFieldByPath(String invoker, String method, String path);
+
+    Map<String, String> findAllByPathAsString(String path);
+
+    UpdateInvokerResource toUpdateInvokerResource(Map.Entry<String, String> entry) throws XPathExpressionException;
 
 //    Object findField(String field, Map<String, Object> body);
 }

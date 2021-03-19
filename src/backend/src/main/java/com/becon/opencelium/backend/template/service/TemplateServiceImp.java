@@ -85,7 +85,7 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public List<Template> findByFromInvokerAndToInvoker(String fromInvoker, String toInvoker) {
         List<Template> result = new ArrayList<>();
-        getAll().forEach(t -> {
+        getAll(PathConstant.TEMPLATE).forEach(t -> {
             if (t == null){
                 return;
             }
@@ -99,12 +99,17 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public List<Template> findAll() {
-        return getAll();
+        return getAll(PathConstant.TEMPLATE);
+    }
+
+    @Override
+    public List<Template> findAllByPath(String path) {
+        return getAll(path);
     }
 
     @Override
     public boolean existsById(String templateId) {
-        List<Template> templates = getAll();
+        List<Template> templates = getAll(PathConstant.TEMPLATE);
         return templates.stream().anyMatch(t -> t.getTemplateId().equals(templateId));
     }
 
@@ -144,8 +149,8 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
-    private List<Template> getAll() throws WrongEncode {
-        try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
+    private List<Template> getAll(String folder) throws WrongEncode {
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
             ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)
                     .filter(path -> FilenameUtils.getExtension(path.toString()).equals("json"))
