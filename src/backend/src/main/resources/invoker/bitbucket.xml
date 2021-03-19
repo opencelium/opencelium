@@ -75,7 +75,7 @@
                         <field name="values" type="array">
                            <field name="full_name" type="string"/>
                            <field name="name" type="string"/>
-                           <field name="slug" type="string"/>                                
+                           <field name="slug" type="string"/>
                         </field>
                     </body>
                 </success>

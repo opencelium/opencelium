@@ -240,6 +240,11 @@ public class InvokerServiceImp implements InvokerService{
         return updateInvokerResource;
     }
 
+    @Override
+    public Map<String, Invoker> findAllAsMap() {
+        return null;
+    }
+
     private static Document convertStringToXMLDocument(String xmlString)
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
