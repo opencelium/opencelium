@@ -18,22 +18,16 @@ class Arrow extends React.Component{
         if(!from || !to){
             return null;
         }
-        const {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
+        let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
         return(
-            <svg>
-                <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7"
-                            refX="0" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" />
-                    </marker>
-                </defs>
-                {line1 && <line x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke="#000"
+            <React.Fragment>
+                {line1 && <line id={`${from.id}_${to.id}_line1`} className={'line1'} x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke="#000"
                       strokeWidth={ARROW_WIDTH}/>}
-                {line2 && <line x1={line2.x1} y1={line2.y1} x2={line2.x2} y2={line2.y2} stroke="#000"
+                {line2 && <line id={`${from.id}_${to.id}_line2`} className={'line2'} x1={line2.x1} y1={line2.y1} x2={line2.x2} y2={line2.y2} stroke="#000"
                       strokeWidth={ARROW_WIDTH}/>}
-                {arrow && <line x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke="#000"
-                      strokeWidth={ARROW_WIDTH} markerEnd="url(#arrowhead)" />}
-            </svg>
+                {arrow && <line id={`${from.id}_${to.id}_arrow`} className={'arrow'} x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke="#000"
+                      strokeWidth={ARROW_WIDTH} markerEnd="url(#arrow_head_right)" />}
+            </React.Fragment>
         );
     }
 }

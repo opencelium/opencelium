@@ -78,7 +78,7 @@ export default class CCoordinates{
         line1.x1 = elemATop.x;
         line1.y1 = elemATop.y;
         line1.x2 = elemATop.x;
-        line1.y2 = elemATop.y - ARROW_MARGIN;
+        line1.y2 = elemATop.y - ARROW_MARGIN - (Math.abs(from.y - to.y));
 
         line2.x1 = line1.x2;
         line2.y1 = line1.y2;
@@ -316,6 +316,32 @@ export default class CCoordinates{
         arrow.x2 = arrow.x1;
         arrow.y2 = elemBBottom.y + ARROW_END_LENGTH;
         return {line2, arrow};
+    }
+
+    static case15Coordinates(from, to){
+        let line1 = {x1: 0, y1: 0, x2: 0, y2: 0};
+        let line2 = {x1: 0, y1: 0, x2: 0, y2: 0};
+        let arrow = {x1: 0, y1: 0, x2: 0, y2: 0};
+        let elemABottom = CCoordinates.getBottomMiddle(from);
+        let elemBBottom = CCoordinates.getBottomMiddle(to);
+        line1.x1 = elemABottom.x;
+        line1.y1 = elemABottom.y;
+        line1.x2 = elemABottom.x;
+        line1.y2 = elemABottom.y + ARROW_MARGIN + (Math.abs(from.y - to.y));
+
+        line2.x1 = line1.x2;
+        line2.y1 = line1.y2;
+        line2.x2 = elemBBottom.x;
+        if(from.x === to.x){
+            line2.x2 += 10;
+        }
+        line2.y2 = line2.y1;
+
+        arrow.x1 = line2.x2;
+        arrow.y1 = line2.y2;
+        arrow.x2 = arrow.x1;
+        arrow.y2 = arrow.y1 - ARROW_MARGIN + ARROW_END_LENGTH;
+        return {line1, line2, arrow};
     }
 
     static getLinkCoordinates(from, to){

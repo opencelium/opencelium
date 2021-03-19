@@ -483,3 +483,11 @@ export const UpdateAssistantAction = {
     ADD_CONVERTCONNECTIONSLOGS_REJECTED:       'ADD_CONVERTCONNECTIONSLOGS_REJECTED',
     ADD_CONVERTCONNECTIONSLOGS_CANCELED:       'ADD_CONVERTCONNECTIONSLOGS_CANCELED',
 };
+
+/**
+ * connection overview 2 actions for redux state
+ */
+export const ConnectionOverview2Action = {
+    SET_CURRENTITEM:                           'SET_CURRENTITEM',
+    SET_CURRENTSUBITEM:                        'SET_CURRENTSUBITEM',
+};

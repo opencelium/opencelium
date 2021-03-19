@@ -19,7 +19,7 @@ import React, { Component } from 'react';
 /**
  * to bring the component be draggable, zoomable, pannable
  */
-export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10}){
+export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10, isDraggable: false}){
     return function (Component) {
         return(
             class C extends React.Component {
@@ -77,10 +77,12 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
 
                 startDrag(e){
                     if(e.target.classList.contains('draggable')) {
-                        this.selectedElement = e.target.parentNode;
-                        this.offset = this.getMousePosition(e, this.selectedElement.parentNode);
-                        this.offset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
-                        this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
+                        if(params.isDraggable) {
+                            this.selectedElement = e.target.parentNode;
+                            this.offset = this.getMousePosition(e, this.selectedElement.parentNode);
+                            this.offset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
+                            this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
+                        }
                     } else{
                         const {svg} = this.state;
                         this.isPointerDown = true;
@@ -88,22 +90,26 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     }
                 }
 
-                drag(e){
+                drag(e, setCoordinates){
                     if (this.selectedElement) {
-                        e.preventDefault();
-                        const coordinates = this.getMousePosition(e, this.selectedElement.parentNode);
-                        let currentOffset = {x: coordinates.x, y: coordinates.y};
-                        currentOffset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
-                        currentOffset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
-                        if(Math.abs(currentOffset.x - this.offset.x) >= params.dragAndDropStep) {
-                            let x = parseInt(coordinates.x - this.offset.x);
-                            x = Math.round(x / params.dragAndDropStep) * params.dragAndDropStep;
-                            this.selectedElement.setAttributeNS(null, "x", `${x}`);
-                        }
-                        if(Math.abs(currentOffset.y - this.offset.y) >= params.dragAndDropStep){
-                            let y = parseInt(coordinates.y - this.offset.y);
-                            y = Math.round(y / params.dragAndDropStep) * params.dragAndDropStep;
-                            this.selectedElement.setAttributeNS(null, "y", `${y}`);
+                        if(params.isDraggable) {
+                            e.preventDefault();
+                            const coordinates = this.getMousePosition(e, this.selectedElement.parentNode);
+                            let currentOffset = {x: coordinates.x, y: coordinates.y};
+                            currentOffset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
+                            currentOffset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
+                            if (Math.abs(currentOffset.x - this.offset.x) >= params.dragAndDropStep) {
+                                let x = parseInt(coordinates.x - this.offset.x);
+                                x = Math.round(x / params.dragAndDropStep) * params.dragAndDropStep;
+                                //this.selectedElement.setAttributeNS(null, "x", `${x}`);
+                                setCoordinates({x})
+                            }
+                            if (Math.abs(currentOffset.y - this.offset.y) >= params.dragAndDropStep) {
+                                let y = parseInt(coordinates.y - this.offset.y);
+                                y = Math.round(y / params.dragAndDropStep) * params.dragAndDropStep;
+                                //this.selectedElement.setAttributeNS(null, "y", `${y}`);
+                                setCoordinates({y})
+                            }
                         }
                     } else{
                         if (!this.isPointerDown) {
@@ -113,10 +119,8 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         const {ratio, svg} = this.state;
                         let viewBox = svg.viewBox.baseVal;
                         let pointerPosition = this.getMousePosition(e, svg);
-                        console.log('old', viewBox)
                         viewBox.x -= ((pointerPosition.x - this.pointerOrigin.x) * ratio);
                         viewBox.y -= ((pointerPosition.y - this.pointerOrigin.y) * ratio);
-                        console.log('new', viewBox);
                     }
                 }
 

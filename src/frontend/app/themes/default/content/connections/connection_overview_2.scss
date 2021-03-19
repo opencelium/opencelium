@@ -101,14 +101,21 @@
     pointer-events: none;
   }
 }
-
+.current_process{
+  rect {
+    fill: wheat;
+  }
+}
 .process_rect{
-  cursor: grab;
+  cursor: move;
   fill: #eee;
   stroke: #b2b2b2;
   stroke-width: 2;
 }
-.process_rect:active{
+.process_rect_draggable{
+  cursor: grab;
+}
+.process_rect_draggable:active{
   cursor: grabbing;
 }
 .process_label{
@@ -129,6 +136,13 @@
 }
 
 .details{
-  text-align: center;
-  font-size: 32px;
+  padding: 10px;
+  .title{
+    text-align: center;
+    font-size: 32px;
+  }
+  .label{
+    font-size: 14px;
+    text-align: left;
+  }
 }
