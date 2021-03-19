@@ -58,6 +58,22 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
+    public void deleteZipFile(Path path) {
+        if(path.equals("")){
+            return;
+        }
+        try {
+            File tempFile = new File(path.toString());
+            if(tempFile.exists()){
+                Files.delete(path);
+            }
+        }
+        catch (IOException e){
+            throw new StorageException("Failed to delete stored file", e);
+        }
+    }
+
+    @Override
     public SystemOverviewResource toResource(SystemOverview systemOverview) {
         SystemOverviewResource systemOverviewResource = new SystemOverviewResource();
         systemOverviewResource.setJava(systemOverview.getJava());

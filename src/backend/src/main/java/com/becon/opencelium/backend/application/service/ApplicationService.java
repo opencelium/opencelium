@@ -12,5 +12,6 @@ public interface ApplicationService {
 
     SystemOverview getSystemOverview();
     void uploadZipFile(MultipartFile file, String location);
+    void deleteZipFile(Path path);
     SystemOverviewResource toResource(SystemOverview systemOverview);
 }

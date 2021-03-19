@@ -113,7 +113,7 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
-    @GetMapping("/oc/offline/template")
+    @GetMapping("/oc/template")
     public ResponseEntity<?> getAssistentTemplateFiles() {
         String path = PathConstant.TEMPLATE;
         List<Template> templates = templateServiceImp.findAllByPath(path);
@@ -123,7 +123,7 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(templateResources);
     }
 
-    @GetMapping("/oc/offline/invoker")
+    @GetMapping("/oc/invoker")
     public ResponseEntity<?> getAssistentInvokerFiles() {
         String path = PathConstant.INVOKER;
         Map<String, String> invokers = invokerServiceImp.findAllByPathAsString(path);
