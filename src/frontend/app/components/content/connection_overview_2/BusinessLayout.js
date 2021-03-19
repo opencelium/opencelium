@@ -8,7 +8,6 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import IfOperator from "@components/content/connection_overview_2/elements/IfOperator";
 import SvgLayout from "@decorators/SvgLayout";
 import Arrow from "@components/content/connection_overview_2/elements/Arrow";
-import CCoordinates from "@classes/components/content/connection_overview_2/CCoordinates";
 import {setCurrentItem} from "@actions/connection_overview_2/set";
 
 
@@ -130,7 +129,6 @@ class BusinessLayout extends React.Component{
         }
         this.props.setCurrentItem(currentProcess);
         this.setState({
-            //currentProcess,
             processes,
         });
     }
@@ -150,68 +148,6 @@ class BusinessLayout extends React.Component{
             })
         }
     }
-/*
-    setArrowCoordinates(currentProcessCoordinates){
-        const {currentItem} = this.props;
-        let {arrows} = this.state;
-        if(currentItem){
-            let arrowIfFromProcess = arrows.find(arrow => arrow.from === currentItem.id);
-            if(arrowIfFromProcess) this.setLinesCoordinates(arrowIfFromProcess, currentProcessCoordinates);
-            let arrowIfToProcess = arrows.find(arrow => arrow.to === currentItem.id);
-            if(arrowIfToProcess) this.setLinesCoordinates(arrowIfToProcess, currentProcessCoordinates);
-        }
-    }
-
-    setLinesCoordinates(arrowConnection, currentProcessCoordinates){
-        const {currentItem} = this.props;
-        let {processes} = this.state;
-        let fromProcess = processes.find(process => process.id === arrowConnection.from);
-        let toProcess = processes.find(process => process.id === arrowConnection.to);
-        if(currentItem.id === fromProcess.id){
-            fromProcess = {...fromProcess, ...currentProcessCoordinates};
-        }
-        if(currentItem.id === toProcess.id){
-            toProcess = {...toProcess, ...currentProcessCoordinates};
-        }
-        const {line1, line2, arrow} = CCoordinates.getLinkCoordinates(fromProcess, toProcess);
-        const line1Elem = document.getElementById(`${arrowConnection.from}_${arrowConnection.to}_line1`);
-        const line2Elem = document.getElementById(`${arrowConnection.from}_${arrowConnection.to}_line2`);
-        const arrowElem = document.getElementById(`${arrowConnection.from}_${arrowConnection.to}_arrow`);
-        if(line1){
-            if(line1Elem){
-                this.setLineCoordinate(line1Elem, line1);
-            }
-        } else{
-            if(line1Elem){
-                line1Elem.remove();
-            }
-        }
-        if(line2){
-            if(line2Elem){
-                this.setLineCoordinate(line2Elem, line2);
-            }
-        }else{
-            if(line2Elem){
-                line2Elem.remove();
-            }
-        }
-        if(arrow){
-            if(arrowElem){
-                this.setLineCoordinate(arrowElem, arrow);
-            }
-        }else{
-            if(arrowElem){
-                arrowElem.remove();
-            }
-        }
-    }
-
-    setLineCoordinate(elem, coordinate){
-        elem.setAttribute('x1', coordinate.x1);
-        elem.setAttribute('x2', coordinate.x2);
-        elem.setAttribute('y1', coordinate.y1);
-        elem.setAttribute('y2', coordinate.y2);
-    }*/
 
     onMouseDown(e){
         const {startDrag} = this.props;
@@ -239,7 +175,7 @@ class BusinessLayout extends React.Component{
 
     renderOperators(){
         const operators = [
-            //{type: 'if', x: 220, y: 100,},
+            {type: 'if', x: 220, y: 100,},
         ];
         return operators.map((operator,key) => {
             switch (operator.type){

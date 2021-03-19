@@ -98,18 +98,14 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                             let currentOffset = {x: coordinates.x, y: coordinates.y};
                             currentOffset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
                             currentOffset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
+                            let newCoordinates = {};
                             if (Math.abs(currentOffset.x - this.offset.x) >= params.dragAndDropStep) {
-                                let x = parseInt(coordinates.x - this.offset.x);
-                                x = Math.round(x / params.dragAndDropStep) * params.dragAndDropStep;
-                                //this.selectedElement.setAttributeNS(null, "x", `${x}`);
-                                setCoordinates({x})
+                                newCoordinates.x = Math.round((coordinates.x - this.offset.x) / params.dragAndDropStep) * params.dragAndDropStep;
                             }
                             if (Math.abs(currentOffset.y - this.offset.y) >= params.dragAndDropStep) {
-                                let y = parseInt(coordinates.y - this.offset.y);
-                                y = Math.round(y / params.dragAndDropStep) * params.dragAndDropStep;
-                                //this.selectedElement.setAttributeNS(null, "y", `${y}`);
-                                setCoordinates({y})
+                                newCoordinates.y = Math.round((coordinates.y - this.offset.y) / params.dragAndDropStep) * params.dragAndDropStep;
                             }
+                            setCoordinates(newCoordinates)
                         }
                     } else{
                         if (!this.isPointerDown) {
@@ -154,7 +150,7 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         let normalized;
                         let delta = e.wheelDelta;
                         if (delta) {
-                            normalized = (delta % 120) == 0 ? delta / 120 : delta / 12;
+                            normalized = (delta % 120) === 0 ? delta / 120 : delta / 12;
                         } else {
                             delta = e.deltaY || e.detail || 0;
                             normalized = -(delta % 3 ? delta * 10 : delta / 3);
