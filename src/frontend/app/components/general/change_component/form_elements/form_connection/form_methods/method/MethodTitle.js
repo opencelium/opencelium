@@ -175,13 +175,13 @@ class MethodTitle extends Component{
         let hasRefreshIcon = false;
 
         const newInvokerData = method.invoker._operations.find(o => o.name === method.name);
-        if(newInvokerData){
+        /*if(newInvokerData){
             if(!isEqualObjectParams(newInvokerData.request.body.fields, method.request.body.fields)
             || !isEqualObjectParams(newInvokerData.response.success.body.fields, method.response.success.body.fields)
             || !isEqualObjectParams(newInvokerData.response.fail.body.fields, method.response.fail.body.fields)){
                 hasRefreshIcon = true;
             }
-        }
+        }*/
         return (
             <div>
                 <CardTitle

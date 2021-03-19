@@ -70,7 +70,7 @@ class OldVersionEntry extends React.Component{
         const {showDeleteIcon} = this.state;
         const {t, version, deletingVersion, currentVersion} = this.props;
         let icon = 'delete';
-        if(currentVersion && currentVersion.id === version.id && deletingVersion === API_REQUEST_STATE.START){
+        if(currentVersion && currentVersion.name === version.name && deletingVersion === API_REQUEST_STATE.START){
             icon = 'loading';
         }
         return(

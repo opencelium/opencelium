@@ -114,7 +114,7 @@ const deleteVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.DELETE_VERSION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.id}`;
+            let url = `${urlPrefix}/${action.payload.name}`;
             return Rx.Observable.of(deleteVersionFulfilled(action.payload));
             /*return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteVersionFulfilled,

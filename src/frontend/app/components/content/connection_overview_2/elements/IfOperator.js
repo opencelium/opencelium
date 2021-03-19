@@ -16,11 +16,11 @@ class IfOperator extends React.Component{
         const rectWidth = width / 2;
         const rectHeight = rectWidth;
         const borderRadius = 5;
-        const textX = '44%';
-        const textY = '50%';
+        const textX = '38%';
+        const textY = '45%';
         return(
-            <svg x={x} y={y} width={width} height={height}>
-                <rect x={40} y={-20} rx={borderRadius} ry={borderRadius} width={rectWidth} height={rectHeight} className={`${styles.if_operator} draggable`}/>
+            <svg className={`${styles.if_operator} confine`} x={x} y={y} width={width} height={height}>
+                <rect x={10} y={30} rx={borderRadius} ry={borderRadius} width={rectWidth} height={rectHeight} className={`${styles.if_operator_rect} draggable`}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
                     {label}
                 </text>
