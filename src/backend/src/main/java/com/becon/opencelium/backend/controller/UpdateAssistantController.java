@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.application.service.AssistantServiceImp;
 import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
@@ -123,15 +124,15 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(templateResources);
     }
 
-    @GetMapping("/oc/invoker")
-    public ResponseEntity<?> getAssistentInvokerFiles() {
-        String path = PathConstant.INVOKER;
-        Map<String, String> invokers = invokerServiceImp.findAllByPathAsString(path);
-        List<UpdateInvokerResource> invokerResources = invokers.entrySet().stream()
-                .map(inv -> invokerServiceImp.toUpdateInvokerResource(inv))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(invokerResources);
-    }
+//    @GetMapping("/oc/invoker")
+//    public ResponseEntity<?> getAssistentInvokerFiles() {
+//        String path = PathConstant.INVOKER;
+//        List<Invoker> invokers = invokerServiceImp.findAll();
+//        List<UpdateInvokerResource> invokerResources = invokers.entrySet().stream()
+//                .map(inv -> invokerServiceImp.toUpdateInvokerResource(inv))
+//                .collect(Collectors.toList());
+//        return ResponseEntity.ok(invokerResources);
+//    }
 
     @GetMapping("/changelog/file/{packageName}")
     @ResponseBody

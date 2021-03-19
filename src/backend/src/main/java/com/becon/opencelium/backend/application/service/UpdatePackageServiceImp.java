@@ -63,7 +63,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     @Override
     public AvailableUpdateResource toResource(AvailableUpdate offVersions) {
         AvailableUpdateResource availableUpdateResource = new AvailableUpdateResource();
-        availableUpdateResource.setName(offVersions.getName());
+        availableUpdateResource.setFolder(offVersions.getFolder());
         availableUpdateResource.setStatus(offVersions.getStatus());
         availableUpdateResource.setVersion(offVersions.getVersion());
         availableUpdateResource.setChangelogLink(offVersions.getChangelogLink());
@@ -95,7 +95,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
             String status = getVersionStatus(version.toString());
             String c = PathConstant.ASSISTANT + appDir + PathConstant.RESOURCES + "changelog.txt";
-            availableUpdate.setName(appDir);
+            availableUpdate.setFolder(appDir);
             availableUpdate.setStatus(status);
             availableUpdate.setChangelogLink(getChangelogLink(appDir));
             availableUpdate.setVersion(version.toString());

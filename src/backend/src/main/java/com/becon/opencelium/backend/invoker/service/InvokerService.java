@@ -53,5 +53,7 @@ public interface InvokerService {
 
     UpdateInvokerResource toUpdateInvokerResource(Map.Entry<String, String> entry) throws XPathExpressionException;
 
+    Map<String, Invoker> findAllAsMap();
+
 //    Object findField(String field, Map<String, Object> body);
 }
