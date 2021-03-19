@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {connect} from "react-redux";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -17,10 +18,11 @@ class Details extends React.Component{
     }
 
     render(){
-        const {currentItem, currentSubItem} = this.props;
+        const {currentItem, currentSubItem, moveDetails, position} = this.props;
         let details = currentSubItem ? currentSubItem : currentItem;
         return(
             <div className={styles.details}>
+                <TooltipFontIcon className={position === 'left' ? styles.position_icon_left : styles.position_icon_right} onClick={moveDetails} tooltip={position === 'left' ? 'Move to the Right' : 'Move to the Left'} value={position === 'left' ? 'keyboard_arrow_right' : 'keyboard_arrow_left'}/>
                 <div className={styles.title}>
                     Details
                 </div>

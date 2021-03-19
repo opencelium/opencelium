@@ -2,88 +2,17 @@
 
 .connection_editor{
   height: calc(100vh - 71px);
+  padding-bottom: 50px;
 }
 
-.top_panel{
-  position: relative;
-  margin: 0;
-  padding: 0;
-  height: calc(52.8551% - 0.5px);
-}
-
-.left_panel{
-  width: calc(80% - 0.5px);
-  overflow: auto;
-  position: relative;
-  float: left;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.grab_vertical{
-  width: 1px;
-  cursor: ew-resize;
-  height: 100%;
-  float: left;
-  background: #2c2f34;
-  position: relative;
-  margin: 0;
-  padding: 0;
-}
-.grab_vertical:after{
-  content: "";
-  display: block;
-  height: 100%;
-  width: 8px;
+.replace_icon{
   position: absolute;
-  left: -3px;
-  z-index: 10;
+  left: 49%;
+  cursor: pointer;
+  bottom: 0;
 }
-
-.right_panel{
-  width: calc(20% - 0.5px);
-  overflow: auto;
-  position: relative;
-  float: left;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.grab_horizontal{
-  height: 1px;
-  cursor: ns-resize;
-  background: #2c2f34;
-  position: relative;
-  margin: 0;
-  padding: 0;
-}
-
-.grab_horizontal:after{
-  content: "";
-  display: block;
-  height: 8px;
-  width: 100%;
-  position: absolute;
-  top: -3px;
-  z-index: 10;
-}
-
-.bottom_panel{
-  overflow: auto;
-  position: relative;
-  margin: 0;
-  padding: 0;
-  height: calc(47.1449% - 0.5px);
-  width: 100%;
-}
-
-
 .business_layout {
-  width: calc(80% - 20.5px);
-  height: calc(100% - 20px);
-  margin: 10px;
+  width: 100%;
 }
 .business_layout_svg {
   cursor: move;
@@ -92,6 +21,7 @@
   padding: 2px;
 }
 .program_layout{
+  width: 100%;
   :first-child:first-child:focus{
     outline: none !important;
   }
@@ -144,5 +74,18 @@
   .label{
     font-size: 14px;
     text-align: left;
+  }
+  .position_icon{
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+  }
+  .position_icon_left{
+    @extend .position_icon;
+    right: 0;
+  }
+  .position_icon_right{
+    @extend .position_icon;
+    left: 0;
   }
 }

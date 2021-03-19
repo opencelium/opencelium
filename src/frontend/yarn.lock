@@ -11997,6 +11997,13 @@ react-overlays@^4.1.0:
     uncontrollable "^7.0.0"
     warning "^4.0.3"
 
+react-panelgroup@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/react-panelgroup/-/react-panelgroup-1.0.12.tgz#e19c2d9d1fa4fbe504cdac9255eebc1c569c08f4"
+  integrity sha512-DuA+6TnxLK1TmlQqijYCbzvEVZYS3i6SyG9xqk7SW/S4pzzIxQ73lkSHLkMBG55/iOvGQEL/uH3Y96btk6mPDw==
+  dependencies:
+    prop-types "^15.6.1"
+
 react-popper@^1.3.6:
   version "1.3.7"
   resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-1.3.7.tgz#f6a3471362ef1f0d10a4963673789de1baca2324"

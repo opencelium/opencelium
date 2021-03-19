@@ -175,7 +175,7 @@ class BusinessLayout extends React.Component{
 
     renderOperators(){
         const operators = [
-            {type: 'if', x: 220, y: 100,},
+            //{type: 'if', x: 220, y: 100,},
         ];
         return operators.map((operator,key) => {
             switch (operator.type){
