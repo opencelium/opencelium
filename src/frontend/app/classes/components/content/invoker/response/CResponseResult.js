@@ -132,7 +132,8 @@ export default class CResponseResult{
                         value: WHOLE_ARRAY,
                         type: FIELD_TYPE_ARRAY,
                         label: '(the whole array)'
-                    });
+                    })
+                    return result;
                 } else{
                     return [];
                 }

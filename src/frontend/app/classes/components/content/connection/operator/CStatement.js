@@ -134,14 +134,14 @@ export default class CStatement{
             return null;
         } else {
             let field = this._field;
-            if(this._parent !== null){
+            if(this._parent !== null && typeof this._parent !== 'undefined'){
                 let fieldSplit = field.split('.');
                 let tmpField = '';
                 let newField = '';
                 for(let i = 0; i < fieldSplit.length; i++){
                     let fieldSplitValue = fieldSplit[i];
                     tmpField += tmpField !== '' ? `.${fieldSplitValue}` : fieldSplitValue;
-                    let findField = this._parent && this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
+                    let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
                     if(findField && findField.value !== WHOLE_ARRAY && findField.type === 'array'){
                         fieldSplitValue = markFieldNameAsArray(fieldSplitValue);
                     }
