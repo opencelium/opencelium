@@ -54,7 +54,7 @@ const fetchAppVersionEpic = (action$, store) => {
     return action$.ofType(AppAction.FETCH_APPVERSION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `application/oc/version`;
+            let url = `assistant/oc/version`;
             return doRequest({url},{
                 success: (data) => fetchAppVersionFulfilled(data, {...action.settings}),
                 reject: fetchAppVersionRejected,
