@@ -6,40 +6,58 @@
 }
 
 .replace_icon{
-  position: absolute;
-  left: 49%;
   cursor: pointer;
+  height: 30px;
+  position: absolute;
   bottom: 0;
+  text-align: center;
+  width: 100%;
 }
 .business_layout {
   width: 100%;
+  height: 100%;
 }
-.business_layout_svg {
-  cursor: move;
+.technical_layout{
   width: 100%;
   height: 100%;
+}
+.layout_svg {
+  cursor: move;
   padding: 2px;
 }
-.program_layout{
-  width: 100%;
-  :first-child:first-child:focus{
-    outline: none !important;
-  }
+.operator_polygon{
+  cursor: move;
+  fill: #fff;
+  stroke: #000;
+  stroke-width: 2;
 }
 .process{
   text{
     pointer-events: none;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+}
+.operator{
+  text{
+    pointer-events: none;
+    font-size: $FONT_SIZE_SMALL;
   }
 }
 .current_process{
   rect {
-    fill: wheat;
+    fill: #e2e2e2;
+  }
+}
+.current_operator{
+  polygon {
+    fill: #e2e2e2;
   }
 }
 .process_rect{
   cursor: move;
-  fill: #eee;
-  stroke: #b2b2b2;
+  fill: #fff;
+  stroke: #000;
+  //stroke: #00000021;
   stroke-width: 2;
 }
 .process_rect_draggable{
@@ -68,7 +86,6 @@
 .details{
   padding: 10px;
   .title{
-    text-align: center;
     font-size: 32px;
   }
   .label{

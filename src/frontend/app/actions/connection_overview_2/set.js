@@ -24,8 +24,34 @@ const setCurrentSubItem = (currentSubItem) => {
     };
 };
 
+/**
+ * set items
+ * @param items
+ * @returns {{type: string, payload: {}}}
+ */
+const setItems = (items) => {
+    return {
+        type: ConnectionOverview2Action.SET_ITEMS,
+        payload: items,
+    };
+};
+
+/**
+ * set arrows
+ * @param arrows
+ * @returns {{type: string, payload: {}}}
+ */
+const setArrows = (arrows) => {
+    return {
+        type: ConnectionOverview2Action.SET_ARROWS,
+        payload: arrows,
+    };
+};
+
 
 export{
     setCurrentItem,
     setCurrentSubItem,
+    setArrows,
+    setItems,
 };

@@ -13,13 +13,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
+import styles from "@themes/default/content/connections/connection_overview_2";
+import {ARROWS, ITEMS} from "@components/content/connection_overview_2/data";
+import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import IfOperator from "@components/content/connection_overview_2/elements/IfOperator";
+import Process from "@components/content/connection_overview_2/elements/Process";
+import Arrow from "@components/content/connection_overview_2/elements/Arrow";
+import {setCurrentSubItem} from "@actions/connection_overview_2/set";
 
+/*
+* TODO: move items and arrows into redux state and manipulate them instead of component state
+*/
 
 /**
- * to bring the component be draggable, zoomable, pannable
+ * to bring the component be draggable, scalable, panable
  */
-export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10, isDraggable: false}){
+export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10, isDraggable: false, isScalable: false}){
     return function (Component) {
         return(
             class C extends React.Component {
@@ -45,6 +56,7 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         svg: null,
                         ratio: 0,
                     }
+                    this.svgRef = React.createRef();
                 }
 
                 componentDidMount() {
@@ -65,47 +77,101 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         });
                         window.addEventListener('resize', ::this.setRatio);
                     }
+                    if(params.isScalable) {
+                        this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
+                    }
                 }
 
                 componentWillUnmount() {
                     window.removeEventListener('resize', ::this.setRatio);
+                    if(params.isScalable) {
+                        this.svgRef.current.removeEventListener('wheel', ::this.onWheel);
+                    }
                 }
 
                 setRatio(){
                     this.setState({ratio: this.state.viewBox.width / this.state.svg.getBoundingClientRect().width});
                 }
 
+                setCurrentItem(currentItem){
+                    let {items} = this.props;
+                    const {setCurrentItem, setCurrentSubItem, setItems} = this.props;
+                    if(currentItem){
+                        let index = items.findIndex(item => item.id === currentItem.id);
+                        if(index !== -1) {
+                            items.splice(index, 1);
+                            items.push(currentItem);
+                        }
+                    }
+                    if(setCurrentSubItem){
+                        setCurrentSubItem(currentItem);
+                    } else{
+                        if(setCurrentItem) {
+                            setCurrentItem(currentItem);
+                        }
+                    }
+                    if(setItems) {
+                        setItems(items);
+                    }
+                }
+
+                setItemCoordinates(coordinates){
+                    const {currentItem, setItems, items} = this.props;
+                    if(currentItem) {
+                        if(setItems) {
+                            setItems(items.map(item => {
+                                if (item.id === currentItem.id) {
+                                    item.setCoordinates(coordinates);
+                                }
+                                return item;
+                            }));
+                        }
+                    }
+                }
+
                 startDrag(e){
                     if(e.target.classList.contains('draggable')) {
                         if(params.isDraggable) {
                             this.selectedElement = e.target.parentNode;
-                            this.offset = this.getMousePosition(e, this.selectedElement.parentNode);
-                            this.offset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
-                            this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
+                            if(this.selectedElement.parentNode){
+                                this.offset = this.getMousePosition(e, this.selectedElement.parentNode);
+                                this.offset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
+                                this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
+                            }
                         }
                     } else{
                         const {svg} = this.state;
-                        this.isPointerDown = true;
-                        this.pointerOrigin = this.getMousePosition(e, svg);
+                        if(svg) {
+                            this.isPointerDown = true;
+                            this.pointerOrigin = this.getMousePosition(e, svg);
+                        }
                     }
                 }
 
-                drag(e, setCoordinates){
+                drag(e){
                     if (this.selectedElement) {
                         if(params.isDraggable) {
                             e.preventDefault();
-                            const coordinates = this.getMousePosition(e, this.selectedElement.parentNode);
-                            let currentOffset = {x: coordinates.x, y: coordinates.y};
-                            currentOffset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
-                            currentOffset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
-                            let newCoordinates = {};
-                            if (Math.abs(currentOffset.x - this.offset.x) >= params.dragAndDropStep) {
-                                newCoordinates.x = Math.round((coordinates.x - this.offset.x) / params.dragAndDropStep) * params.dragAndDropStep;
+                            if(this.selectedElement.parentNode) {
+                                const coordinates = this.getMousePosition(e, this.selectedElement.parentNode);
+                                let currentOffset = {x: coordinates.x, y: coordinates.y};
+                                currentOffset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
+                                currentOffset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
+                                let newCoordinates = null;
+                                if (Math.abs(currentOffset.x - this.offset.x) >= params.dragAndDropStep) {
+                                    newCoordinates = {};
+                                    newCoordinates.x = Math.round((coordinates.x - this.offset.x) / params.dragAndDropStep) * params.dragAndDropStep;
+                                }
+                                if (Math.abs(currentOffset.y - this.offset.y) >= params.dragAndDropStep) {
+                                    if(newCoordinates === null){
+                                        newCoordinates = {};
+                                    }
+                                    newCoordinates.y = Math.round((coordinates.y - this.offset.y) / params.dragAndDropStep) * params.dragAndDropStep;
+                                }
+                                if(newCoordinates !== null) {
+                                    ::this.setItemCoordinates(newCoordinates)
+                                }
                             }
-                            if (Math.abs(currentOffset.y - this.offset.y) >= params.dragAndDropStep) {
-                                newCoordinates.y = Math.round((coordinates.y - this.offset.y) / params.dragAndDropStep) * params.dragAndDropStep;
-                            }
-                            setCoordinates(newCoordinates)
                         }
                     } else{
                         if (!this.isPointerDown) {
@@ -114,9 +180,11 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         e.preventDefault();
                         const {ratio, svg} = this.state;
                         let viewBox = svg.viewBox.baseVal;
-                        let pointerPosition = this.getMousePosition(e, svg);
-                        viewBox.x -= ((pointerPosition.x - this.pointerOrigin.x) * ratio);
-                        viewBox.y -= ((pointerPosition.y - this.pointerOrigin.y) * ratio);
+                        if(svg) {
+                            let pointerPosition = this.getMousePosition(e, svg);
+                            viewBox.x -= ((pointerPosition.x - this.pointerOrigin.x) * ratio);
+                            viewBox.y -= ((pointerPosition.y - this.pointerOrigin.y) * ratio);
+                        }
                     }
                 }
 
@@ -165,10 +233,84 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         viewBox.height *= scaleDelta;
                     }
                 }
+                renderItems(){
+                    const {items} = this.props;
+                    return items.map((item,key) => {
+                        switch (item.type){
+                            case 'if':
+                                return(
+                                    <IfOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem}/>
+                                );
+                            default:
+                                return(
+                                    <Process key={key} process={item} setCurrentItem={::this.setCurrentItem}/>
+                                );
+                        }
+                    });
+                }
+
+                renderArrows(){
+                    const {arrows, items} = this.props;
+                    return arrows.map((arrow,key) => {
+                        const from = items.find(item => item.id === arrow.from);
+                        const to = items.find(item => item.id === arrow.to);
+                        return(
+                            <Arrow key={key} {...arrow} from={from} to={to}/>
+                        );
+                    });
+                }
+
+                renderMarkers(){
+                    return (
+                        <defs>
+                            <marker id="arrow_head_right" markerWidth="10" markerHeight="7"
+                                    refX="0" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                            <marker id="arrow_head_down" markerWidth="7" markerHeight="10"
+                                    refX="0" refY="3.5" orient="auto">
+                                <polygon points="0 0, 7 0, 3.5 10" />
+                            </marker>
+                            <marker id="arrow_head_left" markerWidth="10" markerHeight="7"
+                                    refX="0" refY="3.5" orient="auto">
+                                <polygon points="10 0, 0 3.5, 10 7" />
+                            </marker>
+                            <marker id="arrow_head_up" markerWidth="7" markerHeight="10"
+                                    refX="0" refY="3.5" orient="auto">
+                                <polygon points="0 10, 3.5 0, 7 10" />
+                            </marker>
+                        </defs>
+                    );
+                }
 
                 render(){
                     const {viewBox} = this.state;
-                    return <Component {...this.props} viewBox={viewBox} onWheel={::this.onWheel} startDrag={::this.startDrag} drag={::this.drag} endDrag={::this.endDrag}/>;
+                    const {x, y, width, height} = viewBox;
+                    const {svgWidth, svgHeight} = this.props;
+                    return(
+                        <svg
+                            id={params.svgId}
+                            style={svgWidth === 0 || svgHeight === 0 ? {width: '100%', height: '100%'} : {width: svgWidth, height: svgHeight}}
+                            className={styles.layout_svg}
+                            viewBox={`${x} ${y} ${width} ${height}`}
+                            preserveAspectRatio={'xMidYMid slice'}
+                            onMouseDown={::this.startDrag}
+                            onMouseMove={::this.drag}
+                            onMouseUp={::this.endDrag}
+                            onMouseLeave={::this.endDrag}
+                            ref={this.svgRef}
+                        >
+                            {
+                                this.renderMarkers()
+                            }
+                            {
+                                this.renderArrows()
+                            }
+                            {
+                                this.renderItems()
+                            }
+                        </svg>
+                    );
                 }
             }
         )

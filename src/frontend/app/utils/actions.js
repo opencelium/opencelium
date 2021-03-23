@@ -490,4 +490,6 @@ export const UpdateAssistantAction = {
 export const ConnectionOverview2Action = {
     SET_CURRENTITEM:                           'SET_CURRENTITEM',
     SET_CURRENTSUBITEM:                        'SET_CURRENTSUBITEM',
+    SET_ITEMS:                                 'SET_ITEMS',
+    SET_ARROWS:                                'SET_ARROWS',
 };

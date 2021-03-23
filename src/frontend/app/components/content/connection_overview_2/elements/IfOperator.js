@@ -1,28 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
+import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
 
+
+function mapStateToProps(state){
+    const connectionOverview = state.get('connection_overview');
+    return{
+        currentItem: connectionOverview.get('currentItem'),
+    };
+}
+
+@connect(mapStateToProps, {})
 class IfOperator extends React.Component{
     constructor(props) {
-        super(props);
+        super(props)
+    }
+
+    onMouseDown(){
+        this.props.setCurrentItem(this.props.operator);
     }
 
     render(){
-        const {x, y} = this.props;
-        const label = 'IF';
-        const rectPaddingSides = 40;
-        let width = 20 + rectPaddingSides * 2;
-        let height = width;
-        const rectWidth = width / 2;
-        const rectHeight = rectWidth;
-        const borderRadius = 5;
-        const textX = '38%';
-        const textY = '45%';
+        const {currentItem, operator, isNotDraggable} = this.props;
+        const isCurrentOperator = currentItem ? currentItem.id === operator.id : false;
+        const textX = '50%';
+        const textY = '50%';
+        const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         return(
-            <svg className={`${styles.if_operator} confine`} x={x} y={y} width={width} height={height}>
-                <rect x={10} y={30} rx={borderRadius} ry={borderRadius} width={rectWidth} height={rectHeight} className={`${styles.if_operator_rect} draggable`}/>
+            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${isCurrentOperator ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`} onMouseDown={::this.onMouseDown} points={points}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
-                    {label}
+                    {operator.label}
                 </text>
             </svg>
         );
@@ -30,8 +40,15 @@ class IfOperator extends React.Component{
 }
 
 IfOperator.propTypes = {
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
+    operator: PropTypes.oneOfType([
+        PropTypes.instanceOf(CBusinessOperator),
+    ]),
+    isNotDraggable: PropTypes.bool,
+    setCurrentItem: PropTypes.func,
+};
+
+IfOperator.defaultProps = {
+    isNotDraggable: false,
 };
 
 export default IfOperator;

@@ -1,64 +1,25 @@
 
-export const BUSINESS_NODES = [
+export const ITEMS = [
     {
-        id: "1",
-        size: 150,
-        label: "Get Clients",
-        color: "#FFCFCF",
-        shape: "box",
-        font: { face: "monospace", align: "left" },
-        x: 34,
-        y: 92,
+        id: 1, x: 20, y: 40, name: 'Get Clients', invoker: 'i-doit',
+        items: [{
+            id: 11, x: 420, y: 20, name: 'cmdb.objects.read', label: 'getObjects', invoker: 'i-doit'},
+            {id: 22, x: 240, y: 20, label: 'cmdb.category.read', invoker: 'i-doit'},],
+        arrows: [{from: 11, to: 22}]
     },
     {
-        id: "2",
-        size: 150,
-        label: "Save Tickets",
-        color: "#FFCFCF",
-        shape: "box",
-        font: { face: "monospace", align: "left" },
-        x: 300,
-        y: 200,
+        id: 2, x: 250, y: 40, name: 'Find Tickets', invoker: 'otrs',
+        items: [{id: 11, x: 20, y: 20, label: 'ConfigItemSearch', invoker: 'otrs'},
+            {id: 22, x: 240, y: 20, label: 'ConfigItemCreate', invoker: 'otrs'},],
+        arrows: [{from: 11, to: 22}]
+
     },
-];
-export const BUSINESS_EDGES = [
     {
-        from: "1",
-        to: "2",
-        arrows: "to",
-        physics: false,
-        smooth: { type: "cubicBezier" },
+        id: 3, x: 450, y: 50, type: 'if', label: 'IF'
     },
 ];
 
-export const PROGRAM_NODES = [
-    {
-        id: "1",
-        size: 150,
-        label: "cmdb.objects.read",
-        color: "#FFCFCF",
-        shape: "box",
-        font: { face: "monospace", align: "left" },
-        x: 100,
-        y: 100,
-    },
-    {
-        id: "2",
-        size: 150,
-        label: "saveTickets",
-        color: "#FFCFCF",
-        shape: "box",
-        font: { face: "monospace", align: "left" },
-        x: 300,
-        y: 100,
-    },
-];
-export const PROGRAM_EDGES = [
-    {
-        from: "1",
-        to: "2",
-        arrows: "to",
-        physics: false,
-        smooth: { type: "cubicBezier" },
-    },
+export const ARROWS = [
+    {from: 1, to: 2},
+    {from: 2, to: 3},
 ];

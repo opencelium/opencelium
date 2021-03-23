@@ -2,15 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
-
-export const PROCESS_HEIGHT = 50;
-
-export const PROCESS_LABEL_PADDING = 5;
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
     return{
-        currentProcess: connectionOverview.get('currentItem'),
+        currentItem: connectionOverview.get('currentItem'),
+        currentSubItem: connectionOverview.get('currentSubItem'),
     };
 }
 
@@ -21,19 +20,25 @@ class Process extends React.Component{
     }
 
     onMouseDown(){
-        this.props.setCurrentProcess(this.props.process);
+        this.props.setCurrentItem(this.props.process);
     }
 
     render(){
-        const {currentProcess, process, isNotDraggable} = this.props;
-        const {label, x, y, width, height} = process;
-        const isCurrentProcess = currentProcess ? currentProcess.id === process.id : false;
-        const borderRadius = 5;
+        const {currentItem, currentSubItem, process, isNotDraggable} = this.props;
+        let isCurrentProcess = currentItem ? currentItem.id === process.id : false;
+        if(!isCurrentProcess){
+            isCurrentProcess = currentSubItem ? currentSubItem.id === process.id : false;
+        }
+        const borderRadius = 10;
         const textX = '50%';
         const textY = '50%';
+        let label = process.label ? process.label : process.name;
+        if(label.length > 12){
+            label = `${label.substr(0, 9)}...`;
+        }
         return(
-            <svg x={x} y={y} className={`${styles.process} ${isCurrentProcess ? styles.current_process : ''} confine`} width={width} height={height}>
-                <rect onMouseDown={::this.onMouseDown}  x={0} y={0} rx={borderRadius} ry={borderRadius} width={width} height={height} className={`${styles.process_rect} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`}/>
+            <svg x={process.x} y={process.y} className={`${styles.process} ${isCurrentProcess ? styles.current_process : ''} confine`} width={process.width} height={process.height}>
+                <rect onMouseDown={::this.onMouseDown}  x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2} className={`${styles.process_rect} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
                     {label}
                 </text>
@@ -43,15 +48,12 @@ class Process extends React.Component{
 }
 
 Process.propTypes = {
-    process: PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        x: PropTypes.number.isRequired,
-        y: PropTypes.number.isRequired,
-        width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired,
-        label: PropTypes.string.isRequired,
-    }),
+    process: PropTypes.oneOfType([
+        PropTypes.instanceOf(CBusinessProcess),
+        PropTypes.instanceOf(CTechnicalProcess),
+    ]),
     isNotDraggable: PropTypes.bool,
+    setCurrentItem: PropTypes.func,
 };
 
 Process.defaultProps = {

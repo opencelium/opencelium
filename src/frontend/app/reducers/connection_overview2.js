@@ -22,6 +22,8 @@ import {ConnectionOverview2Action} from "@utils/actions";
 const initialState = fromJS({
     currentItem: null,
     currentSubItem: null,
+    items: List([]),
+    arrows: List([]),
     error: null,
     message: {},
     notificationData: {},
@@ -32,6 +34,10 @@ const initialState = fromJS({
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case ConnectionOverview2Action.SET_ARROWS:
+            return state.set('arrows', action.payload);
+        case ConnectionOverview2Action.SET_ITEMS:
+            return state.set('items', action.payload);
         case ConnectionOverview2Action.SET_CURRENTITEM:
             return state.set('currentItem', action.payload).set('currentSubItem', null);
         case ConnectionOverview2Action.SET_CURRENTSUBITEM:

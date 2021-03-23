@@ -141,7 +141,7 @@ export default class CStatement{
                 for(let i = 0; i < fieldSplit.length; i++){
                     let fieldSplitValue = fieldSplit[i];
                     tmpField += tmpField !== '' ? `.${fieldSplitValue}` : fieldSplitValue;
-                    let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
+                    let findField = this._parent && this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
                     if(findField && findField.value !== WHOLE_ARRAY && findField.type === 'array'){
                         fieldSplitValue = markFieldNameAsArray(fieldSplitValue);
                     }

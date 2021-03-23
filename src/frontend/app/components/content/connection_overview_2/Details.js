@@ -28,9 +28,9 @@ class Details extends React.Component{
                 </div>
                 {details ?
                     <div className={styles.label}>
-                        Label: {details.label}
-                        <br/>
-                        Invoker: {details.invoker}
+                        {details.label && <React.Fragment><span>Label: {details.label}</span><br/></React.Fragment>}
+                        {details.name && <React.Fragment><span>Name: {details.name}</span><br/></React.Fragment>}
+                        {details.invoker && `Invoker: ${details.invoker}`}
                     </div>
                     :
                     <div>
