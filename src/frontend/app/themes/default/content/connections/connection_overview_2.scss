@@ -5,14 +5,6 @@
   padding-bottom: 50px;
 }
 
-.replace_icon{
-  cursor: pointer;
-  height: 30px;
-  position: absolute;
-  bottom: 0;
-  text-align: center;
-  width: 100%;
-}
 .business_layout {
   width: 100%;
   height: 100%;
@@ -23,6 +15,8 @@
 }
 .layout_svg {
   cursor: move;
+  width: 100%;
+  height: 100%;
   padding: 2px;
 }
 .operator_polygon{
@@ -84,7 +78,29 @@
 }
 
 .details{
-  padding: 10px;
+  z-index: 1;
+  background: white;
+  width: 300px;
+  position: absolute;
+}
+.details_left{
+  @extend .details;
+  left: 0;
+  border-right: 1px solid #eee;
+}
+.details_right{
+  @extend .details;
+  right: 0;
+  border-left: 2px solid #eee;
+}
+.details_minimized{
+  height: 20px;
+}
+.details_maximized{
+  height: calc(100vh - 119px)
+}
+.details_data{
+  padding: 0 10px 10px;
   .title{
     font-size: 32px;
   }
@@ -92,17 +108,108 @@
     font-size: 14px;
     text-align: left;
   }
+}
+.settings_panel{
+  position: relative;
+  background: #e5e8f3;
+  height: 23px;
+  border: 1px solid #eee;
+  top: 0;
+  width: 100%;
+  .icon{
+    position: absolute;
+    cursor: pointer;
+    background: white;
+    border: 1px solid #eee;
+    z-index: 1;
+  }
+  .replace_icon {
+    @extend .icon;
+  }
+  .min_max_icon {
+    @extend .icon;
+  }
+  .position_icon{
+    @extend .icon;
+  }
+}
+.layout_settings_panel{
+  @extend .settings_panel;
+  .replace_icon{
+    cursor: pointer;
+    position: absolute;
+  }
+}
+.layout_settings_panel_left{
+  @extend .layout_settings_panel;
+  .replace_icon{
+    left: 0;
+  }
+  .min_max_icon{
+    left: 20px;
+  }
+}
+.layout_settings_panel_right{
+  @extend .layout_settings_panel;
+  .replace_icon{
+    right: 0;
+  }
+  .min_max_icon{
+    right: 20px;
+  }
+}
+.details_settings_panel{
+  @extend .settings_panel;
   .position_icon{
     cursor: pointer;
     position: absolute;
-    top: 0;
   }
   .position_icon_left{
     @extend .position_icon;
     right: 0;
+    border-right: none;
   }
   .position_icon_right{
     @extend .position_icon;
     left: 0;
+    border-left: none;
   }
+  .min_max_icon_left{
+    @extend .min_max_icon;
+    right: 20px;
+  }
+  .min_max_icon_right{
+    @extend .position_icon;
+    left: 20px;
+  }
+}
+.settings_panel_title{
+  width: 100%;
+  text-align: center;
+  font-size: $FONT_SIZE_14;
+  color: #00000047;
+  position: absolute;
+  line-height: 20px;
+}
+.details_title_right{
+  @extend .settings_panel_title;
+  width: calc(100% - 40px);
+  right: 0;
+}
+.details_title_left{
+  @extend .settings_panel_title;
+  width: calc(100% - 40px);
+}
+.technical_settings_panel_title_right{
+  @extend .settings_panel_title;
+  width: calc(100vw - 300px);
+  right: 0;
+}
+.technical_settings_panel_title_left{
+  @extend .settings_panel_title;
+  width: calc(100vw - 300px);
+}
+.technical_settings_panel_title_center{
+  @extend .settings_panel_title;
+  width: 100%;
 }

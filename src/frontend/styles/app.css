@@ -166,3 +166,7 @@ textarea{
 .resizer::before {
   left: 0;
 }
+
+.technical_layout_is_minimized>.panelGroup>.divider>div{
+  cursor: default !important;
+}

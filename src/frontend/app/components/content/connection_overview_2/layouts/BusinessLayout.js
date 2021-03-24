@@ -14,7 +14,7 @@ function mapStateToProps(state){
 }
 
 @connect(mapStateToProps, {setCurrentItem, setItems})
-@SvgLayout({layoutId: 'business_layout', svgId: 'business_layout_svg', dragAndDropStep: 5, isDraggable: true, isScalable: true})
+@SvgLayout({layoutId: 'business_layout', svgId: 'business_layout_svg', dragAndDropStep: 5, isDraggable: true, isScalable: false})
 class BusinessLayout extends React.Component{
 
     constructor(props) {

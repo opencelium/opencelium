@@ -22,6 +22,7 @@ import IfOperator from "@components/content/connection_overview_2/elements/IfOpe
 import Process from "@components/content/connection_overview_2/elements/Process";
 import Arrow from "@components/content/connection_overview_2/elements/Arrow";
 import {setCurrentSubItem} from "@actions/connection_overview_2/set";
+import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
 
 /*
 * TODO: move items and arrows into redux state and manipulate them instead of component state
@@ -48,10 +49,10 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     //for panning and zooming
                     this.state = {
                         viewBox: {
-                            x: 0,
-                            y: 0,
-                            width: 0,
-                            height: 0,
+                            x: ::this.getViewBoxX(props),
+                            y: -190,
+                            width: 1800,
+                            height: 715,
                         },
                         svg: null,
                         ratio: 0,
@@ -82,11 +83,29 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     }
                 }
 
+                componentDidUpdate(prevProps, prevState, snapshot) {
+                    if(this.props.detailsPosition !== prevProps.detailsPosition){
+                        let x = ::this.getViewBoxX(this.props);
+                        if(x !== this.state.viewBox.x) {
+                            this.setState({
+                                viewBox: {...this.state.viewBox, x},
+                            });
+                        }
+                    }
+                }
+
                 componentWillUnmount() {
                     window.removeEventListener('resize', ::this.setRatio);
                     if(params.isScalable) {
                         this.svgRef.current.removeEventListener('wheel', ::this.onWheel);
                     }
+                }
+
+                getViewBoxX(props){
+                    const {detailsPosition} = props;
+                    let x = -15;
+                    if(detailsPosition === DETAILS_POSITION.LEFT) x = -370;
+                    return x;
                 }
 
                 setRatio(){
@@ -283,14 +302,23 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     );
                 }
 
+                renderBoundaries(){
+                    return(
+                        <React.Fragment>
+                            <rect x={-100000} y={-100000}/>
+                            <rect x={100000} y={-100000}/>
+                            <rect x={100000} y={100000}/>
+                            <rect x={-100000} y={100000}/>
+                        </React.Fragment>
+                    )
+                }
+
                 render(){
                     const {viewBox} = this.state;
                     const {x, y, width, height} = viewBox;
-                    const {svgWidth, svgHeight} = this.props;
                     return(
                         <svg
                             id={params.svgId}
-                            style={svgWidth === 0 || svgHeight === 0 ? {width: '100%', height: '100%'} : {width: svgWidth, height: svgHeight}}
                             className={styles.layout_svg}
                             viewBox={`${x} ${y} ${width} ${height}`}
                             preserveAspectRatio={'xMidYMid slice'}
@@ -308,6 +336,9 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                             }
                             {
                                 this.renderItems()
+                            }
+                            {
+                                this.renderBoundaries()
                             }
                         </svg>
                     );
