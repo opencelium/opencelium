@@ -173,6 +173,18 @@ export default class CMethodItem{
         this._response.fail.body.fields = fields;
     }
 
+    setRequestBodyType(type){
+        this._request.body.type = type;
+    }
+
+    setResponseSuccessBodyType(type){
+        this._response.success.body.type = type;
+    }
+
+    setResponseFailBodyType(type){
+        this._response.fail.body.type = type;
+    }
+
     get error(){
         return this._error;
     }
