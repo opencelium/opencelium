@@ -1,6 +1,6 @@
 export const PROCESS_HEIGHT = 80;
 
-export const PROCESS_WIDTH = 128;
+export const PROCESS_WIDTH = 130;
 
 export const PROCESS_LABEL_PADDING = 10;
 

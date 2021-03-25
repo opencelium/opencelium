@@ -302,17 +302,6 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     );
                 }
 
-                renderBoundaries(){
-                    return(
-                        <React.Fragment>
-                            <rect x={-100000} y={-100000}/>
-                            <rect x={100000} y={-100000}/>
-                            <rect x={100000} y={100000}/>
-                            <rect x={-100000} y={100000}/>
-                        </React.Fragment>
-                    )
-                }
-
                 render(){
                     const {viewBox} = this.state;
                     const {x, y, width, height} = viewBox;
@@ -336,9 +325,6 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                             }
                             {
                                 this.renderItems()
-                            }
-                            {
-                                this.renderBoundaries()
                             }
                         </svg>
                     );

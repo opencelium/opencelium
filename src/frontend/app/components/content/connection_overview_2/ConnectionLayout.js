@@ -62,7 +62,7 @@ class ConnectionLayout extends Component{
         this.state = {
             businessLayoutPosition: LAYOUT_POSITION.TOP,
             technicalLayoutPosition: LAYOUT_POSITION.BOTTOM,
-            detailsPosition: DETAILS_POSITION.LEFT,
+            detailsPosition: DETAILS_POSITION.RIGHT,
             verticalPanelWidths: ::this.getVerticalPanelWidthsForTechnical(),
             isDetailsMinimized: false,
             isBusinessLayoutMinimized: false,

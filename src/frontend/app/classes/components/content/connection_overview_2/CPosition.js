@@ -2,7 +2,7 @@ import CCoordinates from "@classes/components/content/connection_overview_2/CCoo
 
 export default class CPosition{
 
-    static NEIGHBOURHOOD = 10;
+    static NEIGHBOURHOOD = 50;
 
     static isCentralizedByX(from, to){
         return CCoordinates.getCenter(from).x === CCoordinates.getCenter(to).x;
@@ -41,8 +41,8 @@ export default class CPosition{
     //------------
     //
     static isCase2(from, to){
-        return (CPosition.isCentralizedByX(from, to) || (from.x < to.x && from.x + from.width + this.NEIGHBOURHOOD >= to.x) || (from.x > to.x && from.x <= to.x + to.width + this.NEIGHBOURHOOD))
-            && (from.y < to.y + to.height + this.NEIGHBOURHOOD * 3) && from.y >= to.y;
+        return (from.x === to.x || CPosition.isCentralizedByX(from, to) || (from.x < to.x && from.x + from.width + this.NEIGHBOURHOOD >= to.x) || (from.x > to.x && from.x <= to.x + to.width + this.NEIGHBOURHOOD))
+            && (from.y < to.y + to.height + this.NEIGHBOURHOOD) && from.y >= to.y;
     }
 
     //case 3.
@@ -103,7 +103,7 @@ export default class CPosition{
     static isCase6(from, to) {
         const centeredFromY = CCoordinates.getCenter(from).y;
         const centeredToY = CCoordinates.getCenter(to).y;
-        return ((from.x > to.x && from.x < to.x + to.width) || (from.x + from.width > to.x && from.x < to.x)) && (centeredFromY + from.height + this.NEIGHBOURHOOD * 3 <= centeredToY);
+        return ((from.x === to.x) || (from.x > to.x && from.x < to.x + to.width) || (from.x + from.width > to.x && from.x < to.x)) && (centeredFromY + from.height + this.NEIGHBOURHOOD <= centeredToY);
     }
 
     //case 7.
@@ -165,7 +165,7 @@ export default class CPosition{
     static isCase10(from, to) {
         const centeredFromY = CCoordinates.getCenter(from).y;
         const centeredToY = CCoordinates.getCenter(to).y;
-        return from.x >= to.x + to.width + this.NEIGHBOURHOOD * 3 && centeredFromY < centeredToY + to.height ;
+        return from.x >= to.x + to.width + this.NEIGHBOURHOOD && centeredFromY < centeredToY + to.height ;
     }
 
     //case 11.
@@ -205,7 +205,7 @@ export default class CPosition{
     static isCase12(from, to) {
         const centeredFromY = CCoordinates.getCenter(from).y;
         const centeredToY = CCoordinates.getCenter(to).y;
-        return ((from.x < to.x && from.x + from.width > to.x) || (from.x > to.x && from.x < to.x + to.width)) && centeredFromY >= centeredToY + to.height ;
+        return ((from.x === to.x) || (from.x < to.x && from.x + from.width > to.x) || (from.x > to.x && from.x < to.x + to.width)) && centeredFromY >= centeredToY + to.height ;
     }
 
     //case 13.
@@ -253,7 +253,7 @@ export default class CPosition{
     //  ↑_____|
     //
     static isCase15(from, to){
-        return ((from.x < to.x && from.x + from.width + this.NEIGHBOURHOOD >= to.x) || (from.x > to.x && from.x <= to.x + to.width + this.NEIGHBOURHOOD))
-            && (from.y + from.height + this.NEIGHBOURHOOD * 3 > to.y) && from.y < to.y;
+        return ((from.x === to.x) || (from.x < to.x && from.x + from.width + this.NEIGHBOURHOOD >= to.x) || (from.x > to.x && from.x <= to.x + to.width + this.NEIGHBOURHOOD))
+            && (from.y + from.height + this.NEIGHBOURHOOD > to.y) && from.y < to.y;
     }
 }
