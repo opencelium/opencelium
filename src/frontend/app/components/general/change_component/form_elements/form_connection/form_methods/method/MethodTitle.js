@@ -40,6 +40,16 @@ class MethodTitle extends Component{
     constructor(props){
         super(props);
 
+        let hasRefreshIcon = false;
+
+        const newInvokerData = props.method.invoker._operations.find(o => o.name === props.method.name);
+        if(newInvokerData){
+            if(!isEqualObjectParams(newInvokerData.request.body.fields, props.method.request.body.fields)
+                || !isEqualObjectParams(newInvokerData.response.success.body.fields, props.method.response.success.body.fields)
+                || !isEqualObjectParams(newInvokerData.response.fail.body.fields, props.method.response.fail.body.fields)){
+                hasRefreshIcon = true;
+            }
+        }
         this.state = {
             hasDeleteButton: false,
             showSettings: false,
@@ -47,6 +57,7 @@ class MethodTitle extends Component{
             showConfirm: false,
             onDeleteButtonOver: false,
             isRefreshingFromInvoker: false,
+            hasRefreshIcon,
         };
     }
 
@@ -106,10 +117,13 @@ class MethodTitle extends Component{
             method.setRequestBodyFields(newRequestInvokerData);
             method.setResponseSuccessBodyFields(newResponseSuccessInvokerData);
             method.setResponseFailBodyFields(newResponseFailInvokerData);
+            method.setRequestBodyType(newInvokerData.request.body.type);
+            method.setResponseSuccessBodyType(newInvokerData.response.success.body.type);
+            method.setResponseFailBodyType(newInvokerData.response.fail.body.type);
             updateEntity();
             this.setState({
                 isRefreshingFromInvoker: true,
-            }, () => setTimeout(() => that.setState({isRefreshingFromInvoker: false}), 600));
+            }, () => setTimeout(() => that.setState({isRefreshingFromInvoker: false, hasRefreshIcon: false,}), 600));
         }
     }
 
@@ -159,7 +173,7 @@ class MethodTitle extends Component{
 
     render(){
         const {connector, method, readOnly, showParams, toggleShowParams} = this.props;
-        const {showConfirm, onDeleteButtonOver, hasDeleteButton, isRefreshingFromInvoker} = this.state;
+        const {showConfirm, onDeleteButtonOver, hasDeleteButton, isRefreshingFromInvoker, hasRefreshIcon} = this.state;
         let methodStyles = {};
         let methodTitleStyles = {backgroundColor: method.color, borderRadius: '3px'};
         let isCurrentItem = connector.getCurrentItem().index === method.index;
@@ -172,16 +186,6 @@ class MethodTitle extends Component{
         if(marginLeftTimes > 1) {
             methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
         }
-        let hasRefreshIcon = false;
-
-        const newInvokerData = method.invoker._operations.find(o => o.name === method.name);
-        /*if(newInvokerData){
-            if(!isEqualObjectParams(newInvokerData.request.body.fields, method.request.body.fields)
-            || !isEqualObjectParams(newInvokerData.response.success.body.fields, method.response.success.body.fields)
-            || !isEqualObjectParams(newInvokerData.response.fail.body.fields, method.response.fail.body.fields)){
-                hasRefreshIcon = true;
-            }
-        }*/
         return (
             <div>
                 <CardTitle

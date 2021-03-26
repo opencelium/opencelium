@@ -83,7 +83,7 @@ export default class CCoordinates{
         line2.x1 = line1.x2;
         line2.y1 = line1.y2;
         line2.x2 = elemBTop.x;
-        if(from.x === to.x){
+        if(from.x === to.x && from.width === to.width){
             line2.x2 += 10;
         }
         line2.y2 = line2.y1;
@@ -202,7 +202,7 @@ export default class CCoordinates{
 
         arrow.x1 = line2.x2;
         arrow.y1 = line2.y2;
-        arrow.x2 = arrow.x1 - ARROW_MARGIN + ARROW_END_LENGTH;
+        arrow.x2 = arrow.x1 - ARROW_MARGIN + ARROW_END_LENGTH - (Math.abs(from.width - to.width) / 2);
         arrow.y2 = arrow.y1;
         return {line1, line2, arrow};
     }
@@ -327,12 +327,12 @@ export default class CCoordinates{
         line1.x1 = elemABottom.x;
         line1.y1 = elemABottom.y;
         line1.x2 = elemABottom.x;
-        line1.y2 = elemABottom.y + ARROW_MARGIN + (Math.abs(from.y - to.y));
+        line1.y2 = elemABottom.y + ARROW_MARGIN + (Math.abs(from.y - to.y)) - (Math.abs(from.height - to.height));
 
         line2.x1 = line1.x2;
         line2.y1 = line1.y2;
         line2.x2 = elemBBottom.x;
-        if(from.x === to.x){
+        if(from.x === to.x && from.width === to.width){
             line2.x2 += 10;
         }
         line2.y2 = line2.y1;

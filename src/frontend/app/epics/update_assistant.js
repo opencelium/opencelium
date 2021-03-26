@@ -58,7 +58,7 @@ const OFFLINE_UPDATES = [
 
 const NEW_UPDATE = {id: 100, name: 'v1.5', changeLogLink: '', status: 'not_available'};
 
-const urlPrefix = 'application/oc';
+const urlPrefix = 'assistant/oc';
 
 /**
  * fetch update application version
