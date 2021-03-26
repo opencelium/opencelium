@@ -38,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
@@ -106,6 +107,12 @@ public class JobExecutor extends QuartzJobBean {
         Long connectionId = jobDataMap.getLongValue("connectionId");
         Object schedulerId = jobDataMap.getIntValue("schedulerId");
 
+        Object queryParams = jobDataMap.getOrDefault("queryParams", null);
+        Map<String, Object> queryParamsMap = null;
+        if (queryParams instanceof Map) {
+            queryParamsMap = (Map) queryParams;
+        }
+
         Date date= new Date();
         Execution execution = new Execution();
         LastExecution lastExecution = new LastExecution();
@@ -120,6 +127,7 @@ public class JobExecutor extends QuartzJobBean {
         String taId = schedulerId + "-" + execution.getId();
         executionContainer.setTaId(taId);
         executionContainer.setOrder(0);
+        executionContainer.setQueryParams(queryParamsMap);
 
         if (lastExecutionServiceImp.existsBySchedulerId(scheduler.getId())){
             lastExecution = lastExecutionServiceImp.findBySchedulerId(scheduler.getId());

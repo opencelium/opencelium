@@ -338,6 +338,17 @@ public class FieldNodeServiceImp implements FieldNodeService {
         return false;
     }
 
+    public static boolean hasQueryParams(String fieldValue) {
+        String regex = "\\$\\{(.*?)\\}";
+        Pattern pattern = Pattern.compile(regex);
+
+        Matcher matcher = pattern.matcher(fieldValue);
+        while (matcher.find()){
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean existsInInvokerMethod(String invokerName, String methodName, String path) {
         String pathValue = ConditionUtility.getRefValue(path);

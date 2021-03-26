@@ -196,6 +196,11 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    public void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception{
+        quartzUtility.runJob(scheduler, queryMap);
+    }
+
+    @Override
     public void saveEntity(Scheduler scheduler) {
         schedulerRepository.save(scheduler);
     }
