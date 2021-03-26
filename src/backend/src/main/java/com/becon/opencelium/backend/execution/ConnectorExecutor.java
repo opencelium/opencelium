@@ -458,7 +458,8 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String exp) {
         String result = exp;
-        String refRegex = RegExpression.requiredData;
+//        String refRegex = RegExpression.requiredData;
+        String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\})";
         String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(exp);
@@ -481,6 +482,9 @@ public class ConnectorExecutor {
                     value = (String) executionContainer.getValueFromResponseData(ref);
                 }
 
+                result = result.replace(pointer, value);
+            } else if(pointer.matches("\\$\\{(.*?)\\}")) {
+                String value = executionContainer.getValueFromQueryParams(pointer);
                 result = result.replace(pointer, value);
             } else {
                 // replace from request data
