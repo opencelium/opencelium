@@ -4,8 +4,8 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
 import {setDetailsLocation} from "@actions/connection_overview_2/set";
-import {DETAILS_LOCATION} from "@components/content/connection_overview_2/details/Details";
 import {connectionOverviewDetailsUrl} from "@utils/constants/url";
+import {DETAILS_LOCATION} from "@utils/constants/app";
 
 
 @connect(null, {setDetailsLocation})

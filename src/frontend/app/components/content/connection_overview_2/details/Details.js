@@ -4,12 +4,8 @@ import {connect} from "react-redux";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import SettingsPanel from "@components/content/connection_overview_2/details/SettingsPanel";
 import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
+import {DETAILS_LOCATION} from "@utils/constants/app";
 
-
-export const DETAILS_LOCATION = {
-    NEW_WINDOW: 'new_window',
-    SAME_WINDOW: 'same_window',
-};
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');

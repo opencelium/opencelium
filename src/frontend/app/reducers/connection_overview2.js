@@ -15,7 +15,7 @@
 
 import {List, fromJS} from 'immutable';
 import {ConnectionOverview2Action} from "@utils/actions";
-import {DETAILS_LOCATION} from "@components/content/connection_overview_2/details/Details";
+import {DETAILS_LOCATION} from "@utils/constants/app";
 
 
 const initialState = fromJS({

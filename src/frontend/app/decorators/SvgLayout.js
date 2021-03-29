@@ -60,7 +60,7 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     const layoutSVG = document.getElementById(params.svgId);
                     if(layout && layoutSVG) {
                         let width = layout.offsetWidth;
-                        //let ratio = width / layoutSVG.getBoundingClientRect().width;
+                        let ratio = width / layoutSVG.getBoundingClientRect().width;
                         let viewBox = layoutSVG.viewBox.baseVal;
                         viewBox.x = ::this.getViewBoxX();
                         viewBox.y = -190;
@@ -68,7 +68,7 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         viewBox.height = 715;
                         this.setState({
                             svg: layoutSVG,
-                            //ratio,
+                            ratio,
                         });
                         window.addEventListener('resize', ::this.setRatio);
                     }
