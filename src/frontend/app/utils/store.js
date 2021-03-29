@@ -16,7 +16,6 @@
 import {createStore, applyMiddleware, compose} from 'redux';
 import createLogger from 'redux-logger';
 import {createEpicMiddleware} from 'redux-observable';
-import {createStateSyncMiddleware, initMessageListener} from 'redux-state-sync'
 
 import notificationMiddleware from '../middlewares/notification';
 import errorHandlingMiddleware from '../middlewares/error_handling';
@@ -49,10 +48,6 @@ let loggerOptions = {
 let enhancers = {};
 
 let initialMiddleware = [];
-
-const config = {
-    whitelist: ['connection_overview'],
-};
 /**
  * define middlewares
  */

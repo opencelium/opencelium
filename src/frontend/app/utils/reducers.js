@@ -15,7 +15,6 @@
 
 import {combineReducers} from 'redux-immutable';
 import {responsiveStateReducer} from 'redux-responsive';
-import {withReduxStateSync} from 'redux-state-sync';
 
 import {routing} from '../reducers/routing';
 import {users} from '../reducers/users';
