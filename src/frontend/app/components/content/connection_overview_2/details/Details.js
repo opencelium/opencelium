@@ -5,11 +5,18 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import SettingsPanel from "@components/content/connection_overview_2/details/SettingsPanel";
 import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
 
+
+export const DETAILS_LOCATION = {
+    NEW_WINDOW: 'new_window',
+    SAME_WINDOW: 'same_window',
+};
+
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
     return{
         currentItem: connectionOverview.get('currentItem'),
         currentSubItem: connectionOverview.get('currentSubItem'),
+        detailsLocation: connectionOverview.get('detailsLocation'),
     };
 }
 
@@ -20,7 +27,10 @@ class Details extends React.Component{
     }
 
     render(){
-        const {currentItem, currentSubItem, isMinimized, position} = this.props;
+        const {currentItem, currentSubItem, isMinimized, position, detailsLocation} = this.props;
+        if(detailsLocation === DETAILS_LOCATION.NEW_WINDOW){
+            return null;
+        }
         let details = currentSubItem ? currentSubItem : currentItem;
         let detailsClassName = '';
         let detailsStyle = {};
@@ -59,6 +69,16 @@ class Details extends React.Component{
             </div>
         );
     }
+}
+
+Details.defaultProps = {
+    moveDetailsRight: () => {},
+    moveDetailsLeft: () => {},
+    position: '',
+    minimize: () => {},
+    maximize: () => {},
+    isMinimized: false,
+
 }
 
 export default Details;

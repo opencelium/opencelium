@@ -48,10 +48,24 @@ const setArrows = (arrows) => {
     };
 };
 
+/**
+ * set details location: DETAILS_LOCATION
+ * @returns {{type: string, payload: {}}}
+ */
+const setDetailsLocation = (location) => {
+    return {
+        type: ConnectionOverview2Action.SET_DETAILSLOCATION,
+        payload: location,
+    };
+};
+
+
+
 
 export{
     setCurrentItem,
     setCurrentSubItem,
     setArrows,
     setItems,
+    setDetailsLocation,
 };

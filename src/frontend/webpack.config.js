@@ -163,6 +163,7 @@ module.exports = {
         extensions: ['.js', '.json', '.scss'],
         alias: {
             'assets': path.resolve('./img'),
+            '@root': path.resolve('.'),
             '@styles': path.resolve('./styles'),
             '@images': path.resolve('./img'),
             '@actions': path.resolve(__dirname, 'app/actions'),

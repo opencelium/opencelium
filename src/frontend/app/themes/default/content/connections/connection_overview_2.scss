@@ -157,6 +157,9 @@
   .min_max_icon{
     right: 20px;
   }
+  .new_window_icon{
+    right: 40px;
+  }
 }
 .details_settings_panel{
   @extend .settings_panel;
@@ -181,6 +184,14 @@
   .min_max_icon_right{
     @extend .position_icon;
     left: 20px;
+  }
+  .new_window_icon_left{
+    @extend .new_window_icon;
+    right: 40px;
+  }
+  .new_window_icon_right{
+    @extend .position_icon;
+    left: 40px;
   }
 }
 .settings_panel_title{

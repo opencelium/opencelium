@@ -492,4 +492,5 @@ export const ConnectionOverview2Action = {
     SET_CURRENTSUBITEM:                        'SET_CURRENTSUBITEM',
     SET_ITEMS:                                 'SET_ITEMS',
     SET_ARROWS:                                'SET_ARROWS',
+    SET_DETAILSLOCATION:                       'SET_DETAILSLOCATION',
 };

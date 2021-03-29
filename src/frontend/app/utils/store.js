@@ -16,17 +16,17 @@
 import {createStore, applyMiddleware, compose} from 'redux';
 import createLogger from 'redux-logger';
 import {createEpicMiddleware} from 'redux-observable';
+import {createStateSyncMiddleware, initMessageListener} from 'redux-state-sync'
 
 import notificationMiddleware from '../middlewares/notification';
 import errorHandlingMiddleware from '../middlewares/error_handling';
 import resourceMappingMiddleware from '../middlewares/resource_mapping';
 import frontBackMappingMiddleware from '../middlewares/front_back_mapping';
-import { combinedReducers } from './reducers';
+import combinedReducers from './reducers';
 import epics from './epics';
 
 import {responsiveStoreEnhancer} from 'redux-responsive';
 import {AppSettings} from "./constants/app";
-
 
 const initialEnhancers  = [responsiveStoreEnhancer];
 
@@ -50,6 +50,9 @@ let enhancers = {};
 
 let initialMiddleware = [];
 
+const config = {
+    whitelist: ['connection_overview'],
+};
 /**
  * define middlewares
  */
@@ -64,6 +67,9 @@ const composeEnhancers = compose();
 /**
  * creates store for app including reducers, moddlewares and additional enhancers
  */
+
+
+
 const store = createStore(
     combinedReducers,
     composeEnhancers(
@@ -73,4 +79,4 @@ const store = createStore(
     )
 );
 
-export default store;
+export {store};

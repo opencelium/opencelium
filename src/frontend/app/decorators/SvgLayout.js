@@ -29,8 +29,9 @@ import {DETAILS_POSITION} from "@components/content/connection_overview_2/Connec
 */
 
 /**
- * to bring the component be draggable, scalable, panable
+ * to bring the component be draggable, scalable, pannable
  */
+
 export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10, isDraggable: false, isScalable: false}){
     return function (Component) {
         return(
@@ -48,14 +49,8 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     };
                     //for panning and zooming
                     this.state = {
-                        viewBox: {
-                            x: ::this.getViewBoxX(props),
-                            y: -190,
-                            width: 1800,
-                            height: 715,
-                        },
                         svg: null,
-                        ratio: 0,
+                        ratio: 1,
                     }
                     this.svgRef = React.createRef();
                 }
@@ -64,17 +59,16 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     const layout = document.getElementById(params.layoutId);
                     const layoutSVG = document.getElementById(params.svgId);
                     if(layout && layoutSVG) {
-                        const {viewBox} = this.state;
-                        let {width, height} = viewBox;
-                        if(width === 0 && height === 0){
-                            width = layout.offsetWidth;
-                            height = layout.offsetHeight;
-                        }
-                        let ratio = width / layoutSVG.getBoundingClientRect().width;
+                        let width = layout.offsetWidth;
+                        //let ratio = width / layoutSVG.getBoundingClientRect().width;
+                        let viewBox = layoutSVG.viewBox.baseVal;
+                        viewBox.x = ::this.getViewBoxX();
+                        viewBox.y = -190;
+                        viewBox.width = 1800;
+                        viewBox.height = 715;
                         this.setState({
-                            viewBox: {...viewBox, width, height},
                             svg: layoutSVG,
-                            ratio,
+                            //ratio,
                         });
                         window.addEventListener('resize', ::this.setRatio);
                     }
@@ -84,12 +78,11 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                 }
 
                 componentDidUpdate(prevProps, prevState, snapshot) {
+                    let viewBox = this.state.svg.viewBox.baseVal;
                     if(this.props.detailsPosition !== prevProps.detailsPosition){
-                        let x = ::this.getViewBoxX(this.props);
-                        if(x !== this.state.viewBox.x) {
-                            this.setState({
-                                viewBox: {...this.state.viewBox, x},
-                            });
+                        let x = ::this.getViewBoxX();
+                        if(x !== viewBox.x) {
+                            viewBox.x = x;
                         }
                     }
                 }
@@ -101,15 +94,17 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     }
                 }
 
-                getViewBoxX(props){
-                    const {detailsPosition} = props;
+                getViewBoxX(){
+                    const {detailsPosition} = this.props;
                     let x = -15;
                     if(detailsPosition === DETAILS_POSITION.LEFT) x = -370;
                     return x;
                 }
 
                 setRatio(){
-                    this.setState({ratio: this.state.viewBox.width / this.state.svg.getBoundingClientRect().width});
+                    const {svg} = this.state;
+                    let viewBox = svg.viewBox.baseVal;
+                    this.setState({ratio: viewBox.width / svg.getBoundingClientRect().width});
                 }
 
                 setCurrentItem(currentItem){
@@ -303,13 +298,10 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                 }
 
                 render(){
-                    const {viewBox} = this.state;
-                    const {x, y, width, height} = viewBox;
                     return(
                         <svg
                             id={params.svgId}
                             className={styles.layout_svg}
-                            viewBox={`${x} ${y} ${width} ${height}`}
                             preserveAspectRatio={'xMidYMid slice'}
                             onMouseDown={::this.startDrag}
                             onMouseMove={::this.drag}

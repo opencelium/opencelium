@@ -15,8 +15,7 @@
 
 import {List, fromJS} from 'immutable';
 import {ConnectionOverview2Action} from "@utils/actions";
-
-
+import {DETAILS_LOCATION} from "@components/content/connection_overview_2/details/Details";
 
 
 const initialState = fromJS({
@@ -27,6 +26,7 @@ const initialState = fromJS({
     error: null,
     message: {},
     notificationData: {},
+    detailsLocation: DETAILS_LOCATION.SAME_WINDOW,
 });
 
 /**
@@ -42,6 +42,8 @@ const reducer = (state = initialState, action) => {
             return state.set('currentItem', action.payload).set('currentSubItem', null);
         case ConnectionOverview2Action.SET_CURRENTSUBITEM:
             return state.set('currentSubItem', action.payload);
+        case ConnectionOverview2Action.SET_DETAILSLOCATION:
+            return state.set('detailsLocation', action.payload);
         default:
             return state;
     }

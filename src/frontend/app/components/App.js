@@ -20,7 +20,7 @@ import {Router, browserHistory} from 'react-router';
 import {syncHistoryWithStore } from 'react-router-redux';
 
 import {setAuthSettings} from '@utils/auth';
-import store from '@utils/store';
+import {store} from '@utils/store';
 import i18n from '@utils/i18n';
 import {createRoutes} from '@utils/routes';
 import Loading from "@loading";

@@ -1,0 +1,11 @@
+{
+  "PORT": {
+    "APPLICATION": 0,
+    "API": 9090,
+    "SOCKET": 8082,
+    "KIBANA": 5601,
+    "NEO4J": 7474
+  },
+  "PROTOCOL": "",
+  "HOSTNAME": ""
+}
