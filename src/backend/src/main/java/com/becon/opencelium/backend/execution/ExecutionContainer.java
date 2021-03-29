@@ -53,6 +53,7 @@ public class ExecutionContainer {
     private String taId;
     private String conn;
     private int order;
+    private Map<String, Object> queryParams = new HashMap<>();
 
     private EnhancementServiceImp enhancementService;
     private FieldNodeServiceImp fieldNodeService;
@@ -193,6 +194,25 @@ public class ExecutionContainer {
         return messageContainer.getValue(ref, getLoopIndex());
     }
 
+    public String getValueFromQueryParams(String exp) {
+        if (exp == null || exp.isEmpty()) {
+            return "";
+        }
+        String result = exp;
+        if (queryParams.isEmpty()) {
+            return null;
+        }
+
+        for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+            String pointer = "${" + entry.getKey() + "}";
+            if (!result.contains(pointer)){
+                continue;
+            }
+            result = result.replace(pointer, entry.getValue().toString());
+        }
+        return result;
+    }
+
     public String getValueFromRequestData(String exp) {
         if (exp == null || exp.isEmpty()) {
             return "";
@@ -251,6 +271,14 @@ public class ExecutionContainer {
 
     public void setSupportRequestData(List<RequestData> supportRequestData) {
         this.supportRequestData = supportRequestData;
+    }
+
+    public Map<String, Object> getQueryParams() {
+        return queryParams;
+    }
+
+    public void setQueryParams(Map<String, Object> queryParams) {
+        this.queryParams = queryParams;
     }
 
     public String getConn() {

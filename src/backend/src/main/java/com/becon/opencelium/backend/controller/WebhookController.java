@@ -25,13 +25,11 @@ import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/api/webhook")
@@ -45,7 +43,7 @@ public class WebhookController {
 
     //    @ResponseBody
     @GetMapping("execute/{token}")
-    public ResponseEntity<?> executeConnection(@PathVariable("token") String token) {
+    public ResponseEntity<?> executeConnection(@PathVariable("token") String token, @RequestParam Map<String, Object> queryParam) {
         WebhookTokenResource webhookToken = webhookService.getTokenObject(token).orElse(null);
         if (webhookToken == null){
             throw new RuntimeException("TOKEN_NOT_FOUND");
@@ -66,7 +64,11 @@ public class WebhookController {
         }
 
         try {
-            schedulerService.startNow(scheduler);
+            if (queryParam.isEmpty()) {
+                schedulerService.startNow(scheduler);
+            } else {
+                schedulerService.startNow(scheduler, queryParam);
+            }
         }
         catch (Exception e){
             throw new RuntimeException(e);

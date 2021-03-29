@@ -36,11 +36,7 @@ import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
@@ -60,7 +56,6 @@ import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -463,7 +458,8 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String exp) {
         String result = exp;
-        String refRegex = RegExpression.requiredData;
+//        String refRegex = RegExpression.requiredData;
+        String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\})";
         String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(exp);
@@ -486,6 +482,9 @@ public class ConnectorExecutor {
                     value = (String) executionContainer.getValueFromResponseData(ref);
                 }
 
+                result = result.replace(pointer, value);
+            } else if(pointer.matches("\\$\\{(.*?)\\}")) {
+                String value = executionContainer.getValueFromQueryParams(pointer);
                 result = result.replace(pointer, value);
             } else {
                 // replace from request data
@@ -530,6 +529,12 @@ public class ConnectorExecutor {
             // from response data;
             if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasReference(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
+                return;
+            }
+
+            // from url query data;
+            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasQueryParams(f.getValue())){
+                item.put(f.getName(), executionContainer.getValueFromQueryParams(f.getValue()));
                 return;
             }
 
