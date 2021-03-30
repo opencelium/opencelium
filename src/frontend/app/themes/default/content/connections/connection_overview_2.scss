@@ -132,6 +132,9 @@
   .position_icon{
     @extend .icon;
   }
+  .new_window_icon{
+    @extend .icon;
+  }
 }
 .layout_settings_panel{
   @extend .settings_panel;
@@ -147,6 +150,9 @@
   }
   .min_max_icon{
     left: 20px;
+  }
+  .new_window_icon{
+    left: 40px;
   }
 }
 .layout_settings_panel_right{

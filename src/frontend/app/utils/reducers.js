@@ -15,6 +15,7 @@
 
 import {combineReducers} from 'redux-immutable';
 import {responsiveStateReducer} from 'redux-responsive';
+import { withReduxStateSync } from 'redux-state-sync';
 
 import {routing} from '../reducers/routing';
 import {users} from '../reducers/users';
@@ -32,6 +33,8 @@ import {admincards} from '../reducers/admin_cards';
 import {notificationTemplates} from '../reducers/notification_templates';
 import {update_assistant} from '../reducers/update_assistant';
 import {connection_overview} from "../reducers/connection_overview2";
+import {dashboard} from "../reducers/dashboard";
+import {fromJS} from "immutable";
 
 
 /**
@@ -55,6 +58,7 @@ const combinedReducers = combineReducers({
     notificationTemplates,
     update_assistant,
     connection_overview,
+    dashboard,
 });
 
-export default combinedReducers;
+export default withReduxStateSync(combinedReducers, state => fromJS(state));

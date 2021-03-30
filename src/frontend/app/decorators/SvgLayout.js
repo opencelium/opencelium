@@ -53,6 +53,7 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                         ratio: 1,
                     }
                     this.svgRef = React.createRef();
+                    window.addEventListener('resize', ::this.resizeSVG);
                 }
 
                 componentDidMount() {
@@ -92,6 +93,16 @@ export function SvgLayout(params = {layoutId: '', svgId: '', dragAndDropStep: 10
                     if(params.isScalable) {
                         this.svgRef.current.removeEventListener('wheel', ::this.onWheel);
                     }
+                }
+
+                resizeSVG(){
+                    const layout = document.getElementById(params.layoutId);
+                    let width = layout.offsetWidth;
+                    let height = layout.offsetHeight;
+                    const {svg} = this.state;
+                    const viewBox = svg.viewBox.baseVal;
+                    viewBox.width = width + 300;
+                    viewBox.height = height + 300;
                 }
 
                 getViewBoxX(){

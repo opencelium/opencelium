@@ -25,29 +25,34 @@ import {Col, Container, Row} from "react-grid-system";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {
     HAS_DASHBOARD_WIDGET_ENGINE,
-    INITIAL_LAYOUT,
-    INITIAL_TOOLBOX,
     WIDGET_LIST
 } from "@components/content/dashboard/view/settings";
 import DashboardToolbox from "@components/content/dashboard/view/DashboardToolbox";
+import {fetchDashboardSettings} from "@actions/dashboard/fetch";
+import {updateDashboardSettings} from "@actions/dashboard/update";
+
 const ReactGridLayout = WidthProvider(RGL);
 
-
 function mapStateToProps(state){
-    const updateAssistant = state.get('update_assistant');
     const auth = state.get('auth');
+    const updateAssistant = state.get('update_assistant');
+    const dashboard = state.get('dashboard');
     return {
         authUser: auth.get('authUser'),
         fetchingUpdateAppVersion: updateAssistant.get('fetchingUpdateAppVersion'),
+        settings: dashboard.get('settings'),
+        updatingWidgetSettings: dashboard.get('updatingWidgetSettings'),
+        currentWidget: dashboard.get('currentWidget'),
+        layout: dashboard.get('layout').toJS(),
+        toolbox: dashboard.get('toolbox').toJS(),
     };
 }
-
 
 /**
  * Dashboard component
  * Important! schedules and app translations should be imported already here
  */
-@connect(mapStateToProps, {fetchUpdateAppVersion})
+@connect(mapStateToProps, {fetchUpdateAppVersion, fetchDashboardSettings, updateDashboardSettings})
 @withTranslation(['dashboard', 'schedules', 'app'])
 class DashboardView extends Component{
 
@@ -56,16 +61,15 @@ class DashboardView extends Component{
 
         this.state = {
             isWidgetEditOn: false,
-            layout: INITIAL_LAYOUT,
-            toolbox: INITIAL_TOOLBOX
         }
     }
 
     componentDidMount() {
-        const {fetchingUpdateAppVersion, fetchUpdateAppVersion} = this.props;
+        const {fetchingUpdateAppVersion, fetchUpdateAppVersion, fetchDashboardSettings} = this.props;
         if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START) {
             fetchUpdateAppVersion();
         }
+        fetchDashboardSettings();
         componentAppear('app_content');
     }
 
@@ -76,53 +80,47 @@ class DashboardView extends Component{
     }
 
     onTakeItem(e, item){
-        this.setState(prevState => ({
-            toolbox: [
-                ...prevState.toolbox.filter(({ i }) => i !== item.i),
-            ],
-            layout: [
-                ...prevState.layout,
-                item
-            ]
-        }));
+        const toolbox = [
+            ...this.props.toolbox.filter(({ i }) => i !== item.i),
+        ];
+        const layout = [
+            ...this.props.layout,
+            item
+        ]
+        this.props.updateDashboardSettings({currentWidget: item, settings: {widgetSettings: layout}, toolbox, layout});
     };
 
     onPutItem(e, item){
-        this.setState(prevState => {
-            return {
-                toolbox: [
-                    ...prevState.toolbox,
-                    item
-                ],
-                layout: [
-                    ...prevState.layout.filter(({ i }) => i !== item.i),
-                ]
-            };
-        });
+        const toolbox = [
+            ...this.props.toolbox,
+            item
+        ];
+        const layout = [
+            ...this.props.layout.filter(({ i }) => i !== item.i),
+        ];
+        this.props.updateDashboardSettings({currentWidget: item, settings: {widgetSettings: layout}, toolbox, layout});
     };
 
     onLayoutChange(layout){
-        this.setState(prevState => {
-            let updatedLayout = prevState.layout;
-            for(let i = 0; i < updatedLayout.length; i++){
-                let findLayout = layout.find(l => l.i === updatedLayout[i].i);
-                if(findLayout){
-                    updatedLayout[i] = {...updatedLayout[i], ...findLayout};
-                }
+        const {toolbox} = this.props;
+        let updatedLayout = this.props.layout;
+        for(let i = 0; i < updatedLayout.length; i++){
+            let findLayout = layout.find(l => l.i === updatedLayout[i].i);
+            if(findLayout){
+                updatedLayout[i] = {...updatedLayout[i], ...findLayout};
             }
-            return {
-                layout: updatedLayout,
-            };
-        });
+        }
+        this.props.updateDashboardSettings({settings: {widgetSettings: updatedLayout}, toolbox, layout: updatedLayout});
     };
 
     renderWidgets(){
-        const {layout, isWidgetEditOn} = this.state;
+        const {isWidgetEditOn} = this.state;
+        const {layout, currentWidget, updatingWidgetSettings} = this.props;
         return layout.map(layout => {
             return (
                 <div key={layout.i} className={`${styles.dashboard_widget_item} ${isWidgetEditOn && styles.dashboard_widget_item_edit_on}`}>
                     {isWidgetEditOn &&
-                        <TooltipFontIcon size={20} isButton={true} tooltip={'Close'} value={'close'} className={styles.close_widget} onClick={(e) => ::this.onPutItem(e, layout)}/>
+                        <TooltipFontIcon size={20} isButton={true} tooltip={'Close'} value={updatingWidgetSettings === API_REQUEST_STATE.START && currentWidget && currentWidget.i === layout.i ? 'loading' : 'close'} className={styles.close_widget} onClick={(e) => ::this.onPutItem(e, layout)}/>
                     }
                     {WIDGET_LIST.hasOwnProperty(layout.i) && WIDGET_LIST[layout.i]}
                 </div>
@@ -131,7 +129,8 @@ class DashboardView extends Component{
     }
 
     render(){
-        const {isWidgetEditOn, layout, toolbox} = this.state;
+        const {isWidgetEditOn} = this.state;
+        const {layout, toolbox} = this.props;
         let gridSettings = {
             className: `layout`,
             cols: 12,
@@ -159,10 +158,10 @@ class DashboardView extends Component{
                         <Row style={{ marginLeft: 0, marginRight: 0}}>
                             <Col md={12}>
                                 {isWidgetEditOn &&
-                                <DashboardToolbox
-                                    items={toolbox || []}
-                                    onTakeItem={::this.onTakeItem}
-                                />
+                                    <DashboardToolbox
+                                        items={toolbox || []}
+                                        onTakeItem={::this.onTakeItem}
+                                    />
                                 }
                                 <ReactGridLayout {...gridSettings}>
                                     {::this.renderWidgets()}

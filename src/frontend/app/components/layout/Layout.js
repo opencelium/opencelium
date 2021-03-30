@@ -33,6 +33,7 @@ import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 import {getLS} from "@utils/LocalStorage";
 import {API_REQUEST_STATE, TEST} from "@utils/constants/app";
+import {hasHeader} from "@utils/app";
 
 let checkTokenInterval;
 
@@ -133,7 +134,7 @@ class Layout extends Component{
     }
 
     renderHeader(){
-        if(this.props.isAuth){
+        if(this.props.isAuth && hasHeader(this.props)){
             return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
         }
         return null;

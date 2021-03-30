@@ -14,6 +14,7 @@
  */
 
 import {createStore, applyMiddleware, compose} from 'redux';
+import { createStateSyncMiddleware, initMessageListener } from 'redux-state-sync';
 import createLogger from 'redux-logger';
 import {createEpicMiddleware} from 'redux-observable';
 
@@ -26,6 +27,7 @@ import epics from './epics';
 
 import {responsiveStoreEnhancer} from 'redux-responsive';
 import {AppSettings} from "./constants/app";
+import {ConnectionOverview2Action} from "@utils/actions";
 
 const initialEnhancers  = [responsiveStoreEnhancer];
 
@@ -45,6 +47,13 @@ let loggerOptions = {
     },
 };
 
+const syncConfig = {
+    whitelist: [
+        ConnectionOverview2Action.SET_ITEMS, ConnectionOverview2Action.SET_CURRENTSUBITEM,
+        ConnectionOverview2Action.SET_DETAILSLOCATION, ConnectionOverview2Action.SET_ITEMS,
+        ConnectionOverview2Action.SET_ARROWS, ConnectionOverview2Action.SET_CURRENTITEM,
+    ],
+};
 let enhancers = {};
 
 let initialMiddleware = [];
@@ -52,7 +61,7 @@ let initialMiddleware = [];
  * define middlewares
  */
 const epicMiddleware = createEpicMiddleware(epics);
-let middleware = [errorHandlingMiddleware, notificationMiddleware, resourceMappingMiddleware, frontBackMappingMiddleware, epicMiddleware];
+let middleware = [createStateSyncMiddleware(syncConfig), errorHandlingMiddleware, notificationMiddleware, resourceMappingMiddleware, frontBackMappingMiddleware, epicMiddleware];
 if (AppSettings.reduxHasLogs){
     initialMiddleware = [createLogger(loggerOptions)];
 }
@@ -73,5 +82,7 @@ const store = createStore(
         ...enhancers
     )
 );
+
+initMessageListener(store);
 
 export {store};

@@ -43,7 +43,7 @@ const reducer = (state = initialState, action) => {
         case ConnectionOverview2Action.SET_CURRENTSUBITEM:
             return state.set('currentSubItem', action.payload);
         case ConnectionOverview2Action.SET_DETAILSLOCATION:
-            return state.set('detailsLocation', action.payload);
+            return state.set('detailsLocation', action.payload.location);
         default:
             return state;
     }
