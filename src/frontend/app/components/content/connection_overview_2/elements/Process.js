@@ -4,12 +4,13 @@ import {connect} from 'react-redux';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
 
 function mapStateToProps(state){
-    const connectionOverview = state.get('connection_overview');
+    const {currentItem, currentSubItem} = mapItemsToClasses(state);
     return{
-        currentItem: connectionOverview.get('currentItem'),
-        currentSubItem: connectionOverview.get('currentSubItem'),
+        currentItem,
+        currentSubItem,
     };
 }
 

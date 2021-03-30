@@ -2,10 +2,10 @@ import React from 'react';
 import SvgLayout from "@decorators/SvgLayout";
 import {connect} from "react-redux";
 import {setCurrentItem, setCurrentSubItem} from "@actions/connection_overview_2/set";
+import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
 
 function mapStateToProps(state){
-    const connectionOverview = state.get('connection_overview');
-    const currentItem = connectionOverview.get('currentItem');
+    const {currentItem} = mapItemsToClasses(state);
     return{
         currentItem,
         items: currentItem ? currentItem.items : [],

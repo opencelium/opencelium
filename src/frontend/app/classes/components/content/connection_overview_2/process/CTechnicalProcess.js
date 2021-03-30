@@ -19,4 +19,12 @@ export class CTechnicalProcess extends CProcess{
     set label(label){
         this._label = label;
     }
+
+    getObject(){
+        let data = super.getObject();
+        return{
+            ...data,
+            label: this._label,
+        }
+    }
 }

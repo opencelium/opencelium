@@ -43,4 +43,21 @@ export class CBusinessProcess extends CProcess{
     set arrows(arrows){
         this._arrows = arrows;
     }
+
+    getObject(){
+        let data = super.getObject();
+        let objectItems = [];
+        if(this._items.length > 0){
+            if(this._items[0] instanceof CTechnicalProcess || this._items[0] instanceof CTechnicalOperator){
+                for(let i = 0; i < this._items.length; i++){
+                    objectItems.push(this._items[i].getObject());
+                }
+            }
+        }
+        return{
+            ...data,
+            items: objectItems,
+            arrows: this._arrows,
+        }
+    }
 }

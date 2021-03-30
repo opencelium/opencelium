@@ -2,13 +2,15 @@ import React from 'react';
 import {connect} from 'react-redux';
 import SvgLayout from "@decorators/SvgLayout";
 import {setCurrentItem, setItems} from "@actions/connection_overview_2/set";
+import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
 
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
+    const {currentItem, items} = mapItemsToClasses(state);
     return{
-        currentItem: connectionOverview.get('currentItem'),
-        items: connectionOverview.get('items'),
+        currentItem,
+        items,
         arrows: connectionOverview.get('arrows'),
     };
 }

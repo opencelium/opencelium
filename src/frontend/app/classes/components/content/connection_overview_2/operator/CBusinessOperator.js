@@ -27,4 +27,13 @@ export class CBusinessOperator extends COperator{
     set arrows(arrows){
         this._arrows = arrows;
     }
+
+    getObject(){
+        let data = super.getObject();
+        return{
+            ...data,
+            items: this._items,
+            arrows: this._arrows,
+        }
+    }
 }
