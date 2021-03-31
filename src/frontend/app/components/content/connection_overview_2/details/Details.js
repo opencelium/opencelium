@@ -1,26 +1,54 @@
 import React from 'react';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {connect} from "react-redux";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import SettingsPanel from "@components/content/connection_overview_2/details/SettingsPanel";
 import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
+import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
+import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
+import {connectionOverviewDetailsUrl} from "@utils/constants/url";
+import {setDetailsLocation} from "@actions/connection_overview_2/set";
+import {NewWindowFeature} from "@decorators/NewWindowFeature";
+
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
+    const {currentItem, currentSubItem} = mapItemsToClasses(state);
     return{
-        currentItem: connectionOverview.get('currentItem'),
-        currentSubItem: connectionOverview.get('currentSubItem'),
+        currentItem,
+        currentSubItem,
+        detailsLocation: connectionOverview.get('detailsLocation'),
     };
 }
 
-@connect(mapStateToProps, {})
+function isLocationSameWindow(props){
+    return props.detailsLocation === PANEL_LOCATION.SAME_WINDOW;
+}
+
+function setLocation(props, data){
+    props.setDetailsLocation(data);
+}
+
+function moveTo(props, newWindow){
+    if(props.position === DETAILS_POSITION.LEFT){
+        newWindow.moveTo(0, 0);
+    }
+    if(props.position === DETAILS_POSITION.RIGHT){
+        newWindow.moveTo(20000, 0);
+    }
+}
+
+@connect(mapStateToProps, {setDetailsLocation})
+@NewWindowFeature({url: connectionOverviewDetailsUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.DETAILS, setLocation, isLocationSameWindow, moveTo})
 class Details extends React.Component{
     constructor(props) {
         super(props);
     }
 
     render(){
-        const {currentItem, currentSubItem, isMinimized, position} = this.props;
+        const {currentItem, currentSubItem, isMinimized, position, detailsLocation, openInNewWindow} = this.props;
+        if(detailsLocation === PANEL_LOCATION.NEW_WINDOW){
+            return null;
+        }
         let details = currentSubItem ? currentSubItem : currentItem;
         let detailsClassName = '';
         let detailsStyle = {};
@@ -37,7 +65,7 @@ class Details extends React.Component{
         }
         return(
             <div className={detailsClassName} style={detailsStyle}>
-                <SettingsPanel {...this.props}/>
+                <SettingsPanel {...this.props} openInNewWindow={openInNewWindow}/>
                 {!isMinimized &&
                     <div className={styles.details_data}>
                         <div className={styles.title}>
@@ -59,6 +87,16 @@ class Details extends React.Component{
             </div>
         );
     }
+}
+
+Details.defaultProps = {
+    moveDetailsRight: () => {},
+    moveDetailsLeft: () => {},
+    position: '',
+    minimize: () => {},
+    maximize: () => {},
+    isMinimized: false,
+
 }
 
 export default Details;

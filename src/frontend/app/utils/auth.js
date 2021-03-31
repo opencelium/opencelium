@@ -16,7 +16,7 @@
 import Rx from 'rxjs/Rx';
 import jwt from 'jsonwebtoken';
 
-import store from '@utils/store';
+import {store} from '@utils/store';
 import {loginUserFulfilled, logoutUserFulfilled, sessionExpired} from '@actions/auth';
 import {doRequestRejected} from '@actions/app';
 import {updateMenu} from '@actions/app';

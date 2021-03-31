@@ -3,12 +3,13 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
+import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
 
 
 function mapStateToProps(state){
-    const connectionOverview = state.get('connection_overview');
+    const {currentItem} = mapItemsToClasses(state);
     return{
-        currentItem: connectionOverview.get('currentItem'),
+        currentItem,
     };
 }
 

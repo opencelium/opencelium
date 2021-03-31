@@ -1,4 +1,7 @@
 import {ConnectionOverview2Action} from "@utils/actions";
+import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
+import {isObject} from "@utils/app";
 
 /**
  * set current item
@@ -8,7 +11,7 @@ import {ConnectionOverview2Action} from "@utils/actions";
 const setCurrentItem = (currentItem) => {
     return {
         type: ConnectionOverview2Action.SET_CURRENTITEM,
-        payload: currentItem,
+        payload: isObject(currentItem) ? currentItem : currentItem.getObject(),
     };
 };
 
@@ -20,7 +23,7 @@ const setCurrentItem = (currentItem) => {
 const setCurrentSubItem = (currentSubItem) => {
     return {
         type: ConnectionOverview2Action.SET_CURRENTSUBITEM,
-        payload: currentSubItem,
+        payload: isObject(currentSubItem) ? currentSubItem : currentSubItem.getObject(),
     };
 };
 
@@ -30,9 +33,17 @@ const setCurrentSubItem = (currentSubItem) => {
  * @returns {{type: string, payload: {}}}
  */
 const setItems = (items) => {
+    let convertedItems = [];
+    if(items.length > 0 && (items[0] instanceof CProcess || items[0] instanceof COperator)){
+        for(let i = 0; i < items.length; i++){
+            convertedItems.push(items[i].getObject());
+        }
+    } else{
+        convertedItems = items;
+    }
     return {
         type: ConnectionOverview2Action.SET_ITEMS,
-        payload: items,
+        payload: convertedItems,
     };
 };
 
@@ -48,10 +59,24 @@ const setArrows = (arrows) => {
     };
 };
 
+/**
+ * set details location: {PANEL_LOCATION}
+ * @returns {{type: string, payload: {}}}
+ */
+const setDetailsLocation = (data) => {
+    return {
+        type: ConnectionOverview2Action.SET_DETAILSLOCATION,
+        payload: data,
+    };
+};
+
+
+
 
 export{
     setCurrentItem,
     setCurrentSubItem,
     setArrows,
     setItems,
+    setDetailsLocation,
 };

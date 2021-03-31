@@ -41,11 +41,6 @@ export const DETAILS_POSITION = {
     LEFT: 'left',
 };
 
-export const DETAILS_SETTINGS = {
-    MIN_WIDTH: 250,
-    MAX_WIDTH: 400,
-};
-
 export const  LAYOUT_SETTINGS = {
     MIN_WIDTH: 200,
 };
@@ -63,11 +58,18 @@ class ConnectionLayout extends Component{
             businessLayoutPosition: LAYOUT_POSITION.TOP,
             technicalLayoutPosition: LAYOUT_POSITION.BOTTOM,
             detailsPosition: DETAILS_POSITION.RIGHT,
-            verticalPanelWidths: ::this.getVerticalPanelWidthsForTechnical(),
+            verticalPanelWidths: ::this.getPanelGroupWidths(),
             isDetailsMinimized: false,
             isBusinessLayoutMinimized: false,
             isTechnicalLayoutMinimized: false,
+            businessViewBoxYOffset: 0,
+            technicalViewBoxYOffset: 0,
+            businessLayoutHeight: 300,
+            technicalLayoutHeight: 300,
         }
+        this.hasInitialPanelGroupSizes = false;
+        this.initialBusinessSize = 300;
+        this.initialTechnicalSize = 300;
     }
 
     componentDidMount() {
@@ -113,9 +115,11 @@ class ConnectionLayout extends Component{
 
     minimizeTechnicalLayout(){
         if(!this.state.isBusinessLayoutMinimized) {
+            let technicalLayoutHeight = this.state.technicalLayoutPosition === LAYOUT_POSITION.TOP ? this.state.verticalPanelWidths[0].size : this.state.verticalPanelWidths[1].size;
             this.setState({
                 isTechnicalLayoutMinimized: true,
-                verticalPanelWidths: ::this.getVerticalPanelWidthsForTechnical(true, this.state.isBusinessLayoutMinimized, this.state.technicalLayoutPosition),
+                verticalPanelWidths: ::this.getPanelGroupWidths({layoutOne: true, layoutTwo: this.state.isBusinessLayoutMinimized}, this.state.technicalLayoutPosition, this.state.technicalLayoutHeight),
+                technicalLayoutHeight,
             });
         } else{
             alert('Two panels cannot be minified');
@@ -125,15 +129,17 @@ class ConnectionLayout extends Component{
     maximizeTechnicalLayout(){
         this.setState({
             isTechnicalLayoutMinimized: false,
-            verticalPanelWidths: ::this.getVerticalPanelWidthsForTechnical(false, this.state.isBusinessLayoutMinimized, this.state.technicalLayoutPosition),
+            verticalPanelWidths: ::this.getPanelGroupWidths({layoutOne: false, layoutTwo: this.state.isBusinessLayoutMinimized}, this.state.technicalLayoutPosition, this.state.technicalLayoutHeight),
         });
     }
 
     minimizeBusinessLayout(){
         if(!this.state.isTechnicalLayoutMinimized) {
+            let businessLayoutHeight = this.state.businessLayoutPosition === LAYOUT_POSITION.TOP ? this.state.verticalPanelWidths[0].size : this.state.verticalPanelWidths[1].size;
             this.setState({
                 isBusinessLayoutMinimized: true,
-                verticalPanelWidths: ::this.getVerticalPanelWidthsForBusiness(this.state.isTechnicalLayoutMinimized, true, this.state.businessLayoutPosition),
+                verticalPanelWidths: ::this.getPanelGroupWidths({layoutTwo: this.state.isTechnicalLayoutMinimized, layoutOne: true}, this.state.businessLayoutPosition, this.state.businessLayoutHeight),
+                businessLayoutHeight,
             });
         } else{
             alert('Two panels cannot be minified');
@@ -143,89 +149,78 @@ class ConnectionLayout extends Component{
     maximizeBusinessLayout(){
         this.setState({
             isBusinessLayoutMinimized: false,
-            verticalPanelWidths: ::this.getVerticalPanelWidthsForBusiness(this.state.isTechnicalLayoutMinimized, false, this.state.businessLayoutPosition),
+            verticalPanelWidths: ::this.getPanelGroupWidths({layoutTwo: this.state.isTechnicalLayoutMinimized, layoutOne: false}, this.state.businessLayoutPosition, this.state.businessLayoutHeight),
         });
     }
 
-    getVerticalPanelWidthsForTechnical(isTechnicalLayoutMinimized = false, isBusinessLayoutMinimized = false, technicalLayoutPosition = LAYOUT_POSITION.BOTTOM){
+    onUpdatePanelGroupParams(panels){
+        const {businessLayoutPosition, technicalLayoutPosition, businessViewBoxYOffset, technicalViewBoxYOffset} = this.state;
+        let businessPanel = businessLayoutPosition === LAYOUT_POSITION.TOP ? panels[0] : panels[1];
+        let technicalPanel = technicalLayoutPosition === LAYOUT_POSITION.TOP ? panels[0] : panels[1];
+        if(!this.hasInitialPanelGroupSizes){
+            this.initialBusinessSize = businessPanel.size;
+            this.initialTechnicalSize = technicalPanel.size;
+            this.hasInitialPanelGroupSizes = true;
+        }
+        let newBusinessViewBoxYOffset = (businessPanel.size - this.initialBusinessSize) / 1.7;
+        let newTechnicalViewBoxYOffset = (technicalPanel.size - this.initialTechnicalSize) / 1.7;
+        if(businessViewBoxYOffset !== newBusinessViewBoxYOffset){
+            const svg = document.getElementById('business_layout_svg');
+            let viewBox = svg.viewBox.baseVal;
+            if(viewBox) viewBox.y = viewBox.y - businessViewBoxYOffset + newBusinessViewBoxYOffset;
+        }
+        if(technicalViewBoxYOffset !== newTechnicalViewBoxYOffset){
+            const svg = document.getElementById('technical_layout_svg');
+            let viewBox = svg.viewBox.baseVal;
+            if(viewBox) viewBox.y = viewBox.y - technicalViewBoxYOffset + newTechnicalViewBoxYOffset;
+        }
+        this.setState({
+            businessViewBoxYOffset: newBusinessViewBoxYOffset,
+            technicalViewBoxYOffset: newTechnicalViewBoxYOffset,
+            verticalPanelWidths: [...panels],
+        });
+    }
+
+    getPanelGroupWidths(isMinimized = {layoutOne: false, layoutTwo: false}, layoutPosition = LAYOUT_POSITION.BOTTOM, height = 300){
         let panelWidths = [
             {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
             {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
         ];
-        if(isTechnicalLayoutMinimized){
-            if(technicalLayoutPosition === LAYOUT_POSITION.TOP){
+        if(isMinimized.layoutOne){
+            if(layoutPosition === LAYOUT_POSITION.TOP){
                 panelWidths[0].maxSize = 20;
                 panelWidths[0].minSize = 20;
                 panelWidths[0].size = 20;
             }
-            if(technicalLayoutPosition === LAYOUT_POSITION.BOTTOM){
+            if(layoutPosition === LAYOUT_POSITION.BOTTOM){
                 panelWidths[1].maxSize = 20;
                 panelWidths[1].minSize = 20;
                 panelWidths[1].size = 20;
             }
         } else{
-            if(technicalLayoutPosition === LAYOUT_POSITION.TOP){
-                if(isBusinessLayoutMinimized){
+            if(layoutPosition === LAYOUT_POSITION.TOP){
+                if(isMinimized.layoutTwo){
                     panelWidths[1].maxSize = 20;
                     panelWidths[1].minSize = 20;
                     panelWidths[1].size = 20;
                 } else{
-                    panelWidths[0].size = 300;
+                    panelWidths[0].size = height;
                 }
             }
-            if(technicalLayoutPosition === LAYOUT_POSITION.BOTTOM){
-                if(isBusinessLayoutMinimized){
+            if(layoutPosition === LAYOUT_POSITION.BOTTOM){
+                if(isMinimized.layoutTwo){
                     panelWidths[0].maxSize = 20;
                     panelWidths[0].minSize = 20;
                     panelWidths[0].size = 20;
                 } else{
-                    panelWidths[1].size = 300;
+                    panelWidths[1].size = height;
                 }
             }
         }
         return panelWidths;
     }
 
-    getVerticalPanelWidthsForBusiness(isTechnicalLayoutMinimized = false, isBusinessLayoutMinimized = false, businessLayoutPosition = LAYOUT_POSITION.BOTTOM){
-        let panelWidths = [
-            {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
-            {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
-        ];
-        if(isBusinessLayoutMinimized){
-            if(businessLayoutPosition === LAYOUT_POSITION.TOP){
-                panelWidths[0].maxSize = 20;
-                panelWidths[0].minSize = 20;
-                panelWidths[0].size = 20;
-            }
-            if(businessLayoutPosition === LAYOUT_POSITION.BOTTOM){
-                panelWidths[1].maxSize = 20;
-                panelWidths[1].minSize = 20;
-                panelWidths[1].size = 20;
-            }
-        } else{
-            if(businessLayoutPosition === LAYOUT_POSITION.TOP){
-                if(isTechnicalLayoutMinimized){
-                    panelWidths[1].maxSize = 20;
-                    panelWidths[1].minSize = 20;
-                    panelWidths[1].size = 20;
-                } else{
-                    panelWidths[0].size = 300;
-                }
-            }
-            if(businessLayoutPosition === LAYOUT_POSITION.BOTTOM){
-                if(isTechnicalLayoutMinimized){
-                    panelWidths[0].maxSize = 20;
-                    panelWidths[0].minSize = 20;
-                    panelWidths[0].size = 20;
-                } else{
-                    panelWidths[1].size = 300;
-                }
-            }
-        }
-        return panelWidths;
-    }
-
-    getVerticalPanelParams(){
+    getPanelGroupParams(){
         const {verticalPanelWidths} = this.state;
         return {
             direction: 'column',
@@ -233,159 +228,73 @@ class ConnectionLayout extends Component{
             borderWidth: 1,
             panelWidths: verticalPanelWidths,
             spacing: 2,
+            onUpdate: ::this.onUpdatePanelGroupParams,
         };
     }
 
-    getHorizontalPanelParams(){
-        const {detailsPosition, isDetailsMinimized, verticalPanelParams} = this.state;
-        let params = {direction: 'row', borderColor: '#eee'};
-        let rowPanelWidths = [];
-        switch (detailsPosition) {
-            case DETAILS_POSITION.RIGHT:
-                rowPanelWidths = [
-                    {minSize: 100, resize: "stretch"},
-                    isDetailsMinimized ? {minSize: 20, maxSize: 20, resize: "dynamic"} : {minSize: DETAILS_SETTINGS.MIN_WIDTH, maxSize: DETAILS_SETTINGS.MAX_WIDTH, resize: "dynamic"},
-                ];
-                break;
-            case DETAILS_POSITION.LEFT:
-                rowPanelWidths = [
-                    isDetailsMinimized ? {minSize: 20, maxSize: 20, resize: "dynamic"} : {minSize: DETAILS_SETTINGS.MIN_WIDTH, maxSize: DETAILS_SETTINGS.MAX_WIDTH, resize: "dynamic"},
-                    {minSize: 100, resize: "stretch"},
-                ];
-                break;
-        }
-        params.panelWidths = rowPanelWidths;
-        return params;
-    }
-
-    replaceLayoutsForTechnical(){
+    replaceLayouts(){
+        const {technicalLayoutPosition, businessLayoutPosition, verticalPanelWidths} = this.state;
         this.setState({
-            businessLayoutPosition: this.state.technicalLayoutPosition,
-            technicalLayoutPosition: this.state.businessLayoutPosition,
-            verticalPanelWidths: ::this.getVerticalPanelWidthsForTechnical(this.state.isTechnicalLayoutMinimized, this.state.isBusinessLayoutMinimized, this.state.businessLayoutPosition),
+            businessLayoutPosition: technicalLayoutPosition,
+            technicalLayoutPosition: businessLayoutPosition,
+            verticalPanelWidths: [
+                verticalPanelWidths[1],
+                verticalPanelWidths[0],
+            ],
         })
-    }
-
-    replaceLayoutsForBusiness(){
-        this.setState({
-            businessLayoutPosition: this.state.technicalLayoutPosition,
-            technicalLayoutPosition: this.state.businessLayoutPosition,
-            verticalPanelWidths: ::this.getVerticalPanelWidthsForBusiness(this.state.isTechnicalLayoutMinimized, this.state.isBusinessLayoutMinimized, this.state.technicalLayoutPosition),
-        })
-    }
-
-    renderTechnicalSettingsPanel(){
-        const {detailsPosition, isTechnicalLayoutMinimized, isDetailsMinimized} = this.state;
-        let settingsPanelClassName = '';
-        let minMaxTooltip = 'Minimize';
-        let minMaxValue = 'minimize';
-        let minMaxClick = ::this.minimizeTechnicalLayout;
-        let minMaxTooltipPosition = 'top';
-        if(isTechnicalLayoutMinimized){
-            minMaxTooltip = 'Maximize';
-            minMaxValue = 'maximize';
-            minMaxClick = ::this.maximizeTechnicalLayout;
-        }
-        let titleClassName = '';
-        if(detailsPosition === DETAILS_POSITION.RIGHT){
-            settingsPanelClassName = styles.layout_settings_panel_left;
-            minMaxTooltipPosition = 'right';
-            titleClassName = styles.technical_settings_panel_title_left;
-        }
-        if(detailsPosition === DETAILS_POSITION.LEFT){
-            settingsPanelClassName = styles.layout_settings_panel_right;
-            minMaxTooltipPosition = 'left';
-            titleClassName = styles.technical_settings_panel_title_right;
-        }
-        if(isDetailsMinimized){
-            titleClassName = styles.technical_settings_panel_title_center;
-        }
-        return(
-            <div className={settingsPanelClassName}>
-                <TooltipFontIcon className={styles.replace_icon} size={20} onClick={::this.replaceLayoutsForTechnical} tooltip={'Replace'} value={'import_export'} tooltipPosition={minMaxTooltipPosition}  />
-                <div className={titleClassName}>Technical Layout</div>
-                <TooltipFontIcon className={styles.min_max_icon} size={20} onClick={minMaxClick} tooltip={minMaxTooltip} value={minMaxValue} tooltipPosition={minMaxTooltipPosition}/>
-            </div>
-        );
-    }
-
-    renderBusinessSettingsPanel(){
-        const {detailsPosition, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
-        let settingsPanelClassName = '';
-        let minMaxTooltip = 'Minimize';
-        let minMaxValue = 'minimize';
-        let minMaxClick = ::this.minimizeBusinessLayout;
-        let minMaxTooltipPosition = 'top';
-        if(isBusinessLayoutMinimized){
-            minMaxTooltip = 'Maximize';
-            minMaxValue = 'maximize';
-            minMaxClick = ::this.maximizeBusinessLayout;
-        }
-        let titleClassName = '';
-        if(detailsPosition === DETAILS_POSITION.RIGHT){
-            settingsPanelClassName = styles.layout_settings_panel_left;
-            minMaxTooltipPosition = 'right';
-            titleClassName = styles.technical_settings_panel_title_left;
-        }
-        if(detailsPosition === DETAILS_POSITION.LEFT){
-            settingsPanelClassName = styles.layout_settings_panel_right;
-            minMaxTooltipPosition = 'left';
-            titleClassName = styles.technical_settings_panel_title_right;
-        }
-        return(
-            <div className={settingsPanelClassName}>
-                <TooltipFontIcon className={styles.replace_icon} size={20} onClick={::this.replaceLayoutsForBusiness} tooltip={'Replace'} value={'import_export'} tooltipPosition={minMaxTooltipPosition}  />
-                <div className={titleClassName}>Business Layout</div>
-                <TooltipFontIcon className={styles.min_max_icon} size={20} onClick={minMaxClick} tooltip={minMaxTooltip} value={minMaxValue} tooltipPosition={minMaxTooltipPosition}/>
-            </div>
-        );
-    }
-
-    renderDetails(){
-        const {detailsPosition, isDetailsMinimized} = this.state;
-        return(
-            <Details
-                moveDetailsRight={::this.moveDetailsRight}
-                moveDetailsLeft={::this.moveDetailsLeft}
-                position={detailsPosition}
-                minimize={::this.minimizeDetails}
-                maximize={::this.maximizeDetails}
-                isMinimized={isDetailsMinimized}
-            />
-        );
     }
 
     render(){
-        const {businessLayoutPosition, detailsPosition, isTechnicalLayoutMinimized} = this.state;
-        const horizontalPanelParams = ::this.getHorizontalPanelParams();
-        const verticalPanelParams = ::this.getVerticalPanelParams();
+        const {businessLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
+        const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div id={'app_content'} className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
-                {::this.renderDetails()}
-                {businessLayoutPosition === LAYOUT_POSITION.TOP
-                    &&
+                <Details
+                    moveDetailsRight={::this.moveDetailsRight}
+                    moveDetailsLeft={::this.moveDetailsLeft}
+                    position={detailsPosition}
+                    minimize={::this.minimizeDetails}
+                    maximize={::this.maximizeDetails}
+                    isMinimized={isDetailsMinimized}
+                />
+                {
+                    businessLayoutPosition === LAYOUT_POSITION.TOP &&
                     <PanelGroup {...verticalPanelParams}>
-                        <div id={'business_layout'} className={`${styles.business_layout}`}>
-                            {this.renderBusinessSettingsPanel()}
-                            <BusinessLayout detailsPosition={detailsPosition}/>
-                        </div>
-                        <div id={'technical_layout'} className={`${styles.technical_layout}`}>
-                            {this.renderTechnicalSettingsPanel()}
-                            <TechnicalLayout detailsPosition={detailsPosition}/>
-                        </div>
+                        <BusinessLayout
+                            isLayoutMinimized={isBusinessLayoutMinimized}
+                            minimizeLayout={::this.minimizeBusinessLayout}
+                            maximizeLayout={::this.maximizeBusinessLayout}
+                            replaceLayouts={::this.replaceLayouts}
+                            detailsPosition={detailsPosition}
+                        />
+                        <TechnicalLayout
+                            isLayoutMinimized={isTechnicalLayoutMinimized}
+                            minimizeLayout={::this.minimizeTechnicalLayout}
+                            maximizeLayout={::this.maximizeTechnicalLayout}
+                            replaceLayouts={::this.replaceLayouts}
+                            detailsPosition={detailsPosition}
+                            isDetailsMinimized={isDetailsMinimized}
+                        />
                     </PanelGroup>
                 }
-                {businessLayoutPosition === LAYOUT_POSITION.BOTTOM
-                    &&
+                {
+                    businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                     <PanelGroup {...verticalPanelParams}>
-                        <div id={'technical_layout'} className={`${styles.technical_layout}`}>
-                            {this.renderTechnicalSettingsPanel()}
-                            <TechnicalLayout detailsPosition={detailsPosition}/>
-                        </div>
-                        <div id={'business_layout'} className={`${styles.business_layout}`}>
-                            {this.renderBusinessSettingsPanel()}
-                            <BusinessLayout detailsPosition={detailsPosition}/>
-                        </div>
+                        <TechnicalLayout
+                            isLayoutMinimized={isTechnicalLayoutMinimized}
+                            minimizeLayout={::this.minimizeTechnicalLayout}
+                            maximizeLayout={::this.maximizeTechnicalLayout}
+                            replaceLayouts={::this.replaceLayouts}
+                            detailsPosition={detailsPosition}
+                            isDetailsMinimized={isDetailsMinimized}
+                        />
+                        <BusinessLayout
+                            isLayoutMinimized={isBusinessLayoutMinimized}
+                            minimizeLayout={::this.minimizeBusinessLayout}
+                            maximizeLayout={::this.maximizeBusinessLayout}
+                            replaceLayouts={::this.replaceLayouts}
+                            detailsPosition={detailsPosition}
+                        />
                     </PanelGroup>
                 }
             </div>

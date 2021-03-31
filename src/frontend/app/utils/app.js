@@ -18,6 +18,7 @@ import React from 'react';
 import CUserGroup from "@classes/components/content/user_group/CUserGroup";
 import CComponent from "@classes/components/content/user_group/CComponent";
 import _ from 'lodash';
+import {SEPARATE_WINDOW} from "@utils/constants/app";
 
 
 /**
@@ -31,6 +32,15 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
+
+export function hasHeader(props){
+    for(let windowParam in SEPARATE_WINDOW.CONNECTION_OVERVIEW){
+        if(window.name === SEPARATE_WINDOW.CONNECTION_OVERVIEW[windowParam]){
+            return false;
+        }
+    }
+    return true;
+}
 
 export function checkCronExpression(cronExp){
     const timeParts = cronExp.split(' ');

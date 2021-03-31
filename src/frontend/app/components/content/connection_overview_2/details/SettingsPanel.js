@@ -3,15 +3,17 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
 
+
 class SettingsPanel extends React.Component{
     constructor(props) {
         super(props);
     }
 
     render(){
-        const {moveDetailsLeft, moveDetailsRight, position, isMinimized, minimize, maximize} = this.props;
+        const {moveDetailsLeft, moveDetailsRight, position, isMinimized, minimize, maximize, openInNewWindow} = this.props;
         let positionIconClassName = '';
         let minMaxIconClassName = '';
+        let newWindowIconClassName = '';
         let positionTooltip = '';
         let positionValue = '';
         let positionClick = null;
@@ -21,20 +23,22 @@ class SettingsPanel extends React.Component{
         if(position === DETAILS_POSITION.LEFT){
             positionIconClassName = styles.position_icon_left;
             minMaxIconClassName = styles.min_max_icon_left;
+            newWindowIconClassName = styles.new_window_icon_left;
             positionTooltip = 'Move to the Right';
             positionValue = 'keyboard_arrow_right';
             positionClick = moveDetailsRight;
-            minMaxTooltipPosition = 'right';
+            minMaxTooltipPosition = 'top';
             settingsPanelStyles.borderRight = 'none';
             detailsTitleClassName = styles.details_title_left;
         }
         if(position === DETAILS_POSITION.RIGHT){
             positionIconClassName = styles.position_icon_right;
             minMaxIconClassName = styles.min_max_icon_right;
+            newWindowIconClassName = styles.new_window_icon_right;
             positionTooltip = 'Move to the Left';
             positionValue = 'keyboard_arrow_left';
             positionClick = moveDetailsLeft;
-            minMaxTooltipPosition = 'left';
+            minMaxTooltipPosition = 'top';
             settingsPanelStyles.borderLeft = 'none';
             detailsTitleClassName = styles.details_title_right;
         }
@@ -67,6 +71,14 @@ class SettingsPanel extends React.Component{
                     tooltip={minMaxTooltip}
                     value={minMaxValue}
                     tooltipPosition={minMaxTooltipPosition}
+                />
+                <TooltipFontIcon
+                    size={20}
+                    className={newWindowIconClassName}
+                    onClick={openInNewWindow}
+                    tooltip={'Open in new Window'}
+                    value={'open_in_new'}
+                    tooltipPosition={'top'}
                 />
             </div>
         );

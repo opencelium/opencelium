@@ -286,6 +286,14 @@ const ConnectionOverview2 = Loadable({
     loading: Loading,
 });
 
+/**
+ * Loadable Connection Overview Details Layout
+ */
+const ConnectionOverviewDetails = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_extended_details' */ '@components/content/connection_overview_2/details/ExtendedDetails'),
+    loading: Loading,
+});
+
 export default {
     UserLayout,
     UserAdd,
@@ -337,4 +345,5 @@ export default {
     UpdateAssistantLayout,
     UpdateAssistant,
     ConnectionOverview2,
+    ConnectionOverviewDetails,
 };

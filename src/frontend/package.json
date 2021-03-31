@@ -64,6 +64,7 @@
     "redux-notify": "^0.2.0",
     "redux-observable": "^0.12.1",
     "redux-responsive": "^4.3.8",
+    "redux-state-sync": "^3.1.2",
     "rx": "^4.1.0",
     "rxjs": "^5.0.0-rc.2",
     "secure-ls": "^1.1.0",
