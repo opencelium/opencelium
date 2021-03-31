@@ -178,7 +178,7 @@ public class AssistantServiceImp implements ApplicationService {
         Git.cloneRepository()
                 .setURI(path)
                 .setDirectory(new File("/"))
-                .setBranchesToClone(Arrays.asList("master"))
+                .setBranchesToClone(Arrays.asList("dev"))
                 .setBranch("dev")
                 .call();
     }
