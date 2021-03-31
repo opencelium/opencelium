@@ -3,10 +3,11 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {connect} from "react-redux";
 import SettingsPanel from "@components/content/connection_overview_2/details/SettingsPanel";
 import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
-import {DETAILS_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
+import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
 import {connectionOverviewDetailsUrl} from "@utils/constants/url";
 import {setDetailsLocation} from "@actions/connection_overview_2/set";
+import {NewWindowFeature} from "@decorators/NewWindowFeature";
 
 
 function mapStateToProps(state){
@@ -19,47 +20,33 @@ function mapStateToProps(state){
     };
 }
 
+function isLocationSameWindow(props){
+    return props.detailsLocation === PANEL_LOCATION.SAME_WINDOW;
+}
+
+function setLocation(props, data){
+    props.setDetailsLocation(data);
+}
+
+function moveTo(props, newWindow){
+    if(props.position === DETAILS_POSITION.LEFT){
+        newWindow.moveTo(0, 0);
+    }
+    if(props.position === DETAILS_POSITION.RIGHT){
+        newWindow.moveTo(20000, 0);
+    }
+}
+
 @connect(mapStateToProps, {setDetailsLocation})
+@NewWindowFeature({url: connectionOverviewDetailsUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.DETAILS, setLocation, isLocationSameWindow, moveTo})
 class Details extends React.Component{
     constructor(props) {
         super(props);
-        this.isOpenedConnectionOverviewDetailsWindow = false;
-        this.connectionOverviewDetailsWindow = null;
-        this.checkIfWindowClosed = () => {};
-    }
-
-    openInNewWindow(){
-        const {position, setDetailsLocation} = this.props;
-        const that = this;
-        this.connectionOverviewDetailsWindow = window.open(connectionOverviewDetailsUrl, SEPARATE_WINDOW.CONNECTION_OVERVIEW.DETAILS, 'menubar:0,status:0,toolbar:0');
-        this.connectionOverviewDetailsWindow.onload = () => {setTimeout(() => {that.isOpenedConnectionOverviewDetailsWindow = true;}, 200); setDetailsLocation({location: DETAILS_LOCATION.NEW_WINDOW})};
-        if(position === DETAILS_POSITION.LEFT){
-            this.connectionOverviewDetailsWindow.moveTo(0, 0);
-        }
-        if(position === DETAILS_POSITION.RIGHT){
-            this.connectionOverviewDetailsWindow.moveTo(20000, 0);
-        }
-        this.checkIfWindowClosed = setInterval(() => {
-            if(that.connectionOverviewDetailsWindow){
-                if(that.connectionOverviewDetailsWindow.closed) {
-                    clearInterval(that.checkIfWindowClosed);
-                    setDetailsLocation({location: DETAILS_LOCATION.SAME_WINDOW});
-                    that.connectionOverviewDetailsWindow = null;
-                    that.isOpenedConnectionOverviewDetailsWindow = false;
-                }
-                if(that.isOpenedConnectionOverviewDetailsWindow && that.connectionOverviewDetailsWindow && that.props.detailsLocation === DETAILS_LOCATION.SAME_WINDOW){
-                    clearInterval(that.checkIfWindowClosed);
-                    that.connectionOverviewDetailsWindow.close();
-                    that.connectionOverviewDetailsWindow = null;
-                    that.isOpenedConnectionOverviewDetailsWindow = false;
-                }
-            }
-        }, 100);
     }
 
     render(){
-        const {currentItem, currentSubItem, isMinimized, position, detailsLocation} = this.props;
-        if(detailsLocation === DETAILS_LOCATION.NEW_WINDOW){
+        const {currentItem, currentSubItem, isMinimized, position, detailsLocation, openInNewWindow} = this.props;
+        if(detailsLocation === PANEL_LOCATION.NEW_WINDOW){
             return null;
         }
         let details = currentSubItem ? currentSubItem : currentItem;
@@ -78,7 +65,7 @@ class Details extends React.Component{
         }
         return(
             <div className={detailsClassName} style={detailsStyle}>
-                <SettingsPanel {...this.props} openInNewWindow={::this.openInNewWindow}/>
+                <SettingsPanel {...this.props} openInNewWindow={openInNewWindow}/>
                 {!isMinimized &&
                     <div className={styles.details_data}>
                         <div className={styles.title}>

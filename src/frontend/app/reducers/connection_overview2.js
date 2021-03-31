@@ -15,7 +15,7 @@
 
 import {List, fromJS} from 'immutable';
 import {ConnectionOverview2Action} from "@utils/actions";
-import {DETAILS_LOCATION} from "@utils/constants/app";
+import {PANEL_LOCATION} from "@utils/constants/app";
 
 
 const initialState = fromJS({
@@ -26,7 +26,7 @@ const initialState = fromJS({
     error: null,
     message: {},
     notificationData: {},
-    detailsLocation: DETAILS_LOCATION.SAME_WINDOW,
+    detailsLocation: PANEL_LOCATION.SAME_WINDOW,
 });
 
 /**

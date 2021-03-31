@@ -60,7 +60,7 @@ const setArrows = (arrows) => {
 };
 
 /**
- * set details location: {DETAILS_LOCATION}
+ * set details location: {PANEL_LOCATION}
  * @returns {{type: string, payload: {}}}
  */
 const setDetailsLocation = (data) => {

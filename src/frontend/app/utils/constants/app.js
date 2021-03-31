@@ -67,7 +67,7 @@ export const API_METHOD = {
 
 
 
-export const DETAILS_LOCATION = {
+export const PANEL_LOCATION = {
     NEW_WINDOW: 'new_window',
     SAME_WINDOW: 'same_window',
 };
