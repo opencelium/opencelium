@@ -46,6 +46,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'com.jayway.jsonpath:json-path:2.4.0'
+	implementation 'org.eclipse.jgit:org.eclipse.jgit:5.4.2.201908231537-r'
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

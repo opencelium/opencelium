@@ -67,23 +67,11 @@ public class StorageConfiguration {
             directory.mkdir();
             System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "application/");
         }
-        filePath = Paths.get(PathConstant.REPOSITORY + "connection/");
+        filePath = Paths.get(PathConstant.REPOSITORY + "temporary/");
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY + "connection/");
+            File directory = new File(PathConstant.REPOSITORY + "temporary/");
             directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "connection/");
-        }
-        filePath = Paths.get(PathConstant.REPOSITORY + "invoker/");
-        if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY + "invoker/");
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "invoker/");
-        }
-        filePath = Paths.get(PathConstant.REPOSITORY + "template/");
-        if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY + "template/");
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "template/");
+            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "temporary/");
         }
         filePath = Paths.get(PathConstant.REPOSITORY + "zipfile/");
         if (Files.notExists(filePath)){
