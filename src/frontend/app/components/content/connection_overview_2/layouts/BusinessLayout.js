@@ -6,7 +6,8 @@ import Svg from "@components/content/connection_overview_2/layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import SettingsPanel from "@components/content/connection_overview_2/layouts/SettingsPanel";
 import PropTypes from "prop-types";
-import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
+import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
+import {PANEL_LOCATION} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
@@ -16,10 +17,12 @@ function mapStateToProps(state){
         currentItem,
         items,
         arrows: connectionOverview.get('arrows'),
+        technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
+        businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };
 }
 
-@connect(mapStateToProps, {setCurrentItem, setItems})
+@connect(mapStateToProps, {setCurrentItem, setItems, setBusinessLayoutLocation})
 class BusinessLayout extends React.Component{
 
     constructor(props) {
@@ -27,8 +30,15 @@ class BusinessLayout extends React.Component{
         this.layoutId = 'business_layout';
     }
 
+    setLocation(data){
+        const {technicalLayoutLocation, setBusinessLayoutLocation} = this.props;
+        if(technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW){
+            setBusinessLayoutLocation(data);
+        }
+    }
+
     render(){
-        const {isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, detailsPosition, ...svgProps} = this.props;
+        const {isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, detailsPosition, businessLayoutLocation, ...svgProps} = this.props;
         return(
             <div id={this.layoutId} className={`${styles.business_layout}`}>
                 <SettingsPanel
@@ -37,6 +47,8 @@ class BusinessLayout extends React.Component{
                     minimizeLayout={minimizeLayout}
                     replaceLayouts={replaceLayouts}
                     detailsPosition={detailsPosition}
+                    setLocation={::this.setLocation}
+                    location={businessLayoutLocation}
                     title={'Business Layout'}
                 />
                 <Svg

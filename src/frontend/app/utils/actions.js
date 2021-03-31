@@ -493,6 +493,8 @@ export const ConnectionOverview2Action = {
     SET_ITEMS:                                 'SET_ITEMS',
     SET_ARROWS:                                'SET_ARROWS',
     SET_DETAILSLOCATION:                       'SET_DETAILSLOCATION',
+    SET_BUSINESSLAYOUTLOCATION:                'SET_BUSINESSLAYOUTLOCATION',
+    SET_TECHNICALLAYOUTLOCATION:               'SET_TECHNICALLAYOUTLOCATION',
 }
 
 /**

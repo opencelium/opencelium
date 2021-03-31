@@ -27,6 +27,8 @@ import {setItems, setArrows} from "@actions/connection_overview_2/set";
 import {ARROWS, ITEMS} from "@components/content/connection_overview_2/data";
 import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
+import {PANEL_LOCATION} from "@utils/constants/app";
 
 
 export const HAS_LAYOUTS_SCALING = false;
@@ -45,10 +47,18 @@ export const  LAYOUT_SETTINGS = {
     MIN_WIDTH: 200,
 };
 
+function mapStateToProps(state){
+    const connectionOverview = state.get('connection_overview');
+    return{
+        technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
+        businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+    };
+}
+
 /**
  * Layout for TemplateConverter
  */
-@connect(null, {setArrows, setItems})
+@connect(mapStateToProps, {setArrows, setItems})
 class ConnectionLayout extends Component{
 
     constructor(props){
@@ -246,6 +256,7 @@ class ConnectionLayout extends Component{
 
     render(){
         const {businessLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
+        const {technicalLayoutLocation, businessLayoutLocation} = this.props;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div id={'app_content'} className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
@@ -257,9 +268,8 @@ class ConnectionLayout extends Component{
                     maximize={::this.maximizeDetails}
                     isMinimized={isDetailsMinimized}
                 />
-                {
-                    businessLayoutPosition === LAYOUT_POSITION.TOP &&
-                    <PanelGroup {...verticalPanelParams}>
+                <PanelGroup {...verticalPanelParams}>
+                    {businessLayoutPosition === LAYOUT_POSITION.TOP &&
                         <BusinessLayout
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
@@ -267,27 +277,16 @@ class ConnectionLayout extends Component{
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
                         />
-                        <TechnicalLayout
-                            isLayoutMinimized={isTechnicalLayoutMinimized}
-                            minimizeLayout={::this.minimizeTechnicalLayout}
-                            maximizeLayout={::this.maximizeTechnicalLayout}
-                            replaceLayouts={::this.replaceLayouts}
-                            detailsPosition={detailsPosition}
-                            isDetailsMinimized={isDetailsMinimized}
-                        />
-                    </PanelGroup>
-                }
-                {
-                    businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
-                    <PanelGroup {...verticalPanelParams}>
-                        <TechnicalLayout
-                            isLayoutMinimized={isTechnicalLayoutMinimized}
-                            minimizeLayout={::this.minimizeTechnicalLayout}
-                            maximizeLayout={::this.maximizeTechnicalLayout}
-                            replaceLayouts={::this.replaceLayouts}
-                            detailsPosition={detailsPosition}
-                            isDetailsMinimized={isDetailsMinimized}
-                        />
+                    }
+                    <TechnicalLayout
+                        isLayoutMinimized={isTechnicalLayoutMinimized}
+                        minimizeLayout={::this.minimizeTechnicalLayout}
+                        maximizeLayout={::this.maximizeTechnicalLayout}
+                        replaceLayouts={::this.replaceLayouts}
+                        detailsPosition={detailsPosition}
+                        isDetailsMinimized={isDetailsMinimized}
+                    />
+                    {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
@@ -295,8 +294,8 @@ class ConnectionLayout extends Component{
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
                         />
-                    </PanelGroup>
-                }
+                    }
+                </PanelGroup>
             </div>
         );
     }

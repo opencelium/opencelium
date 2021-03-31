@@ -91,6 +91,7 @@ export const createRoutes = (store) => {
             </Route>
             <Route path='/connection_overview_2' component={isAuth(LoadableRouteComponents.ConnectionOverview2, store)}/>
             <Route path='/connection_overview_details' component={isAuth(LoadableRouteComponents.ConnectionOverviewDetails, store)}/>
+            <Route path='/connection_overview_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewLayout, store)}/>
             <Route path='/template_converter' component={isAuth(LoadableRouteComponents.TemplateConverterLayout, store)}/>
             <Route path='/update_assistant' component={isAuth(LoadableRouteComponents.UpdateAssistantLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.UpdateAssistant}/>
