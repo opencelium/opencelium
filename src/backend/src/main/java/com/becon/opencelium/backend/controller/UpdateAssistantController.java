@@ -20,16 +20,24 @@ import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.service.AssistantServiceImp;
 import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.execution2.executor.Execution;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
+import com.becon.opencelium.backend.resource.application.MigrateDataResource;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
+import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.pool.HikariPool;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +50,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping(value = "/api/assistant", produces = "application/hal+json", consumes = {"application/json"})
@@ -70,6 +81,12 @@ public class UpdateAssistantController {
 
     @Autowired
     private InvokerServiceImp invokerServiceImp;
+
+    @Autowired
+    private ConnectionServiceImp connectionServiceImp;
+
+    @Autowired
+    private ConnectionNodeServiceImp connectionNodeServiceImp;
 
     @GetMapping("/all")
     public List<String> getAll(){
@@ -124,18 +141,86 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(templateResources);
     }
 
-//    @GetMapping("/oc/invoker")
-//    public ResponseEntity<?> getAssistentInvokerFiles() {
-//        String path = PathConstant.INVOKER;
-//        List<Invoker> invokers = invokerServiceImp.findAll();
-//        List<UpdateInvokerResource> invokerResources = invokers.entrySet().stream()
-//                .map(inv -> invokerServiceImp.toUpdateInvokerResource(inv))
-//                .collect(Collectors.toList());
-//        return ResponseEntity.ok(invokerResources);
-//    }
+    // create
+    @PostMapping("/oc/migrate")
+    public ResponseEntity<?> migrate(@PathVariable MigrateDataResource migrateDataResource) {
 
-    @GetMapping("/changelog/file/{packageName}")
+        // create dir
+
+        try {
+            String version = migrateDataResource.getVersion();
+            assistantServiceImp.createTmpDir(version);
+
+            final String dir;
+            if (migrateDataResource.getFolder() != null || !migrateDataResource.getFolder().isEmpty()) {
+                dir = migrateDataResource.getFolder();
+            } else {
+                dir = migrateDataResource.getVersion();
+            }
+
+            // saving files to tmp folder
+            migrateDataResource.getInvokers().forEach(inv -> {
+                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
+            });
+
+            migrateDataResource.getTemplates().forEach(temp -> {
+                assistantServiceImp.saveTmpJSON(temp, dir + "/template");
+            });
+
+            migrateDataResource.getConnections().forEach(ction -> {
+                assistantServiceImp.saveTmpJSON(ction, dir + "/connection");
+            });
+
+            if (migrateDataResource.isOnline()) {
+                assistantServiceImp.updateOn();
+            } else {
+                assistantServiceImp.updateOff();
+            }
+
+
+            // after update need to move or replace files in main project
+            Path filePath = Paths.get(PathConstant.REPOSITORY + "temporary/" + dir + "/invoker");
+            List<File> invokers = Files.list(filePath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".xml"))
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+            invokers.forEach(f -> {
+                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
+            });
+
+            filePath = Paths.get(PathConstant.REPOSITORY + "temporary/" + dir + "/template");
+            List<File> templates = Files.list(filePath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".json"))
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+            templates.forEach(f -> {
+                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
+            });
+
+
+            List<String> connectionResources = migrateDataResource.getConnections().stream()
+                    .map(t -> JsonPath.read(t, "$.connection").toString()).collect(Collectors.toList());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            for (String cn : connectionResources) {
+                ConnectionResource connectionResource = objectMapper.readValue(cn, ConnectionResource.class);
+                connectionServiceImp.deleteById(connectionResource.getConnectionId());
+                connectionNodeServiceImp.deleteById(connectionResource.getConnectionId());
+                assistantServiceImp.updateConnection(connectionResource);
+            }
+
+        } catch (Exception e) {
+            assistantServiceImp.doBackup();
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+
     @ResponseBody
+    @GetMapping("/changelog/file/{packageName}")
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
 
         try {
