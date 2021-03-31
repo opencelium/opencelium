@@ -174,7 +174,7 @@ public class UpdateAssistantController {
             if (migrateDataResource.isOnline()) {
                 assistantServiceImp.updateOn();
             } else {
-                assistantServiceImp.updateOff();
+                assistantServiceImp.updateOff(dir);
             }
 
 

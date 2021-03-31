@@ -17,6 +17,6 @@ public interface ApplicationService {
     void createTmpDir(String dir);
     SystemOverviewResource toResource(SystemOverview systemOverview);
     void updateOn() throws Exception;
-    void updateOff() throws Exception;
+    void updateOff(String dir) throws Exception;
     void updateConnection(ConnectionResource connectionresource);
 }

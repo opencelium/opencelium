@@ -10,22 +10,16 @@ import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.entity.relation.LinkRelation;
-import com.becon.opencelium.backend.neo4j.service.ConnectionNodeService;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
-import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -179,12 +173,13 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public void updateOff() throws Exception {
+    public void updateOff(String dir) throws Exception {
+        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
         Git.cloneRepository()
-                .setURI("https://github.com/eclipse/jgit.git")
-                .setDirectory(new File("/path/to/targetdirectory"))
-                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
-                .setBranch("refs/heads/specific-branch")
+                .setURI(path)
+                .setDirectory(new File("/"))
+                .setBranchesToClone(Arrays.asList("master"))
+                .setBranch("dev")
                 .call();
     }
 
