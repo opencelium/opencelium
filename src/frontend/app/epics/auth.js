@@ -75,6 +75,7 @@ const updateAuthUserLanguageEpic = (action$, store) => {
                         setLS("userDetail", response.userDetail);
                         decodedData['userGroup'] = response.userGroup;
                         decodedData['userDetail'] = response.userDetail;
+                        decodedData['widgetSettings'] = response.widgetSettings;
                         return loginUserFulfilled(decodedData);
                     } else{
                         return loginUserRejected({'message': 'SERVER_NOT_FOUND'});

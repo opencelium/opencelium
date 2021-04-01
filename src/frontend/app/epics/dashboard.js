@@ -7,6 +7,7 @@ import {
 } from "@actions/dashboard/fetch";
 import {updateWidgetSettingsFulfilled, updateWidgetSettingsRejected} from "@actions/dashboard/update";
 import {isArray} from "@utils/app";
+import {API_METHOD} from "@utils/constants/app";
 
 /**
  * main url for invokers
@@ -24,7 +25,6 @@ const fetchWidgetSettingsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.FETCH_WIDGETSETTINGS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `widget_setting/all`;
             let widgetSettings = store.getState('auth').get('auth').get('authUser').widgetSettings;
             if(isArray(widgetSettings)){
                 return Rx.Observable.of(fetchWidgetSettingsFulfilled({widgetSettings}))
@@ -60,12 +60,11 @@ const updateWidgetSettingsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.UPDATE_WIDGETSETTINGS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}`;
-            return Rx.Observable.of(updateWidgetSettingsFulfilled(action.payload));/*
+            let url = `widget_setting/all`;
             return doRequest({url, method: API_METHOD.POST, data: action.payload},{
                 success: updateWidgetSettingsFulfilled,
                 reject: updateWidgetSettingsRejected,},
-            );*/
+            );
         });
 };
 
