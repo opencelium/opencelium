@@ -6,6 +6,8 @@ import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class WidgetSettingServiceImp implements WidgetSettingService {
 
@@ -30,6 +32,21 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
     @Override
     public void deleteByName(String name) {
         widgetSettingRepository.deleteByName(name);
+    }
+
+    @Override
+    public List<WidgetSetting> findAll() {
+        return widgetSettingRepository.findAll();
+    }
+
+    @Override
+    public WidgetSetting findById(int id) {
+        return widgetSettingRepository.findById(id).orElseThrow(() -> new RuntimeException("WidgetNotFound"));
+    }
+
+    @Override
+    public void deleteById(int id) {
+
     }
 
     @Override

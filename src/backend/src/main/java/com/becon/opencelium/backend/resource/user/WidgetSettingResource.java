@@ -8,7 +8,6 @@ import javax.annotation.Resource;
 @Resource
 public class WidgetSettingResource {
 
-    @JsonIgnore
     private int widgetId;
     private String i;
     private int x;

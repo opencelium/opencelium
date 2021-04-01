@@ -18,6 +18,8 @@ import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Service;
@@ -164,6 +166,9 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateOn() throws Exception {
+//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+//        Repository
+//        Git git = new Git();
         Git.cloneRepository()
                 .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
                 .setDirectory(new File("/path/to/targetdirectory"))
