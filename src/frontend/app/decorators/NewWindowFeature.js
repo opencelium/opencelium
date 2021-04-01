@@ -34,7 +34,7 @@ export function NewWindowFeature(params = {url: '', windowName: '', setLocation:
                 const that = this;
                 this.newWindow = window.open(params.url, params.windowName, 'menubar:0,status:0,toolbar:0');
                 this.newWindow.onload = () => {setTimeout(() => {that.isOpenedNewWindow = true;}, 200); params.setLocation(that.props, {location: PANEL_LOCATION.NEW_WINDOW})};
-                if(params.moveTo === null){
+                if(typeof params.moveTo !== 'function'){
                     this.newWindow.moveTo(0, 0);
                 } else{
                     params.moveTo(this.props, this.newWindow);

@@ -27,6 +27,8 @@ const initialState = fromJS({
     message: {},
     notificationData: {},
     detailsLocation: PANEL_LOCATION.SAME_WINDOW,
+    businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
+    technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
 });
 
 /**
@@ -44,6 +46,10 @@ const reducer = (state = initialState, action) => {
             return state.set('currentSubItem', action.payload);
         case ConnectionOverview2Action.SET_DETAILSLOCATION:
             return state.set('detailsLocation', action.payload.location);
+        case ConnectionOverview2Action.SET_BUSINESSLAYOUTLOCATION:
+            return state.set('businessLayoutLocation', action.payload.location);
+        case ConnectionOverview2Action.SET_TECHNICALLAYOUTLOCATION:
+            return state.set('technicalLayoutLocation', action.payload.location);
         default:
             return state;
     }

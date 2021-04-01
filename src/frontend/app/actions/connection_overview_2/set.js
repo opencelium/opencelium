@@ -70,6 +70,28 @@ const setDetailsLocation = (data) => {
     };
 };
 
+/**
+ * set business location: {PANEL_LOCATION}
+ * @returns {{type: string, payload: {}}}
+ */
+const setBusinessLayoutLocation = (data) => {
+    return {
+        type: ConnectionOverview2Action.SET_BUSINESSLAYOUTLOCATION,
+        payload: data,
+    };
+};
+
+/**
+ * set technical location: {PANEL_LOCATION}
+ * @returns {{type: string, payload: {}}}
+ */
+const setTechnicalLayoutLocation = (data) => {
+    return {
+        type: ConnectionOverview2Action.SET_TECHNICALLAYOUTLOCATION,
+        payload: data,
+    };
+};
+
 
 
 
@@ -79,4 +101,6 @@ export{
     setArrows,
     setItems,
     setDetailsLocation,
+    setBusinessLayoutLocation,
+    setTechnicalLayoutLocation,
 };

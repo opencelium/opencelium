@@ -1,0 +1,41 @@
+import React from 'react';
+import {connect} from "react-redux";
+import {setCurrentItem, setCurrentSubItem} from "@actions/connection_overview_2/set";
+import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
+import Svg from "@components/content/connection_overview_2/layouts/Svg";
+import styles from "@themes/default/content/connections/connection_overview_2";
+import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
+
+function mapStateToProps(state){
+    const {currentItem} = mapItemsToClasses(state);
+    return{
+        currentItem,
+        items: currentItem ? currentItem.items : [],
+        arrows: currentItem ? currentItem.arrows : [],
+    };
+}
+
+@connect(mapStateToProps, {setCurrentItem, setCurrentSubItem, setTechnicalLayoutLocation})
+class ExtendedTechnicalLayout extends React.Component{
+
+    constructor(props) {
+        super(props);
+        this.layoutId = 'technical_layout';
+    }
+
+    render(){
+        return(
+            <div id={this.layoutId} className={`${styles.technical_layout}`}>
+                <Svg
+                    {...this.props}
+                    layoutId={this.layoutId}
+                    svgId={`${this.layoutId}_svg`}
+                    isDraggable={false}
+                    isScalable={false}
+                />
+            </div>
+        );
+    }
+}
+
+export default ExtendedTechnicalLayout;

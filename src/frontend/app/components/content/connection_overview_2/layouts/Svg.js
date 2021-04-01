@@ -24,6 +24,7 @@ class Svg extends React.Component {
             ratio: 1,
         }
         this.svgRef = React.createRef();
+        this.resetRatio = false;
     }
 
     componentDidMount() {
@@ -49,7 +50,6 @@ class Svg extends React.Component {
         if(isScalable) {
             this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
         }
-        window.addEventListener('resize', ::this.resizeSVG);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -92,12 +92,20 @@ class Svg extends React.Component {
         return x;
     }
 
-    setRatio(){
-        const {svg} = this.state;
-        let viewBox = svg.viewBox.baseVal;
+    setRatio(e){
+        const svgElement = document.getElementById(this.props.svgId);
+        let viewBox = svgElement.viewBox.baseVal;
         if(viewBox) {
-            this.setState({ratio: viewBox.width / svg.getBoundingClientRect().width});
+            let newRatio = viewBox.width / svgElement.getBoundingClientRect().width;
+            if(newRatio >= 2){
+                this.resetRatio = true;
+            }
+            this.setState({ratio: newRatio}, () => {if(this.resetRatio){
+                this.resetRatio = false;
+                this.setRatio();
+            }});
         }
+        this.resizeSVG();
     }
 
     setCurrentItem(currentItem){
