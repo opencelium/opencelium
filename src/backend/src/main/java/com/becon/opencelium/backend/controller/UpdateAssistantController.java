@@ -131,6 +131,15 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
+    @GetMapping("/oc/online/versions")
+    public ResponseEntity<?> getOnlineVersion() {
+
+        List<AvailableUpdate> offVersions  = packageServiceImp.getOnVersions();
+        List<AvailableUpdateResource> packageResource = offVersions.stream()
+                .map(p -> packageServiceImp.toResource(p)).collect(Collectors.toList());
+        return ResponseEntity.ok(packageResource);
+    }
+
     @GetMapping("/oc/template")
     public ResponseEntity<?> getAssistentTemplateFiles() {
         String path = PathConstant.TEMPLATE;

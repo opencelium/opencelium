@@ -8,7 +8,12 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
@@ -16,6 +21,7 @@ import java.io.FilenameFilter;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UpdatePackageServiceImp implements UpdatePackageService {
@@ -25,6 +31,9 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     @Autowired
     private Environment env;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public List<AvailableUpdate> getOffVersions() {
@@ -46,7 +55,19 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     @Override
     public List<AvailableUpdate> getOnVersions() {
-        return null;
+        try {
+            List<String> versions = getVersions();
+            List<AvailableUpdate> availableUpdates = versions.stream().map(v -> {
+                AvailableUpdate availableUpdate = new AvailableUpdate();
+                String status = getVersionStatus(v);
+                availableUpdate.setStatus(status);
+                availableUpdate.setVersion(v);
+                return availableUpdate;
+            }).collect(Collectors.toList());
+            return availableUpdates;
+        } catch (Exception e) {
+            throw  new RuntimeException(e);
+        }
     }
 
     @Override
@@ -129,5 +150,16 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         } else {
             return "not_available";
         }
+    }
+
+    private List<String> getVersions() throws Exception{
+        String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
+        HttpMethod method = HttpMethod.GET;
+        HttpHeaders header = new HttpHeaders();
+        header.set("Content-Type", "application/json");
+        HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
+        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+        String values = JsonPath.read(response.toString(), "$.values[*].name");
+        return new ObjectMapper().readValue(values, List.class);
     }
 }
