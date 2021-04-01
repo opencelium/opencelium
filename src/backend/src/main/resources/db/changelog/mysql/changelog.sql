@@ -163,3 +163,44 @@ ALTER TABLE enhancement MODIFY expert_code varchar(1024);
 
 --changeset 1.1:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE enhancement MODIFY expert_code TEXT;
+
+--changeset 1.3:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+-- -----------------------------------------------------
+-- Table `opencelium`.`user_has_widget_setting`
+-- -----------------------------------------------------
+
+DROP TABLE IF EXISTS `widget_setting` ;
+
+CREATE TABLE IF NOT EXISTS `widget_setting` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(45) NULL,
+  `x_axis` INT NULL,
+  `y_axis` INT NULL,
+  `width` INT NULL,
+  `height` INT NULL,
+  `min_width` INT NULL,
+  `min_height` INT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `name_UNIQUE` (`name` ASC))
+ENGINE = InnoDB;
+
+DROP TABLE IF EXISTS `user_has_widget_setting` ;
+
+CREATE TABLE IF NOT EXISTS `user_has_widget_setting` (
+  `user_id` INT(11) NOT NULL,
+  `widget_setting_id` INT NOT NULL,
+  PRIMARY KEY (`user_id`, `widget_setting_id`),
+  INDEX `fk_user_has_widget_setting_widget_setting1_idx` (`widget_setting_id` ASC),
+  INDEX `fk_user_has_widget_setting_user1_idx` (`user_id` ASC),
+  CONSTRAINT `fk_user_has_widget_setting_user1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `opencelium`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_user_has_widget_setting_widget_setting1`
+    FOREIGN KEY (`widget_setting_id`)
+    REFERENCES `widget_setting` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;

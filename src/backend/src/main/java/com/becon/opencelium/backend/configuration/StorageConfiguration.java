@@ -55,29 +55,29 @@ public class StorageConfiguration {
             System.out.println("Directory has been created: " + PathConstant.TEMPLATE);
         }
 
-        filePath = Paths.get(PathConstant.REPOSITORY);
+        filePath = Paths.get(PathConstant.ASSISTANT);
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY);
+            File directory = new File(PathConstant.ASSISTANT);
             directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY);
+            System.out.println("Directory has been created: " + PathConstant.ASSISTANT);
         }
-        filePath = Paths.get(PathConstant.REPOSITORY + "application/");
+        filePath = Paths.get(PathConstant.ASSISTANT + "application/");
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY + "application/");
+            File directory = new File(PathConstant.ASSISTANT + "application/");
             directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "application/");
+            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "application/");
         }
-        filePath = Paths.get(PathConstant.REPOSITORY + "temporary/");
+        filePath = Paths.get(PathConstant.ASSISTANT + "temporary/");
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY + "temporary/");
+            File directory = new File(PathConstant.ASSISTANT + "temporary/");
             directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "temporary/");
+            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/");
         }
-        filePath = Paths.get(PathConstant.REPOSITORY + "zipfile/");
+        filePath = Paths.get(PathConstant.ASSISTANT + "zipfile/");
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY + "zipfile/");
+            File directory = new File(PathConstant.ASSISTANT + "zipfile/");
             directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "zipfile/");
+            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "zipfile/");
         }
         List<Connector> connectors = connectorService.findAll();
         connectors.forEach(c -> {

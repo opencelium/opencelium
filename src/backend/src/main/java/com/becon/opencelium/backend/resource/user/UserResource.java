@@ -17,9 +17,13 @@
 package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.mysql.entity.User;
+import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
 import org.springframework.hateoas.ResourceSupport;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Resource
 public class UserResource  extends ResourceSupport {
@@ -28,6 +32,7 @@ public class UserResource  extends ResourceSupport {
     private String email;
     private UserRoleResource userGroup; // TODO: should be  userRole
     private UserDetailResource userDetail;
+    private Set<WidgetSettingResource> widgetSettings;
 
     public UserResource() {
     }
@@ -37,6 +42,8 @@ public class UserResource  extends ResourceSupport {
         this.email = user.getEmail();
         this.userGroup = new UserRoleResource(user.getUserRole());
         this.userDetail = new UserDetailResource(user.getUserDetail());
+        this.widgetSettings = user.getWidgetSettings().stream().map(WidgetSettingResource::new)
+                .collect(Collectors.toSet());
     }
 
     public int getUserId() {
@@ -69,5 +76,13 @@ public class UserResource  extends ResourceSupport {
 
     public void setUserDetail(UserDetailResource userDetail) {
         this.userDetail = userDetail;
+    }
+
+    public Set<WidgetSettingResource> getWidgetSettings() {
+        return widgetSettings;
+    }
+
+    public void setWidgetSettings(Set<WidgetSettingResource> widgetSettings) {
+        this.widgetSettings = widgetSettings;
     }
 }

@@ -179,7 +179,7 @@ public class UpdateAssistantController {
 
 
             // after update need to move or replace files in main project
-            Path filePath = Paths.get(PathConstant.REPOSITORY + "temporary/" + dir + "/invoker");
+            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
             List<File> invokers = Files.list(filePath)
                     .filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".xml"))
@@ -189,7 +189,7 @@ public class UpdateAssistantController {
                 assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
             });
 
-            filePath = Paths.get(PathConstant.REPOSITORY + "temporary/" + dir + "/template");
+            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
             List<File> templates = Files.list(filePath)
                     .filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".json"))

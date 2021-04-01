@@ -113,20 +113,20 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void createTmpDir(String dir) {
-        Path filePath = Paths.get(PathConstant.REPOSITORY + "temporary/" + dir + "/");
+        Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/");
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.REPOSITORY + "temporary/" + dir + "/");
+            File directory = new File(PathConstant.ASSISTANT + "temporary/" + dir + "/");
             directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "temporary/" + dir + "/");
+            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/" + dir + "/");
         }
 
         List<String> folders = Arrays.asList("connection/", "template/", "invoker/");
         folders.forEach(f -> {
-            Path path = Paths.get(PathConstant.REPOSITORY + "temporary/" + dir + "/" + f);
+            Path path = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
             if (Files.notExists(path)){
-                File directory = new File(PathConstant.REPOSITORY + "temporary/" + dir + "/" + f);
+                File directory = new File(PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
                 directory.mkdir();
-                System.out.println("Directory has been created: " + PathConstant.REPOSITORY + "temporary/" + dir + "/" + f);
+                System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
             }
         });
 
@@ -143,7 +143,7 @@ public class AssistantServiceImp implements ApplicationService {
             TransformerFactory tFactory = TransformerFactory.newInstance();
             Transformer transformer = tFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File(PathConstant.REPOSITORY + "temporary/" + dir + "/" + filename + ".xml"));
+            StreamResult result = new StreamResult(new File(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename + ".xml"));
             transformer.transform(source, result);
         } catch (TransformerException ex){
             throw new RuntimeException(ex);
@@ -154,7 +154,7 @@ public class AssistantServiceImp implements ApplicationService {
         try {
             String jsonPath = "$.templateId";
             String filename = JsonPath.read(template, jsonPath) + ".json";
-            FileWriter jsonTemplate = new FileWriter(PathConstant.REPOSITORY + "temporary/" + dir + "/" + filename);
+            FileWriter jsonTemplate = new FileWriter(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename);
             jsonTemplate.write(template);
             jsonTemplate.close();
         } catch (IOException e) {
@@ -165,7 +165,7 @@ public class AssistantServiceImp implements ApplicationService {
     @Override
     public void updateOn() throws Exception {
         Git.cloneRepository()
-                .setURI("https://github.com/eclipse/jgit.git")
+                .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
                 .setDirectory(new File("/path/to/targetdirectory"))
                 .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
                 .setBranch("refs/heads/specific-branch")

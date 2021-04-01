@@ -211,7 +211,7 @@ public class FileController {
         Path zipPath = Paths.get(PathConstant.ASSISTANT + filename);
         assistantServiceImp.deleteZipFile(zipPath);
 
-        Path folderPath = Paths.get(PathConstant.REPOSITORY + "zipfile/" + filename + ".zip");
+        Path folderPath = Paths.get(PathConstant.ASSISTANT + "zipfile/" + filename + ".zip");
         assistantServiceImp.deleteZipFile(folderPath);
         return ResponseEntity.noContent().build();
     }
