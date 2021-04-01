@@ -209,3 +209,10 @@ DEFAULT CHARACTER SET = utf8;
 ALTER TABLE widget_setting ADD COLUMN IF NOT EXISTS icon varchar(45);
 ALTER TABLE widget_setting ADD COLUMN IF NOT EXISTS tooltipTranslationKey varchar(45);
 
+--changeset 1.3:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES `widget_setting` WRITE;
+/*!40000 ALTER TABLE `activity` DISABLE KEYS */;
+INSERT INTO `widget_setting` VALUES (1,'CONNECTION_OVERVIEW',0,0,6,4,6,4,'cable','Connection Overview'),(2,'CURRENT_SCHEDULER',10,0,6,3,6,3,'date_range','Current Scheduler'),(3,'MONITORING_BOARDS',0,0,6,4,6,4,'analytics','Monitoring Boards');
+/*!40000 ALTER TABLE `activity` ENABLE KEYS */;
+UNLOCK TABLES;
+
