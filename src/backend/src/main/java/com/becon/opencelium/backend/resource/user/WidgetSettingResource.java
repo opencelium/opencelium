@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.annotation.Resource;
+import javax.persistence.Column;
 
 @Resource
 public class WidgetSettingResource {
@@ -16,6 +17,8 @@ public class WidgetSettingResource {
     private int h;
     private int minW;
     private int minH;
+    private String icon;
+    private String tooltipTranslationKey;
 
     public WidgetSettingResource() {
     }
@@ -29,6 +32,8 @@ public class WidgetSettingResource {
         this.h = widgetSetting.getHeight();
         this.minW = widgetSetting.getMinWidth();
         this.minH = widgetSetting.getMinHeight();
+        this.icon = widgetSetting.getIcon();
+        this.tooltipTranslationKey = widgetSetting.getTooltipTranslationKey();
     }
 
     public int getWidgetId() {
@@ -93,5 +98,21 @@ public class WidgetSettingResource {
 
     public void setMinH(int minH) {
         this.minH = minH;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getTooltipTranslationKey() {
+        return tooltipTranslationKey;
+    }
+
+    public void setTooltipTranslationKey(String tooltipTranslationKey) {
+        this.tooltipTranslationKey = tooltipTranslationKey;
     }
 }

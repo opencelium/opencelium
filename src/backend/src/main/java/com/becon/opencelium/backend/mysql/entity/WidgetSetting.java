@@ -36,6 +36,12 @@ public class WidgetSetting {
     @Column(name = "min_height")
     private int minHeight;
 
+    @Column(name = "icon")
+    private String icon;
+
+    @Column(name = "tooltipTranslationKey")
+    private String tooltipTranslationKey;
+
     @JsonIgnore
     @ManyToMany(mappedBy = "widgetSettings")
     private List<User> user = new ArrayList<>();
@@ -52,6 +58,8 @@ public class WidgetSetting {
         this.height = widgetSettingResource.getH();
         this.minWidth = widgetSettingResource.getMinW();
         this.minHeight = widgetSettingResource.getMinH();
+        this.icon = widgetSettingResource.getIcon();
+        this.tooltipTranslationKey = widgetSettingResource.getTooltipTranslationKey();
     }
 
     public int getId() {
@@ -124,5 +132,21 @@ public class WidgetSetting {
 
     public void setUser(List<User> user) {
         this.user = user;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getTooltipTranslationKey() {
+        return tooltipTranslationKey;
+    }
+
+    public void setTooltipTranslationKey(String tooltipTranslationKey) {
+        this.tooltipTranslationKey = tooltipTranslationKey;
     }
 }

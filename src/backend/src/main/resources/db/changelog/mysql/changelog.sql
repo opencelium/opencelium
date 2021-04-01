@@ -204,3 +204,8 @@ CREATE TABLE IF NOT EXISTS `user_has_widget_setting` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
+
+--changeset 1.3:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE widget_setting ADD COLUMN IF NOT EXISTS icon varchar(45);
+ALTER TABLE widget_setting ADD COLUMN IF NOT EXISTS tooltipTranslationKey varchar(45);
+
