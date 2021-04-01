@@ -5,7 +5,7 @@ import Rx from "rxjs";
  * fetch settings
  * @returns {{type: string}}
  */
-const fetchDashboardSettings = () => {
+const fetchWidgetSettings = () => {
     return {
         type: DashboardAction.FETCH_WIDGETSETTINGS
     };
@@ -16,7 +16,7 @@ const fetchDashboardSettings = () => {
  * @param settings
  * @returns {{type: string, payload: {}}}
  */
-const fetchDashboardSettingsFulfilled = (settings) => {
+const fetchWidgetSettingsFulfilled = (settings) => {
     return{
         type: DashboardAction.FETCH_WIDGETSETTINGS_FULFILLED,
         payload: settings
@@ -28,15 +28,51 @@ const fetchDashboardSettingsFulfilled = (settings) => {
  * @param error
  * @returns {*}
  */
-const fetchDashboardSettingsRejected = (error) => {
+const fetchWidgetSettingsRejected = (error) => {
     return Rx.Observable.of({
         type: DashboardAction.FETCH_WIDGETSETTINGS_REJECTED,
         payload: error
     });
 };
+/**
+ * fetch widgets
+ * @returns {{type: string}}
+ */
+const fetchWidgets = () => {
+    return {
+        type: DashboardAction.FETCH_WIDGETS
+    };
+};
+
+/**
+ * fetch widgets fulfilled
+ * @param widgets
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchWidgetsFulfilled = (widgets) => {
+    return{
+        type: DashboardAction.FETCH_WIDGETS_FULFILLED,
+        payload: widgets
+    };
+};
+
+/**
+ * fetch widgets rejected
+ * @param error
+ * @returns {*}
+ */
+const fetchWidgetsRejected = (error) => {
+    return Rx.Observable.of({
+        type: DashboardAction.FETCH_WIDGETS_REJECTED,
+        payload: error
+    });
+};
 
 export{
-    fetchDashboardSettings,
-    fetchDashboardSettingsFulfilled,
-    fetchDashboardSettingsRejected,
+    fetchWidgetSettings,
+    fetchWidgetSettingsFulfilled,
+    fetchWidgetSettingsRejected,
+    fetchWidgets,
+    fetchWidgetsFulfilled,
+    fetchWidgetsRejected,
 };

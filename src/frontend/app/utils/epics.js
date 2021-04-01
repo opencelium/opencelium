@@ -92,7 +92,8 @@ import {
     updateConnectionsForAssistantEpic,
 } from "@epics/update_assistant";
 import {
-    fetchDashboardSettingsEpic, updateWidgetSettingsEpic,
+    fetchWidgetsEpic,
+    fetchWidgetSettingsEpic, updateWidgetSettingsEpic,
 } from "@epics/dashboard";
 
 
@@ -204,6 +205,7 @@ export default combineEpics(
     addConvertTemplatesLogsEpic,
     addConvertInvokersLogsEpic,
     updateConnectionsForAssistantEpic,
-    fetchDashboardSettingsEpic,
+    fetchWidgetSettingsEpic,
+    fetchWidgetsEpic,
     updateWidgetSettingsEpic,
 );
