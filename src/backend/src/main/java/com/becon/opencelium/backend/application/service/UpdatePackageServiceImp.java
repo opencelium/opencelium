@@ -159,7 +159,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         header.set("Content-Type", "application/json");
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-        String values = JsonPath.read(response.toString(), "$.values[*].name");
+        String values = JsonPath.read(response.getBody(), "$.values[*].name").toString();
         return new ObjectMapper().readValue(values, List.class);
     }
 }

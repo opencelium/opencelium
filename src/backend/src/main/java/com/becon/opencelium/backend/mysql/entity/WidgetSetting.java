@@ -2,14 +2,13 @@ package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "detail")
+@Table(name = "widget_setting")
 public class WidgetSetting {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -39,7 +38,7 @@ public class WidgetSetting {
 
     @JsonIgnore
     @ManyToMany(mappedBy = "widgetSettings")
-    private Set<User> user = new HashSet<>();
+    private List<User> user = new ArrayList<>();
 
     public WidgetSetting() {
     }
@@ -119,11 +118,11 @@ public class WidgetSetting {
         this.minHeight = minHeight;
     }
 
-    public Set<User> getUser() {
+    public List<User> getUser() {
         return user;
     }
 
-    public void setUser(Set<User> user) {
+    public void setUser(List<User> user) {
         this.user = user;
     }
 }

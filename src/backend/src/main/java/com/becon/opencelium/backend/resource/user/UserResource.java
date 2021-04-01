@@ -32,7 +32,7 @@ public class UserResource  extends ResourceSupport {
     private String email;
     private UserRoleResource userGroup; // TODO: should be  userRole
     private UserDetailResource userDetail;
-    private Set<WidgetSettingResource> widgetSettings;
+    private List<WidgetSettingResource> widgetSettings;
 
     public UserResource() {
     }
@@ -43,7 +43,7 @@ public class UserResource  extends ResourceSupport {
         this.userGroup = new UserRoleResource(user.getUserRole());
         this.userDetail = new UserDetailResource(user.getUserDetail());
         this.widgetSettings = user.getWidgetSettings().stream().map(WidgetSettingResource::new)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     public int getUserId() {
@@ -78,11 +78,11 @@ public class UserResource  extends ResourceSupport {
         this.userDetail = userDetail;
     }
 
-    public Set<WidgetSettingResource> getWidgetSettings() {
+    public List<WidgetSettingResource> getWidgetSettings() {
         return widgetSettings;
     }
 
-    public void setWidgetSettings(Set<WidgetSettingResource> widgetSettings) {
+    public void setWidgetSettings(List<WidgetSettingResource> widgetSettings) {
         this.widgetSettings = widgetSettings;
     }
 }

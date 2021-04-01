@@ -20,7 +20,9 @@ import com.becon.opencelium.backend.resource.user.UserResource;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,7 +56,7 @@ public class User {
     @JoinTable(name = "user_has_widget_setting",
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "widget_setting_id", referencedColumnName = "id")})
-    private Set<WidgetSetting> widgetSettings = new HashSet<>();
+    private List<WidgetSetting> widgetSettings = new ArrayList<>();
 
     public User() {
     }
@@ -67,7 +69,7 @@ public class User {
         this.widgetSettings = userResource.getWidgetSettings()
                                             .stream()
                                             .map(WidgetSetting::new)
-                                            .collect(Collectors.toSet());
+                                            .collect(Collectors.toList());
     }
 
     public int getId() {
@@ -118,11 +120,11 @@ public class User {
         this.userRole = userRole;
     }
 
-    public Set<WidgetSetting> getWidgetSettings() {
+    public List<WidgetSetting> getWidgetSettings() {
         return widgetSettings;
     }
 
-    public void setWidgetSettings(Set<WidgetSetting> widgetSettings) {
+    public void setWidgetSettings(List<WidgetSetting> widgetSettings) {
         this.widgetSettings = widgetSettings;
     }
 }
