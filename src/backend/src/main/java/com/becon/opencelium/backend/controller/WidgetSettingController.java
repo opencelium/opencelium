@@ -32,7 +32,7 @@ public class WidgetSettingController {
         int userId = userWidgetsResource.getUserId();
         User user  = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         List<WidgetSetting> widgetSettings = userWidgetsResource.getWidgetSettings().stream()
-                .map(uwr -> widgetSettingServiceImp.toEntity(uwr)).collect(Collectors.toList());
+                .map(uwr -> widgetSettingServiceImp.toEntity(uwr, userId)).collect(Collectors.toList());
         user.setWidgetSettings(widgetSettings);
 
         userService.save(user);

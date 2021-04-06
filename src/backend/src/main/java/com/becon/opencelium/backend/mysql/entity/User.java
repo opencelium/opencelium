@@ -56,15 +56,23 @@ public class User {
     public User() {
     }
 
-    public User(UserResource userResource) {
+//    public User(UserResource userResource) {
+//        this.id = userResource.getUserId();
+//        this.email = userResource.getEmail();
+//        this.userDetail = new UserDetail(userResource.getUserDetail());
+//        this.userRole = new UserRole(userResource.getUserGroup());
+//        this.widgetSettings = userResource.getWidgetSettings()
+//                                            .stream()
+//                                            .map(WidgetSetting::new)
+//                                            .collect(Collectors.toList());
+//    }
+
+    public User(UserResource userResource, List<WidgetSetting> widgetSettings) {
         this.id = userResource.getUserId();
         this.email = userResource.getEmail();
         this.userDetail = new UserDetail(userResource.getUserDetail());
         this.userRole = new UserRole(userResource.getUserGroup());
-        this.widgetSettings = userResource.getWidgetSettings()
-                                            .stream()
-                                            .map(WidgetSetting::new)
-                                            .collect(Collectors.toList());
+        this.widgetSettings = widgetSettings;
     }
 
     public int getId() {

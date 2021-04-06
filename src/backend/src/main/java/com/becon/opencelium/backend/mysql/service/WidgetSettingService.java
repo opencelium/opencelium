@@ -15,7 +15,7 @@ public interface WidgetSettingService {
     void deleteById(int id);
     List<WidgetSetting> findAll();
     WidgetSettingResource toResource(WidgetSetting widgetSetting);
-    WidgetSetting toEntity(WidgetSettingResource widgetSettingResource);
+    WidgetSetting toEntity(WidgetSettingResource widgetSettingResource, int userId);
 
     List<WidgetSetting> findByUserId(int id);
 }

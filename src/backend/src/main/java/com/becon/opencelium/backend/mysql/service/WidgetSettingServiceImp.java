@@ -64,11 +64,11 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
     }
 
     @Override
-    public WidgetSetting toEntity(WidgetSettingResource widgetSettingResource) {
+    public WidgetSetting toEntity(WidgetSettingResource widgetSettingResource, int userId) {
         Widget widget = widgetServiceImp.findById(widgetSettingResource.getWidgetId())
                 .orElseThrow(() -> new RuntimeException("Widget not found"));
-        User  user = userService.findById(widgetSettingResource.getUserId())
-                .orElseThrow(() -> new RuntimeException("Widget not found"));;
+        User  user = userService.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Widget not found"));
         return new WidgetSetting(widgetSettingResource, widget, user);
     }
 
