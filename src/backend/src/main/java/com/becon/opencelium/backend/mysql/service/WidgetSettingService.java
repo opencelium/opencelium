@@ -17,4 +17,5 @@ public interface WidgetSettingService {
     WidgetSettingResource toResource(WidgetSetting widgetSetting);
     WidgetSetting toEntity(WidgetSettingResource widgetSettingResource);
 
+    List<WidgetSetting> findByUserId(int id);
 }
