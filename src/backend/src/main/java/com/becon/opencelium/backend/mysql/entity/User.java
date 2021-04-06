@@ -50,10 +50,7 @@ public class User {
     private UserRole userRole;
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "user_has_widget_setting",
-            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "widget_setting_id", referencedColumnName = "id")})
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<WidgetSetting> widgetSettings = new ArrayList<>();
 
     public User() {

@@ -1,14 +1,13 @@
 package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.annotation.Resource;
-import javax.persistence.Column;
 
 @Resource
 public class WidgetSettingResource {
 
+    private int widgetSettingId;
     private int widgetId;
     private String i;
     private int x;
@@ -17,23 +16,19 @@ public class WidgetSettingResource {
     private int h;
     private int minW;
     private int minH;
-    private String icon;
-    private String tooltipTranslationKey;
 
     public WidgetSettingResource() {
     }
 
     public WidgetSettingResource(WidgetSetting widgetSetting) {
-        this.widgetId = widgetSetting.getId();
-        this.i = widgetSetting.getName();
+        this.widgetSettingId = widgetSetting.getId();
+        this.widgetId = widgetSetting.getWidget().getId();
         this.x = widgetSetting.getAxisX();
         this.y = widgetSetting.getAxisY();
         this.w = widgetSetting.getWidth();
         this.h = widgetSetting.getHeight();
         this.minW = widgetSetting.getMinWidth();
         this.minH = widgetSetting.getMinHeight();
-        this.icon = widgetSetting.getIcon();
-        this.tooltipTranslationKey = widgetSetting.getTooltipTranslationKey();
     }
 
     public int getWidgetId() {
@@ -100,19 +95,11 @@ public class WidgetSettingResource {
         this.minH = minH;
     }
 
-    public String getIcon() {
-        return icon;
+    public int getWidgetSettingId() {
+        return widgetSettingId;
     }
 
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public String getTooltipTranslationKey() {
-        return tooltipTranslationKey;
-    }
-
-    public void setTooltipTranslationKey(String tooltipTranslationKey) {
-        this.tooltipTranslationKey = tooltipTranslationKey;
+    public void setWidgetSettingId(int widgetSettingId) {
+        this.widgetSettingId = widgetSettingId;
     }
 }

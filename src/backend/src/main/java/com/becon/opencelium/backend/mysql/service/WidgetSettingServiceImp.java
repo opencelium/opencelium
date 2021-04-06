@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.mysql.service;
 
+import com.becon.opencelium.backend.mysql.entity.User;
+import com.becon.opencelium.backend.mysql.entity.Widget;
 import com.becon.opencelium.backend.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.mysql.repository.WidgetSettingRepository;
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
@@ -14,6 +16,12 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
     @Autowired
     private WidgetSettingRepository widgetSettingRepository;
 
+    @Autowired
+    private WidgetServiceImp widgetServiceImp;
+
+    @Autowired
+    private UserServiceImpl userService;
+
     @Override
     public void create(WidgetSetting widgetSetting) {
          widgetSettingRepository.save(widgetSetting);
@@ -26,12 +34,13 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
 
     @Override
     public WidgetSetting findByName(String name) {
-         return widgetSettingRepository.findByName(name).orElse(null);
+//         return widgetSettingRepository.findByName(name).orElse(null);
+        return null;
     }
 
     @Override
     public void deleteByName(String name) {
-        widgetSettingRepository.deleteByName(name);
+//        widgetSettingRepository.deleteByName(name);
     }
 
     @Override
@@ -56,6 +65,15 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
 
     @Override
     public WidgetSetting toEntity(WidgetSettingResource widgetSettingResource) {
-        return new WidgetSetting(widgetSettingResource);
+        Widget widget = widgetServiceImp.findById(widgetSettingResource.getWidgetId())
+                .orElseThrow(() -> new RuntimeException("Widget not found"));
+        User  user = userService.findById(widgetSettingResource.getUserId())
+                .orElseThrow(() -> new RuntimeException("Widget not found"));;
+        return new WidgetSetting(widgetSettingResource, widget, user);
+    }
+
+    @Override
+    public List<WidgetSetting> findByUserId(int id) {
+        return widgetSettingRepository.findByUserId(id);
     }
 }

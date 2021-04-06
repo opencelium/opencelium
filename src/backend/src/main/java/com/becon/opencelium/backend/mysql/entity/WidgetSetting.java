@@ -1,11 +1,7 @@
 package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "widget_setting")
@@ -14,9 +10,6 @@ public class WidgetSetting {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private int id;
-
-    @Column(name = "name", unique = true)
-    private String name;
 
     @Column(name = "x_axis")
     private int axisX;
@@ -36,30 +29,27 @@ public class WidgetSetting {
     @Column(name = "min_height")
     private int minHeight;
 
-    @Column(name = "icon")
-    private String icon;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "tooltipTranslationKey")
-    private String tooltipTranslationKey;
-
-    @JsonIgnore
-    @ManyToMany(mappedBy = "widgetSettings")
-    private List<User> user = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "widget_id")
+    private Widget widget;
 
     public WidgetSetting() {
     }
 
-    public WidgetSetting(WidgetSettingResource widgetSettingResource) {
-        this.id = widgetSettingResource.getWidgetId();
-        this.name = widgetSettingResource.getI();
+    public WidgetSetting(WidgetSettingResource widgetSettingResource, Widget widget, User user) {
+        this.id = widgetSettingResource.getWidgetSettingId();
         this.axisX = widgetSettingResource.getX();
         this.axisY = widgetSettingResource.getY();
         this.width = widgetSettingResource.getW();
         this.height = widgetSettingResource.getH();
         this.minWidth = widgetSettingResource.getMinW();
         this.minHeight = widgetSettingResource.getMinH();
-        this.icon = widgetSettingResource.getIcon();
-        this.tooltipTranslationKey = widgetSettingResource.getTooltipTranslationKey();
+        this.widget = widget;
+        this.user = user;
     }
 
     public int getId() {
@@ -68,14 +58,6 @@ public class WidgetSetting {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public int getAxisX() {
@@ -126,27 +108,19 @@ public class WidgetSetting {
         this.minHeight = minHeight;
     }
 
-    public List<User> getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(List<User> user) {
+    public void setUser(User user) {
         this.user = user;
     }
 
-    public String getIcon() {
-        return icon;
+    public Widget getWidget() {
+        return widget;
     }
 
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public String getTooltipTranslationKey() {
-        return tooltipTranslationKey;
-    }
-
-    public void setTooltipTranslationKey(String tooltipTranslationKey) {
-        this.tooltipTranslationKey = tooltipTranslationKey;
+    public void setWidget(Widget widget) {
+        this.widget = widget;
     }
 }
