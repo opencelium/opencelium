@@ -210,4 +210,10 @@ CREATE TABLE IF NOT EXISTS `widget_setting` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+--changeset 1.3:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES `widget` WRITE;
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` DISABLE KEYS */;
+INSERT INTO `widget` VALUES (1,'CONNECTION_OVERVIEW','cable','Connection Overview'), (2,'CURRENT_SCHEDULER','date_range','Current Scheduler'), (3,'MONITORING_BOARDS','analytics','Monitoring Boards');
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` ENABLE KEYS */;
+UNLOCK TABLES;
 
