@@ -23,6 +23,7 @@ public class WidgetSettingResource {
     public WidgetSettingResource(WidgetSetting widgetSetting) {
         this.widgetSettingId = widgetSetting.getId();
         this.widgetId = widgetSetting.getWidget().getId();
+        this.i = widgetSetting.getWidget().getName();
         this.x = widgetSetting.getAxisX();
         this.y = widgetSetting.getAxisY();
         this.w = widgetSetting.getWidth();
