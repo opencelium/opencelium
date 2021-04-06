@@ -54,8 +54,9 @@ const updateWidgetSettingsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.UPDATE_WIDGETSETTINGS)
         .debounceTime(500)
         .mergeMap((action) => {
+            let authUser = store.getState('auth').get('auth').get('authUser');
             let url = `widget_setting`;
-            return doRequest({url, method: API_METHOD.POST, data: action.payload.layout},{
+            return doRequest({url, method: API_METHOD.POST, data: {userId: authUser.userId, widgetSettings:action.payload.layout}},{
                 success: updateWidgetSettingsFulfilled,
                 reject: updateWidgetSettingsRejected,},
             );
