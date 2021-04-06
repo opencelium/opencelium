@@ -61,7 +61,7 @@ const updateWidgetSettingsEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `widget_setting/all`;
-            return doRequest({url, method: API_METHOD.POST, data: action.payload},{
+            return doRequest({url, method: API_METHOD.PUT, data: action.payload.layout},{
                 success: updateWidgetSettingsFulfilled,
                 reject: updateWidgetSettingsRejected,},
             );
