@@ -25,12 +25,12 @@ const fetchWidgetSettingsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.FETCH_WIDGETSETTINGS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let widgetSettings = store.getState('auth').get('auth').get('authUser').widgetSettings;
-            if(isArray(widgetSettings)){
-                return Rx.Observable.of(fetchWidgetSettingsFulfilled({widgetSettings}))
-            } else{
-                return fetchWidgetSettingsRejected({widgetSettings});
-            }
+            let authUser = store.getState('auth').get('auth').get('authUser');
+            let url = `widget_setting/user/${authUser.userId}`;
+            return doRequest({url},{
+                success: fetchWidgetsFulfilled,
+                reject: fetchWidgetsRejected,
+            });
         });
 };
 
@@ -45,7 +45,7 @@ const fetchWidgetsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.FETCH_WIDGETS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `widget_setting/all`;
+            let url = `widget/all`;
             return doRequest({url},{
                 success: fetchWidgetsFulfilled,
                 reject: fetchWidgetsRejected,
@@ -60,8 +60,8 @@ const updateWidgetSettingsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.UPDATE_WIDGETSETTINGS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `widget_setting/all`;
-            return doRequest({url, method: API_METHOD.PUT, data: action.payload.layout},{
+            let url = `widget_setting`;
+            return doRequest({url, method: API_METHOD.POST, data: action.payload.layout},{
                 success: updateWidgetSettingsFulfilled,
                 reject: updateWidgetSettingsRejected,},
             );
