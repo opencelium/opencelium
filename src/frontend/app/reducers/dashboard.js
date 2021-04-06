@@ -17,12 +17,13 @@ import {fromJS, List} from 'immutable';
 
 import {DashboardAction} from '@utils/actions';
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import {INITIAL_WIDGET_SETTINGS} from "@components/content/dashboard/view/settings";
 
 
 const initialState = fromJS({
     fetchingWidgetSettings: API_REQUEST_STATE.INITIAL,
+    fetchingWidgets: API_REQUEST_STATE.INITIAL,
     updatingWidgetSettings: API_REQUEST_STATE.INITIAL,
+    widgets: List([]),
     settings: null,
     layout: List([]),
     toolbox: List([]),
@@ -38,12 +39,13 @@ const initialState = fromJS({
 const reducer = (state = initialState, action) => {
     let layout = [];
     let toolbox = [];
+    let widgets = state.get('widgets');
     switch (action.type) {
         case DashboardAction.FETCH_WIDGETSETTINGS:
             return state.set('fetchingWidgetSettings', API_REQUEST_STATE.START).set('error', null);
         case DashboardAction.FETCH_WIDGETSETTINGS_FULFILLED:
             layout = action.payload.widgetSettings.map(item => {
-                let initial = INITIAL_WIDGET_SETTINGS.find(initialItem => initialItem.i === item.i);
+                let initial = widgets.find(initialItem => initialItem.i === item.i);
                 if(initial){
                     return {
                         ...initial,
@@ -53,7 +55,7 @@ const reducer = (state = initialState, action) => {
                     return item;
                 }
             });
-            toolbox = INITIAL_WIDGET_SETTINGS.filter(initialItem => {
+            toolbox = widgets.filter(initialItem => {
                 let itemIndex = action.payload.widgetSettings.findIndex(item => item.i === initialItem.i);
                 return itemIndex === -1;
             });
@@ -66,6 +68,12 @@ const reducer = (state = initialState, action) => {
             return state.set('updatingWidgetSettings', API_REQUEST_STATE.FINISH);
         case DashboardAction.UPDATE_WIDGETSETTINGS_REJECTED:
             return state.set('updatingWidgetSettings', API_REQUEST_STATE.ERROR).set('error', action.payload).set('currentWidget', null);
+        case DashboardAction.FETCH_WIDGETS:
+            return state.set('fetchingWidgets', API_REQUEST_STATE.START).set('error', null);
+        case DashboardAction.FETCH_WIDGETS_FULFILLED:
+            return state.set('fetchingWidgets', API_REQUEST_STATE.FINISH).set('widgets', action.payload);
+        case DashboardAction.FETCH_WIDGETS_REJECTED:
+            return state.set('fetchingWidgets', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

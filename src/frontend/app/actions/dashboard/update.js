@@ -5,7 +5,7 @@ import Rx from "rxjs";
  * update settings
  * @returns {{type: string}}
  */
-const updateDashboardSettings = (settings) => {
+const updateWidgetSettings = (settings) => {
     return {
         type: DashboardAction.UPDATE_WIDGETSETTINGS,
         payload: settings,
@@ -17,7 +17,7 @@ const updateDashboardSettings = (settings) => {
  * @param settings
  * @returns {{type: string, payload: {}}}
  */
-const updateDashboardSettingsFulfilled = (settings) => {
+const updateWidgetSettingsFulfilled = (settings) => {
     return{
         type: DashboardAction.UPDATE_WIDGETSETTINGS_FULFILLED,
         payload: settings,
@@ -29,7 +29,7 @@ const updateDashboardSettingsFulfilled = (settings) => {
  * @param error
  * @returns {*}
  */
-const updateDashboardSettingsRejected = (error) => {
+const updateWidgetSettingsRejected = (error) => {
     return Rx.Observable.of({
         type: DashboardAction.UPDATE_WIDGETSETTINGS_REJECTED,
         payload: error
@@ -37,7 +37,7 @@ const updateDashboardSettingsRejected = (error) => {
 };
 
 export{
-    updateDashboardSettings,
-    updateDashboardSettingsFulfilled,
-    updateDashboardSettingsRejected,
+    updateWidgetSettings,
+    updateWidgetSettingsFulfilled,
+    updateWidgetSettingsRejected,
 };

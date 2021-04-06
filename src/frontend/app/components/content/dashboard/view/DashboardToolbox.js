@@ -9,7 +9,7 @@ const ToolboxItem = (props) => {
             className={styles.dashboard_toolbox_item}
             onClick={(e) => onTakeItem(e, item)}
         >
-            <TooltipFontIcon size={30} tooltip={item.tooltip} value={item.icon} isButton={true}/>
+            <TooltipFontIcon size={30} tooltip={item.tooltipTranslationKey} value={item.icon} isButton={true}/>
         </div>
     );
 }

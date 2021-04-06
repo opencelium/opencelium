@@ -28,8 +28,9 @@ import {
     WIDGET_LIST
 } from "@components/content/dashboard/view/settings";
 import DashboardToolbox from "@components/content/dashboard/view/DashboardToolbox";
-import {fetchDashboardSettings} from "@actions/dashboard/fetch";
-import {updateDashboardSettings} from "@actions/dashboard/update";
+import {fetchWidgetSettings, fetchWidgets, fetchWidgetsRejected} from "@actions/dashboard/fetch";
+import {updateWidgetSettings} from "@actions/dashboard/update";
+import {ListComponent} from "@decorators/ListComponent";
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -42,6 +43,7 @@ function mapStateToProps(state){
         fetchingUpdateAppVersion: updateAssistant.get('fetchingUpdateAppVersion'),
         settings: dashboard.get('settings'),
         updatingWidgetSettings: dashboard.get('updatingWidgetSettings'),
+        fetchingWidgets: dashboard.get('fetchingWidgets'),
         currentWidget: dashboard.get('currentWidget'),
         layout: dashboard.get('layout').toJS(),
         toolbox: dashboard.get('toolbox').toJS(),
@@ -52,8 +54,9 @@ function mapStateToProps(state){
  * Dashboard component
  * Important! schedules and app translations should be imported already here
  */
-@connect(mapStateToProps, {fetchUpdateAppVersion, fetchDashboardSettings, updateDashboardSettings})
+@connect(mapStateToProps, {fetchUpdateAppVersion, fetchWidgetSettings, updateWidgetSettings, fetchWidgets, fetchWidgetsRejected})
 @withTranslation(['dashboard', 'schedules', 'app'])
+@ListComponent('widgets', true)
 class DashboardView extends Component{
 
     constructor(props){
@@ -65,11 +68,11 @@ class DashboardView extends Component{
     }
 
     componentDidMount() {
-        const {fetchingUpdateAppVersion, fetchUpdateAppVersion, fetchDashboardSettings} = this.props;
+        const {fetchingUpdateAppVersion, fetchUpdateAppVersion, fetchWidgetSettings} = this.props;
         if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START) {
             fetchUpdateAppVersion();
         }
-        fetchDashboardSettings();
+        fetchWidgetSettings();
         componentAppear('app_content');
     }
 
@@ -87,7 +90,7 @@ class DashboardView extends Component{
             ...this.props.layout,
             item
         ]
-        this.props.updateDashboardSettings({currentWidget: item, settings: {widgetSettings: layout}, toolbox, layout});
+        this.props.updateWidgetSettings({currentWidget: item, settings: {widgetSettings: layout}, toolbox, layout});
     };
 
     onPutItem(e, item){
@@ -98,7 +101,7 @@ class DashboardView extends Component{
         const layout = [
             ...this.props.layout.filter(({ i }) => i !== item.i),
         ];
-        this.props.updateDashboardSettings({currentWidget: item, settings: {widgetSettings: layout}, toolbox, layout});
+        this.props.updateWidgetSettings({currentWidget: item, settings: {widgetSettings: layout}, toolbox, layout});
     };
 
     onLayoutChange(layout){
@@ -110,7 +113,7 @@ class DashboardView extends Component{
                 updatedLayout[i] = {...updatedLayout[i], ...findLayout};
             }
         }
-        this.props.updateDashboardSettings({settings: {widgetSettings: updatedLayout}, toolbox, layout: updatedLayout});
+        this.props.updateWidgetSettings({settings: {widgetSettings: updatedLayout}, toolbox, layout: updatedLayout});
     };
 
     renderWidgets(){
