@@ -8,7 +8,7 @@ import javax.persistence.Column;
 @Resource
 public class WidgetResource {
 
-    private int id;
+    private int widgetId;
     private String name;
     private String icon;
     private String tooltipTranslationKey;
@@ -22,12 +22,12 @@ public class WidgetResource {
         this.tooltipTranslationKey = widget.getTooltipTranslationKey();
     }
 
-    public int getId() {
-        return id;
+    public int getWidgetId() {
+        return widgetId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setWidgetId(int widgetId) {
+        this.widgetId = widgetId;
     }
 
     public String getName() {

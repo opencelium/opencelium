@@ -30,7 +30,7 @@ public class WidgetController {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .path("/{id}")
-                .buildAndExpand(resource.getId()).toUri();
+                .buildAndExpand(resource.getWidgetId()).toUri();
         return ResponseEntity.created(uri).body(resource);
     }
 
