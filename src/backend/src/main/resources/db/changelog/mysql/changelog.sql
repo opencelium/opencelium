@@ -186,7 +186,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `widget_setting` ;
 
 CREATE TABLE IF NOT EXISTS `widget_setting` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `x_axis` INT NULL,
   `y_axis` INT NULL,
   `width` INT NULL,
