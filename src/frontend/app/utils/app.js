@@ -32,7 +32,6 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
-
 export function hasHeader(props){
     for(let windowParam in SEPARATE_WINDOW.CONNECTION_OVERVIEW){
         if(window.name === SEPARATE_WINDOW.CONNECTION_OVERVIEW[windowParam]){

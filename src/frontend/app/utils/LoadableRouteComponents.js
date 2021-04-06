@@ -302,6 +302,14 @@ const ConnectionOverviewLayout = Loadable({
     loading: Loading,
 });
 
+/**
+ * Loadable Sandbox Resources
+ */
+const Sandbox = Loadable({
+    loader: () => import(/* webpackChunkName: 'sandbox_resources' */ '@components/content/sandbox/Resources'),
+    loading: Loading,
+});
+
 export default {
     UserLayout,
     UserAdd,
@@ -355,4 +363,5 @@ export default {
     ConnectionOverview2,
     ConnectionOverviewDetails,
     ConnectionOverviewLayout,
+    Sandbox,
 };
