@@ -40,6 +40,11 @@ const reducer = (state = initialState, action) => {
     let layout = [];
     let toolbox = [];
     let widgets = state.get('widgets');
+    const WIDGET_COORDINATES = {
+        'CONNECTION_OVERVIEW': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
+        'CURRENT_SCHEDULER': {x: 10, y: 0, w: 6, h: 3, minW: 6, minH: 3},
+        'MONITORING_BOARDS': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4}
+    };
     switch (action.type) {
         case DashboardAction.FETCH_WIDGETSETTINGS:
             return state.set('fetchingWidgetSettings', API_REQUEST_STATE.START).set('error', null);
@@ -71,7 +76,7 @@ const reducer = (state = initialState, action) => {
         case DashboardAction.FETCH_WIDGETS:
             return state.set('fetchingWidgets', API_REQUEST_STATE.START).set('error', null);
         case DashboardAction.FETCH_WIDGETS_FULFILLED:
-            return state.set('fetchingWidgets', API_REQUEST_STATE.FINISH).set('widgets', action.payload);
+            return state.set('fetchingWidgets', API_REQUEST_STATE.FINISH).set('widgets', action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.name], i: widget.name};}));
         case DashboardAction.FETCH_WIDGETS_REJECTED:
             return state.set('fetchingWidgets', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
