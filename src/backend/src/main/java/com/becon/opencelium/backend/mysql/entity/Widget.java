@@ -31,6 +31,7 @@ public class Widget {
     }
 
     public Widget(WidgetResource widgetResource) {
+        this.id = widgetResource.getWidgetId();
         this.name = widgetResource.getName();
         this.icon = widgetResource.getIcon();
         this.tooltipTranslationKey = widgetResource.getTooltipTranslationKey();
