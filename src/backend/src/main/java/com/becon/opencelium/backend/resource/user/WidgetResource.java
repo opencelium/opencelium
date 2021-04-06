@@ -9,7 +9,7 @@ import javax.persistence.Column;
 public class WidgetResource {
 
     private int widgetId;
-    private String name;
+    private String i;
     private String icon;
     private String tooltipTranslationKey;
 
@@ -18,7 +18,7 @@ public class WidgetResource {
 
     public WidgetResource(Widget widget) {
         this.widgetId = widget.getId();
-        this.name = widget.getName();
+        this.i = widget.getName();
         this.icon = widget.getIcon();
         this.tooltipTranslationKey = widget.getTooltipTranslationKey();
     }
@@ -31,12 +31,12 @@ public class WidgetResource {
         this.widgetId = widgetId;
     }
 
-    public String getName() {
-        return name;
+    public String getI() {
+        return i;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setI(String i) {
+        this.i = i;
     }
 
     public String getIcon() {
