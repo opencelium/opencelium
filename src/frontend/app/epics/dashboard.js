@@ -1,4 +1,3 @@
-import Rx from 'rxjs/Rx';
 import {DashboardAction} from "@utils/actions";
 import {doRequest} from "@utils/auth";
 import {
@@ -6,13 +5,8 @@ import {
     fetchWidgetsFulfilled, fetchWidgetsRejected,
 } from "@actions/dashboard/fetch";
 import {updateWidgetSettingsFulfilled, updateWidgetSettingsRejected} from "@actions/dashboard/update";
-import {isArray} from "@utils/app";
 import {API_METHOD} from "@utils/constants/app";
 
-/**
- * main url for invokers
- */
-const urlPrefix = 'dashboard';
 
 /**
  * fetch settings
@@ -28,8 +22,8 @@ const fetchWidgetSettingsEpic = (action$, store) => {
             let authUser = store.getState('auth').get('auth').get('authUser');
             let url = `widget_setting/user/${authUser.userId}`;
             return doRequest({url},{
-                success: fetchWidgetsFulfilled,
-                reject: fetchWidgetsRejected,
+                success: fetchWidgetSettingsFulfilled,
+                reject: fetchWidgetSettingsRejected,
             });
         });
 };
