@@ -74,12 +74,16 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingOnlineUpdates', API_REQUEST_STATE.FINISH).set('onlineUpdates', List(action.payload));
         case UpdateAssistantAction.FETCH_ONLINEUPDATES_REJECTED:
             return state.set('fetchingOnlineUpdates', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.FETCH_ONLINEUPDATES_CANCELED:
+            return state.set('fetchingOnlineUpdates', API_REQUEST_STATE.PAUSE).set('message', action.payload);
         case UpdateAssistantAction.FETCH_OFFLINEUPDATES:
             return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.START).set('error', null);
         case UpdateAssistantAction.FETCH_OFFLINEUPDATES_FULFILLED:
             return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.FINISH).set('offlineUpdates', List(action.payload));
         case UpdateAssistantAction.FETCH_OFFLINEUPDATES_REJECTED:
             return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.FETCH_OFFLINEUPDATES_CANCELED:
+            return state.set('fetchingOfflineUpdates', API_REQUEST_STATE.PAUSE).set('message', action.payload);
         case UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS:
             return state.set('fetchingSystemRequirements', API_REQUEST_STATE.START).set('error', null);
         case UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS_FULFILLED:

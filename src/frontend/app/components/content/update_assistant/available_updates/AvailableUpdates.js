@@ -5,7 +5,10 @@ import Button from "@basic_components/buttons/Button";
 import styles from "@themes/default/content/update_assistant/main";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Loading from "@loading";
-import {fetchOnlineUpdates, fetchOfflineUpdates} from "@actions/update_assistant/fetch";
+import {
+    fetchOnlineUpdates, fetchOnlineUpdatesCanceled,
+    fetchOfflineUpdates, fetchOfflineUpdatesCanceled,
+} from "@actions/update_assistant/fetch";
 import {uploadVersion} from "@actions/update_assistant/add";
 import Table from "@basic_components/table/Table";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
@@ -33,10 +36,11 @@ function mapStateToProps(state){
         uploadingVersion: updateAssistant.get('uploadingVersion'),
         onlineUpdates: updateAssistant.get('onlineUpdates').toJS(),
         offlineUpdates: updateAssistant.get('offlineUpdates').toJS(),
+        error: updateAssistant.get('error'),
     };
 }
 
-@connect(mapStateToProps, {fetchOnlineUpdates, fetchOfflineUpdates, uploadVersion})
+@connect(mapStateToProps, {fetchOnlineUpdates, fetchOfflineUpdates, uploadVersion, fetchOnlineUpdatesCanceled, fetchOfflineUpdatesCanceled})
 @withTranslation('update_assistant')
 class AvailableUpdates extends React.Component{
     constructor(props) {
@@ -96,14 +100,19 @@ class AvailableUpdates extends React.Component{
 
     selectMode(e, activeMode){
         let {startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
-        const {fetchOnlineUpdates, fetchOfflineUpdates, entity, updateEntity} = this.props;
+        const {
+            fetchOnlineUpdates, fetchOnlineUpdatesCanceled, fetchOfflineUpdates, fetchOfflineUpdatesCanceled,
+            fetchingOnlineUpdates, fetchingOfflineUpdates, entity, updateEntity,
+        } = this.props;
         switch (activeMode){
             case ONLINE_UPDATE:
-                fetchOnlineUpdates({background: true});
+                fetchOnlineUpdates();
+                if(fetchingOfflineUpdates === API_REQUEST_STATE.START) fetchOfflineUpdatesCanceled();
                 startFetchingOnlineUpdates = true;
                 break;
             case OFFLINE_UPDATE:
-                fetchOfflineUpdates({background: true});
+                fetchOfflineUpdates();
+                if(fetchingOnlineUpdates === API_REQUEST_STATE.START) fetchOnlineUpdatesCanceled();
                 startFetchingOfflineUpdates = true;
                 break;
         }
@@ -201,10 +210,17 @@ class AvailableUpdates extends React.Component{
     }
 
     renderUpdates(){
-        const {selectedVersion, isOldVersionsExtended, isNewVersionsExtended} = this.state;
-        const {t, authUser} = this.props;
+        const {selectedVersion, isOldVersionsExtended, isNewVersionsExtended, activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
+        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error} = this.props;
         let updates = ::this.getUpdates();
-        if(updates.available.length === 0){
+        if(updates.available.length === 0 && updates.old.length === 0 && updates.veryNew.length === 0){
+            if(activeMode !== '' && !(fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START)){
+                if(error === null){
+                    return <div className={styles.no_versions}>{"There are no updates"}</div>;
+                } else{
+                    return <div className={styles.no_versions}>{"There are some errors"}</div>;
+                }
+            }
             return null;
         }
         let numberOfVisibleEntries = updates.available.length;
@@ -358,7 +374,7 @@ class AvailableUpdates extends React.Component{
 
     render(){
         const {activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
-        const {t, authUser} = this.props;
+        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates} = this.props;
         return(
             <div style={{margin: '20px 68px 0 0'}}>
                 <div style={{textAlign: 'center'}}>
@@ -377,7 +393,7 @@ class AvailableUpdates extends React.Component{
                         className={styles.offline_button}
                     />
                     {
-                        (startFetchingOnlineUpdates || startFetchingOfflineUpdates) &&
+                        (fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START) &&
                             <Loading className={styles.available_updates_loading}/>
                     }
                     {

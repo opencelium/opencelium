@@ -24,6 +24,11 @@
     width: 33.3%;
   }
 }
+.no_versions{
+  font-size: $FONT_SIZE_SMALL;
+  margin: 40px 0;
+  text-align: center;
+}
 .table_content{
   max-height: 300px;
   overflow-y: auto;
