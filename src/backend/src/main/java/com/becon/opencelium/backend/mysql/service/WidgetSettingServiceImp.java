@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.mysql.repository.WidgetSettingRepository;
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -53,6 +54,7 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
         return widgetSettingRepository.findById(id).orElseThrow(() -> new RuntimeException("WidgetNotFound"));
     }
 
+    @Transactional
     @Override
     public void deleteById(int id) {
         widgetSettingRepository.deleteById(id);
@@ -63,9 +65,15 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
         widgetSettingRepository.saveAll(widgetSettings);
     }
 
+    @Transactional
     @Override
     public void deleteAll() {
         widgetSettingRepository.deleteAll();
+    }
+
+    @Override
+    public List<WidgetSetting> findAllByUserId(int id) {
+        return widgetSettingRepository.findByUserId(id);
     }
 
     @Override

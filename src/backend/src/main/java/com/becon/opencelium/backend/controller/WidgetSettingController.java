@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.resource.user.WidgetResource;
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -31,7 +32,7 @@ public class WidgetSettingController {
     public ResponseEntity<?> create(@RequestBody UserWidgetsResource userWidgetsResource){
         int userId = userWidgetsResource.getUserId();
         User user  = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        List<WidgetSetting> initWidgetSettings = widgetSettingServiceImp.findAll();
+        List<WidgetSetting> initWidgetSettings = widgetSettingServiceImp.findAllByUserId(userId);
         List<WidgetSetting> widgetSettings = userWidgetsResource.getWidgetSettings().stream()
                 .map(uwr -> widgetSettingServiceImp.toEntity(uwr, userId)).collect(Collectors.toList());
 
@@ -39,14 +40,22 @@ public class WidgetSettingController {
             widgetSettingServiceImp.deleteAll();
         } else {
             initWidgetSettings.forEach(iws -> {
-                if (!widgetSettings.contains(iws)) {
+                boolean contains = false;
+                for (WidgetSetting ws : widgetSettings) {
+                    if (ws.getId() == iws.getId()) {
+                        contains = true;
+                    }
+                }
+                if (!contains) {
                     widgetSettingServiceImp.deleteById(iws.getId());
                 }
             });
         }
 
         widgetSettingServiceImp.saveAll(widgetSettings);
-        List<WidgetSettingResource> widgetSettingResources = widgetSettings.stream()
+
+        initWidgetSettings = widgetSettingServiceImp.findAllByUserId(userId);
+        List<WidgetSettingResource> widgetSettingResources = initWidgetSettings.stream()
                 .map(ws -> widgetSettingServiceImp.toResource(ws)).collect(Collectors.toList());
         UserWidgetsResource resource = new UserWidgetsResource();
         resource.setUserId(user.getId());
