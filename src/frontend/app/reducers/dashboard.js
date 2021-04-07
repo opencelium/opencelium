@@ -76,7 +76,7 @@ const reducer = (state = initialState, action) => {
         case DashboardAction.FETCH_WIDGETS:
             return state.set('fetchingWidgets', API_REQUEST_STATE.START).set('error', null);
         case DashboardAction.FETCH_WIDGETS_FULFILLED:
-            return state.set('fetchingWidgets', API_REQUEST_STATE.FINISH).set('widgets', action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.name], i: widget.name};}));
+            return state.set('fetchingWidgets', API_REQUEST_STATE.FINISH).set('widgets', action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.name]};}));
         case DashboardAction.FETCH_WIDGETS_REJECTED:
             return state.set('fetchingWidgets', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
