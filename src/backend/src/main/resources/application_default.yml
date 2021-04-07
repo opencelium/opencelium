@@ -89,7 +89,7 @@ kibana:
   port: 5601
 
 opencelium:
-  version: v.1.3
+  version: v1.3
   mail:
     from: OC_Application
   token:
