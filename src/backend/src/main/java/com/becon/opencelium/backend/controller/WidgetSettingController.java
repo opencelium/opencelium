@@ -44,6 +44,7 @@ public class WidgetSettingController {
                 for (WidgetSetting ws : widgetSettings) {
                     if (ws.getId() == iws.getId()) {
                         contains = true;
+                        break;
                     }
                 }
                 if (!contains) {
