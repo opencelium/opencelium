@@ -9,7 +9,7 @@ public interface UpdatePackageService {
 
     List<AvailableUpdate> getOffVersions();
     List<AvailableUpdate> getOnVersions();
-
+    AvailableUpdate getOffVersionByDir(String dir) throws Exception;
     String[] getDirectories();
     AvailableUpdateResource toResource(AvailableUpdate offVersions);
 }

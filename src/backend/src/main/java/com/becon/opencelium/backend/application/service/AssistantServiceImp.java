@@ -59,9 +59,10 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public void uploadZipFile(MultipartFile file, String location) {
+    public Path uploadZipFile(MultipartFile file, String location) {
         String filename = file.getOriginalFilename();
         Path source = Paths.get(location);
+        Path target = source.resolve(filename);
         try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + filename);
@@ -73,7 +74,7 @@ public class AssistantServiceImp implements ApplicationService {
                                 + filename);
             }
             try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, source.resolve(filename),
+                Files.copy(inputStream, target,
                         StandardCopyOption.REPLACE_EXISTING);
             }
         }
@@ -81,6 +82,8 @@ public class AssistantServiceImp implements ApplicationService {
             e.printStackTrace();
             throw new StorageException("Failed to store file " + filename, e);
         }
+
+        return target;
     }
 
 
@@ -290,11 +293,12 @@ public class AssistantServiceImp implements ApplicationService {
         return null;
     }
 
-    private void unzipFolder(Path source, Path target) throws IOException {
+    public Path unzipFolder(Path source, Path target) throws IOException {
 
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
-            ZipEntry zipEntry = zis.getNextEntry();
 
+            ZipEntry zipEntry = zis.getNextEntry();
+            Path folder = zipSlipProtect(zipEntry, target);
             while (zipEntry != null) {
 
                 boolean isDirectory = false;
@@ -323,9 +327,8 @@ public class AssistantServiceImp implements ApplicationService {
 
             }
             zis.closeEntry();
-
+            return folder;
         }
-
     }
 
     private Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)

@@ -12,7 +12,7 @@ import java.util.List;
 public interface ApplicationService {
 
     SystemOverview getSystemOverview();
-    void uploadZipFile(MultipartFile file, String location);
+    Path uploadZipFile(MultipartFile file, String location);
     void deleteZipFile(Path path);
     void createTmpDir(String dir);
     SystemOverviewResource toResource(SystemOverview systemOverview);
