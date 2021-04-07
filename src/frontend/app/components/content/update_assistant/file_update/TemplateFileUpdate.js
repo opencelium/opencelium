@@ -124,7 +124,7 @@ class TemplateFileUpdate extends React.Component{
                     <thead>
                         <tr>
                             <th>{`${appVersion}`}</th>
-                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
+                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion}`}</th>
                         </tr>
                     </thead>
                 </Table>

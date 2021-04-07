@@ -85,7 +85,7 @@ const fetchOnlineUpdatesEpic = (action$, store) => {
             let url = `${urlPrefix}/online/versions`;
             //return Rx.Observable.of(fetchOnlineUpdatesFulfilled(ONLINE_UPDATES));
             return doRequest({url},{
-                success: (data) => fetchOnlineUpdatesFulfilled(data.map(version => {return {...version, name: version.version.substr(1)}}), {...action.settings}),
+                success: (data) => fetchOnlineUpdatesFulfilled(data, {...action.settings}),
                 reject: fetchOnlineUpdatesRejected,
                 cancel: action$.ofType(UpdateAssistantAction.FETCH_ONLINEUPDATES_CANCELED),
             });
@@ -136,11 +136,11 @@ const uploadVersionEpic = (action$, store) => {
             let url = `storage/assistant/zipfile`;
             let data = new FormData();
             data.append('file', action.payload.versionFile);
-            return Rx.Observable.of(uploadVersionFulfilled(NEW_UPDATE));
-            /*return doRequest({url, method: API_METHOD.POST, data: action.payload},{
-                success: uploadVersionFulfilled,
+            //return Rx.Observable.of(uploadVersionFulfilled(NEW_UPDATE));
+            return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
+                success: () => uploadVersionFulfilled(NEW_UPDATE),
                 reject: uploadVersionRejected,},
-            );*/
+            );
         });
 };
 
