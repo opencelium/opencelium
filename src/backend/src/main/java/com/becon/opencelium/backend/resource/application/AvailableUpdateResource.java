@@ -8,7 +8,7 @@ import javax.annotation.Resource;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AvailableUpdateResource {
     private String folder;
-    private String version;
+    private String name;
     private String changelogLink;
     private String status;
 
@@ -20,12 +20,12 @@ public class AvailableUpdateResource {
         this.folder = folder;
     }
 
-    public String getVersion() {
-        return version;
+    public String getName() {
+        return name;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getChangelogLink() {
