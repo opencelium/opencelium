@@ -124,30 +124,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         ObjectMapper ymlOm = new ObjectMapper(new YAMLFactory());
         List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
-            AvailableUpdate availableUpdate = new AvailableUpdate();
-
-            String yamlPath = PathConstant.APPLICATION + appDir + PathConstant.RESOURCES + "application_default.yml";
-            File application_yml = Paths.get(yamlPath).toFile();
-
-            Object obj = ymlOm.readValue(application_yml, Map.class);
-            String s = jsonOm.writeValueAsString(obj);
-
-            String paths = "$.opencelium.version";
-            Object version;
-            if (JsonPath.isPathDefinite(yamlPath)) {
-                version = JsonPath.read(s, paths);
-            } else {
-                version = "opencelium.version not found in application_default.yml file";
-            }
-            if (!(version instanceof String)) {
-                version = "opencelium.version should be String and look like: v.#.#.#";
-            }
-
-            String status = getVersionStatus(version.toString());
-            availableUpdate.setFolder(appDir);
-            availableUpdate.setStatus(status);
-            availableUpdate.setChangelogLink(getChangelogLink(appDir));
-            availableUpdate.setVersion(version.toString());
+            AvailableUpdate availableUpdate = getOffVersionByDir(appDir);
             packages.add(availableUpdate);
         }
         return packages;
