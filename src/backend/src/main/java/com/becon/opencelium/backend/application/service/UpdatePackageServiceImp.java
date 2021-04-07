@@ -121,7 +121,6 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     }
 
     private List<AvailableUpdate> getAll(String[] appDirectories) throws Exception {
-        ObjectMapper ymlOm = new ObjectMapper(new YAMLFactory());
         List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
             AvailableUpdate availableUpdate = getOffVersionByDir(appDir);
@@ -132,7 +131,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     private String getChangelogLink(String ocPackage) {
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return uri.getScheme() + "://" + uri.getAuthority() + "/api/application/changelog/file/" + ocPackage;
+        return uri.getScheme() + "://" + uri.getAuthority() + "/api/assistant/changelog/file/" + ocPackage;
     }
 
     // [1.2, 1.3] :  1.2 - current

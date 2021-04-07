@@ -233,18 +233,20 @@ public class UpdateAssistantController {
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
 
         try {
-            String path = PathConstant.ASSISTANT + packageName + PathConstant.RESOURCES;
+            String path = PathConstant.APPLICATION + packageName + "/";
             Path rootLocation = Paths.get(path);
-            Path filePath = rootLocation.resolve("changelog.txt");
+            Path filePath = rootLocation.resolve("CHANGELOG");
             org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());
             if (!file.exists() || !file.isReadable()) {
-                throw new StorageFileNotFoundException("Could not read file: " + packageName + "/changelog.txt");
+                throw new StorageFileNotFoundException("Could not read file: " + packageName + "/CHANGELOG");
             }
+
+            System.out.println(file.);
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getFilename() + "\"").body(file);
         }
         catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + packageName + "/changelog.txt", e);
+            throw new StorageFileNotFoundException("Could not read file: " + packageName + "/CHANGELOG", e);
         }
     }
 }
