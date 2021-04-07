@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "opencelium, open celium, oc, template, converter",
   "author": "becon <ruzalin.galiev@becon.de>",
-  "license": "MIT",
+  "license": "becon",
   "dependencies": {
     "bootstrap": "^4.5.2",
     "classnames": "^2.2.6",
