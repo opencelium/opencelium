@@ -133,7 +133,7 @@ const uploadVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.UPLOAD_VERSION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}`;
+            let url = `storage/assistant/zipfile`;
             let data = new FormData();
             data.append('file', action.payload.versionFile);
             return Rx.Observable.of(uploadVersionFulfilled(NEW_UPDATE));

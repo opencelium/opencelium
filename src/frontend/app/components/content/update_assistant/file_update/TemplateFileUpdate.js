@@ -123,7 +123,7 @@ class TemplateFileUpdate extends React.Component{
                 <Table className={styles.table} authUser={authUser}>
                     <thead>
                         <tr>
-                            <th>{`v${appVersion}`}</th>
+                            <th>{`${appVersion}`}</th>
                             <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
                         </tr>
                     </thead>
