@@ -59,6 +59,16 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
     }
 
     @Override
+    public void saveAll(List<WidgetSetting> widgetSettings) {
+        widgetSettingRepository.saveAll(widgetSettings);
+    }
+
+    @Override
+    public void deleteAll() {
+        widgetSettingRepository.deleteAll();
+    }
+
+    @Override
     public WidgetSettingResource toResource(WidgetSetting widgetSetting) {
         return new WidgetSettingResource(widgetSetting);
     }

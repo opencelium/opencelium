@@ -31,12 +31,22 @@ public class WidgetSettingController {
     public ResponseEntity<?> create(@RequestBody UserWidgetsResource userWidgetsResource){
         int userId = userWidgetsResource.getUserId();
         User user  = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        List<WidgetSetting> initWidgetSettings = widgetSettingServiceImp.findAll();
         List<WidgetSetting> widgetSettings = userWidgetsResource.getWidgetSettings().stream()
                 .map(uwr -> widgetSettingServiceImp.toEntity(uwr, userId)).collect(Collectors.toList());
-        user.setWidgetSettings(widgetSettings);
 
-        userService.save(user);
-        List<WidgetSettingResource> widgetSettingResources = user.getWidgetSettings().stream()
+        if (widgetSettings.isEmpty()) {
+            widgetSettingServiceImp.deleteAll();
+        } else {
+            initWidgetSettings.forEach(iws -> {
+                if (!widgetSettings.contains(iws)) {
+                    widgetSettingServiceImp.deleteById(iws.getId());
+                }
+            });
+        }
+
+        widgetSettingServiceImp.saveAll(widgetSettings);
+        List<WidgetSettingResource> widgetSettingResources = widgetSettings.stream()
                 .map(ws -> widgetSettingServiceImp.toResource(ws)).collect(Collectors.toList());
         UserWidgetsResource resource = new UserWidgetsResource();
         resource.setUserId(user.getId());

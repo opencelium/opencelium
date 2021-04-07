@@ -14,6 +14,8 @@ public interface WidgetSettingService {
     void deleteByName(String name);
     void deleteById(int id);
     List<WidgetSetting> findAll();
+    void saveAll(List<WidgetSetting> widgetSettings);
+    void deleteAll();
     WidgetSettingResource toResource(WidgetSetting widgetSetting);
     WidgetSetting toEntity(WidgetSettingResource widgetSettingResource, int userId);
 

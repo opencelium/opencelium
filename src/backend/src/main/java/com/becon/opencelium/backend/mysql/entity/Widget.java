@@ -24,7 +24,7 @@ public class Widget {
     @Column(name = "tooltipTranslationKey")
     private String tooltipTranslationKey;
 
-    @OneToMany(mappedBy = "widget", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "widget", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<WidgetSetting> widgetSettings = new ArrayList<>();
 
     public Widget() {
@@ -32,7 +32,7 @@ public class Widget {
 
     public Widget(WidgetResource widgetResource) {
         this.id = widgetResource.getWidgetId();
-        this.name = widgetResource.getName();
+        this.name = widgetResource.getI();
         this.icon = widgetResource.getIcon();
         this.tooltipTranslationKey = widgetResource.getTooltipTranslationKey();
     }

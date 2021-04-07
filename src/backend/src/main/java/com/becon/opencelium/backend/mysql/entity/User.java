@@ -50,7 +50,7 @@ public class User {
     private UserRole userRole;
 
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<WidgetSetting> widgetSettings = new ArrayList<>();
 
     public User() {
