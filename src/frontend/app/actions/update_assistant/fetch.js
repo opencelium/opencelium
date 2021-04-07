@@ -98,6 +98,18 @@ const fetchOnlineUpdatesRejected = (error) => {
 };
 
 /**
+ * fetch online updates canceled
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOnlineUpdatesCanceled = (message) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_CANCELED,
+        payload: message
+    };
+};
+
+/**
  * fetch offline updates
  * @param settings = {background: bool}
  *      background - if true -> does not show a notification; else -> show a notification
@@ -135,6 +147,18 @@ const fetchOfflineUpdatesRejected = (error) => {
         type: UpdateAssistantAction.FETCH_OFFLINEUPDATES_REJECTED,
         payload: error
     });
+};
+
+/**
+ * fetch offline updates canceled
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOfflineUpdatesCanceled = (message) => {
+    return {
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES_CANCELED,
+        payload: message
+    };
 };
 
 /**
@@ -185,9 +209,11 @@ export {
     fetchOnlineUpdates,
     fetchOnlineUpdatesRejected,
     fetchOnlineUpdatesFulfilled,
+    fetchOnlineUpdatesCanceled,
     fetchOfflineUpdates,
     fetchOfflineUpdatesRejected,
     fetchOfflineUpdatesFulfilled,
+    fetchOfflineUpdatesCanceled,
     fetchSystemRequirements,
     fetchSystemRequirementsRejected,
     fetchSystemRequirementsFulfilled,

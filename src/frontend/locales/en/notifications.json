@@ -184,7 +184,13 @@
     },
     "DELETE_VERSION": "Version was not removed",
     "UPDATE_TEMPLATESFORASSISTANT": "Templates were not updated",
-    "UPDATE_INVOKERSFORASSISTANT": "Invokers were not updated"
+    "UPDATE_INVOKERSFORASSISTANT": "Invokers were not updated",
+    "FETCH_ONLINEUPDATES": {
+      "__DEFAULT__": "The Online Updates were not fetched"
+    },
+    "FETCH_OFFLINEUPDATES": {
+      "__DEFAULT__": "The Offline Updates were not fetched"
+    }
   },
   "WARNING": {
     "ADD_USER": "The user was added, but ...",

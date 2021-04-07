@@ -61,7 +61,7 @@ class NotificationMessage extends Component{
                 toggle={::this.toggleShowDialogInDetails}
                 title={t('DIALOG_DETAILS.TITLE')}
             >
-                <p>
+                <p style={{overflow: 'auto'}}>
                     <span>{inDetailsMessage}</span>
                     {hasColor && <span style={{background: lastWord, width: '30px', height: '17px', verticalAlign: 'sub', display: 'inline-block', borderRadius: '2px', marginLeft: '5px'}}/>}
                 </p>

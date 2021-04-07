@@ -82,12 +82,13 @@ const fetchOnlineUpdatesEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_ONLINEUPDATES)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/online`;
-            return Rx.Observable.of(fetchOnlineUpdatesFulfilled(ONLINE_UPDATES));
-            /*return doRequest({url},{
-                success: (data) => fetchOnlineUpdatesFulfilled(data, {...action.settings}),
+            let url = `${urlPrefix}/online/versions`;
+            //return Rx.Observable.of(fetchOnlineUpdatesFulfilled(ONLINE_UPDATES));
+            return doRequest({url},{
+                success: (data) => fetchOnlineUpdatesFulfilled(data.map(version => {return {...version, name: version.version.substr(1)}}), {...action.settings}),
                 reject: fetchOnlineUpdatesRejected,
-            });*/
+                cancel: action$.ofType(UpdateAssistantAction.FETCH_ONLINEUPDATES_CANCELED),
+            });
         });
 };
 
@@ -98,12 +99,13 @@ const fetchOfflineUpdatesEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_OFFLINEUPDATES)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/offline`;
-            return Rx.Observable.of(fetchOfflineUpdatesFulfilled(OFFLINE_UPDATES));
-            /*return doRequest({url},{
+            let url = `${urlPrefix}/offline/versions`;
+            //return Rx.Observable.of(fetchOfflineUpdatesFulfilled(OFFLINE_UPDATES));
+            return doRequest({url},{
                 success: (data) => fetchOfflineUpdatesFulfilled(data, {...action.settings}),
                 reject: fetchOfflineUpdatesRejected,
-            });*/
+                cancel: action$.ofType(UpdateAssistantAction.FETCH_OFFLINEUPDATES_CANCELED),
+            });
         });
 };
 
@@ -203,7 +205,7 @@ const fetchSystemRequirementsEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/system`;
+            let url = `${urlPrefix}/system/overview`;
             return doRequest({url},{
                 success: (data) => fetchSystemRequirementsFulfilled(data, {...action.settings}),
                 reject: fetchSystemRequirementsRejected,
