@@ -16,7 +16,9 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.service.AssistantServiceImp;
+import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
@@ -28,6 +30,7 @@ import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
@@ -69,6 +72,9 @@ public class FileController {
 
     @Autowired
     private AssistantServiceImp assistantServiceImp;
+
+    @Autowired
+    private UpdatePackageServiceImp updatePackageServiceImp;
 
     private final UserStorageService storageService;
 
@@ -201,8 +207,17 @@ public class FileController {
 
     @PostMapping(value = "/assistant/zipfile")
     public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
-        assistantServiceImp.uploadZipFile(file,"repository/zipfile/");
-        return ResponseEntity.ok().build();
+        try {
+            Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
+            Path target = Paths.get(PathConstant.APPLICATION);
+            Path folder = assistantServiceImp.unzipFolder(source, target);
+            String dir = folder.toString().replace(folder.getParent().toString() + "/", "");
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(dir);
+            AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
+            return ResponseEntity.ok(availableUpdateResource);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @DeleteMapping(value = "/assistant/zipfile/{filename}")
