@@ -55,7 +55,7 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
 
     @Override
     public void deleteById(int id) {
-
+        widgetSettingRepository.deleteById(id);
     }
 
     @Override
