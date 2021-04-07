@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -134,8 +135,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public User toEntity(UserResource resource) {
 
-        List<WidgetSetting> widgetSettings = resource.getWidgetSettings().stream()
-                .map(wsr -> widgetSettingServiceImp.toEntity(wsr, resource.getUserId())).collect(Collectors.toList());
+        Set<WidgetSetting> widgetSettings = resource.getWidgetSettings().stream()
+                .map(wsr -> widgetSettingServiceImp.toEntity(wsr, resource.getUserId())).collect(Collectors.toSet());
         return new User(resource, widgetSettings);
     }
 

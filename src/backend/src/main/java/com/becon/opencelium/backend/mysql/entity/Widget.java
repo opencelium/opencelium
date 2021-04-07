@@ -3,8 +3,9 @@ package com.becon.opencelium.backend.mysql.entity;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
 
 import javax.persistence.*;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "widget")
@@ -24,8 +25,8 @@ public class Widget {
     @Column(name = "tooltipTranslationKey")
     private String tooltipTranslationKey;
 
-    @OneToMany(mappedBy = "widget", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<WidgetSetting> widgetSettings = new ArrayList<>();
+    @OneToMany(mappedBy = "widget", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<WidgetSetting> widgetSettings = new HashSet<>();
 
     public Widget() {
     }
@@ -70,11 +71,11 @@ public class Widget {
         this.tooltipTranslationKey = tooltipTranslationKey;
     }
 
-    public List<WidgetSetting> getWidgetSettings() {
+    public Set<WidgetSetting> getWidgetSettings() {
         return widgetSettings;
     }
 
-    public void setWidgetSettings(List<WidgetSetting> widgetSettings) {
+    public void setWidgetSettings(Set<WidgetSetting> widgetSettings) {
         this.widgetSettings = widgetSettings;
     }
 }

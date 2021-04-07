@@ -21,7 +21,9 @@ import com.becon.opencelium.backend.resource.user.UserResource;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -50,8 +52,8 @@ public class User {
     private UserRole userRole;
 
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<WidgetSetting> widgetSettings = new ArrayList<>();
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<WidgetSetting> widgetSettings = new HashSet<>();
 
     public User() {
     }
@@ -67,7 +69,7 @@ public class User {
 //                                            .collect(Collectors.toList());
 //    }
 
-    public User(UserResource userResource, List<WidgetSetting> widgetSettings) {
+    public User(UserResource userResource, Set<WidgetSetting> widgetSettings) {
         this.id = userResource.getUserId();
         this.email = userResource.getEmail();
         this.userDetail = new UserDetail(userResource.getUserDetail());
@@ -123,11 +125,11 @@ public class User {
         this.userRole = userRole;
     }
 
-    public List<WidgetSetting> getWidgetSettings() {
+    public Set<WidgetSetting> getWidgetSettings() {
         return widgetSettings;
     }
 
-    public void setWidgetSettings(List<WidgetSetting> widgetSettings) {
+    public void setWidgetSettings(Set<WidgetSetting> widgetSettings) {
         this.widgetSettings = widgetSettings;
     }
 }
