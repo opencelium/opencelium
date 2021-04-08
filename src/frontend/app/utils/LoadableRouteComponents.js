@@ -295,10 +295,18 @@ const ConnectionOverviewDetails = Loadable({
 });
 
 /**
- * Loadable Connection Overview Layout Layout
+ * Loadable Connection Overview Technical Layout Layout
  */
-const ConnectionOverviewLayout = Loadable({
-    loader: () => import(/* webpackChunkName: 'connection_overview_layout' */ '@components/content/connection_overview_2/layouts/ExtendedTechnicalLayout'),
+const ConnectionOverviewTechnicalLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_technical_layout' */ '@components/content/connection_overview_2/layouts/ExtendedTechnicalLayout'),
+    loading: Loading,
+});
+
+/**
+ * Loadable Connection Overview Business Layout Layout
+ */
+const ConnectionOverviewBusinessLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_business_layout' */ '@components/content/connection_overview_2/layouts/ExtendedBusinessLayout'),
     loading: Loading,
 });
 
@@ -362,6 +370,7 @@ export default {
     UpdateAssistant,
     ConnectionOverview2,
     ConnectionOverviewDetails,
-    ConnectionOverviewLayout,
+    ConnectionOverviewTechnicalLayout,
+    ConnectionOverviewBusinessLayout,
     Sandbox,
 };

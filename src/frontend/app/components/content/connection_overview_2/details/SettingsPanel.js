@@ -17,6 +17,7 @@ import React from 'react';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
+import {setLS} from "@utils/LocalStorage";
 
 
 class SettingsPanel extends React.Component{
@@ -24,8 +25,13 @@ class SettingsPanel extends React.Component{
         super(props);
     }
 
+    openInNewWindow(){
+        setLS('connection_overview', this.props.connectionOverviewState.toJS(), 'connection_overview');
+        this.props.openInNewWindow();
+    }
+
     render(){
-        const {moveDetailsLeft, moveDetailsRight, position, isMinimized, minimize, maximize, openInNewWindow} = this.props;
+        const {moveDetailsLeft, moveDetailsRight, position, isMinimized, minimize, maximize} = this.props;
         let positionIconClassName = '';
         let minMaxIconClassName = '';
         let newWindowIconClassName = '';
@@ -90,7 +96,7 @@ class SettingsPanel extends React.Component{
                 <TooltipFontIcon
                     size={20}
                     className={newWindowIconClassName}
-                    onClick={openInNewWindow}
+                    onClick={::this.openInNewWindow}
                     tooltip={'Open in new Window'}
                     value={'open_in_new'}
                     tooltipPosition={'top'}

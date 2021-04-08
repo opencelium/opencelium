@@ -29,6 +29,7 @@ function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
     const {currentItem, currentSubItem} = mapItemsToClasses(state);
     return{
+        connectionOverviewState: connectionOverview,
         currentItem,
         currentSubItem,
         detailsLocation: connectionOverview.get('detailsLocation'),

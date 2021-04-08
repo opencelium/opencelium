@@ -37,7 +37,7 @@ export function mapItemsToClasses(state){
             currentSubItem = CTechnicalProcess.createTechnicalProcess(currentSubItem);
         }
     }
-    let items = connectionOverview.get('items');
+    let items = connectionOverview.get('items').toJS();
     let instancesItems = [];
     if(items.length > 0){
         if(!(items[0] instanceof CBusinessProcess || items[0] instanceof CBusinessOperator)){

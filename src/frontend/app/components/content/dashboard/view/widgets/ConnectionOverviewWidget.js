@@ -148,7 +148,6 @@ class ConnectionOverviewWidget extends React.Component{
                         });
                         network.on("initRedrew", function(params) {
                             // Get the node ID
-                            console.log(params)
                         });
                     }}
                 />

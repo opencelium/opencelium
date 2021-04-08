@@ -22,13 +22,18 @@ import PropTypes from "prop-types";
 import SettingsPanel from "@components/content/connection_overview_2/layouts/SettingsPanel";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
-import {PANEL_LOCATION} from "@utils/constants/app";
+import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
+import {NewWindowFeature} from "@decorators/NewWindowFeature";
+import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
+import {setLS} from "@utils/LocalStorage";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem} = mapItemsToClasses(state);
+    const {currentItem, currentSubItem} = mapItemsToClasses(state);
     return{
+        connectionOverviewState: connectionOverview,
         currentItem,
+        currentSubItem,
         items: currentItem ? currentItem.items : [],
         arrows: currentItem ? currentItem.arrows : [],
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
@@ -36,18 +41,22 @@ function mapStateToProps(state){
     };
 }
 
+function isLocationSameWindow(props){
+    return props.technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW;
+}
+
+function setLocation(props, data){
+    props.setTechnicalLayoutLocation(data);
+    props.maximizeBusinessLayout();
+}
+
 @connect(mapStateToProps, {setCurrentItem, setCurrentSubItem, setTechnicalLayoutLocation})
+@NewWindowFeature({url: connectionOverviewTechnicalLayoutUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.TECHNICAL_LAYOUT, setLocation, isLocationSameWindow})
 class TechnicalLayout extends React.Component{
 
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.props.technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW && !this.props.isLayoutMinimized){
-            this.props.minimizeLayout();
-        }
     }
 
     setLocation(data){
@@ -57,12 +66,27 @@ class TechnicalLayout extends React.Component{
         }
     }
 
+    openInNewWindow(){
+        setLS('connection_overview', this.props.connectionOverviewState.toJS(), 'connection_overview');
+        this.props.openInNewWindow();
+    }
+
     render(){
-        const {isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, detailsPosition, technicalLayoutLocation, ...svgProps} = this.props;
+        const {
+            isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
+            detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized,
+            ...svgProps
+        } = this.props;
+        if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW){
+            return null;
+        }
+        const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
+        const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
+        const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
-                    isVisible={technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW}
+                    openInNewWindow={::this.openInNewWindow}
                     isLayoutMinimized={isLayoutMinimized}
                     maximizeLayout={maximizeLayout}
                     minimizeLayout={minimizeLayout}
@@ -71,6 +95,9 @@ class TechnicalLayout extends React.Component{
                     setLocation={::this.setLocation}
                     location={technicalLayoutLocation}
                     title={'Technical Layout'}
+                    isReplaceIconDisabled={isReplaceIconDisabled}
+                    isMinMaxIconDisabled={isMinMaxIconDisabled}
+                    isNewWindowIconDisabled={isNewWindowIconDisabled}
                 />
                 <Svg
                     {...svgProps}
@@ -87,8 +114,10 @@ class TechnicalLayout extends React.Component{
 TechnicalLayout.propTypes = {
     detailsPosition: PropTypes.oneOf(['right', 'left']).isRequired,
     isLayoutMinimized: PropTypes.bool.isRequired,
+    isBusinessLayoutMinimized: PropTypes.bool.isRequired,
     minimizeLayout: PropTypes.func.isRequired,
     maximizeLayout: PropTypes.func.isRequired,
+    maximizeBusinessLayout: PropTypes.func.isRequired,
     replaceLayouts: PropTypes.func.isRequired,
     isDetailsMinimized: PropTypes.bool,
 };

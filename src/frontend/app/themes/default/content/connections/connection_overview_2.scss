@@ -41,10 +41,6 @@
   stroke-width: 2;
 }
 .process{
-  text{
-    pointer-events: none;
-    font-size: $FONT_SIZE_MEDIUM;
-  }
 }
 .operator{
   text{
@@ -77,6 +73,14 @@
 }
 .process_label{
   font-family: $FONT_FAMILY;
+  pointer-events: none;
+  font-size: $FONT_SIZE_MEDIUM;
+}
+.process_close{
+  font-family: $FONT_FAMILY;
+  font-size: 16px;
+  fill: $ERROR_COLOR;
+  cursor: pointer;
 }
 .if_operator{
   text{
@@ -244,4 +248,26 @@
 .technical_settings_panel_title_center{
   @extend .settings_panel_title;
   width: 100%;
+}
+
+.new_process_icon{
+  cursor: pointer;
+  fill: #fff;
+  stroke: #000;
+  transition: all 0.3s;
+}
+.new_process_icon:hover{
+  fill: #21d0e226;
+}
+
+.new_operator_icon{
+  polygon {
+    cursor: pointer;
+    fill: #fff;
+    stroke: #000;
+    transition: all 0.3s;
+  }
+  polygon:hover{
+    fill: #21d0e226;
+  }
 }

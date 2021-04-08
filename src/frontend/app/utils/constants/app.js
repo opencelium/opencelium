@@ -75,7 +75,8 @@ export const PANEL_LOCATION = {
 export const SEPARATE_WINDOW = {
     CONNECTION_OVERVIEW:{
         DETAILS: 'connection_overview_details',
-        LAYOUT: 'connection_overview_layout',
+        TECHNICAL_LAYOUT: 'connection_overview_technical_layout',
+        BUSINESS_LAYOUT: 'connection_overview_business_layout',
     }
 }
 
