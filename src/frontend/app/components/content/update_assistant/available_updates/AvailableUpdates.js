@@ -231,7 +231,14 @@ class AvailableUpdates extends React.Component{
         if(updates.available.length === 0 && updates.old.length === 0 && updates.veryNew.length === 0){
             if(activeMode !== '' && !(fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START)){
                 if(error === null){
-                    return <div className={styles.no_versions}>{"There are no updates"}</div>;
+                    return (
+                        <div>
+                            <div className={styles.no_versions}>
+                                <span>{"There are no updates"}</span>
+                            </div>
+                            {::this.renderUploadButton()}
+                        </div>
+                    );
                 } else{
                     return <div className={styles.no_versions}>{"There are some errors"}</div>;
                 }

@@ -74,9 +74,11 @@ class CVoiceControl{
     }
 
     static removeAll(){
-        annyang.removeCommands();
-        this.unregisterAll();
-        this.stop();
+        if(ENABLE_VOICE_CONTROL) {
+            annyang.removeCommands();
+            this.unregisterAll();
+            this.stop();
+        }
     }
 
     static pauseAllCommands(){

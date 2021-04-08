@@ -132,8 +132,8 @@ class ConnectionFileUpdate extends React.Component{
                 <Table className={styles.table} authUser={authUser}>
                     <thead>
                         <tr>
-                            <th>{`v${appVersion}`}</th>
-                            <th style={{paddingRight: connections.length > 6 ? '35px' : ''}}>{`v${entity.availableUpdates.selectedVersion}`}</th>
+                            <th>{`${appVersion}`}</th>
+                            <th style={{paddingRight: connections.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion}`}</th>
                         </tr>
                     </thead>
                 </Table>
