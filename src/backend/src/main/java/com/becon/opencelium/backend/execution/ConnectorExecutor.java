@@ -623,7 +623,11 @@ public class ConnectorExecutor {
                 value = executionContainer.getValueFromResponseData(ref);
                 result.add(value);
             } else {
-                result.add(statementVariable.getFiled());
+                if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+                    result.add(executionContainer.getValueFromQueryParams(statementVariable.getFiled()));
+                } else {
+                    result.add(statementVariable.getFiled());
+                }
             }
 
             value = executionContainer.getValueFromResponseData(rightPropertyValueRef);
