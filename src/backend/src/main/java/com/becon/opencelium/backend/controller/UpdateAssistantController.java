@@ -240,8 +240,6 @@ public class UpdateAssistantController {
             if (!file.exists() || !file.isReadable()) {
                 throw new StorageFileNotFoundException("Could not read file: " + packageName + "/CHANGELOG");
             }
-
-            System.out.println(file.);
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getFilename() + "\"").body(file);
         }

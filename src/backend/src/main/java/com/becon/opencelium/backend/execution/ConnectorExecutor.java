@@ -512,7 +512,7 @@ public class ConnectorExecutor {
             }
 
             // replace from request_data
-            if ((f.getValue() != null) && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
+            if ((f.getValue() != null) && !f.getValue().contains("${") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
 
                 item.put (f.getName(), executionContainer.getValueFromRequestData(f.getValue()));
                 return;
