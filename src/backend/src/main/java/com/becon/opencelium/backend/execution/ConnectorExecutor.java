@@ -637,7 +637,11 @@ public class ConnectorExecutor {
 
         String ref = statementNodeService.convertToRef(statementVariable);
         if (!fieldNodeService.hasReference(ref)){
-            return statementVariable.getFiled();
+            if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+                return executionContainer.getValueFromQueryParams(statementVariable.getFiled());
+            } else {
+                return statementVariable.getFiled();
+            }
         }
         return executionContainer.getValueFromResponseData(ref);
     }
