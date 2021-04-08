@@ -512,7 +512,7 @@ public class ConnectorExecutor {
             }
 
             // replace from request_data
-            if ((f.getValue() != null) && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
+            if ((f.getValue() != null) && !f.getValue().contains("${") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
 
                 item.put (f.getName(), executionContainer.getValueFromRequestData(f.getValue()));
                 return;
@@ -623,7 +623,11 @@ public class ConnectorExecutor {
                 value = executionContainer.getValueFromResponseData(ref);
                 result.add(value);
             } else {
-                result.add(statementVariable.getFiled());
+                if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+                    result.add(executionContainer.getValueFromQueryParams(statementVariable.getFiled()));
+                } else {
+                    result.add(statementVariable.getFiled());
+                }
             }
 
             value = executionContainer.getValueFromResponseData(rightPropertyValueRef);
@@ -633,7 +637,11 @@ public class ConnectorExecutor {
 
         String ref = statementNodeService.convertToRef(statementVariable);
         if (!fieldNodeService.hasReference(ref)){
-            return statementVariable.getFiled();
+            if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+                return executionContainer.getValueFromQueryParams(statementVariable.getFiled());
+            } else {
+                return statementVariable.getFiled();
+            }
         }
         return executionContainer.getValueFromResponseData(ref);
     }
