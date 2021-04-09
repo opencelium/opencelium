@@ -293,40 +293,87 @@ public class AssistantServiceImp implements ApplicationService {
 
     public Path unzipFolder(Path source, Path target) throws IOException {
 
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
-
+        String os = System.getProperty("os.name");
+        if (os.contains("Windows")) {
+            String fileZip = source.toString();
+            File destDir = new File(target.toString());
+            byte[] buffer = new byte[1024];
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
             ZipEntry zipEntry = zis.getNextEntry();
             Path folder = zipSlipProtect(zipEntry, target);
             while (zipEntry != null) {
-
-                boolean isDirectory = false;
-                if (zipEntry.getName().endsWith(File.separator)) {
-                    isDirectory = true;
-                }
-
-                Path newPath = zipSlipProtect(zipEntry, target);
-
-                if (isDirectory) {
-                    Files.createDirectories(newPath);
-                } else {
-
-                    // example 1.2
-                    // some zip stored file path only, need create parent directories
-                    // e.g data/folder/file.txt
-                    if (newPath.getParent() != null) {
-                        if (Files.notExists(newPath.getParent())) {
-                            Files.createDirectories(newPath.getParent());
-                        }
+                File newFile = newFile(destDir, zipEntry);
+                if (zipEntry.isDirectory()) {
+                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                        throw new IOException("Failed to create directory " + newFile);
                     }
-                    Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
-                }
+                } else {
+                    // fix for Windows-created archives
+                    File parent = newFile.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Failed to create directory " + parent);
+                    }
 
-                zipEntry = zis.getNextEntry();
+                    // write file content
+                    FileOutputStream fos = new FileOutputStream(newFile);
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                    fos.close();
+                }
 
             }
-            zis.closeEntry();
             return folder;
+        } else {
+            try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
+
+                ZipEntry zipEntry = zis.getNextEntry();
+                Path folder = zipSlipProtect(zipEntry, target);
+                while (zipEntry != null) {
+
+                    boolean isDirectory = false;
+                    if (zipEntry.getName().endsWith(File.separator)) {
+                        isDirectory = true;
+                    }
+
+                    Path newPath = zipSlipProtect(zipEntry, target);
+
+                    if (isDirectory) {
+                        Files.createDirectories(newPath);
+                    } else {
+
+                        // example 1.2
+                        // some zip stored file path only, need create parent directories
+                        // e.g data/folder/file.txt
+                        if (newPath.getParent() != null) {
+                            if (Files.notExists(newPath.getParent())) {
+                                Files.createDirectories(newPath.getParent());
+                            }
+                        }
+                        Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
+
+                    zipEntry = zis.getNextEntry();
+
+                }
+                zis.closeEntry();
+                return folder;
+            }
         }
+    }
+
+    private File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+        File destFile = new File(destinationDir, zipEntry.getName());
+
+        String destDirPath = destinationDir.getCanonicalPath();
+        String destFilePath = destFile.getCanonicalPath();
+
+        if (!destFilePath.startsWith(destDirPath + File.separator)) {
+            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+        }
+
+        return destFile;
     }
 
     private Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)
