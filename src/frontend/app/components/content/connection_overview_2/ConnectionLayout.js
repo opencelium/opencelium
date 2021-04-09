@@ -47,6 +47,10 @@ export const  LAYOUT_SETTINGS = {
     MIN_WIDTH: 200,
 };
 
+const INITIAL_BUSINESS_LAYOUT_POSITION = LAYOUT_POSITION.TOP;
+const INITIAL_TECHNICAL_LAYOUT_POSITION = LAYOUT_POSITION.BOTTOM;
+const INITIAL_DETAILS_POSITION = DETAILS_POSITION.RIGHT;
+
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
     return{
@@ -65,9 +69,9 @@ class ConnectionLayout extends Component{
         super(props);
 
         this.state = {
-            businessLayoutPosition: LAYOUT_POSITION.TOP,
-            technicalLayoutPosition: LAYOUT_POSITION.BOTTOM,
-            detailsPosition: DETAILS_POSITION.RIGHT,
+            businessLayoutPosition: INITIAL_BUSINESS_LAYOUT_POSITION,
+            technicalLayoutPosition: INITIAL_TECHNICAL_LAYOUT_POSITION,
+            detailsPosition: INITIAL_DETAILS_POSITION,
             verticalPanelWidths: ::this.getPanelGroupWidths(),
             isDetailsMinimized: false,
             isBusinessLayoutMinimized: false,
@@ -124,7 +128,7 @@ class ConnectionLayout extends Component{
     }
 
     minimizeTechnicalLayout(){
-        if(!this.state.isBusinessLayoutMinimized) {
+        if(!this.state.isBusinessLayoutMinimized && this.props.businessLayoutLocation === PANEL_LOCATION.SAME_WINDOW) {
             let technicalLayoutHeight = this.state.technicalLayoutPosition === LAYOUT_POSITION.TOP ? this.state.verticalPanelWidths[0].size : this.state.verticalPanelWidths[1].size;
             this.setState({
                 isTechnicalLayoutMinimized: true,
@@ -144,7 +148,7 @@ class ConnectionLayout extends Component{
     }
 
     minimizeBusinessLayout(){
-        if(!this.state.isTechnicalLayoutMinimized) {
+        if(!this.state.isTechnicalLayoutMinimized && this.props.technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW) {
             let businessLayoutHeight = this.state.businessLayoutPosition === LAYOUT_POSITION.TOP ? this.state.verticalPanelWidths[0].size : this.state.verticalPanelWidths[1].size;
             this.setState({
                 isBusinessLayoutMinimized: true,
@@ -176,13 +180,17 @@ class ConnectionLayout extends Component{
         let newTechnicalViewBoxYOffset = (technicalPanel.size - this.initialTechnicalSize) / 1.7;
         if(businessViewBoxYOffset !== newBusinessViewBoxYOffset){
             const svg = document.getElementById('business_layout_svg');
-            let viewBox = svg.viewBox.baseVal;
-            if(viewBox) viewBox.y = viewBox.y - businessViewBoxYOffset + newBusinessViewBoxYOffset;
+            if(svg) {
+                let viewBox = svg.viewBox.baseVal;
+                if (viewBox) viewBox.y = viewBox.y - businessViewBoxYOffset + newBusinessViewBoxYOffset;
+            }
         }
         if(technicalViewBoxYOffset !== newTechnicalViewBoxYOffset){
             const svg = document.getElementById('technical_layout_svg');
-            let viewBox = svg.viewBox.baseVal;
-            if(viewBox) viewBox.y = viewBox.y - technicalViewBoxYOffset + newTechnicalViewBoxYOffset;
+            if(svg) {
+                let viewBox = svg.viewBox.baseVal;
+                if (viewBox) viewBox.y = viewBox.y - technicalViewBoxYOffset + newTechnicalViewBoxYOffset;
+            }
         }
         this.setState({
             businessViewBoxYOffset: newBusinessViewBoxYOffset,
@@ -192,6 +200,8 @@ class ConnectionLayout extends Component{
     }
 
     getPanelGroupWidths(isMinimized = {layoutOne: false, layoutTwo: false}, layoutPosition = LAYOUT_POSITION.BOTTOM, height = 300){
+        let technicalLayoutLocation = this.props ? this.props.technicalLayoutLocation : PANEL_LOCATION.SAME_WINDOW;
+        let businessLayoutLocation = this.props ? this.props.businessLayoutLocation : PANEL_LOCATION.SAME_WINDOW;
         let panelWidths = [
             {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
             {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
@@ -227,14 +237,44 @@ class ConnectionLayout extends Component{
                 }
             }
         }
+        if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW){
+            const businessLayoutPosition = this.state ? this.state.businessLayoutPosition : INITIAL_BUSINESS_LAYOUT_POSITION;
+            if(businessLayoutPosition === LAYOUT_POSITION.TOP) {
+                panelWidths = [
+                    {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
+                    {minSize: 1, size: 1, maxSize: 1},
+                ];
+            } else{
+                panelWidths = [
+                    {minSize: 1, size: 1, maxSize: 1},
+                    {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
+                ];
+            }
+        }
+        if(businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW){
+            const technicalLayoutPosition = this.state ? this.state.technicalLayoutPosition : INITIAL_TECHNICAL_LAYOUT_POSITION;
+            if(technicalLayoutPosition === LAYOUT_POSITION.TOP) {
+                panelWidths = [
+                    {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
+                    {minSize: 1, size: 1, maxSize: 1},
+                ];
+            } else{
+                panelWidths = [
+                    {minSize: 1, size: 1, maxSize: 1},
+                    {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
+                ];
+            }
+        }
         return panelWidths;
     }
 
     getPanelGroupParams(){
         const {verticalPanelWidths} = this.state;
+        const {technicalLayoutLocation, businessLayoutLocation} = this.props;
+        const borderColor = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW ? '#fff' : '#7f7f7f';
         return {
             direction: 'column',
-            borderColor: '#7f7f7f',
+            borderColor,
             borderWidth: 1,
             panelWidths: verticalPanelWidths,
             spacing: 2,
@@ -256,7 +296,6 @@ class ConnectionLayout extends Component{
 
     render(){
         const {businessLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
-        const {technicalLayoutLocation, businessLayoutLocation} = this.props;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div id={'app_content'} className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
@@ -272,16 +311,20 @@ class ConnectionLayout extends Component{
                     {businessLayoutPosition === LAYOUT_POSITION.TOP &&
                         <BusinessLayout
                             isLayoutMinimized={isBusinessLayoutMinimized}
+                            isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
                             maximizeLayout={::this.maximizeBusinessLayout}
+                            maximizeTechnicalLayout={::this.maximizeTechnicalLayout}
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
                         />
                     }
                     <TechnicalLayout
                         isLayoutMinimized={isTechnicalLayoutMinimized}
+                        isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                         minimizeLayout={::this.minimizeTechnicalLayout}
                         maximizeLayout={::this.maximizeTechnicalLayout}
+                        maximizeBusinessLayout={::this.maximizeBusinessLayout}
                         replaceLayouts={::this.replaceLayouts}
                         detailsPosition={detailsPosition}
                         isDetailsMinimized={isDetailsMinimized}
@@ -289,8 +332,10 @@ class ConnectionLayout extends Component{
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout
                             isLayoutMinimized={isBusinessLayoutMinimized}
+                            isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
                             maximizeLayout={::this.maximizeBusinessLayout}
+                            maximizeTechnicalLayout={::this.maximizeTechnicalLayout}
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
                         />

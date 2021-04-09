@@ -75,9 +75,7 @@ class Layout extends Component{
             if( appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
                 fetchAppVersion();
             }
-        }/*
-        console.log(TEST.connection.toConnector.methods.map(method => method.index));
-        console.log(TEST.connection.toConnector.operators.map(operator => operator.index));*/
+        }
     }
 
     componentDidUpdate(prevProps){

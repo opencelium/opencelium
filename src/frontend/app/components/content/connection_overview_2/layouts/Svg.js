@@ -20,6 +20,7 @@ import IfOperator from "@components/content/connection_overview_2/elements/IfOpe
 import Process from "@components/content/connection_overview_2/elements/Process";
 import Arrow from "@components/content/connection_overview_2/elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
+import NewElementPanel from "@components/content/connection_overview_2/elements/NewElementPanel";
 
 class Svg extends React.Component {
     constructor(props) {
@@ -316,7 +317,11 @@ class Svg extends React.Component {
     }
 
     render(){
-        const {svgId} = this.props;
+        const {svgId, layoutId} = this.props;
+        let {currentItem, currentSubItem} = this.props;
+        if(layoutId === 'technical_layout'){
+            currentItem = currentSubItem;
+        }
         return(
             <svg
                 id={svgId}
@@ -337,6 +342,7 @@ class Svg extends React.Component {
                 {
                     this.renderItems()
                 }
+                <NewElementPanel currentItem={currentItem}/>
             </svg>
         );
     }

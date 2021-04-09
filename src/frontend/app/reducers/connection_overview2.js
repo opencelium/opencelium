@@ -13,23 +13,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {List, fromJS} from 'immutable';
+import {List, fromJS, Map} from 'immutable';
 import {ConnectionOverview2Action} from "@utils/actions";
-import {PANEL_LOCATION} from "@utils/constants/app";
+import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
+import {getLS, removeLS, setLS} from "@utils/LocalStorage";
+import {isExternalWindow} from "@utils/app";
 
+let initialState = null;
+if(isExternalWindow()){
+    const localStorageState = getLS('connection_overview', 'connection_overview');
+    if(localStorageState){
+        initialState = fromJS(localStorageState);
+        initialState = initialState.map(value => {
+            if(Map.isMap(value)){
+                return value.toJS();
+            }
+            return value;
+        });
+    }
+}
 
-const initialState = fromJS({
-    currentItem: null,
-    currentSubItem: null,
-    items: List([]),
-    arrows: List([]),
-    error: null,
-    message: {},
-    notificationData: {},
-    detailsLocation: PANEL_LOCATION.SAME_WINDOW,
-    businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
-    technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
-});
+if(initialState === null){
+    initialState = fromJS({
+        currentItem: null,
+        currentSubItem: null,
+        items: List([]),
+        arrows: List([]),
+        error: null,
+        message: {},
+        notificationData: {},
+        detailsLocation: PANEL_LOCATION.SAME_WINDOW,
+        businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
+        technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
+    });
+}
 
 /**
  * redux reducer for connection overview 2
@@ -37,18 +54,24 @@ const initialState = fromJS({
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case ConnectionOverview2Action.SET_ARROWS:
-            return state.set('arrows', action.payload);
+            return state.set('arrows', List(action.payload));
         case ConnectionOverview2Action.SET_ITEMS:
-            return state.set('items', action.payload);
+            return state.set('items', List(action.payload));
         case ConnectionOverview2Action.SET_CURRENTITEM:
             return state.set('currentItem', action.payload).set('currentSubItem', null);
         case ConnectionOverview2Action.SET_CURRENTSUBITEM:
             return state.set('currentSubItem', action.payload);
         case ConnectionOverview2Action.SET_DETAILSLOCATION:
+            if(action.payload.location === PANEL_LOCATION.SAME_WINDOW)
+                removeLS('connection_overview', 'connection_overview');
             return state.set('detailsLocation', action.payload.location);
         case ConnectionOverview2Action.SET_BUSINESSLAYOUTLOCATION:
+            if(action.payload.location === PANEL_LOCATION.SAME_WINDOW)
+                removeLS('connection_overview', 'connection_overview');
             return state.set('businessLayoutLocation', action.payload.location);
         case ConnectionOverview2Action.SET_TECHNICALLAYOUTLOCATION:
+            if(action.payload.location === PANEL_LOCATION.SAME_WINDOW)
+                removeLS('connection_overview', 'connection_overview');
             return state.set('technicalLayoutLocation', action.payload.location);
         default:
             return state;

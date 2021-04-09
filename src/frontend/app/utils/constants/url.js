@@ -41,4 +41,5 @@ export const neo4jUrl = `${protocol}//${hostname}:${neo4jPort}/`;
 export const appUrl = `${protocol}//${hostname}:${port}/apps`;
 export const invokerUrl = `${protocol}//${hostname}:${port}/invokers`;
 export const connectionOverviewDetailsUrl = `${protocol}//${hostname}:${port}/connection_overview_details`;
-export const connectionOverviewLayoutUrl = `${protocol}//${hostname}:${port}/connection_overview_layout`;
+export const connectionOverviewTechnicalLayoutUrl = `${protocol}//${hostname}:${port}/connection_overview_technical_layout`;
+export const connectionOverviewBusinessLayoutUrl = `${protocol}//${hostname}:${port}/connection_overview_business_layout`;

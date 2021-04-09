@@ -20,6 +20,7 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
+import NewElementPanel from "@components/content/connection_overview_2/elements/NewElementPanel";
 
 function mapStateToProps(state){
     const {currentItem, currentSubItem} = mapItemsToClasses(state);
@@ -39,6 +40,11 @@ class Process extends React.Component{
         this.props.setCurrentItem(this.props.process);
     }
 
+    deleteProcess(e){
+        console.log('delete process');
+        e.stopPropagation();
+    }
+
     render(){
         const {currentItem, currentSubItem, process, isNotDraggable} = this.props;
         let isCurrentProcess = currentItem ? currentItem.id === process.id : false;
@@ -46,8 +52,10 @@ class Process extends React.Component{
             isCurrentProcess = currentSubItem ? currentSubItem.id === process.id : false;
         }
         const borderRadius = 10;
-        const textX = '50%';
-        const textY = '50%';
+        const labelX = '50%';
+        const labelY = '50%';
+        const closeX = process.width - 15;
+        const closeY = 15;
         let label = process.label ? process.label : process.name;
         if(label.length > 12){
             label = `${label.substr(0, 9)}...`;
@@ -55,9 +63,15 @@ class Process extends React.Component{
         return(
             <svg x={process.x} y={process.y} className={`${styles.process} ${isCurrentProcess ? styles.current_process : ''} confine`} width={process.width} height={process.height}>
                 <rect onMouseDown={::this.onMouseDown}  x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2} className={`${styles.process_rect} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`}/>
-                <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
+                <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
                     {label}
                 </text>
+                {isCurrentProcess &&
+                    <text onMouseDown={::this.deleteProcess} dominantBaseline={"text-top"} textAnchor={"start"} className={styles.process_close} x={closeX}
+                          y={closeY}>
+                        {'x'}
+                    </text>
+                }
             </svg>
         );
     }
