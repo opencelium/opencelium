@@ -339,6 +339,7 @@ public class AssistantServiceImp implements ApplicationService {
                 }
 
             }
+            zis.closeEntry();
             return folder;
         } else {
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {

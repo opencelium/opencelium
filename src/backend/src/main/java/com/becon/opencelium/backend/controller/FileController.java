@@ -47,6 +47,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -211,7 +212,7 @@ public class FileController {
             Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
             Path target = Paths.get(PathConstant.APPLICATION);
             Path folder = assistantServiceImp.unzipFolder(source, target);
-            String dir = folder.toString().replace(folder.getParent().toString() + "/", "");
+            String dir = folder.toString().replace(folder.getParent().toString() + File.separator, "");
             AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(dir);
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
             return ResponseEntity.ok(availableUpdateResource);
