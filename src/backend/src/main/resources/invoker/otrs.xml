@@ -1,23 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--
-  ~ Copyright (C) <2019>  <becon GmbH>
-  ~
-  ~ This program is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU General Public License as published by
-  ~ the Free Software Foundation, version 3 of the License.
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  ~ GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License
-  ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
--->
-<invoker type="RESTful">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
     <name>otrs</name>
     <description>Otrs Description</description>
     <hint>hint text</hint>
-    <icon>otrs.png</icon>
+    <icon>http://localhost:9090/api/storage/files/otrs.png</icon>
     <requiredData>
         <item name="url" type="string" visibility="public"/>
         <item name="UserLogin" type="string" visibility="public"/>
@@ -30,28 +15,30 @@
             <request>
                 <method>GET</method>
                 <endpoint>{url}/{WebService}/TicketSearch/{UserLogin}/{Password}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
                     <header>
-                        <item name="TicketGet" type="object"/>
+                        <item name="TicketGet" type="string"/>
                     </header>
-                    <body/>
                 </success>
                 <fail status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="Error" type="object">
+                            <field name="ErrorCode" type="string"/>
+                            <field name="ErrorMessage" type="string"/>
+                        </field>
+                    </body>
                     <header>
                         <item name="Content-Type" type="string">application/json</item>
                     </header>
-                    <body type="object" format="json" data="raw">
-                        <field name="Error" type="object">
-                            <field name="ErrorMessage"  type="string"/>
-                            <field name="ErrorCode" type="string"/>
-                        </field>
-                    </body>
                 </fail>
             </response>
         </operation>
@@ -59,40 +46,40 @@
             <request>
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemCreate/{UserLogin}/{Password}</endpoint>
-                <header>
-                    <item name="Content-Type" type="string"/>
-                </header>
-                <body type="array" format="json" data="raw">
+                <body data="raw" format="json" type="array">
                     <field name="ConfigItem" type="object">
                         <field name="Number" type="string"/>
-                        <field name="Class" type="string"/>
-                        <field name="Name" type="string"/>
-                        <field name="DeplState" type="string"/>
                         <field name="InciState" type="string"/>
+                        <field name="DeplState" type="string"/>
+                        <field name="Class" type="string"/>
                         <field name="CIXMLData" type="object">
                             <field name="Vendor" type="string"/>
                         </field>
+                        <field name="Name" type="string"/>
                     </field>
                 </body>
+                <header>
+                    <item name="Content-Type" type="string"/>
+                </header>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                        <field name="ConfigItemID" type="string"/>
+                    <body data="raw" format="json" type="object">
                         <field name="Number" type="string"/>
+                        <field name="ConfigItemID" type="string"/>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </success>
                 <fail status="500">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="faultcode" type="string"/>
                         <field name="faultstring" type="string"/>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </fail>
             </response>
         </operation>
@@ -100,41 +87,41 @@
             <request>
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemUpdate/{UserLogin}/{Password}</endpoint>
-                <header>
-                    <item name="Content-Type" type="string"/>
-                </header>
-                <body type="object" format="json" data="raw">
-                    <field name="ConfigItemID" type="string"/>
+                <body data="raw" format="json" type="object">
                     <field name="ConfigItem" type="object">
                         <field name="Number" type="string"/>
-                        <field name="Class" type="string"/>
-                        <field name="Name" type="string"/>
-                        <field name="DeplState" type="string"/>
                         <field name="InciState" type="string"/>
+                        <field name="DeplState" type="string"/>
+                        <field name="Class" type="string"/>
                         <field name="CIXMLData" type="object">
                             <field name="Vendor" type="string"/>
                         </field>
+                        <field name="Name" type="string"/>
                     </field>
+                    <field name="ConfigItemID" type="string"/>
                 </body>
+                <header>
+                    <item name="Content-Type" type="string"/>
+                </header>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                        <field name="ConfigItemID" type="string"/>
+                    <body data="raw" format="json" type="object">
                         <field name="Number" type="string"/>
+                        <field name="ConfigItemID" type="string"/>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </success>
                 <fail status="500">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="faultcode" type="string"/>
                         <field name="faultstring" type="string"/>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </fail>
             </response>
         </operation>
@@ -142,73 +129,71 @@
             <request>
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemSearch/{UserLogin}/{Password}</endpoint>
-                <header>
-                    <item name="Content-Type" type="string" >application/json</item>
-                </header>
-                <body type="object" format="json" data="raw">
+                <body data="raw" format="json" type="object">
                     <field name="ConfigItem" type="object">
                         <field name="Number" type="string"/>
+                        <field name="InciState" type="string"/>
+                        <field name="DeplState" type="string"/>
                         <field name="Class" type="string"/>
                         <field name="Name" type="string"/>
-                        <field name="DeplState" type="string"/>
-                        <field name="InciState" type="string"/>
                     </field>
                 </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                        <!-- for empty or not need to ask a user -->
+                    <body data="raw" format="json" type="object">
                         <field name="ConfigItemIDs" type="array"/>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </success>
                 <fail status="200">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="Error" type="object">
-                            <field name="ErrorMessage"  type="string"/>
                             <field name="ErrorCode" type="string"/>
+                            <field name="ErrorMessage" type="string"/>
                         </field>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </fail>
             </response>
         </operation>
-        <operation name="ConfigItemDelete" type="" protocol="http" method="POST">
+        <operation name="ConfigItemDelete" type="">
             <request>
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemDelete/{UserLogin}/{Password}</endpoint>
-                <header>
-                    <item name="Content-Type" type="string" >application/json</item>
-                </header>
-                <body type="object" format="json" data="raw">
+                <body data="raw" format="json" type="object">
                     <field name="ConfigItemID" type="array"/>
                 </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                        <!-- for empty or not need to ask a user -->
+                    <body data="raw" format="json" type="object">
                         <field name="ConfigItemID" type="array"/>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </success>
                 <fail status="200">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="Error" type="object">
-                            <field name="ErrorMessage"  type="string"/>
                             <field name="ErrorCode" type="string"/>
+                            <field name="ErrorMessage" type="string"/>
                         </field>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </fail>
             </response>
         </operation>
@@ -216,39 +201,37 @@
             <request>
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemGet/{UserLogin}/{Password}</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="ConfigItemID" type="array"/>
+                </body>
                 <header>
                     <item name="Content-Type" type="string"/>
                 </header>
-                <body type="object" format="json" data="raw">
-                    <field name="ConfigItemID" type="array"/>
-                </body>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="ConfigItem" type="array">
-                            <field name="Number" type="string"/>
-                            <field name="Class" type="string"/>
-                            <field name="Name" type="string"/>
-                            <field name="DeplState" type="string"/>
-                            <field name="InciState" type="string"/>
-                            <field name="CIXMLData" type="object">
-                                <field name="Vendor" type="string"/>
-                            </field>
+                            <field name="Number" type=""/>
+                            <field name="InciState" type=""/>
+                            <field name="DeplState" type=""/>
+                            <field name="Class" type=""/>
+                            <field name="CIXMLData" type=""/>
+                            <field name="Name" type=""/>
                         </field>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </success>
                 <fail status="500">
-                    <header>
-                        <item name="Content-Type" type="string" >application/json</item>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="faultcode" type="string"/>
                         <field name="faultstring" type="string"/>
                     </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
                 </fail>
             </response>
         </operation>

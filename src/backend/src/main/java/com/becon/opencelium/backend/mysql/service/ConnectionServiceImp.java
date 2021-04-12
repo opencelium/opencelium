@@ -137,6 +137,11 @@ public class ConnectionServiceImp implements ConnectionService{
     }
 
     @Override
+    public boolean existsById(Long id) {
+        return connectionRepository.existsById(id);
+    }
+
+    @Override
     public List<Connection> findAllByConnectorId(int connectorId) {
         return connectionRepository.findAllByConnectorId(connectorId);
     }

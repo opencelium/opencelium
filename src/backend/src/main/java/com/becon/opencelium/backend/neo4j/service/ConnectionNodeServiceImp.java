@@ -75,6 +75,11 @@ public class ConnectionNodeServiceImp implements ConnectionNodeService{
     }
 
     @Override
+    public boolean existsByConnectionId(Long connectionId) {
+        return connectionNodeRepository.existsByConnectionId(connectionId);
+    }
+
+    @Override
     public List<EnhancementNode> buildEnhancementNodes(List<FieldBindingResource> enhanceResource, Connection connection) {
         List<EnhancementNode> enhancementNodes = new ArrayList<>();
         List<Enhancement> enhancements = new ArrayList<>();
