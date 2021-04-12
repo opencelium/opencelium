@@ -342,7 +342,7 @@ public class AssistantServiceImp implements ApplicationService {
             }
             zis.closeEntry();
             zis.close();
-            return folder;
+            return folder.getParent();
         } else {
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
 
@@ -376,6 +376,7 @@ public class AssistantServiceImp implements ApplicationService {
 
                 }
                 zis.closeEntry();
+                zis.close();
                 return folder;
             }
         }
