@@ -209,9 +209,13 @@ public class FileController {
     @PostMapping(value = "/assistant/zipfile")
     public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
         try {
+
             Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
             Path target = Paths.get(PathConstant.APPLICATION);
             Path folder = assistantServiceImp.unzipFolder(source, target);
+
+            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
+            assistantServiceImp.deleteZipFile(pathToZip);
             String dir = folder.toString().replace(folder.getParent().toString() + File.separator, "");
             AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(dir);
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
@@ -227,8 +231,6 @@ public class FileController {
         Path zipPath = Paths.get(PathConstant.APPLICATION + filename);
         assistantServiceImp.deleteZipFile(zipPath);
 
-        Path folderPath = Paths.get(PathConstant.ASSISTANT + "zipfile/" + filename + ".zip");
-        assistantServiceImp.deleteZipFile(folderPath);
         return ResponseEntity.noContent().build();
     }
 

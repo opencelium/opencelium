@@ -29,6 +29,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -39,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -177,23 +179,25 @@ public class AssistantServiceImp implements ApplicationService {
 //        FileRepositoryBuilder builder = new FileRepositoryBuilder();
 //        Repository
 //        Git git = new Git();
-        Git.cloneRepository()
-                .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
-                .setDirectory(new File("/path/to/targetdirectory"))
-                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
-                .setBranch("refs/heads/specific-branch")
-                .call();
+        System.out.println("Online update run");
+//        Git.cloneRepository()
+//                .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
+//                .setDirectory(new File("/path/to/targetdirectory"))
+//                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
+//                .setBranch("refs/heads/specific-branch")
+//                .call();
     }
 
     @Override
     public void updateOff(String dir) throws Exception {
-        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
-        Git.cloneRepository()
-                .setURI(path)
-                .setDirectory(new File("/"))
-                .setBranchesToClone(Arrays.asList("dev"))
-                .setBranch("dev")
-                .call();
+        System.out.println("Offline update run");
+//        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
+//        Git.cloneRepository()
+//                .setURI(path)
+//                .setDirectory(new File("/"))
+//                .setBranchesToClone(Arrays.asList("dev"))
+//                .setBranch("dev")
+//                .call();
     }
 
     public void moveFiles(String fromDir, String toDir) {
