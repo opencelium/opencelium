@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -93,9 +94,15 @@ public class AssistantServiceImp implements ApplicationService {
         }
         try {
             File tempFile = new File(path.toString());
-            if(tempFile.exists()){
-                Files.delete(path);
+            if(!tempFile.exists()){
+                return;
             }
+            Files.walk(path)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+
+
         }
         catch (IOException e){
             throw new StorageException("Failed to delete stored file", e);
