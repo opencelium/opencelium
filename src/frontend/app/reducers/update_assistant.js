@@ -94,7 +94,7 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingVersion', API_REQUEST_STATE.START).set('currentVersion', action.payload).set('error', null);
         case UpdateAssistantAction.DELETE_VERSION_FULFILLED:
             index = offlineUpdates.findIndex(function (version) {
-                return version.id === action.payload.id;
+                return version.name === action.payload.name;
             });
             if(index >= 0) {
                 return state.set('deletingVersion', API_REQUEST_STATE.FINISH).set('currentVersion', null).set('offlineUpdates', offlineUpdates.delete(index));

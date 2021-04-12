@@ -284,7 +284,7 @@ class AvailableUpdates extends React.Component{
                             {updates.available.map(version => (
                                 <tr key={version.name}>
                                     <td>{version.name}</td>
-                                    <td><a href={'#'}>{t('FORM.CHANGELOG')}</a></td>
+                                    <td><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
                                     <td>
                                         {version.status !== VERSION_STATUS.CURRENT
                                             ?
@@ -349,7 +349,7 @@ class AvailableUpdates extends React.Component{
                     return (
                         <tr key={version.name}>
                             <td>{version.name}</td>
-                            <td><a href={'#'}>{t('FORM.CHANGELOG')}</a></td>
+                            <td><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
                             <td>
                                 <RadioButtons
                                     label={''}
