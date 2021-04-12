@@ -264,7 +264,22 @@ public class AssistantServiceImp implements ApplicationService {
         }
     }
 
-    public void doBackup(){
+    public void runScript(){
+        final String scriptPath = "/path/to/sh/file";
+        String script = "clean.sh";
+        try {
+            Process awk = new ProcessBuilder("/bin/bash", scriptPath + script).start();
+            awk.waitFor();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void restore() {
 
     }
 
@@ -295,35 +310,28 @@ public class AssistantServiceImp implements ApplicationService {
 
         String os = System.getProperty("os.name");
         if (os.contains("Windows")) {
-            String fileZip = source.toString();
             File destDir = new File(target.toString());
-            byte[] buffer = new byte[1024];
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
-            ZipEntry zipEntry = zis.getNextEntry();
-            Path folder = zipSlipProtect(zipEntry, target);
-            while (zipEntry != null) {
-                File newFile = newFile(destDir, zipEntry);
-                if (zipEntry.isDirectory()) {
-                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                        throw new IOException("Failed to create directory " + newFile);
-                    }
-                } else {
-                    // fix for Windows-created archives
-                    File parent = newFile.getParentFile();
-                    if (!parent.isDirectory() && !parent.mkdirs()) {
-                        throw new IOException("Failed to create directory " + parent);
-                    }
-
-                    // write file content
-                    FileOutputStream fos = new FileOutputStream(newFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
-                    }
-                    fos.close();
-                }
-
+            if (!destDir.exists()) {
+                destDir.mkdir();
             }
+            ZipInputStream zipIn = new ZipInputStream(new FileInputStream(source.toString()));
+            ZipEntry entry = zipIn.getNextEntry();
+            Path folder = zipSlipProtect(entry, target);
+            // iterates over entries in the zip file
+            while (entry != null) {
+                String filePath = target.toString() + File.separator + entry.getName();
+                if (!entry.isDirectory()) {
+                    // if the entry is a file, extracts it
+                    extractFile(zipIn, filePath);
+                } else {
+                    // if the entry is a directory, make the directory
+                    File dir = new File(filePath);
+                    dir.mkdirs();
+                }
+                zipIn.closeEntry();
+                entry = zipIn.getNextEntry();
+            }
+            zipIn.close();
             return folder;
         } else {
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
@@ -363,17 +371,14 @@ public class AssistantServiceImp implements ApplicationService {
         }
     }
 
-    private File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
-
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+    private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+        byte[] bytesIn = new byte[4096];
+        int read = 0;
+        while ((read = zipIn.read(bytesIn)) != -1) {
+            bos.write(bytesIn, 0, read);
         }
-
-        return destFile;
+        bos.close();
     }
 
     private Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)

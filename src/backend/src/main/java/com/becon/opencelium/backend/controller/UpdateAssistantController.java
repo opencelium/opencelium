@@ -154,8 +154,8 @@ public class UpdateAssistantController {
     @PostMapping("/oc/migrate")
     public ResponseEntity<?> migrate(@PathVariable MigrateDataResource migrateDataResource) {
 
-        // create dir
-
+        // do backup
+        assistantServiceImp.runScript();
         try {
             String version = migrateDataResource.getVersion();
             assistantServiceImp.createTmpDir(version);
@@ -221,7 +221,7 @@ public class UpdateAssistantController {
             }
 
         } catch (Exception e) {
-            assistantServiceImp.doBackup();
+            assistantServiceImp.restore();
         }
 
         return ResponseEntity.ok().build();

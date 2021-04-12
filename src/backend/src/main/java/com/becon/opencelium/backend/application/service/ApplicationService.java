@@ -1,13 +1,13 @@
 package com.becon.opencelium.backend.application.service;
 
-import com.becon.opencelium.backend.application.entity.SystemOverview;
-import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+        import com.becon.opencelium.backend.application.entity.SystemOverview;
+        import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
+        import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+        import org.springframework.stereotype.Service;
+        import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
-import java.util.List;
+        import java.nio.file.Path;
+        import java.util.List;
 
 public interface ApplicationService {
 
@@ -19,4 +19,6 @@ public interface ApplicationService {
     void updateOn() throws Exception;
     void updateOff(String dir) throws Exception;
     void updateConnection(ConnectionResource connectionresource);
+
+    void restore();
 }
