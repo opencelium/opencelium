@@ -110,19 +110,18 @@ const fetchOfflineUpdatesEpic = (action$, store) => {
 };
 
 /**
- * delete version by id
+ * delete version by name
  */
 const deleteVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.DELETE_VERSION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.name}`;
-            return Rx.Observable.of(deleteVersionFulfilled(action.payload));
-            /*return doRequest({url, method: API_METHOD.DELETE},{
+            let url = `storage/assistant/zipfile/${action.payload.folder}`;
+            return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteVersionFulfilled,
                     reject: deleteVersionRejected,},
-                res => {return {connectionId: action.payload.id};}
-            );*/
+                res => {return action.payload;}
+            );
         });
 };
 
@@ -138,7 +137,7 @@ const uploadVersionEpic = (action$, store) => {
             data.append('file', action.payload.versionFile);
             //return Rx.Observable.of(uploadVersionFulfilled(NEW_UPDATE));
             return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
-                success: () => uploadVersionFulfilled(NEW_UPDATE),
+                success: uploadVersionFulfilled,
                 reject: uploadVersionRejected,},
             );
         });
