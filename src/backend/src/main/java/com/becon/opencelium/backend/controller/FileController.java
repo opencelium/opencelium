@@ -224,7 +224,7 @@ public class FileController {
     @DeleteMapping(value = "/assistant/zipfile/{filename}")
     public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
 
-        Path zipPath = Paths.get(PathConstant.ASSISTANT + filename);
+        Path zipPath = Paths.get(PathConstant.APPLICATION + filename);
         assistantServiceImp.deleteZipFile(zipPath);
 
         Path folderPath = Paths.get(PathConstant.ASSISTANT + "zipfile/" + filename + ".zip");
