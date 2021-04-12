@@ -336,6 +336,7 @@ public class AssistantServiceImp implements ApplicationService {
                         fos.write(buffer, 0, len);
                     }
                     fos.close();
+                    zipEntry = zis.getNextEntry();
                 }
 
             }
