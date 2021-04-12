@@ -212,8 +212,7 @@ public class FileController {
             Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
             Path target = Paths.get(PathConstant.APPLICATION);
             Path folder = assistantServiceImp.unzipFolder(source, target);
-            String dir = folder.toString().replace(folder.getParent().toString() + File.separator, "");
-            AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(dir);
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(folder.toString());
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
             return ResponseEntity.ok(availableUpdateResource);
         } catch (Exception e) {
