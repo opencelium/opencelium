@@ -45,7 +45,7 @@ function mapStateToProps(state){
 
 @connect(mapStateToProps, {fetchConnections, updateConnections, updateConnectionsRejected, addConvertConnectionsLogs})
 @withTranslation('update_assistant')
-@ListComponent('connections')
+@ListComponent('connections', true)
 class ConnectionFileUpdate extends React.Component{
     constructor(props) {
         super(props);

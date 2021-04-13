@@ -79,10 +79,12 @@ class UpdateAssistant extends Component{
                 },
             },
         };
+        this.isUpdateStarted = false;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.props.updatingSystem === API_REQUEST_STATE.FINISH){
+        if(this.props.updatingSystem === API_REQUEST_STATE.FINISH && this.isUpdateStarted){
+            this.isUpdateStarted = false;
             const {logoutUserFulfilled} = this.props;
             logoutUserFulfilled({});
             this.props.router.push(`/login`);
@@ -131,6 +133,7 @@ class UpdateAssistant extends Component{
             invokers: updateData.invokerFileUpdate.updatedInvokers.map(invoker => invoker.data),
             connections: updateData.connectionMigration.updatedConnections.map(connection => connection.data),
         };
+        this.isUpdateStarted = true;
         updateSystem(data);
     }
 

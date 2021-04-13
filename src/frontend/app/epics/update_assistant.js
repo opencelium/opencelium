@@ -207,7 +207,7 @@ const updateSystemForAssistantEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `assistant/oc/migrate`;
             let data = action.payload;
-            return doRequest({url, method: API_METHOD.PUT, data},{
+            return doRequest({url, method: API_METHOD.POST, data},{
                     success: updateSystemFulfilled,
                     reject: updateSystemRejected,
             });

@@ -44,7 +44,7 @@ function mapStateToProps(state){
 
 @connect(mapStateToProps, {fetchTemplates, updateTemplates, updateTemplatesRejected, addConvertTemplatesLogs})
 @withTranslation('update_assistant')
-@ListComponent('templates')
+@ListComponent('templates', true)
 class TemplateFileUpdate extends React.Component{
     constructor(props) {
         super(props);
