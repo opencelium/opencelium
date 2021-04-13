@@ -36,4 +36,6 @@ public interface ConnectionNodeService {
     Optional<ConnectionNode> findByConnectionId(Long id);
 
     List<EnhancementNode> buildEnhancementNodes(List<FieldBindingResource> resources, Connection connection);
+
+    boolean existsByConnectionId(Long connectionId);
 }

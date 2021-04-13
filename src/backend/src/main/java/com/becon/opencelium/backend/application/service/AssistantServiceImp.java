@@ -15,11 +15,15 @@ import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
+import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -29,6 +33,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -39,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -160,9 +166,21 @@ public class AssistantServiceImp implements ApplicationService {
         }
     }
 
-    public void saveTmpJSON(String template, String dir) {
+    public void saveTmpTemplate(String template, String dir) {
         try {
             String jsonPath = "$.templateId";
+            String filename = JsonPath.read(template, jsonPath) + ".json";
+            FileWriter jsonTemplate = new FileWriter(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename);
+            jsonTemplate.write(template);
+            jsonTemplate.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void saveTmpConnection(String template, String dir) {
+        try {
+            String jsonPath = "$.connection.connectionId";
             String filename = JsonPath.read(template, jsonPath) + ".json";
             FileWriter jsonTemplate = new FileWriter(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename);
             jsonTemplate.write(template);
@@ -177,23 +195,25 @@ public class AssistantServiceImp implements ApplicationService {
 //        FileRepositoryBuilder builder = new FileRepositoryBuilder();
 //        Repository
 //        Git git = new Git();
-        Git.cloneRepository()
-                .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
-                .setDirectory(new File("/path/to/targetdirectory"))
-                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
-                .setBranch("refs/heads/specific-branch")
-                .call();
+        System.out.println("Online update run");
+//        Git.cloneRepository()
+//                .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
+//                .setDirectory(new File("/path/to/targetdirectory"))
+//                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
+//                .setBranch("refs/heads/specific-branch")
+//                .call();
     }
 
     @Override
     public void updateOff(String dir) throws Exception {
-        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
-        Git.cloneRepository()
-                .setURI(path)
-                .setDirectory(new File("/"))
-                .setBranchesToClone(Arrays.asList("dev"))
-                .setBranch("dev")
-                .call();
+        System.out.println("Offline update run");
+//        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
+//        Git.cloneRepository()
+//                .setURI(path)
+//                .setDirectory(new File("/"))
+//                .setBranchesToClone(Arrays.asList("dev"))
+//                .setBranch("dev")
+//                .call();
     }
 
     public void moveFiles(String fromDir, String toDir) {
@@ -230,44 +250,31 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateConnection(ConnectionResource connectionResource) {
+        Long connectionId = connectionResource.getConnectionId();
+        connectionResource.setConnectionId(connectionId);
         Connection connection = connectionService.toEntity(connectionResource);
-        if (connectionService.existsByName(connection.getName())){
-            throw new RuntimeException("CONNECTION_NAME_ALREADY_EXISTS");
-        }
-        Long connectionId = 0L;
+        Connection connectionClone = connectionService.findById(connectionId)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        ConnectionNode connectionNodeClone = connectionNodeService.findByConnectionId(connectionId)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
         try {
+//            List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
+            enhancementService.deleteAllByConnectionId(connectionId);
             connectionService.save(connection);
-            connectionId = connection.getId();
 
-            connectionResource.setConnectionId(connection.getId());
             ConnectionNode connectionNode = connectionNodeService.toEntity(connectionResource);
+            connectionNodeService.deleteById(connectionId);
             connectionNodeService.save(connectionNode);
 
-            if (connectionResource.getFieldBinding() != null){
-                if (connectionResource.getFieldBinding().isEmpty()){
-                    final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
-                    return;
-                }
-
-                List<EnhancementNode> enhancementNodes =  connectionNodeService
+            if (connectionResource.getFieldBinding() != null || !connectionResource.getFieldBinding().isEmpty()){
+                List<EnhancementNode> enhancementNodes = connectionNodeService
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
                 enhancementNodeService.saveAll(enhancementNodes);
-
-                List<LinkRelation> linkRelations = linkRelationService
-                        .toEntity(connectionResource.getFieldBinding(), connection);
-                if (linkRelations != null && !linkRelations.isEmpty()){
-                    linkRelationService.saveAll(linkRelations);
-                }
             }
-
-            final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
-            validationContext.remove(connection.getName());
-        } catch (Exception e) {
+        } catch (Exception e){
             e.printStackTrace();
-            enhancementService.deleteAllByConnectionId(connectionId);
-            connectionService.deleteById(connectionId);
-            connectionNodeService.deleteById(connectionId);
-            validationContext.remove(connection.getName());
+            connectionService.save(connectionClone);
+            connectionNodeService.save(connectionNodeClone);
         }
     }
 

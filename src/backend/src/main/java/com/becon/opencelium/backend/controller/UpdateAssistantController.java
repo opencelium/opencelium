@@ -55,6 +55,8 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -152,7 +154,7 @@ public class UpdateAssistantController {
 
     // create
     @PostMapping("/oc/migrate")
-    public ResponseEntity<?> migrate(@PathVariable MigrateDataResource migrateDataResource) {
+    public ResponseEntity<?> migrate(@RequestBody MigrateDataResource migrateDataResource) {
 
         // do backup
         assistantServiceImp.runScript();
@@ -161,23 +163,23 @@ public class UpdateAssistantController {
             assistantServiceImp.createTmpDir(version);
 
             final String dir;
-            if (migrateDataResource.getFolder() != null || !migrateDataResource.getFolder().isEmpty()) {
+            if (migrateDataResource.getFolder() != null && !migrateDataResource.getFolder().isEmpty()) {
                 dir = migrateDataResource.getFolder();
             } else {
                 dir = migrateDataResource.getVersion();
             }
 
-            // saving files to tmp folder
-            migrateDataResource.getInvokers().forEach(inv -> {
-                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
-            });
-
-            migrateDataResource.getTemplates().forEach(temp -> {
-                assistantServiceImp.saveTmpJSON(temp, dir + "/template");
-            });
+//            // saving files to tmp folder
+//            migrateDataResource.getInvokers().forEach(inv -> {
+//                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
+//            });
+//
+//            migrateDataResource.getTemplates().forEach(temp -> {
+//                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
+//            });
 
             migrateDataResource.getConnections().forEach(ction -> {
-                assistantServiceImp.saveTmpJSON(ction, dir + "/connection");
+                assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
             });
 
             if (migrateDataResource.isOnline()) {
@@ -186,41 +188,43 @@ public class UpdateAssistantController {
                 assistantServiceImp.updateOff(dir);
             }
 
+//            // after update need to move or replace files in main project
+//            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
+//            List<File> invokers = Files.list(filePath)
+//                    .filter(Files::isRegularFile)
+//                    .filter(path -> path.toString().endsWith(".xml"))
+//                    .map(Path::toFile)
+//                    .collect(Collectors.toList());
+//            invokers.forEach(f -> {
+//                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
+//            });
+//
+//            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
+//            List<File> templates = Files.list(filePath)
+//                    .filter(Files::isRegularFile)
+//                    .filter(path -> path.toString().endsWith(".json"))
+//                    .map(Path::toFile)
+//                    .collect(Collectors.toList());
+//            templates.forEach(f -> {
+//                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
+//            });
 
-            // after update need to move or replace files in main project
-            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
-            List<File> invokers = Files.list(filePath)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".xml"))
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-            invokers.forEach(f -> {
-                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
-            });
-
-            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
-            List<File> templates = Files.list(filePath)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".json"))
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-            templates.forEach(f -> {
-                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
-            });
-
-
-            List<String> connectionResources = migrateDataResource.getConnections().stream()
-                    .map(t -> JsonPath.read(t, "$.connection").toString()).collect(Collectors.toList());
-
+            Object connectionResources = migrateDataResource.getConnections().stream()
+                    .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
+            List<HashMap> cns = (ArrayList) connectionResources;
             ObjectMapper objectMapper = new ObjectMapper();
-            for (String cn : connectionResources) {
-                ConnectionResource connectionResource = objectMapper.readValue(cn, ConnectionResource.class);
-                connectionServiceImp.deleteById(connectionResource.getConnectionId());
-                connectionNodeServiceImp.deleteById(connectionResource.getConnectionId());
+            for (HashMap<String, Object> connection : cns) {
+                String str = objectMapper.writeValueAsString(connection);
+                ConnectionResource connectionResource = objectMapper.readValue(str, ConnectionResource.class);
+//                if (connectionNodeServiceImp.existsByConnectionId(connectionResource.getConnectionId())) {
+////                    connectionServiceImp.deleteById(connectionResource.getConnectionId());
+//                    connectionNodeServiceImp.deleteById(connectionResource.getConnectionId());
+//                }
                 assistantServiceImp.updateConnection(connectionResource);
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             assistantServiceImp.restore();
         }
 

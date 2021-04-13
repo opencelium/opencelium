@@ -35,6 +35,7 @@ public interface ConnectionService {
     List<Connection> findAll();
 
     boolean existsByName(String name);
+    boolean existsById(Long id);
 
     void run(Long connectionId) throws Exception;
 
