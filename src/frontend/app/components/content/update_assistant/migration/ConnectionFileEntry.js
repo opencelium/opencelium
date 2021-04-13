@@ -48,13 +48,13 @@ class ConnectionFileEntry extends React.Component{
         let status = null;
         const {jsonData, error} = CExecution.executeConfig({
             fromVersion: connection.version,
-            toVersion: entity.availableUpdates.selectedVersion
+            toVersion: entity.availableUpdates.selectedVersion.name,
         }, connection);
         if (error.message !== '') {
         //if(Math.floor(Math.random() * 2)){
             status = {error};
         }
-        convertedConnection = {name: connection.title, description: '', connection: jsonData, version: entity.availableUpdates.selectedVersion};
+        convertedConnection = JSON.stringify({name: connection.title, description: '', connection: jsonData, version: entity.availableUpdates.selectedVersion.name});
         setTimeout(() => {
             setConnection(convertedConnection, status, index);
         }, 100);

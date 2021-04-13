@@ -20,15 +20,15 @@ import {TemplatesAction} from "@utils/actions";
 
 /**
  * fetch all templates
- * @param templates
- * @param settings = {background: bool}
+ * @param settings = {from: object, to: object, background: bool}
+ *      from - from connector
+ *      to - to connector
  *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, settings: {}}}
  */
-const fetchTemplates = (templates, settings = {}) => {
+const fetchTemplates = (settings = {}) => {
     return {
         type: TemplatesAction.FETCH_TEMPLATES,
-        payload: templates,
         settings,
     };
 };

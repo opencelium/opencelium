@@ -14,6 +14,7 @@
  */
 
 import {UpdateAssistantAction} from "@utils/actions";
+import Rx from "rxjs";
 
 /**
  * update templates for update assistant
@@ -123,6 +124,42 @@ const updateConnectionsRejected = (error) => {
     };
 };
 
+/**
+ * update system for update assistant
+ * @param data
+ * @returns {{type: string, payload: {}}}
+ */
+const updateSystem = (data) => {
+    return {
+        type: UpdateAssistantAction.UPDATE_SYSTEM,
+        payload: data,
+    };
+};
+
+/**
+ * update system for update assistant fulfilled
+ * @param response
+ * @returns {{type: string, payload: {}}}
+ */
+const updateSystemFulfilled = (response) => {
+    return {
+        type: UpdateAssistantAction.UPDATE_SYSTEM_FULFILLED,
+        payload: response,
+    };
+};
+
+/**
+ * update system for update assistant rejected
+ * @param error
+ * @returns {promise}
+ */
+const updateSystemRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.UPDATE_SYSTEM_REJECTED,
+        payload: error
+    });
+};
+
 export {
     updateTemplates,
     updateTemplatesFulfilled,
@@ -133,4 +170,7 @@ export {
     updateConnections,
     updateConnectionsFulfilled,
     updateConnectionsRejected,
+    updateSystem,
+    updateSystemFulfilled,
+    updateSystemRejected,
 };

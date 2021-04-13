@@ -50,7 +50,7 @@ class InvokerFileEntry extends React.Component{
         let status = {error: null};
         const {invokerData, error} = CExecution.executeConfig({
             fromVersion: appVersion,
-            toVersion: entity.availableUpdates.selectedVersion
+            toVersion: entity.availableUpdates.selectedVersion.name,
         }, invoker);
         if (error.message !== '') {
         //if(Math.floor(Math.random() * 2)){

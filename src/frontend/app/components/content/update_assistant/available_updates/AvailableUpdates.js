@@ -31,8 +31,8 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import OldVersionEntry from "@components/content/update_assistant/available_updates/OldVersionEntry";
 import BrowseButton from "@basic_components/buttons/BrowseButton";
 
-const ONLINE_UPDATE = 'ONLINE_UPDATE';
-const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
+export const ONLINE_UPDATE = 'ONLINE_UPDATE';
+export const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
 
 const VERSION_STATUS = {
     OLD: 'old',
@@ -67,7 +67,7 @@ class AvailableUpdates extends React.Component{
             activeMode: entity.availableUpdates.mode,
             startFetchingOnlineUpdates: false,
             startFetchingOfflineUpdates: false,
-            selectedVersion: entity.availableUpdates.selectedVersion,
+            selectedVersionName: entity.availableUpdates.selectedVersion ? entity.availableUpdates.selectedVersion.name : '',
             isOldVersionsExtended: false,
             isNewVersionsExtended: false,
         }
@@ -106,11 +106,15 @@ class AvailableUpdates extends React.Component{
         });
     }
 
-    selectVersion(selectedVersion){
+    selectVersion(selectedVersionName){
         const {entity, updateEntity} = this.props;
-        entity.availableUpdates = {...entity.availableUpdates, selectedVersion};
-        updateEntity(entity)
-        this.setState({selectedVersion});
+        const updates = ::this.getUpdates();
+        const selectedVersion = updates.available.find(version => version.name === selectedVersionName);
+        if(selectedVersion) {
+            entity.availableUpdates = {...entity.availableUpdates, selectedVersion};
+            updateEntity(entity)
+            this.setState({selectedVersionName});
+        }
     }
 
     selectMode(e, activeMode){
@@ -131,10 +135,10 @@ class AvailableUpdates extends React.Component{
                 startFetchingOfflineUpdates = true;
                 break;
         }
-        entity.availableUpdates = {...entity.availableUpdates, mode: activeMode, selectedVersion: ''};
+        entity.availableUpdates = {...entity.availableUpdates, mode: activeMode, selectedVersion: null};
         updateEntity(entity)
         this.setState({
-            selectedVersion: '',
+            selectedVersionName: '',
             activeMode,
             startFetchingOnlineUpdates,
             startFetchingOfflineUpdates,
@@ -185,7 +189,7 @@ class AvailableUpdates extends React.Component{
 
     renderOldUpdates(){
         const {t} = this.props;
-        const {isOldVersionsExtended} = this.state;
+        const {isOldVersionsExtended, activeMode} = this.state;
         let updates = ::this.getUpdates().old;
         if(updates.length === 0){
             return null;
@@ -217,7 +221,7 @@ class AvailableUpdates extends React.Component{
                         }
                     }
                     return (
-                        <OldVersionEntry key={version.name} version={version}/>
+                        <OldVersionEntry key={version.name} version={version} activeMode={activeMode}/>
                     );
                 })}
             </React.Fragment>
@@ -225,7 +229,7 @@ class AvailableUpdates extends React.Component{
     }
 
     renderUpdates(){
-        const {selectedVersion, isOldVersionsExtended, isNewVersionsExtended, activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
+        const {selectedVersionName, isOldVersionsExtended, isNewVersionsExtended, activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
         const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error} = this.props;
         let updates = ::this.getUpdates();
         if(updates.available.length === 0 && updates.old.length === 0 && updates.veryNew.length === 0){
@@ -290,7 +294,7 @@ class AvailableUpdates extends React.Component{
                                             ?
                                                 <RadioButtons
                                                     label={''}
-                                                    value={selectedVersion}
+                                                    value={selectedVersionName}
                                                     handleChange={::this.selectVersion}
                                                     style={{textAlign: 'center'}}
                                                     radios={[{
@@ -316,7 +320,7 @@ class AvailableUpdates extends React.Component{
 
     renderNewUpdates(){
         const {t} = this.props;
-        const {isNewVersionsExtended, selectedVersion} = this.state;
+        const {isNewVersionsExtended, selectedVersionName} = this.state;
         let updates = ::this.getUpdates().veryNew;
         if(updates.length === 0){
             return null;
@@ -353,7 +357,7 @@ class AvailableUpdates extends React.Component{
                             <td>
                                 <RadioButtons
                                     label={''}
-                                    value={selectedVersion}
+                                    value={selectedVersionName}
                                     handleChange={() => {}}
                                     style={{textAlign: 'center'}}
                                     radios={[{

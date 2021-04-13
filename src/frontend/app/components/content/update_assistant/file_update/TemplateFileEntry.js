@@ -48,13 +48,13 @@ class TemplateFileEntry extends React.Component{
         let status = null;
         const {jsonData, error} = CExecution.executeConfig({
             fromVersion: template.version,
-            toVersion: entity.availableUpdates.selectedVersion
+            toVersion: entity.availableUpdates.selectedVersion.name,
         }, template.connection);
         if (error.message !== '') {
         //if(Math.floor(Math.random() * 2)){
             status = {error};
         }
-        convertedTemplate = {...template, connection: jsonData, version: entity.availableUpdates.selectedVersion};
+        convertedTemplate = JSON.stringify({...template, connection: jsonData, version: entity.availableUpdates.selectedVersion.name});
         setTimeout(() => {
             setTemplate(convertedTemplate, status, index);
         }, 100);

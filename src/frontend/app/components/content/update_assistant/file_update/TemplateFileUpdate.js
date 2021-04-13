@@ -44,7 +44,7 @@ function mapStateToProps(state){
 
 @connect(mapStateToProps, {fetchTemplates, updateTemplates, updateTemplatesRejected, addConvertTemplatesLogs})
 @withTranslation('update_assistant')
-@ListComponent('templates')
+@ListComponent('templates', true)
 class TemplateFileUpdate extends React.Component{
     constructor(props) {
         super(props);
@@ -124,7 +124,7 @@ class TemplateFileUpdate extends React.Component{
                     <thead>
                         <tr>
                             <th>{`${appVersion}`}</th>
-                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion}`}</th>
+                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion.name}`}</th>
                         </tr>
                     </thead>
                 </Table>
@@ -153,7 +153,7 @@ class TemplateFileUpdate extends React.Component{
                         className={styles.update_button}
                     />
                 }
-                {currentTemplateIndex !== -1 && <TooltipFontIcon isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
+                <TooltipFontIcon iconStyles={{opacity: currentTemplateIndex !== -1 ? '1.0' : '0'}} isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
             </div>
         );
     }

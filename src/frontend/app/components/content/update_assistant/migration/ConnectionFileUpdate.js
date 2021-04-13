@@ -45,7 +45,7 @@ function mapStateToProps(state){
 
 @connect(mapStateToProps, {fetchConnections, updateConnections, updateConnectionsRejected, addConvertConnectionsLogs})
 @withTranslation('update_assistant')
-@ListComponent('connections')
+@ListComponent('connections', true)
 class ConnectionFileUpdate extends React.Component{
     constructor(props) {
         super(props);
@@ -133,7 +133,7 @@ class ConnectionFileUpdate extends React.Component{
                     <thead>
                         <tr>
                             <th>{`${appVersion}`}</th>
-                            <th style={{paddingRight: connections.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion}`}</th>
+                            <th style={{paddingRight: connections.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion.name}`}</th>
                         </tr>
                     </thead>
                 </Table>

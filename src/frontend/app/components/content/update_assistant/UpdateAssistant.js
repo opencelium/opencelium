@@ -16,32 +16,39 @@
 import React, {Component, Suspense} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-    import {UpdateAssistantPermissions} from "@utils/constants/permissions";
+import {UpdateAssistantPermissions} from "@utils/constants/permissions";
 import ChangeContent from "@change_component/ChangeContent";
 import OCTour from "@basic_components/OCTour";
 import {automaticallyShowTour, UPDATE_ASSISTANT_TOURS} from "@utils/constants/tours";
 import Content from "@components/general/content/Content";
 import {INPUTS} from "@utils/constants/inputs";
 import SystemOverview from "@components/content/update_assistant/system_overview/SystemOverview";
-import AvailableUpdates from "@components/content/update_assistant/available_updates/AvailableUpdates";
+import AvailableUpdates, {ONLINE_UPDATE} from "@components/content/update_assistant/available_updates/AvailableUpdates";
 import TemplateFileUpdate from "@components/content/update_assistant/file_update/TemplateFileUpdate";
 import {permission} from "@decorators/permission";
 import InvokerFileUpdate from "@components/content/update_assistant/file_update/InvokerFileUpdate";
 import ConnectionFileUpdate from "@components/content/update_assistant/migration/ConnectionFileUpdate";
 import FinishUpdate from "@components/content/update_assistant/FinishUpdate";
 
+import {updateSystem} from "@actions/update_assistant/update";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import {logoutUserFulfilled} from "@actions/auth";
+
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const updateAssistant = state.get('update_assistant');
     return{
         authUser: auth.get('authUser'),
+        updatingSystem: updateAssistant.get('updatingSystem'),
     };
 }
 
 /**
  * Layout for UpdateAssistant
  */
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {updateSystem, logoutUserFulfilled})
 @permission(UpdateAssistantPermissions.CREATE, true)
 @withTranslation(['update_assistant', 'app'])
 class UpdateAssistant extends Component{
@@ -56,7 +63,7 @@ class UpdateAssistant extends Component{
                 systemCheck: {},
                 availableUpdates: {
                     mode: '',
-                    selectedVersion: '',
+                    selectedVersion: null,
                 },
                 templateFileUpdate:{
                     isFinishUpdate: false,
@@ -72,6 +79,17 @@ class UpdateAssistant extends Component{
                 },
             },
         };
+        this.isUpdateStarted = false;
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.updatingSystem === API_REQUEST_STATE.FINISH && this.isUpdateStarted){
+            this.isUpdateStarted = false;
+            const {logoutUserFulfilled} = this.props;
+            logoutUserFulfilled({});
+            this.props.router.push(`/login`);
+            CVoiceControl.removeAll();
+        }
     }
 
     /**
@@ -104,6 +122,21 @@ class UpdateAssistant extends Component{
         });
     }
 
+    updateSystem(){
+        const {updateSystem} = this.props;
+        const {updateData} = this.state;
+        const data = {
+            folder: updateData.availableUpdates.folder ? updateData.availableUpdates.folder : '',
+            isOnline: updateData.availableUpdates.mode === ONLINE_UPDATE,
+            version: updateData.availableUpdates.name ? updateData.availableUpdates.name : '',
+            templates: updateData.templateFileUpdate.updatedTemplates.map(template => template.data),
+            invokers: updateData.invokerFileUpdate.updatedInvokers.map(invoker => invoker.data),
+            connections: updateData.connectionMigration.updatedConnections.map(connection => connection.data),
+        };
+        this.isUpdateStarted = true;
+        updateSystem(data);
+    }
+
     /**
      * to validate available updates
      */
@@ -112,7 +145,7 @@ class UpdateAssistant extends Component{
         if (entity.availableUpdates && entity.availableUpdates.mode === '') {
             return {value: false, message: t('FORM.VALIDATION_MESSAGES.NO_UPDATE_MODE')};
         }
-        if(entity.availableUpdates && entity.availableUpdates.selectedVersion === ''){
+        if(entity.availableUpdates && entity.availableUpdates.selectedVersion === null){
             return {value: false, message: t('FORM.VALIDATION_MESSAGES.NO_SELECTED_VERSION')};
         }
         return {value: true, message: ''};
@@ -164,12 +197,12 @@ class UpdateAssistant extends Component{
 
     render(){
         const {updateData} = this.state;
-        const {t, authUser} = this.props;
+        const {t, authUser, updatingSystem} = this.props;
         let contentTranslations = {};
         contentTranslations.header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         contentTranslations.list_button = '';
         let changeContentTranslations = {};
-        changeContentTranslations.onlyTextButton = `${t('FORM.UPDATE_OC')} v${updateData.availableUpdates.selectedVersion}`;
+        changeContentTranslations.onlyTextButton = `${t('FORM.UPDATE_OC')} ${updateData.availableUpdates.selectedVersion ? updateData.availableUpdates.selectedVersion.name : ''}`;
         let getListLink = ``;
         let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5'), t('FORM.PAGE_6')];
         let contents = [{
@@ -253,10 +286,11 @@ class UpdateAssistant extends Component{
                     breadcrumbsItems={breadcrumbsItems}
                     contents={contents}
                     translations={changeContentTranslations}
-                    action={() => {}}
+                    action={::this.updateSystem}
                     authUser={authUser}
                     onPageSwitch={::this.setCurrentTour}
                     entity={updateData}
+                    isActionInProcess={updatingSystem}
                     type={'onlyText'}
                 />
                 <OCTour
