@@ -169,14 +169,14 @@ public class UpdateAssistantController {
                 dir = migrateDataResource.getVersion();
             }
 
-//            // saving files to tmp folder
-//            migrateDataResource.getInvokers().forEach(inv -> {
-//                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
-//            });
-//
-//            migrateDataResource.getTemplates().forEach(temp -> {
-//                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
-//            });
+            // saving files to tmp folder
+            migrateDataResource.getInvokers().forEach(inv -> {
+                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
+            });
+
+            migrateDataResource.getTemplates().forEach(temp -> {
+                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
+            });
 
             migrateDataResource.getConnections().forEach(ction -> {
                 assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
