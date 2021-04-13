@@ -142,6 +142,14 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
+    @GetMapping("/oc/repo/status")
+    public ResponseEntity<?> checkRepoConnection() {
+        if (assistantServiceImp.checkRepoConnection()) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/oc/template")
     public ResponseEntity<?> getAssistentTemplateFiles() {
         String path = PathConstant.TEMPLATE;
@@ -230,6 +238,8 @@ public class UpdateAssistantController {
 
         return ResponseEntity.ok().build();
     }
+
+
 
 
     @ResponseBody

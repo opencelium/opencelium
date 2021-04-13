@@ -19,6 +19,6 @@ public interface ApplicationService {
     void updateOn() throws Exception;
     void updateOff(String dir) throws Exception;
     void updateConnection(ConnectionResource connectionresource);
-
+    boolean checkRepoConnection();
     void restore();
 }
