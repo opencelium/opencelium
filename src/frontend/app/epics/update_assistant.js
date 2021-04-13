@@ -34,6 +34,7 @@ import {
     updateTemplatesFulfilled, updateTemplatesRejected,
     updateInvokersFulfilled, updateInvokersRejected,
     updateConnectionsFulfilled, updateConnectionsRejected,
+    updateSystemFulfilled, updateSystemRejected,
 } from "@actions/update_assistant/update";
 
 
@@ -198,6 +199,22 @@ const updateConnectionsForAssistantEpic = (action$, store) => {
 };
 
 /**
+ * update system
+ */
+const updateSystemForAssistantEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.UPDATE_SYSTEM)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `assistant/oc/migrate`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.PUT, data},{
+                    success: updateSystemFulfilled,
+                    reject: updateSystemRejected,
+            });
+        });
+};
+
+/**
  * fetch system requirements
  */
 const fetchSystemRequirementsEpic = (action$, store) => {
@@ -270,6 +287,7 @@ export {
     updateTemplatesForAssistantEpic,
     updateInvokersForAssistantEpic,
     updateConnectionsForAssistantEpic,
+    updateSystemForAssistantEpic,
     fetchSystemRequirementsEpic,
     addConvertTemplatesLogsEpic,
     addConvertInvokersLogsEpic,

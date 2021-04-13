@@ -30,7 +30,7 @@ export default class CExecution{
         const config = getConfig(fromVersion, toVersion, 'invoker');
         const invoker = CInvoker.createInvoker(invokerData);
         if(!(fromVersion === '' || toVersion === '')){
-            if(isArray(config) && config.length > 0) {
+            /*if(isArray(config) && config.length > 0) {
                 for (let i = 0; i < config.length; i++) {
                     switch (config[i].type) {
                         case RULE_TYPES.RENAME_PARAM:
@@ -41,7 +41,8 @@ export default class CExecution{
                             break;
                     }
                 }
-            }
+            }*/
+            executionResult.invokerData = invoker.getXml();
         }else{
             executionResult.error.message = `One of the version is not defined: from - ${fromVersion}, to - ${toVersion}`;
         }

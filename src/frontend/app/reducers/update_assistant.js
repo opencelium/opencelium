@@ -144,6 +144,12 @@ const reducer = (state = initialState, action) => {
             return state.set('addingConnectionsLogs', API_REQUEST_STATE.FINISH).set('connectionsLogs', List(action.payload));
         case UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS_REJECTED:
             return state.set('addingConnectionsLogs', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UpdateAssistantAction.UPDATE_SYSTEM:
+            return state.set('updatingSystem', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case UpdateAssistantAction.UPDATE_SYSTEM_FULFILLED:
+            return state.set('updatingSystem', API_REQUEST_STATE.FINISH);
+        case UpdateAssistantAction.UPDATE_SYSTEM_REJECTED:
+            return state.set('updatingSystem', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

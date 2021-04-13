@@ -95,6 +95,8 @@ export const EntitiesWithNotification = [
     {name: UpdateAssistantAction.DELETE_VERSION, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_SYSTEM, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**

@@ -90,6 +90,7 @@ import {
     addConvertTemplatesLogsEpic,
     addConvertInvokersLogsEpic,
     updateConnectionsForAssistantEpic,
+    updateSystemForAssistantEpic,
 } from "@epics/update_assistant";
 import {
     fetchWidgetsEpic,
@@ -205,6 +206,7 @@ export default combineEpics(
     addConvertTemplatesLogsEpic,
     addConvertInvokersLogsEpic,
     updateConnectionsForAssistantEpic,
+    updateSystemForAssistantEpic,
     fetchWidgetSettingsEpic,
     fetchWidgetsEpic,
     updateWidgetSettingsEpic,

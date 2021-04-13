@@ -22,6 +22,7 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {deleteVersion} from "@actions/update_assistant/delete";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Confirmation from "@components/general/app/Confirmation";
+import {OFFLINE_UPDATE} from "@components/content/update_assistant/available_updates/AvailableUpdates";
 
 function mapStateToProps(state){
     const updateAssistant = state.get('update_assistant');
@@ -38,7 +39,7 @@ class OldVersionEntry extends React.Component{
         super(props);
 
         this.state = {
-            showDeleteIcon: false,
+            isMouseOver: false,
             showConfirmDelete: false,
         }
     }
@@ -49,15 +50,15 @@ class OldVersionEntry extends React.Component{
         });
     }
 
-    showDeleteIcon(){
+    onMouseOver(){
         this.setState({
-            showDeleteIcon: true,
+            isMouseOver: true,
         });
     }
 
-    hideDeleteIcon(){
+    onMouseLeave(){
         this.setState({
-            showDeleteIcon: false
+            isMouseOver: false
         });
     }
 
@@ -82,19 +83,20 @@ class OldVersionEntry extends React.Component{
     }
 
     render(){
-        const {showDeleteIcon} = this.state;
-        const {t, version, deletingVersion, currentVersion} = this.props;
+        const {isMouseOver} = this.state;
+        const {t, version, deletingVersion, currentVersion, activeMode} = this.props;
+        const isVisibleDeleteIcon = isMouseOver && activeMode === OFFLINE_UPDATE;
         let icon = 'delete';
         if(currentVersion && currentVersion.name === version.name && deletingVersion === API_REQUEST_STATE.START){
             icon = 'loading';
         }
         return(
-            <tr className={styles.disable_version_entry} onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon}>
-                <td onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon}>{version.name}</td>
-                <td onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon}><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
-                <td onMouseOver={::this.showDeleteIcon} onMouseLeave={::this.hideDeleteIcon} style={{position: 'relative'}}>
+            <tr className={styles.disable_version_entry} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave}>
+                <td onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave}>{version.name}</td>
+                <td onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave}><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
+                <td onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} style={{position: 'relative'}}>
                     <span>{t('FORM.OLD_VERSION')}</span>
-                    {showDeleteIcon &&
+                    {isVisibleDeleteIcon &&
                         <TooltipFontIcon
                             className={styles.delete_icon}
                             isButton={true}
@@ -113,6 +115,7 @@ class OldVersionEntry extends React.Component{
 
 OldVersionEntry.propTypes = {
     version: PropTypes.object.isRequired,
+    activeMode: PropTypes.string.isRequired,
 }
 
 export default OldVersionEntry;
