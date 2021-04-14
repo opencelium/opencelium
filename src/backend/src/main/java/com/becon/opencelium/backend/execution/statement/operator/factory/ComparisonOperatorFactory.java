@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.execution.statement.operator.factory;
 
-import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.statement.operator.*;
 
 public class ComparisonOperatorFactory implements OperatorFactory {
@@ -55,8 +54,10 @@ public class ComparisonOperatorFactory implements OperatorFactory {
                 return new ContainsSubStr();
             case "NotContainsSubStr":
                 return new NotContainsSubStr();
-            case "SqlLike":
-                return new SqlLike();
+            case "Like":
+                return new Like();
+            case "NotLike":
+                return new NotLike();
             case "Matches":
                 return new Matches();
             default:
