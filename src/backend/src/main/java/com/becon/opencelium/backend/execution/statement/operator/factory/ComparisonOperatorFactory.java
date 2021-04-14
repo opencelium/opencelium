@@ -55,6 +55,10 @@ public class ComparisonOperatorFactory implements OperatorFactory {
                 return new ContainsSubStr();
             case "NotContainsSubStr":
                 return new NotContainsSubStr();
+            case "SqlLike":
+                return new SqlLike();
+            case "Matches":
+                return new Matches();
             default:
                 throw new RuntimeException("Operator '" + type + "' not supported");
         }
