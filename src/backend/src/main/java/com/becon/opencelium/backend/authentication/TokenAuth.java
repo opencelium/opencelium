@@ -87,6 +87,10 @@ public class TokenAuth implements AuthenticationType {
             return httpHeaders.get(tokenRefParts.get(0)).get(0);
         }
 
+        if(tokenRef.equals("body")){
+            return responseEntity.getBody().toString();
+        }
+
 
         String path = tokenRefParts.stream().map(Object::toString).collect(Collectors.joining(", "));;
         String body = responseEntity.getBody().toString();
