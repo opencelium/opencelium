@@ -142,6 +142,14 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(packageResource);
     }
 
+    @GetMapping("/oc/repo/status")
+    public ResponseEntity<?> checkRepoConnection() {
+        if (assistantServiceImp.checkRepoConnection()) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/oc/template")
     public ResponseEntity<?> getAssistentTemplateFiles() {
         String path = PathConstant.TEMPLATE;
@@ -157,7 +165,7 @@ public class UpdateAssistantController {
     public ResponseEntity<?> migrate(@RequestBody MigrateDataResource migrateDataResource) {
 
         // do backup
-        assistantServiceImp.runScript();
+//        assistantServiceImp.runScript();
         try {
             String version = migrateDataResource.getVersion();
             assistantServiceImp.createTmpDir(version);
@@ -169,14 +177,14 @@ public class UpdateAssistantController {
                 dir = migrateDataResource.getVersion();
             }
 
-//            // saving files to tmp folder
-//            migrateDataResource.getInvokers().forEach(inv -> {
-//                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
-//            });
-//
-//            migrateDataResource.getTemplates().forEach(temp -> {
-//                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
-//            });
+            // saving files to tmp folder
+            migrateDataResource.getInvokers().forEach(inv -> {
+                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
+            });
+
+            migrateDataResource.getTemplates().forEach(temp -> {
+                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
+            });
 
             migrateDataResource.getConnections().forEach(ction -> {
                 assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
@@ -188,26 +196,26 @@ public class UpdateAssistantController {
                 assistantServiceImp.updateOff(dir);
             }
 
-//            // after update need to move or replace files in main project
-//            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
-//            List<File> invokers = Files.list(filePath)
-//                    .filter(Files::isRegularFile)
-//                    .filter(path -> path.toString().endsWith(".xml"))
-//                    .map(Path::toFile)
-//                    .collect(Collectors.toList());
-//            invokers.forEach(f -> {
-//                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
-//            });
-//
-//            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
-//            List<File> templates = Files.list(filePath)
-//                    .filter(Files::isRegularFile)
-//                    .filter(path -> path.toString().endsWith(".json"))
-//                    .map(Path::toFile)
-//                    .collect(Collectors.toList());
-//            templates.forEach(f -> {
-//                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
-//            });
+            // after update need to move or replace files in main project
+            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
+            List<File> invokers = Files.list(filePath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".xml"))
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+            invokers.forEach(f -> {
+                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
+            });
+
+            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
+            List<File> templates = Files.list(filePath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".json"))
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+            templates.forEach(f -> {
+                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
+            });
 
             Object connectionResources = migrateDataResource.getConnections().stream()
                     .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
@@ -224,12 +232,14 @@ public class UpdateAssistantController {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            assistantServiceImp.restore();
+            throw new RuntimeException(e);
+//            assistantServiceImp.restore();
         }
 
         return ResponseEntity.ok().build();
     }
+
+
 
 
     @ResponseBody

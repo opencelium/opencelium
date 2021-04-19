@@ -113,9 +113,28 @@ public class MessageContainer {
 
         if (responseFormat.equals("xml")) {
             return xmlPathFinder(value, loopStack);
+        } else if (responseFormat.equals("text")) {
+            return textPathFinder(value, loopStack);
         } else {
             return jsonPathFinder(value, loopStack);
         }
+    }
+
+    private Object textPathFinder(String value, Map<String, Integer> loopStack) {
+        String ref = value.replaceFirst("\\$", "");
+
+
+        String message = "";
+        if (loopingArrays == null || loopingArrays.isEmpty()){
+            message = data.get(0);
+        } else {
+
+            String arr = loopingArrays.stream().reduce((f,s)->s).get();
+            int responseIndex = loopStack.get(arr); // determining index of response data
+            message = data.get(responseIndex);
+        }
+
+        return message;
     }
 
     private Object xmlPathFinder(String value, Map<String, Integer> loopStack){

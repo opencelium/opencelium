@@ -201,7 +201,10 @@ public class ConnectorServiceImp implements ConnectorService{
         } else {
             requestData = connector.getRequestData();
         }
-        return invokerRequestBuilder.setInvokerName(connector.getInvoker()).setFunction(function).setRequestData(requestData).sendRequest();
+        return invokerRequestBuilder.setInvokerName(connector.getInvoker())
+                .setFunction(function)
+                .setRequestData(requestData)
+                .sendRequest();
     }
 
     @Override

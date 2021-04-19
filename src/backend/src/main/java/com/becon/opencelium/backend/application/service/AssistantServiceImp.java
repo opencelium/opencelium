@@ -9,22 +9,20 @@ import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
-import com.becon.opencelium.backend.neo4j.entity.relation.LinkRelation;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.error.validation.ErrorMessageDataResource;
-import com.becon.opencelium.backend.resource.error.validation.ValidationResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
-import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -33,7 +31,6 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -44,7 +41,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -57,6 +53,9 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Autowired
     private SystemOverviewRepository systemOverviewRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -214,6 +213,22 @@ public class AssistantServiceImp implements ApplicationService {
 //                .setBranchesToClone(Arrays.asList("dev"))
 //                .setBranch("dev")
 //                .call();
+    }
+
+
+    @Override
+    public boolean checkRepoConnection() {
+        try {
+            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
+            HttpMethod method = HttpMethod.GET;
+            HttpHeaders header = new HttpHeaders();
+            header.set("Content-Type", "application/json");
+            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
+            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public void moveFiles(String fromDir, String toDir) {

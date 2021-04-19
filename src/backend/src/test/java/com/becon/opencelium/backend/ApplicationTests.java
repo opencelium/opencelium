@@ -16,18 +16,14 @@
 
 package com.becon.opencelium.backend;
 
-import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.execution.MessageContainer;
-import com.becon.opencelium.backend.utility.ConditionUtility;
-import com.jayway.jsonpath.JsonPath;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.File;
 
 
 @RunWith(SpringRunner.class)
@@ -36,5 +32,16 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
+//		try	{
+//			FileRepositoryBuilder builder = new FileRepositoryBuilder();
+//			Repository repository = builder.findGitDir(new File("/assistant/application/1.3"))
+//					.readEnvironment() // scan environment GIT_* variables
+//					.findGitDir()// scan up the file system tree
+//					.build();
+//			System.out.println(repository.toString());
+//		} catch (Exception e) {
+//
+//		}
+
 	}
 }
