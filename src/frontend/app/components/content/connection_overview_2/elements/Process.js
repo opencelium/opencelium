@@ -20,7 +20,6 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
-import NewElementPanel from "@components/content/connection_overview_2/elements/NewElementPanel";
 
 function mapStateToProps(state){
     const {currentItem, currentSubItem} = mapItemsToClasses(state);

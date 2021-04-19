@@ -26,6 +26,7 @@ import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
+import CreateElementPanel from "@components/content/connection_overview_2/elements/CreateElementPanel";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -57,6 +58,15 @@ class TechnicalLayout extends React.Component{
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
+        this.state = {
+            createElementPanelPosition: {x: 0, y: 0},
+        }
+    }
+
+    setCreateElementPanelPosition(position){
+        this.setState({
+            createElementPanelPosition: position,
+        });
     }
 
     setLocation(data){
@@ -72,6 +82,8 @@ class TechnicalLayout extends React.Component{
     }
 
     render(){
+        const {createElementPanelPosition} = this.state;
+        const {currentSubItem} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized,
@@ -105,7 +117,9 @@ class TechnicalLayout extends React.Component{
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={false}
                     isScalable={false}
+                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                 />
+                <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y} currentItem={currentSubItem}/>
             </div>
         );
     }

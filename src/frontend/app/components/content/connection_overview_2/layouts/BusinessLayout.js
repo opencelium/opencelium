@@ -26,6 +26,7 @@ import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewBusinessLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
+import CreateElementPanel from "@components/content/connection_overview_2/elements/CreateElementPanel";
 
 
 function mapStateToProps(state){
@@ -57,6 +58,15 @@ class BusinessLayout extends React.Component{
     constructor(props) {
         super(props);
         this.layoutId = 'business_layout';
+        this.state = {
+            createElementPanelPosition: {x: 0, y: 0},
+        }
+    }
+
+    setCreateElementPanelPosition(position){
+        this.setState({
+            createElementPanelPosition: position,
+        });
     }
 
     setLocation(data){
@@ -72,6 +82,8 @@ class BusinessLayout extends React.Component{
     }
 
     render(){
+        const {createElementPanelPosition} = this.state;
+        const {currentItem} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts,
             detailsPosition, businessLayoutLocation, technicalLayoutLocation, isTechnicalLayoutMinimized,
@@ -102,7 +114,9 @@ class BusinessLayout extends React.Component{
                     dragAndDropStep={5}
                     isDraggable={true}
                     isScalable={false}
+                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                 />
+                <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y} currentItem={currentItem}/>
             </div>
         );
     }

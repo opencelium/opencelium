@@ -26,7 +26,7 @@ import {isObject} from "@utils/app";
 const setCurrentItem = (currentItem) => {
     return {
         type: ConnectionOverview2Action.SET_CURRENTITEM,
-        payload: isObject(currentItem) ? currentItem : currentItem.getObject(),
+        payload: currentItem instanceof CProcess || currentItem instanceof COperator ? currentItem.getObject() : currentItem,
     };
 };
 
@@ -38,7 +38,7 @@ const setCurrentItem = (currentItem) => {
 const setCurrentSubItem = (currentSubItem) => {
     return {
         type: ConnectionOverview2Action.SET_CURRENTSUBITEM,
-        payload: isObject(currentSubItem) ? currentSubItem : currentSubItem.getObject(),
+        payload: currentSubItem instanceof CProcess || currentSubItem instanceof COperator ? currentSubItem.getObject() : currentSubItem,
     };
 };
 
