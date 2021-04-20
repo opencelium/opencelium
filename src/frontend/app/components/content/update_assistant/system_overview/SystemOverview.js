@@ -37,15 +37,21 @@ class SystemOverview extends React.Component{
         super(props);
     }
 
+    componentDidMount() {
+        const {entity, updateEntity, systemRequirements} = this.props;
+        entity.systemRequirements = systemRequirements;
+        updateEntity(entity);
+    }
+
     render(){
         const {systemRequirements} = this.props;
         return(
             <Container>
                 {
-                    Object.entries(systemRequirements).map(line => {
+                    Object.entries(systemRequirements.details).map(line => {
                         return(
-                            <Row key={line}>
-                                <Col md={3}>{line[0]}</Col><Col md={9}>{line[1]}</Col>
+                            <Row key={line[0]}>
+                                <Col md={3}>{line[0]}</Col><Col md={9}>{line[1].status}</Col>
                             </Row>
                         )
                     })

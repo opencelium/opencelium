@@ -27,7 +27,8 @@ class FinishUpdate extends React.Component{
     }
 
     render(){
-        const {t, updateLogLink} = this.props;
+        const {t} = this.props;
+        const updateLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
         const logsLinkText = t('FORM.FINISH.LOGS_LINK_TEXT');
         return(
             <div className={styles.finish_update}>
@@ -36,7 +37,7 @@ class FinishUpdate extends React.Component{
                 <Translate i18nKey="update_assistant:FORM.FINISH.LOG_MESSAGE"
                            values={{logsLinkText}}
                            components={[
-                               <a href={'#'} onClick={() => history.push(`/${updateLogLink}`)} children={logsLinkText}/>
+                               <a href={'#'} onClick={() => history.push(`${updateLogLink}`)} children={logsLinkText}/>
                            ]}/>
                 <div><span className={styles.hint}>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
             </div>

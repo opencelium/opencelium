@@ -34,6 +34,7 @@ import {updateSystem} from "@actions/update_assistant/update";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import {logoutUserFulfilled} from "@actions/auth";
+import {APP_STATUS_UP} from "@utils/constants/url";
 
 
 function mapStateToProps(state){
@@ -60,7 +61,7 @@ class UpdateAssistant extends Component{
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
             updateData: {
-                systemCheck: {},
+                systemRequirements: {},
                 availableUpdates: {
                     mode: '',
                     selectedVersion: null,
@@ -138,6 +139,18 @@ class UpdateAssistant extends Component{
     }
 
     /**
+     * to validate system requirements
+     */
+    validateSystemRequirements(entity){
+        const {t} = this.props;
+        const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('details') && entity.systemRequirements.details && entity.systemRequirements.details.hasOwnProperty('neo4j') && entity.systemRequirements.details.neo4j.status === APP_STATUS_UP;
+        if (!isNeo4jUp) {
+            return {value: false, message: t('FORM.VALIDATION_MESSAGES.NEO4j_DOWN')};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
      * to validate available updates
      */
     validateAvailableUpdates(entity){
@@ -211,9 +224,10 @@ class UpdateAssistant extends Component{
                     ...INPUTS.COMPONENT,
                     icon: 'notes',
                     tourStep: UPDATE_ASSISTANT_TOURS.page_1[0].selector,
-                    name: 'systemCheck',
+                    name: 'systemRequirements',
                     label: t('FORM.SYSTEM_CHECK'),
-                    Component: SystemOverview
+                    Component: SystemOverview,
+                    check: (e, entity) => ::this.validateSystemRequirements(e, entity),
                 },
             ],
             hint: {text: t('FORM.HINT_1'), openTour: ::this.openTour},
