@@ -171,6 +171,7 @@ public class ConnectionController {
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
         ConnectionNode connectionNodeClone = connectionNodeService.findByConnectionId(connectionId)
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        List<EnhancementNode> enhancementNodeClone = enhancementNodeService.findAllByConnectionId(connectionId);
         try {
 //            List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
             enhancementService.deleteAllByConnectionId(connectionId);
@@ -191,6 +192,7 @@ public class ConnectionController {
             e.printStackTrace();
             connectionService.save(connectionClone);
             connectionNodeService.save(connectionNodeClone);
+            enhancementNodeService.saveAll(enhancementNodeClone);
             ErrorMessageDataResource errorMessageDataResource =
                     new ErrorMessageDataResource(validationContext.get(connection.getName()));
             ValidationResource validationResource =
