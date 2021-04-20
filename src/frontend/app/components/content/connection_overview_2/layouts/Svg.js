@@ -181,7 +181,6 @@ class Svg extends React.Component {
                 this.isPointerDown = true;
                 this.pointerOrigin = this.getMousePosition(e, svg);
             }
-            this.setCurrentItem(null);
         }
     }
 
