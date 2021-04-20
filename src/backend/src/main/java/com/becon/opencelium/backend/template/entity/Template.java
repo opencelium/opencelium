@@ -26,6 +26,7 @@ public class Template {
     private String description;
     private String license;
     private String version;
+    private String link;
     private CtionTemplateResource connection;
 
     public String getTemplateId() {
@@ -66,6 +67,14 @@ public class Template {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 
     public CtionTemplateResource getConnection() {

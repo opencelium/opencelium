@@ -118,7 +118,7 @@ public class AssistantServiceImp implements ApplicationService {
     public SystemOverviewResource toResource(SystemOverview systemOverview) {
         SystemOverviewResource systemOverviewResource = new SystemOverviewResource();
         systemOverviewResource.setJava(systemOverview.getJava());
-        systemOverviewResource.setOc(systemOverview.getOs());
+        systemOverviewResource.setOs(systemOverview.getOs());
         systemOverviewResource.setElasticSearch(systemOverview.getElasticSearch());
         systemOverviewResource.setKibana(systemOverview.getKibana());
         systemOverviewResource.setMariadb(systemOverview.getMariadb());
