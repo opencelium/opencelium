@@ -37,7 +37,7 @@ class FinishUpdate extends React.Component{
                 <Translate i18nKey="update_assistant:FORM.FINISH.LOG_MESSAGE"
                            values={{logsLinkText}}
                            components={[
-                               <a href={'#'} onClick={() => history.push(`${updateLogLink}`)} children={logsLinkText}/>
+                               <a href={updateLogLink} target={'_blank'} children={logsLinkText}/>
                            ]}/>
                 <div><span className={styles.hint}>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
             </div>

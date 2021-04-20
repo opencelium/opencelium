@@ -133,7 +133,7 @@ class TemplateFileUpdate extends React.Component{
                         <tbody>
                             {templates.map((template, key) => (
                                 <TemplateFileEntry
-                                    key={template.templateId}
+                                    key={`${template.templateId}_${key}`}
                                     index={key}
                                     template={template}
                                     setTemplate={::this.setTemplate}

@@ -1,6 +1,6 @@
 {
   "FORM":{
-    "UPDATE_OC": "Run OC",
+    "UPDATE_OC": "Update OC",
     "HEADER": "Update Assistant",
     "UPDATE_BUTTON": "Update",
     "CANCEL_TOOLTIP": "Cancel",
@@ -39,7 +39,7 @@
     "PAGE_5": "Connection-Migration",
     "NO_CONNECTIONS": "You do not need to update connections, because you do not have them.",
     "HINT_5": "Please, update your connections",
-    "PAGE_6": "Done",
+    "PAGE_6": "Update Process",
     "FINISH": {
       "HEADER": "Almost done!",
       "NEW_VERSION": "After you click start update the system will try to update the opencelium files and also the databases. On the next the system will restart. Wait about 2 minutes and then try opencelium again.",

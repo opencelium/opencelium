@@ -215,7 +215,7 @@ class UpdateAssistant extends Component{
         contentTranslations.header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         contentTranslations.list_button = '';
         let changeContentTranslations = {};
-        changeContentTranslations.onlyTextButton = `${t('FORM.UPDATE_OC')} ${updateData.availableUpdates.selectedVersion ? updateData.availableUpdates.selectedVersion.name : ''}`;
+        changeContentTranslations.onlyTextButton = `${t('FORM.UPDATE_OC')}`;
         let getListLink = ``;
         let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5'), t('FORM.PAGE_6')];
         let contents = [{
