@@ -18,6 +18,7 @@ import MonochromePhotosIconPath from "@images/default_connector.png";
 export default {
     'add': 'add',
     'add_circle_outline': 'add',
+    'add_circle_do_outline': 'add_circle_outline',
     'arrow_back': 'keyboard_arrow_left',
     'arrow_forward': 'keyboard_arrow_right',
     'assignment': 'assignment',

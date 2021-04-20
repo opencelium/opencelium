@@ -15,12 +15,11 @@
 
 import React from "react";
 import PropTypes from 'prop-types';
-import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
+import {DETAILS_POSITION, LAYOUT_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
 import IfOperator from "@components/content/connection_overview_2/elements/IfOperator";
 import Process from "@components/content/connection_overview_2/elements/Process";
 import Arrow from "@components/content/connection_overview_2/elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import NewElementPanel from "@components/content/connection_overview_2/elements/NewElementPanel";
 
 class Svg extends React.Component {
     constructor(props) {
@@ -42,6 +41,7 @@ class Svg extends React.Component {
         this.svgRef = React.createRef();
         this.resetRatio = false;
     }
+
 
     componentDidMount() {
         const {layoutId, svgId, isScalable} = this.props;
@@ -161,22 +161,27 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {isDraggable} = this.props;
+        const {isDraggable, setCreateElementPanelPosition} = this.props;
         if(e.target.classList.contains('draggable')) {
             if(isDraggable) {
                 this.selectedElement = e.target.parentNode;
                 if(this.selectedElement.parentNode){
+                    setCreateElementPanelPosition({x: 0, y: 0});
                     this.offset = this.getMousePosition(e, this.selectedElement.parentNode);
                     this.offset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
                     this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
                 }
+            } else{
+                this.setCoordinatesForCreateElementPanel(e);
             }
         } else{
+            setCreateElementPanelPosition({x: 0, y: 0});
             const {svg} = this.state;
             if(svg) {
                 this.isPointerDown = true;
                 this.pointerOrigin = this.getMousePosition(e, svg);
             }
+            this.setCurrentItem(null);
         }
     }
 
@@ -221,13 +226,37 @@ class Svg extends React.Component {
         }
     }
 
-    endDrag(){
+    endDrag(e){
         if(this.selectedElement){
             this.selectedElement = null;
+            this.setCoordinatesForCreateElementPanel(e);
         }
         if(this.isPointerDown) {
             this.isPointerDown = false;
         }
+    }
+
+    setCoordinatesForCreateElementPanel(e){
+        const {setCreateElementPanelPosition, layoutPosition} = this.props;
+        const clientRect = e.target.getBoundingClientRect();
+        let x = clientRect.x;
+        let y = clientRect.y;
+        x += clientRect.width + 8;
+        if(e.target.points) {
+            y -= clientRect.height * 1.5;
+        } else{
+            y -= clientRect.height + 5;
+        }
+        if(layoutPosition === LAYOUT_POSITION.BOTTOM) {
+            let layoutSvg;
+            if (e.currentTarget.id === 'technical_layout_svg') {
+                layoutSvg = document.getElementById('business_layout_svg');
+            } else {
+                layoutSvg = document.getElementById('technical_layout_svg');
+            }
+            y -= layoutSvg.height.baseVal.value + 5;
+        }
+        setCreateElementPanelPosition({x, y});
     }
 
     getMousePosition(event, element) {
@@ -317,11 +346,7 @@ class Svg extends React.Component {
     }
 
     render(){
-        const {svgId, layoutId} = this.props;
-        let {currentItem, currentSubItem} = this.props;
-        if(layoutId === 'technical_layout'){
-            currentItem = currentSubItem;
-        }
+        const {svgId} = this.props;
         return(
             <svg
                 id={svgId}
@@ -342,7 +367,6 @@ class Svg extends React.Component {
                 {
                     this.renderItems()
                 }
-                <NewElementPanel currentItem={currentItem}/>
             </svg>
         );
     }

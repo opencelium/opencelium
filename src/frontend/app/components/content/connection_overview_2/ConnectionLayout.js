@@ -295,7 +295,7 @@ class ConnectionLayout extends Component{
     }
 
     render(){
-        const {businessLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
+        const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div id={'app_content'} className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
@@ -317,6 +317,7 @@ class ConnectionLayout extends Component{
                             maximizeTechnicalLayout={::this.maximizeTechnicalLayout}
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
+                            layoutPosition={businessLayoutPosition}
                         />
                     }
                     <TechnicalLayout
@@ -328,6 +329,7 @@ class ConnectionLayout extends Component{
                         replaceLayouts={::this.replaceLayouts}
                         detailsPosition={detailsPosition}
                         isDetailsMinimized={isDetailsMinimized}
+                        layoutPosition={technicalLayoutPosition}
                     />
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout
@@ -338,6 +340,7 @@ class ConnectionLayout extends Component{
                             maximizeTechnicalLayout={::this.maximizeTechnicalLayout}
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
+                            layoutPosition={businessLayoutPosition}
                         />
                     }
                 </PanelGroup>

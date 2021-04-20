@@ -78,7 +78,7 @@ class TooltipFontIcon extends Component{
 
     render(){
         const {showTooltip, left, top} = this.state;
-        const {tooltip, tooltipPosition, wrapClassName, ...props} = this.props;
+        const {tooltip, tooltipPosition, wrapClassName, wrapStyles, ...props} = this.props;
         let position = '';
         switch (tooltipPosition) {
             case 'top':
@@ -92,7 +92,7 @@ class TooltipFontIcon extends Component{
                 break;
         }
         return (
-            <span onMouseOver={::this.show} onMouseLeave={::this.hide} className={wrapClassName}>
+            <span onMouseOver={::this.show} onMouseLeave={::this.hide} className={wrapClassName} style={wrapStyles}>
                 {showTooltip && this.tooltip && ReactDOM.createPortal(<span className={`${theme.tooltip} ${position} ${theme.tooltipActive}`} style={{left, top, zIndex: 1000000}}><span className={theme.tooltipInner}>{tooltip}</span></span>, this.tooltip)}
                 <FontIcon myRef={this.icon} onButtonFocus={::this.show} onButtonBlur={::this.hide} {...props}/>
             </span>
@@ -109,6 +109,7 @@ TooltipFontIcon.defaultProps = {
     tooltipPosition: 'top',
     isButton: false,
     wrapClassName: '',
+    wrapStyles: {},
 };
 
 export default TooltipFontIcon;

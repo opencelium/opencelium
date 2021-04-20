@@ -20,6 +20,7 @@ import {mapItemsToClasses} from "@components/content/connection_overview_2/utils
 import Svg from "@components/content/connection_overview_2/layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
+import CreateElementPanel from "@components/content/connection_overview_2/elements/CreateElementPanel";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -39,9 +40,19 @@ class ExtendedBusinessLayout extends React.Component{
     constructor(props) {
         super(props);
         this.layoutId = 'business_layout';
+        this.state = {
+            createElementPanelPosition: {x: 0, y: 0},
+        }
+    }
+
+    setCreateElementPanelPosition(position){
+        this.setState({
+            createElementPanelPosition: position,
+        });
     }
 
     render(){
+        const {createElementPanelPosition} = this.state;
         return(
             <div id={this.layoutId} className={`${styles.business_layout}`}>
                 <Svg
@@ -51,7 +62,9 @@ class ExtendedBusinessLayout extends React.Component{
                     dragAndDropStep={5}
                     isDraggable={true}
                     isScalable={false}
+                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                 />
+                <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y}/>
             </div>
         );
     }
