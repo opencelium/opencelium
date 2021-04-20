@@ -8,7 +8,7 @@ import javax.annotation.Resource;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SystemOverviewResource {
     private String java;
-    private String oc;
+    private String os;
     private String neo4j;
     private String kibana;
     private String elasticSearch;
@@ -22,12 +22,12 @@ public class SystemOverviewResource {
         this.java = java;
     }
 
-    public String getOc() {
-        return oc;
+    public String getOs() {
+        return os;
     }
 
-    public void setOc(String oc) {
-        this.oc = oc;
+    public void setOs(String os) {
+        this.os = os;
     }
 
     public String getNeo4j() {
