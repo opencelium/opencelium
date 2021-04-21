@@ -221,8 +221,9 @@ const fetchSystemRequirementsEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/system/overview`;
-            return doRequest({url},{
+            //const url = `${urlPrefix}/system/overview`;
+            const url = 'actuator/health';
+            return doRequest({url, isApi: false, hasAuthHeader: true},{
                 success: (data) => fetchSystemRequirementsFulfilled(data, {...action.settings}),
                 reject: fetchSystemRequirementsRejected,
             });

@@ -133,7 +133,7 @@ class TemplateFileUpdate extends React.Component{
                         <tbody>
                             {templates.map((template, key) => (
                                 <TemplateFileEntry
-                                    key={template.templateId}
+                                    key={`${template.templateId}_${key}`}
                                     index={key}
                                     template={template}
                                     setTemplate={::this.setTemplate}
@@ -153,7 +153,7 @@ class TemplateFileUpdate extends React.Component{
                         className={styles.update_button}
                     />
                 }
-                <TooltipFontIcon iconStyles={{opacity: currentTemplateIndex !== -1 ? '1.0' : '0'}} isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>}
+                <TooltipFontIcon iconStyles={{opacity: currentTemplateIndex !== -1 ? '1.0' : '0'}} isButton={true} tooltip={t('FORM.CANCEL_TOOLTIP')} value={'cancel'} iconClassName={'material-icons-outlined'} className={styles.cancel_icon} onClick={::this.cancelConvert}/>
             </div>
         );
     }

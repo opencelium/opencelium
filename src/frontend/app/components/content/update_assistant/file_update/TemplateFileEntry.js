@@ -44,6 +44,7 @@ class TemplateFileEntry extends React.Component{
 
     convertTemplate(){
         const {index, template, entity, setTemplate} = this.props;
+        const {link, ...templateData} = template;
         let convertedTemplate = null;
         let status = null;
         const {jsonData, error} = CExecution.executeConfig({
@@ -54,7 +55,7 @@ class TemplateFileEntry extends React.Component{
         //if(Math.floor(Math.random() * 2)){
             status = {error};
         }
-        convertedTemplate = JSON.stringify({...template, connection: jsonData, version: entity.availableUpdates.selectedVersion.name});
+        convertedTemplate = JSON.stringify({...templateData, connection: jsonData, version: entity.availableUpdates.selectedVersion.name});
         setTimeout(() => {
             setTemplate(convertedTemplate, status, index);
         }, 100);
@@ -69,7 +70,7 @@ class TemplateFileEntry extends React.Component{
             isSuccess = convertedTemplates[index].status === null;
         }
         return(
-            <tr key={template.name}>
+            <tr>
                 <td>{template.name}</td>
                 <td>
                     {!isConverting && !isFail && !isSuccess && <span>-</span>}

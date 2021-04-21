@@ -1,6 +1,6 @@
 {
   "FORM":{
-    "UPDATE_OC": "Run OC",
+    "UPDATE_OC": "Update OC",
     "HEADER": "Update Assistant",
     "UPDATE_BUTTON": "Update",
     "CANCEL_TOOLTIP": "Cancel",
@@ -39,11 +39,11 @@
     "PAGE_5": "Connection-Migration",
     "NO_CONNECTIONS": "You do not need to update connections, because you do not have them.",
     "HINT_5": "Please, update your connections",
-    "PAGE_6": "Done",
+    "PAGE_6": "Update Process",
     "FINISH": {
-      "HEADER": "Congratulations!",
-      "NEW_VERSION": "Your OC application has been successfully updated to a newer version.",
-      "LOG_MESSAGE": "Detailed debug information can be found in <0>{{logsLinkText}}</0> on your oc web-server.",
+      "HEADER": "Almost done!",
+      "NEW_VERSION": "After you click start update the system will try to update the opencelium files and also the databases. On the next the system will restart. Wait about 2 minutes and then try opencelium again.",
+      "LOG_MESSAGE": "You can restore (see <0>{{logsLinkText}}</0>) the old system in any time if an error occurs.",
       "LOGS_LINK_TEXT": "logs",
       "HINT": "Hint",
       "CLEAR_CACHE": "Don't forget to clear browser cache (especially the javascript cache)."
@@ -56,7 +56,8 @@
       "INVOKER_UPDATE_ABSENT": "Please, update invokers",
       "INVOKERS_HAVE_ERROR": "All invokers should be updated",
       "CONNECTION_UPDATE_ABSENT": "Please, update connections",
-      "CONNECTIONS_HAVE_ERROR": "All connections should be updated"
+      "CONNECTIONS_HAVE_ERROR": "All connections should be updated",
+      "NEO4j_DOWN": "Neo4j is down. Please, turn it on."
     }
   }
 }
