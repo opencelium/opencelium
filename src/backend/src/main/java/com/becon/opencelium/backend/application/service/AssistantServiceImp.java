@@ -17,6 +17,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -53,6 +54,10 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Autowired
     private SystemOverviewRepository systemOverviewRepository;
+
+
+    @Autowired
+    private Environment env;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -144,7 +149,17 @@ public class AssistantServiceImp implements ApplicationService {
                 System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
             }
         });
+    }
 
+    @Override
+    public void buildAndRestart() {
+        try {
+            String target = env.getProperty("opencelium.reboot.path");
+            Runtime rt = Runtime.getRuntime();
+            Process proc = rt.exec(target);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     public void saveTmpInvoker(String xmlInvoker, String dir) {

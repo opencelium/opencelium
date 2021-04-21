@@ -16,14 +16,13 @@
 
 package com.becon.opencelium.backend;
 
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 
 @RunWith(SpringRunner.class)
@@ -32,16 +31,7 @@ public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
-//		try	{
-//			FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//			Repository repository = builder.findGitDir(new File("/assistant/application/1.3"))
-//					.readEnvironment() // scan environment GIT_* variables
-//					.findGitDir()// scan up the file system tree
-//					.build();
-//			System.out.println(repository.toString());
-//		} catch (Exception e) {
-//
-//		}
+
 
 	}
 }

@@ -224,12 +224,10 @@ public class UpdateAssistantController {
             for (HashMap<String, Object> connection : cns) {
                 String str = objectMapper.writeValueAsString(connection);
                 ConnectionResource connectionResource = objectMapper.readValue(str, ConnectionResource.class);
-//                if (connectionNodeServiceImp.existsByConnectionId(connectionResource.getConnectionId())) {
-////                    connectionServiceImp.deleteById(connectionResource.getConnectionId());
-//                    connectionNodeServiceImp.deleteById(connectionResource.getConnectionId());
-//                }
                 assistantServiceImp.updateConnection(connectionResource);
             }
+
+            assistantServiceImp.buildAndRestart();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -238,9 +236,6 @@ public class UpdateAssistantController {
 
         return ResponseEntity.ok().build();
     }
-
-
-
 
     @ResponseBody
     @GetMapping("/changelog/file/{packageName}")

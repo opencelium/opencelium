@@ -89,6 +89,8 @@ kibana:
   port: 5601
 
 opencelium:
+  reboot:
+    path: path/to/sh/file;
   version: v1.3
   mail:
     from: OC_Application
