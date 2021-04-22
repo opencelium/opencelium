@@ -15,9 +15,12 @@
 
 import React from "react";
 import {connect} from 'react-redux';
+import {withTranslation} from "react-i18next";
 import { Row, Col, Container } from "react-grid-system";
 import {fetchSystemRequirements} from "@actions/update_assistant/fetch";
 import {ListComponent} from "@decorators/ListComponent";
+import styles from "@themes/default/content/update_assistant/main";
+import Translate from "@components/general/app/Translate";
 
 
 function mapStateToProps(state){
@@ -30,6 +33,7 @@ function mapStateToProps(state){
     }
 }
 
+@withTranslation('update_assistant')
 @connect(mapStateToProps, {fetchSystemRequirements})
 @ListComponent('systemRequirements')
 class SystemOverview extends React.Component{
@@ -44,18 +48,30 @@ class SystemOverview extends React.Component{
     }
 
     render(){
-        const {systemRequirements} = this.props;
+        const {t, systemRequirements} = this.props;
+        const backupLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
+        const backupLinkText = t('FORM.FINISH.BACKUP_LINK_TEXT');
         return(
             <Container>
                 {
                     Object.entries(systemRequirements.details).map(line => {
                         return(
                             <Row key={line[0]}>
-                                <Col md={3}>{line[0]}</Col><Col md={9}>{line[1].status}</Col>
+                                <Col md={3}>{line[0]}</Col><Col md={9}>{line[1].details.version}</Col>
                             </Row>
                         )
                     })
                 }
+                <div className={styles.system_overview}>
+                    <span className={styles.hint}>
+                        {`Hint: `}
+                    </span>
+                    <Translate i18nKey="update_assistant:FORM.FINISH.BACKUP_MESSAGE"
+                               values={{backupLinkText}}
+                               components={[
+                                   <a href={backupLogLink} target={'_blank'} children={backupLinkText}/>
+                               ]}/>
+                </div>
             </Container>
         );
     }

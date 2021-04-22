@@ -3,7 +3,21 @@ import styles from "@themes/default/content/connections/connection_overview_2";
 import Input from "@basic_components/inputs/Input";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {setFocusById} from "@utils/app";
+import {setItems, setArrows} from "@actions/connection_overview_2/set";
+import {connect} from "react-redux";
+import {ARROWS, ITEMS} from "@components/content/connection_overview_2/data";
+import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 
+function mapStateToProps(state){
+    const connectionOverview = state.get('connection_overview');
+    return{
+        items: connectionOverview.get('items').toJS(),
+        currentItem: connectionOverview.get('currentItem'),
+    };
+}
+
+@connect(mapStateToProps, {setArrows, setItems})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -37,6 +51,21 @@ class CreateElementPanel extends React.Component{
         });
     }
 
+    createElement(){
+        const {name} = this.state;
+        const {items, currentItem} = this.props;
+        let index = items.findIndex(i => i.id === currentItem.id);
+        if(index !== -1) {
+            items.splice(index, 0, {id: 5, name, x: currentItem.x + 150,y: currentItem.y});
+            this.props.setItems(items);
+            this.props.setArrows([
+                {from: 1, to: 2},
+                {from: 2, to: 3},
+                {from: currentItem.id, to: 5},
+            ]);
+        }
+    }
+
     render(){
         const {type, name} = this.state;
         const {x, y, currentItem} = this.props;
@@ -56,7 +85,7 @@ class CreateElementPanel extends React.Component{
                             <Input id={'new_request_name'} theme={{input: styles.input_name}} onChange={::this.changeName} value={name} label={'Name'}/>
                         </div>
                         <div className={styles.create_element_panel_line} style={{top: `${y + 33}px`, left: `${x + 220}px`}}/>
-                        <TooltipFontIcon wrapStyles={{top: `${y + 22}px`, left: `${x + 240}px`}} wrapClassName={styles.add_icon} tooltip={'Create'} value={'add_circle_do_outline'}  isButton={true} />
+                        <TooltipFontIcon onClick={::this.createElement} wrapStyles={{top: `${y + 22}px`, left: `${x + 240}px`}} wrapClassName={styles.add_icon} tooltip={'Create'} value={'add_circle_do_outline'}  isButton={true} />
                     </React.Fragment>
                 }
             </div>
