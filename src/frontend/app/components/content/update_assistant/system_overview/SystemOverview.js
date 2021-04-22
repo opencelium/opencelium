@@ -21,6 +21,8 @@ import {fetchSystemRequirements} from "@actions/update_assistant/fetch";
 import {ListComponent} from "@decorators/ListComponent";
 import styles from "@themes/default/content/update_assistant/main";
 import Translate from "@components/general/app/Translate";
+import {OC_NAME} from "@utils/constants/app";
+import {APP_STATUS_DOWN} from "@utils/constants/url";
 
 
 function mapStateToProps(state){
@@ -49,24 +51,32 @@ class SystemOverview extends React.Component{
 
     render(){
         const {t, systemRequirements} = this.props;
+        const VISIBLE_SERVICES = ['db', 'elasticsearch', 'neo4j', OC_NAME.toLowerCase(), 'os'];
         const backupLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
-        const backupLinkText = t('FORM.FINISH.BACKUP_LINK_TEXT');
+        const backupLinkText = t('FORM.BACKUP_LINK_TEXT');
         return(
             <Container>
                 {
                     Object.entries(systemRequirements.details).map(line => {
-                        return(
-                            <Row key={line[0]}>
-                                <Col md={3}>{line[0]}</Col><Col md={9}>{line[1].details.version}</Col>
-                            </Row>
-                        )
+                        if(VISIBLE_SERVICES.indexOf(line[0]) !== -1) {
+                            let stringData = line[1].status === APP_STATUS_DOWN ? t('FORM.SERVICE_IS_DOWN') : line[1].details.name ? line[1].details.name : line[1].details.version;
+                            if(line[0] === OC_NAME.toLowerCase() && line[1].details.version === ''){
+                                stringData = t('FORM.UNKNOWN_OC_VERSION');
+                            }
+                            return (
+                                <Row key={line[0]}>
+                                    <Col md={3}>{line[0]}</Col>
+                                    <Col md={9}>{stringData}</Col>
+                                </Row>
+                            );
+                        }
                     })
                 }
                 <div className={styles.system_overview}>
                     <span className={styles.hint}>
                         {`Hint: `}
                     </span>
-                    <Translate i18nKey="update_assistant:FORM.FINISH.BACKUP_MESSAGE"
+                    <Translate i18nKey="update_assistant:FORM.BACKUP_MESSAGE"
                                values={{backupLinkText}}
                                components={[
                                    <a href={backupLogLink} target={'_blank'} children={backupLinkText}/>

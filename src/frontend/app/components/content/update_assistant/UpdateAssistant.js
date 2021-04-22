@@ -31,7 +31,7 @@ import ConnectionFileUpdate from "@components/content/update_assistant/migration
 import FinishUpdate from "@components/content/update_assistant/FinishUpdate";
 
 import {updateSystem} from "@actions/update_assistant/update";
-import {API_REQUEST_STATE} from "@utils/constants/app";
+import {API_REQUEST_STATE, OC_NAME} from "@utils/constants/app";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import {logoutUserFulfilled} from "@actions/auth";
 import {APP_STATUS_UP} from "@utils/constants/url";
@@ -144,8 +144,12 @@ class UpdateAssistant extends Component{
     validateSystemRequirements(entity){
         const {t} = this.props;
         const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('details') && entity.systemRequirements.details && entity.systemRequirements.details.hasOwnProperty('neo4j') && entity.systemRequirements.details.neo4j.status === APP_STATUS_UP;
+        const isOCVersionUnknown = !entity.systemRequirements.hasOwnProperty('details') || !entity.systemRequirements.details.hasOwnProperty(OC_NAME.toLowerCase()) || entity.systemRequirements.details[OC_NAME.toLowerCase()].details.version === '';
         if (!isNeo4jUp) {
             return {value: false, message: t('FORM.VALIDATION_MESSAGES.NEO4j_DOWN')};
+        }
+        if (isOCVersionUnknown) {
+            return {value: false, message: t('FORM.VALIDATION_MESSAGES.UNKNOWN_OC_VERSION')};
         }
         return {value: true, message: ''};
     }
