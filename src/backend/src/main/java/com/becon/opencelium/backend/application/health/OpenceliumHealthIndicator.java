@@ -16,7 +16,8 @@ public class OpenceliumHealthIndicator extends AbstractHealthIndicator {
 
     @Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
+        String version = env.containsProperty("opencelium.version") ? env.getProperty("opencelium.version") : "";
         builder.up()
-                .withDetail("version", Objects.requireNonNull(env.getProperty("opencelium.version")));
+                .withDetail("version", Objects.requireNonNull(version));
     }
 }
