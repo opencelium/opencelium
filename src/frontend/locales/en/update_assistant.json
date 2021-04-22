@@ -43,8 +43,10 @@
     "FINISH": {
       "HEADER": "Almost done!",
       "NEW_VERSION": "After you click start update the system will try to update the opencelium files and also the databases. On the next the system will restart. Wait about 2 minutes and then try opencelium again.",
-      "LOG_MESSAGE": "You can restore (see <0>{{logsLinkText}}</0>) the old system in any time if an error occurs.",
-      "LOGS_LINK_TEXT": "logs",
+      "LOG_MESSAGE": "You can restore (see <0>{{restoreLinkText}}</0>) the old system in any time if an error occurs.",
+      "RESTORE_LINK_TEXT": "docs",
+      "BACKUP_MESSAGE": "Please, do not forget to create a backup of the system, before you start the update (see <0>{{backupLinkText}}</0>).",
+      "BACKUP_LINK_TEXT": "docs",
       "HINT": "Hint",
       "CLEAR_CACHE": "Don't forget to clear browser cache (especially the javascript cache)."
     },
