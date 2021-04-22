@@ -1,6 +1,9 @@
 package com.becon.opencelium.backend.application.repository;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.elasticsearch.action.admin.cluster.node.info.NodeInfo;
 import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse;
 import org.elasticsearch.client.Client;
@@ -79,6 +82,21 @@ public class SystemOverviewRepository {
         }
 
         return systemOverview;
+    }
+
+    public String getVersion() {
+        try	{
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository repository = builder
+                    .readEnvironment()
+                    .findGitDir()
+                    .build();
+            Git git = new Git(repository);
+            return git.describe().call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     // Kibana getting request

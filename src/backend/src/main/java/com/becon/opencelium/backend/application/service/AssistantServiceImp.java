@@ -162,6 +162,11 @@ public class AssistantServiceImp implements ApplicationService {
         }
     }
 
+    @Override
+    public String getVersion() {
+        return systemOverviewRepository.getVersion();
+    }
+
     public void saveTmpInvoker(String xmlInvoker, String dir) {
         Document doc = convertStringToXMLDocument(xmlInvoker);
         NodeList nodeList = doc.getChildNodes();

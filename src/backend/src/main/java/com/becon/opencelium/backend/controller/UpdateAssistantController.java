@@ -112,7 +112,7 @@ public class UpdateAssistantController {
 
     @GetMapping("/oc/requirements")
     public ResponseEntity<?> getSystemRequirement() {
-        String version = env.getProperty("opencelium.version");
+        String version = assistantServiceImp.getVersion();
         String result = "{" + "\"version\": \"" + version + "\"}";
         return ResponseEntity.ok(result);
     }
