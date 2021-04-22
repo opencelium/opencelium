@@ -7,6 +7,10 @@
     "PAGE_1": "System Check",
     "HINT_1": "Please check your system properties",
     "SYSTEM_CHECK": "System Overview",
+    "BACKUP_MESSAGE": "Please, do not forget to create a backup of the system, before you start the update (see <0>{{backupLinkText}}</0>).",
+    "BACKUP_LINK_TEXT": "docs",
+    "UNKNOWN_OC_VERSION": "Unknown",
+    "SERVICE_IS_DOWN": "Service is down",
     "PAGE_2": "Available Updates",
     "HINT_2": "Select desirable update",
     "AVAILABLE_UPDATES": "Available Updates",
@@ -45,8 +49,6 @@
       "NEW_VERSION": "After you click start update the system will try to update the opencelium files and also the databases. On the next the system will restart. Wait about 2 minutes and then try opencelium again.",
       "LOG_MESSAGE": "You can restore (see <0>{{restoreLinkText}}</0>) the old system in any time if an error occurs.",
       "RESTORE_LINK_TEXT": "docs",
-      "BACKUP_MESSAGE": "Please, do not forget to create a backup of the system, before you start the update (see <0>{{backupLinkText}}</0>).",
-      "BACKUP_LINK_TEXT": "docs",
       "HINT": "Hint",
       "CLEAR_CACHE": "Don't forget to clear browser cache (especially the javascript cache)."
     },
@@ -59,7 +61,8 @@
       "INVOKERS_HAVE_ERROR": "All invokers should be updated",
       "CONNECTION_UPDATE_ABSENT": "Please, update connections",
       "CONNECTIONS_HAVE_ERROR": "All connections should be updated",
-      "NEO4j_DOWN": "Neo4j is down. Please, turn it on."
+      "NEO4j_DOWN": "Neo4j is down. Please, turn it on.",
+      "UNKNOWN_OC_VERSION": "Please, check OpenCelium version"
     }
   }
 }
