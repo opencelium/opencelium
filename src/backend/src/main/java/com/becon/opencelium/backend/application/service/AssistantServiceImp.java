@@ -214,18 +214,29 @@ public class AssistantServiceImp implements ApplicationService {
 //        FileRepositoryBuilder builder = new FileRepositoryBuilder();
 //        Repository
 //        Git git = new Git();
-        System.out.println("Online update run");
+//        System.out.println("Online update run");
 //        Git.cloneRepository()
 //                .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
 //                .setDirectory(new File("/path/to/targetdirectory"))
 //                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
 //                .setBranch("refs/heads/specific-branch")
 //                .call();
+        String gitUrl = env.getProperty("opencelium.assistant.repo.url");
+//        String tag = systemOverviewRepository.getVersion();
+        Process process = Runtime.getRuntime().exec("git pull -t " + gitUrl);
+        printStream(process.getInputStream());
+        printStream(process.getErrorStream());
+
     }
 
     @Override
     public void updateOff(String dir) throws Exception {
         System.out.println("Offline update run");
+        Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString();
+        Process process = Runtime.getRuntime().exec("git pull " + s + "/assistant/" + dir);
+        printStream(process.getInputStream());
+        printStream(process.getErrorStream());
 //        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
 //        Git.cloneRepository()
 //                .setURI(path)
@@ -233,6 +244,17 @@ public class AssistantServiceImp implements ApplicationService {
 //                .setBranchesToClone(Arrays.asList("dev"))
 //                .setBranch("dev")
 //                .call();
+    }
+
+    public void printStream(InputStream is) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is));) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println("> " + line);
+            }
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
     }
 
 
