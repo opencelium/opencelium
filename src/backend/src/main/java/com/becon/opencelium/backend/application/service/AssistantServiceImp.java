@@ -210,7 +210,7 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public void updateOn() throws Exception {
+    public void updateOn(String version) throws Exception {
 //        FileRepositoryBuilder builder = new FileRepositoryBuilder();
 //        Repository
 //        Git git = new Git();
@@ -222,21 +222,28 @@ public class AssistantServiceImp implements ApplicationService {
 //                .setBranch("refs/heads/specific-branch")
 //                .call();
         String gitUrl = env.getProperty("opencelium.assistant.repo.url");
-//        String tag = systemOverviewRepository.getVersion();
-        Process process = Runtime.getRuntime().exec("git pull -t " + gitUrl);
+        Process process = Runtime.getRuntime().exec("git pull " + gitUrl);
+        printStream(process.getInputStream());
+        printStream(process.getErrorStream());
+
+        process = Runtime.getRuntime().exec("git checkout " + version);
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
 
     }
 
     @Override
-    public void updateOff(String dir) throws Exception {
+    public void updateOff(String dir, String version) throws Exception {
         System.out.println("Offline update run");
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
-        Process process = Runtime.getRuntime().exec("git pull " + s + "/assistant/" + dir);
+        Process process = Runtime.getRuntime().exec("git pull " + s + "/assistant/application/" + dir);
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
+
+        Process process1 = Runtime.getRuntime().exec("git checkout " + version);
+        printStream(process1.getInputStream());
+        printStream(process1.getErrorStream());
 //        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
 //        Git.cloneRepository()
 //                .setURI(path)

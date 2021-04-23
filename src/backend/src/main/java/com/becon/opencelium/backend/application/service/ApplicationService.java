@@ -16,8 +16,8 @@ public interface ApplicationService {
     void deleteZipFile(Path path);
     void createTmpDir(String dir);
     SystemOverviewResource toResource(SystemOverview systemOverview);
-    void updateOn() throws Exception;
-    void updateOff(String dir) throws Exception;
+    void updateOn(String version) throws Exception;
+    void updateOff(String dir, String version) throws Exception;
     void updateConnection(ConnectionResource connectionresource);
     boolean checkRepoConnection();
     void buildAndRestart();

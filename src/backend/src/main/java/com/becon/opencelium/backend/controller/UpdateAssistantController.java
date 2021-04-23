@@ -191,9 +191,9 @@ public class UpdateAssistantController {
             });
 
             if (migrateDataResource.isOnline()) {
-                assistantServiceImp.updateOn();
+                assistantServiceImp.updateOn(version);
             } else {
-                assistantServiceImp.updateOff(dir);
+                assistantServiceImp.updateOff(dir, version);
             }
 
             // after update need to move or replace files in main project
