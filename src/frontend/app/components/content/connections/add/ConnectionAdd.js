@@ -298,7 +298,7 @@ class ConnectionAdd extends Component{
                     hasAddMethod: true,
                 },
                 {
-                    ...INPUTS.CONNECTION_SVG,
+                    ...INPUTS.METHODS,
                     tourSteps: CONNECTION_ADD_TOURS.page_3,
                     label: t('ADD.FORM.METHODS'),
                     templateLabels: {addTemplate: t('ADD.FORM.ADD_TEMPLATE'), addTemplateTitle: t('ADD.FORM.ADD_TEMPLATE_TITLE')},

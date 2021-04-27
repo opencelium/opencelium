@@ -34,9 +34,9 @@ function mapStateToProps(state){
     return{
         connectionOverviewState: connectionOverview,
         currentItem,
-        currentSubItem,
+        currentSubItem,/*
         items: currentItem ? currentItem.items : [],
-        arrows: currentItem ? currentItem.arrows : [],
+        arrows: currentItem ? currentItem.arrows : [],*/
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };

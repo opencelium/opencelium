@@ -288,7 +288,7 @@ class ConnectionAdd2 extends Component{
             ],
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
         },{
-            inputs: [
+            inputs: [/*
                 {
                     ...INPUTS.CONNECTOR_READONLY,
                     label: t('ADD.FORM.CONNECTORS'),
@@ -296,9 +296,9 @@ class ConnectionAdd2 extends Component{
                     source: connectorMenuItems,
                     readOnly: true,
                     hasAddMethod: true,
-                },
+                },*/
                 {
-                    ...INPUTS.METHODS,
+                    ...INPUTS.CONNECTION_SVG,
                     tourSteps: CONNECTION_ADD_TOURS.page_3,
                     label: t('ADD.FORM.METHODS'),
                     templateLabels: {addTemplate: t('ADD.FORM.ADD_TEMPLATE'), addTemplateTitle: t('ADD.FORM.ADD_TEMPLATE_TITLE')},

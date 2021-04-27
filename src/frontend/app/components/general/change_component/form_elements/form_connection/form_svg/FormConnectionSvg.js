@@ -22,10 +22,6 @@ import Details from "./details/Details";
 
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {componentAppear} from "@utils/app";
-import {setItems, setArrows} from "@actions/connection_overview_2/set";
-import {ARROWS, ITEMS} from "./data";
-import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
-import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {PANEL_LOCATION} from "@utils/constants/app";
 
 
@@ -60,7 +56,7 @@ function mapStateToProps(state){
 /**
  * Layout for TemplateConverter
  */
-@connect(mapStateToProps, {setArrows, setItems})
+@connect(mapStateToProps, {})
 class FormConnectionSvg extends Component{
 
     constructor(props){
@@ -86,19 +82,6 @@ class FormConnectionSvg extends Component{
 
     componentDidMount() {
         componentAppear('app_content');
-        const {setItems, setArrows} = this.props;
-        setArrows(ARROWS);
-        setItems(::this.getItems())
-    }
-
-    getItems(){
-        return ITEMS.map((item, key) => {
-            if(item.hasOwnProperty('type')){
-                return CBusinessOperator.createBusinessOperator(item);
-            } else{
-                return CBusinessProcess.createBusinessProcess(item);
-            }
-        });
     }
 
     moveDetailsLeft(){
@@ -293,6 +276,7 @@ class FormConnectionSvg extends Component{
     }
 
     render(){
+        const {entity} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
@@ -319,6 +303,8 @@ class FormConnectionSvg extends Component{
                         />
                     }
                     <TechnicalLayout
+                        items={entity.toConnector.processes}
+                        arrows={entity.toConnector.arrows}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                         minimizeLayout={::this.minimizeTechnicalLayout}

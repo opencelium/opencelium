@@ -53,21 +53,6 @@ export default class CMethodItem{
         return new CMethodItem(index, name, color, request, response, invoker, error, isToggled);
     }
 
-
-    getPrevIndex(index){
-        if(index === '0'){
-            return '';
-        }
-        let splitIndex = index.split('_');
-        if(splitIndex[splitIndex.length - 1] === '0'){
-            splitIndex.pop();
-            return splitIndex.join('_');
-        } else{
-            splitIndex[splitIndex.length - 1] = splitIndex[splitIndex.length - 1] - 1;
-            return splitIndex.join('_');
-        }
-    }
-
     deleteError(){
         this._error = {
             hasError: false,
