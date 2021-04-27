@@ -50,6 +50,7 @@ export function mapItemsToClasses(state){
         }
     }
     return {
+        connectionOverview,
         currentItem,
         currentSubItem,
         items: instancesItems,

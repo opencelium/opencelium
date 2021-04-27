@@ -80,10 +80,6 @@ class FormConnectionSvg extends Component{
         this.initialTechnicalSize = 300;
     }
 
-    componentDidMount() {
-        componentAppear('app_content');
-    }
-
     moveDetailsLeft(){
         this.setState({
             detailsPosition: DETAILS_POSITION.LEFT,
@@ -280,7 +276,7 @@ class FormConnectionSvg extends Component{
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
-            <div id={'app_content'} className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
+            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
                 <Details
                     moveDetailsRight={::this.moveDetailsRight}
                     moveDetailsLeft={::this.moveDetailsLeft}

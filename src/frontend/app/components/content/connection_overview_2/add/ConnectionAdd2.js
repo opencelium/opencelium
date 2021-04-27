@@ -288,15 +288,7 @@ class ConnectionAdd2 extends Component{
             ],
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
         },{
-            inputs: [/*
-                {
-                    ...INPUTS.CONNECTOR_READONLY,
-                    label: t('ADD.FORM.CONNECTORS'),
-                    placeholders: [t('ADD.FORM.CHOSEN_CONNECTOR_FROM'), t('ADD.FORM.CHOSEN_CONNECTOR_TO')],
-                    source: connectorMenuItems,
-                    readOnly: true,
-                    hasAddMethod: true,
-                },*/
+            inputs: [
                 {
                     ...INPUTS.CONNECTION_SVG,
                     tourSteps: CONNECTION_ADD_TOURS.page_3,
@@ -308,6 +300,7 @@ class ConnectionAdd2 extends Component{
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
+            isExternalComponent: true
             /*
             * TODO: uncomment when backend will be ready
             */

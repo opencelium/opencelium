@@ -28,6 +28,7 @@ function mapStateToProps(state){
     const app = state.get('app');
     return {
         currentPageItems: app.get('currentPageItems').toJS(),
+        isComponentExternalInChangeContent: app.get('isComponentExternalInChangeContent'),
     };
 }
 export function LayoutComponent(componentSingleName = '', componentPluralName = '', url = '', deleteActionName = '', exceptions = []){
@@ -50,9 +51,9 @@ export function LayoutComponent(componentSingleName = '', componentPluralName = 
                 }
 
                 render(){
-                    const {children} = this.props;
+                    const {children, isComponentExternalInChangeContent} = this.props;
                     return (
-                        <Container>
+                        <Container style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
                             <Suspense fallback={(<Loading/>)}>
                                 <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: componentSingleName}}>
                                     {children}

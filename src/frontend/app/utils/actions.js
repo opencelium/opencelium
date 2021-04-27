@@ -19,6 +19,7 @@
  */
 export const AppAction = {
     CHANGE_LANGUAGE:                    'CHANGE_LANGUAGE',
+    SET_COMPONENTINCHANGECONTENT:       'SET_COMPONENTINCHANGECONTENT',
     UPDATE_MENU:                        'UPDATE_MENU',
     DO_REQUEST:                         'DO_REQUEST',
     DO_REQUEST_REJECTED:                'DO_REQUEST_REJECTED',

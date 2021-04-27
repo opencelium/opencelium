@@ -15,6 +15,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 import { Container, Row, Col } from "react-grid-system";
 import ViewHeader from '../view_component/Header';
 import ListButton from "../view_component/ListButton";
@@ -25,9 +26,17 @@ import {componentAppear, getThemeClass} from "@utils/app";
 import EmptyButton from "../view_component/EmptyButton";
 
 
+function mapStateToProps(state){
+    const app = state.get('app');
+    return {
+        isComponentExternalInChangeContent: app.get('isComponentExternalInChangeContent'),
+    };
+}
+
 /**
  * Content Component
  */
+@connect(mapStateToProps, {})
 class Content extends Component{
 
     constructor(props){
@@ -67,16 +76,16 @@ class Content extends Component{
     }
 
     render(){
-        const {translations, style, contentStyle, authUser, contentColClass} = this.props;
+        const {translations, style, contentStyle, authUser, contentColClass, isComponentExternalInChangeContent} = this.props;
         let classNames = ['content'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <Row style={style} id={'app_content'}>
-                <Col xl={10} lg={10} md={12} sm={12} offset={{ xl: 1, lg: 1 }} >
-                    <Container sm>
+                <Col xl={10} lg={10} md={12} sm={12} offset={{ xl: 1, lg: 1 }} style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
+                    <Container sm style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
                         <ViewHeader header={translations.header}/>
                         <Row style={{...contentStyle, marginLeft: 0, marginRight: 0}}>
-                            <Col md={12} className={`${contentColClass} ${styles[classNames.content]}`}>
+                            <Col md={12} className={`${contentColClass} ${styles[classNames.content]}`} style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
                                 {this.props.children}
                             </Col>
                         </Row>

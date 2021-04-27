@@ -90,10 +90,15 @@ export default class CConnectorItem{
     }
 
     setSvgItems(){
-        const items = [...this.methods, ...this.operators];
+        let items = [...this.methods, ...this.operators];
+        items = sortByIndex(items);
         let xIterator = 0;
         for(let i = 0; i < items.length; i++){
             let svgElement = {};
+            svgElement.name = items[i].name ? items[i].name : '';
+            if(items[i].type) {
+                svgElement.type = items[i].type;
+            }
             let currentSplitIndex = items[i].index.split('_');
             if(currentSplitIndex[currentSplitIndex.length - 1] !== '0'){
                 xIterator += 200;

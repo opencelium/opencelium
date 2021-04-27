@@ -22,11 +22,11 @@ import styles from "@themes/default/content/connections/connection_overview_2";
 import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
 
 function mapStateToProps(state){
-    const {currentItem} = mapItemsToClasses(state);
+    const {connectionOverview, currentItem, items} = mapItemsToClasses(state);
     return{
         currentItem,
-        items: currentItem ? currentItem.items : [],
-        arrows: currentItem ? currentItem.arrows : [],
+        items: connectionOverview.get('items').toJS(),
+        arrows: connectionOverview.get('arrows').toJS(),
     };
 }
 

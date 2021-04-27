@@ -27,6 +27,8 @@ import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
 import CreateElementPanel from "../elements/CreateElementPanel";
+import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -77,7 +79,16 @@ class TechnicalLayout extends React.Component{
     }
 
     openInNewWindow(){
-        setLS('connection_overview', this.props.connectionOverviewState.toJS(), 'connection_overview');
+        const {items} = this.props;
+        let convertedItems = [];
+        if(items.length > 0 && (items[0] instanceof CProcess || items[0] instanceof COperator)){
+            for(let i = 0; i < items.length; i++){
+                convertedItems.push(items[i].getObject());
+            }
+        } else{
+            convertedItems = items;
+        }
+        setLS('connection_overview', {...this.props.connectionOverviewState.toJS(), items: convertedItems, arrows: this.props.arrows}, 'connection_overview');
         this.props.openInNewWindow();
     }
 

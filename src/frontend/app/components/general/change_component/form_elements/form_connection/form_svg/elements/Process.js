@@ -20,6 +20,7 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {mapItemsToClasses} from "../utils";
+import {isString} from "@utils/app";
 
 function mapStateToProps(state){
     const {currentItem, currentSubItem} = mapItemsToClasses(state);
@@ -55,8 +56,8 @@ class Process extends React.Component{
         const labelY = '50%';
         const closeX = process.width - 15;
         const closeY = 15;
-        let label = process.label ? process.label : process.name;
-        if(label.length > 12){
+        let label = process.label ? process.label : process.name ? process.name : '';
+        if(isString(label) && label.length > 12){
             label = `${label.substr(0, 9)}...`;
         }
         return(

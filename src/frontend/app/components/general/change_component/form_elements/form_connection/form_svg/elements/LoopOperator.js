@@ -19,6 +19,7 @@ import {connect} from 'react-redux';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
 import {mapItemsToClasses} from "../utils";
+import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 
 
 function mapStateToProps(state){
@@ -57,7 +58,7 @@ class LoopOperator extends React.Component{
 
 LoopOperator.propTypes = {
     operator: PropTypes.oneOfType([
-        PropTypes.instanceOf(CBusinessOperator),
+        PropTypes.instanceOf(CTechnicalOperator),
     ]),
     isNotDraggable: PropTypes.bool,
     setCurrentItem: PropTypes.func,

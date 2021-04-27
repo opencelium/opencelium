@@ -31,6 +31,18 @@ const changeLanguage = (language) => {
 };
 
 /**
+ * set component in ChangeContent as external or internal
+ * @param isExternal
+ * @returns {{type: string, payload: {}}}
+ */
+const setComponentInChangeContent = (isExternal = false) => {
+    return {
+        type: AppAction.SET_COMPONENTINCHANGECONTENT,
+        payload: isExternal,
+    }
+}
+
+/**
  * update burger menu
  * @param menu
  * @returns {{type: string, payload: {}}}
@@ -142,6 +154,7 @@ const setCurrentPageItems = (currentItems) => {
 
 export {
     changeLanguage,
+    setComponentInChangeContent,
     updateMenu,
     doRequestRejected,
     addErrorTicket,
