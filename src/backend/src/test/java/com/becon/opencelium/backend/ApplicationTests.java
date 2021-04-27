@@ -27,31 +27,27 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {
-//		try	{
-//
+		try	{
+
 //			FileRepositoryBuilder builder = new FileRepositoryBuilder();
 //			Repository repository = builder
 //					.readEnvironment() // scan environment GIT_* variables
 //					.findGitDir()// scan up the file system tree
 //					.build();
 //			Git git = new Git(repository);
-////			System.out.println(repository.toString());
-////			System.out.println(git.tag().getMessage());
-////			ListTagCommand listTagCommand = git.tagList();
-////			TagCommand tagCommand = git.tag();
-////			System.out.println(git.tag().getName());
-////			RevWalk revCommits = new RevWalk(repository);
+//			git.checkout().setName().call();
+//			System.out.println(repository.toString());
+//			System.out.println(git.tag().getMessage());
+//			ListTagCommand listTagCommand = git.tagList();
+//			TagCommand tagCommand = git.tag();
+//			System.out.println(git.tag().getName());
+//			RevWalk revCommits = new RevWalk(repository);
 //			System.out.println(git.tag().getName());
 //			List<Ref> list = git.tagList().call();
 //			Ref peeledRefs = repository.findRef("refs/tags/v1.3.2");
@@ -71,8 +67,8 @@ public class ApplicationTests {
 //				}
 //			}
 //			System.out.println("hhh");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

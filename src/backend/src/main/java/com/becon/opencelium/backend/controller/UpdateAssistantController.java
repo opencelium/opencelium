@@ -112,7 +112,7 @@ public class UpdateAssistantController {
 
     @GetMapping("/oc/requirements")
     public ResponseEntity<?> getSystemRequirement() {
-        String version = env.getProperty("opencelium.version");
+        String version = assistantServiceImp.getVersion();
         String result = "{" + "\"version\": \"" + version + "\"}";
         return ResponseEntity.ok(result);
     }
@@ -191,9 +191,9 @@ public class UpdateAssistantController {
             });
 
             if (migrateDataResource.isOnline()) {
-                assistantServiceImp.updateOn();
+                assistantServiceImp.updateOn(version);
             } else {
-                assistantServiceImp.updateOff(dir);
+                assistantServiceImp.updateOff(dir, version);
             }
 
             // after update need to move or replace files in main project
