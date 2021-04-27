@@ -17,10 +17,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
-import {NewWindowFeature} from "@decorators/NewWindowFeature";
-import {connectionOverviewLayoutUrl} from "@utils/constants/url";
-import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
+import {DETAILS_POSITION} from "../FormConnectionSvg";
 
 class SettingsPanel extends React.Component{
     constructor(props) {

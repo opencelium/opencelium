@@ -16,18 +16,16 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import PanelGroup from 'react-panelgroup';
-import BusinessLayout from "@components/content/connection_overview_2/layouts/BusinessLayout";
-import TechnicalLayout from "@components/content/connection_overview_2/layouts/TechnicalLayout";
-import Details from "@components/content/connection_overview_2/details/Details";
+import BusinessLayout from "./layouts/BusinessLayout";
+import TechnicalLayout from "./layouts/TechnicalLayout";
+import Details from "./details/Details";
 
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {componentAppear} from "@utils/app";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {setItems, setArrows} from "@actions/connection_overview_2/set";
-import {ARROWS, ITEMS} from "@components/content/connection_overview_2/data";
+import {ARROWS, ITEMS} from "./data";
 import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
-import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
 import {PANEL_LOCATION} from "@utils/constants/app";
 
 
@@ -63,7 +61,7 @@ function mapStateToProps(state){
  * Layout for TemplateConverter
  */
 @connect(mapStateToProps, {setArrows, setItems})
-class ConnectionLayout extends Component{
+class FormConnectionSvg extends Component{
 
     constructor(props){
         super(props);
@@ -349,4 +347,4 @@ class ConnectionLayout extends Component{
     }
 }
 
-export default ConnectionLayout;
+export default FormConnectionSvg;

@@ -282,7 +282,12 @@ const UpdateAssistant = Loadable({
  * Loadable Connection Overview 2 Layout
  */
 const ConnectionOverview2 = Loadable({
-    loader: () => import(/* webpackChunkName: 'connection_overview_2' */ '@components/content/connection_overview_2/ConnectionLayout'),
+    loader: () => import(/* webpackChunkName: 'connection_overview_2' */ '@components/content/connection_overview_2/ConnectionOverview2'),
+    loading: Loading,
+});
+
+const ConnectionAdd2 =  Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_add_2' */ '@components/content/connection_overview_2/add/ConnectionAdd2'),
     loading: Loading,
 });
 
@@ -290,7 +295,7 @@ const ConnectionOverview2 = Loadable({
  * Loadable Connection Overview Details Layout
  */
 const ConnectionOverviewDetails = Loadable({
-    loader: () => import(/* webpackChunkName: 'connection_overview_extended_details' */ '@components/content/connection_overview_2/details/ExtendedDetails'),
+    loader: () => import(/* webpackChunkName: 'connection_overview_extended_details' */ '@change_component/form_elements/form_connection/form_svg/details/ExtendedDetails'),
     loading: Loading,
 });
 
@@ -298,7 +303,7 @@ const ConnectionOverviewDetails = Loadable({
  * Loadable Connection Overview Technical Layout Layout
  */
 const ConnectionOverviewTechnicalLayout = Loadable({
-    loader: () => import(/* webpackChunkName: 'connection_overview_technical_layout' */ '@components/content/connection_overview_2/layouts/ExtendedTechnicalLayout'),
+    loader: () => import(/* webpackChunkName: 'connection_overview_technical_layout' */ '@change_component/form_elements/form_connection/form_svg/layouts/ExtendedTechnicalLayout'),
     loading: Loading,
 });
 
@@ -306,7 +311,7 @@ const ConnectionOverviewTechnicalLayout = Loadable({
  * Loadable Connection Overview Business Layout Layout
  */
 const ConnectionOverviewBusinessLayout = Loadable({
-    loader: () => import(/* webpackChunkName: 'connection_overview_business_layout' */ '@components/content/connection_overview_2/layouts/ExtendedBusinessLayout'),
+    loader: () => import(/* webpackChunkName: 'connection_overview_business_layout' */ '@change_component/form_elements/form_connection/form_svg/layouts/ExtendedBusinessLayout'),
     loading: Loading,
 });
 
@@ -369,6 +374,7 @@ export default {
     UpdateAssistantLayout,
     UpdateAssistant,
     ConnectionOverview2,
+    ConnectionAdd2,
     ConnectionOverviewDetails,
     ConnectionOverviewTechnicalLayout,
     ConnectionOverviewBusinessLayout,

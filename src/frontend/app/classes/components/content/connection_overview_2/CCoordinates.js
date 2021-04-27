@@ -14,7 +14,9 @@
  */
 
 import CPosition from "@classes/components/content/connection_overview_2/CPosition";
-import {ARROW_END_LENGTH, ARROW_MARGIN} from "@components/content/connection_overview_2/elements/Arrow";
+export const ARROW_END_LENGTH = 20;
+
+export const ARROW_MARGIN = 25;
 
 export default class CCoordinates{
 

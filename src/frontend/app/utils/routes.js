@@ -89,7 +89,10 @@ export const createRoutes = (store) => {
                 <Route path='/notification_templates/:id/view' component={LoadableRouteComponents.NotificationTemplateView}/>
                 <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
-            <Route path='/connection_overview_2' component={isAuth(LoadableRouteComponents.ConnectionOverview2, store)}/>
+            <Route path='/connection_overview_2' component={isAuth(LoadableRouteComponents.ConnectionOverview2, store)}>
+                <IndexRoute component={LoadableRouteComponents.ConnectionsList}/>
+                <Route path='/connection_overview_2/add' component={LoadableRouteComponents.ConnectionAdd2}/>
+            </Route>
             <Route path='/connection_overview_details' component={isAuth(LoadableRouteComponents.ConnectionOverviewDetails, store)}/>
             <Route path='/connection_overview_technical_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewTechnicalLayout, store)}/>
             <Route path='/connection_overview_business_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewBusinessLayout, store)}/>

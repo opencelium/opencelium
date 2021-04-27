@@ -66,7 +66,7 @@ function mapConnection(connection){
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'adding', ['connectors'], mapConnection)
-class ConnectionAdd extends Component{
+class ConnectionAdd2 extends Component{
 
     constructor(props){
         super(props);
@@ -298,7 +298,7 @@ class ConnectionAdd extends Component{
                     hasAddMethod: true,
                 },
                 {
-                    ...INPUTS.CONNECTION_SVG,
+                    ...INPUTS.METHODS,
                     tourSteps: CONNECTION_ADD_TOURS.page_3,
                     label: t('ADD.FORM.METHODS'),
                     templateLabels: {addTemplate: t('ADD.FORM.ADD_TEMPLATE'), addTemplateTitle: t('ADD.FORM.ADD_TEMPLATE_TITLE')},
@@ -336,4 +336,4 @@ class ConnectionAdd extends Component{
     }
 }
 
-export default ConnectionAdd;
+export default ConnectionAdd2;
