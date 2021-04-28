@@ -80,6 +80,10 @@ class FormConnectionSvg extends Component{
         this.initialTechnicalSize = 300;
     }
 
+    componentDidMount() {
+        this.minimizeBusinessLayout();
+    }
+
     moveDetailsLeft(){
         this.setState({
             detailsPosition: DETAILS_POSITION.LEFT,
@@ -125,12 +129,14 @@ class FormConnectionSvg extends Component{
     }
 
     minimizeBusinessLayout(){
-        if(!this.state.isTechnicalLayoutMinimized && this.props.technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW) {
-            let businessLayoutHeight = this.state.businessLayoutPosition === LAYOUT_POSITION.TOP ? this.state.verticalPanelWidths[0].size : this.state.verticalPanelWidths[1].size;
+        const {isTechnicalLayoutMinimized, businessLayoutPosition, verticalPanelWidths, businessLayoutHeight} = this.state;
+        const {technicalLayoutLocation} = this.props;
+        if(!isTechnicalLayoutMinimized && technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW) {
+            let newBusinessLayoutHeight = businessLayoutPosition === LAYOUT_POSITION.TOP ? verticalPanelWidths[0].size : verticalPanelWidths[1].size;
             this.setState({
                 isBusinessLayoutMinimized: true,
-                verticalPanelWidths: ::this.getPanelGroupWidths({layoutTwo: this.state.isTechnicalLayoutMinimized, layoutOne: true}, this.state.businessLayoutPosition, this.state.businessLayoutHeight),
-                businessLayoutHeight,
+                verticalPanelWidths: ::this.getPanelGroupWidths({layoutTwo: isTechnicalLayoutMinimized, layoutOne: true}, businessLayoutPosition, businessLayoutHeight),
+                businessLayoutHeight: newBusinessLayoutHeight,
             });
         } else{
             alert('Two panels cannot be minified');
@@ -288,6 +294,8 @@ class FormConnectionSvg extends Component{
                 <PanelGroup {...verticalPanelParams}>
                     {businessLayoutPosition === LAYOUT_POSITION.TOP &&
                         <BusinessLayout
+                            items={[]}
+                            arrows={[]}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
@@ -313,6 +321,8 @@ class FormConnectionSvg extends Component{
                     />
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout
+                            items={[]}
+                            arrows={[]}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}

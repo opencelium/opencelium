@@ -34,9 +34,9 @@ function mapStateToProps(state){
     const {currentItem, items} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentItem,
+        currentItem,/*
         items,
-        arrows: connectionOverview.get('arrows').toJS(),
+        arrows: connectionOverview.get('arrows').toJS(),*/
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };

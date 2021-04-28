@@ -27,6 +27,7 @@ export default class COperator{
         this._height = IF_OPERATOR_SIZE;
         this._connector = operator && operator.hasOwnProperty('connector') ? operator.connector : null;
         this._invoker = operator && operator.hasOwnProperty('invoker') ? operator.invoker : null;
+        this._entity = operator && operator.hasOwnProperty('entity') ? operator.entity : null;
     }
 
     get id(){
@@ -97,6 +98,10 @@ export default class COperator{
         this._invoker = invoker;
     }
 
+    get entity(){
+        return this._entity;
+    }
+
     get items(){
         return this._items;
     }
@@ -135,6 +140,7 @@ export default class COperator{
             height: this._height,
             connector: this._connector,
             invoker: this._invoker,
+            entity: this._entity,
         };
     }
 }

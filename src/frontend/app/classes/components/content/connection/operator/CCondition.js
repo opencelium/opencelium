@@ -16,6 +16,7 @@
 
 import CStatement from "./CStatement";
 import React from "react";
+import {clearFieldNameFromArraySign} from "@change_component/form_elements/form_connection/form_methods/help";
 
 const OPERATOR_LABELS = {
     PROPERTY_EXISTS: <span>∃</span>,
@@ -66,6 +67,43 @@ export default class CCondition{
         let relationalOperator = condition && condition.hasOwnProperty('relationalOperator') ? condition.relationalOperator : '';
         let rightStatement = condition && condition.hasOwnProperty('rightStatement') ? condition.rightStatement : null;
         return new CCondition(leftStatement, relationalOperator, rightStatement);
+    }
+
+    generateStatementText(){
+        let statement = '';
+        if(this.relationalOperator === ''){
+            if(this.leftStatement && this.leftStatement.field !== '') {
+                statement = (
+                    <span>
+                        <span>{`For each element of the `}</span>
+                        <b>{clearFieldNameFromArraySign(this.leftStatement.field)}</b>
+                    </span>
+                );
+            }
+        } else {
+            let leftStatementText = '';
+            if (this.leftStatement && this.leftStatement.field !== '') {
+                leftStatementText = this.leftStatement.field;
+            }
+            let rightStatementText = '';
+            if (this.rightStatement && this.rightStatement.field !== '') {
+                rightStatementText = this.rightStatement.field;
+            }
+            if(leftStatementText !== '') {
+                statement = (
+                    <span>
+                        {`If `}
+                        <b>{clearFieldNameFromArraySign(leftStatementText)}</b>
+                        <span>{` ${this.relationalOperator} `}</span>
+                        <b>{clearFieldNameFromArraySign(rightStatementText)}</b>
+                    </span>
+                );
+            }
+        }
+        if(statement === ''){
+            statement = 'Some data is missing';
+        }
+        return statement;
     }
 
     checkRelationalOperator(relationalOperator){

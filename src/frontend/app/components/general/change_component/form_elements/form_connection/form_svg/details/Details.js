@@ -23,6 +23,7 @@ import {mapItemsToClasses} from "../utils";
 import {connectionOverviewDetailsUrl} from "@utils/constants/url";
 import {setDetailsLocation} from "@actions/connection_overview_2/set";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
+import Description from "@change_component/form_elements/form_connection/form_svg/details/Description";
 
 
 function mapStateToProps(state){
@@ -89,9 +90,7 @@ class Details extends React.Component{
                         </div>
                         {details ?
                             <div className={styles.label}>
-                                {details.label && <React.Fragment><span>Label: {details.label}</span><br/></React.Fragment>}
-                                {details.name && <React.Fragment><span>Name: {details.name}</span><br/></React.Fragment>}
-                                {details.invoker && `Invoker: ${details.invoker}`}
+                                <Description details={details}/>
                             </div>
                             :
                             <div>
