@@ -92,7 +92,8 @@ public class SystemOverviewRepository {
                     .findGitDir()
                     .build();
             Git git = new Git(repository);
-            return git.describe().call();
+            String version = git.describe().call();
+            return version.charAt(4) == '-' ? version.substring(0,4) : version.substring(0,6);
         } catch (Exception e) {
             e.printStackTrace();
         }
