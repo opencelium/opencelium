@@ -25,6 +25,7 @@ import {fetchTemplates} from "@actions/templates/fetch";
 import {ListComponent} from "@decorators/ListComponent";
 import TemplateFileEntry from "@components/content/update_assistant/file_update/TemplateFileEntry";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
@@ -53,6 +54,14 @@ class TemplateFileUpdate extends React.Component{
             currentTemplateIndex: -1,
             convertedTemplates: entity.templateFileUpdate.updatedTemplates,
             isCanceledConvert: false,
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.templates.length === 0 && !this.props.entity.templateFileUpdate.isFinishUpdate && this.props.fetchingTemplates === API_REQUEST_STATE.FINISH){
+            const {entity, updateEntity} = this.props;
+            entity.templateFileUpdate = {...entity.templateFileUpdate, isFinishUpdate: true};
+            updateEntity(entity);
         }
     }
 

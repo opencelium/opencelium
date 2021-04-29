@@ -173,11 +173,13 @@ class UpdateAssistant extends Component{
      */
     validateTemplateFileUpdate(entity){
         const {t} = this.props;
-        if (entity.templateFileUpdate && entity.templateFileUpdate.updatedTemplates.length === 0) {
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.TEMPLATE_UPDATE_ABSENT')};
-        }
-        if (entity.templateFileUpdate && !entity.templateFileUpdate.isFinishUpdate) {
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.TEMPLATES_HAVE_ERROR')};
+        if(!entity.templateFileUpdate.isFinishUpdate){
+            if (entity.templateFileUpdate && entity.templateFileUpdate.updatedTemplates.length === 0) {
+                return {value: false, message: t('FORM.VALIDATION_MESSAGES.TEMPLATE_UPDATE_ABSENT')};
+            }
+            if (entity.templateFileUpdate && !entity.templateFileUpdate.isFinishUpdate) {
+                return {value: false, message: t('FORM.VALIDATION_MESSAGES.TEMPLATES_HAVE_ERROR')};
+            }
         }
         return {value: true, message: ''};
     }
@@ -187,11 +189,13 @@ class UpdateAssistant extends Component{
      */
     validateInvokerFileUpdate(entity){
         const {t} = this.props;
-        if (entity.invokerFileUpdate && entity.invokerFileUpdate.updatedInvokers.length === 0) {
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKER_UPDATE_ABSENT')};
-        }
-        if (entity.invokerFileUpdate && !entity.invokerFileUpdate.isFinishUpdate) {
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKERS_HAVE_ERROR')};
+        if(!entity.invokerFileUpdate.isFinishUpdate) {
+            if (entity.invokerFileUpdate && entity.invokerFileUpdate.updatedInvokers.length === 0) {
+                return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKER_UPDATE_ABSENT')};
+            }
+            if (entity.invokerFileUpdate && !entity.invokerFileUpdate.isFinishUpdate) {
+                return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKERS_HAVE_ERROR')};
+            }
         }
         return {value: true, message: ''};
     }

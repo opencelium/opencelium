@@ -21,7 +21,6 @@ import TechnicalLayout from "./layouts/TechnicalLayout";
 import Details from "./details/Details";
 
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
-import {componentAppear} from "@utils/app";
 import {PANEL_LOCATION} from "@utils/constants/app";
 
 
@@ -44,6 +43,8 @@ export const  LAYOUT_SETTINGS = {
 const INITIAL_BUSINESS_LAYOUT_POSITION = LAYOUT_POSITION.TOP;
 const INITIAL_TECHNICAL_LAYOUT_POSITION = LAYOUT_POSITION.BOTTOM;
 const INITIAL_DETAILS_POSITION = DETAILS_POSITION.RIGHT;
+
+const BUSINESS_DATA = {processes: [], arrows: []};
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -81,7 +82,9 @@ class FormConnectionSvg extends Component{
     }
 
     componentDidMount() {
-        this.minimizeBusinessLayout();
+        if(BUSINESS_DATA.processes.length === 0) {
+            this.minimizeBusinessLayout();
+        }
     }
 
     moveDetailsLeft(){
@@ -294,8 +297,8 @@ class FormConnectionSvg extends Component{
                 <PanelGroup {...verticalPanelParams}>
                     {businessLayoutPosition === LAYOUT_POSITION.TOP &&
                         <BusinessLayout
-                            items={[]}
-                            arrows={[]}
+                            items={BUSINESS_DATA.processes}
+                            arrows={BUSINESS_DATA.arrows}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
@@ -321,8 +324,8 @@ class FormConnectionSvg extends Component{
                     />
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout
-                            items={[]}
-                            arrows={[]}
+                            items={BUSINESS_DATA.processes}
+                            arrows={BUSINESS_DATA.arrows}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
