@@ -123,7 +123,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     // [1.2, 1.3] :  1.2 - current
     // [1.2, 1.3] :  1.3 - current
     private String getVersionStatus(String version) {
-        String currentVersion = env.getProperty("opencelium.version");
+        String currentVersion = assistantServiceImp.getVersion();
         ArrayList<String> versions = new ArrayList<>();
         versions.add(currentVersion);
         versions.add(version);
