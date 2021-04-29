@@ -314,6 +314,7 @@ class FormConnectionSvg extends Component{
                         arrows={entity.toConnector.arrows}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
+                        isBusinessLayoutEmpty={BUSINESS_DATA.processes.length === 0}
                         minimizeLayout={::this.minimizeTechnicalLayout}
                         maximizeLayout={::this.maximizeTechnicalLayout}
                         maximizeBusinessLayout={::this.maximizeBusinessLayout}

@@ -13,6 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+
 export const PROCESS_HEIGHT = 80;
 
 export const PROCESS_WIDTH = 130;
@@ -31,6 +33,9 @@ export default class CProcess{
         this._connector = process && process.hasOwnProperty('connector') ? process.connector : null;
         this._invoker = process && process.hasOwnProperty('invoker') ? process.invoker : null;
         this._entity = process && process.hasOwnProperty('entity') ? process.entity : null;
+        if(!(this._entity instanceof CMethodItem)){
+            this._entity = CMethodItem.createMethodItem(this._entity);
+        }
     }
 
     get id(){
@@ -138,7 +143,7 @@ export default class CProcess{
             height: this._height,
             connector: this._connector,
             invoker: this._invoker,
-            entity: this._entity,
+            entity: this._entity.getObject(),
         };
     }
 }

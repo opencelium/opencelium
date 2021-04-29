@@ -45,7 +45,7 @@ class Svg extends React.Component {
 
 
     componentDidMount() {
-        const {layoutId, svgId, isScalable} = this.props;
+        const {layoutId, svgId, isScalable, startingSvgY} = this.props;
         const layout = document.getElementById(layoutId);
         const layoutSVG = document.getElementById(svgId);
         if(layout && layoutSVG) {
@@ -54,7 +54,7 @@ class Svg extends React.Component {
             let viewBox = layoutSVG.viewBox.baseVal;
             if(viewBox) {
                 viewBox.x = ::this.getViewBoxX();
-                viewBox.y = -190;
+                viewBox.y = startingSvgY;
                 viewBox.width = 1800;
                 viewBox.height = 715;
             }
@@ -382,12 +382,14 @@ Svg.propTypes = {
     dragAndDropStep: PropTypes.number,
     isDraggable: PropTypes.bool,
     isScalable: PropTypes.bool,
+    startingSvgY : PropTypes.number,
 };
 
 Svg.defaultProps = {
     dragAndDropStep: 10,
     isDraggable: false,
     isScalable: false,
+    startingSvgY: -190,
 }
 
 export default Svg;
