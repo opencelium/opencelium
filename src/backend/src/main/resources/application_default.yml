@@ -90,7 +90,7 @@ kibana:
 
 opencelium:
   reboot:
-    path: assistant/restart.sh;
+    path: src/backend/src/main/resources/bashfile/restart.sh
   mail:
     from: OC_Application
   token:
