@@ -25,6 +25,7 @@ import {fetchInvokers, fetchDefaultInvokers} from "@actions/invokers/fetch";
 import {ListComponent} from "@decorators/ListComponent";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import InvokerFileEntry from "@components/content/update_assistant/file_update/InvokerFileEntry";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
@@ -56,6 +57,14 @@ class InvokerFileUpdate extends React.Component{
             currentInvokerIndex: -1,
             convertedInvokers: entity.invokerFileUpdate.updatedInvokers,
             isCanceledConvert: false,
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.invokers.length === 0 && !this.props.entity.invokerFileUpdate.isFinishUpdate && this.props.fetchingInvokers === API_REQUEST_STATE.FINISH){
+            const {entity, updateEntity} = this.props;
+            entity.invokerFileUpdate = {...entity.invokerFileUpdate, isFinishUpdate: true};
+            updateEntity(entity);
         }
     }
 

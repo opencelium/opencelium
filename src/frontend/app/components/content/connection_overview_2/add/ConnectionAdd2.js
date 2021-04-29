@@ -73,7 +73,7 @@ class ConnectionAdd2 extends Component{
         const {authUser} = this.props;
         this.startCheckingTitle = false;
         this.state = {
-            connection: CConnection.createConnection(null),
+            connection: CConnection.createConnection({title: 'test', fromConnector: {title: 'i-doit', connectorId: 1}, toConnector: {title: 'otrs', connectorId: 2}}),
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
         };
