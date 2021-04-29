@@ -16,7 +16,7 @@
 import {List, fromJS, Map} from 'immutable';
 import {ConnectionOverview2Action} from "@utils/actions";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
-import {getLS, removeLS, setLS} from "@utils/LocalStorage";
+import {getLS, removeLS} from "@utils/LocalStorage";
 import {isExternalWindow} from "@utils/app";
 
 let initialState = null;
@@ -37,6 +37,7 @@ if(initialState === null){
     initialState = fromJS({
         currentItem: null,
         currentSubItem: null,
+        connection: null,
         items: List([]),
         arrows: List([]),
         error: null,

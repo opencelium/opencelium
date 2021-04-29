@@ -16,17 +16,19 @@
 import React from 'react';
 import {connect} from "react-redux";
 import {setCurrentItem, setCurrentSubItem} from "@actions/connection_overview_2/set";
-import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
-import Svg from "@components/content/connection_overview_2/layouts/Svg";
+import {mapItemsToClasses} from "../utils";
+import Svg from "../layouts/Svg";
 import PropTypes from "prop-types";
-import SettingsPanel from "@components/content/connection_overview_2/layouts/SettingsPanel";
+import SettingsPanel from "../layouts/SettingsPanel";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
-import CreateElementPanel from "@components/content/connection_overview_2/elements/CreateElementPanel";
+import CreateElementPanel from "../elements/CreateElementPanel";
+import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -34,9 +36,9 @@ function mapStateToProps(state){
     return{
         connectionOverviewState: connectionOverview,
         currentItem,
-        currentSubItem,
+        currentSubItem,/*
         items: currentItem ? currentItem.items : [],
-        arrows: currentItem ? currentItem.arrows : [],
+        arrows: currentItem ? currentItem.arrows : [],*/
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };
@@ -77,7 +79,16 @@ class TechnicalLayout extends React.Component{
     }
 
     openInNewWindow(){
-        setLS('connection_overview', this.props.connectionOverviewState.toJS(), 'connection_overview');
+        const {items} = this.props;
+        let convertedItems = [];
+        if(items.length > 0 && (items[0] instanceof CProcess || items[0] instanceof COperator)){
+            for(let i = 0; i < items.length; i++){
+                convertedItems.push(items[i].getObject());
+            }
+        } else{
+            convertedItems = items;
+        }
+        setLS('connection_overview', {...this.props.connectionOverviewState.toJS(), items: convertedItems, arrows: this.props.arrows}, 'connection_overview');
         this.props.openInNewWindow();
     }
 

@@ -16,17 +16,17 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {setCurrentItem, setItems} from "@actions/connection_overview_2/set";
-import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
-import Svg from "@components/content/connection_overview_2/layouts/Svg";
+import {mapItemsToClasses} from "../utils";
+import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import SettingsPanel from "@components/content/connection_overview_2/layouts/SettingsPanel";
+import SettingsPanel from "../layouts/SettingsPanel";
 import PropTypes from "prop-types";
 import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewBusinessLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
-import CreateElementPanel from "@components/content/connection_overview_2/elements/CreateElementPanel";
+import CreateElementPanel from "../elements/CreateElementPanel";
 
 
 function mapStateToProps(state){
@@ -34,9 +34,9 @@ function mapStateToProps(state){
     const {currentItem, items} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentItem,
+        currentItem,/*
         items,
-        arrows: connectionOverview.get('arrows').toJS(),
+        arrows: connectionOverview.get('arrows').toJS(),*/
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };

@@ -43,6 +43,7 @@ function mapStateToProps(state){
     const auth = state.get('auth');
     return {
         appVersion: app.get('appVersion'),
+        isComponentExternalInChangeContent: app.get('isComponentExternalInChangeContent'),
         fetchingAppVersion: app.get('fetchingAppVersion'),
         authUser: auth.get('authUser'),
         isAuth: auth.get('isAuth'),
@@ -145,11 +146,12 @@ class Layout extends Component{
     }
 
     renderLayout(){
+        const {isComponentExternalInChangeContent} = this.props;
         return (
             <div>
                 {this.renderHeader()}
                 {this.renderLoginAgain()}
-                <div>
+                <div style={isComponentExternalInChangeContent ? {position: 'relative'} : {}}>
                     {this.props.children}
                 </div>
                 {this.renderFooter()}

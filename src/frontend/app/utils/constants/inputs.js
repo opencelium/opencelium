@@ -31,12 +31,14 @@ const CONNECTOR = {name: 'connectors', type: 'connectors', icon: 'device_hub'};
 const CONNECTOR_READONLY = {name: 'connectors_readonly', type: 'connectors', icon: 'device_hub'};
 const MODE = {name: 'mode', type: 'connection_mode'};
 const METHODS = {name: 'methods', type: 'methods', icon: 'device_hub'};
+const CONNECTION_SVG = {name: 'methods', type: 'connection_svg', icon: 'device_hub'};
 const ICONNECTION = {
     CONNECTION_TITLE,
     CONNECTOR,
     CONNECTOR_READONLY,
     MODE,
     METHODS,
+    CONNECTION_SVG,
 };
 
 //CONNECTOR

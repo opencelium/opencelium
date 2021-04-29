@@ -16,10 +16,10 @@
 import React from 'react';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {connect} from "react-redux";
-import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
+import {DETAILS_POSITION} from "../FormConnectionSvg";
 import PageNotFound from "@components/general/app/PageNotFound";
 import {SEPARATE_WINDOW} from "@utils/constants/app";
-import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
+import {mapItemsToClasses} from "../utils";
 
 function mapStateToProps(state){
     const {currentItem, currentSubItem} = mapItemsToClasses(state);

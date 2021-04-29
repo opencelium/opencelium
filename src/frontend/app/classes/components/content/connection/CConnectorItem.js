@@ -18,6 +18,11 @@ import CMethodItem from "./method/CMethodItem";
 import COperatorItem, {LOOP_OPERATOR} from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
 import CConnectorPagination from "./CConnectorPagination";
+import {ITEMS} from "@change_component/form_elements/form_connection/form_svg/data";
+import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -50,9 +55,12 @@ export default class CConnectorItem{
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._processes = [];
+        this._arrows = [];
         this._pagination = this.setConnectorPagination();
         this._currentProgress = this.getCurrentProgress();
         this._operatorsHistory = [];
+        this.setSvgItems();
     }
 
     static createConnectorItem(connectorItem){
@@ -68,6 +76,60 @@ export default class CConnectorItem{
 
     static hasIcon(icon){
         return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null';
+    }
+
+    getSvgElement(element){
+        if(element instanceof CTechnicalOperator || element instanceof CTechnicalProcess){
+            return element
+        }
+        if(element.hasOwnProperty('type')){
+            return CTechnicalOperator.createTechnicalOperator(element);
+        } else{
+            return CTechnicalProcess.createTechnicalProcess(element);
+        }
+    }
+
+    setSvgItems(){
+        let items = [...this.methods, ...this.operators];
+        items = sortByIndex(items);
+        let xIterator = 0;
+        for(let i = 0; i < items.length; i++){
+            let svgElement = {};
+            svgElement.name = items[i].name ? items[i].name : '';
+            svgElement.entity = items[i];
+            if(items[i].type) {
+                svgElement.type = items[i].type;
+            }
+            let currentSplitIndex = items[i].index.split('_');
+            if(currentSplitIndex[currentSplitIndex.length - 1] !== '0'){
+                xIterator += 200;
+            }
+            svgElement.x = xIterator;
+            svgElement.y = 150 * (currentSplitIndex.length - 1)
+            if(items[i].type){
+                svgElement.x += 35;
+                svgElement.y += 10;
+            }
+            svgElement.id = items[i].index;
+            this.processes.push(this.getSvgElement(svgElement));
+            if(items[i].index !== '0') {
+                this.arrows.push({from: this.getPrevIndex(items[i].index), to: items[i].index});
+            }
+        }
+    }
+
+    getPrevIndex(index){
+        if(index === '0'){
+            return '';
+        }
+        let splitIndex = index.split('_');
+        if(splitIndex[splitIndex.length - 1] === '0'){
+            splitIndex.pop();
+            return splitIndex.join('_');
+        } else{
+            splitIndex[splitIndex.length - 1] = splitIndex[splitIndex.length - 1] - 1;
+            return splitIndex.join('_');
+        }
     }
 
     convertItem(itemType, item){
@@ -101,6 +163,8 @@ export default class CConnectorItem{
     resetItems(){
         this._methods = [];
         this._operators = [];
+        this._processes = [];
+        this._arrows = [];
         this._currentItem = null;
         this.reloadPagination();
         this.reloadOperatorsHistory();
@@ -331,6 +395,7 @@ export default class CConnectorItem{
 
     set methods(methods){
         this._methods = this.convertMethods(methods);
+        this.setSvgItems();
     }
 
     get operators(){
@@ -339,6 +404,15 @@ export default class CConnectorItem{
 
     set operators(operators){
         this._operators = this.convertOperators(operators);
+        this.setSvgItems();
+    }
+
+    get processes(){
+        return this._processes;
+    }
+
+    get arrows(){
+        return this._arrows;
     }
 
     get pagination(){
@@ -555,6 +629,7 @@ export default class CConnectorItem{
         }
         this.setCurrentItem(newItem);
         this.reloadPagination({newItem});
+        this.setSvgItems();
     }
 
     // max can be 18 depth of loop operators
@@ -730,6 +805,7 @@ export default class CConnectorItem{
             }
         }
         this.reloadPagination();
+        this.setSvgItems();
     }
 
     addOperator(operator, mode = OUTSIDE_ITEM){
@@ -754,6 +830,7 @@ export default class CConnectorItem{
             }
         }
         this.reloadPagination();
+        this.setSvgItems();
     }
 
     generateNextIndex(mode){

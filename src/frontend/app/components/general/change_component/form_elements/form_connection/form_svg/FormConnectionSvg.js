@@ -16,18 +16,12 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import PanelGroup from 'react-panelgroup';
-import BusinessLayout from "@components/content/connection_overview_2/layouts/BusinessLayout";
-import TechnicalLayout from "@components/content/connection_overview_2/layouts/TechnicalLayout";
-import Details from "@components/content/connection_overview_2/details/Details";
+import BusinessLayout from "./layouts/BusinessLayout";
+import TechnicalLayout from "./layouts/TechnicalLayout";
+import Details from "./details/Details";
 
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {componentAppear} from "@utils/app";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {setItems, setArrows} from "@actions/connection_overview_2/set";
-import {ARROWS, ITEMS} from "@components/content/connection_overview_2/data";
-import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
-import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
-import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
 import {PANEL_LOCATION} from "@utils/constants/app";
 
 
@@ -62,8 +56,8 @@ function mapStateToProps(state){
 /**
  * Layout for TemplateConverter
  */
-@connect(mapStateToProps, {setArrows, setItems})
-class ConnectionLayout extends Component{
+@connect(mapStateToProps, {})
+class FormConnectionSvg extends Component{
 
     constructor(props){
         super(props);
@@ -87,20 +81,7 @@ class ConnectionLayout extends Component{
     }
 
     componentDidMount() {
-        componentAppear('app_content');
-        const {setItems, setArrows} = this.props;
-        setArrows(ARROWS);
-        setItems(::this.getItems())
-    }
-
-    getItems(){
-        return ITEMS.map((item, key) => {
-            if(item.hasOwnProperty('type')){
-                return CBusinessOperator.createBusinessOperator(item);
-            } else{
-                return CBusinessProcess.createBusinessProcess(item);
-            }
-        });
+        this.minimizeBusinessLayout();
     }
 
     moveDetailsLeft(){
@@ -148,12 +129,14 @@ class ConnectionLayout extends Component{
     }
 
     minimizeBusinessLayout(){
-        if(!this.state.isTechnicalLayoutMinimized && this.props.technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW) {
-            let businessLayoutHeight = this.state.businessLayoutPosition === LAYOUT_POSITION.TOP ? this.state.verticalPanelWidths[0].size : this.state.verticalPanelWidths[1].size;
+        const {isTechnicalLayoutMinimized, businessLayoutPosition, verticalPanelWidths, businessLayoutHeight} = this.state;
+        const {technicalLayoutLocation} = this.props;
+        if(!isTechnicalLayoutMinimized && technicalLayoutLocation === PANEL_LOCATION.SAME_WINDOW) {
+            let newBusinessLayoutHeight = businessLayoutPosition === LAYOUT_POSITION.TOP ? verticalPanelWidths[0].size : verticalPanelWidths[1].size;
             this.setState({
                 isBusinessLayoutMinimized: true,
-                verticalPanelWidths: ::this.getPanelGroupWidths({layoutTwo: this.state.isTechnicalLayoutMinimized, layoutOne: true}, this.state.businessLayoutPosition, this.state.businessLayoutHeight),
-                businessLayoutHeight,
+                verticalPanelWidths: ::this.getPanelGroupWidths({layoutTwo: isTechnicalLayoutMinimized, layoutOne: true}, businessLayoutPosition, businessLayoutHeight),
+                businessLayoutHeight: newBusinessLayoutHeight,
             });
         } else{
             alert('Two panels cannot be minified');
@@ -295,10 +278,11 @@ class ConnectionLayout extends Component{
     }
 
     render(){
+        const {entity} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
-            <div id={'app_content'} className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
+            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
                 <Details
                     moveDetailsRight={::this.moveDetailsRight}
                     moveDetailsLeft={::this.moveDetailsLeft}
@@ -310,6 +294,8 @@ class ConnectionLayout extends Component{
                 <PanelGroup {...verticalPanelParams}>
                     {businessLayoutPosition === LAYOUT_POSITION.TOP &&
                         <BusinessLayout
+                            items={[]}
+                            arrows={[]}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
@@ -321,6 +307,8 @@ class ConnectionLayout extends Component{
                         />
                     }
                     <TechnicalLayout
+                        items={entity.toConnector.processes}
+                        arrows={entity.toConnector.arrows}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                         minimizeLayout={::this.minimizeTechnicalLayout}
@@ -333,6 +321,8 @@ class ConnectionLayout extends Component{
                     />
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout
+                            items={[]}
+                            arrows={[]}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
                             minimizeLayout={::this.minimizeBusinessLayout}
@@ -349,4 +339,4 @@ class ConnectionLayout extends Component{
     }
 }
 
-export default ConnectionLayout;
+export default FormConnectionSvg;

@@ -18,9 +18,6 @@ import PropTypes from 'prop-types';
 import CCoordinates from "@classes/components/content/connection_overview_2/CCoordinates";
 
 export const ARROW_WIDTH = 2;
-export const ARROW_END_LENGTH = 20;
-
-export const ARROW_MARGIN = 25;
 
 
 class Arrow extends React.Component{

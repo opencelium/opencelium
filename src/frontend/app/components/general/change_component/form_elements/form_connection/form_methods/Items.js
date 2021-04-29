@@ -204,7 +204,7 @@ class Items extends Component{
             if(allItems[i] instanceof CMethodItem){
                 allComponents.push(<MethodItem key={allItems[i].uniqueIndex} isDraft={isDraft} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} method={allItems[i]} updateEntity={updateEntity}/>);
             }
-            if(allItems[i] instanceof  COperatorItem){
+            if(allItems[i] instanceof COperatorItem){
                 allComponents.push(<OperatorItem key={allItems[i].uniqueIndex} index={i} firstItemIndex={allItems[0].index} readOnly={readOnly} connection={connection} connector={connector} operator={allItems[i]} updateEntity={updateEntity}/>);
             }
         }

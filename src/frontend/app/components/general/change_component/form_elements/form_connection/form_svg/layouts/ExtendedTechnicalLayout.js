@@ -16,17 +16,17 @@
 import React from 'react';
 import {connect} from "react-redux";
 import {setCurrentItem, setCurrentSubItem} from "@actions/connection_overview_2/set";
-import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
-import Svg from "@components/content/connection_overview_2/layouts/Svg";
+import {mapItemsToClasses} from "../utils";
+import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
 
 function mapStateToProps(state){
-    const {currentItem} = mapItemsToClasses(state);
+    const {connectionOverview, currentItem, items} = mapItemsToClasses(state);
     return{
         currentItem,
-        items: currentItem ? currentItem.items : [],
-        arrows: currentItem ? currentItem.arrows : [],
+        items: connectionOverview.get('items').toJS(),
+        arrows: connectionOverview.get('arrows').toJS(),
     };
 }
 

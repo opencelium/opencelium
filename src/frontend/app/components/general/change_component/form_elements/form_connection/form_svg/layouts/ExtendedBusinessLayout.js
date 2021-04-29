@@ -16,11 +16,11 @@
 import React from 'react';
 import {connect} from "react-redux";
 import {setCurrentItem, setItems} from "@actions/connection_overview_2/set";
-import {mapItemsToClasses} from "@components/content/connection_overview_2/utils";
-import Svg from "@components/content/connection_overview_2/layouts/Svg";
+import {mapItemsToClasses} from "../utils";
+import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
-import CreateElementPanel from "@components/content/connection_overview_2/elements/CreateElementPanel";
+import CreateElementPanel from "../elements/CreateElementPanel";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');

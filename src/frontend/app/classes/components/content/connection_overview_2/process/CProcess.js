@@ -30,6 +30,7 @@ export default class CProcess{
         this._height = PROCESS_HEIGHT;
         this._connector = process && process.hasOwnProperty('connector') ? process.connector : null;
         this._invoker = process && process.hasOwnProperty('invoker') ? process.invoker : null;
+        this._entity = process && process.hasOwnProperty('entity') ? process.entity : null;
     }
 
     get id(){
@@ -103,6 +104,10 @@ export default class CProcess{
         this._invoker = invoker;
     }
 
+    get entity(){
+        return this._entity;
+    }
+
     get items(){
         return this._items;
     }
@@ -133,6 +138,7 @@ export default class CProcess{
             height: this._height,
             connector: this._connector,
             invoker: this._invoker,
+            entity: this._entity,
         };
     }
 }

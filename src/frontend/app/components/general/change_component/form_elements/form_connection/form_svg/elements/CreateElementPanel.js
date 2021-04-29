@@ -5,9 +5,6 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {setFocusById} from "@utils/app";
 import {setItems, setArrows} from "@actions/connection_overview_2/set";
 import {connect} from "react-redux";
-import {ARROWS, ITEMS} from "@components/content/connection_overview_2/data";
-import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
-import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');

@@ -15,11 +15,12 @@
 
 import React from "react";
 import PropTypes from 'prop-types';
-import {DETAILS_POSITION, LAYOUT_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
-import IfOperator from "@components/content/connection_overview_2/elements/IfOperator";
-import Process from "@components/content/connection_overview_2/elements/Process";
-import Arrow from "@components/content/connection_overview_2/elements/Arrow";
+import {DETAILS_POSITION, LAYOUT_POSITION} from "../FormConnectionSvg";
+import IfOperator from "../elements/IfOperator";
+import Process from "../elements/Process";
+import Arrow from "../elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
+import LoopOperator from "../elements/LoopOperator";
 
 class Svg extends React.Component {
     constructor(props) {
@@ -301,6 +302,10 @@ class Svg extends React.Component {
                 case 'if':
                     return(
                         <IfOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem}/>
+                    );
+                case 'loop':
+                    return(
+                        <LoopOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem}/>
                     );
                 default:
                     return(

@@ -16,7 +16,7 @@
 import React from 'react';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import {DETAILS_POSITION} from "@components/content/connection_overview_2/ConnectionLayout";
+import {DETAILS_POSITION} from "../FormConnectionSvg";
 import {setLS} from "@utils/LocalStorage";
 
 

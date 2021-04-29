@@ -19,7 +19,6 @@ import {CTechnicalProcess} from "@classes/components/content/connection_overview
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 
 export function mapItemsToClasses(state){
-
     const connectionOverview = state.get('connection_overview');
     let currentItem = connectionOverview.get('currentItem');
     if(currentItem !== null && (!(currentItem instanceof CBusinessProcess) || !(currentItem instanceof CBusinessOperator))){
@@ -51,6 +50,7 @@ export function mapItemsToClasses(state){
         }
     }
     return {
+        connectionOverview,
         currentItem,
         currentSubItem,
         items: instancesItems,

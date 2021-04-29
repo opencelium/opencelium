@@ -41,6 +41,7 @@ import FormNotificationTemplateName from './form_elements/form_notification_temp
 import FormNotificationTemplateType from './form_elements/form_notification_template/FormType';
 import FormContent from "./form_elements/form_notification_template/FormContent";
 import FormComponent from "@change_component/form_elements/FormComponent";
+import FormConnectionSvg from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 
 
 /**
@@ -142,6 +143,13 @@ class Form extends Component{
                 />;
             case 'methods':
                 return <FormMethods
+                    key={key}
+                    entity={entity}
+                    updateEntity={updateEntity}
+                    data={data}
+                />;
+            case 'connection_svg':
+                return <FormConnectionSvg
                     key={key}
                     entity={entity}
                     updateEntity={updateEntity}

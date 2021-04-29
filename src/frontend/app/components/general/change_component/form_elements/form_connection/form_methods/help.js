@@ -46,6 +46,15 @@ export function markFieldNameAsArray(fieldName){
     }
     return fieldName;
 }
+/**
+ * to mark field name as array
+ */
+export function clearFieldNameFromArraySign(fieldName){
+    if(isString(fieldName)) {
+        return fieldName.replace(ARRAY_SIGN, '');
+    }
+    return fieldName;
+}
 
 export function convertFieldNameForBackend(invokerBody, fieldName){
     let fieldNameSplitted = fieldName.split('.');
