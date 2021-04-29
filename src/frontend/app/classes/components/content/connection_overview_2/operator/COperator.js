@@ -13,6 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+
 export const IF_OPERATOR_SIZE = 60;
 
 export default class COperator{
@@ -28,6 +30,9 @@ export default class COperator{
         this._connector = operator && operator.hasOwnProperty('connector') ? operator.connector : null;
         this._invoker = operator && operator.hasOwnProperty('invoker') ? operator.invoker : null;
         this._entity = operator && operator.hasOwnProperty('entity') ? operator.entity : null;
+        if(!(this._entity instanceof COperatorItem)){
+            this._entity = COperatorItem.createOperatorItem(this._entity);
+        }
     }
 
     get id(){
@@ -140,7 +145,7 @@ export default class COperator{
             height: this._height,
             connector: this._connector,
             invoker: this._invoker,
-            entity: this._entity,
+            entity: this._entity.getObject(),
         };
     }
 }

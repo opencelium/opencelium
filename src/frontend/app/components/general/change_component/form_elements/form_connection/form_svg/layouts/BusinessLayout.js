@@ -31,12 +31,10 @@ import CreateElementPanel from "../elements/CreateElementPanel";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem, items} = mapItemsToClasses(state);
+    const {currentItem} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentItem,/*
-        items,
-        arrows: connectionOverview.get('arrows').toJS(),*/
+        currentItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };
@@ -83,14 +81,14 @@ class BusinessLayout extends React.Component{
 
     render(){
         const {createElementPanelPosition} = this.state;
-        const {currentItem} = this.props;
+        const {currentItem, items} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts,
             detailsPosition, businessLayoutLocation, technicalLayoutLocation, isTechnicalLayoutMinimized,
             ...svgProps} = this.props;
         const isReplaceIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
-        const isMinMaxIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isTechnicalLayoutMinimized;
-        const isNewWindowIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
+        const isMinMaxIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isTechnicalLayoutMinimized || items.length === 0;
+        const isNewWindowIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || items.length === 0;
         return(
             <div id={this.layoutId} className={`${styles.business_layout}`}>
                 <SettingsPanel

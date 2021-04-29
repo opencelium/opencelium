@@ -36,9 +36,7 @@ function mapStateToProps(state){
     return{
         connectionOverviewState: connectionOverview,
         currentItem,
-        currentSubItem,/*
-        items: currentItem ? currentItem.items : [],
-        arrows: currentItem ? currentItem.arrows : [],*/
+        currentSubItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };
@@ -94,7 +92,7 @@ class TechnicalLayout extends React.Component{
 
     render(){
         const {createElementPanelPosition} = this.state;
-        const {currentSubItem} = this.props;
+        const {currentSubItem, isBusinessLayoutEmpty} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized,
@@ -105,7 +103,8 @@ class TechnicalLayout extends React.Component{
         }
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
-        const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
+        const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
+        const startingSvgY = isBusinessLayoutEmpty ? -10 : -190;
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
@@ -129,6 +128,7 @@ class TechnicalLayout extends React.Component{
                     isDraggable={false}
                     isScalable={false}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    startingSvgY={startingSvgY}
                 />
                 <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y} currentItem={currentSubItem}/>
             </div>
@@ -145,10 +145,12 @@ TechnicalLayout.propTypes = {
     maximizeBusinessLayout: PropTypes.func.isRequired,
     replaceLayouts: PropTypes.func.isRequired,
     isDetailsMinimized: PropTypes.bool,
+    isBusinessLayoutEmpty: PropTypes.bool,
 };
 
 TechnicalLayout.defaultProps = {
     isDetailsMinimized: false,
+    isBusinessLayoutEmpty: true,
 };
 
 export default TechnicalLayout;
