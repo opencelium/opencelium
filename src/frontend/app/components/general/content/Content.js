@@ -77,7 +77,7 @@ class Content extends Component{
 
     render(){
         const {translations, style, contentStyle, authUser, contentColClass, isComponentExternalInChangeContent} = this.props;
-        let classNames = ['content'];
+        let classNames = ['content', 'content_with_external_component'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
             <Row style={style} id={'app_content'}>
@@ -85,7 +85,7 @@ class Content extends Component{
                     <Container sm style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
                         <ViewHeader header={translations.header}/>
                         <Row style={{...contentStyle, marginLeft: 0, marginRight: 0}}>
-                            <Col md={12} className={`${contentColClass} ${styles[classNames.content]}`} style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
+                            <Col md={12} className={`${contentColClass} ${styles[isComponentExternalInChangeContent ? classNames.content_with_external_component : classNames.content]}`}>
                                 {this.props.children}
                             </Col>
                         </Row>

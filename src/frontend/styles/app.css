@@ -170,3 +170,8 @@ textarea{
 .technical_layout_is_minimized>.panelGroup>.divider>div{
   cursor: default !important;
 }
+
+.panelWrapper{/*
+  flex-shrink: 0 !important;
+  flex-basis: auto !important;*/
+}

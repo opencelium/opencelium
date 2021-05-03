@@ -24,6 +24,12 @@
   overflow: initial !important;
 }
 
+.content_with_external_component{
+  @extend .content;
+  min-height: initial !important;
+  position: initial !important;
+}
+
 .title{
   font-family: $FONT_FAMILY;
   margin-bottom: 5px;

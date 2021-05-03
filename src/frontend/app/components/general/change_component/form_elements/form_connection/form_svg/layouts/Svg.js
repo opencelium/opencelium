@@ -54,10 +54,11 @@ class Svg extends React.Component {
             let viewBox = layoutSVG.viewBox.baseVal;
             if(viewBox) {
                 viewBox.x = ::this.getViewBoxX();
-                viewBox.y = startingSvgY;
+                //viewBox.y = startingSvgY;
                 viewBox.width = 1800;
                 viewBox.height = 715;
             }
+            console.log(viewBox.y);
             this.setState({
                 svg: layoutSVG,
                 ratio,
@@ -94,10 +95,12 @@ class Svg extends React.Component {
             let width = layout.offsetWidth;
             let height = layout.offsetHeight;
             const {svg} = this.state;
-            const viewBox = svg.viewBox.baseVal;
-            if(viewBox) {
-                viewBox.width = width + 300;
-                viewBox.height = height + 300;
+            if(svg) {
+                const viewBox = svg.viewBox.baseVal;
+                if (viewBox) {
+                    viewBox.width = width + 300;
+                    viewBox.height = height + 300;
+                }
             }
         }
     }
