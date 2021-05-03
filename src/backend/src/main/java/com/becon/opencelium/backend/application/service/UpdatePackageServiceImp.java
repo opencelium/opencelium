@@ -135,10 +135,10 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
             return "current";
         } else if(isOld) {
             return "old";
-        } else if(isParent && !isOld){
+        } else if(isParent){
             return "available";
         } else {
-            return "not_available";
+            return "available";
         }
     }
 
