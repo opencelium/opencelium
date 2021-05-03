@@ -82,7 +82,7 @@ class FormConnectionSvg extends Component{
     }
 
     componentDidMount() {
-        if(BUSINESS_DATA.processes.length === 0) {
+        if(BUSINESS_DATA.processes.length === 0 && this.props.entity.toConnector.processes.length !== 0) {
             this.minimizeBusinessLayout();
         }
     }

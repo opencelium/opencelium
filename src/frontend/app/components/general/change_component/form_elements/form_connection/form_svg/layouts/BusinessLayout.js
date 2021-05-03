@@ -27,6 +27,7 @@ import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewBusinessLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
 import CreateElementPanel from "../elements/CreateElementPanel";
+import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 
 
 function mapStateToProps(state){
@@ -111,7 +112,7 @@ class BusinessLayout extends React.Component{
                     svgId={`${this.layoutId}_svg`}
                     dragAndDropStep={5}
                     isDraggable={true}
-                    isScalable={false}
+                    isScalable={HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                 />
                 <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y} currentItem={currentItem}/>

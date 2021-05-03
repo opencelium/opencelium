@@ -29,6 +29,7 @@ import {setLS} from "@utils/LocalStorage";
 import CreateElementPanel from "../elements/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
+import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -126,7 +127,7 @@ class TechnicalLayout extends React.Component{
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={false}
-                    isScalable={false}
+                    isScalable={HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
                 />
