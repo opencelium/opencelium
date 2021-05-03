@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -585,16 +585,25 @@ export const UPDATE_ASSISTANT_TOURS = {
             selector: '.tour-page-3-step-1',
             content:
                 <SwitchOffTour>
-                    Update connections
+                    Update Templates
                 </SwitchOffTour>,
         },
     ],
     page_4: [
         {
-            selector: '.tour-page-3-step-1',
+            selector: '.tour-page-4-step-1',
             content:
                 <SwitchOffTour>
-                    Migrate Templates and Invokers
+                    Update Invokers
+                </SwitchOffTour>,
+        },
+    ],
+    page_5: [
+        {
+            selector: '.tour-page-5-step-1',
+            content:
+                <SwitchOffTour>
+                    Migrate Templates
                 </SwitchOffTour>,
         },
     ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 import React from 'react';
 import Loadable from 'react-loadable';
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 
 
 
@@ -270,7 +270,56 @@ const TemplateConverterLayout = Loadable({
  * Loadable Update Assistant
  */
 const UpdateAssistantLayout = Loadable({
-    loader: () => import(/* webpackChunkName: 'template_converter_layout' */ '@components/content/update_assistant/UpdateAssistantLayout'),
+    loader: () => import(/* webpackChunkName: 'update_assistant_layout' */ '@components/content/update_assistant/UpdateAssistantLayout'),
+    loading: Loading,
+});
+const UpdateAssistant = Loadable({
+    loader: () => import(/* webpackChunkName: 'update_assistant' */ '@components/content/update_assistant/UpdateAssistant'),
+    loading: Loading,
+});
+
+/**
+ * Loadable Connection Overview 2 Layout
+ */
+const ConnectionOverview2 = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_2' */ '@components/content/connection_overview_2/ConnectionOverview2'),
+    loading: Loading,
+});
+
+const ConnectionAdd2 =  Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_add_2' */ '@components/content/connection_overview_2/add/ConnectionAdd2'),
+    loading: Loading,
+});
+
+/**
+ * Loadable Connection Overview Details Layout
+ */
+const ConnectionOverviewDetails = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_extended_details' */ '@change_component/form_elements/form_connection/form_svg/details/ExtendedDetails'),
+    loading: Loading,
+});
+
+/**
+ * Loadable Connection Overview Technical Layout Layout
+ */
+const ConnectionOverviewTechnicalLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_technical_layout' */ '@change_component/form_elements/form_connection/form_svg/layouts/ExtendedTechnicalLayout'),
+    loading: Loading,
+});
+
+/**
+ * Loadable Connection Overview Business Layout Layout
+ */
+const ConnectionOverviewBusinessLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_overview_business_layout' */ '@change_component/form_elements/form_connection/form_svg/layouts/ExtendedBusinessLayout'),
+    loading: Loading,
+});
+
+/**
+ * Loadable Sandbox Resources
+ */
+const Sandbox = Loadable({
+    loader: () => import(/* webpackChunkName: 'sandbox_resources' */ '@components/content/sandbox/Resources'),
     loading: Loading,
 });
 
@@ -323,4 +372,11 @@ export default {
     NotificationTemplateUpdate,
     TemplateConverterLayout,
     UpdateAssistantLayout,
+    UpdateAssistant,
+    ConnectionOverview2,
+    ConnectionAdd2,
+    ConnectionOverviewDetails,
+    ConnectionOverviewTechnicalLayout,
+    ConnectionOverviewBusinessLayout,
+    Sandbox,
 };

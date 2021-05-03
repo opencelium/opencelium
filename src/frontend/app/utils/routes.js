@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,11 +89,21 @@ export const createRoutes = (store) => {
                 <Route path='/notification_templates/:id/view' component={LoadableRouteComponents.NotificationTemplateView}/>
                 <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
+            <Route path='/connection_overview_2' component={isAuth(LoadableRouteComponents.ConnectionOverview2, store)}>
+                <IndexRoute component={LoadableRouteComponents.ConnectionsList}/>
+                <Route path='/connection_overview_2/add' component={LoadableRouteComponents.ConnectionAdd2}/>
+            </Route>
+            <Route path='/connection_overview_details' component={isAuth(LoadableRouteComponents.ConnectionOverviewDetails, store)}/>
+            <Route path='/connection_overview_technical_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewTechnicalLayout, store)}/>
+            <Route path='/connection_overview_business_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewBusinessLayout, store)}/>
             <Route path='/template_converter' component={isAuth(LoadableRouteComponents.TemplateConverterLayout, store)}/>
-            {/*<Route path='/update_assistant' component={isAuth(LoadableRouteComponents.UpdateAssistantLayout, store)}/>*/}
+            <Route path='/update_assistant' component={isAuth(LoadableRouteComponents.UpdateAssistantLayout, store)}>
+                <IndexRoute component={LoadableRouteComponents.UpdateAssistant}/>
+            </Route>
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfileLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.MyProfile}/>
             </Route>
+            <Route path='/sandbox' component={isAuth(LoadableRouteComponents.Sandbox, store)}/>
             <Route path='/login' component={isNotAuth(LoadableRouteComponents.Login, store)}/>
             <Route path='/*' component={PageNotFound}/>
         </Route>

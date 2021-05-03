@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Property from "@basic_components/xml_editor/Property";
@@ -231,6 +246,7 @@ class Tag extends Component{
         const {translate, tag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         if(tag.minimized){
             return <TooltipFontIcon
+                size={14}
                 className={styles.expand_tag}
                 tooltip={translate('XML_EDITOR.MORE')}
                 value={'more_horiz'}
@@ -245,6 +261,7 @@ class Tag extends Component{
                 <div>
                     <TooltipFontIcon
                         id={`${tag.uniqueIndex}_add_tag`}
+                        size={14}
                         className={styles.add_tag_icon_outside}
                         tooltip={translate('XML_EDITOR.ADD_ITEM')}
                         value={'add_circle_outline'}
@@ -274,7 +291,7 @@ class Tag extends Component{
         const isMinimized = tag.minimized;
         return(
             <span onMouseOver={::this.showMinimizerIcon} onMouseLeave={::this.hideMinimizerIcon}>
-                {hasMinimizer && <div className={styles.minimized_icon} style={{marginLeft: `${XML_TAG_INDENT - 10}px`}}><TooltipFontIcon tooltip={isMinimized ? translate('XML_EDITOR.MAXIMIZE') : translate('XML_EDITOR.MINIMIZE')} value={isMinimized ? 'add' : 'remove'} onClick={::this.toggleTag}/></div>}
+                {hasMinimizer && <div className={styles.minimized_icon} style={{marginLeft: `${XML_TAG_INDENT - 10}px`}}><TooltipFontIcon size={14} tooltip={isMinimized ? translate('XML_EDITOR.MAXIMIZE') : translate('XML_EDITOR.MINIMIZE')} value={isMinimized ? 'add' : 'remove'} onClick={::this.toggleTag}/></div>}
                 <div className={styles.tag} style={{paddingLeft: `${XML_TAG_INDENT}px`}}>
                     <span onMouseOver={::this.showTagIcons} onMouseLeave={::this.hideTagIcons} className={styles.tag_open}>
                         <span className={styles.bracket}>{`<${isDeclaration ? '?' : ''}`}</span>
@@ -282,13 +299,13 @@ class Tag extends Component{
                         {hasUpdateTagPopup && !readOnly && <ChangeTag translate={translate} correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
                         {hasAddTagPopup && !readOnly && <ChangeTag translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
                         {this.renderProperties()}
-                        {hasAddPropertyIcon && !readOnly && <TooltipFontIcon id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
+                        {hasAddPropertyIcon && !readOnly && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
                         {hasAddPropertyPopup && !readOnly && <ChangeProperty translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
-                        {hasDeleteTagIcon && !readOnly && <TooltipFontIcon tooltip={translate('XML_EDITOR.DELETE_TAG')} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}
-                        {hasCopyToClipboardIcon && <TooltipFontIcon id={`${tag.uniqueIndex}_copy_to_clipboard`} tooltip={translate('XML_EDITOR.COPY_TO_CLIPBOARD')} value={'keyboard'} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !readOnly && !isDeclaration  ? '16px': '0'}} className={styles.add_tag_icon_inside} onClick={::this.copyToClipboard}/>}
-                        {hasAddTagIcon && !readOnly && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration && <TooltipFontIcon id={`${tag.uniqueIndex}_add_tag`} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={'add_circle_outline'} className={styles.add_tag_icon_inside} onClick={::this.showAddTagPopup}/>}
+                        {hasDeleteTagIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_TAG')} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}
+                        {hasCopyToClipboardIcon && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_copy_to_clipboard`} tooltip={translate('XML_EDITOR.COPY_TO_CLIPBOARD')} value={'keyboard'} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !readOnly && !isDeclaration  ? '16px': '0'}} className={styles.add_tag_icon_inside} onClick={::this.copyToClipboard}/>}
+                        {hasAddTagIcon && !readOnly && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_tag`} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={'add_circle_outline'} className={styles.add_tag_icon_inside} onClick={::this.showAddTagPopup}/>}
                     </span>
                     {
                         tag.tags &&

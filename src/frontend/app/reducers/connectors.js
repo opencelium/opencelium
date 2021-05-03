@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,16 @@ const reducer = (state = initialState, action) => {
         case ConnectorsAction.ADD_CONNECTORICON:
             return state.set('addingConnectorIcon', API_REQUEST_STATE.START).set('error', null);
         case ConnectorsAction.ADD_CONNECTORICON_FULFILLED:
-            return state.set('addingConnectorIcon', API_REQUEST_STATE.FINISH).set('addingConnector', API_REQUEST_STATE.FINISH).set('connectors', connectors.set(connectors.size, action.payload));
+            index = connectors.findIndex(function (connector) {
+                return connector.id === action.payload.connectorId;
+            });
+            if(index === -1) {
+                return state.set('addingConnectorIcon', API_REQUEST_STATE.FINISH).set('addingConnector', API_REQUEST_STATE.FINISH).set('connectors', connectors.set(connectors.size, action.payload));
+            } else{
+                connector = connectors.toJS()[index];
+                connector.icon = action.payload.icon;
+                return state.set('addingConnectorIcon', API_REQUEST_STATE.FINISH).set('addingConnector', API_REQUEST_STATE.FINISH).set('connectors', connectors.set(index, connector));
+            }
         case ConnectorsAction.ADD_CONNECTORICON_REJECTED:
             return state.set('addingConnectorIcon', API_REQUEST_STATE.ERROR).set('addingConnector', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case ConnectorsAction.UPDATE_CONNECTOR:

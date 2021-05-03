@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ const fetchAppVersionEpic = (action$, store) => {
     return action$.ofType(AppAction.FETCH_APPVERSION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `application/oc/version`;
+            let url = `assistant/oc/version`;
             return doRequest({url},{
                 success: (data) => fetchAppVersionFulfilled(data, {...action.settings}),
                 reject: fetchAppVersionRejected,

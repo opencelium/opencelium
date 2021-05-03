@@ -120,6 +120,59 @@ public class QuartzUtility {
         quartzScheduler.scheduleJob(trigger);
     }
 
+    public void runJob(Scheduler scheduler, Map<String, Object> queryParams) throws Exception{
+        Long connectionId = scheduler.getConnection().getId();
+        int schedulerId = scheduler.getId();
+        String name = connectionId + "-" + schedulerId;
+        JobKey jobKey = JobKey.jobKey(name, "connection");
+        JobDetail jobDetail = quartzScheduler.getJobDetail(jobKey);
+        Integer schedulerIdDataMap = (Integer) jobDetail.getJobDataMap().get("schedulerId");
+        JobDataMap jobDataMap = new JobDataMap();
+        if (jobDetail == null){
+            // mapping in context
+            jobDataMap.put("connectionId", connectionId);
+            jobDataMap.put("schedulerId", scheduler.getId());
+            jobDataMap.put("executionType", "scheduler");
+            jobDataMap.put("queryParams", queryParams);
+            jobDataMap.put("type", "prod");
+            jobDetail = org.quartz.JobBuilder.newJob(JobExecutor.class)
+                    .withIdentity(name, "connection")
+                    .withDescription("runJob")
+                    .usingJobData(jobDataMap)
+                    .storeDurably()
+                    .build();
+
+            Trigger trigger = TriggerBuilder.newTrigger()
+                    .withIdentity(Integer.toString(schedulerId), Long.toString(connectionId))
+                    .forJob(jobDetail)
+                    .startNow()
+                    .build();
+
+            quartzScheduler.scheduleJob(jobDetail,trigger);
+            return;
+        }
+
+        if (schedulerIdDataMap == null){
+            jobDetail.getJobDataMap().put("schedulerId", scheduler.getId());
+            quartzScheduler.addJob(jobDetail, true);
+        }
+
+        if (!queryParams.isEmpty()) {
+            jobDetail.getJobDataMap().put("queryParams", queryParams);
+            quartzScheduler.addJob(jobDetail, true);
+        }
+
+        // Define a Trigger that will fire "now" and associate it with the existing job
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity(Integer.toString(schedulerId) + "-now", Long.toString(connectionId))
+                .forJob(jobDetail)
+                .startNow()
+                .build();
+
+        // Schedule the trigger
+        quartzScheduler.scheduleJob(trigger);
+    }
+
     public void runJob(Scheduler scheduler) throws Exception{
         Long connectionId = scheduler.getConnection().getId();
         int schedulerId = scheduler.getId();

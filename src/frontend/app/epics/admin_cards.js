@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ const adminCards = [
     {id: 2, name: 'Invokers', link: '/invokers'},
     {id: 3, name: 'Templates', link: '/templates'},
     {id: 4, name: 'Converter', link: '/template_converter'},
-    {id: 5, name: 'Notification Templates', link: '/notification_templates'},/*
-    {id: 6, name: 'Available Updates', link: '/update_assistant'},*/
+    {id: 5, name: 'Notification Templates', link: '/notification_templates'},
+    {id: 6, name: 'Available Updates', link: '/update_assistant'},
 ];
 
 /**

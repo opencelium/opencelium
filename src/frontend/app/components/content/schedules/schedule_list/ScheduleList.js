@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -314,8 +314,8 @@ class ScheduleList extends Component{
 
     renderFilter(){
         const {filterTitle} = this.state;
-        const {t, schedules} = this.props;
-        if(schedules.length === 0){
+        const {t, schedules, readOnly} = this.props;
+        if(schedules.length === 0 || readOnly){
             return null;
         }
         return(
@@ -333,7 +333,7 @@ class ScheduleList extends Component{
     renderTable(){
         const {currentSchedules} = this.state;
         const {t, authUser, checkingAppResult} = this.props;
-        const {allChecked, checks, checkAllSchedules, checkOneSchedule, deleteCheck} = this.props;
+        const {allChecked, checks, checkAllSchedules, checkOneSchedule, deleteCheck, readOnly} = this.props;
         let classNames = [
             'schedule_list',
             'checkbox_label',
@@ -355,15 +355,15 @@ class ScheduleList extends Component{
             <Table authUser={authUser}>
                 <thead>
                     <tr>
-                        <th><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} labelClassName={styles[classNames.checkbox_label]} inputClassName={styles[classNames.checkbox_field]}/></th>
+                        {!readOnly &&  <th><Checkbox id='input_check_all' checked={allChecked} onChange={checkAllSchedules} labelClassName={styles[classNames.checkbox_label]} inputClassName={styles[classNames.checkbox_field]}/></th>}
                         <th><span>{t('LIST.TITLE')}</span></th>
                         <th><span>{t('LIST.CONNECTION')}</span></th>
                         <th className={'tour-step-3'}><span>{t('LIST.CRON')}</span></th>
                         <th className={'tour-step-4'}><span>{t('LIST.LAST_SUCCESS')}</span></th>
                         <th className={'tour-step-5'}><span>{t('LIST.LAST_FAILURE')}</span></th>
                         <th className={'tour-step-6'}><span>{t('LIST.LAST_DURATION')}</span></th>
-                        <th className={'tour-step-7'}><span>{t('LIST.STATUS')}</span></th>
-                        <th><span>{t('LIST.ACTION')}</span></th>
+                        {!readOnly &&  <th className={'tour-step-7'}><span>{t('LIST.STATUS')}</span></th>}
+                        {!readOnly &&  <th><span>{t('LIST.ACTION')}</span></th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -380,7 +380,7 @@ class ScheduleList extends Component{
                             }
                             return (
                                 <tr key={key} style={backgroundColorStyle}>
-                                    <td>
+                                    {!readOnly &&  <td>
                                         <Checkbox
                                             id={`input_check_${key}`}
                                             checked={checked}
@@ -388,27 +388,33 @@ class ScheduleList extends Component{
                                             labelClassName={styles[classNames.checkbox_label]}
                                             inputClassName={styles[classNames.checkbox_field]}
                                         />
-                                    </td>
+                                    </td>}
                                     <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>
                                     <td className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></td>
                                     <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
                                     <LastSuccessCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
                                     <LastFailureCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
                                     <LastDurationCell schedule={schedule} t={t}/>
-                                    <StatusCell index={key} schedule={schedule}/>
-                                    <td style={{padding: '5px'}}>
-                                        <div className={styles[classNames.schedule_list_actions]}>
-                                            <div>
-                                                <WebHookTools index={key} schedule={schedule} t={t}/>
-                                                <ScheduleNotification schedule={schedule} index={key}/>
-                                                <ScheduleDelete index={key} schedule={schedule} deleteCheck={(e) => deleteCheck(e, {key, id: schedule.id})}/>
+                                    {!readOnly &&  <StatusCell index={key} schedule={schedule}/>}
+                                    {!readOnly &&
+                                        <td style={{padding: '5px'}}>
+                                            <div className={styles[classNames.schedule_list_actions]}>
+                                                <div>
+                                                    <WebHookTools index={key} schedule={schedule} t={t}/>
+                                                    <ScheduleNotification schedule={schedule} index={key}/>
+                                                    <ScheduleDelete index={key} schedule={schedule}
+                                                                    deleteCheck={(e) => deleteCheck(e, {
+                                                                        key,
+                                                                        id: schedule.id
+                                                                    })}/>
+                                                </div>
+                                                <div>
+                                                    <ScheduleStart index={key} schedule={schedule}/>
+                                                    <ScheduleUpdate index={key} schedule={schedule}/>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <ScheduleStart index={key} schedule={schedule}/>
-                                                <ScheduleUpdate index={key} schedule={schedule}/>
-                                            </div>
-                                        </div>
-                                    </td>
+                                        </td>
+                                    }
                                 </tr>
                             );
                         })
@@ -420,7 +426,7 @@ class ScheduleList extends Component{
 
     render(){
         const {currentSchedules} = this.state;
-        const {authUser} = this.props;
+        const {authUser, readOnly} = this.props;
         let classNames = [
             'schedule_list',
             'checkbox',
@@ -439,7 +445,7 @@ class ScheduleList extends Component{
                     {this.renderFilter()}
                     {this.renderTable()}
                     {
-                        currentSchedules.length !== 0 &&
+                        currentSchedules.length !== 0 && !readOnly &&
                             <div className={styles[classNames.bulk_actions]}>
                                 <Button authUser={authUser} title={'Start'} className={styles[classNames.action_item]}
                                         onClick={::this.startSelectedSchedules} disabled={!this.isOneChecked()}/>
@@ -460,11 +466,21 @@ class ScheduleList extends Component{
 
 ScheduleList.propTypes = {
     schedules: PropTypes.array.isRequired,
-    allChecked: PropTypes.bool.isRequired,
-    checks: PropTypes.array.isRequired,
-    checkAllSchedules: PropTypes.func.isRequired,
-    checkOneSchedule: PropTypes.func.isRequired,
-    deleteCheck: PropTypes.func.isRequired,
+    allChecked: PropTypes.bool,
+    checks: PropTypes.array,
+    checkAllSchedules: PropTypes.func,
+    checkOneSchedule: PropTypes.func,
+    deleteCheck: PropTypes.func,
+    readOnly: PropTypes.bool,
 };
+
+ScheduleList.defaultProps = {
+    allChecked: false,
+    checks: [],
+    checkAllSchedules: () => {},
+    checkOneSchedule: () => {},
+    deleteCheck: () => {},
+    readOnly: false,
+}
 
 export default ScheduleList;

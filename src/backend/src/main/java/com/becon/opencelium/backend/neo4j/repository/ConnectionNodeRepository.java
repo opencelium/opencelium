@@ -31,4 +31,6 @@ public interface ConnectionNodeRepository extends Neo4jRepository<ConnectionNode
 
     @Query("MATCH p=((:Connection{connectionId:{0}})-[*]->()) return p")
     Optional<ConnectionNode> findByConnectionId(Long connectionId);
+
+    boolean existsByConnectionId(Long id);
 }

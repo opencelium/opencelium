@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ class NotificationTypeInput extends Component{
                 onBlur={::this.blurNotificationType}
                 options={options}
                 placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_PLACEHOLDER')}
-                icon={'add_alert'}
+                icon={'bell'}
                 label={t('NOTIFICATION.NOTIFICATION_CHANGE.NOTIFICATION_TYPE_LABEL')}
                 required={true}
                 isFocused={focused}

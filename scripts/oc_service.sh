@@ -59,9 +59,14 @@ restart_backend(){
 	start_backend
 }
 
+rebuild_frontend(){
+        cd /opt/src/frontend/ && yarn upgrade --cwd /opt/src/frontend --cache-folder /opt/src/frontend > /opt/logs/oc_frontend.out &
+}
+
 stop_frontend()
 {
-        /usr/lib/klibc/bin/kill $(pgrep -f "/usr/local/bin/node dev_server.js --mode development")
+	/usr/lib/klibc/bin/kill $(pgrep -f "bin/node server.js")
+	sleep 1
 }
 
 start_frontend(){
@@ -75,7 +80,7 @@ start_frontend(){
 		        RETRY=$((RETRY-1))
                 	sleep 2
 		else
-        		cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_dev > /opt/logs/oc_frontend.out &
+        		cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_prod > /opt/logs/oc_frontend.out &
 		        echo "frontend started..."
                 	return 1
 		fi
@@ -94,7 +99,7 @@ check_frontend(){
 	if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ;
         then echo ""
         else
-        	cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_dev > /opt/logs/oc_frontend.out &
+        	cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_prod > /opt/logs/oc_frontend.out &
                 echo "frontend started..."
                 return 1
         fi
@@ -115,10 +120,154 @@ check_backend(){
         echo "Backtend already started."
 }
 
+helpBackup()
+{
+	   echo ""
+	   echo "Usage: oc backup -d /backup/dir -u username -p password"
+	   echo ""
+	   echo -e "\t-d Set path to the backup directory"
+	   echo -e "\t-u Database username"
+	   echo -e "\t-p Database password"
+	   echo -e "\t-n [optional] Filename (default OC_TIMESTAMP)"
+	   exit 1 # Exit script after printing help
+}
+
+backup(){
+
+	OPTIND=2
+	while getopts "d:u:p:n:" opt
+	do
+	   case "$opt" in
+	      d ) backupdir="$OPTARG" ;;
+	      u ) username="$OPTARG" ;;
+	      p ) password="$OPTARG" ;;
+	      n ) name="$OPTARG" ;;
+	      ? ) helpBackup ;; # Print helpInfo in case parameter is non-existent
+	   esac
+	done
+	
+	# Init name
+	if [ -z "$name" ]
+	then
+           current_time=$(date "+%Y%m%d%H%M%S")
+	   name="OC_$current_time"
+	fi
+	
+	        # Print helpInfo in case parameters are empty
+        if [ -z "$backupdir" ] || [ -z "$username" ] || [ -z "$password" ]
+        then
+           echo "Some or all of the parameters are empty";
+           helpBackup
+        fi
+	
+	### clear old backups
+	rm -rf $backupdir/graph.db.dump
+	rm -rf $backupdir/oc_data.sql
+	rm -rf $backupdir/sourcecode.zip
+	rm -rf $backupdir/$name.zip
+
+	/usr/bin/systemctl stop neo4j
+
+	### database backup
+	/usr/bin/neo4j-admin dump --database=graph.db --to=$backupdir
+	/usr/bin/mysqldump -u $username -p$password opencelium > $backupdir/oc_data.sql
+
+	/usr/bin/systemctl start neo4j
+
+	### file system backup
+	zip -q -r $backupdir/sourcecode.zip /opt/ 2>/dev/null
+
+	### save all together in one backup file
+	zip -q -r $backupdir/$name.zip $backupdir/sourcecode.zip $backupdir/oc_data.sql $backupdir/graph.db.dump 2>/dev/null
+
+        ### clear old backups
+        rm -rf $backupdir/graph.db.dump
+        rm -rf $backupdir/oc_data.sql
+        rm -rf $backupdir/sourcecode.zip
+}
+
+helpRestore()
+{
+	   echo ""
+	   echo "Usage: oc backup -d /backup/dir -u username -p password"
+	   echo ""
+	   echo -e "\t-d Set path from the backup directory"
+	   echo -e "\t-u Database username"
+	   echo -e "\t-p Database password"
+	   echo -e "\t-n Filename of the backup file"
+	   exit 1 # Exit script after printing help
+}
+
+restore(){
+
+	OPTIND=2
+	while getopts "d:u:p:n:" opt
+	do
+	   case "$opt" in
+	      d ) backupdir="$OPTARG" ;;
+	      u ) username="$OPTARG" ;;
+	      p ) password="$OPTARG" ;;
+	      n ) name="$OPTARG" ;;
+	      ? ) helpRestore ;; # Print helpInfo in case parameter is non-existent
+	   esac
+	done
+	
+	        # Print helpInfo in case parameters are empty
+        if [ -z "$backupdir" ] || [ -z "$username" ] || [ -z "$password" ] || [ -z "$name" ]
+        then
+           echo "Some or all of the parameters are empty";
+           helpRestore
+        fi
+
+	### unzip backup file
+	unzip -qq -o $backupdir/$name.zip -d /
+
+	### stopping all services
+	/usr/bin/systemctl stop neo4j
+	/usr/bin/oc stop_backend
+	/usr/bin/oc stop_frontend
+
+	### database backup
+	/usr/bin/neo4j-admin load --database=graph.db --from=$backupdir/graph.db.dump --force
+	/usr/bin/mysql -u $username -p$password opencelium < $backupdir/oc_data.sql
+	
+	### change owner rights
+	chown -R neo4j:neo4j /var/lib/neo4j/data/databases/graph.db/
+
+	### file system backup
+	unzip -qq -o $backupdir/$name.zip -d /
+
+	rm $backupdir/sourcecode.zip $backupdir/oc_data.sql $backupdir/graph.db.dump
+
+        ### starting all services
+        /usr/bin/systemctl start neo4j
+        /usr/bin/oc start_backend
+        /usr/bin/oc rebuild_frontend
+        sleep 60
+	/usr/bin/oc start_frontend
+
+	echo "[Hint] If the frontend doesnt start, please execute the commands rebuild_frontend and start_frontend."
+}
+
 ###### MAIN
 if [ "$1" != "" ]
 then
-	$1 $2
+	$1 $@
 else
-    echo "please use one of the following commands: refresh_db rebuild_backend stop_backend start_backend restart_backend stop_frontend start_frontend restart_frontend check_frontend check_backend"
+    echo ""
+    echo "Please use one of the following commands:"
+    echo ""
+    echo "refresh_db		- deletes all databases"
+    echo "rebuild_backend		- rebuild backend files"
+    echo "stop_backend		- stop backend service"
+    echo "start_backend		- start backend service"
+    echo "restart_backend		- restart backend service"
+    echo "rebuild_frontend	- rebuild frontend files"
+    echo "stop_frontend		- stop frontend service"
+    echo "start_frontend		- start frontend service"
+    echo "restart_frontend	- restart frontend service"
+    echo "check_frontend		- checks if frontend is running. Otherwise the frontend will be started automatically"
+    echo "check_backend		- checks if backend is running. Otherwise the backend will be started automatically"
+    echo "backup			- creates a backup of the entire system"
+    echo "restore			- restores the system"
 fi

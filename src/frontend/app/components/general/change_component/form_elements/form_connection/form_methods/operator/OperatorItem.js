@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -269,10 +269,6 @@ class OperatorItem extends Component{
         let value = 'vertical_align_top';
         let tooltip = 'Minimize';
         let fontIconStyles = {};
-        if(operator.isMinimized) {
-            value = 'vertical_align_bottom';
-            tooltip = 'Maximize';
-        }
         return(
             <TooltipFontIcon value={value} tooltip={tooltip} className={styles.toggle_icon} style={fontIconStyles} onClick={::this.toggleItem}/>
         );

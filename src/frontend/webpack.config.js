@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 const path = require('path');
 const webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
@@ -68,6 +83,9 @@ const babelOptions = preset => {
     const opts = {
         presets: [
             '@babel/preset-env'
+        ],
+        plugins: [
+            "@babel/plugin-proposal-optional-chaining",
         ]
     };
     if (preset) {
@@ -103,10 +121,6 @@ const plugins = () => {
                 {
                     from: path.resolve(__dirname, 'styles'),
                     to: path.resolve(__dirname, 'dist/styles')
-                },
-                {
-                    from: path.resolve(__dirname, 'jira_integration.js'),
-                    to: path.resolve(__dirname, 'dist')
                 },
                 {
                     from: path.resolve(__dirname, 'locales'),
@@ -164,6 +178,9 @@ module.exports = {
         extensions: ['.js', '.json', '.scss'],
         alias: {
             'assets': path.resolve('./img'),
+            '@root': path.resolve('.'),
+            '@styles': path.resolve('./styles'),
+            '@images': path.resolve('./img'),
             '@actions': path.resolve(__dirname, 'app/actions'),
             '@classes': path.resolve(__dirname, 'app/classes'),
             '@components': path.resolve(__dirname, 'app/components'),
@@ -201,19 +218,14 @@ module.exports = {
                 })
             },
             {
-                test: /\.(png|jpe?g|svg|gif)$/,
+                test: /\.(png|jpe?g|svg|gif|woff|woff2)$/,
                 use: [
                     {
-                        loader: 'file-loader',
-                        options: {
-                            name(file) {
-                                return '[sha512:hash:base64:7].[ext]';
-                            },
-                        },
-                    },
+                        loader: 'url-loader',
+                    }/*,
                     {
                         loader: 'image-webpack-loader'
-                    }
+                    }*/
                 ]
             },
             {

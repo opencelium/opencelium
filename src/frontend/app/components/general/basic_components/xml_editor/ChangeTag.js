@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import ReactDOM from 'react-dom';
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
@@ -170,7 +185,7 @@ class ChangeTag extends Component{
         const {translate, tag, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
-                <TooltipFontIcon size={16} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
+                <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
                 <TagType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}
                 {valueType === TAG_VALUE_TYPES.TEXT && <Value translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}

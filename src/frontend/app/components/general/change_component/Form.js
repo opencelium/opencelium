@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,8 @@ import FormOperations from "./form_elements/form_invoker/FormOperations";
 import FormNotificationTemplateName from './form_elements/form_notification_template/FormName';
 import FormNotificationTemplateType from './form_elements/form_notification_template/FormType';
 import FormContent from "./form_elements/form_notification_template/FormContent";
-import FormMessage from "@change_component/form_elements/FormMessage";
+import FormComponent from "@change_component/form_elements/FormComponent";
+import FormConnectionSvg from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 
 
 /**
@@ -100,8 +101,8 @@ class Form extends Component{
                     updateEntity={updateEntity}
                     data={data}
                 />;
-            case 'message':
-                return <FormMessage
+            case 'component':
+                return <FormComponent
                     key={key}
                     entity={entity}
                     updateEntity={updateEntity}
@@ -142,6 +143,13 @@ class Form extends Component{
                 />;
             case 'methods':
                 return <FormMethods
+                    key={key}
+                    entity={entity}
+                    updateEntity={updateEntity}
+                    data={data}
+                />;
+            case 'connection_svg':
+                return <FormConnectionSvg
                     key={key}
                     entity={entity}
                     updateEntity={updateEntity}

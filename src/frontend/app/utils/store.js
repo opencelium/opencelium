@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 
 import {createStore, applyMiddleware, compose} from 'redux';
+import { createStateSyncMiddleware, initMessageListener } from 'redux-state-sync';
 import createLogger from 'redux-logger';
 import {createEpicMiddleware} from 'redux-observable';
 
@@ -21,12 +22,12 @@ import notificationMiddleware from '../middlewares/notification';
 import errorHandlingMiddleware from '../middlewares/error_handling';
 import resourceMappingMiddleware from '../middlewares/resource_mapping';
 import frontBackMappingMiddleware from '../middlewares/front_back_mapping';
-import { combinedReducers } from './reducers';
+import combinedReducers from './reducers';
 import epics from './epics';
 
 import {responsiveStoreEnhancer} from 'redux-responsive';
 import {AppSettings} from "./constants/app";
-
+import {ConnectionOverview2Action} from "@utils/actions";
 
 const initialEnhancers  = [responsiveStoreEnhancer];
 
@@ -46,15 +47,21 @@ let loggerOptions = {
     },
 };
 
+const syncConfig = {
+    whitelist: [
+        ConnectionOverview2Action.SET_ITEMS, ConnectionOverview2Action.SET_CURRENTSUBITEM,
+        ConnectionOverview2Action.SET_DETAILSLOCATION, ConnectionOverview2Action.SET_ITEMS,
+        ConnectionOverview2Action.SET_ARROWS, ConnectionOverview2Action.SET_CURRENTITEM,
+    ],
+};
 let enhancers = {};
 
 let initialMiddleware = [];
-
 /**
  * define middlewares
  */
 const epicMiddleware = createEpicMiddleware(epics);
-let middleware = [errorHandlingMiddleware, notificationMiddleware, resourceMappingMiddleware, frontBackMappingMiddleware, epicMiddleware];
+let middleware = [createStateSyncMiddleware(syncConfig), errorHandlingMiddleware, notificationMiddleware, resourceMappingMiddleware, frontBackMappingMiddleware, epicMiddleware];
 if (AppSettings.reduxHasLogs){
     initialMiddleware = [createLogger(loggerOptions)];
 }
@@ -64,6 +71,9 @@ const composeEnhancers = compose();
 /**
  * creates store for app including reducers, moddlewares and additional enhancers
  */
+
+
+
 const store = createStore(
     combinedReducers,
     composeEnhancers(
@@ -73,4 +83,6 @@ const store = createStore(
     )
 );
 
-export default store;
+initMessageListener(store);
+
+export {store};

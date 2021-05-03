@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import {sessionExpired} from "@actions/auth";
 import {AuthAction} from "../utils/actions";
 
 import {history} from '@components/App';
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import styles from "@themes/default/general/app";
 import {checkExpiredMessages} from "@utils/app";
 

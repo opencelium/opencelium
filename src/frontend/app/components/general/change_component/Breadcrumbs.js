@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class Breadcrumbs extends Component{
     /**
      * to open page
      */
-    openPage(e, page){
+    openPage(page){
         const {exactPage} = this.props;
         exactPage(page);
     }
@@ -43,7 +43,7 @@ class Breadcrumbs extends Component{
         let classNames = ['breadcrumbs_item_text_active', 'breadcrumbs_item_text'];
         classNames = getThemeClass({classNames, authUser, styles});
         let itemStyle = styles[classNames.breadcrumbs_item_text_active];
-        let onClickItem = (e) => ::this.openPage(e, key);
+        let onClickItem = () => ::this.openPage(key);
         if(page === key){
             itemStyle = styles[classNames.breadcrumbs_item_text];
             onClickItem = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import {Table as BootstrapTable} from 'reactstrap';
 import styles from '@themes/default/general/basic_components.scss';
 import {getThemeClass} from "@utils/app";

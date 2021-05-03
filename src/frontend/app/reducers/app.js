@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ const initialState = fromJS({
     addingErrorTicket: API_REQUEST_STATE.INITIAL,
     fetchingAppVersion: API_REQUEST_STATE.INITIAL,
     currentPageItems: [],
+    isComponentExternalInChangeContent: false,
     appVersion: '',
     currentMenu: {},
     error: null,
@@ -42,6 +43,8 @@ const reducer = (state = initialState, action) => {
         case AppAction.CHANGE_LANGUAGE:
             i18n.changeLanguage(action.payload.code);
             return state.set('currentLanguage', action.payload.code);
+        case AppAction.SET_COMPONENTINCHANGECONTENT:
+            return state.set('isComponentExternalInChangeContent', action.payload);
         case AppAction.UPDATE_MENU:
             setLS("currentMenu", action.payload);
             return state.set('currentMenu', action.payload);

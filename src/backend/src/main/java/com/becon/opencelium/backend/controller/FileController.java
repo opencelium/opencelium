@@ -16,6 +16,10 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.application.entity.AvailableUpdate;
+import com.becon.opencelium.backend.application.service.AssistantServiceImp;
+import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.mysql.entity.Connector;
@@ -26,6 +30,7 @@ import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.mysql.service.UserDetailServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
@@ -42,6 +47,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Controller
@@ -62,6 +70,12 @@ public class FileController {
 
     @Autowired
     private ConnectorServiceImp connectorService;
+
+    @Autowired
+    private AssistantServiceImp assistantServiceImp;
+
+    @Autowired
+    private UpdatePackageServiceImp updatePackageServiceImp;
 
     private final UserStorageService storageService;
 
@@ -190,6 +204,34 @@ public class FileController {
         } catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    @PostMapping(value = "/assistant/zipfile")
+    public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+
+            Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
+            Path target = Paths.get(PathConstant.APPLICATION);
+            Path folder = assistantServiceImp.unzipFolder(source, target);
+
+            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
+            assistantServiceImp.deleteZipFile(pathToZip);
+            String dir = folder.toString().replace(folder.getParent().toString() + File.separator, "");
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(dir);
+            AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
+            return ResponseEntity.ok(availableUpdateResource);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping(value = "/assistant/zipfile/{filename}")
+    public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
+
+        Path zipPath = Paths.get(PathConstant.APPLICATION + filename);
+        assistantServiceImp.deleteZipFile(zipPath);
+
+        return ResponseEntity.noContent().build();
     }
 
     private boolean checkJsonExtension(String extension){

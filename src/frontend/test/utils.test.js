@@ -1,6 +1,21 @@
-import {checkCronExpression} from "@utils/app";
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-describe.only('Regular Expression for Cron Expression ', () => {
+import {checkCronExpression, isEqualObjectParams} from "@utils/app";
+
+describe('Regular Expression for Cron Expression ', () => {
     const truthyCronExpressions = [
         //test seconds
         '0/1 0 0 0 0 ?', '1-5 0 0 0 0 ?', '2,3 0 0 0 0 ?', '* 0 0 0 0 ?',
@@ -36,3 +51,18 @@ describe.only('Regular Expression for Cron Expression ', () => {
         });
     }
 });
+
+describe('Compare Object Params', () => {
+    test('same keys different values', () => {
+        let obj = {param1: {param3: 'a', param4: 'b'}, params2: '2'};
+        let anotherObj = {params2: '2', param1: {param4: 'b2', param3: 'a'}};
+        const received = isEqualObjectParams(obj, anotherObj);
+        expect(received).toBeTruthy();
+    })
+    test('different keys different values', () => {
+        let obj = {"test":"test","method":"idoit.version","id":"1","params":{"apikey":"{apikey}","language":"de"},"version":"2.0","one more test":"onemoretest"};
+        let anotherObj = {"test":"t","method":"idoit.version","id":"1","params":{"apikey":"{apikey}","language":"de"},"version":"2.0"};
+        const received = isEqualObjectParams(obj, anotherObj);
+        expect(received).toBeFalsy();
+    })
+})

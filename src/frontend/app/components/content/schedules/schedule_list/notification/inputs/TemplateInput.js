@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import CNotification from "@classes/components/content/schedule/notification/CNo
 import Select from "@basic_components/inputs/Select";
 import {fetchScheduleNotificationTemplates} from "@actions/schedules/fetch";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import Loading from "@loading";
 import CNotificationTemplate
     from "@classes/components/content/schedule/notification/CNotificationTemplate";
 

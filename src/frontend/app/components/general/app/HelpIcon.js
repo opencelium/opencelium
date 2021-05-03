@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@ class HelpIcon extends Component{
         return (
             <sup>
                 <TooltipFontIcon
-                    style={{cursor: 'pointer', color: 'black', fontSize: '18px'}}
+                    grayTheme={true}
+                    size={16}
                     value={'help_outline'}
                     tooltip={'Help'}
                     onClick={onClick}

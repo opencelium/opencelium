@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -201,6 +201,7 @@ class Header extends Component{
                                 ?
                                 <div>
                                     <TooltipFontIcon
+                                        size={16}
                                         className={styles.invoker_item_delete_button}
                                         value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
                                         onMouseOver={::this.isOnDeleteButtonOver}

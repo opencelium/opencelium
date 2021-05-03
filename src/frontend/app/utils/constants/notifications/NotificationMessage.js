@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ class NotificationMessage extends Component{
                 toggle={::this.toggleShowDialogInDetails}
                 title={t('DIALOG_DETAILS.TITLE')}
             >
-                <p>
+                <p style={{overflow: 'auto'}}>
                     <span>{inDetailsMessage}</span>
                     {hasColor && <span style={{background: lastWord, width: '30px', height: '17px', verticalAlign: 'sub', display: 'inline-block', borderRadius: '2px', marginLeft: '5px'}}/>}
                 </p>

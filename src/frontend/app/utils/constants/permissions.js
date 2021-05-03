@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,4 +131,16 @@ export const NotificationTemplatePermissions = {
     READ: {entity: 'SCHEDULE', permission: 'READ'},
     UPDATE: {entity: 'SCHEDULE', permission: 'UPDATE'},
     DELETE: {entity: 'SCHEDULE', permission: 'DELETE'},
+};
+/**
+ * permission constants for update assistant
+ */
+/*
+* TODO: change entity when backend will be ready
+*/
+export const UpdateAssistantPermissions = {
+    CREATE: {entity: 'USERGROUP', permission: 'CREATE'},
+    READ: {entity: 'USERGROUP', permission: 'READ'},
+    UPDATE: {entity: 'USERGROUP', permission: 'UPDATE'},
+    DELETE: {entity: 'USERGROUP', permission: 'DELETE'},
 };

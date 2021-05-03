@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import {fetchConnection} from '@actions/connections/fetch';
 import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
-import ReactSVG from 'react-svg';
+import {ReactSVG} from 'react-svg';
 import styles from '@themes/default/content/connections/graph.scss';
 import {getThemeClass} from "@utils/app";
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,18 @@ const changeLanguage = (language) => {
         payload: language
     };
 };
+
+/**
+ * set component in ChangeContent as external or internal
+ * @param isExternal
+ * @returns {{type: string, payload: {}}}
+ */
+const setComponentInChangeContent = (isExternal = false) => {
+    return {
+        type: AppAction.SET_COMPONENTINCHANGECONTENT,
+        payload: isExternal,
+    }
+}
 
 /**
  * update burger menu
@@ -142,6 +154,7 @@ const setCurrentPageItems = (currentItems) => {
 
 export {
     changeLanguage,
+    setComponentInChangeContent,
     updateMenu,
     doRequestRejected,
     addErrorTicket,

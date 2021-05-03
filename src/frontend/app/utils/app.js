@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import CUserGroup from "@classes/components/content/user_group/CUserGroup";
 import CComponent from "@classes/components/content/user_group/CComponent";
+import _ from 'lodash';
+import {SEPARATE_WINDOW} from "@utils/constants/app";
 
 
 /**
@@ -30,6 +32,18 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
+export function hasHeader(props){
+    return !isExternalWindow();
+}
+
+export function isExternalWindow(){
+    for(let windowParam in SEPARATE_WINDOW.CONNECTION_OVERVIEW){
+        if(window.name === SEPARATE_WINDOW.CONNECTION_OVERVIEW[windowParam]){
+            return true;
+        }
+    }
+    return false;
+}
 
 export function checkCronExpression(cronExp){
     const timeParts = cronExp.split(' ');
@@ -59,22 +73,98 @@ export function checkExpiredMessages(data){
         if(data && data.hasOwnProperty('message')){
             result = TOKEN_EXPIRED_MESSAGES.indexOf(data.message) !== -1;
         }
-        if(!result && data && data.hasOwnProperty('response') && data.response.hasOwnProperty('message')){
+        if(!result && data && data.hasOwnProperty('response') && data.response && data.response.hasOwnProperty('message')){
             result = TOKEN_EXPIRED_MESSAGES.indexOf(data.response.message) !== -1;
         }
     }
     return result;
 }
 
+export function setFocusByCaretPositionInDivEditable(elem, caretPosition){
+    if(elem && caretPosition >= 0) {
+        let range = document.createRange();
+        let sel = window.getSelection();
+        let childNodeIndex = 0;
+        for(let i = 0; i < elem.children.length; i++){
+            caretPosition -= elem.children[i].innerText.length;
+            if(caretPosition < 0){
+                caretPosition = elem.children[i].innerText.length + caretPosition;
+                break;
+            }
+            childNodeIndex++;
+        }
+        const childNode = elem.childNodes[childNodeIndex];
+        if(childNode) {
+            if (childNode.nodeType === 1) {
+                if (caretPosition < childNode.firstChild.length) {
+                    range.setStart(childNode.firstChild, caretPosition);
+                } else {
+                    return;
+                }
+            } else {
+                if (caretPosition < childNode.length) {
+                    range.setStart(childNode, caretPosition);
+                } else {
+                    return;
+                }
+            }
+        } else{
+            return;
+        }
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        elem.focus();
+    }
+}
+
+export function getCaretPositionOfDivEditable(editableDiv) {
+    let caretOffset = 0;
+    if (window.getSelection) {
+        let range = window.getSelection().getRangeAt(0);
+        let preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(editableDiv);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        caretOffset = preCaretRange.toString().length;
+    }
+
+    else if (document.selection && document.selection.type != "Control") {
+        let textRange = document.selection.createRange();
+        let preCaretTextRange = document.body.createTextRange();
+        preCaretTextRange.moveToElementText(editableDiv);
+        preCaretTextRange.setEndPoint("EndToEnd", textRange);
+        caretOffset = preCaretTextRange.text.length;
+    }
+
+    return caretOffset;
+}
+
+export function dataURLtoFile(dataurl, filename) {
+    let arr = dataurl.split(','),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, {type:mime});
+}
 
 /**
  * to replace &amp to amp in the text
- * @param innerText - shoul be free html text
+ * @param innerText - should be free html text
  */
 export function freeStringFromAmp(innerText){
     const div = document.createElement('div');
-    div.innerHTML = innerText;
-    return div.firstChild.nodeValue;
+    if(div){
+        div.innerHTML = innerText;
+        if(div.firstChild) {
+            return div.firstChild.nodeValue;
+        }
+    }
+    return innerText;
 }
 
 /**
@@ -313,6 +403,60 @@ export function componentAppear(elementId){
         }
     }, 500);
 }
+
+/**
+ * to merge two objects deeply
+ *
+ * @param target - target object
+ * @param source - source object
+ */
+export function deepObjectsMerge(target, source){
+    // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
+    for (const key of Object.keys(source)) {
+        if (source[key] instanceof Object) Object.assign(source[key], deepObjectsMerge(target[key], source[key]))
+    }
+
+    // Join `target` and modified `source`
+    Object.assign(target || {}, source)
+    return target
+}
+
+/**
+ * to compare two arrays values
+ *
+ * @param arr1 - first array
+ * @param arr2 - second array
+ */
+function compareArrays(arr1, arr2){
+    return _.isEqual(_.sortBy(arr1), _.sortBy(arr2))
+}
+
+
+/**
+ * to compare two objects' params on equality
+ *
+ * @param obj1 - first object
+ * @param obj2 - second object
+ */
+export function isEqualObjectParams(obj1, obj2){
+    let result = false;
+    let obj1Keys = _.sortBy(Object.keys(obj1));
+    let obj2Keys = _.sortBy(Object.keys(obj2));
+    if(compareArrays(obj1Keys, obj2Keys)){
+        let hasObjects = false;
+        for(let param in obj1){
+            if(_.isPlainObject(obj1[param]) && _.isPlainObject(obj2[param])){
+                result = isEqualObjectParams(obj1[param], obj2[param]);
+                hasObjects = true;
+            }
+        }
+        if(!hasObjects){
+            result = true;
+        }
+    }
+    return result;
+}
+
 
 /**
  * to focus on input by id

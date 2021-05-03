@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ class FormSelectDescription extends Component{
                     tabIndex={'-1'}
                     name={description.name}
                     type={'text'}
-                    icon={'short_text'}
+                    icon={'notes'}
                     value={descriptionValue}
                     multiline={true}
                     rows={4}

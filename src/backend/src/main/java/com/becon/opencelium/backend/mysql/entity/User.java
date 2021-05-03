@@ -20,6 +20,11 @@ import com.becon.opencelium.backend.resource.user.UserResource;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "user")
@@ -46,14 +51,30 @@ public class User {
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private UserRole userRole;
 
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<WidgetSetting> widgetSettings = new HashSet<>();
+
     public User() {
     }
 
-    public User(UserResource userResource) {
+//    public User(UserResource userResource) {
+//        this.id = userResource.getUserId();
+//        this.email = userResource.getEmail();
+//        this.userDetail = new UserDetail(userResource.getUserDetail());
+//        this.userRole = new UserRole(userResource.getUserGroup());
+//        this.widgetSettings = userResource.getWidgetSettings()
+//                                            .stream()
+//                                            .map(WidgetSetting::new)
+//                                            .collect(Collectors.toList());
+//    }
+
+    public User(UserResource userResource, Set<WidgetSetting> widgetSettings) {
         this.id = userResource.getUserId();
         this.email = userResource.getEmail();
         this.userDetail = new UserDetail(userResource.getUserDetail());
         this.userRole = new UserRole(userResource.getUserGroup());
+        this.widgetSettings = widgetSettings;
     }
 
     public int getId() {
@@ -102,5 +123,13 @@ public class User {
 
     public void setUserRole(UserRole userRole) {
         this.userRole = userRole;
+    }
+
+    public Set<WidgetSetting> getWidgetSettings() {
+        return widgetSettings;
+    }
+
+    public void setWidgetSettings(Set<WidgetSetting> widgetSettings) {
+        this.widgetSettings = widgetSettings;
     }
 }

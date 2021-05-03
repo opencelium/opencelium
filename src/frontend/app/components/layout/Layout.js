@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 import {getLS} from "@utils/LocalStorage";
 import {API_REQUEST_STATE, TEST} from "@utils/constants/app";
+import {hasHeader} from "@utils/app";
 
 let checkTokenInterval;
 
@@ -42,6 +43,7 @@ function mapStateToProps(state){
     const auth = state.get('auth');
     return {
         appVersion: app.get('appVersion'),
+        isComponentExternalInChangeContent: app.get('isComponentExternalInChangeContent'),
         fetchingAppVersion: app.get('fetchingAppVersion'),
         authUser: auth.get('authUser'),
         isAuth: auth.get('isAuth'),
@@ -74,9 +76,7 @@ class Layout extends Component{
             if( appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
                 fetchAppVersion();
             }
-        }/*
-        console.log(TEST.connection.toConnector.methods.map(method => method.index));
-        console.log(TEST.connection.toConnector.operators.map(operator => operator.index));*/
+        }
     }
 
     componentDidUpdate(prevProps){
@@ -133,7 +133,7 @@ class Layout extends Component{
     }
 
     renderHeader(){
-        if(this.props.isAuth){
+        if(this.props.isAuth && hasHeader(this.props)){
             return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
         }
         return null;
@@ -146,11 +146,12 @@ class Layout extends Component{
     }
 
     renderLayout(){
+        const {isComponentExternalInChangeContent} = this.props;
         return (
             <div>
                 {this.renderHeader()}
                 {this.renderLoginAgain()}
-                <div>
+                <div style={isComponentExternalInChangeContent ? {position: 'relative'} : {}}>
                     {this.props.children}
                 </div>
                 {this.renderFooter()}

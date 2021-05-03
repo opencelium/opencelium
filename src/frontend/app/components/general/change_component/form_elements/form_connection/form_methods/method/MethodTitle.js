@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ import CMethodItem from "@classes/components/content/connection/method/CMethodIt
 import FontIcon from "@basic_components/FontIcon";
 import CardTitle from "@basic_components/card/CardTitle";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {deepObjectsMerge, isEqualObjectParams} from "@utils/app";
+import _ from "lodash";
 
 
 /**
@@ -38,12 +40,24 @@ class MethodTitle extends Component{
     constructor(props){
         super(props);
 
+        let hasRefreshIcon = false;
+
+        const newInvokerData = props.method.invoker._operations.find(o => o.name === props.method.name);
+        if(newInvokerData){
+            if(!isEqualObjectParams(newInvokerData.request.body.fields, props.method.request.body.fields)
+                || !isEqualObjectParams(newInvokerData.response.success.body.fields, props.method.response.success.body.fields)
+                || !isEqualObjectParams(newInvokerData.response.fail.body.fields, props.method.response.fail.body.fields)){
+                hasRefreshIcon = true;
+            }
+        }
         this.state = {
             hasDeleteButton: false,
             showSettings: false,
             openSettings: false,
             showConfirm: false,
             onDeleteButtonOver: false,
+            isRefreshingFromInvoker: false,
+            hasRefreshIcon,
         };
     }
 
@@ -87,6 +101,30 @@ class MethodTitle extends Component{
      */
     toggleConfirm(){
         this.setState({showConfirm: !this.state.showConfirm});
+    }
+
+    /**
+     * to refresh data from invoker
+     */
+    refreshInvoker(){
+        const that = this;
+        const {method, updateEntity} = this.props;
+        let newInvokerData = method.invoker._operations.find(o => o.name === method.name);
+        if(newInvokerData){
+            let newRequestInvokerData = deepObjectsMerge(newInvokerData.request.body.fields, method.request.body.fields);
+            let newResponseSuccessInvokerData = deepObjectsMerge(newInvokerData.response.success.body.fields, method.response.success.body.fields);
+            let newResponseFailInvokerData = deepObjectsMerge(newInvokerData.response.fail.body.fields, method.response.fail.body.fields);
+            method.setRequestBodyFields(newRequestInvokerData);
+            method.setResponseSuccessBodyFields(newResponseSuccessInvokerData);
+            method.setResponseFailBodyFields(newResponseFailInvokerData);
+            method.setRequestBodyType(newInvokerData.request.body.type);
+            method.setResponseSuccessBodyType(newInvokerData.response.success.body.type);
+            method.setResponseFailBodyType(newInvokerData.response.fail.body.type);
+            updateEntity();
+            this.setState({
+                isRefreshingFromInvoker: true,
+            }, () => setTimeout(() => that.setState({isRefreshingFromInvoker: false, hasRefreshIcon: false,}), 600));
+        }
     }
 
     /**
@@ -135,7 +173,7 @@ class MethodTitle extends Component{
 
     render(){
         const {connector, method, readOnly, showParams, toggleShowParams} = this.props;
-        const {showConfirm, onDeleteButtonOver, hasDeleteButton} = this.state;
+        const {showConfirm, onDeleteButtonOver, hasDeleteButton, isRefreshingFromInvoker, hasRefreshIcon} = this.state;
         let methodStyles = {};
         let methodTitleStyles = {backgroundColor: method.color, borderRadius: '3px'};
         let isCurrentItem = connector.getCurrentItem().index === method.index;
@@ -165,6 +203,14 @@ class MethodTitle extends Component{
                         {
                             !readOnly && (isCurrentItem || hasDeleteButton) ?
                                 <div>
+                                    {(hasRefreshIcon || isRefreshingFromInvoker) && <TooltipFontIcon
+                                        size={isRefreshingFromInvoker ? 16 : 20}
+                                        isButton={true}
+                                        className={styles.item_refresh_button}
+                                        value={isRefreshingFromInvoker ? 'loading' : 'refresh'}
+                                        onClick={::this.refreshInvoker}
+                                        tooltip={'Refresh'}
+                                    />}
                                     <TooltipFontIcon
                                         size={20}
                                         isButton={true}

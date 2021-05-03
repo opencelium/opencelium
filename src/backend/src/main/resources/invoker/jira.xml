@@ -1,9 +1,10 @@
-<invoker type="RESTful">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
     <name>jira</name>
     <description>jira description</description>
     <hint>This interface provides the token by user auth. It works like basic_auth. You just need to replace password with added api-token (https://id.atlassian.com/manage-profile/security/api-tokens). Check out the documentation https://developer.atlassian.com/cloud/jira/platform/rest/v3/</hint>
+    <icon>http://localhost:9090/api/storage/files/null</icon>
     <requiredData>
-        <item name="url" type="string" visibility="public"></item>
+        <item name="url" type="string" visibility="public"/>
         <item name="username" type="string" visibility="public"/>
         <item name="password" type="string" visibility="protected"/>
         <item name="token" type="string" visibility="private">Basic {username:password}</item>
@@ -14,19 +15,20 @@
             <request>
                 <method>GET</method>
                 <endpoint>{url}/rest/api/3/myself</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Authorization" type="string">{token}</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </success>
                 <fail status="401">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
@@ -34,58 +36,27 @@
             <request>
                 <method>GET</method>
                 <endpoint>{url}/rest/api/3/search?jql=project="{PROJECTKEY}"</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
-                    <item name="Accept" type="string">application/json</item>
                     <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                        <field name="values" type="array">
-                           <field name="id" type="string"/>
-                           <field name="key" type="string"/>
-                            <field name="fields" type="object">
-                              <field name="summary" type="string"/>
-                              <field name="statuscategorychangedate" type="string"/>
-                              <field name="timespent" type="string"/>
-                              <field name="aggregatetimespent" type="string"/>
-                              <field name="timeoriginalestimate" type="string"/>
-                              <field name="aggregatetimeestimate" type="string"/>
-                              <field name="labels" type="array"/>
-                              <field name="status" type="object">
-                                <field name="id" type="string"/>
-                                <field name="name" type="string"/>                                
-                              </field>
-                              <field name="description" type="object">
-                                <field name="content" type="array">
-                                    <field name="content" type="array">
-                                        <field name="text" type="string"/>
-                                   </field>                                
-                                </field>                                                                     
-                              </field>                                                                 
-                              <field name="assignee" type="object">
-                                <field name="displayName" type="string"/>
-                              </field>                                
-                              <field name="components" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                
-                              <field name="versions" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                                         
-                              <field name="fixVersions" type="array">
-                                <field name="name" type="string"/>
-                              </field>
-                            </field>                              
+                    <body data="raw" format="json" type="object">
+                        <field name="issues" type="array">
+                            <field name="id" type=""/>
+                            <field name="fields" type=""/>
+                            <field name="renderedFields" type=""/>
+                            <field name="key" type=""/>
                         </field>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
@@ -93,88 +64,49 @@
             <request>
                 <method>GET</method>
                 <endpoint>{url}/rest/api/3/issue/{ISSUEID}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
-                    <item name="Accept" type="string">application/json</item>
                     <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="values" type="array">
-                           <field name="id" type="string"/>
-                           <field name="key" type="string"/>
-                            <field name="fields" type="object">
-                              <field name="summary" type="string"/>
-                              <field name="statuscategorychangedate" type="string"/>
-                              <field name="timespent" type="string"/>
-                              <field name="aggregatetimespent" type="string"/>
-                              <field name="timeoriginalestimate" type="string"/>
-                              <field name="aggregatetimeestimate" type="string"/>
-                              <field name="labels" type="array"/>
-                              <field name="status" type="object">
-                                <field name="id" type="string"/>
-                                <field name="name" type="string"/>                                
-                              </field>
-                              <field name="description" type="object">
-                                <field name="content" type="array">
-                                    <field name="content" type="array">
-                                        <field name="text" type="string"/>
-                                   </field>                                
-                                </field>                                                                     
-                              </field>                                                                 
-                              <field name="assignee" type="object">
-                                <field name="displayName" type="string"/>
-                              </field>                                
-                              <field name="components" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                
-                              <field name="versions" type="array">
-                                <field name="name" type="string"/>
-                              </field>                                                         
-                              <field name="fixVersions" type="array">
-                                <field name="name" type="string"/>
-                              </field>
-                              <field name="attachment" type="object">
-                                <field name="id" type="string"/>
-                                <field name="created" type="string"/>
-                                <field name="filename" type="string"/>
-                                <field name="size" type="string"/>
-                                <field name="content" type="string"/>
-                                <field name="thumbnail" type="string"/>                                
-                              </field>                              
-                            </field>                               
+                            <field name="id" type=""/>
+                            <field name="fields" type=""/>
+                            <field name="renderedFields" type=""/>
+                            <field name="key" type=""/>
                         </field>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
-        </operation>                        
-        <operation name="project" type="">
+        </operation>
+        <operation name="projects" type="">
             <request>
                 <method>GET</method>
                 <endpoint>{url}/project</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
-                    <item name="Accept" type="string">application/json</item>
                     <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
@@ -182,35 +114,28 @@
             <request>
                 <method>GET</method>
                 <endpoint>{url}/repositories/{workspace}/{repo_slug}/commits/</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
-                    <item name="Accept" type="string">application/json</item>
                     <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
+                    <body data="raw" format="json" type="object">
                         <field name="values" type="array">
-                           <field name="rendered" type="object">
-                             <field name="message" type="object">
-                               <field name="raw" type="string"/>
-                             </field>   
-                           </field>                  
-                           <field name="author" type="string">
-                             <field name="raw" type="string"/>
-                           </field>                          
-                           <field name="hash" type="string"/>
+                            <field name="rendered" type=""/>
+                            <field name="author" type=""/>
+                            <field name="hash" type=""/>
                         </field>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
-        </operation>       
+        </operation>
     </operations>
 </invoker>

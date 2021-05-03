@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,11 +12,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+import Rx from 'rxjs';
 import {InvokersAction} from '@utils/actions';
 import {
     fetchInvokersFulfilled,fetchInvokersRejected,
     fetchInvokerFulfilled, fetchInvokerRejected,
+    fetchDefaultInvokersFulfilled, fetchDefaultInvokersRejected,
 } from '@actions/invokers/fetch';
 import {
     addInvokerFulfilled, addInvokerRejected,
@@ -58,6 +59,28 @@ const fetchInvokersEpic = (action$, store) => {
 };
 
 /**
+ * fetch default invokers
+ *
+ * @param action$ - catch the state of the app
+ * @param store - from redux
+ * returns promise depending on the result of request
+ */
+const fetchDefaultInvokersEpic = (action$, store) => {
+    return action$.ofType(InvokersAction.FETCH_DEFAULTINVOKERS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            /*
+            * TODO: change when backend will be ready
+            */
+            return Rx.Observable.of(fetchDefaultInvokersFulfilled([{name: 'icinga2'}, {name: 'trello'}, {name: 'sensu'}]));
+            /*return doRequest({url},{
+                success: fetchDefaultInvokersFulfilled,
+                reject: fetchDefaultInvokersRejected,
+            });*/
+        });
+};
+/**
  * fetch one connector
  */
 const fetchInvokerEpic = (action$, store) => {
@@ -86,6 +109,7 @@ const addInvokerEpic = (action$, store) => {
             );
         });
 };
+
 /**
  * update one invoker
  */
@@ -126,4 +150,5 @@ export {
     addInvokerEpic,
     updateInvokerEpic,
     deleteInvokerEpic,
+    fetchDefaultInvokersEpic
 };

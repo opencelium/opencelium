@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,8 +55,8 @@ const fetchTemplatesEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.FETCH_TEMPLATES)
         .debounceTime(500)
         .mergeMap((action) => {
-            let from = action.payload ? action.payload.from : null;
-            let to = action.payload ? action.payload.to : null;
+            let from = action.settings ? action.settings.from : null;
+            let to = action.settings ? action.settings.to : null;
             let url = from && to ? `${urlPrefix}/all/${from}/${to}` : `${urlPrefix}/all`;
             return doRequest({url},{
                 success: (data) => fetchTemplatesFulfilled(data, action.settings),

@@ -23,5 +23,8 @@ public interface PathConstant {
     public static final String INVOKER = "src/main/resources/invoker/";
     public static final String IMAGES = "/api/storage/files/";
     public static final String TEMPLATE = "src/main/resources/templates/";
+    public static final String APPLICATION = "assistant/application/";
+    public static final String ASSISTANT = "assistant/";
+    public static final String RESOURCES = "/src/backend/src/main/resources/";
     public static final String ICONS = "src/main/resources/icon/";
 }

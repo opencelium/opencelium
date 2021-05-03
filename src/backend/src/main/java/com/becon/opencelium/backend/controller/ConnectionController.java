@@ -75,10 +75,10 @@ public class ConnectionController {
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
         List<Connection> connections = connectionService.findAll();
-        List<ConnectionResource> connectionResources = connections.stream()
-                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
 //        List<ConnectionResource> connectionResources = connections.stream()
-//                .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
+//                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
+        List<ConnectionResource> connectionResources = connections.stream()
+                .map(c -> connectionService.toNodeResource(c)).collect(Collectors.toList());
         return ResponseEntity.ok().body(connectionResources);
     }
 
@@ -171,6 +171,7 @@ public class ConnectionController {
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
         ConnectionNode connectionNodeClone = connectionNodeService.findByConnectionId(connectionId)
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        List<EnhancementNode> enhancementNodeClone = enhancementNodeService.findAllByConnectionId(connectionId);
         try {
 //            List<Enhancement> enhancements = enhancementService.findAllByConnectionId(connectionId);
             enhancementService.deleteAllByConnectionId(connectionId);
@@ -188,8 +189,10 @@ public class ConnectionController {
             final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
+            e.printStackTrace();
             connectionService.save(connectionClone);
             connectionNodeService.save(connectionNodeClone);
+            enhancementNodeService.saveAll(enhancementNodeClone);
             ErrorMessageDataResource errorMessageDataResource =
                     new ErrorMessageDataResource(validationContext.get(connection.getName()));
             ValidationResource validationResource =

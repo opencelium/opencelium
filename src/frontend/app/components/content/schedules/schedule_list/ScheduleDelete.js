@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Confirmation from "../../../general/app/Confirmation";
 import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
-import Loading from "@loading";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
 

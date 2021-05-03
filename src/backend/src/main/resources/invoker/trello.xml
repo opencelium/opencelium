@@ -1,13 +1,13 @@
-<invoker type="RESTful">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
     <name>trello</name>
     <description>trello description</description>
     <hint>This interface provides the apikey auth. First you need to create a apikey token (https://trello.com/app-key/). Check out the documentation https://developer.atlassian.com/cloud/trello/rest/</hint>
+    <icon>http://localhost:9090/api/storage/files/null</icon>
     <requiredData>
-        <item name="url" type="string" visibility="private">https://api.trello.com</item>
-        <item name="username" type="string" visibility="public"/>        
-        <item name="key" type="string" visibility="public"/>
-        <item name="token" type="string" visibility="protected"/>
-        <item name="BOARDID" type="string" visibility="protected"/>
+        <item name="url" type="string" visibility="public"/>
+        <item name="UserLogin" type="string" visibility="public"/>
+        <item name="Password" type="string" visibility="protected"/>
+        <item name="WebService" type="string" visibility="public"/>
     </requiredData>
     <authType>endpointAuth</authType>
     <operations>
@@ -15,252 +15,372 @@
             <request>
                 <method>GET</method>
                 <endpoint>{url}/1/members/{username}/boards?key={key}&amp;token={token}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="array">
+                        <field name="name" type="string"/>
+                        <field name="id" type="string"/>
+                    </body>
                 </success>
                 <fail status="401">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
         <operation name="GetBoardList" type="">
             <request>
                 <method>GET</method>
-                <endpoint>{url}/1/boards/{BOARDID}/lists?key={key}&amp;token={token}"</endpoint>
+                <endpoint>{url}/1/boards/{BOARDID}/lists?key={key}&amp;token={token}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="array" format="json" data="raw">
-                      <field name="id" type="string"/>
-                      <field name="name" type="string"/>
-                      <field name="closed" type="string"/>
-                      <field name="pos" type="string"/>
-                      <field name="softLimit" type="string"/>
-                      <field name="idBoard" type="string"/>
-                      <field name="subscribed" type="string"/>
+                    <body data="raw" format="json" type="array">
+                        <field name="subscribed" type="string"/>
+                        <field name="idBoard" type="string"/>
+                        <field name="pos" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="closed" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="softLimit" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
         <operation name="GetLabelsList" type="">
             <request>
                 <method>GET</method>
-                <endpoint>{url}/1/boards/{BOARDID}/lists?key={key}&amp;token={token}"</endpoint>
+                <endpoint>{url}/1/boards/{BOARDID}/labels?key={key}&amp;token={token}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                      <field name="id" type="string"/>
-                      <field name="idBoard" type="string"/>
-                      <field name="name" type="string"/>
-                      <field name="pos" type="string"/>
-                      <field name="color" type="string"/>
+                    <body data="raw" format="json" type="array">
+                        <field name="idBoard" type="string"/>
+                        <field name="color" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="id" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
-        </operation>        
+        </operation>
         <operation name="GetListCards" type="">
             <request>
                 <method>GET</method>
-                <endpoint>{url}/1/list/{LISTID}/cards?key={key}&amp;token={token}"</endpoint>
+                <endpoint>{url}/1/list/{LISTID}/cards?key={key}&amp;token={token}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                       <field name="id" type="string"/>
-                       <field name="name" type="string"/>
-                       <field name="shortUrl" type="string"/>
-                       <field name="dateLastActivity" type="string"/>
-                       <field name="desc" type="string"/>
-                       <field name="badges" type="object">
-                        <field name="comments" type="string"/>
-                        <field name="labels" type="array">
-                          <field name="id" type="string"/>
-                          <field name="idBoard" type="string"/>
-                          <field name="name" type="string"/>
-                          <field name="color" type="string"/>
+                    <body data="raw" format="json" type="object">
+                        <field name="badges" type="object">
+                            <field name="comments" type="string"/>
+                            <field name="labels" type="array">
+                                <field name="idBoard" type=""/>
+                                <field name="color" type=""/>
+                                <field name="name" type=""/>
+                                <field name="id" type=""/>
+                            </field>
                         </field>
-                       </field>                                
+                        <field name="shortUrl" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="dateLastActivity" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="desc" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
-        </operation>                        
+        </operation>
         <operation name="GetCardAttachments" type="">
             <request>
                 <method>GET</method>
-                <endpoint>{url}/1/cards/{CARDID}/attachments?key={key}&amp;token={token}"</endpoint>
+                <endpoint>{url}/1/cards/{CARDID}/attachments?key={key}&amp;token={token}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                       <field name="id" type="string"/>
-                       <field name="name" type="string"/>
-                       <field name="date" type="string"/>
-                       <field name="url" type="string"/>
-                       <field name="edgeColor" type="string"/>
-                       <field name="previews" type="array">
-                          <field name="id" type="string"/>
-                          <field name="url" type="string"/>
-                          <field name="scaled" type="string"/>
-                          <field name="bytes" type="string"/>
-                          <field name="height" type="string"/>
-                          <field name="width" type="string"/>
-                       </field>
+                    <body data="raw" format="json" type="object">
+                        <field name="date" type="string"/>
+                        <field name="edgeColor" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="previews" type="array">
+                            <field name="scaled" type=""/>
+                            <field name="bytes" type=""/>
+                            <field name="width" type=""/>
+                            <field name="id" type=""/>
+                            <field name="url" type=""/>
+                            <field name="height" type=""/>
+                        </field>
+                        <field name="id" type="string"/>
+                        <field name="url" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
         <operation name="GetCardComments" type="">
             <request>
                 <method>GET</method>
-                <endpoint>{url}/1/cards/{CARDID}/actions?key={key}&amp;token={token}&amp;filter=commentCard"</endpoint>
+                <endpoint>{url}/1/cards/{CARDID}/actions?key={key}&amp;token={token}&amp;filter=commentCard</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                       <field name="id" type="string"/>
-                       <field name="date" type="string"/>
-                       <field name="idMemberCreator" type="string"/>
-                       <field name="data" type="object">
-                          <field name="text" type="string"/>
-                       </field>
+                    <body data="raw" format="json" type="object">
+                        <field name="date" type="string"/>
+                        <field name="data" type="object">
+                            <field name="text" type="string"/>
+                        </field>
+                        <field name="id" type="string"/>
+                        <field name="idMemberCreator" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddBoard" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/1/boards?key={key}&amp;token={token}&amp;defaultLists=false&amp;name={NAME}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddList" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/1/boards/{BOARDID}/lists?key={key}&amp;token={token}&amp;name={NAME}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
         <operation name="AddCard" type="">
             <request>
                 <method>POST</method>
-                <endpoint>{url}/1/cards?key={key}&amp;token={token}&amp;idList={LISTID}&amp;name={NAME}&amp;idMembers={MEMBERID}&amp;idLabels={LABELID}&amp;"</endpoint>
+                <endpoint>{url}/1/cards</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="idLabels" type="string"/>
+                    <field name="name" type="string"/>
+                    <field name="idList" type="string"/>
+                    <field name="key" type="string"/>
+                    <field name="token" type="string"/>
+                    <field name="desc" type="string"/>
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                       <field name="id" type="string"/>
-                       <field name="dateLastActivity" type="string"/>
+                    <body data="raw" format="json" type="object">
+                        <field name="dateLastActivity" type="string"/>
+                        <field name="id" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddLabel" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/1/boards/{BOARDID}/labels?key={key}&amp;token={token}&amp;name={NAME}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
         </operation>
         <operation name="AddCardAttachment" type="">
             <request>
                 <method>POST</method>
-                <endpoint>{url}/1/cards/{CARDID}/attachments?key={key}&amp;token={token}&amp;name={NAME}&amp;url={URL}"</endpoint>
+                <endpoint>{url}/1/cards/{CARDID}/attachments?key={key}&amp;token={token}&amp;name={NAME}&amp;url={URL}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">multipart/form-data</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                       <field name="id" type="string"/>
-                       <field name="date" type="string"/>
+                    <body data="raw" format="json" type="object">
+                        <field name="date" type="string"/>
+                        <field name="id" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
-        </operation>                   
+        </operation>
         <operation name="AddCardComment" type="">
             <request>
                 <method>POST</method>
-                <endpoint>{url}/1/cards/{CARDID}/actions/comments?key={key}&amp;token={token}&amp;text={TEXT}"</endpoint>
+                <endpoint>{url}/1/cards/{CARDID}/actions/comments?key={key}&amp;token={token}&amp;text={TEXT}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
             </request>
             <response>
                 <success status="200">
-                    <header>
-                    </header>
-                    <body type="object" format="json" data="raw">
-                       <field name="id" type="string"/>
-                       <field name="date" type="string"/>
-                       <field name="idMemberCreator" type="string"/>
-                       <field name="data" type="object">
-                          <field name="text" type="string"/>
-                       </field>
+                    <body data="raw" format="json" type="object">
+                        <field name="date" type="string"/>
+                        <field name="data" type="object">
+                            <field name="text" type="string"/>
+                        </field>
+                        <field name="id" type="string"/>
+                        <field name="idMemberCreator" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
-                    <header/>
-                    <body/>
+                    <body data="raw" format="json" type="object">
+                    </body>
                 </fail>
             </response>
-        </operation>                                      
+        </operation>
+        <operation name="SearchInBoard" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/1/search?idBoard={BOARDID}&amp;key={key}&amp;token={token}&amp;query={QUERY}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="cards" type="array">
+                            <field name="name" type=""/>
+                            <field name="id" type=""/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UpdateCard" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/1/cards/{CARDID}</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="idLabels" type="string"/>
+                    <field name="name" type="string"/>
+                    <field name="idList" type="string"/>
+                    <field name="key" type="string"/>
+                    <field name="token" type="string"/>
+                    <field name="desc" type="string"/>
+                </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="dateLastActivity" type="string"/>
+                        <field name="id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
     </operations>
 </invoker>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 import React, {Component, Suspense} from 'react';
 import {Container} from "react-grid-system";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import ComponentError from "@components/general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
 

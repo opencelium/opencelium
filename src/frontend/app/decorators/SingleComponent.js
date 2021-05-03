@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 import React, { Component } from 'react';
 import RejectedRequest from "@components/general/app/RejectedRequest";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import PageNotFound from "@components/general/app/PageNotFound";
 
 import {capitalize, consoleLog, isEmptyObject} from '@utils/app';

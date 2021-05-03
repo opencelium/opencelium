@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import {
     UpdateAssistantAction,
 } from '@utils/actions';
 import Translate from "@components/general/app/Translate";
-import AvailableUpdate from "@basic_components/translations/AvailableUpdate";
+import AvailableUpdateMessage from "@basic_components/translations/AvailableUpdateMessage";
 
 
 /**
@@ -48,6 +48,7 @@ export const EntitiesWithNotification = [
     {name: AppAction.DO_REQUEST, types: ['REJECTED']},
     {name: ConnectorsAction.TEST_CONNECTOR, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.ADD_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
+    {name: ConnectorsAction.ADD_CONNECTORICON, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.FETCH_CONNECTORS, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.UPDATE_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: ConnectorsAction.UPDATE_CONNECTORICON, types: ['REJECTED']},
@@ -88,6 +89,14 @@ export const EntitiesWithNotification = [
     {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.FETCH_ONLINEUPDATES, types: ['REJECTED']},
+    {name: UpdateAssistantAction.FETCH_OFFLINEUPDATES, types: ['REJECTED']},
+    {name: UpdateAssistantAction.UPLOAD_VERSION, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.DELETE_VERSION, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.UPDATE_SYSTEM, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**
@@ -121,7 +130,7 @@ const SuccessInterpolates = {
         );
     },
     FETCH_UPDATEAPPVERSION: (params) => {
-        return <AvailableUpdate {...params}/>
+        return <AvailableUpdateMessage {...params}/>
     },
     CHANGE_LANGUAGE: '',
 };

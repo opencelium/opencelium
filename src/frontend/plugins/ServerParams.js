@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ module.exports = {
         PORT: webpackDevServerPort,
         HOSTNAME: '0.0.0.0',
         OPTIONS: {
+            disableHostCheck: true,
             open: NodeParams.IS_DEV && !NodeParams.HAS_BROWSER_SYNC,
             liveReload: false,
             headers: {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ class SlackChannelInput extends Component{
                 options={allChannels}
                 placeholder={t('NOTIFICATION.NOTIFICATION_CHANGE.SLACK_CHANNEL_PLACEHOLDER')}
                 selectClassName={`${styles[classNames.notification_select]}`}
-                icon={startFetchingChannels ? 'loading' : 'add_alert'}
+                icon={startFetchingChannels ? 'loading' : 'bell'}
                 label={t('NOTIFICATION.NOTIFICATION_CHANGE.SLACK_CHANNEL_LABEL')}
                 isFocused={focused}
                 required={true}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ const addConnectorEpic = (action$, store) => {
             let data = {...action.payload};
             let successResponse = addConnectorFulfilled;
             if(data.icon !== null && data.icon !== ''){
-                successResponse = addConnectorIcon;
+                successResponse = (connector) => addConnectorIcon(connector, {background: true});
             }
             delete data.icon;
             return doRequest({url, method: API_METHOD.POST, data: {...data}},{
@@ -132,7 +132,7 @@ const addConnectorIconEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
                     success: addConnectorIconFulfilled,
                     reject: addConnectorIconRejected,},
-                res => {return action.payload;}
+                res => {return {...action.payload, icon: res.response.icon};}
             );
         });
 };

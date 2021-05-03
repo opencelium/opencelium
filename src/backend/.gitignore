@@ -5,8 +5,10 @@ build/
 !**/src/main/**
 !**/src/test/**
 src/main/resources/templates/**
+assistant/
 src/main/resources/application.yml
 src/main/resources/upload-dir
+src/test/
 
 ### STS ###
 .apt_generated

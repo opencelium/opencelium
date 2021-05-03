@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ class AddTemplate extends Component{
                             value={addTemplateName}
                             label={'Name'}
                             name={'template_name'}
-                            icon={'text_fields'}
+                            icon={'title'}
                             autoFocus
                         />
                         <Input
@@ -112,7 +112,7 @@ class AddTemplate extends Component{
                             value={addTemplateDescription}
                             label={'Description'}
                             name={'template_description'}
-                            icon={'short_text'}
+                            icon={'notes'}
                             multiline={true}
                             rows={4}
                         />

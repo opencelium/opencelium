@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,6 +163,26 @@ export default class CMethodItem{
 
     setRequestBodyFields(fields){
         this._request.body.fields = fields;
+    }
+
+    setResponseSuccessBodyFields(fields){
+        this._response.success.body.fields = fields;
+    }
+
+    setResponseFailBodyFields(fields){
+        this._response.fail.body.fields = fields;
+    }
+
+    setRequestBodyType(type){
+        this._request.body.type = type;
+    }
+
+    setResponseSuccessBodyType(type){
+        this._response.success.body.type = type;
+    }
+
+    setResponseFailBodyType(type){
+        this._response.fail.body.type = type;
     }
 
     get error(){

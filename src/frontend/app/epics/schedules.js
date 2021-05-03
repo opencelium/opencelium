@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -174,7 +174,7 @@ const fetchSchedulesEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
-                success: fetchSchedulesFulfilled,
+                success: (data) => fetchSchedulesFulfilled(data, action.settings),
                 reject: fetchSchedulesRejected,
                 cancel: action$.ofType(SchedulesAction.FETCH_SCHEDULES_CANCELED)
             });

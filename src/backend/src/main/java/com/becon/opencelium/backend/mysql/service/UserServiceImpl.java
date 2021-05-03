@@ -16,10 +16,7 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.mysql.entity.Activity;
-import com.becon.opencelium.backend.mysql.entity.User;
-import com.becon.opencelium.backend.mysql.entity.UserDetail;
-import com.becon.opencelium.backend.mysql.entity.UserRole;
+import com.becon.opencelium.backend.mysql.entity.*;
 import com.becon.opencelium.backend.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
@@ -30,6 +27,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -48,6 +47,9 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private ActivityServiceImpl activityService;
+
+    @Autowired
+    private WidgetSettingServiceImp widgetSettingServiceImp;
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -132,7 +134,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User toEntity(UserResource resource) {
-        return new User(resource);
+
+        Set<WidgetSetting> widgetSettings = resource.getWidgetSettings().stream()
+                .map(wsr -> widgetSettingServiceImp.toEntity(wsr, resource.getUserId())).collect(Collectors.toSet());
+        return new User(resource, widgetSettings);
     }
 
     @Override

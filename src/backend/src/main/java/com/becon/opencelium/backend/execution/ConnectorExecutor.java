@@ -36,8 +36,8 @@ import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -51,11 +51,12 @@ import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -94,7 +95,7 @@ public class ConnectorExecutor {
         executionContainer.setConn(conn);
         executionContainer.setSupportRequestData(supportRequestData);
         executionContainer.setRequestData(requestData);
-        executionContainer.setLoopIndex(new HashMap<>());
+        executionContainer.setLoopIndex(new LinkedHashMap<>());
         executeMethod(connectorNode.getStartMethod());
         executeDecisionStatement(connectorNode.getStartOperator());
     }
@@ -132,10 +133,12 @@ public class ConnectorExecutor {
             else {
                 messageContainer = new MessageContainer();
                 responseContainer = new HashMap<>();
-                Integer loopIndex = loopStack.get(arrayContainer);
-                if(loopIndex == null){
-                    loopIndex = 0;
+
+                Integer loopIndex = 0;
+                if (!arrayContainer.isEmpty()) {
+                    loopIndex = loopStack.getOrDefault(arrayContainer.get(sizeArrayContainer - 1), 0);
                 }
+
                 responseContainer.put(loopIndex,responseEntity.getBody());
 
                 messageContainer.setMethodKey(methodNode.getColor());
@@ -169,7 +172,7 @@ public class ConnectorExecutor {
         String taId = executionContainer.getTaId();
 
         System.out.println("============================================================");
-        System.out.println("Function: " + methodNode.getName());
+        System.out.println("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
 
         HttpMethod method = getMethod(methodNode); // done
         System.out.println("Method: " + method.name());
@@ -261,7 +264,11 @@ public class ConnectorExecutor {
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        if (invoker.getName().equals("igel")){
+//        f (invoker.getName().equalsIgnoreCase("igel")){
+//            restTemplate = getRestTemplate();
+//        }i
+
+        if (invoker.getName().equalsIgnoreCase("IGEL")){
             ClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory(getHttpClient());
             restTemplate.setRequestFactory(requestFactory);
@@ -297,18 +304,52 @@ public class ConnectorExecutor {
         return response;
     }
 
-    private HttpClient getHttpClient() {
+//    private RestTemplate getRestTemplate() {
+//
+//        try {
+//            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+//                @Override
+//                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+//                    return true;
+//                }
+//            };
+//            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+//            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
+//            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+//            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+//            requestFactory.setHttpClient(httpClient);
+//            RestTemplate restTemplate = new RestTemplate(requestFactory);
+//            return restTemplate;
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//    }
+
+    private CloseableHttpClient getHttpClient() {
 
         try {
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
-            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            HttpClient httpClient = HttpClients.custom()
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            CloseableHttpClient httpClient = HttpClients.custom()
                     .setSSLContext(sslContext)
-                    .setSSLHostnameVerifier(new DefaultHostnameVerifier())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
+
+
 
             return httpClient;
         } catch (Exception e) {
@@ -417,7 +458,8 @@ public class ConnectorExecutor {
 
     private String replaceRefValue(String exp) {
         String result = exp;
-        String refRegex = RegExpression.requiredData;
+//        String refRegex = RegExpression.requiredData;
+        String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\})";
         String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(exp);
@@ -429,7 +471,20 @@ public class ConnectorExecutor {
         for (String pointer : refParts) {
             if (pointer.matches(refResRegex)) {
                 String ref = pointer.replace("{%", "").replace("%}", "");
-                String value = (String) executionContainer.getValueFromResponseData(ref);
+                Object responseValue = executionContainer.getValueFromResponseData(ref);
+                String value = "";
+                if (responseValue instanceof Integer) {
+                    value = Integer.toString((int) responseValue);
+                } else if(responseValue instanceof Double) {
+                    value = Double.toString((double) responseValue);
+                }
+                else {
+                    value = (String) executionContainer.getValueFromResponseData(ref);
+                }
+
+                result = result.replace(pointer, value);
+            } else if(pointer.matches("\\$\\{(.*?)\\}")) {
+                String value = executionContainer.getValueFromQueryParams(pointer);
                 result = result.replace(pointer, value);
             } else {
                 // replace from request data
@@ -457,7 +512,7 @@ public class ConnectorExecutor {
             }
 
             // replace from request_data
-            if ((f.getValue() != null) && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
+            if ((f.getValue() != null) && !f.getValue().contains("${") && f.getValue().contains("{") && f.getValue().contains("}") && !isObject){
 
                 item.put (f.getName(), executionContainer.getValueFromRequestData(f.getValue()));
                 return;
@@ -474,6 +529,12 @@ public class ConnectorExecutor {
             // from response data;
             if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasReference(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
+                return;
+            }
+
+            // from url query data;
+            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasQueryParams(f.getValue())){
+                item.put(f.getName(), executionContainer.getValueFromQueryParams(f.getValue()));
                 return;
             }
 
@@ -527,10 +588,11 @@ public class ConnectorExecutor {
     }
 
     private void executeIfStatement(StatementNode ifStatement){
+        System.out.println("=============== " + ifStatement.getOperand() + " ================= " + ifStatement.getIndex() );
         OperatorAbstractFactory factory = new OperatorAbstractFactory();
         Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());
         Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
-        System.out.println("=============== " + ifStatement.getOperand() + " =================");
+
         if(leftVariable != null){
             System.out.println("Left Statement: " + leftVariable.toString());
         }
@@ -561,7 +623,11 @@ public class ConnectorExecutor {
                 value = executionContainer.getValueFromResponseData(ref);
                 result.add(value);
             } else {
-                result.add(statementVariable.getFiled());
+                if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+                    result.add(executionContainer.getValueFromQueryParams(statementVariable.getFiled()));
+                } else {
+                    result.add(statementVariable.getFiled());
+                }
             }
 
             value = executionContainer.getValueFromResponseData(rightPropertyValueRef);
@@ -571,7 +637,11 @@ public class ConnectorExecutor {
 
         String ref = statementNodeService.convertToRef(statementVariable);
         if (!fieldNodeService.hasReference(ref)){
-            return statementVariable.getFiled();
+            if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+                return executionContainer.getValueFromQueryParams(statementVariable.getFiled());
+            } else {
+                return statementVariable.getFiled();
+            }
         }
         return executionContainer.getValueFromResponseData(ref);
     }
@@ -591,16 +661,16 @@ public class ConnectorExecutor {
         List<Object> array =
                 (List<Object>) message.getValue(condition, loopIndex);
 
+        System.out.println("============================= LOOP ======================== " + statementNode.getIndex());
+        String arr = ConditionUtility.getLastArray(condition);;
         for (int i = 0; i < array.size(); i++) {
             System.out.println("Loop " + condition + "-------- index : " + i);
-            String arr = ConditionUtility.getLastArray(condition);
             loopIndex.put(arr, i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
         }
-
-        if (loopIndex.containsKey(condition)){
-            loopIndex.remove(condition);
+        if (loopIndex.containsKey(arr)){
+            loopIndex.remove(arr);
         }
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());

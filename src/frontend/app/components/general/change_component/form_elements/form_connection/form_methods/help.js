@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,15 @@ export const dotColor = (color = '#ccc') => (color !== '#ccc' ? {
 export function markFieldNameAsArray(fieldName){
     if(isString(fieldName)) {
         return `${fieldName}${ARRAY_SIGN}`;
+    }
+    return fieldName;
+}
+/**
+ * to mark field name as array
+ */
+export function clearFieldNameFromArraySign(fieldName){
+    if(isString(fieldName)) {
+        return fieldName.replace(ARRAY_SIGN, '');
     }
     return fieldName;
 }

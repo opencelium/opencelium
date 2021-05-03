@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,15 @@ import {TemplatesAction} from "@utils/actions";
 
 /**
  * fetch all templates
- * @param templates
- * @param settings = {background: bool}
+ * @param settings = {from: object, to: object, background: bool}
+ *      from - from connector
+ *      to - to connector
  *      background - if true -> does not show a notification; else -> show a notification
  * @returns {{type: string, settings: {}}}
  */
-const fetchTemplates = (templates, settings = {}) => {
+const fetchTemplates = (settings = {}) => {
     return {
         type: TemplatesAction.FETCH_TEMPLATES,
-        payload: templates,
         settings,
     };
 };

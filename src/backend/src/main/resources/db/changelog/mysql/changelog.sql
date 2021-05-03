@@ -157,3 +157,63 @@ alter table detail add column if not exists lang varchar(3) not null default 'en
 --changeset 1.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 
 alter table connector add column if not exists icon  varchar(128);
+
+--changeset 1.1:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE enhancement MODIFY expert_code varchar(1024);
+
+--changeset 1.1:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE enhancement MODIFY expert_code TEXT;
+
+--changeset 1.3:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+-- -----------------------------------------------------
+-- Table `mydb`.`widget`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `widget` ;
+
+CREATE TABLE IF NOT EXISTS `widget` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(45) NULL,
+  `icon` VARCHAR(45) NULL,
+  `tooltipTranslationKey` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `name_UNIQUE` (`name` ASC))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`widget_setting`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `widget_setting` ;
+
+CREATE TABLE IF NOT EXISTS `widget_setting` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `x_axis` INT NULL,
+  `y_axis` INT NULL,
+  `width` INT NULL,
+  `height` INT NULL,
+  `min_width` INT NULL,
+  `min_height` INT NULL,
+  `widget_id` INT NOT NULL,
+  `user_id` INT(11) NOT NULL,
+  PRIMARY KEY (`id`, `widget_id`),
+  INDEX `fk_widget_setting_widget_idx` (`widget_id` ASC),
+  INDEX `fk_widget_setting_user1_idx` (`user_id` ASC),
+  CONSTRAINT `fk_widget_setting_widget`
+    FOREIGN KEY (`widget_id`)
+    REFERENCES `widget` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_widget_setting_user1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `opencelium`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+--changeset 1.3:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES `widget` WRITE;
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` DISABLE KEYS */;
+INSERT INTO `widget` VALUES (1,'CONNECTION_OVERVIEW','cable','Connection Overview'), (2,'CURRENT_SCHEDULER','date_range','Current Scheduler'), (3,'MONITORING_BOARDS','analytics','Monitoring Boards');
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` ENABLE KEYS */;
+UNLOCK TABLES;
+

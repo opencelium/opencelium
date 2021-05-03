@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import {Router, browserHistory} from 'react-router';
 import {syncHistoryWithStore } from 'react-router-redux';
 
 import {setAuthSettings} from '@utils/auth';
-import store from '@utils/store';
+import {store} from '@utils/store';
 import i18n from '@utils/i18n';
 import {createRoutes} from '@utils/routes';
 import Loading from "@loading";

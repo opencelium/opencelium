@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
@@ -49,21 +64,15 @@ class TemplateConversionIcon extends Component{
         const {appVersion, convertingTemplates, data} = this.props;
         let {classNameIcon} = this.props;
         let invalidVersion = data.template.version !== appVersion;
-        let convertUp = true /*invalidVersion && data.template.version < appVersion*/;
         const isLoading = convertingTemplates.findIndex(t => t.templateId === data.template.templateId) !== -1;
         let styleIcon = {verticalAlign: 'sub', cursor: 'pointer'};
-        if(convertUp){
-            styleIcon.transform = 'rotateY(180deg) rotateZ(270deg)';
-            styleIcon.margin = 0;
-        } else{
-            styleIcon.transform = 'rotate(270deg)';
-            styleIcon.margin = '0px 2px 0 0';
-        }
+        styleIcon.transform = 'scaleX(-1) rotate(-45deg)';
+        styleIcon.margin = 0;
         return(
             <React.Fragment>
                 {
                     invalidVersion && !isLoading &&
-                    <TooltipFontIcon isButton={true} className={classNameIcon} style={styleIcon} tooltip={`${convertUp ? 'Upgrade' : 'Downgrade'}`} value={'replay'} onClick={::this.convert}/>
+                    <TooltipFontIcon isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={::this.convert}/>
                 }
                 {
                     isLoading &&

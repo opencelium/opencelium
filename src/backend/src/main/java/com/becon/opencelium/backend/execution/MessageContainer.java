@@ -43,6 +43,7 @@ public class MessageContainer {
     private String responseFormat;
     private List<String> loopingArrays; // level of loops
     private HashMap<Integer, String> data; // data from last loop if loop is nested
+    private String currentLoopArr;
 
     public MessageContainer() {
     }
@@ -87,6 +88,14 @@ public class MessageContainer {
         this.result = result;
     }
 
+    public String getCurrentLoopArr() {
+        return currentLoopArr;
+    }
+
+    public void setCurrentLoopArr(String currentLoopArr) {
+        this.currentLoopArr = currentLoopArr;
+    }
+
     public String getResponseFormat() {
         return responseFormat;
     }
@@ -104,9 +113,28 @@ public class MessageContainer {
 
         if (responseFormat.equals("xml")) {
             return xmlPathFinder(value, loopStack);
+        } else if (responseFormat.equals("text")) {
+            return textPathFinder(value, loopStack);
         } else {
             return jsonPathFinder(value, loopStack);
         }
+    }
+
+    private Object textPathFinder(String value, Map<String, Integer> loopStack) {
+        String ref = value.replaceFirst("\\$", "");
+
+
+        String message = "";
+        if (loopingArrays == null || loopingArrays.isEmpty()){
+            message = data.get(0);
+        } else {
+
+            String arr = loopingArrays.stream().reduce((f,s)->s).get();
+            int responseIndex = loopStack.get(arr); // determining index of response data
+            message = data.get(responseIndex);
+        }
+
+        return message;
     }
 
     private Object xmlPathFinder(String value, Map<String, Integer> loopStack){
@@ -126,6 +154,21 @@ public class MessageContainer {
             loopIndex = loopStack.get(arr);
             message = data.get(loopIndex);
         }
+
+//        if (loopingArrays == null || loopingArrays.isEmpty()){
+//            message = data.get(loopIndex);
+//        } else {
+////            if (currentLoopArr == null) {
+////                currentLoopArr = loopingArrays.stream().reduce((f,s)->s).get();
+////            }
+////            String arr = currentLoopArr.replaceAll("\\[([a-z,*]+)\\]", "[]");
+////            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
+////            message = data.get(loopIndex);
+//
+//            String arr = loopingArrays.stream().reduce((f,s)->s).get();
+//            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
+//            message = data.get(loopIndex);
+//        }
 
         int size = conditionParts.size() - 1;
         int i = 0;
@@ -230,15 +273,16 @@ public class MessageContainer {
         String refValue = ConditionUtility.getRefValue(ref);
 
         List<String> conditionParts =  Arrays.asList(refValue.split("\\."));
-        int loopIndex = 0;
+        int responseIndex = 0;
 
         String message = "";
         if (loopingArrays == null || loopingArrays.isEmpty()){
-            message = data.get(loopIndex);
+            message = data.get(responseIndex);
         } else {
+
             String arr = loopingArrays.stream().reduce((f,s)->s).get();
-            loopIndex = loopStack.get(arr);
-            message = data.get(loopIndex);
+            responseIndex = loopStack.get(arr); // determining index of response data
+            message = data.get(responseIndex);
         }
 
         int size = conditionParts.size() - 1;
@@ -248,6 +292,8 @@ public class MessageContainer {
                 continue;
             }
             condition = condition + "." + part;
+
+            // Getting current index of current loop
             String array = ConditionUtility.getLastArray(condition);// need to find index
             int index = 0;
             boolean hasLoop = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,19 @@ class BrowseButton extends Component{
 
     render(){
         const {focused} = this.state;
-        const {name, tourStep, browseTitle, icon, label, themeStyle, hideInput, browseProps} = this.props;
+        const {name, tourStep, browseTitle, icon, label, themeStyle, hideInput, browseProps, onlyButton} = this.props;
+        if(onlyButton){
+            return(
+                <ToolboxBrowseButton
+                    {...browseProps}
+                    className={styles.input_file_browse}
+                    id={formatHtmlId(`button_${name ? name : label}`)}
+                    onFocus={::this.onFocus}
+                    onBlur={::this.onBlur}
+                    disabled={hideInput}
+                />
+            );
+        }
         return (
             <ToolboxThemeInput style={themeStyle} hideInput={hideInput} tourStep={tourStep} inputElementClassName={styles.input_file_label} inputElementText={browseTitle} icon={icon} label={label} isFocused={focused}>
                 <ToolboxBrowseButton
@@ -68,11 +80,13 @@ BrowseButton.propTypes = {
     label: PropTypes.string,
     browseProps: PropTypes.object.isRequired,
     hideInput: PropTypes.bool,
+    onlyButton: PropTypes.bool,
 };
 
 BrowseButton.defaultProps = {
     themeStyle: {},
     hideInput: false,
+    onlyButton: false,
 };
 
 export default BrowseButton;

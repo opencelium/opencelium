@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@ class Hint extends Component{
         let text = '';
         let openTour = null;
         if(!isString(hint)){
+            if(!hint){
+                return null;
+            }
             if(hint.hasOwnProperty('text')){
                 text = hint.text;
             }

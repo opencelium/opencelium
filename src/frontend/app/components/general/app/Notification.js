@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ class Notification extends Component{
     renderCloseButton(){
         if(this.state.hasCloseButton){
             return (
-                <TooltipFontIcon iconStyles={{fontSize: '14px', color: 'black'}} isButton={true} id={'notification_close'} className={styles.close_icon} value={'close'} tooltip={'Close'} onClick={::this.closeNotification}/>
+                <TooltipFontIcon size={16} isButton={true} id={'notification_close'} className={styles.close_icon} value={'close'} tooltip={'Close'} onClick={::this.closeNotification}/>
             );
         }
         return null;

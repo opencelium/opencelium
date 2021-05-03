@@ -1,9 +1,24 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {Suspense} from 'react';
 import {connect} from "react-redux";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import {setCurrentPageItems} from "@actions/app";
 import {Container} from "react-grid-system";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import ComponentError from "@components/general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
 import CListVoiceControl from "@classes/voice_control/CListVoiceControl";
@@ -13,6 +28,7 @@ function mapStateToProps(state){
     const app = state.get('app');
     return {
         currentPageItems: app.get('currentPageItems').toJS(),
+        isComponentExternalInChangeContent: app.get('isComponentExternalInChangeContent'),
     };
 }
 export function LayoutComponent(componentSingleName = '', componentPluralName = '', url = '', deleteActionName = '', exceptions = []){
@@ -35,9 +51,9 @@ export function LayoutComponent(componentSingleName = '', componentPluralName = 
                 }
 
                 render(){
-                    const {children} = this.props;
+                    const {children, isComponentExternalInChangeContent} = this.props;
                     return (
-                        <Container>
+                        <Container style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
                             <Suspense fallback={(<Loading/>)}>
                                 <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: componentSingleName}}>
                                     {children}

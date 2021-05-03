@@ -1,5 +1,5 @@
 /*!
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,7 +89,8 @@
   font-family: $FONT_FAMILY;
   padding-top: 10px;
   float:left;
-  width: 70%;
+  width: 65%;
+  padding-left: 8px;
 }
 
 .title{
@@ -110,7 +111,6 @@
 }
 
 .card_avatar{
-  width: 30%;
   font-family: $FONT_FAMILY;
   float: right;
   margin-top: 5px;
@@ -119,6 +119,7 @@
 }
 
 .avatar{
+  cursor: pointer;
   float: right;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
@@ -133,6 +134,7 @@
 }
 
 .avatar_default{
+  cursor: pointer;
   font-size: 42px
 }
 

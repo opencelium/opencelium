@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ textarea{
 }
 
 #atlwdg-trigger{
-  top: 15% !important;
+  top: 25% !important;
 }
 #atlwdg-trigger:focus{
   box-shadow: 0 0 0 0.2rem rgba(38,143,255,.5) !important;
@@ -128,3 +128,50 @@ textarea{
 }
 .clearfix:after { clear: both; }
 .clearfix { zoom: 1; }
+
+
+.panel {
+  background: white;
+  border: 1px solid gray;
+  padding: 15px;
+}
+.panel:first-child {
+
+}
+
+.resizer {
+  width: 8px;
+  background: darkGray;
+  position: relative;
+  cursor: col-resize;
+  flex-shrink: 0;
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */
+}
+
+.resizer::after,
+.resizer::before {
+  content: "";
+  border-left: 1px solid #333;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-100%);
+  right: 0;
+  display: inline-block;
+  height: 20px;
+  margin: 0 2px;
+}
+.resizer::before {
+  left: 0;
+}
+
+.technical_layout_is_minimized>.panelGroup>.divider>div{
+  cursor: default !important;
+}
+
+.panelWrapper{/*
+  flex-shrink: 0 !important;
+  flex-basis: auto !important;*/
+}

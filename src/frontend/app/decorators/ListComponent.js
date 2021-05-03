@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 import React, { Component } from 'react';
 import CanceledRequest from "@components/general/app/CanceledRequest";
 import RejectedRequest from "@components/general/app/RejectedRequest";
-import Loading from "@components/general/app/Loading";
+import Loading from "@loading";
 import PageNotFound from "@components/general/app/PageNotFound";
 import {entitiesProPage} from '@components/general/basic_components/pagination/Pagination';
 
@@ -31,7 +31,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
  * @returns the same component with additional functionalities
  * @constructor
  */
-export function ListComponent(pluralEntityName){
+export function ListComponent(pluralEntityName, isBackground = false){
     return function (Component) {
         return class extends Component{
             constructor(props){
@@ -80,7 +80,7 @@ export function ListComponent(pluralEntityName){
                 let fetchName = 'fetch' + capitalize(pluralEntityName);
                 if(this.props.hasOwnProperty(fetchName)) {
                     this.setState({hasStartedFetchingEntities: true});
-                    this.props[fetchName]();
+                    this.props[fetchName]({background: isBackground});
                 } else{
                     consoleLog('The fetching function is absent');
                 }
@@ -112,12 +112,11 @@ export function ListComponent(pluralEntityName){
                 if(entities === null)
                     return <Loading cancelCallback={cancelFetching} authUser={authUser}/>;
 
-                if(params.pageNumber > this.totalPages && this.totalPages > 0){
+                if(params && params.pageNumber > this.totalPages && this.totalPages > 0){
                     if(params.pageNumber - 1 !== this.totalPages){
                         return <PageNotFound/>;
                     }
                 }
-
                 return null;
             }
 

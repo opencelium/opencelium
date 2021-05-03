@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,9 +57,164 @@ const fetchUpdateAppVersionRejected = (error) => {
     });
 };
 
+/**
+ * fetch online updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOnlineUpdates = (settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES,
+        settings,
+    };
+};
+
+/**
+ * fetch online updates fulfilled
+ * @param updates = available updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOnlineUpdatesFulfilled = (updates, settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_FULFILLED,
+        payload: updates,
+        settings: {...settings, hasCloseButton: true},
+    };
+};
+
+/**
+ * fetch online updates rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchOnlineUpdatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch online updates canceled
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOnlineUpdatesCanceled = (message) => {
+    return {
+        type: UpdateAssistantAction.FETCH_ONLINEUPDATES_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch offline updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOfflineUpdates = (settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES,
+        settings,
+    };
+};
+
+/**
+ * fetch offline updates fulfilled
+ * @param updates = available updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOfflineUpdatesFulfilled = (updates, settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES_FULFILLED,
+        payload: updates,
+        settings: {...settings, hasCloseButton: true},
+    };
+};
+
+/**
+ * fetch offline updates rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchOfflineUpdatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * fetch offline updates canceled
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchOfflineUpdatesCanceled = (message) => {
+    return {
+        type: UpdateAssistantAction.FETCH_OFFLINEUPDATES_CANCELED,
+        payload: message
+    };
+};
+
+/**
+ * fetch system requirements
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchSystemRequirements = (settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS,
+        settings,
+    };
+};
+
+/**
+ * fetch system requirements fulfilled
+ * @param systemRequirements     = available updates
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchSystemRequirementsFulfilled = (systemRequirements, settings = {background: false}) => {
+    return {
+        type: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS_FULFILLED,
+        payload: systemRequirements,
+        settings: {...settings, hasCloseButton: true},
+    };
+};
+
+/**
+ * fetch system requirements rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchSystemRequirementsRejected = (error) => {
+    return Rx.Observable.of({
+        type: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS_REJECTED,
+        payload: error
+    });
+};
+
 
 export {
     fetchUpdateAppVersion,
     fetchUpdateAppVersionRejected,
     fetchUpdateAppVersionFulfilled,
+    fetchOnlineUpdates,
+    fetchOnlineUpdatesRejected,
+    fetchOnlineUpdatesFulfilled,
+    fetchOnlineUpdatesCanceled,
+    fetchOfflineUpdates,
+    fetchOfflineUpdatesRejected,
+    fetchOfflineUpdatesFulfilled,
+    fetchOfflineUpdatesCanceled,
+    fetchSystemRequirements,
+    fetchSystemRequirementsRejected,
+    fetchSystemRequirementsFulfilled,
 };

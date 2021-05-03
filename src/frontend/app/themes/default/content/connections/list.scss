@@ -1,0 +1,60 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+@import '../../constants';
+
+.connection_card_title{
+  .icons{
+    .from{
+      padding: 0 !important;
+      min-height: 20px !important;
+      line-height: 20px;
+      text-align: right;
+      transition: all 0.3s;
+    }
+    .arrow{
+      padding: 0 !important;
+      text-align: center;
+      align-self: center;
+      .arrow_icon{
+        margin-top: 0px;
+        transition: all 0.3s;
+      }
+    }
+    .to{
+      padding: 0 !important;
+      min-height: 20px !important;
+      line-height: 20px;
+      text-align: left;
+      transition: all 0.3s;
+    }
+    img{
+      max-height: 20px;
+      transition: all 0.3s;
+    }
+  }
+  .title{
+    padding: 0 !important;
+    text-align: left;
+    font-family: $FONT_FAMILY;
+    margin-bottom: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 8px !important;
+    font-size: $FONT_SIZE_SMALL;
+  }
+}

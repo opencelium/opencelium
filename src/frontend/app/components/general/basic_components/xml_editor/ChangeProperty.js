@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Input from "@basic_components/inputs/Input";
@@ -106,7 +121,7 @@ class ChangeProperty extends Component{
         const {translate, property, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={basicStyles.change_popup} style={{top: this.top, left: this.left}}>
-                <TooltipFontIcon size={16} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={basicStyles.close_icon} onClick={close}/>
+                <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={basicStyles.close_icon} onClick={close}/>
                 <Input id={`${property.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.PROPERTY.NAME')} theme={{input: basicStyles.change_tag_name}}/>
                 <Value translate={translate} value={value} changeValue={::this.changeValue} uniqueIndex={property.uniqueIndex} ReferenceComponent={ReferenceComponent} pressKey={::this.pressKey}/>
                 <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.PROPERTY.ADD') : translate('XML_EDITOR.PROPERTY.UPDATE')}/>

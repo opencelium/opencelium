@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import OCTour from "@components/general/basic_components/OCTour";
 import {disableBodyScroll, enableBodyScroll} from "body-scroll-lock";
 import {automaticallyShowTour} from "@utils/constants/tours";
 import {toggleAppTour} from '@actions/auth';
-import store from '@utils/store';
+import {store} from '@utils/store';
 
 
 /**

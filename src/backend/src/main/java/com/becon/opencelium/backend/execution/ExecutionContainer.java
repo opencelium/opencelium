@@ -49,10 +49,11 @@ public class ExecutionContainer {
     private List<RequestData> requestData = new LinkedList<>();
     private List<RequestData> supportRequestData = new LinkedList<>();
     private ArrayList<MessageContainer> responseData = new ArrayList<>();
-    private Map<String, Integer> loopIndex = new HashMap<>();
+    private LinkedHashMap<String, Integer> loopIndex = new LinkedHashMap<>();
     private String taId;
     private String conn;
     private int order;
+    private Map<String, Object> queryParams = new HashMap<>();
 
     private EnhancementServiceImp enhancementService;
     private FieldNodeServiceImp fieldNodeService;
@@ -193,6 +194,25 @@ public class ExecutionContainer {
         return messageContainer.getValue(ref, getLoopIndex());
     }
 
+    public String getValueFromQueryParams(String exp) {
+        if (exp == null || exp.isEmpty()) {
+            return "";
+        }
+        String result = exp;
+        if (queryParams.isEmpty()) {
+            return null;
+        }
+
+        for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+            String pointer = "${" + entry.getKey() + "}";
+            if (!result.contains(pointer)){
+                continue;
+            }
+            result = result.replace(pointer, entry.getValue().toString());
+        }
+        return result;
+    }
+
     public String getValueFromRequestData(String exp) {
         if (exp == null || exp.isEmpty()) {
             return "";
@@ -253,6 +273,14 @@ public class ExecutionContainer {
         this.supportRequestData = supportRequestData;
     }
 
+    public Map<String, Object> getQueryParams() {
+        return queryParams;
+    }
+
+    public void setQueryParams(Map<String, Object> queryParams) {
+        this.queryParams = queryParams;
+    }
+
     public String getConn() {
         return conn;
     }
@@ -265,11 +293,11 @@ public class ExecutionContainer {
         this.responseData = responseData;
     }
 
-    public Map<String, Integer> getLoopIndex() {
+    public LinkedHashMap<String, Integer> getLoopIndex() {
         return loopIndex;
     }
 
-    public void setLoopIndex(Map<String, Integer> loopIndex) {
+    public void setLoopIndex(LinkedHashMap<String, Integer> loopIndex) {
         this.loopIndex = loopIndex;
     }
 
@@ -293,14 +321,8 @@ public class ExecutionContainer {
 
     private List<?> convertToArray(String stringifiedArray){
         try {
-//            List<String> array = new ArrayList<>();
             ObjectMapper mapper = new ObjectMapper();
             List jsonString = (List) mapper.readValue(stringifiedArray, Object.class);
-//            String withoutBrackets = stringifiedArray.replaceAll("[\\[\\](){}]", ""); // Remove all the brackets
-//            for (String word : withoutBrackets.split(",")) {
-//                String element = word.replaceAll("\"", "");
-//                array.add(element);
-//            }
             return jsonString;
         } catch (Exception e){
             throw new RuntimeException(e);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@ import {FormElement} from "@decorators/FormElement";
 import BrowseButton from "@basic_components/buttons/BrowseButton";
 import Checkbox from "@basic_components/inputs/Checkbox";
 import styles from "@themes/default/general/change_component.scss";
+import ReactCrop from "@components/general/app/ReactCrop";
+import Dialog from "@basic_components/Dialog";
 
 
 /**
@@ -35,7 +37,16 @@ class FormInputImage extends Component{
             browseTitle: '',
             checkboxLabel: '',
             hasImage: true,
+            src: null,
+            croppedImage: null,
         };
+    }
+
+    setCroppedImage(croppedImage){
+        const {name} = this.props.data;
+        const {entity, updateEntity} = this.props;
+        entity[name] = croppedImage;
+        this.setState({croppedImage}, updateEntity(entity));
     }
 
     onChangeCheckbox(e){
@@ -53,19 +64,23 @@ class FormInputImage extends Component{
     }
 
     handleChange(e){
-        const {name} = this.props.data;
-        const {entity, updateEntity} = this.props;
         const f = e.target.files[0];
         if(f) {
-            entity[name] = f;
-            this.setState({browseTitle: f.name}, updateEntity(entity));
+            const reader = new FileReader();
+            reader.addEventListener('load', () =>
+                this.setState({ src: reader.result })
+            );
+            reader.readAsDataURL(f);
+            this.setState({
+                browseTitle: f.name,
+            })
         } else{
             this.setState({browseTitle: ''});
         }
     };
 
     render(){
-        const {hasImage, checkboxLabel} = this.state;
+        const {hasImage, checkboxLabel, src} = this.state;
         const {entity, data} = this.props;
         const {icon, label, name} = data;
         let {tourStep, browseTitle} = data;
@@ -102,6 +117,7 @@ class FormInputImage extends Component{
                         name: label,
                     }}
                 />
+                <ReactCrop src={src} setCroppedImage={::this.setCroppedImage}/>
             </div>
         );
     }

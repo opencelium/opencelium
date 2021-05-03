@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import {
 } from '@epics/connectors';
 import {
     fetchInvokersEpic, fetchInvokerEpic, addInvokerEpic,
-    updateInvokerEpic, deleteInvokerEpic,
+    updateInvokerEpic, deleteInvokerEpic, fetchDefaultInvokersEpic,
 } from '@epics/invokers';
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
@@ -78,7 +78,24 @@ import {
     fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
     updateNotificationTemplateEpic, deleteNotificationTemplateEpic,
 } from '@epics/notification_templates';
-import {fetchUpdateAppVersionEpic} from "@epics/update_assistant";
+import {
+    fetchUpdateAppVersionEpic,
+    fetchOfflineUpdatesEpic,
+    fetchOnlineUpdatesEpic,
+    deleteVersionEpic,
+    uploadVersionEpic,
+    updateTemplatesForAssistantEpic,
+    updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic,
+    addConvertTemplatesLogsEpic,
+    addConvertInvokersLogsEpic,
+    updateConnectionsForAssistantEpic,
+    updateSystemForAssistantEpic,
+} from "@epics/update_assistant";
+import {
+    fetchWidgetsEpic,
+    fetchWidgetSettingsEpic, updateWidgetSettingsEpic,
+} from "@epics/dashboard";
 
 
 /**
@@ -120,6 +137,7 @@ export default combineEpics(
     addInvokerEpic,
     updateInvokerEpic,
     deleteInvokerEpic,
+    fetchDefaultInvokersEpic,
     testConnectorEpic,
     fetchConnectionEpic,
     fetchConnectionsEpic,
@@ -178,4 +196,18 @@ export default combineEpics(
     deleteNotificationTemplateEpic,
     checkConnectionEpic,
     fetchUpdateAppVersionEpic,
+    fetchOfflineUpdatesEpic,
+    fetchOnlineUpdatesEpic,
+    deleteVersionEpic,
+    uploadVersionEpic,
+    updateTemplatesForAssistantEpic,
+    updateInvokersForAssistantEpic,
+    fetchSystemRequirementsEpic,
+    addConvertTemplatesLogsEpic,
+    addConvertInvokersLogsEpic,
+    updateConnectionsForAssistantEpic,
+    updateSystemForAssistantEpic,
+    fetchWidgetSettingsEpic,
+    fetchWidgetsEpic,
+    updateWidgetSettingsEpic,
 );

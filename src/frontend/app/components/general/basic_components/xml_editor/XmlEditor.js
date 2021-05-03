@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2021>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Tag from "@basic_components/xml_editor/Tag";
@@ -92,7 +107,7 @@ class XmlEditor extends Component{
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
-                        <TooltipFontIcon tooltip={translate('XML_EDITOR.ADD_DECLARATION')} value={<span>{'<?xml?>'}</span>} className={styles.add_declaration_icon} onClick={::this.addDeclaration}/>
+                        <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.ADD_DECLARATION')} value={<span>{'<?xml?>'}</span>} className={styles.add_declaration_icon} onClick={::this.addDeclaration}/>
                         <br/>
                     </React.Fragment>
                 }
@@ -101,7 +116,7 @@ class XmlEditor extends Component{
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
-                        <TooltipFontIcon id={`xml_add_tag`} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
+                        <TooltipFontIcon id={`xml_add_tag`} size={14} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
                         {
                             hasAddTagPopup && !readOnly &&
                                 <ChangeTag translate={translate} correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -165,12 +165,12 @@ class SelectSearch extends Component{
      * to filter fields
      */
     filterFields(inputValue){
-        let {items, predicator} = this.props;
+        let {items, predicator, currentConnector} = this.props;
         if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
-        let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue) : [];
-        if(result.length > 0) {
+        let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue, currentConnector) : [];
+        if(isArray(result) && result.length > 0) {
             result = result.map(field => {
                 let {value, type} = field;
                 let label = field.hasOwnProperty('label') ? field.label : field.value;
@@ -275,6 +275,7 @@ SelectSearch.defaultProps = {
     placeholder: '',
     icon: '',
     predicator: '',
+    currentConnector: null,
 };
 
 export default SelectSearch;

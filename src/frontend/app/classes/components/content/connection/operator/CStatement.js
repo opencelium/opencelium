@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,12 +129,19 @@ export default class CStatement{
         this._rightPropertyValue = rightPropertyValue;
     }
 
+    isNotElementWithIndex(value){
+        if(isString(value) && value.length > 1){
+            return value[0] !== '[' && value[value.length - 1] !== ']';
+        }
+        return true;
+    }
+
     getObject(){
         if((this._color === DEFAULT_COLOR || this._color === '') && this.field === ''){             //for one statement operator
             return null;
         } else {
             let field = this._field;
-            if(this._parent !== null){
+            if(this._parent !== null && typeof this._parent !== 'undefined'){
                 let fieldSplit = field.split('.');
                 let tmpField = '';
                 let newField = '';
@@ -142,7 +149,7 @@ export default class CStatement{
                     let fieldSplitValue = fieldSplit[i];
                     tmpField += tmpField !== '' ? `.${fieldSplitValue}` : fieldSplitValue;
                     let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
-                    if(findField && findField.value !== WHOLE_ARRAY && findField.type === 'array'){
+                    if(findField && this.isNotElementWithIndex(findField.value) && findField.type === 'array'){
                         fieldSplitValue = markFieldNameAsArray(fieldSplitValue);
                     }
                     newField += newField !== '' ? `.${fieldSplitValue}` : `${fieldSplitValue}`;

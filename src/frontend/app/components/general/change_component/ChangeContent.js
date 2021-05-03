@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 import Breadcrumbs from "./Breadcrumbs";
 import Form from "./Form";
 import Hint from "./Hint";
@@ -31,11 +32,20 @@ import {
 
 import {isEmptyObject} from '@utils/app';
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import {setComponentInChangeContent} from "@actions/app";
 
+
+function mapStateToProps(state){
+    const app = state.get('app');
+    return {
+        isComponentExternalInChangeContent: app.get('isComponentExternalInChangeContent'),
+    };
+}
 
 /**
  * Change Content Component
  */
+@connect(mapStateToProps, {setComponentInChangeContent})
 class ChangeContent extends Component{
 
     constructor(props){
@@ -76,6 +86,21 @@ class ChangeContent extends Component{
         addNextPageChangeEntityKeyNavigation(this);
         //addChangeContentActionNavigation(this);
         addFocusDocumentNavigation(this);
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {page} = this.state;
+        const {contents, isComponentExternalInChangeContent} = this.props;
+        const isExternalComponent = contents[page].hasOwnProperty('isExternalComponent') ? contents[page].isExternalComponent : false;
+        if(isExternalComponent){
+            if(!isComponentExternalInChangeContent) {
+                this.props.setComponentInChangeContent(true);
+            }
+        } else{
+            if(isComponentExternalInChangeContent) {
+                this.props.setComponentInChangeContent(false);
+            }
+        }
     }
 
     componentWillUnmount(){
@@ -341,7 +366,7 @@ class ChangeContent extends Component{
     }
 
     render(){
-        const {breadcrumbsItems, contents, translations, type, isActionInProcess, noBreadcrumbs, noHint, noNavigation, authUser} = this.props;
+        const {breadcrumbsItems, contents, translations, type, isActionInProcess, noBreadcrumbs, noHint, noNavigation, authUser, isComponentExternalInChangeContent} = this.props;
         const {page, focusedInput, contentsLength} = this.state;
         const inputs = contents[page].inputs;
         const {extraAction} = contents[page];
@@ -352,6 +377,19 @@ class ChangeContent extends Component{
             nextPage: ::this.nextPage,
         };
         const test = ::this.getTestData();
+        if(isComponentExternalInChangeContent){
+            return (
+                <Form
+                    clearValidationMessage={::this.clearValidationMessage}
+                    inputs={inputs}
+                    entity={this.state.entity}
+                    updateEntity={::this.updateEntity}
+                    focusedInput={focusedInput.name}
+                    authUser={authUser}
+                    setFocusInput={::this.setFocusInput}
+                />
+            );
+        }
         return (
             <div>
                 <Breadcrumbs items={breadcrumbsItems} page={page} exactPage={::this.exactPage} authUser={authUser}/>

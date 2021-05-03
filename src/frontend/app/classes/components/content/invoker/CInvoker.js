@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ export default class CInvoker{
         let description = invoker && invoker.hasOwnProperty('description') ? invoker.description : '';
         let hint = invoker && invoker.hasOwnProperty('hint') ? invoker.hint : '';
         let icon = invoker && invoker.hasOwnProperty('icon') ? invoker.icon : '';
-        let data = invoker && invoker.hasOwnProperty('data') ? invoker.data : '';
+        let data = invoker && invoker.hasOwnProperty('requiredData') ? invoker.requiredData : '';
         let auth = invoker && invoker.hasOwnProperty('authType') ? invoker.authType : '';
         let operations = invoker && invoker.hasOwnProperty('operations') ? invoker.operations : [];
         return new CInvoker(name, description, hint, icon, data, auth, operations);

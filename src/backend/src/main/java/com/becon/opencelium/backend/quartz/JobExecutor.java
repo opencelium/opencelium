@@ -38,6 +38,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JobExecutor extends QuartzJobBean {
@@ -103,8 +105,13 @@ public class JobExecutor extends QuartzJobBean {
         logger.info("Firing  Trigger with key {}", context.getTrigger().getKey());
         System.out.println("==================================================================");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        Long connectionId = jobDataMap.getLongValue("connectionId");
         Object schedulerId = jobDataMap.getIntValue("schedulerId");
+
+        Object queryParams = jobDataMap.getOrDefault("queryParams", null);
+        Map<String, Object> queryParamsMap = new HashMap<>();
+        if (queryParams instanceof Map) {
+            queryParamsMap = (Map) queryParams;
+        }
 
         Date date= new Date();
         Execution execution = new Execution();
@@ -120,6 +127,7 @@ public class JobExecutor extends QuartzJobBean {
         String taId = schedulerId + "-" + execution.getId();
         executionContainer.setTaId(taId);
         executionContainer.setOrder(0);
+        executionContainer.setQueryParams(queryParamsMap);
 
         if (lastExecutionServiceImp.existsBySchedulerId(scheduler.getId())){
             lastExecution = lastExecutionServiceImp.findBySchedulerId(scheduler.getId());

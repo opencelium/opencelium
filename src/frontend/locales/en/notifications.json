@@ -6,16 +6,17 @@
     "UPDATE_USER": "The user was successfully updated.",
     "UPDATE_PROFILEPICTURE": "The user was successfully updated.",
     "UPDATE_USERDETAIL": "The userdetail was successfully updated.",
-    "DELETE_USER": "The user was successfully deleted.",
+    "DELETE_USER": "The user was successfully removed.",
     "UPDATE_AUTH_USER_LANGUAGE": "The language was updated",
     "ADD_USERGROUP": "The user group {{name}} was successfully added.",
     "ADD_GROUPICON": "The user group {{name}} was successfully added.",
     "FETCH_USERGROUPS": "The list of user groups was successfully fetched.",
     "UPDATE_USERGROUP": "The user group was successfully updated.",
     "UPDATE_GROUPICON": "The user group was successfully updated.",
-    "DELETE_USERGROUP": "The user group was successfully deleted.",
+    "DELETE_USERGROUP": "The user group was successfully removed.",
     "TEST_CONNECTOR": "Successfully tested!",
     "ADD_CONNECTOR": "The connector was successfully added",
+    "ADD_CONNECTORICON": "The icon was successfully uploaded",
     "FETCH_CONNECTORS": "Connectors were successfully fetched",
     "UPDATE_CONNECTOR": "The connector was successfully updated",
     "DELETE_CONNECTOR": "The connector was successfully removed",
@@ -46,12 +47,17 @@
     "DELETE_WEBHOOK": "The webhook was successfully removed",
     "COPYTOCLIPBOARD_WEBHOOK": "The webhook was successfully copied",
     "ADD_INVOKER": "The invoker was successfully added",
-    "DELETE_INVOKER": "The invoker was successfully deleted",
+    "DELETE_INVOKER": "The invoker was successfully removed",
     "ADD_NOTIFICATIONTEMPLATE": "The template was successfully added",
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were successfully fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template was successfully updated",
     "DELETE_NOTIFICATIONTEMPLATE": "The template was successfully removed",
-    "FETCH_UPDATEAPPVERSION": "OC Update <0>{{version}}</0> available"
+    "FETCH_UPDATEAPPVERSION": "OC Update <0>{{version}}</0> available",
+    "UPLOAD_VERSION": "New version was successfully uploaded",
+    "UPDATE_TEMPLATESFORASSISTANT": "Templates were successfully updated",
+    "UPDATE_INVOKERSFORASSISTANT": "Invokers were successfully updated",
+    "UPDATE_CONNECTIONSFORASSISTANT": "Connections were successfully updated",
+    "UPDATE_SYSTEM": "Opencelium was successfully updated"
   },
   "ERROR": {
     "ADD_USER": {
@@ -85,6 +91,7 @@
       "CONNECTOR_EXISTS": "This connector with this name already exists",
       "__DEFAULT__": "The connection was not added"
     },
+    "ADD_CONNECTORICON": "The icon was not uploaded",
     "FETCH_CONNECTORS": "Connectors were not fetched",
     "UPDATE_CONNECTOR": {
       "CONNECTOR_EXISTS": "This connector with this name already exists",
@@ -169,11 +176,25 @@
     "LOAD_APPSLINK": "The link to this application does not work, please check your installations",
     "LOAD_ADMINCARD": "The link to this card does not work, please check your permissions",
     "ADD_INVOKER": "The invoker was not added",
-    "DELETE_INVOKER": "The invoker was not deleted",
+    "DELETE_INVOKER": "The invoker was not removed",
     "ADD_NOTIFICATIONTEMPLATE": "The template was not added",
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were not fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template was not updated",
-    "DELETE_NOTIFICATIONTEMPLATE": "The template was not removed"
+    "DELETE_NOTIFICATIONTEMPLATE": "The template was not removed",
+    "UPLOAD_VERSION": {
+      "__DEFAULT__": "New version was not uploaded"
+    },
+    "DELETE_VERSION": "Version was not removed",
+    "UPDATE_TEMPLATESFORASSISTANT": "Templates were not updated",
+    "UPDATE_INVOKERSFORASSISTANT": "Invokers were not updated",
+    "UPDATE_CONNECTIONSFORASSISTANT": "Connections were not updated",
+    "UPDATE_SYSTEM": "Opencelium was not updated",
+    "FETCH_ONLINEUPDATES": {
+      "__DEFAULT__": "The Online Updates were not fetched"
+    },
+    "FETCH_OFFLINEUPDATES": {
+      "__DEFAULT__": "The Offline Updates were not fetched"
+    }
   },
   "WARNING": {
     "ADD_USER": "The user was added, but ...",
@@ -192,11 +213,11 @@
     "FETCH_USERS": "List of users.",
     "UPDATE_USER": "One user was updated.",
     "UPDATE_USERDETAIL": "One userdetail was updated.",
-    "DELETE_USER": "One user was deleted.",
+    "DELETE_USER": "One user was removed.",
     "ADD_USERGROUP": "You have a new user group.",
     "FETCH_USERGROUPS": "List of user groups.",
     "UPDATE_USERGROUP": "One user group was updated.",
-    "DELETE_USERGROUP": "One user group was deleted."
+    "DELETE_USERGROUP": "One user group was removed."
   },
   "HEADERS": {
     "SUCCESS": "Success",

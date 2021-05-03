@@ -310,15 +310,18 @@ public class FieldNodeServiceImp implements FieldNodeService {
                 if (child.equals("")){
                     result = "";
                     continue;
-                }
-            }
-            if (f.getId().equals(fieldNode.getId())){
-                if (f.getType().equals("array")){
-                    result = result + f.getName() + "[]";
                 } else {
-                    result = result + f.getName();
+                    break;
                 }
-                break;
+            } else {
+                if (f.getId().equals(fieldNode.getId())){
+                    if (f.getType().equals("array")){
+                        result = result + f.getName() + "[]";
+                    } else {
+                        result = result + f.getName();
+                    }
+                    break;
+                }
             }
         }
         return result;
@@ -326,6 +329,17 @@ public class FieldNodeServiceImp implements FieldNodeService {
 
     public static boolean hasReference(String fieldValue) {
         String regex = "#(([a-zA-Z0-9]+).\\(response\\)|([a-zA-Z0-9]+).\\(request\\))";
+        Pattern pattern = Pattern.compile(regex);
+
+        Matcher matcher = pattern.matcher(fieldValue);
+        while (matcher.find()){
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean hasQueryParams(String fieldValue) {
+        String regex = "\\$\\{(.*?)\\}";
         Pattern pattern = Pattern.compile(regex);
 
         Matcher matcher = pattern.matcher(fieldValue);

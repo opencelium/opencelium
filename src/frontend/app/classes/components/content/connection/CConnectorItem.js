@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,11 +13,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, sortByIndex, subArrayToString} from "@utils/app";
+import {consoleLog, isId, isString, sortByIndex, subArrayToString} from "@utils/app";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem, {LOOP_OPERATOR} from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
 import CConnectorPagination from "./CConnectorPagination";
+import {ITEMS} from "@change_component/form_elements/form_connection/form_svg/data";
+import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -28,9 +33,12 @@ export const CONNECTOR_TO = 'toConnector';
 export const METHOD_ITEM = 'method';
 export const OPERATOR_ITEM = 'operator';
 
-export const CONNECTOR_DEPTH_LIMIT = 7;
+export const CONNECTOR_DEPTH_LIMIT = 1000;
 
-export const ITERATOR_NAMES = ['i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+export const ITERATOR_NAMES = [
+    'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    'ii', 'ij', 'ik', 'il', 'im', 'in', 'io', 'ip', 'iq', 'ir', 'is', 'it', 'iu', 'iv', 'iw', 'ix', 'iy', 'iz'
+];
 
 /**
  * Connector class for manipulating data in the Connector Component
@@ -38,27 +46,90 @@ export const ITERATOR_NAMES = ['i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
  */
 export default class CConnectorItem{
 
-    constructor(connectorId = 0, title = '', invoker = null, methods = [], operators = [], connectorType = ''){
+    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = ''){
         this._id = isId(connectorId) ? connectorId : 0;
         this._title = title === '' ? 'Please, choose connector' : title;
+        this._icon = isString(icon) ? icon : '';
         this._invoker = this.convertInvoker(invoker);
         this._currentItem = null;
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._processes = [];
+        this._arrows = [];
         this._pagination = this.setConnectorPagination();
         this._currentProgress = this.getCurrentProgress();
         this._operatorsHistory = [];
+        this.setSvgItems();
     }
 
     static createConnectorItem(connectorItem){
         let connectorId = connectorItem && connectorItem.hasOwnProperty('connectorId') ? connectorItem.connectorId : 0;
         let title = connectorItem && connectorItem.hasOwnProperty('title') ? connectorItem.title : '';
+        let icon = connectorItem && connectorItem.hasOwnProperty('icon') ? connectorItem.icon : '';
         let invoker = connectorItem && connectorItem.hasOwnProperty('invoker') ? connectorItem.invoker : null;
         let methods = connectorItem && connectorItem.hasOwnProperty('methods') ? connectorItem.methods : [];
         let operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
         let connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
-        return new CConnectorItem(connectorId, title, invoker, methods, operators, connectorType);
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType);
+    }
+
+    static hasIcon(icon){
+        return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null';
+    }
+
+    getSvgElement(element){
+        if(element instanceof CTechnicalOperator || element instanceof CTechnicalProcess){
+            return element
+        }
+        if(element.hasOwnProperty('type')){
+            return CTechnicalOperator.createTechnicalOperator(element);
+        } else{
+            return CTechnicalProcess.createTechnicalProcess(element);
+        }
+    }
+
+    setSvgItems(){
+        let items = [...this.methods, ...this.operators];
+        items = sortByIndex(items);
+        let xIterator = 0;
+        for(let i = 0; i < items.length; i++){
+            let svgElement = {};
+            svgElement.name = items[i].name ? items[i].name : '';
+            svgElement.entity = items[i];
+            if(items[i].type) {
+                svgElement.type = items[i].type;
+            }
+            let currentSplitIndex = items[i].index.split('_');
+            if(currentSplitIndex[currentSplitIndex.length - 1] !== '0'){
+                xIterator += 200;
+            }
+            svgElement.x = xIterator;
+            svgElement.y = 150 * (currentSplitIndex.length - 1)
+            if(items[i].type){
+                svgElement.x += 35;
+                svgElement.y += 10;
+            }
+            svgElement.id = items[i].index;
+            this.processes.push(this.getSvgElement(svgElement));
+            if(items[i].index !== '0') {
+                this.arrows.push({from: this.getPrevIndex(items[i].index), to: items[i].index});
+            }
+        }
+    }
+
+    getPrevIndex(index){
+        if(index === '0'){
+            return '';
+        }
+        let splitIndex = index.split('_');
+        if(splitIndex[splitIndex.length - 1] === '0'){
+            splitIndex.pop();
+            return splitIndex.join('_');
+        } else{
+            splitIndex[splitIndex.length - 1] = splitIndex[splitIndex.length - 1] - 1;
+            return splitIndex.join('_');
+        }
     }
 
     convertItem(itemType, item){
@@ -92,6 +163,8 @@ export default class CConnectorItem{
     resetItems(){
         this._methods = [];
         this._operators = [];
+        this._processes = [];
+        this._arrows = [];
         this._currentItem = null;
         this.reloadPagination();
         this.reloadOperatorsHistory();
@@ -299,6 +372,14 @@ export default class CConnectorItem{
         this._title = title;
     }
 
+    get icon(){
+        return this._icon;
+    }
+
+    set icon(icon){
+        this._icon = icon;
+    }
+
     get invoker(){
         return this._invoker;
     }
@@ -314,6 +395,7 @@ export default class CConnectorItem{
 
     set methods(methods){
         this._methods = this.convertMethods(methods);
+        this.setSvgItems();
     }
 
     get operators(){
@@ -322,6 +404,15 @@ export default class CConnectorItem{
 
     set operators(operators){
         this._operators = this.convertOperators(operators);
+        this.setSvgItems();
+    }
+
+    get processes(){
+        return this._processes;
+    }
+
+    get arrows(){
+        return this._arrows;
     }
 
     get pagination(){
@@ -538,10 +629,35 @@ export default class CConnectorItem{
         }
         this.setCurrentItem(newItem);
         this.reloadPagination({newItem});
+        this.setSvgItems();
     }
 
     // max can be 18 depth of loop operators
-    static getIterator(operators, operator, prevIndex){
+    static getIterator(operators, operator, prevIndex) {
+        let result = ITERATOR_NAMES[0];
+        let splitOperatorIndex = operator.index.split('_');
+        if(splitOperatorIndex.length > 1) {
+            let decreasedOperatorIndex = '';
+            let prevOperator = null;
+            let decreaseIterator = 1;
+            while (true) {
+                decreasedOperatorIndex = splitOperatorIndex.slice(0, splitOperatorIndex.length - decreaseIterator).join('_')
+                prevOperator = operators.find(op => op.index === decreasedOperatorIndex);
+                if (!prevOperator || prevOperator.type === LOOP_OPERATOR) {
+                    break;
+                }
+                decreaseIterator++;
+            }
+            if (prevOperator && prevOperator.iterator) {
+                let prevIteratorIndex = ITERATOR_NAMES.indexOf(prevOperator.iterator);
+                if (prevIteratorIndex >= 0) {
+                    result = ITERATOR_NAMES[prevIteratorIndex + 1];
+                }
+            }
+        }
+        return result;
+    }
+    /*static getIterator(operators, operator, prevIndex){
         let result = ITERATOR_NAMES[0];
         let prevOperator = operators[prevIndex];
         if(typeof prevOperator !== "undefined"){
@@ -576,7 +692,7 @@ export default class CConnectorItem{
             }
         }
         return result;
-    }
+    }*/
 
     addMethod(method, mode = OUTSIDE_ITEM){
         this.addItem(METHOD_ITEM, method, mode);
@@ -590,6 +706,42 @@ export default class CConnectorItem{
     getOperatorByIndex(index){
         let operator = this._operators.find(o => o.index === index);
         return operator ? operator : null;
+    }
+
+    getPreviousIterators(){
+        let previousIterators = [];
+        let currentItem = this._currentItem;
+        if(currentItem) {
+            let splitMethodIndex = currentItem.index.split('_');
+            let previousOperatorIndex = splitMethodIndex.length === 1 ? -1 : splitMethodIndex.slice(0, -1).join('_');
+            let previousOperatorArrayIndex = this.operators.findIndex(operator => operator.index === previousOperatorIndex);
+            if(previousOperatorArrayIndex !== -1) {
+                while (true) {
+                    if (this.operators[previousOperatorArrayIndex].type === LOOP_OPERATOR) {
+                        break;
+                    } else {
+                        if (previousOperatorArrayIndex === 0) {
+                            break;
+                        }
+                        previousOperatorArrayIndex--;
+                    }
+                }
+                const previousOperator = this.operators[previousOperatorArrayIndex];
+                if (previousOperator) {
+                    let iteratorName = previousOperator.iterator;
+                    if (ITERATOR_NAMES.indexOf(iteratorName) === -1) {
+                        return previousIterators;
+                    }
+                    for (let i = 0; i < ITERATOR_NAMES.length; i++) {
+                        previousIterators.push(ITERATOR_NAMES[i]);
+                        if (ITERATOR_NAMES[i] === iteratorName) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return previousIterators;
     }
 
     getCloserItem(itemIndex){
@@ -653,6 +805,7 @@ export default class CConnectorItem{
             }
         }
         this.reloadPagination();
+        this.setSvgItems();
     }
 
     addOperator(operator, mode = OUTSIDE_ITEM){
@@ -677,6 +830,7 @@ export default class CConnectorItem{
             }
         }
         this.reloadPagination();
+        this.setSvgItems();
     }
 
     generateNextIndex(mode){
@@ -789,6 +943,7 @@ export default class CConnectorItem{
             invoker: {name: this._invoker.name},
             connectorId: this._id,
             methods: methods,
+            icon: this._icon,
             operators: operators,
         };
         if(this.hasOwnProperty('_id')){

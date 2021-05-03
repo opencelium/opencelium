@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {LIST_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
+import ConnectionCardTitle from "@components/content/connections/list/ConnectionCardTitle";
 
 
 const prefixUrl = '/connections';
@@ -84,10 +85,10 @@ class ConnectionsList extends Component{
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         let mapEntity = {};
-        mapEntity.map = (connection) => {
+        mapEntity.map = (connection, key) => {
             let result = {};
             result.id = connection.connectionId;
-            result.title = connection.title;
+            result.title = <ConnectionCardTitle title={connection.title} fromConnector={connection.fromConnector} toConnector={connection.toConnector}/>;
             return result;
         };
         mapEntity.getViewLink = (connection) => {return `${prefixUrl}/${connection.connectionId}/view`;};

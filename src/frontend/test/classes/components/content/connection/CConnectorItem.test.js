@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ import React from 'react';
 import CConnectorItem, {INSIDE_ITEM} from "../../../../../app/classes/components/content/connection/CConnectorItem";
 import {ALL_COLORS} from "../../../../../app/classes/components/content/connection/CConnection";
 import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 
 
 describe.skip('Add Method', () => {
@@ -136,7 +137,7 @@ describe.skip('Check Iterators', () => {
     });
 });
 
-describe('Check Get All Previous Methods for defined item (Operator component. Select Box)', () => {
+describe.skip('Check Get All Previous Methods for defined item (Operator component. Select Box)', () => {
     let connectorItem = CConnectorItem.createConnectorItem();
     const item = COperatorItem.createOperatorItem({index: '2_0_0_0_1', type: 'if'})
     beforeEach(() => {
@@ -159,5 +160,85 @@ describe('Check Get All Previous Methods for defined item (Operator component. S
         ];
         const received = connectorItem.getAllPrevMethods(item);
         expect(received).toEqual(expected);
+    });
+});
+
+describe('Get Previous Iterators By Method', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    beforeEach(() => {
+        connectorItem.title = 'i-doit';
+        connectorItem.setConnectorType('fromConnector');
+        connectorItem.methods = [
+            {index: '0'},
+            {index: '1'},
+            {index: '2_0_0'},
+        ];
+        connectorItem.operators = [
+            {index: '2', type: 'loop', iterator: 'i'},
+            {index: '2_0', type: 'loop', iterator: 'j'},
+        ];
+    });
+
+    it('if loops depth is equal 2', () => {
+        const method = CMethodItem.createMethodItem({index: '2_0_0'});
+        connectorItem.setCurrentItem(method);
+        const received = connectorItem.getPreviousIterators(method);
+        const expected = ['i', 'j'];
+        expect(received).toEqual(expected);
+    });
+});
+
+describe('Get Previous Iterator', () => {
+    let connectorItem = CConnectorItem.createConnectorItem();
+    beforeEach(() => {
+        connectorItem.title = 'i-doit';
+        connectorItem.setConnectorType('fromConnector');
+        connectorItem.methods = [
+            {index: '0'},
+            {index: '1'},
+            {index: '2_0_0'},
+        ];
+        connectorItem.operators = [
+            {index: '2', type: 'loop', iterator: 'i'},
+            {index: '2_0', type: 'loop', iterator: 'j'},
+        ];
+    });
+
+    it('if loops depth is equal 2', () => {
+        const method = CMethodItem.createMethodItem({index: '2_0_0'});
+        connectorItem.setCurrentItem(method);
+        const received = connectorItem.getPreviousIterators(method);
+        const expected = ['i', 'j'];
+        expect(received).toEqual(expected);
+    });
+});
+
+describe('Get Next Iterator', () => {
+
+    it('two loops. variant 1', () => {
+        const operators = [
+            COperatorItem.createOperatorItem({index: '1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1', type: 'loop', iterator: 'i'}),
+            COperatorItem.createOperatorItem({index: '1_1_1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1_3', type: 'if', iterator: null}),
+        ];
+        const newOperator = COperatorItem.createOperatorItem({index: '1_1_4'});
+        const prevIndex = 3;
+        const received = CConnectorItem.getIterator(operators, newOperator, prevIndex);
+        const expected = 'j';
+        expect(received).toBe(expected);
+    });
+    it('two loops. variant 2', () => {
+        const operators = [
+            COperatorItem.createOperatorItem({index: '1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1', type: 'loop', iterator: 'i'}),
+            COperatorItem.createOperatorItem({index: '1_1_1', type: 'if', iterator: null}),
+            COperatorItem.createOperatorItem({index: '1_1_3', type: 'if', iterator: null}),
+        ];
+        const newOperator = COperatorItem.createOperatorItem({index: '1_1_3_0'});
+        const prevIndex = 3;
+        const received = CConnectorItem.getIterator(operators, newOperator, prevIndex);
+        const expected = 'j';
+        expect(received).toBe(expected);
     });
 });
