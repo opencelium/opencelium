@@ -93,7 +93,10 @@ public class SystemOverviewRepository {
                     .build();
             Git git = new Git(repository);
             String version = git.describe().call();
-            return version.charAt(4) == '-' ? version.substring(0,4) : version.substring(0,6);
+            if (version.length() > 7) {
+                version = version.charAt(4) == '-' ? version.substring(0,4) : version.substring(0,6);
+            }
+            return version;
         } catch (Exception e) {
             e.printStackTrace();
         }
