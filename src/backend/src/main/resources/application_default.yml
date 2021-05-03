@@ -99,9 +99,7 @@ opencelium:
     experation-time: 86400
   assistant:
     repo:
-      url: https://bobmustaev@bitbucket.org/becon_gmbh/opencelium
-      username: uname
-      password: password
+      url: https://bitbucket.org/becon_gmbh/opencelium
 
 
 
