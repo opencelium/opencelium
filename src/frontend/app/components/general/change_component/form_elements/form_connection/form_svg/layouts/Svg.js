@@ -21,6 +21,8 @@ import Process from "../elements/Process";
 import Arrow from "../elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import LoopOperator from "../elements/LoopOperator";
+import ConnectorPanel from "@change_component/form_elements/form_connection/form_svg/elements/Panel";
+import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 
 class Svg extends React.Component {
     constructor(props) {
@@ -54,7 +56,7 @@ class Svg extends React.Component {
             let viewBox = layoutSVG.viewBox.baseVal;
             if(viewBox) {
                 viewBox.x = ::this.getViewBoxX();
-                //viewBox.y = startingSvgY;
+                viewBox.y = startingSvgY;
                 viewBox.width = 1800;
                 viewBox.height = 715;
             }
@@ -353,7 +355,7 @@ class Svg extends React.Component {
     }
 
     render(){
-        const {svgId} = this.props;
+        const {svgId, fromConnectorPanelParams, toConnectorPanelParams} = this.props;
         return(
             <svg
                 id={svgId}
@@ -374,6 +376,7 @@ class Svg extends React.Component {
                 {
                     this.renderItems()
                 }
+                {fromConnectorPanelParams && toConnectorPanelParams && <ConnectorPanels fromConnectorPanelParams={fromConnectorPanelParams} toConnectorPanelParams={toConnectorPanelParams}/>}
             </svg>
         );
     }
@@ -393,6 +396,8 @@ Svg.defaultProps = {
     isDraggable: false,
     isScalable: false,
     startingSvgY: -190,
+    fromConnectorPanelParams: null,
+    toConnectorPanelParams: null,
 }
 
 export default Svg;

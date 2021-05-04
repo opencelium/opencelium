@@ -46,13 +46,14 @@ export const ITERATOR_NAMES = [
  */
 export default class CConnectorItem{
 
-    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = ''){
+    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = '', shiftXForProcesses = 0){
         this._id = isId(connectorId) ? connectorId : 0;
         this._title = title === '' ? 'Please, choose connector' : title;
         this._icon = isString(icon) ? icon : '';
         this._invoker = this.convertInvoker(invoker);
         this._currentItem = null;
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
+        this._shiftXForProcesses = shiftXForProcesses;
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
         this._processes = [];
@@ -71,7 +72,8 @@ export default class CConnectorItem{
         let methods = connectorItem && connectorItem.hasOwnProperty('methods') ? connectorItem.methods : [];
         let operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
         let connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
-        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType);
+        let shiftXForProcesses = connectorItem && connectorItem.hasOwnProperty('shiftXForProcesses') ? connectorItem.shiftXForProcesses : 0;
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForProcesses);
     }
 
     static hasIcon(icon){
@@ -89,6 +91,36 @@ export default class CConnectorItem{
         }
     }
 
+    getShiftXOfProcesses(){
+        return this.getMaxXOfProcesses() + 100;
+    }
+
+    getMaxXOfProcesses(){
+        let maxX = 0;
+        for(let i = 0; i < this._processes.length; i++){
+            if(this._processes[i].x > maxX){
+                maxX = this._processes[i].x;
+            }
+        }
+        if(maxX !== 0){
+            maxX += 105;
+        }
+        return maxX;
+    }
+
+    getMaxYOfProcesses(){
+        let maxY = 0;
+        for(let i = 0; i < this._processes.length; i++){
+            if(this._processes[i].y > maxY){
+                maxY = this._processes[i].y;
+            }
+        }
+        if(maxY !== 0){
+            maxY += 90;
+        }
+        return maxY;
+    }
+
     setSvgItems(){
         let items = [...this.methods, ...this.operators];
         items = sortByIndex(items);
@@ -104,16 +136,16 @@ export default class CConnectorItem{
             if(currentSplitIndex[currentSplitIndex.length - 1] !== '0'){
                 xIterator += 200;
             }
-            svgElement.x = xIterator;
+            svgElement.x = xIterator + this._shiftXForProcesses;
             svgElement.y = 150 * (currentSplitIndex.length - 1)
             if(items[i].type){
                 svgElement.x += 35;
                 svgElement.y += 10;
             }
-            svgElement.id = items[i].index;
+            svgElement.id = `${this.getConnectorType()}_${items[i].index}`;
             this.processes.push(this.getSvgElement(svgElement));
             if(items[i].index !== '0') {
-                this.arrows.push({from: this.getPrevIndex(items[i].index), to: items[i].index});
+                this.arrows.push({from: `${this.getConnectorType()}_${this.getPrevIndex(items[i].index)}`, to: `${this.getConnectorType()}_${items[i].index}`});
             }
         }
     }

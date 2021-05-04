@@ -315,3 +315,13 @@
     fill: #21d0e226;
   }
 }
+
+.connector_item_panel{
+  fill: none;
+  stroke: #eee;
+  stroke-width: 2;
+}
+.connector_item_text{
+  font-weight: bold;
+  font-size: $FONT_SIZE_MEDIUM;
+}
