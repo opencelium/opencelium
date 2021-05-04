@@ -20,6 +20,7 @@ import {NO_DATA} from "@utils/constants/app";
 
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {EMPHASIZE_DURATION_ANIMATION} from "./ScheduleList";
+import {kibanaUrl} from "@utils/constants/url";
 
 /**
  * Cell Component to display last success for ScheduleList
@@ -61,7 +62,7 @@ class LastSuccessCell extends Component{
         if(time !== NO_DATA) {
             time = convertTimeForSchedulerList(time, 'full');
             if(taId !== ''){
-                url = `http://oc-demo.westeurope.cloudapp.azure.com:5601/app/kibana#/discover?_g=()&_a=(columns:!(taId,orderId,message,method,exchange,methodPart,datetime),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',key:taId,negate:!f,params:(query:'${taId}',type:phrase),type:phrase,value:'${taId}'),query:(match:(taId:(query:'${taId}',type:phrase))))),index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',interval:auto,query:(language:lucene,query:''),sort:!(orderId,asc))`;
+                url = `${kibanaUrl}#/discover?_g=()&_a=(columns:!(taId,orderId,message,method,exchange,methodPart,datetime),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',key:taId,negate:!f,params:(query:'${taId}',type:phrase),type:phrase,value:'${taId}'),query:(match:(taId:(query:'${taId}',type:phrase))))),index:'96f425a0-ce27-11e9-8c24-b7d9afe6d21c',interval:auto,query:(language:lucene,query:''),sort:!(orderId,asc))`;
             }
         } else{
             taId = '';

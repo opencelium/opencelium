@@ -30,6 +30,8 @@ import CreateElementPanel from "../elements/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import ConnectorPanel from "../elements/Panel";
+import CConnection from "@classes/components/content/connection/CConnection";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -78,7 +80,8 @@ class TechnicalLayout extends React.Component{
     }
 
     openInNewWindow(){
-        const {items} = this.props;
+        const {entity} = this.props;
+        const items = [...entity.fromConnector.processes, ...entity.toConnector.processes];
         let convertedItems = [];
         if(items.length > 0 && (items[0] instanceof CProcess || items[0] instanceof COperator)){
             for(let i = 0; i < items.length; i++){
@@ -96,16 +99,23 @@ class TechnicalLayout extends React.Component{
         const {currentSubItem, isBusinessLayoutEmpty} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
-            detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized,
+            detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
             ...svgProps
         } = this.props;
+        const fromConnectorMaxX = connection.fromConnector.getMaxXOfProcesses();
+        const fromConnectorMaxY = connection.fromConnector.getMaxYOfProcesses();
+        const fromConnectorShiftX = connection.fromConnector.getShiftXOfProcesses();
+        const toConnectorMaxX = connection.toConnector.getMaxXOfProcesses();
+        const toConnectorMaxY = connection.toConnector.getMaxYOfProcesses();
+        let fromConnectorPanelParams = {x: -10, y: -50, width: fromConnectorMaxX + 10, height: fromConnectorMaxY + 50, invokerName: connection.fromConnector.invoker.name};
+        let toConnectorPanelParams = {x: fromConnectorShiftX - 10, y: -50, width: toConnectorMaxX - fromConnectorShiftX + 10, height: toConnectorMaxY + 50, invokerName: connection.toConnector.invoker.name};
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW){
             return null;
         }
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
-        const startingSvgY = isBusinessLayoutEmpty ? -10 : -190;
+        const startingSvgY = isBusinessLayoutEmpty ? -50 : -190;
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
@@ -124,6 +134,10 @@ class TechnicalLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    items={[...connection.fromConnector.processes, ...connection.toConnector.processes]}
+                    arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
+                    fromConnectorPanelParams={fromConnectorPanelParams}
+                    toConnectorPanelParams={toConnectorPanelParams}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={false}
@@ -138,6 +152,7 @@ class TechnicalLayout extends React.Component{
 }
 
 TechnicalLayout.propTypes = {
+    connection: PropTypes.instanceOf(CConnection).isRequired,
     detailsPosition: PropTypes.oneOf(['right', 'left']).isRequired,
     isLayoutMinimized: PropTypes.bool.isRequired,
     isBusinessLayoutMinimized: PropTypes.bool.isRequired,

@@ -24,7 +24,7 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {PANEL_LOCATION} from "@utils/constants/app";
 
 
-export const HAS_LAYOUTS_SCALING = false;
+export const HAS_LAYOUTS_SCALING = true;
 
 export const LAYOUT_POSITION = {
     TOP: 'top',
@@ -310,8 +310,7 @@ class FormConnectionSvg extends Component{
                         />
                     }
                     <TechnicalLayout
-                        items={entity.toConnector.processes}
-                        arrows={entity.toConnector.arrows}
+                        connection={entity}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                         isBusinessLayoutEmpty={BUSINESS_DATA.processes.length === 0}

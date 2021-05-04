@@ -172,7 +172,7 @@ class ChangeTag extends Component{
         }
         if(ReferenceComponent) {
             let referenceDiv = document.getElementById(ReferenceComponent.id);
-            if (referenceDiv) {
+            if(referenceDiv) {
                 referenceDiv.innerText = '';
             }
         }
