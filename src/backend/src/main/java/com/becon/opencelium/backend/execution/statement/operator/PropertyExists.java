@@ -9,7 +9,7 @@ public class PropertyExists implements Operator{
     @Override
     public <T, S> boolean compare(T val1, S val2) {
         if (!(val1 instanceof Map)) {
-            throw new RuntimeException("Object required when trying to find property");
+            return false;
         }
         Map<String, Object> object = (Map) val1;
 
