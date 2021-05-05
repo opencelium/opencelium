@@ -19,6 +19,7 @@ import React from "react";
 import {clearFieldNameFromArraySign} from "@change_component/form_elements/form_connection/form_methods/help";
 
 const OPERATOR_LABELS = {
+    IS_TYPE_OF: <span style={{fontSize: '12px'}}>{`<T>`}</span>,
     PROPERTY_EXISTS: <span>∃</span>,
     PROPERTY_NOT_EXISTS: <span>∄</span>,
     CONTAINS: <span>⊂</span>,
@@ -34,6 +35,8 @@ const OPERATOR_LABELS = {
 //placeholderValue - placeholder of the selected operator (short view)
 export const FUNCTIONAL_OPERATORS = [
     {value: 'IsNull', hasValue: false},
+    {value: 'containsInOCList', hasValue: false},
+    {value: 'IsTypeOf',label: <span>IsTypeOf({OPERATOR_LABELS.IS_TYPE_OF})</span>, hasValue: true, isRightStatementOption: true, options: [{value: 'NUM', label: 'Number'}, {value: 'ARR', label: 'Array'}, {value: 'OBJ', label: 'Object'}, {value: 'STR', label: 'String'}, {value: 'BOOL', label: 'Boolean'}], placeholderValue: OPERATOR_LABELS.IS_TYPE_OF},
     {value: 'PropertyExists',label: <span>PropertyExists({OPERATOR_LABELS.PROPERTY_EXISTS})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.PROPERTY_EXISTS},
     {value: 'PropertyNotExists',label: <span>PropertyNotExists({OPERATOR_LABELS.PROPERTY_NOT_EXISTS})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.PROPERTY_NOT_EXISTS},
     {value: 'Contains', label: <span>Contains({OPERATOR_LABELS.CONTAINS})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS},

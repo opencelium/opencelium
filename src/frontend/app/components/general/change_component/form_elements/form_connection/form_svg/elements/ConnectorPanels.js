@@ -1,6 +1,9 @@
 import React from 'react';
 import ConnectorPanel from "@change_component/form_elements/form_connection/form_svg/elements/Panel";
 
+const ARROW_INTEND_TOP = 50;
+
+
 class ConnectorPanels extends React.Component{
     constructor(props) {
         super(props);
@@ -12,7 +15,7 @@ class ConnectorPanels extends React.Component{
             <React.Fragment>
                 <ConnectorPanel {...fromConnectorPanelParams} namePosition={'right'}/>
                 <ConnectorPanel {...toConnectorPanelParams} namePosition={'left'}/>
-                <line strokeDasharray="5, 5" x1={fromConnectorPanelParams.x + fromConnectorPanelParams.width} y1={100} x2={toConnectorPanelParams.x} y2={100} stroke="#656565"/>
+                <line strokeDasharray="5, 5" x1={fromConnectorPanelParams.panelPosition.x + fromConnectorPanelParams.panelPosition.width} y1={ARROW_INTEND_TOP} x2={toConnectorPanelParams.panelPosition.x} y2={ARROW_INTEND_TOP} stroke="#656565"/>
             </React.Fragment>
         );
     }
