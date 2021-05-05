@@ -19,7 +19,7 @@ import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
     ConnectionsAction, SchedulesAction, TemplatesAction, WebHooksAction,
     AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
-    UpdateAssistantAction,
+    UpdateAssistantAction, GlobalConditionalOperatorAction,
 } from '@utils/actions';
 import Translate from "@components/general/app/Translate";
 import AvailableUpdateMessage from "@basic_components/translations/AvailableUpdateMessage";
@@ -97,6 +97,7 @@ export const EntitiesWithNotification = [
     {name: UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPDATE_SYSTEM, types: ['FULFILLED', 'REJECTED']},
+    {name: GlobalConditionalOperatorAction.UPDATE_CONDITIONALOPERATOR, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**

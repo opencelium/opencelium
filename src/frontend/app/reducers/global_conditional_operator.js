@@ -22,7 +22,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 const initialState = fromJS({
     fetchingConditionalOperator: API_REQUEST_STATE.INITIAL,
     updatingConditionalOperator: API_REQUEST_STATE.INITIAL,
-    currentConditionalOperator: null,
+    currentConditionalOperator: '',
     error: null,
     message: {},
     notificationData: {},
@@ -34,15 +34,15 @@ const initialState = fromJS({
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case GlobalConditionalOperatorAction.UPDATE_CONDITIONALOPERATOR:
-            return state.set('updatingConditionalOperator', API_REQUEST_STATE.START).set('error', null).set('currentWidget', action.payload.currentWidget);
+            return state.set('updatingConditionalOperator', API_REQUEST_STATE.START).set('error', null).set('currentConditionalOperator', action.payload);
         case GlobalConditionalOperatorAction.UPDATE_CONDITIONALOPERATOR_FULFILLED:
             return state.set('updatingConditionalOperator', API_REQUEST_STATE.FINISH);
         case GlobalConditionalOperatorAction.UPDATE_CONDITIONALOPERATOR_REJECTED:
-            return state.set('updatingConditionalOperator', API_REQUEST_STATE.ERROR).set('error', action.payload).set('currentWidget', null);
+            return state.set('updatingConditionalOperator', API_REQUEST_STATE.ERROR).set('error', action.payload).set('currentConditionalOperator', '');
         case GlobalConditionalOperatorAction.FETCH_CONDITIONALOPERATOR:
             return state.set('fetchingConditionalOperator', API_REQUEST_STATE.START).set('error', null);
         case GlobalConditionalOperatorAction.FETCH_CONDITIONALOPERATOR_FULFILLED:
-            return state.set('fetchingConditionalOperator', API_REQUEST_STATE.FINISH).set('currentWidget', action.payload);
+            return state.set('fetchingConditionalOperator', API_REQUEST_STATE.FINISH).set('currentConditionalOperator', action.payload);
         case GlobalConditionalOperatorAction.FETCH_CONDITIONALOPERATOR_REJECTED:
             return state.set('fetchingConditionalOperator', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:

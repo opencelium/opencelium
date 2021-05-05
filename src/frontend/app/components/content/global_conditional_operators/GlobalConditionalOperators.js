@@ -66,7 +66,7 @@ class GlobalConditionalOperators extends Component{
     }
 
     save(){
-        this.props.currentConditionalOperator({name: 'ContainsInOCList', value: this.state.value});
+        this.props.updateConditionalOperator({name: 'ContainsInOCList', value: this.state.value});
     }
 
     render(){
