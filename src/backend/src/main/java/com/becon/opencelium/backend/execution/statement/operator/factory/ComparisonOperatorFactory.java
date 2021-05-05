@@ -60,6 +60,8 @@ public class ComparisonOperatorFactory implements OperatorFactory {
                 return new NotLike();
             case "Matches":
                 return new Matches();
+            case "IsTypeOf":
+                return new IsTypeOf();
             default:
                 throw new RuntimeException("Operator '" + type + "' not supported");
         }
