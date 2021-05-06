@@ -45,7 +45,8 @@ class GlobalConditionalOperators extends Component{
         super(props);
 
         this.state = {
-            value: '',
+            allowValue: '',
+            denyValue: '',
         }
     }
 
@@ -61,12 +62,16 @@ class GlobalConditionalOperators extends Component{
         }
     }
 
-    changeValue(value){
-        this.setState({value});
+    changeAllowValue(allowValue){
+        this.setState({allowValue});
+    }
+
+    changeDenyValue(denyValue){
+        this.setState({denyValue});
     }
 
     save(){
-        this.props.updateConditionalOperator({name: 'ContainsInOCList', value: this.state.value});
+        this.props.updateConditionalOperator({name: 'ContainsInAllowList', value: this.state.value});
     }
 
     render(){
@@ -77,8 +82,14 @@ class GlobalConditionalOperators extends Component{
                 <Suspense fallback={(<Loading/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
                         <ViewHeader header={header}/>
-                        <div>ContainsInOCList</div>
-                        <Input value={value} label={'List'} onChange={::this.changeValue}/>
+                        <div>
+                            <div>ContainsInAllowList</div>
+                            <Input value={value} label={'List'} onChange={::this.changeAllowValue}/>
+                        </div>
+                        <div>
+                            <div>ContainsInDenyList</div>
+                            <Input value={value} label={'List'} onChange={::this.changeDenyValue}/>
+                        </div>
                         <Button title={'Save'} onClick={::this.save} style={{float: 'right'}}/>
                     </ComponentError>
                 </Suspense>
