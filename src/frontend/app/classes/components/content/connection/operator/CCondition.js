@@ -20,6 +20,8 @@ import {clearFieldNameFromArraySign} from "@change_component/form_elements/form_
 
 const OPERATOR_LABELS = {
     IS_TYPE_OF: <span style={{fontSize: '12px'}}>{`<T>`}</span>,
+    ALLOW_LIST: <span>✔</span>,
+    DENY_LIST: <span>⊗</span>,
     PROPERTY_EXISTS: <span>∃</span>,
     PROPERTY_NOT_EXISTS: <span>∄</span>,
     CONTAINS: <span>⊂</span>,
@@ -35,7 +37,8 @@ const OPERATOR_LABELS = {
 //placeholderValue - placeholder of the selected operator (short view)
 export const FUNCTIONAL_OPERATORS = [
     {value: 'IsNull', hasValue: false},
-    {value: 'containsInOCList', hasValue: false},
+    {value: 'AllowList',label: <span>AllowList({OPERATOR_LABELS.ALLOW_LIST})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.ALLOW_LIST},
+    {value: 'DenyList',label: <span>DenyList({OPERATOR_LABELS.DENY_LIST})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.DENY_LIST},
     {value: 'IsTypeOf',label: <span>IsTypeOf({OPERATOR_LABELS.IS_TYPE_OF})</span>, hasValue: true, isRightStatementOption: true, options: [{value: 'NUM', label: 'Number'}, {value: 'ARR', label: 'Array'}, {value: 'OBJ', label: 'Object'}, {value: 'STR', label: 'String'}, {value: 'BOOL', label: 'Boolean'}], placeholderValue: OPERATOR_LABELS.IS_TYPE_OF},
     {value: 'PropertyExists',label: <span>PropertyExists({OPERATOR_LABELS.PROPERTY_EXISTS})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.PROPERTY_EXISTS},
     {value: 'PropertyNotExists',label: <span>PropertyNotExists({OPERATOR_LABELS.PROPERTY_NOT_EXISTS})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.PROPERTY_NOT_EXISTS},

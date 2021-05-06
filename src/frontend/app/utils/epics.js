@@ -97,11 +97,6 @@ import {
     fetchWidgetSettingsEpic, updateWidgetSettingsEpic,
 } from "@epics/dashboard";
 
-import {
-    fetchConditionalOperatorEpic,
-    updateConditionalOperatorEpic,
-} from "@epics/global_conditional_operator";
-
 
 /**
  * combine epics for store
@@ -215,6 +210,4 @@ export default combineEpics(
     fetchWidgetSettingsEpic,
     fetchWidgetsEpic,
     updateWidgetSettingsEpic,
-    fetchConditionalOperatorEpic,
-    updateConditionalOperatorEpic,
 );
