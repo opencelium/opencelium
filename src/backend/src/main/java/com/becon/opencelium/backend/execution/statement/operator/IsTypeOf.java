@@ -8,6 +8,6 @@ public class IsTypeOf implements Operator {
     public <T, S> boolean compare(T val1, S val2) {
         DataTypeEnum type = DataTypeEnum.getEnumType((String) val2);
         Class clazz = DataTypeEnum.getClass(type);
-        return clazz != null && clazz.isInstance(val2);
+        return clazz != null && clazz.isInstance(val1);
     }
 }
