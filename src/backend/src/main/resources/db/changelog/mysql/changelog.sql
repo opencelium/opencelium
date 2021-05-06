@@ -217,3 +217,4 @@ INSERT INTO `widget` VALUES (1,'CONNECTION_OVERVIEW','cable','Connection Overvie
 /*!40000 ALTER TABLE `event_notification_has_event_recipient` ENABLE KEYS */;
 UNLOCK TABLES;
 
+
