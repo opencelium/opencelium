@@ -102,13 +102,8 @@ class TechnicalLayout extends React.Component{
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
             ...svgProps
         } = this.props;
-        const fromConnectorMaxX = connection.fromConnector.getMaxXOfProcesses();
-        const fromConnectorMaxY = connection.fromConnector.getMaxYOfProcesses();
-        const fromConnectorShiftX = connection.fromConnector.getShiftXOfProcesses();
-        const toConnectorMaxX = connection.toConnector.getMaxXOfProcesses();
-        const toConnectorMaxY = connection.toConnector.getMaxYOfProcesses();
-        let fromConnectorPanelParams = {x: -10, y: -50, width: fromConnectorMaxX + 10, height: fromConnectorMaxY + 50, invokerName: connection.fromConnector.invoker.name};
-        let toConnectorPanelParams = {x: fromConnectorShiftX - 10, y: -50, width: toConnectorMaxX - fromConnectorShiftX + 10, height: toConnectorMaxY + 50, invokerName: connection.toConnector.invoker.name};
+        let fromConnectorPanelParams = {panelPosition: connection.fromConnector.getPanelPosition(), rectPosition: connection.fromConnector.getPanelRectPosition(), invokerName: connection.fromConnector.invoker.name};
+        let toConnectorPanelParams = {panelPosition: connection.toConnector.getPanelPosition(), rectPosition: connection.toConnector.getPanelRectPosition(), invokerName: connection.toConnector.invoker.name};
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW){
             return null;
         }

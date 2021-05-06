@@ -23,6 +23,8 @@ import {CBusinessOperator} from "@classes/components/content/connection_overview
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
+import React from "react";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -39,6 +41,8 @@ export const ITERATOR_NAMES = [
     'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
     'ii', 'ij', 'ik', 'il', 'im', 'in', 'io', 'ip', 'iq', 'ir', 'is', 'it', 'iu', 'iv', 'iw', 'ix', 'iy', 'iz'
 ];
+
+const PANEL_PADDING_Y = 40;
 
 /**
  * Connector class for manipulating data in the Connector Component
@@ -80,15 +84,13 @@ export default class CConnectorItem{
         return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null';
     }
 
-    getSvgElement(element){
-        if(element instanceof CTechnicalOperator || element instanceof CTechnicalProcess){
-            return element
-        }
-        if(element.hasOwnProperty('type')){
-            return CTechnicalOperator.createTechnicalOperator(element);
-        } else{
-            return CTechnicalProcess.createTechnicalProcess(element);
-        }
+    getPanelPosition(){
+        return {x: this._shiftXForProcesses - 10, y: -PANEL_PADDING_Y, width: this.getMaxXOfProcesses() - this._shiftXForProcesses + 10, height: this.getMaxYOfProcesses() + PANEL_PADDING_Y};
+    }
+
+    getPanelRectPosition(){
+        const panelPosition = this.getPanelPosition();
+        return { x: 1, y: PANEL_PADDING_Y - 8, width: panelPosition.width - 1, height: panelPosition.height - PANEL_PADDING_Y + 8};
     }
 
     getShiftXOfProcesses(){
@@ -104,6 +106,10 @@ export default class CConnectorItem{
         }
         if(maxX !== 0){
             maxX += 105;
+        } else{
+            if(this._processes.length > 0){
+                maxX += 140;
+            }
         }
         return maxX;
     }
@@ -115,10 +121,21 @@ export default class CConnectorItem{
                 maxY = this._processes[i].y;
             }
         }
-        if(maxY !== 0){
+        if(maxY !== 0 || this._processes.length > 0){
             maxY += 90;
         }
         return maxY;
+    }
+
+    getSvgElement(element){
+        if(element instanceof CTechnicalOperator || element instanceof CTechnicalProcess){
+            return element
+        }
+        if(element.hasOwnProperty('type')){
+            return CTechnicalOperator.createTechnicalOperator(element);
+        } else{
+            return CTechnicalProcess.createTechnicalProcess(element);
+        }
     }
 
     setSvgItems(){

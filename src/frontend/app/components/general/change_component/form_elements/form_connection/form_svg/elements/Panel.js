@@ -8,11 +8,11 @@ class Panel extends React.Component{
     }
 
     render(){
-        const {x, y, width, height, invokerName, namePosition} = this.props;
-        const textX = namePosition === 'right' ? width : 2;
+        const {panelPosition, rectPosition, invokerName, namePosition} = this.props;
+        const textX = namePosition === 'right' ? panelPosition.width : 2;
         return(
-            <svg x={x} y={y} width={width} height={height}>
-                <rect x={1} y={41} width={width - 2} height={height - 43} className={styles.connector_item_panel}/>
+            <svg x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
+                <rect x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel}/>
                 <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={'30'} className={styles.connector_item_text}>
                     {invokerName}
                 </text>
@@ -22,10 +22,18 @@ class Panel extends React.Component{
 }
 
 Panel.propTypes = {
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
+    panelPosition: PropTypes.shape({
+        x: PropTypes.number.isRequired,
+        y: PropTypes.number.isRequired,
+        width: PropTypes.number.isRequired,
+        height: PropTypes.number.isRequired,
+    }),
+    rectPosition: PropTypes.shape({
+        x: PropTypes.number.isRequired,
+        y: PropTypes.number.isRequired,
+        width: PropTypes.number.isRequired,
+        height: PropTypes.number.isRequired,
+    }),
     invokerName: PropTypes.string.isRequired,
     namePosition: PropTypes.string,
 };

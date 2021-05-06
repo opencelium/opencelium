@@ -103,6 +103,7 @@ export const createRoutes = (store) => {
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfileLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.MyProfile}/>
             </Route>
+            <Route path='/global_conditional_operators' component={isAuth(LoadableRouteComponents.GlobalConditionalOperators, store)}/>
             <Route path='/sandbox' component={isAuth(LoadableRouteComponents.Sandbox, store)}/>
             <Route path='/login' component={isNotAuth(LoadableRouteComponents.Login, store)}/>
             <Route path='/*' component={PageNotFound}/>

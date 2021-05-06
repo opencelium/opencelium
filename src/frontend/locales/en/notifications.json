@@ -57,7 +57,8 @@
     "UPDATE_TEMPLATESFORASSISTANT": "Templates were successfully updated",
     "UPDATE_INVOKERSFORASSISTANT": "Invokers were successfully updated",
     "UPDATE_CONNECTIONSFORASSISTANT": "Connections were successfully updated",
-    "UPDATE_SYSTEM": "Opencelium was successfully updated"
+    "UPDATE_SYSTEM": "Opencelium was successfully updated",
+    "UPDATE_CONDITIONALOPERATOR": "Operator was successfully updated"
   },
   "ERROR": {
     "ADD_USER": {
@@ -189,6 +190,7 @@
     "UPDATE_INVOKERSFORASSISTANT": "Invokers were not updated",
     "UPDATE_CONNECTIONSFORASSISTANT": "Connections were not updated",
     "UPDATE_SYSTEM": "Opencelium was not updated",
+    "UPDATE_CONDITIONALOPERATOR": "Operator was not updated",
     "FETCH_ONLINEUPDATES": {
       "__DEFAULT__": "The Online Updates were not fetched"
     },

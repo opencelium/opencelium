@@ -113,8 +113,8 @@ class IfOperator extends Component{
     /**
      * to change right field value
      */
-    onChangeRightField(rightField){
-        this.setState({rightField});
+    onChangeRightField(rightField, callback = () => {}){
+        this.setState({rightField}, callback);
     }
 
     /**
@@ -223,6 +223,14 @@ class IfOperator extends Component{
         updateEntity();
     }
 
+
+    /**
+     * to select right field
+     */
+    selectRightField(rightField){
+        this.onChangeRightField(rightField.value, ::this.updateRightField);
+    }
+
     /**
      * to change field
      */
@@ -242,19 +250,35 @@ class IfOperator extends Component{
     isOperatorHasValue(){
         let hasValue = false;
         let isRightStatementText = false;
+        let isRightStatementOption = false;
+        let options = [];
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
         let hasValueItem = FUNCTIONAL_OPERATORS.find(fo => fo.value === value);
         if(hasValueItem){
             hasValue = hasValueItem.hasValue;
             isRightStatementText = hasValueItem.isRightStatementText;
+            if(hasValueItem.hasOwnProperty('isRightStatementOption')) {
+                isRightStatementOption = hasValueItem.isRightStatementOption;
+            }
         }
-        return {hasValue, isRightStatementText} ;
+        if(isRightStatementOption){
+            if(hasValueItem.hasOwnProperty('options')) {
+                options = hasValueItem.options;
+            }
+        }
+        return {hasValue, isRightStatementText, isRightStatementOption, options} ;
     }
 
     renderPlaceholder(){
         let {rightField, rightProperty} = this.state;
-        let {hasValue} = this.isOperatorHasValue();
+        let {hasValue, isRightStatementOption, options} = this.isOperatorHasValue();
+        if(isRightStatementOption){
+            let index = options.findIndex(option => option.value === rightField);
+            if(index !== -1){
+                rightField = options[index].label;
+            }
+        }
         let title = this.state.leftField;
         const {operator, toggleIsVisibleMenuEdit} = this.props;
         let relationalOperator = operator.condition.relationalOperator;
@@ -298,7 +322,6 @@ class IfOperator extends Component{
                         :
                             null
                     }
-
                 </div>
             );
         }
@@ -596,7 +619,7 @@ class IfOperator extends Component{
     }
 
     renderMethodSelectRight(){
-        let {hasValue, isRightStatementText} = this.isOperatorHasValue();
+        let {hasValue, isRightStatementText, isRightStatementOption} = this.isOperatorHasValue();
         const {rightField} = this.state;
         const {connection, operator, readOnly} = this.props;
         let indexSplitted = operator.index.split('_');
@@ -610,7 +633,7 @@ class IfOperator extends Component{
         }
         let value = method ? method.getValueForSelectInput(connector) : null;
         let isVisible = hasValue && !(rightField !== '' && value === null);
-        if(isRightStatementText){
+        if(isRightStatementText || isRightStatementOption){
             isVisible = false;
         }
         let selectThemeInputStyle = {width: isVisible ? '10%' : '0', float: 'left', maxHeight: '38px', transition: isVisible ? 'width 0.3s ease 0s' : 'none',};
@@ -725,7 +748,7 @@ class IfOperator extends Component{
     }
 
     renderParamInputRight(){
-        let {hasValue, isRightStatementText} = this.isOperatorHasValue();
+        let {hasValue, isRightStatementText, isRightStatementOption, options} = this.isOperatorHasValue();
         let {rightField} = this.state;
         const {connection, connector, operator, readOnly} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
@@ -739,6 +762,88 @@ class IfOperator extends Component{
         let inputTheme = {inputElement: hasValue ? styles.input_element_pointer_compare_statement_visible : styles.input_element_pointer_compare_statement_not_visible};
         let divStyles = {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0', float: 'left'};
         inputTheme.input = styles.input_pointer_compare_statement;
+        if(isRightStatementOption){
+            return(
+                <div style={divStyles}>
+                    <span className={styles.if_relational_operator_separator}/>
+                    <Select
+                        name={'relational_operators'}
+                        value={rightField !== '' ? options.find(option => option.value === rightField) : null}
+                        onChange={::this.selectRightField}
+                        options={options}
+                        closeOnSelect={false}
+                        placeholder={`...`}
+                        isDisabled={readOnly}
+                        isSearchable={false}
+                        openMenuOnClick={true}
+                        maxMenuHeight={200}
+                        minMenuHeight={50}
+                        styles={{
+                            container: (provided, {isFocused, isDisabled}) => ({
+                                fontSize: '12px',
+                                borderBottom: isFocused && !isDisabled ? '2px solid #3f51b5 !important' : 'none',
+                            }),
+                            control: styles => ({
+                                ...styles,
+                                borderRadius: 0,
+                                border: 'none',
+                                boxShadow: 'none',
+                                backgroundColor: 'initial',
+                                borderBottom: '1px solid rgba(33, 33, 33, 0.12)'
+                            }),
+                            valueContainer: styles => ({
+                                ...styles,
+                                padding: '0',
+                                textAlign: 'center',
+                            }),
+                            dropdownIndicator: () => ({display: 'none'}),
+                            menu: (styles, {isDisabled}) => {
+                                let s = {
+                                    ...styles,
+                                    top: 'auto',
+                                    marginTop: '-16px',
+                                    marginBottom: '8px',
+                                    width: '120px',
+                                    zIndex: '1',
+                                };
+                                if(isDisabled){
+                                    s = {
+                                        ...styles,
+                                        display: 'none'
+                                    };
+                                }
+                                return s;
+                            },
+                            singleValue: (styles, {data}) => {
+                                return {
+                                    ...styles,
+                                    textAlign: 'center',
+                                    color: data.color,
+                                    background: data.color,
+                                    margin: '0 10%',
+                                    width: '80%',
+                                    maxWidth: 'none',
+                                };
+                            },
+                            placeholder: (styles, {data}) => {
+                                return {
+                                    ...styles,
+                                    width: '70%',
+                                    textAlign: 'center',
+                                };
+                            },
+                            indicatorSeparator: (styles) => {
+                                return {
+                                    ...styles,
+                                    backgroundColor: 'none',
+                                };
+                            }
+                        }}
+                    />
+                    <span className={styles.if_relational_operator_separator}/>
+                </div>
+            );
+        }
         return (
             <div style={divStyles}>
                 {/*{::this.renderResponseTypeGroupRight()}*/}
