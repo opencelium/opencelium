@@ -599,7 +599,7 @@ public class ConnectorExecutor {
 
         String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
         Object rightStatement = null;
-        if (ifStatement.getOperand().equals("ContainsInAllowList") || ifStatement.getOperand().equals("ContainsInDenyList") ) {
+        if (ifStatement.getOperand().equals("AllowList") || ifStatement.getOperand().equals("DenyList") ) {
             rightStatement = ifStatement.getRightStatementVariable().getFiled().split(",");
         } else {
             rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
@@ -609,7 +609,11 @@ public class ConnectorExecutor {
             System.out.println("Right Statement: " + rightStatement.toString());
         }
 //        if (leftVariable instanceof NodeList)
-        if (operator.compare(leftVariable, rightStatement)){
+        boolean result = operator.compare(leftVariable, rightStatement);
+        if (ifStatement.getOperand().equals("DenyList")) {
+            result = !result;
+        }
+        if (result){
             executeMethod(ifStatement.getBodyFunction());
             executeDecisionStatement(ifStatement.getBodyOperator());
         }

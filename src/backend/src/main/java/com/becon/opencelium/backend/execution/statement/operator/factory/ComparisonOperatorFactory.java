@@ -62,8 +62,8 @@ public class ComparisonOperatorFactory implements OperatorFactory {
                 return new Matches();
             case "IsTypeOf":
                 return new IsTypeOf();
-            case "ContainsInDenyList":
-            case "ContainsInAllowList":
+            case "DenyList":
+            case "AllowList":
                 return new MatchesInList();
             default:
                 throw new RuntimeException("Operator '" + type + "' not supported");
