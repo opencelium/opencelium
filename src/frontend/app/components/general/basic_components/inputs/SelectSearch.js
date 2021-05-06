@@ -217,7 +217,7 @@ class SelectSearch extends Component{
     }
 
     render(){
-        const {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, ...props} = this.props;
+        const {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, ...props} = this.props;
         let {theme, className, disabled, placeholder} = this.props;
         let classNames = [
             'input_input_element',
@@ -276,6 +276,9 @@ SelectSearch.defaultProps = {
     icon: '',
     predicator: '',
     currentConnector: null,
+    popupInputStyles: null,
+    isPopupMultiline: false,
+    popupRows: 1,
 };
 
 export default SelectSearch;

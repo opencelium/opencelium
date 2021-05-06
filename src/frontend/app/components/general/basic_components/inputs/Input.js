@@ -88,7 +88,7 @@ class Input extends Component{
     }
 
     renderPopupElement(){
-        const {authUser, onChange, onBlur, isPopupInput, className, ...props} = this.props;
+        const {authUser, onChange, onBlur, isPopupInput, className, popupInputStyles, isPopupMultiline, popupRows, ...props} = this.props;
         let {...popupInputTheme} = this.props.theme;
         const {isVisiblePopupInput} = this.state;
         let classNames = [
@@ -106,12 +106,14 @@ class Input extends Component{
             React.cloneElement(child, {onBlur: ::this.onBlur, autoFocus: true, theme: {inputElement: styles[classNames.highlighted_input_input_element], bar: styles[classNames.input_bar], icon: styles[classNames.input_icon]}});
         let children = React.Children.map(this.props.children, fn);
         return(
-            <div className={styles[classNames.popup_input]}>
+            <div className={styles[classNames.popup_input]} style={popupInputStyles}>
                 {
                     !this.props.children
                         ?
                             <ToolboxInput
                                 {...props}
+                                multiline={isPopupMultiline}
+                                rows={popupRows}
                                 className={className}
                                 theme={popupInputTheme}
                                 onChange={onChange}
@@ -128,7 +130,7 @@ class Input extends Component{
     }
 
     render(){
-        let {authUser, onChange, onBlur, isPopupInput, id, hasFocus, ...props} = this.props;
+        let {authUser, onChange, onBlur, isPopupInput, id, hasFocus, isPopupMultiline, popupRows, ...props} = this.props;
         props.id = id ? id : `input_${formatHtmlId(props.name ? props.name : props.label)}`;
         let {theme, className} = this.props;
         let classNames = [
@@ -183,6 +185,9 @@ Input.defaultProps = {
     isPopupInput: false,
     theme: null,
     hasFocus: false,
+    popupInputStyles: null,
+    isPopupMultiline: false,
+    popupRows: 1,
 };
 
 export default Input;

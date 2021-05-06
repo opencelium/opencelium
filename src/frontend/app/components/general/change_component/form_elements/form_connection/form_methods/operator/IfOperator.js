@@ -251,6 +251,8 @@ class IfOperator extends Component{
         let hasValue = false;
         let isRightStatementText = false;
         let isRightStatementOption = false;
+        let isMultiline = false;
+        let popupInputStyles = null;
         let options = [];
         const {operator} = this.props;
         let value = operator.condition.relationalOperator;
@@ -261,13 +263,19 @@ class IfOperator extends Component{
             if(hasValueItem.hasOwnProperty('isRightStatementOption')) {
                 isRightStatementOption = hasValueItem.isRightStatementOption;
             }
+            if(hasValueItem.hasOwnProperty('isMultiline')){
+                isMultiline = hasValueItem.isMultiline;
+            }
+            if(hasValueItem.hasOwnProperty('popupInputStyles')){
+                popupInputStyles = hasValueItem.popupInputStyles;
+            }
         }
         if(isRightStatementOption){
             if(hasValueItem.hasOwnProperty('options')) {
                 options = hasValueItem.options;
             }
         }
-        return {hasValue, isRightStatementText, isRightStatementOption, options} ;
+        return {hasValue, isRightStatementText, isRightStatementOption, options, isMultiline, popupInputStyles} ;
     }
 
     renderPlaceholder(){
@@ -748,7 +756,7 @@ class IfOperator extends Component{
     }
 
     renderParamInputRight(){
-        let {hasValue, isRightStatementText, isRightStatementOption, options} = this.isOperatorHasValue();
+        let {hasValue, isRightStatementText, isRightStatementOption, options, isMultiline, popupInputStyles} = this.isOperatorHasValue();
         let {rightField} = this.state;
         const {connection, connector, operator, readOnly} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
@@ -857,6 +865,9 @@ class IfOperator extends Component{
                     theme={inputTheme}
                     isPopupInput={true}
                     disabled={!hasValue}
+                    isPopupMultiline={isMultiline}
+                    popupRows={isMultiline ? 4 : 1}
+                    popupInputStyles={popupInputStyles}
                 >
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}
