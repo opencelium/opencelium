@@ -23,8 +23,9 @@ import {CBusinessOperator} from "@classes/components/content/connection_overview
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
-import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
+import COperator, {OPERATOR_SIZE} from "@classes/components/content/connection_overview_2/operator/COperator";
 import React from "react";
+import CProcess, {PROCESS_WIDTH} from "@classes/components/content/connection_overview_2/process/CProcess";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -99,16 +100,28 @@ export default class CConnectorItem{
 
     getMaxXOfProcesses(){
         let maxX = 0;
+        let isProcess = false;
+        let isOperator = false;
         for(let i = 0; i < this._processes.length; i++){
             if(this._processes[i].x > maxX){
                 maxX = this._processes[i].x;
+                if(this._processes[i] instanceof CProcess){
+                    isProcess = true;
+                    isOperator = false;
+                }
+                if(this._processes[i] instanceof COperator){
+                    isProcess = false;
+                    isOperator = true;
+                }
             }
         }
-        if(maxX !== 0){
-            maxX += 105;
-        } else{
-            if(this._processes.length > 0){
-                maxX += 140;
+
+        if(maxX !== 0 || this._processes.length > 0){
+            if(isOperator){
+                maxX += OPERATOR_SIZE + 10;
+            }
+            if(isProcess){
+                maxX += PROCESS_WIDTH + 10;
             }
         }
         return maxX;

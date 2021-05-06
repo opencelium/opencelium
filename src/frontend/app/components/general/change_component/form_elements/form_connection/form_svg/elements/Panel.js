@@ -12,6 +12,7 @@ class Panel extends React.Component{
         const textX = namePosition === 'right' ? panelPosition.width : 2;
         return(
             <svg x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
+                <rect x={0} y={0} width={'100%'} height={'100%'} stroke={'red'} fill={'none'}/>
                 <rect x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel}/>
                 <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={'30'} className={styles.connector_item_text}>
                     {invokerName}
