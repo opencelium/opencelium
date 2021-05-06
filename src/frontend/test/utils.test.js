@@ -65,4 +65,29 @@ describe('Compare Object Params', () => {
         const received = isEqualObjectParams(obj, anotherObj);
         expect(received).toBeFalsy();
     })
+    test('different keys different values 2', () => {
+        let obj = {
+            result: {
+                hardware: null,
+                networking: "",
+                software: ""
+            }
+        };
+        let anotherObj = {
+            result: {
+                hardware: {
+                    components: {
+                        chassis: [{
+                            model: "",
+                            serial: ""
+                        }]
+                    }
+                },
+                networking: "",
+                software: ""
+            }
+        };
+        const received = isEqualObjectParams(obj, anotherObj);
+        expect(received).toBeFalsy();
+    })
 })
