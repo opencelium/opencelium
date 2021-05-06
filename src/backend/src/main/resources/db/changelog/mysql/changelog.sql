@@ -217,3 +217,12 @@ INSERT INTO `widget` VALUES (1,'CONNECTION_OVERVIEW','cable','Connection Overvie
 /*!40000 ALTER TABLE `event_notification_has_event_recipient` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--changeset 1.4:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS `global_param` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NULL,
+  `value` MEDIUMTEXT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
+ENGINE = InnoDB
+

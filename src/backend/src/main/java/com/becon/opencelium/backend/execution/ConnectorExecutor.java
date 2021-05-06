@@ -598,7 +598,13 @@ public class ConnectorExecutor {
         }
 
         String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
-        Object rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
+        Object rightStatement = null;
+        if (ifStatement.getOperand().equals("ContainsInAllowList") || ifStatement.getOperand().equals("ContainsInDenyList") ) {
+            rightStatement = ifStatement.getRightStatementVariable().getFiled().split(",");
+        } else {
+            rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
+        }
+
         if (rightStatement != null){
             System.out.println("Right Statement: " + rightStatement.toString());
         }
