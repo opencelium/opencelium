@@ -226,3 +226,11 @@ CREATE TABLE IF NOT EXISTS `global_param` (
   UNIQUE INDEX `id_UNIQUE` (`id` ASC))
 ENGINE = InnoDB
 
+--changeset 1.4:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+LOCK TABLES `global_param` WRITE;
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` DISABLE KEYS */;
+INSERT INTO `global_param` VALUES (1,'ContainsInAllowList',''), (2,'ContainsInDenyList','');
+/*!40000 ALTER TABLE `event_notification_has_event_recipient` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
