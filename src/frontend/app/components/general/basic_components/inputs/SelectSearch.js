@@ -217,7 +217,7 @@ class SelectSearch extends Component{
     }
 
     render(){
-        const {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, ...props} = this.props;
+        let {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, isPopupMultiline, popupRows, ...props} = this.props;
         let {theme, className, disabled, placeholder} = this.props;
         let classNames = [
             'input_input_element',
@@ -229,6 +229,10 @@ class SelectSearch extends Component{
         let inputElement = theme && theme.hasOwnProperty('inputElement') ? theme.inputElement : styles[classNames.input_input_element];
         theme = {...theme, input: styles[classNames.select_search_input]};
         theme.inputElement = inputElement;
+        if(isPopupMultiline){
+            props.multiline = isPopupMultiline;
+            props.rows = popupRows;
+        }
         return (
             <div>
                 <Input

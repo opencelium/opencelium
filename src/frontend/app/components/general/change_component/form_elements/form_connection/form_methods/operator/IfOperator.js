@@ -865,8 +865,6 @@ class IfOperator extends Component{
                     theme={inputTheme}
                     isPopupInput={true}
                     disabled={!hasValue}
-                    isPopupMultiline={isMultiline}
-                    popupRows={isMultiline ? 4 : 1}
                     popupInputStyles={popupInputStyles}
                 >
                     <SelectSearch
@@ -879,6 +877,8 @@ class IfOperator extends Component{
                         onInputChange={::this.onChangeRightField}
                         inputValue={rightField}
                         currentConnector={connector}
+                        isPopupMultiline={isMultiline}
+                        popupRows={isMultiline ? 4 : 1}
                     />
                 </Input>
             </div>
