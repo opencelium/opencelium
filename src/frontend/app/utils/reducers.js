@@ -34,7 +34,6 @@ import {notificationTemplates} from '../reducers/notification_templates';
 import {update_assistant} from '../reducers/update_assistant';
 import {connection_overview} from "../reducers/connection_overview2";
 import {dashboard} from "../reducers/dashboard";
-import {conditional_operator} from "../reducers/global_conditional_operator";
 import {fromJS} from "immutable";
 
 
@@ -60,7 +59,6 @@ const combinedReducers = combineReducers({
     update_assistant,
     connection_overview,
     dashboard,
-    conditional_operator,
 });
 
 export default withReduxStateSync(combinedReducers, state => fromJS(state));

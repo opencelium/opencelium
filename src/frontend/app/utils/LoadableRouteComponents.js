@@ -323,14 +323,6 @@ const Sandbox = Loadable({
     loading: Loading,
 });
 
-/**
- * Loadable Global Conditional Operators Resources
- */
-const GlobalConditionalOperators = Loadable({
-    loader: () => import(/* webpackChunkName: 'global_conditional_operators' */ '@components/content/global_conditional_operators/GlobalConditionalOperators'),
-    loading: Loading,
-});
-
 export default {
     UserLayout,
     UserAdd,
@@ -387,5 +379,4 @@ export default {
     ConnectionOverviewTechnicalLayout,
     ConnectionOverviewBusinessLayout,
     Sandbox,
-    GlobalConditionalOperators,
 };

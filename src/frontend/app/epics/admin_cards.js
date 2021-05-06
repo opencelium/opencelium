@@ -29,7 +29,6 @@ const adminCards = [
     {id: 4, name: 'Converter', link: '/template_converter'},
     {id: 5, name: 'Notification Templates', link: '/notification_templates'},
     {id: 6, name: 'Available Updates', link: '/update_assistant'},
-    //{id: 7, name: 'Global Conditional Operators', link: '/global_conditional_operators'},
 ];
 
 /**
