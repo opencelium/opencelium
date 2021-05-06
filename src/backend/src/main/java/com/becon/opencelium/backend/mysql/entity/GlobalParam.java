@@ -1,21 +1,20 @@
 package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.application.GlobalParamResource;
-import javax.persistence.*;
 
-@Entity
-@Table(name = "global_param")
+//@Entity
+//@Table(name = "global_param")
 public class GlobalParam {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @Column(name = "id")
     private Integer id;
 
-    @Column(name = "name")
+//    @Column(name = "name")
     private String name;
 
-    @Column(name = "value")
+//    @Column(name = "value")
     private String value;
 
     public GlobalParam() {
