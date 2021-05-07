@@ -226,7 +226,10 @@ public class ConnectorServiceImp implements ConnectorService{
             if (authFunc != null) {
                 function = authFunc;
             }
-            invokerRequestBuilder.setInvokerName(connector.getInvoker()).setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
+            invokerRequestBuilder.setInvokerName(connector.getInvoker())
+                    .setFunction(function)
+                    .setRequestData(connector.getRequestData())
+                    .sendRequest();
             ResponseEntity<?> responseEntity = checkCommunication(connector);
             return authenticationType.getAccessCredentials(connector, responseEntity);
         }

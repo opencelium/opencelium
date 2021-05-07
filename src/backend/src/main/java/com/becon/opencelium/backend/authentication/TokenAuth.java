@@ -88,7 +88,7 @@ public class TokenAuth implements AuthenticationType {
         }
 
         if(tokenRef.equals("body")){
-            return responseEntity.getBody().toString();
+            return responseEntity.getBody().toString().replace("\"", "");// TODO replaced " to empty when body is just string
         }
 
 
