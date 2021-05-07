@@ -448,6 +448,11 @@ export function isEqualObjectParams(obj1, obj2){
             if(_.isPlainObject(obj1[param]) && _.isPlainObject(obj2[param])){
                 result = isEqualObjectParams(obj1[param], obj2[param]);
                 hasObjects = true;
+            } else{
+                if((_.isPlainObject(obj1[param]) && !_.isPlainObject(obj2[param])) ||
+                    !_.isPlainObject(obj1[param]) && _.isPlainObject(obj2[param])){
+                    return false;
+                }
             }
         }
         if(!hasObjects){

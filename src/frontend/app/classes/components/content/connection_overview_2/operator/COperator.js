@@ -15,7 +15,7 @@
 
 import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 
-export const IF_OPERATOR_SIZE = 60;
+export const OPERATOR_SIZE = 60;
 
 export default class COperator{
 
@@ -25,8 +25,8 @@ export default class COperator{
         this._label = operator && operator.hasOwnProperty('label') ? operator.label : '';
         this._x = operator && operator.hasOwnProperty('x') ? operator.x : 0;
         this._y = operator && operator.hasOwnProperty('y') ? operator.y : 0;
-        this._width = IF_OPERATOR_SIZE;
-        this._height = IF_OPERATOR_SIZE;
+        this._width = OPERATOR_SIZE;
+        this._height = OPERATOR_SIZE;
         this._connector = operator && operator.hasOwnProperty('connector') ? operator.connector : null;
         this._invoker = operator && operator.hasOwnProperty('invoker') ? operator.invoker : null;
         this._entity = operator && operator.hasOwnProperty('entity') ? operator.entity : null;

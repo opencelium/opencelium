@@ -23,8 +23,9 @@ import {CBusinessOperator} from "@classes/components/content/connection_overview
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
-import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
+import COperator, {OPERATOR_SIZE} from "@classes/components/content/connection_overview_2/operator/COperator";
 import React from "react";
+import CProcess, {PROCESS_WIDTH} from "@classes/components/content/connection_overview_2/process/CProcess";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -43,6 +44,7 @@ export const ITERATOR_NAMES = [
 ];
 
 const PANEL_PADDING_Y = 40;
+const PANEL_PADDING_SIDES = 10;
 
 /**
  * Connector class for manipulating data in the Connector Component
@@ -85,12 +87,12 @@ export default class CConnectorItem{
     }
 
     getPanelPosition(){
-        return {x: this._shiftXForProcesses - 10, y: -PANEL_PADDING_Y, width: this.getMaxXOfProcesses() - this._shiftXForProcesses + 10, height: this.getMaxYOfProcesses() + PANEL_PADDING_Y};
+        return {x: this._shiftXForProcesses - PANEL_PADDING_SIDES, y: -PANEL_PADDING_Y, width: this.getMaxXOfProcesses() - this._shiftXForProcesses + PANEL_PADDING_SIDES, height: this.getMaxYOfProcesses() + PANEL_PADDING_Y};
     }
 
     getPanelRectPosition(){
         const panelPosition = this.getPanelPosition();
-        return { x: 1, y: PANEL_PADDING_Y - 8, width: panelPosition.width - 1, height: panelPosition.height - PANEL_PADDING_Y + 8};
+        return { x: 1, y: PANEL_PADDING_Y - PANEL_PADDING_SIDES - 1, width: panelPosition.width - 1, height: panelPosition.height - PANEL_PADDING_Y + PANEL_PADDING_SIDES + 1};
     }
 
     getShiftXOfProcesses(){
@@ -99,17 +101,35 @@ export default class CConnectorItem{
 
     getMaxXOfProcesses(){
         let maxX = 0;
+        let isProcess = false;
+        let isOperator = false;
         for(let i = 0; i < this._processes.length; i++){
-            if(this._processes[i].x > maxX){
-                maxX = this._processes[i].x;
+            if(this._processes[i] instanceof CProcess){
+                if(this._processes[i].x + PROCESS_WIDTH > maxX) {
+                    isProcess = true;
+                    isOperator = false;
+                    maxX = this._processes[i].x + PROCESS_WIDTH;
+                }
+            }
+            if(this._processes[i] instanceof COperator){
+                if(this._processes[i].x + OPERATOR_SIZE > maxX) {
+                    isProcess = false;
+                    isOperator = true;
+                    maxX = this._processes[i].x + OPERATOR_SIZE;
+                }
+            }
+        }
+
+        if(maxX === 0 && this._processes.length > 0){
+            if(isOperator){
+                maxX += OPERATOR_SIZE + 10;
+            }
+            if(isProcess){
+                maxX += PROCESS_WIDTH + 10;
             }
         }
         if(maxX !== 0){
-            maxX += 105;
-        } else{
-            if(this._processes.length > 0){
-                maxX += 140;
-            }
+            maxX += 10;
         }
         return maxX;
     }
