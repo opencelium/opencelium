@@ -18,14 +18,14 @@ import CMethodItem from "./method/CMethodItem";
 import COperatorItem, {LOOP_OPERATOR} from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
 import CConnectorPagination from "./CConnectorPagination";
-import {ITEMS} from "@change_component/form_elements/form_connection/form_svg/data";
-import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
-import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import COperator, {OPERATOR_SIZE} from "@classes/components/content/connection_overview_2/operator/COperator";
 import React from "react";
-import CProcess, {PROCESS_WIDTH} from "@classes/components/content/connection_overview_2/process/CProcess";
+import CProcess, {
+    PROCESS_HEIGHT,
+    PROCESS_WIDTH
+} from "@classes/components/content/connection_overview_2/process/CProcess";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -43,8 +43,10 @@ export const ITERATOR_NAMES = [
     'ii', 'ij', 'ik', 'il', 'im', 'in', 'io', 'ip', 'iq', 'ir', 'is', 'it', 'iu', 'iv', 'iw', 'ix', 'iy', 'iz'
 ];
 
-const PANEL_PADDING_Y = 40;
+const PANEL_LABEL_INTEND = 40;
 const PANEL_PADDING_SIDES = 10;
+const PANEL_DISTANT = 150;
+const PANEL_MARGIN_RECT = 1;
 
 /**
  * Connector class for manipulating data in the Connector Component
@@ -52,17 +54,17 @@ const PANEL_PADDING_SIDES = 10;
  */
 export default class CConnectorItem{
 
-    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = '', shiftXForProcesses = 0){
+    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = '', shiftXForSvgItems = 0){
         this._id = isId(connectorId) ? connectorId : 0;
         this._title = title === '' ? 'Please, choose connector' : title;
         this._icon = isString(icon) ? icon : '';
         this._invoker = this.convertInvoker(invoker);
         this._currentItem = null;
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
-        this._shiftXForProcesses = shiftXForProcesses;
+        this._shiftXForSvgItems = shiftXForSvgItems;
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
-        this._processes = [];
+        this._svgItems = [];
         this._arrows = [];
         this._pagination = this.setConnectorPagination();
         this._currentProgress = this.getCurrentProgress();
@@ -78,8 +80,8 @@ export default class CConnectorItem{
         let methods = connectorItem && connectorItem.hasOwnProperty('methods') ? connectorItem.methods : [];
         let operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
         let connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
-        let shiftXForProcesses = connectorItem && connectorItem.hasOwnProperty('shiftXForProcesses') ? connectorItem.shiftXForProcesses : 0;
-        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForProcesses);
+        let shiftXForSvgItems = connectorItem && connectorItem.hasOwnProperty('shiftXForSvgItems') ? connectorItem.shiftXForSvgItems : 0;
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems);
     }
 
     static hasIcon(icon){
@@ -87,64 +89,61 @@ export default class CConnectorItem{
     }
 
     getPanelPosition(){
-        return {x: this._shiftXForProcesses - PANEL_PADDING_SIDES, y: -PANEL_PADDING_Y, width: this.getMaxXOfProcesses() - this._shiftXForProcesses + PANEL_PADDING_SIDES, height: this.getMaxYOfProcesses() + PANEL_PADDING_Y};
+        return {x: this._shiftXForSvgItems - PANEL_PADDING_SIDES, y: -PANEL_LABEL_INTEND - PANEL_PADDING_SIDES, width: this.getMaxXOfSvgItems() - this._shiftXForSvgItems + PANEL_PADDING_SIDES, height: this.getMaxYOfSvgItems() + PANEL_LABEL_INTEND + PANEL_PADDING_SIDES};
     }
 
     getPanelRectPosition(){
         const panelPosition = this.getPanelPosition();
-        return { x: 1, y: PANEL_PADDING_Y - PANEL_PADDING_SIDES - 1, width: panelPosition.width - 1, height: panelPosition.height - PANEL_PADDING_Y + PANEL_PADDING_SIDES + 1};
+        return { x: PANEL_MARGIN_RECT, y: PANEL_LABEL_INTEND - PANEL_MARGIN_RECT, width: panelPosition.width - PANEL_MARGIN_RECT, height: panelPosition.height - PANEL_LABEL_INTEND - PANEL_MARGIN_RECT};
     }
 
-    getShiftXOfProcesses(){
-        return this.getMaxXOfProcesses() + 100;
+    getShiftXOfSvgItems(){
+        return this.getMaxXOfSvgItems() + PANEL_DISTANT;
     }
 
-    getMaxXOfProcesses(){
-        let maxX = 0;
+    getMaxCoordinateOfSvgItems(coordinateType){
+        let maxValue = 0;
         let isProcess = false;
         let isOperator = false;
-        for(let i = 0; i < this._processes.length; i++){
-            if(this._processes[i] instanceof CProcess){
-                if(this._processes[i].x + PROCESS_WIDTH > maxX) {
+        const processSize = coordinateType === 'x' ? PROCESS_WIDTH : PROCESS_HEIGHT;
+        for(let i = 0; i < this._svgItems.length; i++){
+            if(this._svgItems[i] instanceof CProcess){
+                if(this._svgItems[i][coordinateType] + processSize > maxValue) {
                     isProcess = true;
                     isOperator = false;
-                    maxX = this._processes[i].x + PROCESS_WIDTH;
+                    maxValue = this._svgItems[i][coordinateType] + processSize;
                 }
             }
-            if(this._processes[i] instanceof COperator){
-                if(this._processes[i].x + OPERATOR_SIZE > maxX) {
+            if(this._svgItems[i] instanceof COperator){
+                if(this._svgItems[i][coordinateType] + OPERATOR_SIZE > maxValue) {
                     isProcess = false;
                     isOperator = true;
-                    maxX = this._processes[i].x + OPERATOR_SIZE;
+                    maxValue = this._svgItems[i][coordinateType] + OPERATOR_SIZE;
                 }
             }
         }
 
-        if(maxX === 0 && this._processes.length > 0){
+        if(maxValue === 0 && this._svgItems.length > 0){
             if(isOperator){
-                maxX += OPERATOR_SIZE + 10;
+                maxValue += OPERATOR_SIZE + PANEL_PADDING_SIDES;
             }
             if(isProcess){
-                maxX += PROCESS_WIDTH + 10;
+                maxValue += processSize + PANEL_PADDING_SIDES;
             }
         }
-        if(maxX !== 0){
-            maxX += 10;
+        if(maxValue !== 0){
+            maxValue += PANEL_PADDING_SIDES;
         }
-        return maxX;
+        return maxValue;
+
     }
 
-    getMaxYOfProcesses(){
-        let maxY = 0;
-        for(let i = 0; i < this._processes.length; i++){
-            if(this._processes[i].y > maxY){
-                maxY = this._processes[i].y;
-            }
-        }
-        if(maxY !== 0 || this._processes.length > 0){
-            maxY += 90;
-        }
-        return maxY;
+    getMaxXOfSvgItems(){
+        return this.getMaxCoordinateOfSvgItems('x');
+    }
+
+    getMaxYOfSvgItems(){
+        return this.getMaxCoordinateOfSvgItems('y');
     }
 
     getSvgElement(element){
@@ -173,14 +172,14 @@ export default class CConnectorItem{
             if(currentSplitIndex[currentSplitIndex.length - 1] !== '0'){
                 xIterator += 200;
             }
-            svgElement.x = xIterator + this._shiftXForProcesses;
+            svgElement.x = xIterator + this._shiftXForSvgItems;
             svgElement.y = 150 * (currentSplitIndex.length - 1)
             if(items[i].type){
                 svgElement.x += 35;
                 svgElement.y += 10;
             }
             svgElement.id = `${this.getConnectorType()}_${items[i].index}`;
-            this.processes.push(this.getSvgElement(svgElement));
+            this._svgItems.push(this.getSvgElement(svgElement));
             if(items[i].index !== '0') {
                 this.arrows.push({from: `${this.getConnectorType()}_${this.getPrevIndex(items[i].index)}`, to: `${this.getConnectorType()}_${items[i].index}`});
             }
@@ -232,7 +231,7 @@ export default class CConnectorItem{
     resetItems(){
         this._methods = [];
         this._operators = [];
-        this._processes = [];
+        this._svgItems = [];
         this._arrows = [];
         this._currentItem = null;
         this.reloadPagination();
@@ -476,8 +475,8 @@ export default class CConnectorItem{
         this.setSvgItems();
     }
 
-    get processes(){
-        return this._processes;
+    get svgItems(){
+        return this._svgItems;
     }
 
     get arrows(){
@@ -503,6 +502,9 @@ export default class CConnectorItem{
 
     setCurrentItem(item){
         this._currentItem = item ? item : null;
+        if(this._currentItem) {
+            consoleLog(this._currentItem.index);
+        }
         this.reloadOperatorsHistory();
     }
 
@@ -565,7 +567,36 @@ export default class CConnectorItem{
         return result;
     }
 
-    refactorIndexes(index, refactorMode = REFACTOR_ADD, itemType, originalIndex){
+    refactorIndexes(index, refactorMode = REFACTOR_ADD){
+        this.refactorIndexesForItems(index, refactorMode, this.methods);
+        this.refactorIndexesForItems(index, refactorMode, this.operators);
+    }
+
+    refactorIndexesForItems(index, refactorMode = REFACTOR_ADD, items){
+        let splitIndex = index.split('_');
+        for(let i = 0; i < items.length; i++){
+            let splitMethodIndex = items[i].index.split('_');
+            if(splitMethodIndex.length >= splitIndex.length){
+                //if index except last number equals to prefix of method index
+                if(splitMethodIndex.slice(0, splitIndex.length - 1).join('_') === splitIndex.slice(0, splitIndex.length - 1).join('_')){
+                    if(splitMethodIndex[splitIndex.length - 1] >= splitIndex[splitIndex.length - 1]){
+                        switch (refactorMode){
+                            case REFACTOR_ADD:
+                                splitMethodIndex[splitIndex.length - 1] = parseInt(splitMethodIndex[splitIndex.length - 1]) + 1;
+                                break;
+                            case REFACTOR_REMOVE:
+                                splitMethodIndex[splitIndex.length - 1] -= 1;
+                                break;
+                        }
+                        items[i].index = splitMethodIndex.join('_');
+                    }
+                }
+            }
+        }
+
+    }
+
+    refactorIndexes_old(index, refactorMode = REFACTOR_ADD, itemType, originalIndex){
         let doRefactorData = {result: false, index: 0};
         for(let i = 0; i < this.methods.length; i++){
             doRefactorData = this.shouldStartRefactorIndex(this.methods[i], itemType === 'operator' ? originalIndex : index);
@@ -860,11 +891,11 @@ export default class CConnectorItem{
 
     removeMethod(method, withRefactorIndexes = true){
         let methodIndex = method.index;
-        let key = this._methods.findIndex(m => m.index === method.index);
+        let key = this._methods.findIndex(m => m.index === methodIndex);
         if(key !== -1) {
             if(withRefactorIndexes && !this.isLastItemInTheTree(methodIndex)) {
                 let index = key + 1 < this._methods.length ? this._methods[key + 1].index : this._methods[key].index;
-                this.refactorIndexes(index, REFACTOR_REMOVE, 'method', methodIndex);
+                this.refactorIndexes(methodIndex, REFACTOR_REMOVE, 'method', methodIndex);
             }
             this._methods.splice(key, 1);
 
@@ -890,7 +921,7 @@ export default class CConnectorItem{
                 if(isParent){
                     index = operator.index;
                 }
-                this.refactorIndexes(index, REFACTOR_REMOVE, 'operator', operatorIndex);
+                this.refactorIndexes(operatorIndex, REFACTOR_REMOVE, 'operator', operatorIndex);
             }
             this._operators.splice(key, 1);
             this._operators = sortByIndex(this._operators);
