@@ -15,6 +15,7 @@
 
 import React from "react";
 import PropTypes from 'prop-types';
+import {connect} from "react-redux";
 import {DETAILS_POSITION, LAYOUT_POSITION} from "../FormConnectionSvg";
 import IfOperator from "../elements/IfOperator";
 import Process from "../elements/Process";
@@ -22,7 +23,18 @@ import Arrow from "../elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import LoopOperator from "../elements/LoopOperator";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {HighlightedMarkers, DefaultMarkers} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
 
+function mapStateToProps(state){
+    const {currentItem, currentSubItem} = mapItemsToClasses(state);
+    return{
+        currentItem,
+        currentSubItem,
+    };
+}
+
+@connect(mapStateToProps, {})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -299,57 +311,44 @@ class Svg extends React.Component {
         }
     }
     renderItems(){
-        const {items} = this.props;
+        const {currentItem, currentSubItem, items} = this.props;
         return items.map((item,key) => {
+            let isHighlighted = currentItem ? item.id.indexOf(currentItem.id) === 0 : false;
+            let isCurrent = currentItem ? currentItem.id === item.id : false;
+            if(!isCurrent && currentSubItem){
+                isCurrent = currentSubItem ? currentSubItem.id === item.id : false;
+                isHighlighted = currentSubItem ? item.id.indexOf(currentSubItem.id) === 0 : false;
+            }
             switch (item.type){
                 case 'if':
                     return(
-                        <IfOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem}/>
+                        <IfOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
                     );
                 case 'loop':
                     return(
-                        <LoopOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem}/>
+                        <LoopOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem}/>
+                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
                     );
             }
         });
     }
 
     renderArrows(){
-        const {arrows, items} = this.props;
+        const {currentItem, currentSubItem, arrows, items} = this.props;
         return arrows.map((arrow,key) => {
             const from = items.find(item => item.id === arrow.from);
             const to = items.find(item => item.id === arrow.to);
+            let isHighlighted = currentItem ? arrow.from.indexOf(currentItem.id) === 0 && arrow.to.indexOf(currentItem.id) === 0 : false;
+            if(!isHighlighted && currentSubItem){
+                isHighlighted = currentSubItem ? arrow.from.indexOf(currentSubItem.id) === 0 && arrow.to.indexOf(currentSubItem.id) === 0 : false;
+            }
             return(
-                <Arrow key={key} {...arrow} from={from} to={to}/>
+                <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted}/>
             );
         });
-    }
-
-    renderMarkers(){
-        return (
-            <defs>
-                <marker id="arrow_head_right" markerWidth="10" markerHeight="7"
-                        refX="0" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" />
-                </marker>
-                <marker id="arrow_head_down" markerWidth="7" markerHeight="10"
-                        refX="0" refY="3.5" orient="auto">
-                    <polygon points="0 0, 7 0, 3.5 10" />
-                </marker>
-                <marker id="arrow_head_left" markerWidth="10" markerHeight="7"
-                        refX="0" refY="3.5" orient="auto">
-                    <polygon points="10 0, 0 3.5, 10 7" />
-                </marker>
-                <marker id="arrow_head_up" markerWidth="7" markerHeight="10"
-                        refX="0" refY="3.5" orient="auto">
-                    <polygon points="0 10, 3.5 0, 7 10" />
-                </marker>
-            </defs>
-        );
     }
 
     render(){
@@ -365,9 +364,10 @@ class Svg extends React.Component {
                 onMouseLeave={::this.endDrag}
                 ref={this.svgRef}
             >
-                {
-                    this.renderMarkers()
-                }
+                <defs>
+                    <DefaultMarkers/>
+                    <HighlightedMarkers/>
+                </defs>
                 {
                     this.renderArrows()
                 }

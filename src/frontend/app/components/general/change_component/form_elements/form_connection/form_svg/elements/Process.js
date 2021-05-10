@@ -15,29 +15,18 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
-import {mapItemsToClasses} from "../utils";
 import {isString} from "@utils/app";
 
-function mapStateToProps(state){
-    const {currentItem, currentSubItem} = mapItemsToClasses(state);
-    return{
-        currentItem,
-        currentSubItem,
-    };
-}
-
-@connect(mapStateToProps, {})
 class Process extends React.Component{
     constructor(props) {
         super(props)
     }
 
     onMouseDown(){
-        this.props.setCurrentBusinessItem(this.props.process);
+        this.props.setCurrentItem(this.props.process);
     }
 
     deleteProcess(e){
@@ -46,11 +35,7 @@ class Process extends React.Component{
     }
 
     render(){
-        const {currentItem, currentSubItem, process, isNotDraggable} = this.props;
-        let isCurrentProcess = currentItem ? currentItem.id === process.id : false;
-        if(!isCurrentProcess){
-            isCurrentProcess = currentSubItem ? currentSubItem.id === process.id : false;
-        }
+        const {process, isNotDraggable, isCurrent, isHighlighted} = this.props;
         const borderRadius = 10;
         const labelX = '50%';
         const labelY = '50%';
@@ -61,12 +46,12 @@ class Process extends React.Component{
             label = `${label.substr(0, 9)}...`;
         }
         return(
-            <svg x={process.x} y={process.y} className={`${styles.process} ${isCurrentProcess ? styles.current_process : ''} confine`} width={process.width} height={process.height}>
+            <svg x={process.x} y={process.y} className={`${styles.process} ${isCurrent ? styles.current_process : ''} ${isHighlighted ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
                 <rect onMouseDown={::this.onMouseDown}  x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2} className={`${styles.process_rect} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
                     {label}
                 </text>
-                {isCurrentProcess &&
+                {isCurrent &&
                     <text onMouseDown={::this.deleteProcess} dominantBaseline={"text-top"} textAnchor={"start"} className={styles.process_close} x={closeX}
                           y={closeY}>
                         {'x'}
@@ -84,10 +69,14 @@ Process.propTypes = {
     ]),
     isNotDraggable: PropTypes.bool,
     setCurrentBusinessItem: PropTypes.func,
+    isCurrent: PropTypes.bool,
+    isHighlighted: PropTypes.bool,
 };
 
 Process.defaultProps = {
     isNotDraggable: false,
+    isCurrent: false,
+    isHighlighted: false,
 };
 
 export default Process;

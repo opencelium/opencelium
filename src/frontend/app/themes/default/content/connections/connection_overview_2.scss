@@ -97,9 +97,31 @@
     fill: #e2e2e2;
   }
 }
+.highlighting{
+  stroke: $SVG_HIGHLIGHT_COLOR;
+}
+.highlighted_process{
+  rect {
+    @extend .highlighting;
+  }
+}
 .current_operator{
   polygon {
     fill: #e2e2e2;
+  }
+}
+.highlighted_operator{
+  polygon {
+    @extend .highlighting;
+  }
+}
+.highlighted_arrow{
+  @extend .highlighting;
+}
+.highlighted_marker{
+  polygon {
+    @extend .highlighting;
+    fill: $SVG_HIGHLIGHT_COLOR;
   }
 }
 .process_rect{
