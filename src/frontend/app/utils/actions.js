@@ -493,8 +493,8 @@ export const UpdateAssistantAction = {
  * connection overview 2 actions for redux state
  */
 export const ConnectionOverview2Action = {
-    SET_CURRENTITEM:                           'SET_CURRENTITEM',
-    SET_CURRENTSUBITEM:                        'SET_CURRENTSUBITEM',
+    SET_CURRENTBUSINESSITEM:                   'SET_CURRENTBUSINESSITEM',
+    SET_CURRENTECHNICALITEM:                   'SET_CURRENTECHNICALITEM',
     SET_ITEMS:                                 'SET_ITEMS',
     SET_ARROWS:                                'SET_ARROWS',
     SET_DETAILSLOCATION:                       'SET_DETAILSLOCATION',

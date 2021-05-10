@@ -49,9 +49,9 @@ let loggerOptions = {
 
 const syncConfig = {
     whitelist: [
-        ConnectionOverview2Action.SET_ITEMS, ConnectionOverview2Action.SET_CURRENTSUBITEM,
+        ConnectionOverview2Action.SET_ITEMS, ConnectionOverview2Action.SET_CURRENTECHNICALITEM,
         ConnectionOverview2Action.SET_DETAILSLOCATION, ConnectionOverview2Action.SET_ITEMS,
-        ConnectionOverview2Action.SET_ARROWS, ConnectionOverview2Action.SET_CURRENTITEM,
+        ConnectionOverview2Action.SET_ARROWS, ConnectionOverview2Action.SET_CURRENTBUSINESSITEM,
     ],
 };
 let enhancers = {};

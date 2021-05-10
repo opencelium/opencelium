@@ -13,9 +13,10 @@ class Panel extends React.Component{
         return(
             <svg x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
                 <rect x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel}/>
-                <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={'25'} className={styles.connector_item_text}>
+                <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
                     {invokerName}
                 </text>
+                {/*<rect x={1} y={1} width={'100%'} height={'100%'} fill={'none'} stroke={'red'}/>*/}
             </svg>
         );
     }

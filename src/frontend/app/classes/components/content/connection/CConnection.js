@@ -61,7 +61,7 @@ export default class CConnection{
         }
         this._fromConnector = CConnectorItem.createConnectorItem(fromConnector);
         if(toConnector !== null && this._fromConnector instanceof CConnectorItem) {
-            toConnector.shiftXForProcesses = this._fromConnector.getShiftXOfProcesses();
+            toConnector.shiftXForSvgItems = this._fromConnector.getShiftXOfSvgItems();
         }
         this._toConnector = CConnectorItem.createConnectorItem(toConnector);
         this._fieldBinding = this.convertFieldBindingItems(fieldBindingItems);

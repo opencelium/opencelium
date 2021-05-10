@@ -19,6 +19,7 @@ import {
     FIELD_TYPE_OBJECT,
     FIELD_TYPE_STRING
 } from "@classes/components/content/connection/method/CMethodItem";
+import {WHOLE_ARRAY} from "@classes/components/content/invoker/response/CResponseResult";
 
 export const BODY_FORMAT = {
     JSON: 'json',
@@ -164,7 +165,7 @@ export default class CBody{
                 }
             }
             result.push({
-                value: property,
+                value: `${property}${WHOLE_ARRAY}`,
                 type,
                 label: `${property} (the whole array)`,
             });

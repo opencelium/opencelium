@@ -15,7 +15,7 @@
 
 import React from 'react';
 import {connect} from "react-redux";
-import {setCurrentItem, setCurrentSubItem} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem, setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -30,7 +30,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {setCurrentItem, setCurrentSubItem, setTechnicalLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation})
 class ExtendedTechnicalLayout extends React.Component{
 
     constructor(props) {

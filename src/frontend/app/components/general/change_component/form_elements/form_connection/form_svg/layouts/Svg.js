@@ -21,7 +21,6 @@ import Process from "../elements/Process";
 import Arrow from "../elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import LoopOperator from "../elements/LoopOperator";
-import ConnectorPanel from "@change_component/form_elements/form_connection/form_svg/elements/Panel";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 
 class Svg extends React.Component {
@@ -60,7 +59,6 @@ class Svg extends React.Component {
                 viewBox.width = 1800;
                 viewBox.height = 715;
             }
-            console.log(viewBox.y);
             this.setState({
                 svg: layoutSVG,
                 ratio,
@@ -132,7 +130,7 @@ class Svg extends React.Component {
 
     setCurrentItem(currentItem){
         let {items} = this.props;
-        const {setCurrentItem, setCurrentSubItem, setItems} = this.props;
+        const {setCurrentBusinessItem, setCurrentTechnicalItem, setItems} = this.props;
         if(currentItem){
             let index = items.findIndex(item => item.id === currentItem.id);
             if(index !== -1) {
@@ -140,11 +138,11 @@ class Svg extends React.Component {
                 items.push(currentItem);
             }
         }
-        if(setCurrentSubItem){
-            setCurrentSubItem(currentItem);
+        if(setCurrentTechnicalItem){
+            setCurrentTechnicalItem(currentItem);
         } else{
-            if(setCurrentItem) {
-                setCurrentItem(currentItem);
+            if(setCurrentBusinessItem) {
+                setCurrentBusinessItem(currentItem);
             }
         }
         if(setItems) {

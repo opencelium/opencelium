@@ -58,9 +58,9 @@ const reducer = (state = initialState, action) => {
             return state.set('arrows', List(action.payload));
         case ConnectionOverview2Action.SET_ITEMS:
             return state.set('items', List(action.payload));
-        case ConnectionOverview2Action.SET_CURRENTITEM:
+        case ConnectionOverview2Action.SET_CURRENTBUSINESSITEM:
             return state.set('currentItem', action.payload).set('currentSubItem', null);
-        case ConnectionOverview2Action.SET_CURRENTSUBITEM:
+        case ConnectionOverview2Action.SET_CURRENTECHNICALITEM:
             return state.set('currentSubItem', action.payload);
         case ConnectionOverview2Action.SET_DETAILSLOCATION:
             if(action.payload.location === PANEL_LOCATION.SAME_WINDOW)

@@ -23,9 +23,9 @@ import {isObject} from "@utils/app";
  * @param currentItem - item
  * @returns {{type: string, payload: {}}}
  */
-const setCurrentItem = (currentItem) => {
+const setCurrentBusinessItem = (currentItem) => {
     return {
-        type: ConnectionOverview2Action.SET_CURRENTITEM,
+        type: ConnectionOverview2Action.SET_CURRENTBUSINESSITEM,
         payload: currentItem instanceof CProcess || currentItem instanceof COperator ? currentItem.getObject() : currentItem,
     };
 };
@@ -35,9 +35,9 @@ const setCurrentItem = (currentItem) => {
  * @param currentSubItem - subItem
  * @returns {{type: string, payload: {}}}
  */
-const setCurrentSubItem = (currentSubItem) => {
+const setCurrentTechnicalItem = (currentSubItem) => {
     return {
-        type: ConnectionOverview2Action.SET_CURRENTSUBITEM,
+        type: ConnectionOverview2Action.SET_CURRENTECHNICALITEM,
         payload: currentSubItem instanceof CProcess || currentSubItem instanceof COperator ? currentSubItem.getObject() : currentSubItem,
     };
 };
@@ -111,8 +111,8 @@ const setTechnicalLayoutLocation = (data) => {
 
 
 export{
-    setCurrentItem,
-    setCurrentSubItem,
+    setCurrentBusinessItem,
+    setCurrentTechnicalItem,
     setArrows,
     setItems,
     setDetailsLocation,

@@ -15,7 +15,7 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
-import {setCurrentItem, setItems} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem, setItems} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -50,7 +50,7 @@ function setLocation(props, data){
     props.maximizeTechnicalLayout();
 }
 
-@connect(mapStateToProps, {setCurrentItem, setItems, setBusinessLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setItems, setBusinessLayoutLocation})
 @NewWindowFeature({url: connectionOverviewBusinessLayoutUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.BUSINESS_LAYOUT, setLocation, isLocationSameWindow})
 class BusinessLayout extends React.Component{
 

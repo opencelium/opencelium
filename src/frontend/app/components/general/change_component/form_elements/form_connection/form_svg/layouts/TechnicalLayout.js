@@ -15,7 +15,7 @@
 
 import React from 'react';
 import {connect} from "react-redux";
-import {setCurrentItem, setCurrentSubItem} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem, setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import PropTypes from "prop-types";
@@ -30,7 +30,6 @@ import CreateElementPanel from "../elements/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
-import ConnectorPanel from "../elements/Panel";
 import CConnection from "@classes/components/content/connection/CConnection";
 
 function mapStateToProps(state){
@@ -54,7 +53,7 @@ function setLocation(props, data){
     props.maximizeBusinessLayout();
 }
 
-@connect(mapStateToProps, {setCurrentItem, setCurrentSubItem, setTechnicalLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation})
 @NewWindowFeature({url: connectionOverviewTechnicalLayoutUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.TECHNICAL_LAYOUT, setLocation, isLocationSameWindow})
 class TechnicalLayout extends React.Component{
 
@@ -81,7 +80,7 @@ class TechnicalLayout extends React.Component{
 
     openInNewWindow(){
         const {entity} = this.props;
-        const items = [...entity.fromConnector.processes, ...entity.toConnector.processes];
+        const items = [...entity.fromConnector.svgItems, ...entity.toConnector.svgItems];
         let convertedItems = [];
         if(items.length > 0 && (items[0] instanceof CProcess || items[0] instanceof COperator)){
             for(let i = 0; i < items.length; i++){
@@ -129,7 +128,7 @@ class TechnicalLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
-                    items={[...connection.fromConnector.processes, ...connection.toConnector.processes]}
+                    items={[...connection.fromConnector.svgItems, ...connection.toConnector.svgItems]}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}

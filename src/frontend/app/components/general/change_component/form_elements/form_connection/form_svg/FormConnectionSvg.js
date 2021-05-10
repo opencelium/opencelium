@@ -44,7 +44,7 @@ const INITIAL_BUSINESS_LAYOUT_POSITION = LAYOUT_POSITION.TOP;
 const INITIAL_TECHNICAL_LAYOUT_POSITION = LAYOUT_POSITION.BOTTOM;
 const INITIAL_DETAILS_POSITION = DETAILS_POSITION.RIGHT;
 
-const BUSINESS_DATA = {processes: [], arrows: []};
+const BUSINESS_DATA = {items: [], arrows: []};
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -55,7 +55,7 @@ function mapStateToProps(state){
 }
 
 /**
- * Layout for TemplateConverter
+ * Form for ConnectionSvg
  */
 @connect(mapStateToProps, {})
 class FormConnectionSvg extends Component{
@@ -82,7 +82,7 @@ class FormConnectionSvg extends Component{
     }
 
     componentDidMount() {
-        if(BUSINESS_DATA.processes.length === 0 && this.props.entity.toConnector.processes.length !== 0) {
+        if(BUSINESS_DATA.items.length === 0 && this.props.entity.toConnector.svgItems.length !== 0) {
             this.minimizeBusinessLayout();
         }
     }
@@ -297,7 +297,7 @@ class FormConnectionSvg extends Component{
                 <PanelGroup {...verticalPanelParams}>
                     {businessLayoutPosition === LAYOUT_POSITION.TOP &&
                         <BusinessLayout
-                            items={BUSINESS_DATA.processes}
+                            items={BUSINESS_DATA.items}
                             arrows={BUSINESS_DATA.arrows}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}
@@ -313,7 +313,7 @@ class FormConnectionSvg extends Component{
                         connection={entity}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
-                        isBusinessLayoutEmpty={BUSINESS_DATA.processes.length === 0}
+                        isBusinessLayoutEmpty={BUSINESS_DATA.items.length === 0}
                         minimizeLayout={::this.minimizeTechnicalLayout}
                         maximizeLayout={::this.maximizeTechnicalLayout}
                         maximizeBusinessLayout={::this.maximizeBusinessLayout}
@@ -324,7 +324,7 @@ class FormConnectionSvg extends Component{
                     />
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout
-                            items={BUSINESS_DATA.processes}
+                            items={BUSINESS_DATA.items}
                             arrows={BUSINESS_DATA.arrows}
                             isLayoutMinimized={isBusinessLayoutMinimized}
                             isTechnicalLayoutMinimized={isTechnicalLayoutMinimized}

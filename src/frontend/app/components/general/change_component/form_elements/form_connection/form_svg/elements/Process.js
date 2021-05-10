@@ -37,7 +37,7 @@ class Process extends React.Component{
     }
 
     onMouseDown(){
-        this.props.setCurrentItem(this.props.process);
+        this.props.setCurrentBusinessItem(this.props.process);
     }
 
     deleteProcess(e){
@@ -83,7 +83,7 @@ Process.propTypes = {
         PropTypes.instanceOf(CTechnicalProcess),
     ]),
     isNotDraggable: PropTypes.bool,
-    setCurrentItem: PropTypes.func,
+    setCurrentBusinessItem: PropTypes.func,
 };
 
 Process.defaultProps = {

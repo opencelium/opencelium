@@ -15,7 +15,7 @@
 
 import React from 'react';
 import {connect} from "react-redux";
-import {setCurrentItem, setItems} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem, setItems} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -34,7 +34,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {setCurrentItem, setItems, setBusinessLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setItems, setBusinessLayoutLocation})
 class ExtendedBusinessLayout extends React.Component{
 
     constructor(props) {
