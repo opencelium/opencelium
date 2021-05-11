@@ -70,7 +70,7 @@ class ChangeContent extends Component{
         }
         this.state = {
             entity,
-            page: 0,
+            page: 1,
             hasError: false,
             hasRequired: false,
             isValidated: true,
@@ -353,19 +353,19 @@ class ChangeContent extends Component{
         return false;
     }
 
-    renderValidationMessage(){
+    renderValidationMessage(validationMessageProps = {}){
         const {hasRequired, focusedInput, isValidated, validationMessage} = this.state;
         const {authUser} = this.props;
         if(hasRequired && focusedInput.label){
-            return <ValidationMessage message={`${focusedInput.label} is a required field`} authUser={authUser}/>;
+            return <ValidationMessage message={`${focusedInput.label} is a required field`} authUser={authUser} {...validationMessageProps}/>;
         }
         if(!isValidated && focusedInput.label){
-            return <ValidationMessage message={validationMessage} authUser={authUser}/>;
+            return <ValidationMessage message={validationMessage} authUser={authUser} {...validationMessageProps}/>;
         }
         return null;
     }
 
-    renderNavigation(navigationProps){
+    renderNavigation(navigationProps = {}){
         const {contents, translations, type, isActionInProcess, authUser} = this.props;
         const {page, contentsLength} = this.state;
         let navigationPage = {
