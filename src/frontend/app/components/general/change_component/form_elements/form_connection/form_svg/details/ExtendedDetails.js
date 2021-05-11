@@ -20,6 +20,7 @@ import {DETAILS_POSITION} from "../FormConnectionSvg";
 import PageNotFound from "@components/general/app/PageNotFound";
 import {SEPARATE_WINDOW} from "@utils/constants/app";
 import {mapItemsToClasses} from "../utils";
+import Description from "@change_component/form_elements/form_connection/form_svg/details/Description";
 
 function mapStateToProps(state){
     const {currentItem, currentSubItem} = mapItemsToClasses(state);
@@ -58,9 +59,7 @@ class ExtendedDetails extends React.Component{
                     </div>
                     {details ?
                         <div className={styles.label}>
-                            {details.label && <React.Fragment><span>Label: {details.label}</span><br/></React.Fragment>}
-                            {details.name && <React.Fragment><span>Name: {details.name}</span><br/></React.Fragment>}
-                            {details.invoker && `Invoker: ${details.invoker}`}
+                            <Description details={details}/>
                         </div>
                         :
                         <div>

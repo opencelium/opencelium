@@ -60,7 +60,7 @@ class SettingsPanel extends React.Component{
                     className={styles.replace_icon}
                     size={20}
                     onClick={replaceLayouts}
-                    tooltip={'Replace'}
+                    tooltip={isReplaceIconDisabled ? '' : 'Replace'}
                     value={'import_export'}
                     tooltipPosition={minMaxTooltipPosition}
                     disabled={isReplaceIconDisabled}
@@ -71,7 +71,7 @@ class SettingsPanel extends React.Component{
                     className={styles.min_max_icon}
                     size={20}
                     onClick={minMaxClick}
-                    tooltip={minMaxTooltip}
+                    tooltip={isMinMaxIconDisabled ? '' : minMaxTooltip}
                     value={minMaxValue}
                     tooltipPosition={minMaxTooltipPosition}
                     disabled={isMinMaxIconDisabled}
@@ -81,7 +81,7 @@ class SettingsPanel extends React.Component{
                     size={20}
                     className={styles.new_window_icon}
                     onClick={openInNewWindow}
-                    tooltip={'Open in new Window'}
+                    tooltip={isNewWindowIconDisabled ? '' : 'Open in new Window'}
                     value={'open_in_new'}
                     tooltipPosition={'top'}
                     disabled={isNewWindowIconDisabled}

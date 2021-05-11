@@ -189,10 +189,6 @@
   .title{
     font-size: 32px;
   }
-  .label{
-    font-size: 14px;
-    text-align: left;
-  }
 }
 .settings_panel{
   position: relative;
@@ -346,4 +342,33 @@
 .connector_item_text{
   font-weight: bold;
   font-size: $FONT_SIZE_MEDIUM;
+}
+
+.description{
+  font-size: 14px;
+  text-align: left;
+  .row{
+    margin: 0 !important;
+  }
+  .col{
+    padding: 0 !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .entry_padding{
+    padding-left: 15px !important;
+  }
+  .more_details{
+    >span {
+      color: #c0c0c5;
+      cursor: pointer;
+      padding: 40px 3px;
+    }
+    >span:hover{
+      color: #444b4c;
+      padding: 0px 3px;
+      box-shadow: #9f9f9f 0 1px 3px 0;
+    }
+  }
 }
