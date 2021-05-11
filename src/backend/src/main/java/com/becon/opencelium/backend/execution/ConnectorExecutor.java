@@ -607,7 +607,7 @@ public class ConnectorExecutor {
 
         if (rightStatement != null){
             if (rightStatement.getClass().isArray()) {
-                System.out.println("Right Statement: " + Arrays.asList((String[])rightStatement));
+                System.out.println("Right Statement: " + Arrays.toString((String[])rightStatement));
             } else {
                 System.out.println("Right Statement: " + rightStatement.toString());
             }
