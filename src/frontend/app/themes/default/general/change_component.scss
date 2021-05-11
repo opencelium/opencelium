@@ -84,7 +84,8 @@
 
 .external_validation_message{
   @extend .validation_message;
-  bottom: 60px;
+  bottom: 10px;
+  z-index: 2;
 }
 
 .navigation{
@@ -98,7 +99,7 @@
 .external_navigation{
   @extend .navigation;
   border-top: 1px solid #eee;
-  bottom: 50px;
+  bottom: 0;
   z-index: 1;
   height: 50px;
   background: white;
