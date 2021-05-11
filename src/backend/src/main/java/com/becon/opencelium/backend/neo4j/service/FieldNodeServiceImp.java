@@ -298,7 +298,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
                     } else {
                         result = result + f.getName();
                     }
-                    continue;
+                    break;
                 }
                 String child = fieldAsString(f.getChild(), fieldNode);
                 if (f.getType().equals("array")){
