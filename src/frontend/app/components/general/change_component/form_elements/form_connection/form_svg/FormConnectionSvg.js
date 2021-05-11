@@ -281,7 +281,7 @@ class FormConnectionSvg extends Component{
     }
 
     render(){
-        const {entity} = this.props;
+        const {entity, renderNavigationComponent, renderValidationMessage} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
@@ -337,6 +337,8 @@ class FormConnectionSvg extends Component{
                         />
                     }
                 </PanelGroup>
+                {renderValidationMessage({isExternal: true})}
+                {renderNavigationComponent({isExternal: true})}
             </div>
         );
     }

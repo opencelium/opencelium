@@ -30,13 +30,13 @@ class ValidationMessage extends Component{
     }
 
     render(){
-        const {message, authUser, classNames} = this.props;
+        const {message, authUser, classNames, isExternal} = this.props;
         if(message === ''){
             return null;
         }
-        let defaultClassNames = ['validation_message', 'message'];
+        let defaultClassNames = ['validation_message', 'external_validation_message', 'message'];
         defaultClassNames = getThemeClass({classNames: defaultClassNames, authUser, styles});
-        let validationMessageClassName = `${styles[defaultClassNames.validation_message]}`;
+        let validationMessageClassName = `${styles[isExternal ? defaultClassNames.external_validation_message : defaultClassNames.validation_message]}`;
         let messageClassName = `${styles[defaultClassNames.message]}`;
         if(classNames){
             if(classNames.hasOwnProperty('validationMessage')){
@@ -58,10 +58,12 @@ class ValidationMessage extends Component{
 
 ValidationMessage.propTypes = {
     message: PropTypes.string.isRequired,
+    isExternal: PropTypes.bool,
 };
 
 ValidationMessage.defaultProps = {
     classNames: null,
+    isExternal: false,
 };
 
 

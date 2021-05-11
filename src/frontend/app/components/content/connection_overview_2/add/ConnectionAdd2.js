@@ -208,6 +208,17 @@ class ConnectionAdd2 extends Component{
     }
 
     /**
+     * to validate connector
+     */
+    validateMethods(connection){
+        const {t} = this.props;
+        if(connection.fromConnector.methods.length === 0 && connection.toConnector.methods.length === 0){
+            return {value: false, message: 'Please, add at least one method'};
+        }
+        return {value: true, message: ''};
+    }
+
+    /**
      * to add template
      */
     addTemplate(template){
@@ -297,6 +308,7 @@ class ConnectionAdd2 extends Component{
                     actions: {addTemplate: ::this.addTemplate},
                     source: Object.freeze(connectors),
                     readOnly: false,
+                    check: (e, entity) => ::this.validateMethods(e, entity),
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
