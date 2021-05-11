@@ -606,7 +606,12 @@ public class ConnectorExecutor {
         }
 
         if (rightStatement != null){
-            System.out.println("Right Statement: " + rightStatement.toString());
+            if (rightStatement.getClass().isArray()) {
+                System.out.println("Right Statement: " + Arrays.asList((String[])rightStatement));
+            } else {
+                System.out.println("Right Statement: " + rightStatement.toString());
+            }
+
         }
 //        if (leftVariable instanceof NodeList)
         boolean result = operator.compare(leftVariable, rightStatement);
