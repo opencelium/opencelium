@@ -150,11 +150,11 @@ class Navigation extends Component{
     }
     
     render(){
-        const {authUser} = this.props;
-        let classNames = ['navigation'];
+        const {authUser, isExternal} = this.props;
+        let classNames = ['navigation', 'external_navigation'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <div className={styles[classNames.navigation]}>
+            <div className={styles[isExternal ? classNames.external_navigation : classNames.navigation]}>
                 {this.renderPrevButton()}
                 {this.renderNextButton()}
             </div>
@@ -172,6 +172,7 @@ Navigation.propTypes = {
     add: PropTypes.string,
     isTested: PropTypes.number,
     entity: PropTypes.object.isRequired,
+    isExternal: PropTypes.bool,
 };
 
 Navigation.defaultProps = {
@@ -181,6 +182,7 @@ Navigation.defaultProps = {
     type: 'add',
     isTested: 1,
     extraAction: '',
+    isExternal: false,
 };
 
 

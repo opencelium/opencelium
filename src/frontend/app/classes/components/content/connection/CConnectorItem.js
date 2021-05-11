@@ -502,9 +502,6 @@ export default class CConnectorItem{
 
     setCurrentItem(item){
         this._currentItem = item ? item : null;
-        if(this._currentItem) {
-            consoleLog(this._currentItem.index);
-        }
         this.reloadOperatorsHistory();
     }
 

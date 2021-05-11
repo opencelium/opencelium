@@ -57,7 +57,7 @@ class Form extends Component{
      * to map Field Inputs correspondingly
      */
     mapInputs(data, key){
-        const {entity, updateEntity, clearValidationMessage} = this.props;
+        const {entity, updateEntity, clearValidationMessage, renderNavigationComponent, renderValidationMessage} = this.props;
         switch(data.type){
             case 'select+description':
                 return <FormSelectDescription
@@ -154,6 +154,8 @@ class Form extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
+                    renderNavigationComponent={renderNavigationComponent}
+                    renderValidationMessage={renderValidationMessage}
                 />;
             case 'invoker_name':
                 return <FormInvokerName

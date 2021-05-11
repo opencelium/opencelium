@@ -365,11 +365,9 @@ class ChangeContent extends Component{
         return null;
     }
 
-    render(){
-        const {breadcrumbsItems, contents, translations, type, isActionInProcess, noBreadcrumbs, noHint, noNavigation, authUser, isComponentExternalInChangeContent} = this.props;
-        const {page, focusedInput, contentsLength} = this.state;
-        const inputs = contents[page].inputs;
-        const {extraAction} = contents[page];
+    renderNavigation(navigationProps){
+        const {contents, translations, type, isActionInProcess, authUser} = this.props;
+        const {page, contentsLength} = this.state;
         let navigationPage = {
             page,
             lastPage: contentsLength - 1,
@@ -377,6 +375,28 @@ class ChangeContent extends Component{
             nextPage: ::this.nextPage,
         };
         const test = ::this.getTestData();
+        const {extraAction} = contents[page];
+        return(
+            <Navigation
+                navigationPage={navigationPage}
+                action={::this.doAction}
+                translations={translations}
+                type={type}
+                isActionInProcess={isActionInProcess}
+                isTested={test.isTested}
+                entity={this.state.entity}
+                authUser={authUser}
+                makingRequest={this.state.makingRequest}
+                extraAction={extraAction}
+                {...navigationProps}
+            />
+        );
+    }
+
+    render(){
+        const {breadcrumbsItems, contents, noHint, noNavigation, authUser, isComponentExternalInChangeContent} = this.props;
+        const {page, focusedInput} = this.state;
+        const inputs = contents[page].inputs;
         if(isComponentExternalInChangeContent){
             return (
                 <Form
@@ -387,6 +407,8 @@ class ChangeContent extends Component{
                     focusedInput={focusedInput.name}
                     authUser={authUser}
                     setFocusInput={::this.setFocusInput}
+                    renderNavigationComponent={::this.renderNavigation}
+                    renderValidationMessage={::this.renderValidationMessage}
                 />
             );
         }
@@ -408,6 +430,8 @@ class ChangeContent extends Component{
                     focusedInput={focusedInput.name}
                     authUser={authUser}
                     setFocusInput={::this.setFocusInput}
+                    renderNavigationComponent={::this.renderNavigation}
+                    renderValidationMessage={::this.renderValidationMessage}
                 />
                 {this.renderValidationMessage()}
                 {
@@ -415,18 +439,7 @@ class ChangeContent extends Component{
                     ?
                         null
                     :
-                        <Navigation
-                            navigationPage={navigationPage}
-                            action={::this.doAction}
-                            translations={translations}
-                            type={type}
-                            isActionInProcess={isActionInProcess}
-                            isTested={test.isTested}
-                            entity={this.state.entity}
-                            authUser={authUser}
-                            makingRequest={this.state.makingRequest}
-                            extraAction={extraAction}
-                        />
+                        this.renderNavigation()
                 }
             </div>
         );
