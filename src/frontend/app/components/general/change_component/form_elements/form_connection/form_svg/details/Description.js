@@ -53,7 +53,7 @@ class Description extends React.Component{
         return(
             <Row className={styles.row}>
                 <Name {...this.props}/>
-                {/*<Label {...this.props}/*/}>
+                <Label {...this.props}/>
                 {generalDataEntries.map(entry => {
                     return(
                         <React.Fragment key={entry.name}>
