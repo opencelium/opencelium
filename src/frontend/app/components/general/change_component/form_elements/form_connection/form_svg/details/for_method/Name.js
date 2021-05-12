@@ -70,7 +70,7 @@ class Name extends React.Component{
         } else{
             connection.removeToConnectorMethod(details.entity, false);
             connection.addToConnectorMethod(method);
-            currentItem = connection.fromConnector.getSvgElementByIndex(method.index);
+            currentItem = connection.toConnector.getSvgElementByIndex(method.index);
         }
         updateConnection(connection);
         setCurrentTechnicalItem(currentItem);
