@@ -15,6 +15,8 @@
 
 @import "../../constants";
 
+$CURRENT_ITEM_FILL: #f4f4f4;
+
 .connection_editor{
   height: calc(100vh - 121px);
   position: absolute;
@@ -94,7 +96,7 @@
 }
 .current_process{
   rect {
-    fill: #e2e2e2;
+    fill: $CURRENT_ITEM_FILL;
   }
 }
 .highlighting{
@@ -107,7 +109,7 @@
 }
 .current_operator{
   polygon {
-    fill: #e2e2e2;
+    fill: $CURRENT_ITEM_FILL;
   }
 }
 .highlighted_operator{
@@ -182,10 +184,12 @@
   height: 20px;
 }
 .details_maximized{
-  height: calc(100vh - 119px)
+  height: calc(100vh - 171px)
 }
 .details_data{
   padding: 0 10px 10px;
+  overflow-y: auto;
+  height: calc(100% - 22px);
   .title{
     font-size: 32px;
   }
@@ -347,6 +351,11 @@
 .description{
   font-size: 14px;
   text-align: left;
+  .options{
+    width: 150px;
+    float: left;
+    font-size: 12px;
+  }
   .row{
     margin: 0 !important;
   }
@@ -355,6 +364,10 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+  .col_select{
+    @extend .col;
+    overflow: visible;
   }
   .entry_padding{
     padding-left: 15px !important;
@@ -370,5 +383,8 @@
       padding: 0px 3px;
       box-shadow: #9f9f9f 0 1px 3px 0;
     }
+  }
+  .edit_icon{
+    margin-left: 5px;
   }
 }

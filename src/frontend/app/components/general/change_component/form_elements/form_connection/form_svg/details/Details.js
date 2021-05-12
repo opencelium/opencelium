@@ -62,7 +62,7 @@ class Details extends React.Component{
     }
 
     render(){
-        const {currentItem, currentSubItem, isMinimized, position, detailsLocation, openInNewWindow} = this.props;
+        const {currentItem, currentSubItem, isMinimized, position, detailsLocation, openInNewWindow, updateConnection, connection} = this.props;
         if(detailsLocation === PANEL_LOCATION.NEW_WINDOW){
             return null;
         }
@@ -90,7 +90,7 @@ class Details extends React.Component{
                         </div>
                         {details ?
                             <div className={styles.label}>
-                                <Description details={details}/>
+                                <Description details={details} updateConnection={updateConnection} connection={connection}/>
                             </div>
                             :
                             <div>

@@ -109,7 +109,7 @@ class TechnicalLayout extends React.Component{
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
-        const startingSvgY = isBusinessLayoutEmpty ? -50 : -190;
+        const startingSvgY = isBusinessLayoutEmpty ? -80 : -190;
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel

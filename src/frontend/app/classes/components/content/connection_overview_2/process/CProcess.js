@@ -143,7 +143,7 @@ export default class CProcess{
             height: this._height,
             connector: this._connector,
             invoker: this._invoker,
-            entity: this._entity.getObject(),
+            entity: this._entity.getObjectForSvgElement(),
         };
     }
 }

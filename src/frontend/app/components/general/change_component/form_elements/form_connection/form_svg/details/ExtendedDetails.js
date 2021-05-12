@@ -37,7 +37,10 @@ class ExtendedDetails extends React.Component{
     }
 
     render(){
-        const {currentItem, currentSubItem, position} = this.props;
+        /*
+        * TODO: send updateEntity and connection throw the redux state
+        */
+        const {currentItem, currentSubItem, position, updateEntity} = this.props;
         if(window.name !== SEPARATE_WINDOW.CONNECTION_OVERVIEW.DETAILS) {
             return <PageNotFound/>;
         }
@@ -59,7 +62,7 @@ class ExtendedDetails extends React.Component{
                     </div>
                     {details ?
                         <div className={styles.label}>
-                            <Description details={details}/>
+                            <Description details={details} isExtended={true} updateEntity={updateEntity}/>
                         </div>
                         :
                         <div>

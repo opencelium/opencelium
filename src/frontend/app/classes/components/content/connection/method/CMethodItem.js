@@ -235,4 +235,10 @@ export default class CMethodItem{
         }
         return obj;
     }
+    getObjectForSvgElement(){
+        return {
+            ...this.getObject(),
+            invoker: this._invoker.getObject(),
+        }
+    }
 }

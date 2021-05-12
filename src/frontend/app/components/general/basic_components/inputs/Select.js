@@ -70,7 +70,10 @@ class Select extends Component{
     render(){
         const {inputValue} = this.state;
         const {styles, tourStep, icon, iconTooltip, label, required, isFocused, hasFocusStyle, className, tooltipTourStep, ...props} = this.props;
-        let {selectClassName} = this.props;
+        let {
+            selectClassName, selectMenuStyles, selectMenuDropdownIndicatorStyles, selectMenuIndicatorContainerStyles, selectMenuPlaceholderStyles,
+            selectMenuIndicatorSeparatorStyles, selectMenuControlStyles, selectMenuValueContainer, selectMenuSingleValueStyles,
+        } = this.props;
         return (
             <ToolboxThemeInput
                 tourStep={tourStep}
@@ -108,13 +111,15 @@ class Select extends Component{
                             return {
                                 ...styles,
                                 padding: '2px 0',
+                                ...selectMenuValueContainer,
                             };
                         },
                         menu: (provided) => ({
                             ...provided,
                             zIndex: 100,
                             color: 'black',
-                            minWidth: '250px'
+                            minWidth: '250px',
+                            ...selectMenuStyles,
                         }),
                         control:(provided) => ({
                             ...provided,
@@ -125,11 +130,32 @@ class Select extends Component{
                             borderBottom: '1px solid #2121211f',
                             boxSizing: 'content-box',
                             minHeight: '37px',
+                            ...selectMenuControlStyles,
                         }),
                         container:(provided) => ({
                             ...provided,
                             border: 'none',
                         }),
+                        dropdownIndicator:(provided) => ({
+                            ...provided,
+                            ...selectMenuDropdownIndicatorStyles,
+                        }),
+                        indicatorContainer:(provided) => ({
+                            ...provided,
+                            ...selectMenuIndicatorContainerStyles,
+                        }),
+                        indicatorSeparator:(provided) => ({
+                            ...provided,
+                            ...selectMenuIndicatorSeparatorStyles,
+                        }),
+                        singleValue:(provided) => ({
+                            ...provided,
+                            ...selectMenuSingleValueStyles,
+                        }),
+                        placeholder:(provided) => ({
+                            ...provided,
+                            ...selectMenuPlaceholderStyles,
+                        })
                     }}
                 />
             </ToolboxThemeInput>
@@ -156,6 +182,7 @@ Select.defaultProps = {
     selectClassName: '',
     iconTooltip: '',
     tooltipTourStep: '',
+    selectMenuStyles: {},
 };
 
 export default Select
