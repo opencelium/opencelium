@@ -165,9 +165,9 @@ public class UpdateAssistantController {
             errorResource.setMessage("NOT_EXISTS");
             errorResource.setStatus(HttpStatus.OK);
             errorResource.setPath(ocScriptPath);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(errorResource);
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(errorResource);
     }
 
     @GetMapping("/oc/template")
