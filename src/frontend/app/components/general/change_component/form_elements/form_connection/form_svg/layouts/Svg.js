@@ -126,18 +126,22 @@ class Svg extends React.Component {
 
     setRatio(e){
         const svgElement = document.getElementById(this.props.svgId);
-        let viewBox = svgElement.viewBox.baseVal;
-        if(viewBox) {
-            let newRatio = viewBox.width / svgElement.getBoundingClientRect().width;
-            if(newRatio >= 2){
-                this.resetRatio = true;
+        if(svgElement) {
+            let viewBox = svgElement.viewBox.baseVal;
+            if (viewBox) {
+                let newRatio = viewBox.width / svgElement.getBoundingClientRect().width;
+                if (newRatio >= 2) {
+                    this.resetRatio = true;
+                }
+                this.setState({ratio: newRatio}, () => {
+                    if (this.resetRatio) {
+                        this.resetRatio = false;
+                        this.setRatio();
+                    }
+                });
             }
-            this.setState({ratio: newRatio}, () => {if(this.resetRatio){
-                this.resetRatio = false;
-                this.setRatio();
-            }});
+            this.resizeSVG();
         }
-        this.resizeSVG();
     }
 
     setCurrentItem(currentItem){
@@ -368,13 +372,13 @@ class Svg extends React.Component {
                     <DefaultMarkers/>
                     <HighlightedMarkers/>
                 </defs>
+                {fromConnectorPanelParams && toConnectorPanelParams && <ConnectorPanels fromConnectorPanelParams={fromConnectorPanelParams} toConnectorPanelParams={toConnectorPanelParams}/>}
                 {
                     this.renderArrows()
                 }
                 {
                     this.renderItems()
                 }
-                {fromConnectorPanelParams && toConnectorPanelParams && <ConnectorPanels fromConnectorPanelParams={fromConnectorPanelParams} toConnectorPanelParams={toConnectorPanelParams}/>}
             </svg>
         );
     }

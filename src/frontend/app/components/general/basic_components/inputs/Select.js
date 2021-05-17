@@ -140,13 +140,13 @@ class Select extends Component{
                             ...provided,
                             ...selectMenuDropdownIndicatorStyles,
                         }),
-                        indicatorContainer:(provided) => ({
-                            ...provided,
-                            ...selectMenuIndicatorContainerStyles,
-                        }),
                         indicatorSeparator:(provided) => ({
                             ...provided,
                             ...selectMenuIndicatorSeparatorStyles,
+                        }),
+                        indicatorContainer:(provided) => ({
+                            ...provided,
+                            ...selectMenuIndicatorContainerStyles,
                         }),
                         singleValue:(provided) => ({
                             ...provided,
@@ -183,6 +183,13 @@ Select.defaultProps = {
     iconTooltip: '',
     tooltipTourStep: '',
     selectMenuStyles: {},
+    selectMenuValueContainer: {},
+    selectMenuControlStyles: {},
+    selectMenuDropdownIndicatorStyles: {},
+    selectMenuIndicatorSeparatorStyles: {},
+    selectMenuIndicatorContainerStyles: {},
+    selectMenuSingleValueStyles: {},
+    selectMenuPlaceholderStyles: {},
 };
 
 export default Select

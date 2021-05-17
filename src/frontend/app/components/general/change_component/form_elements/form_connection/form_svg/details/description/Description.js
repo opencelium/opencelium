@@ -6,14 +6,24 @@ import CProcess from "@classes/components/content/connection_overview_2/process/
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {isString} from "@utils/app";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import Name from './for_method/Name';
-import Label from './for_method/Label';
-import Endpoint from './for_method/Endpoint';
+import Name from './Name';
+import Label from './Label';
+import Url from './Url';
 import CConnection from "@classes/components/content/connection/CConnection";
 
 class Description extends React.Component{
     constructor(props) {
         super(props);
+
+        this.state = {
+            isResponseVisible: false,
+        };
+    }
+
+    toggleResponseVisibleIcon(){
+        this.setState({
+            isResponseVisible: !this.state.isResponseVisible,
+        })
     }
 
     renderForOperator(){
@@ -37,7 +47,8 @@ class Description extends React.Component{
     }
 
     renderForProcess(){
-        const {details} = this.props;
+        const {isResponseVisible} = this.state;
+        const {details, connection, updateConnection} = this.props;
         const methodItem = details.entity;
         const request = methodItem.request;
         const successResponse = methodItem.response.success;
@@ -69,34 +80,39 @@ class Description extends React.Component{
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{request.method}</Col>
-                        <Endpoint request={request}/>
+                        <Url request={request} connection={connection} updateConnection={updateConnection} method={methodItem}/>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
                         <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
                     </Row>
                 </Col>
                 <br/>
                 <br/>
-                <Col xs={12} className={styles.col}><b>{`Response`}</b></Col>
                 <Col xs={12} className={styles.col}>
-                    <Row className={styles.row}>
-                        <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Success`}</b></Col>
-                        <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
-                        <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
-                        <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Header`}</Col>
-                        <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`H`}</span>} tooltip={'Header'}/></Col>
-                        <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                        <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
-                        <br/>
-                        <br/>
-                        <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
-                        <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
-                        <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
-                        <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Header`}</Col>
-                        <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`H`}</span>} tooltip={'Header'}/></Col>
-                        <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                        <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
-                    </Row>
+                    <b>{`Response`}</b>
+                    <TooltipFontIcon className={styles.response_toggle_icon} onClick={::this.toggleResponseVisibleIcon} tooltip={isResponseVisible ? 'Hide' : 'Show'} value={isResponseVisible ? 'arrow_drop_up' : 'arrow_drop_down'}/>
                 </Col>
+                {isResponseVisible &&
+                    <Col xs={12} className={styles.col}>
+                        <Row className={styles.row}>
+                            <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Success`}</b></Col>
+                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
+                            <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
+                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Header`}</Col>
+                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`H`}</span>} tooltip={'Header'}/></Col>
+                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
+                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
+                            <br/>
+                            <br/>
+                            <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
+                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
+                            <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
+                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Header`}</Col>
+                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`H`}</span>} tooltip={'Header'}/></Col>
+                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
+                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
+                        </Row>
+                    </Col>
+                }
             </Row>
         );
     }

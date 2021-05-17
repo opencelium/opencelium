@@ -20,26 +20,16 @@ export class CTechnicalProcess extends CProcess{
 
     constructor(technicalProcess) {
         super(technicalProcess);
-        this._label = technicalProcess && technicalProcess.hasOwnProperty('label') && isString(technicalProcess.label) ? technicalProcess.label : '';
     }
 
     static createTechnicalProcess(process){
         return new CTechnicalProcess(process);
     }
 
-    get label(){
-        return this._label;
-    }
-
-    set label(label){
-        this._label = label;
-    }
-
     getObject(){
         let data = super.getObject();
         return{
             ...data,
-            label: this._label,
         }
     }
 }

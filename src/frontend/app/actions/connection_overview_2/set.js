@@ -36,9 +36,10 @@ const setCurrentBusinessItem = (currentItem) => {
  * @returns {{type: string, payload: {}}}
  */
 const setCurrentTechnicalItem = (currentSubItem) => {
+    const payload = currentSubItem instanceof CProcess || currentSubItem instanceof COperator ? currentSubItem.getObject() : currentSubItem;
     return {
         type: ConnectionOverview2Action.SET_CURRENTECHNICALITEM,
-        payload: currentSubItem instanceof CProcess || currentSubItem instanceof COperator ? currentSubItem.getObject() : currentSubItem,
+        payload: {...payload},
     };
 };
 

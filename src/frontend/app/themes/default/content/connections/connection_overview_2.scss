@@ -86,6 +86,9 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   stroke: #000;
   stroke-width: 2;
 }
+.operator_loop_icon{
+  cursor: grab;
+}
 .process{
 }
 .operator{
@@ -132,6 +135,9 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   stroke: #000;
   //stroke: #00000021;
   stroke-width: 2;
+}
+.not_draggable{
+  cursor: pointer;
 }
 .process_rect_draggable{
   cursor: grab;
@@ -339,18 +345,36 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 }
 
 .connector_item_panel{
-  fill: none;
+  fill: white;
   stroke: #eee;
   stroke-width: 2;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .connector_item_text{
   font-weight: bold;
   font-size: $FONT_SIZE_MEDIUM;
 }
-
+.response_toggle_icon{
+  vertical-align: text-top;
+  cursor: pointer;
+}
 .description{
   font-size: 14px;
   text-align: left;
+  .name{
+    font-family: $FONT_FAMILY;
+  }
+  .label_input{
+    padding: 0;
+    width: 150px;
+    float: left;
+  }
+  .label_input_element{
+    padding: 0;
+    font-size: 14px;
+    height: 16px;
+    font-family: $FONT_FAMILY;
+  }
   .options{
     width: 150px;
     float: left;
@@ -387,4 +411,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   .edit_icon{
     margin-left: 5px;
   }
+}
+.url_dialog{
+  min-width: 750px;
 }

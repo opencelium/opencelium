@@ -42,11 +42,11 @@ class LoopOperator extends React.Component{
         const {operator, isNotDraggable, isCurrent, isHighlighted} = this.props;
         const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         return(
-            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
-                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`} onMouseDown={::this.onMouseDown} points={points}/>
-                <svg fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
-                    <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                    <path d="M0 0h24v24H0z" fill="none"/>
+            <svg x={operator.x} y={operator.y} className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onMouseDown={::this.onMouseDown} points={points}/>
+                <svg className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} onMouseDown={::this.onMouseDown} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
+                    <path onMouseDown={::this.onMouseDown} d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                    <path onMouseDown={::this.onMouseDown} d="M0 0h24v24H0z" fill="none"/>
                 </svg>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={'55'} y={'10'}>
                     {operator.entity.iterator}
@@ -67,7 +67,7 @@ LoopOperator.propTypes = {
 };
 
 LoopOperator.defaultProps = {
-    isNotDraggable: false,
+    isNotDraggable: true,
     isCurrent: false,
     isHighlighted: false,
 };

@@ -130,7 +130,7 @@ class Input extends Component{
     }
 
     render(){
-        let {authUser, onChange, onBlur, isPopupInput, id, hasFocus, isPopupMultiline, popupRows, ...props} = this.props;
+        let {authUser, onChange, onBlur, isPopupInput, id, hasFocus, popupInputStyles, isPopupMultiline, popupRows, ...props} = this.props;
         props.id = id ? id : `input_${formatHtmlId(props.name ? props.name : props.label)}`;
         let {theme, className} = this.props;
         let classNames = [

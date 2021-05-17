@@ -34,8 +34,8 @@ class IfOperator extends React.Component{
         const textY = '50%';
         const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         return(
-            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
-                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`} onMouseDown={::this.onMouseDown} points={points}/>
+            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onMouseDown={::this.onMouseDown} points={points}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
                     {'if'}
                 </text>
@@ -55,7 +55,7 @@ IfOperator.propTypes = {
 };
 
 IfOperator.defaultProps = {
-    isNotDraggable: false,
+    isNotDraggable: true,
     isCurrent: false,
     isHighlighted: false,
 };

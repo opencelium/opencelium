@@ -22,6 +22,7 @@ import Details from "./details/Details";
 
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {PANEL_LOCATION} from "@utils/constants/app";
+import {setLS} from "@utils/LocalStorage";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -47,8 +48,10 @@ const INITIAL_DETAILS_POSITION = DETAILS_POSITION.RIGHT;
 const BUSINESS_DATA = {items: [], arrows: []};
 
 function mapStateToProps(state){
+    const auth = state.get('auth');
     const connectionOverview = state.get('connection_overview');
     return{
+        authUser: auth.get('authUser'),
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };
@@ -280,15 +283,25 @@ class FormConnectionSvg extends Component{
         })
     }
 
+    updateEntity(e = null){
+        const {authUser, entity, updateEntity} = this.props;
+        setLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, JSON.stringify(entity.getObject()), `connection_${authUser.userId}`);
+        if(e === null) {
+            updateEntity(entity);
+        } else{
+            updateEntity(e);
+        }
+    }
+
     render(){
-        const {entity, renderNavigationComponent, renderValidationMessage, updateEntity} = this.props;
+        const {entity, renderNavigationComponent, renderValidationMessage} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
                 <Details
                     connection={entity}
-                    updateConnection={updateEntity}
+                    updateConnection={::this.updateEntity}
                     moveDetailsRight={::this.moveDetailsRight}
                     moveDetailsLeft={::this.moveDetailsLeft}
                     position={detailsPosition}
