@@ -134,6 +134,10 @@ export default class CInvoker{
         return this._operations.filter(o => o.type !== METHOD_TYPE_TEST);
     }
 
+    getAllOperationsForSelect(){
+        return this._operations.map(o => {return {label: o.name, value: o.name};});
+    }
+
     addOperation(operation){
         this._operations.push(this.convertOperation(operation));
     }

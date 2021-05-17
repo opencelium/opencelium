@@ -146,6 +146,10 @@ export default class CConnectorItem{
         return this.getMaxCoordinateOfSvgItems('y');
     }
 
+    getSvgElementByIndex(index){
+        return this._svgItems.find(svgItem => svgItem.entity.index === index);
+    }
+
     getSvgElement(element){
         if(element instanceof CTechnicalOperator || element instanceof CTechnicalProcess){
             return element
@@ -158,6 +162,8 @@ export default class CConnectorItem{
     }
 
     setSvgItems(){
+        this._svgItems = [];
+        this._arrows = [];
         let items = [...this.methods, ...this.operators];
         items = sortByIndex(items);
         let xIterator = 0;
@@ -455,6 +461,7 @@ export default class CConnectorItem{
     set invoker(invoker){
         this._invoker = this.convertInvoker(invoker);
         this.updateInvokerForMethods();
+        this.setSvgItems()
     }
 
     get methods(){
@@ -700,9 +707,11 @@ export default class CConnectorItem{
         let newItem = this.convertItem(itemType, item);
         let currentIndex = this._currentItem ? this._currentItem.index : '';
         let nextIndex = this.generateNextIndex(mode);
-        newItem.index = nextIndex;
         let key = this.findPrevItemIndex(itemType, currentIndex, mode);
-        this.refactorIndexes(nextIndex, REFACTOR_ADD);
+        if(!newItem.index) {
+            newItem.index = nextIndex;
+            this.refactorIndexes(nextIndex, REFACTOR_ADD);
+        }
         switch(itemType){
             case METHOD_ITEM:
                 if (this._methods.length === 0) {

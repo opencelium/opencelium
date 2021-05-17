@@ -281,12 +281,14 @@ class FormConnectionSvg extends Component{
     }
 
     render(){
-        const {entity, renderNavigationComponent, renderValidationMessage} = this.props;
+        const {entity, renderNavigationComponent, renderValidationMessage, updateEntity} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
                 <Details
+                    connection={entity}
+                    updateConnection={updateEntity}
                     moveDetailsRight={::this.moveDetailsRight}
                     moveDetailsLeft={::this.moveDetailsLeft}
                     position={detailsPosition}
