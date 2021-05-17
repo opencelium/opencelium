@@ -123,7 +123,7 @@ class ChangeContent extends Component{
                             this.setState({makingRequest: true});
                         } else {
                             if (request && request.status === true) {
-                                if (request.result && request.result.message === "EXISTS") {
+                                if (request.result && (request.hasOwnProperty('failCondition') ? request.failCondition(request.result) : request.result.message === "EXISTS")) {
                                     let isValidated = false;
                                     let focusedInput = {name: newInputs.name, label: newInputs.label};
                                     let validationMessage = request.notSuccessMessage;

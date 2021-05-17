@@ -62,7 +62,8 @@
       "CONNECTION_UPDATE_ABSENT": "Please, update connections",
       "CONNECTIONS_HAVE_ERROR": "All connections should be updated",
       "NEO4j_DOWN": "Neo4j is down. Please, turn it on.",
-      "UNKNOWN_OC_VERSION": "Please, check OpenCelium version"
+      "UNKNOWN_OC_VERSION": "Please, check OpenCelium version",
+      "RESET_FILES_NOT_EXIST": "Please, check your files to reset Opencelium"
     }
   }
 }
