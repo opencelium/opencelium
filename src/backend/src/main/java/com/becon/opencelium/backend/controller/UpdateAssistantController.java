@@ -150,6 +150,17 @@ public class UpdateAssistantController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/oc/restart/file/exists")
+    public ResponseEntity<?> fileExists() {
+        Path currentRelativePath = Paths.get("").toAbsolutePath().getParent().getParent();
+        String ocScriptPath = currentRelativePath.toString() + "/scripts/oc_service.sh";
+        File file = new File(ocScriptPath);
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/oc/template")
     public ResponseEntity<?> getAssistentTemplateFiles() {
         String path = PathConstant.TEMPLATE;
