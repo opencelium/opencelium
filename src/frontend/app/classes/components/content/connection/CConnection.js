@@ -148,6 +148,16 @@ export default class CConnection{
         return this._fromConnector.methods.length === 0 && this._fromConnector.operators.length === 0 && this._toConnector.methods.length === 0 && this._toConnector.operators.length === 0;
     }
 
+    getConnectorByMethodIndex(method){
+        if(this.fromConnector.methods.findIndex(m => m.color === method.color) !== -1){
+            return this.fromConnector;
+        }
+        if(this.toConnector.methods.findIndex(m => m.color === method.color) !== -1){
+            return this.toConnector;
+        }
+        return null;
+    }
+
     getOptionsForMethods(connector, item, settings = {statement: 'leftStatement', isKeyConsidered: true, exceptCurrent: true}){
         let result = [];
         let statement = settings && settings.hasOwnProperty('statement') ? settings.statement : '';

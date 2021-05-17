@@ -31,6 +31,7 @@ const initialState = fromJS({
     addingTemplatesLogs: API_REQUEST_STATE.INITIAL,
     addingInvokersLogs: API_REQUEST_STATE.INITIAL,
     addingConnectionsLogs: API_REQUEST_STATE.INITIAL,
+    checkingResetFiles: API_REQUEST_STATE.INITIAL,
     currentVersion: null,
     updateAppVersion: '',
     onlineUpdates: List([]),
@@ -41,6 +42,7 @@ const initialState = fromJS({
     templatesLogs: List([]),
     invokersLogs: List([]),
     connectionsLogs: List([]),
+    checkResetFiles: null,
     systemRequirements: null,
     error: null,
     message: {},
@@ -62,6 +64,12 @@ const reducer = (state = initialState, action) => {
     invokers = state.get('invokers');
     updatedInvokers = state.get('updatedInvokers');
     switch (action.type) {
+        case UpdateAssistantAction.CHECK_RESETFILES:
+            return state.set('checkingResetFiles', API_REQUEST_STATE.START).set('error', null);
+        case UpdateAssistantAction.CHECK_RESETFILES_FULFILLED:
+            return state.set('checkingResetFiles', API_REQUEST_STATE.FINISH).set('checkResetFiles', action.payload);
+        case UpdateAssistantAction.CHECK_RESETFILES_REJECTED:
+            return state.set('checkingResetFiles', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION:
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.START).set('error', null);
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION_FULFILLED:

@@ -170,6 +170,7 @@ export default class CConnectorItem{
         for(let i = 0; i < items.length; i++){
             let svgElement = {};
             svgElement.name = items[i].name ? items[i].name : '';
+            svgElement.label = items[i].label ? items[i].label : '';
             svgElement.entity = items[i];
             if(items[i].type) {
                 svgElement.type = items[i].type;

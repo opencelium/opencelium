@@ -23,7 +23,7 @@ import {mapItemsToClasses} from "../utils";
 import {connectionOverviewDetailsUrl} from "@utils/constants/url";
 import {setDetailsLocation} from "@actions/connection_overview_2/set";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
-import Description from "@change_component/form_elements/form_connection/form_svg/details/Description";
+import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
 
 
 function mapStateToProps(state){

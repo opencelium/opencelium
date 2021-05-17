@@ -36,7 +36,9 @@ import {
     updateConnectionsFulfilled, updateConnectionsRejected,
     updateSystemFulfilled, updateSystemRejected,
 } from "@actions/update_assistant/update";
-
+import {
+    checkResetFilesRejected, checkResetFilesFulfilled,
+} from "@actions/update_assistant/check";
 
 
 const ONLINE_UPDATES = [
@@ -278,6 +280,20 @@ const addConvertConnectionsLogsEpic = (action$, store) => {
         });
 };
 
+/**
+ * check reset files version
+ */
+const checkResetFilesEpic = (action$, store) => {
+    return action$.ofType(UpdateAssistantAction.CHECK_RESETFILES)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/restart/file/exists`;
+            return doRequest({url},{
+                success: (data) => checkResetFilesFulfilled(data, {...action.settings}),
+                reject: checkResetFilesRejected,
+            });
+        });
+};
 
 export {
     fetchUpdateAppVersionEpic,
@@ -293,4 +309,5 @@ export {
     addConvertTemplatesLogsEpic,
     addConvertInvokersLogsEpic,
     addConvertConnectionsLogsEpic,
+    checkResetFilesEpic,
 };

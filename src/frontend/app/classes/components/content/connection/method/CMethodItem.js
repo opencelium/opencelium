@@ -26,11 +26,12 @@ export const FIELD_TYPE_OBJECT = 'object';
  */
 export default class CMethodItem{
 
-    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null, isToggled = false){
+    constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null, isToggled = false, label = ''){
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._invoker = this.convertInvoker(invoker);
         this._name = name;
+        this._label = label;
         this._color = color;
         this._request = this.convertRequest(request);
         this._response = this.convertResponse(response);
@@ -50,7 +51,8 @@ export default class CMethodItem{
         let invoker = methodItem && methodItem.hasOwnProperty('invoker') ? methodItem.invoker : null;
         let error = methodItem && methodItem.hasOwnProperty('error') ? methodItem.error : null;
         let isToggled = methodItem && methodItem.hasOwnProperty('isToggled') ? methodItem.isToggled : false;
-        return new CMethodItem(index, name, color, request, response, invoker, error, isToggled);
+        let label = methodItem && methodItem.hasOwnProperty('label') ? methodItem.label : '';
+        return new CMethodItem(index, name, color, request, response, invoker, error, isToggled, label);
     }
 
     deleteError(){
@@ -126,6 +128,14 @@ export default class CMethodItem{
 
     get name(){
         return this._name;
+    }
+
+    get label(){
+        return this._label;
+    }
+
+    set label(label){
+        this._label = label;
     }
 
     get color(){
@@ -229,6 +239,9 @@ export default class CMethodItem{
         };
         if(this._index !== ''){
             obj.index = this._index;
+        }
+        if(this._label !== ''){
+            obj.label = this._label;
         }
         if(this._color !== ''){
             obj.color = this._color;

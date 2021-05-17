@@ -36,18 +36,19 @@ class Process extends React.Component{
 
     render(){
         const {process, isNotDraggable, isCurrent, isHighlighted} = this.props;
+        const method = process.entity;
         const borderRadius = 10;
         const labelX = '50%';
         const labelY = '50%';
         const closeX = process.width - 15;
         const closeY = 15;
-        let label = process.label ? process.label : process.name ? process.name : '';
+        let label = method.label ? method.label : method.name ? method.name : '';
         if(isString(label) && label.length > 12){
             label = `${label.substr(0, 9)}...`;
         }
         return(
             <svg x={process.x} y={process.y} className={`${styles.process} ${isCurrent ? styles.current_process : ''} ${isHighlighted ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
-                <rect onMouseDown={::this.onMouseDown}  x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2} className={`${styles.process_rect} ${isNotDraggable ? '' : `${styles.process_rect_draggable} draggable`}`}/>
+                <rect onMouseDown={::this.onMouseDown}  x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2} className={`${styles.process_rect} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
                     {label}
                 </text>
@@ -74,7 +75,7 @@ Process.propTypes = {
 };
 
 Process.defaultProps = {
-    isNotDraggable: false,
+    isNotDraggable: true,
     isCurrent: false,
     isHighlighted: false,
 };
