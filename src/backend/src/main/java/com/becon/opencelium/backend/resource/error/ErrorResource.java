@@ -16,10 +16,14 @@
 
 package com.becon.opencelium.backend.resource.error;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
+@Resource
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResource {
     private Date timestamp;
     private int status;

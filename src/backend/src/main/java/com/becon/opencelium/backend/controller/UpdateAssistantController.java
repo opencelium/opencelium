@@ -33,6 +33,7 @@ import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
@@ -44,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -148,6 +150,24 @@ public class UpdateAssistantController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/oc/restart/file/exists")
+    public ResponseEntity<?> fileExists() {
+        Path currentRelativePath = Paths.get("").toAbsolutePath().getParent().getParent();
+        String ocScriptPath = currentRelativePath.toString() + "/scripts/oc_service.sh";
+        File file = new File(ocScriptPath);
+        ErrorResource errorResource = new ErrorResource();
+        errorResource.setMessage("EXISTS");
+        errorResource.setStatus(HttpStatus.OK);
+        errorResource.setPath(ocScriptPath);
+        if (!file.exists()) {
+            errorResource.setMessage("NOT_EXISTS");
+            errorResource.setStatus(HttpStatus.OK);
+            errorResource.setPath(ocScriptPath);
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/oc/template")
