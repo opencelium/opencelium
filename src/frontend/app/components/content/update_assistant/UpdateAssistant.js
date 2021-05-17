@@ -35,6 +35,7 @@ import {API_REQUEST_STATE, OC_NAME} from "@utils/constants/app";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import {logoutUserFulfilled} from "@actions/auth";
 import {APP_STATUS_UP} from "@utils/constants/url";
+import {checkResetFiles} from "@actions/update_assistant/check";
 
 
 function mapStateToProps(state){
@@ -43,13 +44,15 @@ function mapStateToProps(state){
     return{
         authUser: auth.get('authUser'),
         updatingSystem: updateAssistant.get('updatingSystem'),
+        checkingResetFiles: updateAssistant.get('checkingResetFiles'),
+        checkResetFiles: updateAssistant.get('checkResetFiles'),
     };
 }
 
 /**
  * Layout for UpdateAssistant
  */
-@connect(mapStateToProps, {updateSystem, logoutUserFulfilled})
+@connect(mapStateToProps, {updateSystem, logoutUserFulfilled, checkResetFiles})
 @permission(UpdateAssistantPermissions.CREATE, true)
 @withTranslation(['update_assistant', 'app'])
 class UpdateAssistant extends Component{
@@ -57,6 +60,7 @@ class UpdateAssistant extends Component{
     constructor(props){
         super(props);
         const {authUser} = this.props;
+        this.startCheckingResetFiles = false;
         this.state = {
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
@@ -98,7 +102,7 @@ class UpdateAssistant extends Component{
      */
     setCurrentTour(pageNumber){
         const {authUser} = this.props;
-        this.startCheckingName = false;
+        this.startCheckingResetFiles = false;
         this.setState({
             currentTour: `page_${pageNumber}`,
             isTourOpen: automaticallyShowTour(authUser),
@@ -142,7 +146,7 @@ class UpdateAssistant extends Component{
      * to validate system requirements
      */
     validateSystemRequirements(entity){
-        const {t} = this.props;
+        const {t, checkResetFiles} = this.props;
         const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('details') && entity.systemRequirements.details && entity.systemRequirements.details.hasOwnProperty('neo4j') && entity.systemRequirements.details.neo4j.status === APP_STATUS_UP;
         const isOCVersionUnknown = !entity.systemRequirements.hasOwnProperty('details') || !entity.systemRequirements.details.hasOwnProperty(OC_NAME.toLowerCase()) || entity.systemRequirements.details[OC_NAME.toLowerCase()].details.version === '';
         if (!isNeo4jUp) {
@@ -151,7 +155,9 @@ class UpdateAssistant extends Component{
         if (isOCVersionUnknown) {
             return {value: false, message: t('FORM.VALIDATION_MESSAGES.UNKNOWN_OC_VERSION')};
         }
-        return {value: true, message: ''};
+        this.startCheckingResetFiles = true;
+        checkResetFiles();
+        return {value: false, message: ''};
     }
 
     /**
@@ -218,7 +224,7 @@ class UpdateAssistant extends Component{
 
     render(){
         const {updateData} = this.state;
-        const {t, authUser, updatingSystem} = this.props;
+        const {t, authUser, updatingSystem, checkingResetFiles, checkResetFiles} = this.props;
         let contentTranslations = {};
         contentTranslations.header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         contentTranslations.list_button = '';
@@ -236,6 +242,12 @@ class UpdateAssistant extends Component{
                     label: t('FORM.SYSTEM_CHECK'),
                     Component: SystemOverview,
                     check: (e, entity) => ::this.validateSystemRequirements(e, entity),
+                    request: {
+                        inProcess: checkingResetFiles,
+                        status: this.startCheckingResetFiles && !checkingResetFiles,
+                        result: checkResetFiles,
+                        notSuccessMessage: t('FORM.RESET_FILES_NOT_EXIST'),
+                    },
                 },
             ],
             hint: {text: t('FORM.HINT_1'), openTour: ::this.openTour},
