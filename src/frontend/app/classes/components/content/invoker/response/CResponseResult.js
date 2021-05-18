@@ -20,6 +20,7 @@ import {
 } from "@change_component/form_elements/form_connection/form_methods/help";
 import CBody from "@classes/components/content/invoker/CBody";
 import {FIELD_TYPE_ARRAY} from "@classes/components/content/connection/method/CMethodItem";
+import {consoleLog, isArray} from "@utils/app";
 
 export const ARRAY_SIGN = '[]';
 export const WHOLE_ARRAY = '[*]';
@@ -73,6 +74,17 @@ export default class CResponseResult{
 
     get header(){
         return this._header;
+    }
+
+    setHeader(headerItems){
+        this._header = [];
+        if(isArray(headerItems)) {
+            for (let i = 0; i < headerItems.length; i++) {
+                this._header.push(headerItems[i]);
+            }
+        } else{
+            consoleLog('CResponseResult. HeaderItems should be an array.');
+        }
     }
 
     addHeader(headerItem){

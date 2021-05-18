@@ -508,6 +508,22 @@ export default class CConnectorItem{
         return this._currentItem;
     }
 
+    setHeadersForMethods(invoker = null){
+        if(invoker === null){
+            invoker = this._invoker;
+            if(invoker){
+                for(let i = 0; i < this._methods.length; i++){
+                    const operation = invoker.operations.find(operation => operation.name === this._methods[i].name);
+                    if(operation) {
+                        this._methods[i].request.setHeader(operation.request.header);
+                        this._methods[i].response.success.setHeader(operation.response.success.header);
+                        this._methods[i].response.fail.setHeader(operation.response.fail.header);
+                    }
+                }
+            }
+        }
+    }
+
     setCurrentItem(item){
         this._currentItem = item ? item : null;
         this.reloadOperatorsHistory();

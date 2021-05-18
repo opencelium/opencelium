@@ -1022,6 +1022,12 @@
   max-height: 500px;
   overflow: hidden auto;
 }
+.method_body_no_placeholder{
+  @extend .method_body;
+  width: 100%;
+  max-height: calc(100% - 24px);
+  box-shadow: none;
+}
 
 .method_body_draft{
   @extend .method_body;

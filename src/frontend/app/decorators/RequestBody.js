@@ -107,7 +107,7 @@ export function RequestBody(CRequestType){
                 * to open an enhancement when click on pointer
                  */
                 openEnhancement(e, value){
-                    const {connector} = this.props;
+                    const {connector, setEnhancementData} = this.props;
                     if(connector.getConnectorType() === CONNECTOR_FROM){
                         return;
                     }
@@ -124,6 +124,10 @@ export function RequestBody(CRequestType){
                     this.setState({
                         currentEnhancement: this.props.connection.getEnhancementByTo(),
                         showEnhancement: !this.state.showEnhancement,
+                    }, () => {
+                        if(typeof setEnhancementData === 'function'){
+                            setEnhancementData(::this.getEnhancementData());
+                        }
                     });
                 }
 
@@ -155,8 +159,8 @@ export function RequestBody(CRequestType){
                     updateEntity();
                 }
 
-                renderEnhancement(){
-                    const {showEnhancement, currentEnhancement} = this.state;
+                getEnhancementData(){
+                    const { currentEnhancement} = this.state;
                     const {readOnly, connection, method} = this.props;
                     if(!(connection instanceof CConnection)){
                         return null;
@@ -167,22 +171,36 @@ export function RequestBody(CRequestType){
                     }
                     bindingItem = bindingItem.getObject();
                     bindingItem.enhancement = null;
+                    return {
+                        binding: bindingItem,
+                        setEnhancement: ::this.setCurrentEnhancement,
+                        readOnly,
+                        enhancement: currentEnhancement
+                    };
+                }
+
+                getEnhancementComponent(){
+                    return (
+                        <div>
+                            <Enhancement
+                                {...this.getEnhancementData()}
+                            />
+                        </div>
+                    );
+                }
+
+                renderEnhancement(){
+                    const {showEnhancement} = this.state;
+                    const {noPlaceholder} = this.props;
                     return (
                         <Dialog
                             actions={[{label: 'Ok', onClick: ::this.updateEnhancement, id: 'body_ok'}, {label: 'Cancel', onClick: ::this.toggleEnhancement, id: 'body_cancel'}]}
-                            active={showEnhancement}
+                            active={showEnhancement && !noPlaceholder}
                             toggle={::this.toggleEnhancement}
                             title={'Enhancement'}
                             theme={{dialog: styles.enhancement_dialog}}
                         >
-                            <div>
-                                <Enhancement
-                                    binding={bindingItem}
-                                    setEnhancement={::this.setCurrentEnhancement}
-                                    readOnly={readOnly}
-                                    enhancement={currentEnhancement}
-                                />
-                            </div>
+                            {::this.getEnhancementComponent()}
                         </Dialog>
                     );
                 }
@@ -248,8 +266,8 @@ export function RequestBody(CRequestType){
 
                 render(){
                     const {isBodyEditOpened} = this.state;
-                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft} = this.props;
-                    if(!isBodyEditOpened){
+                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder} = this.props;
+                    if(!isBodyEditOpened && !noPlaceholder){
                         return this.renderPlaceholder();
                     }
                     let ownBodyStyles = {left: '-20px'};
@@ -258,9 +276,9 @@ export function RequestBody(CRequestType){
                         ownBodyStyles = bodyStyles;
                     }
                     return(
-                        <ToolboxThemeInput className={styles[CRequestType.getClassName({isDraft})]} style={ownBodyStyles}>
+                        <ToolboxThemeInput className={styles[CRequestType.getClassName({isDraft, noPlaceholder})]} style={ownBodyStyles}>
                             <div style={{display: 'none'}} id={`${id}_reference_component`}/>
-                            {::this.renderCloseMenuEditButton()}
+                            {!noPlaceholder && ::this.renderCloseMenuEditButton()}
                             {this.renderEnhancement()}
                             <Component
                                 {...this.props}

@@ -4,12 +4,15 @@ import {Row, Col} from "react-grid-system";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
+import CConnection from "@classes/components/content/connection/CConnection";
 import {isString} from "@utils/app";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Name from './Name';
 import Label from './Label';
 import Url from './Url';
-import CConnection from "@classes/components/content/connection/CConnection";
+import Header from './Header';
+import Body from './Body';
+
 
 class Description extends React.Component{
     constructor(props) {
@@ -81,8 +84,8 @@ class Description extends React.Component{
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{request.method}</Col>
                         <Url request={request} connection={connection} updateConnection={updateConnection} method={methodItem}/>
-                        <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                        <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
+                        <Header items={request.header}/>
+                        <Body source={request.getBodyFields()} connection={connection} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>
                     </Row>
                 </Col>
                 <br/>
@@ -97,19 +100,15 @@ class Description extends React.Component{
                             <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Success`}</b></Col>
                             <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                             <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
-                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Header`}</Col>
-                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`H`}</span>} tooltip={'Header'}/></Col>
-                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
+                            <Header items={successResponse.header}/>
+                            <Body source={successResponse.getBodyFields()} readOnly={true} connection={connection} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Success data'}/>
                             <br/>
                             <br/>
                             <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
                             <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                             <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
-                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Header`}</Col>
-                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`H`}</span>} tooltip={'Header'}/></Col>
-                            <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                            <Col xs={8} className={`${styles.col} ${styles.more_details}`}><TooltipFontIcon size={14} value={<span>{`...`}</span>} tooltip={'Body'}/></Col>
+                            <Header items={failResponse.header}/>
+                            <Body source={failResponse.getBodyFields()} readOnly={true} connection={connection} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Fail data'}/>
                         </Row>
                     </Col>
                 }

@@ -412,6 +412,73 @@ $CURRENT_ITEM_FILL: #f4f4f4;
     margin-left: 5px;
   }
 }
+.header_head{
+  margin-bottom: 0 !important;
+  margin-top: 20px;
+  th{
+    border-bottom: none !important;
+    width: 50%;
+  }
+}
+.header_body{
+  max-height: 250px;
+  overflow-y: auto;
+  table{
+    margin-bottom: 0 !important;
+  }
+  td{
+    width: 50%;
+  }
+  tr{
+    height: 50px;
+  }
+}
 .url_dialog{
   min-width: 750px;
+}
+.header_dialog{
+  min-width: 750px;
+}
+.body_dialog{
+  min-width: 90vw;
+  max-width: 90vw;
+  width: 90vw;
+}
+.body_content{
+  min-height: 90vh;
+  max-height: 90vh;
+  height: 90vh;
+}
+
+.body_data{
+  width: 50%;
+  float: left;
+  height: 100%;
+  position: relative;
+  border-right: 1px solid #eee;
+  padding-right: 10px;
+}
+.body_mapping{
+  width: 33%;
+  float: left;
+}
+.body_enhancement{
+  width: 50%;
+  float: left;
+  padding-left: 10px;
+  position: relative;
+  height: 100%;
+  .data{
+    width: 100%;
+    position: absolute;
+    overflow-y: auto;
+    height: 100%;
+    overflow-x: hidden;
+  }
+}
+.body_reference_not_selected_message{
+  font-size: 24px;
+  color: #bbb;
+  text-align: center;
+  margin-top: 30px;
 }

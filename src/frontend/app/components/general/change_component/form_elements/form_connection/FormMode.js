@@ -220,6 +220,7 @@ class FormMode extends Component{
         templateContent.fromConnector.setConnectorType(CONNECTOR_FROM);
         templateContent.fromConnector.title = entity.fromConnector.title;
         entity.fromConnector = templateContent.fromConnector;
+        entity.fromConnector.setHeadersForMethods();
         //toConnector
         connector = connectors.find(c => c.id === templateContent.toConnector.id);
         templateContent.toConnector.invoker = connector.invoker;
@@ -227,6 +228,7 @@ class FormMode extends Component{
         templateContent.toConnector.title = entity.toConnector.title;
         templateContent.toConnector.setCurrentItem(templateContent.toConnector.methods[templateContent.toConnector.methods.length - 1]);
         entity.toConnector = templateContent.toConnector;
+        entity.toConnector.setHeadersForMethods();
         //fieldBinding
         entity.fieldBinding = templateContent.fieldBinding;
         entity.template.templateId = template.value;
