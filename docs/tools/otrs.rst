@@ -5,7 +5,7 @@ OTRS
 ApiExtension package
 """""""""""""""""
 
-The ApiExtension is an otrs package. Its extends the api functionalities of the system.
+The ApiExtension is an otrs package. Its extends the system's API functions.
 
 See below the new operations
 
@@ -26,9 +26,9 @@ See below the new operations
 OC-Connector configuration file
 """""""""""""""""
 
-The configuration file (yml) is predefined a webservice in otrs. Its possible to add via the otrs frontend.
+The configuration file (yml) is predefined a webservice in otrs. Its possible to add this via the otrs frontend.
 
-First go admin->webservice and click add, to create a new webservice.
+First go to admin->webservice and click add, to create a new webservice.
 
 |image1|
 
@@ -36,7 +36,7 @@ Now upload the yaml file.
 
 |image2|
 
-After that, it will open a predefined configuration. Just click on add, to save this.
+After that, it will open a predefined configuration. Just click on add, to save it.
 
 |image3|
 
