@@ -46,6 +46,15 @@ class Url extends React.Component{
                         connector={connector}
                         connection={connection}
                         updateEntity={updateConnection}
+                        theme={{
+                            queryInput: styles.url_endpoint_query_input,
+                            paramGenerator: styles.url_endpoint_param_generator,
+                            paramGeneratorForm: styles.url_endpoint_param_generator_form,
+                            generatorFormMethod: styles.url_endpoint_generator_form_method,
+                            generatorFormParam: styles.url_endpoint_generator_form_param,
+                        }}
+                        isParamGeneratorArrowVisible={false}
+                        isParamGeneratorAlwaysVisible={true}
                     />
                 </Dialog>
             </React.Fragment>

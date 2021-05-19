@@ -436,6 +436,27 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .url_dialog{
   min-width: 750px;
 }
+.url_endpoint_query_input{
+  margin-bottom: 30px;
+}
+.url_endpoint_param_generator{
+  left: 0;
+  width: 100%;
+}
+.url_endpoint_param_generator_form{
+  top: 50px;
+  width: 350px;
+  right: 0;
+  box-shadow: none;
+  padding: 0;
+  left: unset;
+}
+.url_endpoint_generator_form_method{
+  width: 150px !important;
+}
+.url_endpoint_generator_form_param{
+  width: 160px !important;
+}
 .header_dialog{
   min-width: 750px;
 }

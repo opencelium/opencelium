@@ -292,7 +292,7 @@ class Endpoint extends Component{
     }
 
     render(){
-        const {connection, connector, method, readOnly} = this.props;
+        const {connection, connector, method, readOnly, theme, isParamGeneratorArrowVisible, isParamGeneratorAlwaysVisible} = this.props;
         const {contentEditableValue, actionButtonTooltip, actionButtonValue, caretPosition} = this.state;
         let hasError = false;
         if(method.error.hasError){
@@ -302,9 +302,13 @@ class Endpoint extends Component{
         }
         let contentEditableStyles = {color: hasError ? 'red' : 'black'};
         let htmlValue = renderToString(<QueryString query={contentEditableValue} connector={connector} caretPosition={caretPosition}/>);
+        let themeQueryInput = '';
+        if(theme && theme.hasOwnProperty('queryInput')){
+            themeQueryInput = theme.queryInput;
+        }
         return (
             <div>
-                <ToolboxThemeInput label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
+                <ToolboxThemeInput className={themeQueryInput} label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
                     <ContentEditable
                         id={this.getEndpointIdName()}
                         innerRef={this.endpointValue}
@@ -328,6 +332,9 @@ class Endpoint extends Component{
                         readOnly={readOnly}
                         actionButtonTooltip={actionButtonTooltip}
                         actionButtonValue={actionButtonValue}
+                        theme={theme}
+                        isArrowVisible={isParamGeneratorArrowVisible}
+                        isAlwaysVisible={isParamGeneratorAlwaysVisible}
                     />
                 </ToolboxThemeInput>
             </div>
@@ -342,6 +349,9 @@ Endpoint.propTypes = {
 
 Endpoint.defaultProps = {
     readOnly: false,
+    theme: null,
+    isParamGeneratorArrowVisible: true,
+    isParamGeneratorAlwaysVisible: false,
 };
 
 export default Endpoint;
