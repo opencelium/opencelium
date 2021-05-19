@@ -20,7 +20,7 @@ Use them in their context.
 |image1|
 
 
-.. |image0| image:: ../img/usecases/tools/idoitaddon1.png
+.. |image0| image:: ../img/tools/idoitaddon1.png
    :align: middle
-.. |image1| image:: ../img/usecases/tools/idoitaddon2.png
+.. |image1| image:: ../img/tools/idoitaddon2.png
    :align: middle

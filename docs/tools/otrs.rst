@@ -41,11 +41,11 @@ After that, it will open a predefined configuration. Just click on add, to save 
 |image3|
 
 
-.. |image0| image:: ../img/usecases/tools/otrspackage.png
+.. |image0| image:: ../img/tools/otrspackage.png
    :align: middle
-.. |image1| image:: ../img/usecases/tools/otrsconfig1.png
+.. |image1| image:: ../img/tools/otrsconfig1.png
    :align: middle
-.. |image2| image:: ../img/usecases/tools/otrsconfig2.png
+.. |image2| image:: ../img/tools/otrsconfig2.png
    :align: middle
-.. |image3| image:: ../img/usecases/tools/otrsconfig3.png
+.. |image3| image:: ../img/tools/otrsconfig3.png
    :align: middle
