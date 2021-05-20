@@ -182,6 +182,9 @@ class ParamGenerator extends Component {
                     openMenuOnClick={true}
                     maxMenuHeight={200}
                     minMenuHeight={50}
+                    selectMenuPlaceholderStyles={{
+                        left: `calc(50% - 10px)`,
+                    }}
                     styles={{
                         container: (provided, {isFocused, isDisabled}) => ({
                             fontSize: '12px',
@@ -214,12 +217,6 @@ class ParamGenerator extends Component {
                                 width: '90%'
                             };
                         },
-                        placeholder: (styles) => {
-                            return{
-                                ...styles,
-                                left: `calc(50% - 10px)`,
-                            }
-                        }
                     }}
                 />
             </div>

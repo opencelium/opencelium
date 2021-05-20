@@ -29,11 +29,12 @@ class XmlBody extends React.Component{
     }
 
     render(){
-        const {t, method, readOnly, updateBody, ReferenceComponent, onReferenceClick} = this.props;
+        const {t, method, readOnly, updateBody, ReferenceComponent, onReferenceClick, source} = this.props;
+        const xml = source === null ? method.request.getBodyFields() : source;
         return(
             <XmlEditor
                 translate={t}
-                xml={method.request.getBodyFields()}
+                xml={xml}
                 afterUpdateCallback={updateBody}
                 readOnly={readOnly}
                 ReferenceComponent={ReferenceComponent}
@@ -54,6 +55,7 @@ XmlBody.propTypes = {
 XmlBody.defaultProps = {
     readOnly: false,
     isDraft: false,
+    source: null,
 };
 
 export default XmlBody;

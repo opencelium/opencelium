@@ -29,12 +29,13 @@ class JsonBody extends Component{
     }
 
     render(){
-        const {readOnly, method, updateBody, ReferenceComponent, onReferenceClick} = this.props;
+        const {readOnly, method, updateBody, ReferenceComponent, onReferenceClick, source} = this.props;
+        const src = source === null ? method.request.getBodyFields() : source;
         return(
             <ReactJson
                 name={false}
                 collapsed={false}
-                src={method.request.getBodyFields()}
+                src={src}
                 onEdit={readOnly ? false : updateBody}
                 onDelete={readOnly ? false : updateBody}
                 onAdd={readOnly ? false : updateBody}
@@ -58,6 +59,7 @@ JsonBody.defaultProps = {
     readOnly: false,
     bodyStyles: {},
     isDraft: false,
+    source: null,
 };
 
 export default JsonBody;

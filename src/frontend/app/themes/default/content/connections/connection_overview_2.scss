@@ -404,7 +404,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
     }
     >span:hover{
       color: #444b4c;
-      padding: 0px 3px;
+      padding: 0 3px;
       box-shadow: #9f9f9f 0 1px 3px 0;
     }
   }
@@ -461,6 +461,11 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   min-width: 750px;
 }
 .body_dialog{
+  min-width: 45vw;
+  max-width: 45vw;
+  width: 45vw;
+}
+.body_dialog_with_enhancement{
   min-width: 90vw;
   max-width: 90vw;
   width: 90vw;
@@ -472,10 +477,16 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 }
 
 .body_data{
-  width: 50%;
+  width: 100%;
   float: left;
   height: 100%;
   position: relative;
+  border-right: none;
+  padding-right: 0;
+}
+.body_data_with_enhancement{
+  @extend .body_data;
+  width: 50%;
   border-right: 1px solid #eee;
   padding-right: 10px;
 }

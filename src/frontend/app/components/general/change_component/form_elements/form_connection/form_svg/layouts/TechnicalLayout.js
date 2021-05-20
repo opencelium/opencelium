@@ -128,6 +128,7 @@ class TechnicalLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    connection={connection}
                     items={[...connection.fromConnector.svgItems, ...connection.toConnector.svgItems]}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
                     fromConnectorPanelParams={fromConnectorPanelParams}

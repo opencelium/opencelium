@@ -107,7 +107,7 @@ export function RequestBody(CRequestType){
                 * to open an enhancement when click on pointer
                  */
                 openEnhancement(e, value){
-                    const {connector, setEnhancementData} = this.props;
+                    const {connector, connection} = this.props;
                     if(connector.getConnectorType() === CONNECTOR_FROM){
                         return;
                     }
@@ -122,12 +122,8 @@ export function RequestBody(CRequestType){
                         this.props.connection.setCurrentFieldBindingTo(bindingItem);
                     }
                     this.setState({
-                        currentEnhancement: this.props.connection.getEnhancementByTo(),
+                        currentEnhancement: connection.getEnhancementByTo(),
                         showEnhancement: !this.state.showEnhancement,
-                    }, () => {
-                        if(typeof setEnhancementData === 'function'){
-                            setEnhancementData(::this.getEnhancementData());
-                        }
                     });
                 }
 

@@ -315,7 +315,7 @@ class Svg extends React.Component {
         }
     }
     renderItems(){
-        const {currentItem, currentSubItem, items} = this.props;
+        const {currentItem, currentSubItem, items, connection, updateConnection} = this.props;
         return items.map((item,key) => {
             let isHighlighted = currentItem ? item.id.indexOf(currentItem.id) === 0 : false;
             let isCurrent = currentItem ? currentItem.id === item.id : false;
@@ -334,7 +334,7 @@ class Svg extends React.Component {
                     );
                 default:
                     return(
-                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
+                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });

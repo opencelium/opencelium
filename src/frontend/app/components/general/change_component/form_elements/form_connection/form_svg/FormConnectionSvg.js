@@ -326,6 +326,7 @@ class FormConnectionSvg extends Component{
                     }
                     <TechnicalLayout
                         connection={entity}
+                        updateConnection={::this.updateEntity}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                         isBusinessLayoutEmpty={BUSINESS_DATA.items.length === 0}

@@ -19,6 +19,7 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {isString} from "@utils/app";
+import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 
 class Process extends React.Component{
     constructor(props) {
@@ -30,7 +31,22 @@ class Process extends React.Component{
     }
 
     deleteProcess(e){
-        console.log('delete process');
+        const {connection, process, updateConnection, setCurrentItem} = this.props;
+        const method = process.entity;
+        const connector = connection.getConnectorByMethodIndex(method);
+        if(connector){
+            if(connector.getConnectorType() === CONNECTOR_FROM){
+                connection.removeFromConnectorMethod(method);
+            } else{
+                connection.removeToConnectorMethod(method);
+            }
+            updateConnection();
+            const currentItem = connector.getCurrentItem();
+            if(currentItem){
+                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+                setCurrentItem(currentSvgElement);
+            }
+        }
         e.stopPropagation();
     }
 
