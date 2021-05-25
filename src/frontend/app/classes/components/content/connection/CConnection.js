@@ -158,6 +158,16 @@ export default class CConnection{
         return null;
     }
 
+    getConnectorByOperatorIndex(operator){
+        if(this.fromConnector.operators.findIndex(o => o.index === operator.index) !== -1){
+            return this.fromConnector;
+        }
+        if(this.toConnector.operators.findIndex(o => o.index === operator.index) !== -1){
+            return this.toConnector;
+        }
+        return null;
+    }
+
     getOptionsForMethods(connector, item, settings = {statement: 'leftStatement', isKeyConsidered: true, exceptCurrent: true}){
         let result = [];
         let statement = settings && settings.hasOwnProperty('statement') ? settings.statement : '';

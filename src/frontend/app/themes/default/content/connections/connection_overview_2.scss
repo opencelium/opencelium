@@ -93,7 +93,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 }
 .operator{
   text{
-    pointer-events: none;
     font-size: $FONT_SIZE_SMALL;
   }
 }
@@ -150,11 +149,17 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   pointer-events: none;
   font-size: $FONT_SIZE_MEDIUM;
 }
-.process_close{
+.delete{
   font-family: $FONT_FAMILY;
   font-size: 16px;
-  fill: $ERROR_COLOR;
+  fill: $REMOVE_ICON_COLOR;
   cursor: pointer;
+}
+.process_delete{
+  @extend .delete;
+}
+.operator_delete{
+  @extend .delete;
 }
 .if_operator{
   text{

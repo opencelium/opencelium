@@ -25,6 +25,7 @@ import LoopOperator from "../elements/LoopOperator";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {HighlightedMarkers, DefaultMarkers} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
+import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
 
 function mapStateToProps(state){
     const {currentItem, currentSubItem} = mapItemsToClasses(state);
@@ -326,11 +327,11 @@ class Svg extends React.Component {
             switch (item.type){
                 case 'if':
                     return(
-                        <IfOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
+                        <Operator key={key} type={'if'} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <LoopOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
+                        <Operator key={key} type={'loop'} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(

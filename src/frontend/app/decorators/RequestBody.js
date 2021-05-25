@@ -262,7 +262,7 @@ export function RequestBody(CRequestType){
 
                 render(){
                     const {isBodyEditOpened} = this.state;
-                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder} = this.props;
+                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder, openEnhancement} = this.props;
                     if(!isBodyEditOpened && !noPlaceholder){
                         return this.renderPlaceholder();
                     }
@@ -302,7 +302,7 @@ export function RequestBody(CRequestType){
                                     id: `${id}_reference_component`,
                                     self: this.paramGenerator,
                                 } : null}
-                                onReferenceClick={hasReferenceComponent ? ::this.openEnhancement : null}
+                                onReferenceClick={hasReferenceComponent ? typeof openEnhancement === 'function' ? openEnhancement : ::this.openEnhancement : null}
                             />
                             {
                                 !readOnly && CRequestType.hasImport()

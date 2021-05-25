@@ -18,9 +18,10 @@ import PropTypes from 'prop-types';
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 
 
-class IfOperator extends React.Component{
+class Operator extends React.Component{
     constructor(props) {
         super(props)
     }
@@ -49,30 +50,18 @@ class IfOperator extends React.Component{
     }
 
     render(){
-        const {operator, isNotDraggable, isCurrent, isHighlighted} = this.props;
-        const textX = '50%';
-        const textY = '50%';
-        const closeX = operator.width - 15;
-        const closeY = 15;
-        const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
-        return(
-            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
-                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onMouseDown={::this.onMouseDown} points={points}/>
-                <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
-                    {'if'}
-                </text>
-                {isCurrent &&
-                <text onMouseDown={::this.deleteOperator} dominantBaseline={"text-top"} textAnchor={"start"} className={styles.operator_delete} x={closeX}
-                      y={closeY}>
-                    {'x'}
-                </text>
-                }
-            </svg>
-        );
+        const {type} = this.props;
+        switch(type){
+            case 'if':
+                return COperator.renderIfOperator(this.props, {onSelect: ::this.onMouseDown, onDelete: ::this.deleteOperator})
+            case 'loop':
+                return COperator.renderLoopOperator(this.props, {onSelect: ::this.onMouseDown, onDelete: ::this.deleteOperator})
+        }
+        return null;
     }
 }
 
-IfOperator.propTypes = {
+Operator.propTypes = {
     operator: PropTypes.oneOfType([
         PropTypes.instanceOf(CTechnicalOperator),
     ]),
@@ -82,10 +71,10 @@ IfOperator.propTypes = {
     isHighlighted: PropTypes.bool,
 };
 
-IfOperator.defaultProps = {
+Operator.defaultProps = {
     isNotDraggable: true,
     isCurrent: false,
     isHighlighted: false,
 };
 
-export default IfOperator;
+export default Operator;

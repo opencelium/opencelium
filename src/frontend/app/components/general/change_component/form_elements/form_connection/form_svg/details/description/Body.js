@@ -7,8 +7,10 @@ import {BODY_FORMAT} from "@classes/components/content/invoker/CBody";
 import JsonBody from "@change_component/form_elements/form_connection/form_methods/method/JsonBody";
 import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
-import {CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 import CConnection from "@classes/components/content/connection/CConnection";
+import {subArrayToString} from "@utils/app";
+import CEnhancement from "@classes/components/content/connection/field_binding/CEnhancement";
 
 class Body extends React.Component{
     constructor(props) {
@@ -16,20 +18,78 @@ class Body extends React.Component{
 
         this.state = {
             isBodyVisible: false,
-            enhancementComponent: null,
+            currentFieldName: '',
+            currentEnhancement: null,
         }
     }
+
     toggleBodyVisible(){
         const {connection, updateConnection} = this.props;
         connection.currentEnhancemnet = null;
         updateConnection();
         this.setState({
             isBodyVisible: !this.state.isBodyVisible,
+            currentEnhancement: null,
+            currentFieldName: '',
         });
     }
 
+    getCurrentBindingItem(fieldName){
+        const {connection, method} = this.props;
+        return connection.fieldBinding.find(item => {
+            return item.to.findIndex(elem => {
+                let name = elem.field.replace('[]', '');
+                return elem.color === method.color && name === fieldName;
+            }) !== -1;
+        });
+    }
+
+    setCurrentEnhancementClickingOnPointer(e, value){
+        const {connection, method} = this.props;
+        const connector = connection.getConnectorByMethodIndex(method);
+        if(connector.getConnectorType() === CONNECTOR_FROM){
+            return;
+        }
+        let fieldName = '';
+        if(value.namespace.length > 1){
+            fieldName = `${subArrayToString(value.namespace, '.', 1, value.namespace.length)}.`;
+        }
+        fieldName += value.variable.name;
+        let bindingItem = this.getCurrentBindingItem(fieldName);
+        if(bindingItem){
+            bindingItem = bindingItem.to[0];
+            connection.setCurrentFieldBindingTo(bindingItem);
+        }
+        this.setCurrentEnhancement(connection.getEnhancementByTo());
+        this.setState({
+            currentFieldName: fieldName,
+        })
+    }
+
+    setCurrentEnhancement(currentEnhancement){
+        const {connection} = this.props;
+        if(currentEnhancement !== null) {
+            connection.updateEnhancement(currentEnhancement);
+        }
+        this.setState({currentEnhancement: currentEnhancement instanceof CEnhancement ? currentEnhancement.getObject() : currentEnhancement});
+    }
+
+    updateEntity(){
+        const {currentFieldName} = this.state;
+        const {connection, updateConnection} = this.props;
+        updateConnection();
+        if(currentFieldName !== '') {
+            let bindingItem = this.getCurrentBindingItem(currentFieldName);
+            if (bindingItem) {
+                bindingItem = bindingItem.to[0];
+                connection.setCurrentFieldBindingTo(bindingItem);
+            }
+            this.setCurrentEnhancement(connection.getEnhancementByTo());
+        }
+    }
+
     renderBody(){
-        const {readOnly, method, connection, updateConnection, isDraft, source} = this.props;
+        const {readOnly, method, connection, isDraft, source} = this.props;
         const connector = connection.getConnectorByMethodIndex(method);
         switch(method.bodyFormat){
             case BODY_FORMAT.JSON:
@@ -41,9 +101,10 @@ class Body extends React.Component{
                         method={connector.getMethodByIndex(method.index)}
                         connection={connection}
                         connector={connector}
-                        updateEntity={updateConnection}
+                        updateEntity={::this.updateEntity}
                         noPlaceholder={true}
                         source={source}
+                        openEnhancement={::this.setCurrentEnhancementClickingOnPointer}
                     />
                 );
             case BODY_FORMAT.XML:
@@ -55,28 +116,28 @@ class Body extends React.Component{
                         method={connector.getMethodByIndex(method.index)}
                         connection={connection}
                         connector={connector}
-                        updateEntity={updateConnection}
+                        updateEntity={::this.updateEntity}
                         noPlaceholder={true}
                         source={source}
+                        openEnhancement={::this.setCurrentEnhancementClickingOnPointer}
                     />
                 );
         }
     }
 
     renderEnhancement(){
-        const {connection} = this.props;
-        if(!connection.currentEnhancement){
+        const {currentEnhancement} = this.state;
+        const {readOnly} = this.props;
+        if(!currentEnhancement){
             return (
                 <div className={styles.body_reference_not_selected_message}>
                     Please, click on the reference
                 </div>
             );
         }
-        const enhancementData = this.getEnhancementData();
-        return null;
         return(
             <div className={styles.data}>
-                <Enhancement {...enhancementData}/>
+                <Enhancement readOnly={readOnly} enhancement={{...currentEnhancement}} setEnhancement={::this.setCurrentEnhancement}/>
             </div>
         );
     }

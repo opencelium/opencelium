@@ -12,8 +12,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+import React from 'react';
 import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import styles from "@themes/default/content/connections/connection_overview_2";
 
 export const OPERATOR_SIZE = 60;
 
@@ -121,6 +122,52 @@ export default class COperator{
 
     set arrows(arrows){
         this._arrows = arrows;
+    }
+
+    static renderLoopOperator(props, actions = {onSelect: () => {}, onDelete: () => {}}){
+        const {operator, isNotDraggable, isCurrent, isHighlighted} = props;
+        const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
+        const closeX = 40;
+        const closeY = 0;
+        return(
+            <svg x={operator.x} y={operator.y} className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onMouseDown={actions.onSelect} points={points}/>
+                <svg className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} onMouseDown={actions.onSelect} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
+                    <path onMouseDown={actions.onSelect} d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                    <path onMouseDown={actions.onSelect} d="M0 0h24v24H0z" fill="none"/>
+                </svg>
+                <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={'55'} y={'10'}>
+                    {operator.entity.iterator}
+                </text>
+                {isCurrent &&
+                    <svg x={closeX} y={closeY}>
+                        <path className={styles.process_delete} onMouseDown={actions.onDelete} xmlns="http://www.w3.org/2000/svg" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                }
+            </svg>
+        );
+    }
+
+    static renderIfOperator(props, actions = {onSelect: () => {}, onDelete: () => {}}){
+        const {operator, isNotDraggable, isCurrent, isHighlighted} = props;
+        const textX = '50%';
+        const textY = '50%';
+        const closeX = 40;
+        const closeY = 0;
+        const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
+        return(
+            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onMouseDown={actions.onSelect} points={points}/>
+                <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
+                    {'if'}
+                </text>
+                {isCurrent &&
+                    <svg x={closeX} y={closeY}>
+                        <path className={styles.process_delete} onMouseDown={actions.onDelete} xmlns="http://www.w3.org/2000/svg" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                }
+            </svg>
+        );
     }
 
     setCoordinates(coordinates){
