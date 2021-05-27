@@ -20,6 +20,7 @@ import {CBusinessProcess} from "@classes/components/content/connection_overview_
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {isString} from "@utils/app";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
+import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
 
 class Process extends React.Component{
     constructor(props) {
@@ -59,19 +60,19 @@ class Process extends React.Component{
         const closeX = process.width - 15;
         const closeY = 15;
         let label = method.label ? method.label : method.name ? method.name : '';
+        let shortLabel = label;
         if(isString(label) && label.length > 12){
-            label = `${label.substr(0, 9)}...`;
+            shortLabel = `${label.substr(0, 9)}...`;
         }
         return(
             <svg x={process.x} y={process.y} className={`${styles.process} ${isCurrent ? styles.current_process : ''} ${isHighlighted ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
                 <rect onMouseDown={::this.onMouseDown}  x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2} className={`${styles.process_rect} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
-                    {label}
+                    {shortLabel}
                 </text>
+                <title>{label}</title>
                 {isCurrent &&
-                    <svg x={105} y={2}>
-                        <path className={styles.process_delete} x={closeX} y={closeY} onMouseDown={::this.deleteProcess} xmlns="http://www.w3.org/2000/svg" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                    </svg>
+                    <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
                 }
             </svg>
         );

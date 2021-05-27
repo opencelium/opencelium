@@ -11,11 +11,12 @@ class ConnectorPanels extends React.Component{
 
     render(){
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.props;
+        const hasLine = toConnectorPanelParams && toConnectorPanelParams.panelPosition && toConnectorPanelParams.panelPosition.width > 0;
         return(
             <React.Fragment>
                 <ConnectorPanel {...fromConnectorPanelParams} namePosition={'right'}/>
                 <ConnectorPanel {...toConnectorPanelParams} namePosition={'left'}/>
-                <line strokeDasharray="5, 5" x1={fromConnectorPanelParams.panelPosition.x + fromConnectorPanelParams.panelPosition.width} y1={ARROW_INTEND_TOP} x2={toConnectorPanelParams.panelPosition.x} y2={ARROW_INTEND_TOP} stroke="#656565"/>
+                {hasLine && <line strokeDasharray="5, 5" x1={fromConnectorPanelParams.panelPosition.x + fromConnectorPanelParams.panelPosition.width} y1={ARROW_INTEND_TOP} x2={toConnectorPanelParams.panelPosition.x} y2={ARROW_INTEND_TOP} stroke="#656565"/>}
             </React.Fragment>
         );
     }

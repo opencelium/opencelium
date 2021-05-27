@@ -6,6 +6,11 @@ import {isString, setFocusById} from "@utils/app";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Input from "@basic_components/inputs/Input";
 import {setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
+import {
+    ApplyIcon,
+    CancelIcon,
+    EditIcon
+} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 
 
 @connect(null, {setCurrentTechnicalItem})
@@ -61,8 +66,15 @@ class Label extends React.Component{
         setCurrentTechnicalItem(currentItem);
         this.setState({
             isEditOn: false,
-            labelValue: '',
+            isMouseOver: false,
         })
+    }
+
+    cancelEdit(){
+        this.setState({
+            isMouseOver: false,
+            isEditOn: false,
+        });
     }
 
     render(){
@@ -77,10 +89,11 @@ class Label extends React.Component{
                     ?
                         <Input id={'details_label'} placeholder={methodLabel} value={labelValue} onChange={::this.setLabelValue} theme={{input: styles.label_input, inputElement: styles.label_input_element}}/>
                     :
-                        <span>{methodLabel === '' ? 'is empty' : methodLabel}</span>
+                        <span className={styles.value}>{methodLabel === '' ? 'is empty' : methodLabel}</span>
                     }
-                    {isMouseOver && !isEditOn && <TooltipFontIcon className={styles.edit_icon} size={14} isButton={true} tooltip={'Edit'} value={'edit'} onClick={::this.toggleEdit}/>}
-                    {isEditOn && <TooltipFontIcon className={styles.edit_icon} size={14} isButton={true} tooltip={'Apply'} value={'check'} onClick={::this.changeLabel}/>}
+                    {isMouseOver && !isEditOn && <EditIcon onClick={::this.toggleEdit}/>}
+                    {isEditOn && <ApplyIcon onClick={::this.changeLabel}/>}
+                    {isEditOn && <CancelIcon onClick={::this.cancelEdit}/>}
                 </Col>
             </React.Fragment>
         );

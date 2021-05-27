@@ -89,7 +89,15 @@ export default class CConnectorItem{
     }
 
     getPanelPosition(){
-        return {x: this._shiftXForSvgItems - PANEL_PADDING_SIDES, y: -PANEL_LABEL_INTEND - PANEL_PADDING_SIDES, width: this.getMaxXOfSvgItems() - this._shiftXForSvgItems + PANEL_PADDING_SIDES, height: this.getMaxYOfSvgItems() + PANEL_LABEL_INTEND + PANEL_PADDING_SIDES};
+        let width = this.getMaxXOfSvgItems() - this._shiftXForSvgItems + PANEL_PADDING_SIDES;
+        let height = this.getMaxYOfSvgItems() + PANEL_LABEL_INTEND + PANEL_PADDING_SIDES;
+        if(width < 350){
+            width = 350;
+        }
+        if(height < 300){
+            height = 300;
+        }
+        return {x: this._shiftXForSvgItems - PANEL_PADDING_SIDES, y: -PANEL_LABEL_INTEND - PANEL_PADDING_SIDES, width, height};
     }
 
     getPanelRectPosition(){
@@ -181,7 +189,7 @@ export default class CConnectorItem{
             }
             svgElement.x = xIterator + this._shiftXForSvgItems;
             svgElement.y = 150 * (currentSplitIndex.length - 1)
-            if(items[i].type){
+            if(items[i].type && items.length !== 1){
                 svgElement.x += 35;
                 svgElement.y += 10;
             }

@@ -31,8 +31,8 @@ class Url extends React.Component{
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
-                <Col xs={8} className={`${styles.col} ${styles.more_details}`}>
-                    <TooltipFontIcon onClick={::this.toggleUrlVisibleIcon} size={14} value={<span>{`URL`}</span>} tooltip={'URL'}/>
+                <Col xs={8} className={`${styles.col}`}>
+                    <TooltipFontIcon onClick={::this.toggleUrlVisibleIcon} size={14} value={<span className={styles.more_details}>{`URL`}</span>} tooltip={'URL'}/>
                 </Col>
                 <Dialog
                     actions={[{label: 'Apply', onClick: ::this.updateEndpoint, id: 'endpoint_apply'}]}

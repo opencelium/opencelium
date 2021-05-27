@@ -12,6 +12,8 @@ import Label from './Label';
 import Url from './Url';
 import Header from './Header';
 import Body from './Body';
+import Condition from "@change_component/form_elements/form_connection/form_svg/details/description/Condition";
+import OperatorType from "@change_component/form_elements/form_connection/form_svg/details/description/OperatorType";
 
 
 class Description extends React.Component{
@@ -30,21 +32,19 @@ class Description extends React.Component{
     }
 
     renderForOperator(){
-        const {details} = this.props;
+        const {details, connection, updateConnection} = this.props;
         const operatorItem = details.entity;
         return(
             <Row className={styles.row}>
-                <Col xs={4} className={styles.col}>{`Type`}</Col>
-                <Col xs={8} className={styles.col}>{operatorItem.type}</Col>
+                <OperatorType details={details} connection={connection} updateConnection={updateConnection} operatorItem={operatorItem}/>
                 {
-                    operatorItem.iterator !== '' &&
+                    operatorItem.iterator &&
                     <React.Fragment>
                         <Col xs={4} className={styles.col}>{`Iterator`}</Col>
-                        <Col xs={8} className={styles.col}>{operatorItem.iterator}</Col>
+                        <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }
-                <Col xs={4} className={styles.col}>{`Condition`}</Col>
-                <Col xs={8} className={styles.col}>{operatorItem.condition.generateStatementText()}</Col>
+                <Condition details={details}/>
             </Row>
         );
     }
@@ -72,7 +72,7 @@ class Description extends React.Component{
                     return(
                         <React.Fragment key={entry.name}>
                             <Col xs={4} className={styles.col}>{`${entry.name}:`}</Col>
-                            <Col xs={8} className={styles.col}>{entry.value}</Col>
+                            <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{entry.value}</span></Col>
                         </React.Fragment>
                     )
                 })}
@@ -82,7 +82,7 @@ class Description extends React.Component{
                 <Col xs={12} className={styles.col}>
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
-                        <Col xs={8} className={`${styles.col}`}>{request.method}</Col>
+                        <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
                         <Url request={request} connection={connection} updateConnection={updateConnection} method={methodItem}/>
                         <Header items={request.header}/>
                         <Body source={request.getBodyFields()} connection={connection} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>

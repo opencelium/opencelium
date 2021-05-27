@@ -150,8 +150,8 @@ class Body extends React.Component{
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
-                <Col xs={8} className={`${styles.col} ${styles.more_details}`}>
-                    <TooltipFontIcon onClick={::this.toggleBodyVisible} size={14} value={<span>{`...`}</span>} tooltip={'Body'}/>
+                <Col xs={8} className={`${styles.col}`}>
+                    <TooltipFontIcon onClick={::this.toggleBodyVisible} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Body'}/>
                 </Col>
                 <Dialog
                     actions={[{label: 'Ok', onClick: ::this.toggleBodyVisible, id: 'header_ok'}]}
