@@ -102,31 +102,38 @@ class SelectableInput extends React.Component{
                 closeOnSelect={false}
                 maxMenuHeight={200}
                 minMenuHeight={50}
+                styles={{
+                    placeholder:(provided) => ({
+                        ...provided,
+                        top: '80%',
+                    }),
+                    singleValue:(provided) => ({
+                        ...provided,
+                        top: '80%',
+                    }),
+                    indicatorContainer:(provided) => ({
+                        ...provided,
+                        padding: '0 !important',
+                        alignItems: 'center'
+                    }),
+                    indicatorSeparator:(provided) => ({
+                        ...provided,
+                        margin: '4px 0',
+                    }),
+                    dropdownIndicator:(provided) => ({
+                        ...provided,
+                        width: '12px',
+                        height: '12px',
+                    }),
+                }}
                 selectMenuStyles={{
                     left: '-75px',
                 }}
                 selectMenuControlStyles={{
                     minHeight: '14px',
                 }}
-                selectMenuIndicatorSeparatorStyles={{
-                    margin: '4px 0',
-                }}
-                selectMenuIndicatorContainerStyles={{
-                    padding: '0 !important',
-                    alignItems: 'center'
-                }}
                 selectMenuValueContainer={{
                     height: '18px'
-                }}
-                selectMenuDropdownIndicatorStyles={{
-                    width: '12px',
-                    height: '12px',
-                }}
-                selectMenuSingleValueStyles={{
-                    top: '80%',
-                }}
-                selectMenuPlaceholderStyles={{
-                    top: '80%',
                 }}
             />
         );

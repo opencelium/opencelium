@@ -24,6 +24,7 @@ import {
     FIELD_TYPE_STRING
 } from "@classes/components/content/connection/method/CMethodItem";
 import Input from "./Input";
+import CResponseResult from "@classes/components/content/invoker/response/CResponseResult";
 
 const PARAM_DELIMITER = '.';
 const MIN_SEARCH_WORD_LENGTH = 0;
@@ -169,7 +170,7 @@ class SelectSearch extends Component{
         if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
-        let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue, currentConnector) : [];
+        let result = items instanceof CResponseResult ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue, currentConnector) : [];
         if(isArray(result) && result.length > 0) {
             result = result.map(field => {
                 let {value, type} = field;

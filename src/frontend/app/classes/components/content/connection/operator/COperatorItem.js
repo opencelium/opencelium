@@ -109,6 +109,39 @@ export default class COperatorItem{
         this._condition = condition;
     }
 
+    setStatementColorByType(type, color){
+        switch(type){
+            case 'leftStatement':
+                this.setLeftStatementColor(color);
+                break;
+            case 'rightStatement':
+                this.setRightStatementColor(color);
+                break;
+        }
+    }
+
+    setStatementFieldByType(type, field){
+        switch(type){
+            case 'leftStatement':
+                this.setLeftStatementField(field);
+                break;
+            case 'rightStatement':
+                this.setRightStatementField(field);
+                break;
+        }
+    }
+
+    setStatementParentByType(type, parent){
+        switch(type){
+            case 'leftStatement':
+                this.setLeftStatementParent(parent);
+                break;
+            case 'rightStatement':
+                this.setRightStatementParent(parent);
+                break;
+        }
+    }
+
     setLeftStatementColor(color){
         this._condition.leftStatement.color = color;
         this._condition.rightStatement.rightPropertyValue = '';

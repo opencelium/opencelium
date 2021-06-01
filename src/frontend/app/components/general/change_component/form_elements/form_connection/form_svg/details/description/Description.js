@@ -7,13 +7,13 @@ import COperator from "@classes/components/content/connection_overview_2/operato
 import CConnection from "@classes/components/content/connection/CConnection";
 import {isString} from "@utils/app";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import Name from './Name';
-import Label from './Label';
-import Url from './Url';
-import Header from './Header';
-import Body from './Body';
-import Condition from "@change_component/form_elements/form_connection/form_svg/details/description/Condition";
-import OperatorType from "@change_component/form_elements/form_connection/form_svg/details/description/OperatorType";
+import Name from './process/Name';
+import Label from './process/Label';
+import Url from './process/Url';
+import Header from './process/Header';
+import Body from './process/Body';
+import Condition from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
+import OperatorType from "@change_component/form_elements/form_connection/form_svg/details/description/operator/OperatorType";
 
 
 class Description extends React.Component{
@@ -44,7 +44,7 @@ class Description extends React.Component{
                         <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }
-                <Condition details={details}/>
+                <Condition updateConnection={updateConnection} connection={connection} operator={operatorItem} readOnly={false}/>
             </Row>
         );
     }

@@ -148,6 +148,20 @@ export default class CConnection{
         return this._fromConnector.methods.length === 0 && this._fromConnector.operators.length === 0 && this._toConnector.methods.length === 0 && this._toConnector.operators.length === 0;
     }
 
+    getMethodByColor(color){
+        let index = this.fromConnector.methods.findIndex(m => m.color === color);
+        if(index !== -1){
+            return this.fromConnector.methods[index];
+        } else{
+            index = this.toConnector.methods.findIndex(m => m.color === color);
+            if(index !== -1){
+                return this.toConnector.methods[index];
+            } else{
+                return null;
+            }
+        }
+    }
+
     getConnectorByMethodIndex(method){
         if(this.fromConnector.methods.findIndex(m => m.color === method.color) !== -1){
             return this.fromConnector;

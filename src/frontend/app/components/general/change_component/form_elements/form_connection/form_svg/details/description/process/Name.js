@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {isString, setFocusById} from "@utils/app";
-import SelectableInput from "./SelectableInput";
+import SelectableInput from "../SelectableInput";
 import {setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 
