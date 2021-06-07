@@ -26,8 +26,7 @@ class Url extends React.Component{
 
     render(){
         const {isUrlVisible} = this.state;
-        const {connection, updateConnection, method} = this.props;
-        const connector = connection.getConnectorByMethodIndex(method);
+        const {connection, updateConnection, method, connector} = this.props;
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>

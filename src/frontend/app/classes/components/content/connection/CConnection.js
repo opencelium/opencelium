@@ -162,12 +162,12 @@ export default class CConnection{
         }
     }
 
-    getConnectorByMethodIndex(method){
-        if(this.fromConnector.methods.findIndex(m => m.color === method.color) !== -1){
-            return this.fromConnector;
+    getConnectorByType(type){
+        if(type === CONNECTOR_FROM){
+            return this._fromConnector;
         }
-        if(this.toConnector.methods.findIndex(m => m.color === method.color) !== -1){
-            return this.toConnector;
+        if(type === CONNECTOR_TO){
+            return this._toConnector;
         }
         return null;
     }
@@ -470,6 +470,8 @@ export default class CConnection{
 
     addFromConnectorMethod(method, mode){
         this.addConnectorMethod(CONNECTOR_FROM, method, mode);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
     }
 
     addToConnectorMethod(method, mode){
@@ -478,6 +480,8 @@ export default class CConnection{
 
     removeFromConnectorMethod(method, withRefactorIndexes = true){
         this.removeConnectorMethod(CONNECTOR_FROM, method, withRefactorIndexes);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
     }
 
     removeToConnectorMethod(method, withRefactorIndexes = true){
@@ -486,6 +490,8 @@ export default class CConnection{
 
     removeFromConnectorOperator(operator){
         this.removeConnectorOperator(CONNECTOR_FROM, operator);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
     }
 
     removeToConnectorOperator(operator){

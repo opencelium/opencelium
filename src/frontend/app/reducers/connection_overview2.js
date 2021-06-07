@@ -46,6 +46,7 @@ if(initialState === null){
         detailsLocation: PANEL_LOCATION.SAME_WINDOW,
         businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
+        colorMode: 2,
     });
 }
 
@@ -54,6 +55,8 @@ if(initialState === null){
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case ConnectionOverview2Action.SET_COLORMODE:
+            return state.set('colorMode', action.payload);
         case ConnectionOverview2Action.SET_ARROWS:
             return state.set('arrows', List(action.payload));
         case ConnectionOverview2Action.SET_ITEMS:

@@ -33,7 +33,7 @@ class Operator extends React.Component{
 
     deleteOperator(e){
         const {connection, operator, updateConnection, setCurrentItem} = this.props;
-        const connector = connection.getConnectorByOperatorIndex(operator.entity);
+        const connector = connection.getConnectorByType(operator.connectorType);
         if(connector){
             if(connector.getConnectorType() === CONNECTOR_FROM){
                 connection.removeFromConnectorOperator(operator.entity);

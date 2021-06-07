@@ -18,6 +18,13 @@ import CProcess from "@classes/components/content/connection_overview_2/process/
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {isObject} from "@utils/app";
 
+
+const setColorMode = (color) => {
+    return{
+        type: ConnectionOverview2Action.SET_COLORMODE,
+        payload: color,
+    };
+}
 /**
  * set current item
  * @param currentItem - item
@@ -39,7 +46,7 @@ const setCurrentTechnicalItem = (currentSubItem) => {
     const payload = currentSubItem instanceof CProcess || currentSubItem instanceof COperator ? currentSubItem.getObject() : currentSubItem;
     return {
         type: ConnectionOverview2Action.SET_CURRENTECHNICALITEM,
-        payload: {...payload},
+        payload: payload === null ? payload : {...payload},
     };
 };
 
@@ -119,4 +126,5 @@ export{
     setDetailsLocation,
     setBusinessLayoutLocation,
     setTechnicalLayoutLocation,
+    setColorMode
 };

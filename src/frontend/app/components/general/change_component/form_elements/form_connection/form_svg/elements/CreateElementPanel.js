@@ -5,12 +5,18 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {setFocusById} from "@utils/app";
 import {setItems, setArrows} from "@actions/connection_overview_2/set";
 import {connect} from "react-redux";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
+import Select from "@basic_components/inputs/Select";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
+    const {currentSubItem} = mapItemsToClasses(state);
     return{
         items: connectionOverview.get('items').toJS(),
-        currentItem: connectionOverview.get('currentItem'),
+        currentSubItem,
     };
 }
 
@@ -21,14 +27,17 @@ class CreateElementPanel extends React.Component{
         this.state = {
             type: '',
             name: '',
+            label: '',
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.props.x === 0 && this.props.y === 0 && (this.state.type !== '' || this.state.name !== '')){
+        if((this.props.x === 0 && this.props.y === 0 && (this.state.type !== '' || this.state.name !== ''))
+        || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
             this.setState({
                 type: '',
                 name: '',
+                label: '',
             });
         }
     }
@@ -48,27 +57,48 @@ class CreateElementPanel extends React.Component{
         });
     }
 
+    changeLabel(label){
+        this.setState({
+            label,
+        });
+    }
+
     createElement(){
-        const {name} = this.state;
-        const {items, currentItem} = this.props;
-        let index = items.findIndex(i => i.id === currentItem.id);
-        if(index !== -1) {
-            items.splice(index, 0, {id: 5, name, x: currentItem.x + 150,y: currentItem.y});
-            this.props.setItems(items);
-            this.props.setArrows([
-                {from: 1, to: 2},
-                {from: 2, to: 3},
-                {from: currentItem.id, to: 5},
-            ]);
+        const {label, type} = this.state;
+        const name = this.state.name.value;
+        const {connection, currentItem, updateConnection, setCreateElementPanelPosition} = this.props;
+        const isMethodItem = currentItem.entity instanceof CMethodItem;
+        const isOperatorItem = currentItem.entity instanceof COperatorItem;
+        const connector = connection.getConnectorByType(currentItem.connectorType);
+        switch(type){
+            case 'request':
+                let method = {name, label};
+                let operation = connector.invoker.operations.find(o => o.name === name);
+                method.request = operation.request.getObject({bodyOnlyConvert: true});
+                method.response = operation.response.getObject({bodyOnlyConvert: true});
+                if (currentItem.connectorType === CONNECTOR_FROM) {
+                    connection.addFromConnectorMethod(method);
+                } else {
+                    connection.addToConnectorMethod(method);
+                }
+                break;
+            case 'operator':
+                break;
         }
+        updateConnection(connection);
+        setCreateElementPanelPosition({x: 0, y: 0});
     }
 
     render(){
-        const {type, name} = this.state;
-        const {x, y, currentItem} = this.props;
-        if(currentItem === null || x === 0 && y === 0){
+        const {type, name, label} = this.state;
+        const {x, y, currentSubItem, connection} = this.props;
+        if(currentSubItem === null || x === 0 && y === 0){
             return null;
         }
+        const connector = connection.getConnectorByType(currentSubItem.connectorType);
+        const nameSource = connector.invoker.operations.map(operation => {
+            return {label: operation.name, value: operation.name};
+        });
         return(
             <div>
                 <div className={styles.create_element_panel} style={{top: `${y}px`, left: `${x}px`}}>
@@ -77,12 +107,24 @@ class CreateElementPanel extends React.Component{
                 </div>
                 {type === 'request' &&
                     <React.Fragment>
-                        <div className={styles.create_element_panel_line} style={{top: `${y + 33}px`, left: `${x + 100}px`}}/>
-                        <div className={styles.create_element_panel} style={{top: `${y}px`, left: `${x + 120}px`}}>
-                            <Input id={'new_request_name'} theme={{input: styles.input_name}} onChange={::this.changeName} value={name} label={'Name'}/>
+                        <div className={styles.create_element_panel_line} style={{top: `${y + 33}px`, left: `${x + 200}px`}}/>
+                        <div className={styles.create_element_panel} style={{top: `${y - 25}px`, left: `${x + 220}px`}}>
+                            <Select
+                                id={'new_request_name'}
+                                name={'new_request_name'}
+                                value={name}
+                                onChange={::this.changeName}
+                                options={nameSource}
+                                closeOnSelect={false}
+                                placeholder={'Name'}
+                                maxMenuHeight={200}
+                                minMenuHeight={50}
+                                label={'Name'}
+                            />
+                            <Input id={'new_request_label'} theme={{input: styles.input_label}} onChange={::this.changeLabel} value={label} label={'Label'}/>
                         </div>
-                        <div className={styles.create_element_panel_line} style={{top: `${y + 33}px`, left: `${x + 220}px`}}/>
-                        <TooltipFontIcon onClick={::this.createElement} wrapStyles={{top: `${y + 22}px`, left: `${x + 240}px`}} wrapClassName={styles.add_icon} tooltip={'Create'} value={'add_circle_do_outline'}  isButton={true} />
+                        <div className={styles.create_element_panel_line} style={{top: `${y + 33}px`, left: `${x + 420}px`}}/>
+                        <TooltipFontIcon onClick={::this.createElement} wrapStyles={{top: `${y + 22}px`, left: `${x + 440}px`}} wrapClassName={styles.add_icon} tooltip={'Create'} value={'add_circle_do_outline'}  isButton={true} />
                     </React.Fragment>
                 }
             </div>

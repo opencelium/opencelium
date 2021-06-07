@@ -26,7 +26,7 @@ export default class COperator{
         this._y = operator && operator.hasOwnProperty('y') ? operator.y : 0;
         this._width = OPERATOR_SIZE;
         this._height = OPERATOR_SIZE;
-        this._connector = operator && operator.hasOwnProperty('connector') ? operator.connector : null;
+        this._connectorType = operator && operator.hasOwnProperty('connectorType') ? operator.connectorType : '';
         this._invoker = operator && operator.hasOwnProperty('invoker') ? operator.invoker : null;
         this._entity = operator && operator.hasOwnProperty('entity') ? operator.entity : null;
         if(!(this._entity instanceof COperatorItem)){
@@ -86,12 +86,12 @@ export default class COperator{
         this._height = height;
     }
 
-    get connector(){
-        return this._connector;
+    get connectorType(){
+        return this._connectorType;
     }
 
-    set connector(connector){
-        this._connector = connector;
+    set connectorType(connectorType){
+        this._connectorType = connectorType;
     }
 
     get invoker(){
@@ -142,7 +142,7 @@ export default class COperator{
             y: this._y,
             width: this._width,
             height: this._height,
-            connector: this._connector,
+            connectorType: this._connectorType,
             invoker: this._invoker,
             entity: this._entity.getObject(),
         };

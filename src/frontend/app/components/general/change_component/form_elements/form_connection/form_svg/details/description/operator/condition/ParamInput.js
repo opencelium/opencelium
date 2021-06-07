@@ -25,6 +25,7 @@ class ParamInput extends React.Component{
                     currentConnector={connector}
                     isPopupMultiline={isMultiline}
                     popupRows={isMultiline ? 4 : 1}
+                    dropdownClassName={styles.param_input_dropdown}
                 />
             </div>
         );

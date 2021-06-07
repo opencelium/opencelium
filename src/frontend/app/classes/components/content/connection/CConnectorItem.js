@@ -188,7 +188,8 @@ export default class CConnectorItem{
                 xIterator += 200;
             }
             svgElement.x = xIterator + this._shiftXForSvgItems;
-            svgElement.y = 150 * (currentSplitIndex.length - 1)
+            svgElement.y = 150 * (currentSplitIndex.length - 1);
+            svgElement.connectorType = this.getConnectorType();
             if(items[i].type && items.length !== 1){
                 svgElement.x += 35;
                 svgElement.y += 10;
@@ -989,6 +990,14 @@ export default class CConnectorItem{
 
     setConnectorType(connectorType){
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
+    }
+
+    get shiftXForSvgItems(){
+        return this._shiftXForSvgItems;
+    }
+
+    set shiftXForSvgItems(shiftXForSvgItems){
+        this._shiftXForSvgItems = shiftXForSvgItems;
     }
 
     getMethodByColor(color){

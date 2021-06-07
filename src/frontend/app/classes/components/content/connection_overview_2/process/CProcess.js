@@ -30,7 +30,7 @@ export default class CProcess{
         this._y = process && process.hasOwnProperty('y') ? process.y : 0;
         this._width = PROCESS_WIDTH;
         this._height = PROCESS_HEIGHT;
-        this._connector = process && process.hasOwnProperty('connector') ? process.connector : null;
+        this._connectorType = process && process.hasOwnProperty('connectorType') ? process.connectorType : '';
         this._invoker = process && process.hasOwnProperty('invoker') ? process.invoker : null;
         this._entity = process && process.hasOwnProperty('entity') ? process.entity : null;
         if(!(this._entity instanceof CMethodItem)){
@@ -93,12 +93,12 @@ export default class CProcess{
         this._height = height;
     }
 
-    get connector(){
-        return this._connector;
+    get connectorType(){
+        return this._connectorType;
     }
 
-    set connector(connector){
-        this._connector = connector;
+    set connectorType(connectorType){
+        this._connectorType = connectorType;
     }
 
     get invoker(){
@@ -141,7 +141,7 @@ export default class CProcess{
             y: this._y,
             width: this._width,
             height: this._height,
-            connector: this._connector,
+            connectorType: this._connectorType,
             invoker: this._invoker,
             entity: this._entity.getObjectForSvgElement(),
         };

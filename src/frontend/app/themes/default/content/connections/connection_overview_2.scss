@@ -41,11 +41,14 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .create_element_panel{
   background: white;
   position: absolute;
-  width: 100px;
+  width: 200px;
   border: 1px solid #eee;
   border-radius: 5px;
   .input_name{
     padding-bottom: 10px;
+  }
+  .input_label{
+    padding-bottom: 0;
   }
   .item{
     font-size: $FONT_SIZE_SMALL;
@@ -130,7 +133,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 }
 .process_rect{
   cursor: move;
-  fill: #fff;
   stroke: #000;
   //stroke: #00000021;
   stroke-width: 2;

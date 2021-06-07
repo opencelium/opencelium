@@ -49,6 +49,10 @@ export default class COperatorItem{
         return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator);
     }
 
+    static getOperatorTypesForSelect(){
+        return [{label: 'if', value: IF_OPERATOR},{label: 'loop', value: LOOP_OPERATOR}];
+    }
+
     deleteError(){
         this._error = {
             hasError: false,

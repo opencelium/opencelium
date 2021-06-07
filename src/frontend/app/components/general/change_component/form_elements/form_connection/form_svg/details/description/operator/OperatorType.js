@@ -4,6 +4,7 @@ import SelectableInput
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 import {connect} from "react-redux";
 import {setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
+import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 
 
 @connect(null, {setCurrentTechnicalItem})
@@ -14,30 +15,34 @@ class OperatorType extends React.Component{
 
     changeType(optionValue){
         if(optionValue) {
-            const {operatorItem, connection, updateConnection, setCurrentTechnicalItem} = this.props;
-            let connector = connection.getConnectorByOperatorIndex(operatorItem);
-            let operator = {index: operatorItem.index, type: optionValue.value};
-            let currentItem;
-            if (connector.getConnectorType() === CONNECTOR_FROM) {
-                connection.removeFromConnectorOperator(operatorItem);
-                connector.addOperator(operator);
-                currentItem = connection.fromConnector.getSvgElementByIndex(operator.index);
-            } else {
-                connection.removeToConnectorOperator(operatorItem);
-                connector.addOperator(operator);
-                currentItem = connection.toConnector.getSvgElementByIndex(operator.index);
+            const {details, connection, updateConnection, setCurrentTechnicalItem} = this.props;
+            const operatorItem = details.entity;
+            let connector = connection.getConnectorByType(details.connectorType);
+            if(connector) {
+                let operator = {index: operatorItem.index, type: optionValue.value};
+                let currentItem;
+                if (connector.getConnectorType() === CONNECTOR_FROM) {
+                    connection.removeFromConnectorOperator(operatorItem);
+                    connector.addOperator(operator);
+                    currentItem = connection.fromConnector.getSvgElementByIndex(operator.index);
+                } else {
+                    connection.removeToConnectorOperator(operatorItem);
+                    connector.addOperator(operator);
+                    currentItem = connection.toConnector.getSvgElementByIndex(operator.index);
+                }
+                updateConnection(connection);
+                setCurrentTechnicalItem(currentItem);
             }
-            updateConnection(connection);
-            setCurrentTechnicalItem(currentItem);
         }
     }
 
     render(){
-        const {operatorItem} = this.props;
+        const {details} = this.props;
+        const operatorItem = details.entity;
         return(
             <SelectableInput
                 id={`type_options`}
-                options={[{label: 'if', value: 'if'},{label: 'loop', value: 'loop'}]}
+                options={COperatorItem.getOperatorTypesForSelect()}
                 changeValue={::this.changeType}
                 label={'Type'}
                 value={operatorItem.type}

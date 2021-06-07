@@ -15,7 +15,7 @@ class Name extends React.Component{
     changeName(optionValue){
         if(optionValue) {
             const {details, connection, updateConnection, setCurrentTechnicalItem} = this.props;
-            let connector = connection.getConnectorByMethodIndex(details.entity);
+            let connector = connection.getConnectorByType(details.connectorType);
             let method = {index: details.entity.index};
             let operation = connector.invoker.operations.find(o => o.name === optionValue.value);
             method.name = optionValue.value;

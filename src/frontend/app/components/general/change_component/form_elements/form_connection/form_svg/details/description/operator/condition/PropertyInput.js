@@ -23,6 +23,7 @@ class PropertyInput extends React.Component{
                         inputValue={property}
                         predicator={predicator}
                         currentConnector={connector}
+                        dropdownClassName={styles.param_input_dropdown}
                     />
                 </div>
                 <div className={styles.property_input_right_equal} style={equalStyle}>

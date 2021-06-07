@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {Col} from "react-grid-system";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -16,6 +17,8 @@ import RelationalOperator
 import {DEFAULT_COLOR} from "@classes/components/content/connection/operator/CStatement";
 import RightStatement
     from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/RightStatement";
+import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 
 
 @connect(null, {setCurrentTechnicalItem})
@@ -54,9 +57,10 @@ class Condition extends React.Component{
         let rightMethod = null;
         let rightParam = '';
         if(props) {
-            const {connection, operator} = props;
+            const {connection, details} = props;
+            const operator = details.entity;
             if(connection instanceof CConnection && operator instanceof COperatorItem) {
-                const connector = connection.getConnectorByOperatorIndex(operator);
+                const connector = connection.getConnectorByType(details.connectorType);
                 leftMethod = connection.getMethodByColor(operator.condition.leftStatement.color);
                 if (leftMethod) {
                     leftMethod = leftMethod.getValueForSelectInput(connector);
@@ -130,8 +134,9 @@ class Condition extends React.Component{
 
     updateConnection(){
         const {condition} = this.state;
-        const {connection, operator, updateConnection, setCurrentTechnicalItem} = this.props;
-        const connector = connection.getConnectorByOperatorIndex(operator);
+        const {connection, details, updateConnection, setCurrentTechnicalItem} = this.props;
+        const operator = details.entity;
+        const connector = connection.getConnectorByType(details.connectorType);
         const operatorItem = connector.getOperatorByIndex(operator.index);
         const {leftParam, leftMethod, rightMethod, relationalOperator, rightParam, property} = condition;
         if(leftMethod) operatorItem.setLeftStatementColor(leftMethod.color);
@@ -146,7 +151,7 @@ class Condition extends React.Component{
             if(rightMethod) operatorItem.setRightStatementParent(connection.getMethodByColor(rightMethod.color).response.success);
         }
         if(property) operatorItem.setRightStatementRightPropertyValue(property);
-        updateConnection();
+        updateConnection(); 
         let currentItem = connector.getSvgElementByIndex(operator.index);
         setCurrentTechnicalItem(currentItem);
         this.setState({
@@ -203,8 +208,9 @@ class Condition extends React.Component{
 
     render(){
         const {isMouseOver, isOpenEditDialog, condition} = this.state;
-        const {connection, operator, readOnly} = this.props;
-        const connector = connection.getConnectorByOperatorIndex(operator);
+        const {connection, details, readOnly} = this.props;
+        const operator = details.entity;
+        const connector = connection.getConnectorByType(details.connectorType);
         const conditionText = operator.condition.generateStatementText();
         const conditionTextTitle = operator.condition.generateStatementText(true);
         const isLoopOperator = operator.type === LOOP_OPERATOR;
@@ -263,5 +269,10 @@ class Condition extends React.Component{
         );
     }
 }
+
+Condition.propTypes = {
+    details: PropTypes.oneOfType([PropTypes.instanceOf(CProcess), PropTypes.instanceOf(COperator), null]).isRequired,
+}
+
 
 export default Condition;

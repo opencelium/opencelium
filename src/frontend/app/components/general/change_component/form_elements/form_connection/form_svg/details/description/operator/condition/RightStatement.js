@@ -19,6 +19,7 @@ class RightStatement extends React.Component{
             leftMethod: condition.leftMethod,
             leftParam: condition.leftParam,
             relationalOperator: condition.relationalOperator,
+            property: condition.property,
             rightMethod: method,
         });
     }
@@ -30,6 +31,7 @@ class RightStatement extends React.Component{
             leftMethod: condition.leftMethod,
             leftParam: condition.leftParam,
             relationalOperator: condition.relationalOperator,
+            property: condition.property,
             rightMethod: condition.rightMethod,
             rightParam: param,
         });
@@ -83,7 +85,7 @@ class RightStatement extends React.Component{
         let {condition, connection, connector, operator, readOnly, isOperatorHasValue, isOperatorHasThreeParams, hasLeftMethod, hasRightMethod, hasRightParam} = this.props;
         let {hasValue, isMultiline, isRightStatementOption, options} = isOperatorHasValue();
         const propertyId = `if_operator_property_${operator.index}`;
-        const propertyItems = hasLeftMethod ? connection.getMethodByColor(condition.leftMethod.color).response.success : [];
+        const propertyItems = hasLeftMethod ? connection.getConnectorMethodByColor(condition.leftMethod.color).response.success : [];
         const isPropertyDisabled = !isOperatorHasThreeParams;
         let methodSource = connection.getOptionsForMethods(connector, operator, {statement: 'rightStatement', isKeyConsidered: false, exceptCurrent: false});
         if(methodSource.length === 0) {
@@ -93,7 +95,7 @@ class RightStatement extends React.Component{
         const isMethodVisible = this.isMethodVisible();
         const isMethodDisabled = readOnly || !isMethodVisible;
         const isMethodSearchable = !readOnly;
-        let paramItems = hasRightMethod ? connection.getMethodByColor(condition.rightMethod.color).response.success : null;
+        let paramItems = hasRightMethod ? connection.getConnectorMethodByColor(condition.rightMethod.color).response.success : null;
         const paramId = `${connector.getConnectorType()}_if_operator_${operator.type}_${operator.index}`;
         return(
             <React.Fragment>
@@ -106,6 +108,7 @@ class RightStatement extends React.Component{
                     updateProperty={::this.updateProperty}
                     items={propertyItems}
                     predicator={condition.leftParam}
+                    property={condition.property}
                 />
                 <MethodSelect
                     readOnly={readOnly}

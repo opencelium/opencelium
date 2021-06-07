@@ -185,7 +185,7 @@ class SelectSearch extends Component{
 
     renderDropdown(){
         const {currentItems, currentItem} = this.state;
-        const {authUser} = this.props;
+        const {authUser, dropdownClassName} = this.props;
         let classNames = [
             'select_search_dropdown',
             'items',
@@ -209,7 +209,7 @@ class SelectSearch extends Component{
             );
         });
         return (
-            <div className={styles[classNames.select_search_dropdown]}>
+            <div className={`${styles[classNames.select_search_dropdown]} ${dropdownClassName}`}>
                 <div className={styles[classNames.items]}>
                     {itemElements}
                 </div>
@@ -218,7 +218,7 @@ class SelectSearch extends Component{
     }
 
     render(){
-        let {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, isPopupMultiline, popupRows, ...props} = this.props;
+        let {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, isPopupMultiline, popupRows,dropdownClassName, ...props} = this.props;
         let {theme, className, disabled, placeholder} = this.props;
         let classNames = [
             'input_input_element',
@@ -284,6 +284,7 @@ SelectSearch.defaultProps = {
     popupInputStyles: null,
     isPopupMultiline: false,
     popupRows: 1,
+    dropdownClassName: '',
 };
 
 export default SelectSearch;

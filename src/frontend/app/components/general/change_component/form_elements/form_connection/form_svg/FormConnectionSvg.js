@@ -23,6 +23,7 @@ import Details from "./details/Details";
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {PANEL_LOCATION} from "@utils/constants/app";
 import {setLS} from "@utils/LocalStorage";
+import {setCurrentBusinessItem, setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -60,7 +61,7 @@ function mapStateToProps(state){
 /**
  * Form for ConnectionSvg
  */
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem})
 class FormConnectionSvg extends Component{
 
     constructor(props){
@@ -89,6 +90,11 @@ class FormConnectionSvg extends Component{
             this.minimizeBusinessLayout();
         }
     }
+
+    componentWillUnmount() {
+        this.props.setCurrentTechnicalItem(null);
+    }
+
 
     moveDetailsLeft(){
         this.setState({

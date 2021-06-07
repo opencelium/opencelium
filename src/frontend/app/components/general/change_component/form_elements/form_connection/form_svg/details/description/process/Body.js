@@ -45,8 +45,7 @@ class Body extends React.Component{
     }
 
     setCurrentEnhancementClickingOnPointer(e, value){
-        const {connection, method} = this.props;
-        const connector = connection.getConnectorByMethodIndex(method);
+        const {connection, connector} = this.props;
         if(connector.getConnectorType() === CONNECTOR_FROM){
             return;
         }
@@ -89,8 +88,7 @@ class Body extends React.Component{
     }
 
     renderBody(){
-        const {readOnly, method, connection, isDraft, source} = this.props;
-        const connector = connection.getConnectorByMethodIndex(method);
+        const {readOnly, method, connection, isDraft, source, connector} = this.props;
         switch(method.bodyFormat){
             case BODY_FORMAT.JSON:
                 return (
@@ -144,8 +142,7 @@ class Body extends React.Component{
 
     render(){
         const {isBodyVisible} = this.state;
-        const {bodyTitle, connection, method} = this.props;
-        const connector = connection.getConnectorByMethodIndex(method);
+        const {bodyTitle, connector} = this.props;
         const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO;
         return(
             <React.Fragment>

@@ -145,7 +145,7 @@ class Svg extends React.Component {
 
     setCurrentItem(currentItem){
         let {items} = this.props;
-        const {setCurrentBusinessItem, setCurrentTechnicalItem, setItems} = this.props;
+        const {setCurrentBusinessItem, setCurrentTechnicalItem, setItems, connection, updateConnection} = this.props;
         if(currentItem){
             let index = items.findIndex(item => item.id === currentItem.id);
             if(index !== -1) {
@@ -163,6 +163,9 @@ class Svg extends React.Component {
         if(setItems) {
             setItems(items);
         }
+        const connector = connection.getConnectorByType(currentItem.connectorType);
+        connector.setCurrentItem(currentItem.entity);
+        updateConnection();
     }
 
     setItemCoordinates(coordinates){

@@ -36,7 +36,7 @@ class Description extends React.Component{
         const operatorItem = details.entity;
         return(
             <Row className={styles.row}>
-                <OperatorType details={details} connection={connection} updateConnection={updateConnection} operatorItem={operatorItem}/>
+                <OperatorType details={details} connection={connection} updateConnection={updateConnection}/>
                 {
                     operatorItem.iterator &&
                     <React.Fragment>
@@ -44,7 +44,7 @@ class Description extends React.Component{
                         <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }
-                <Condition updateConnection={updateConnection} connection={connection} operator={operatorItem} readOnly={false}/>
+                <Condition updateConnection={updateConnection} connection={connection} details={details} readOnly={false}/>
             </Row>
         );
     }
@@ -53,6 +53,7 @@ class Description extends React.Component{
         const {isResponseVisible} = this.state;
         const {details, connection, updateConnection} = this.props;
         const methodItem = details.entity;
+        const connector = connection.getConnectorByType(details.connectorType);
         const request = methodItem.request;
         const successResponse = methodItem.response.success;
         const failResponse = methodItem.response.fail;
@@ -83,9 +84,9 @@ class Description extends React.Component{
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
                         <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
-                        <Url request={request} connection={connection} updateConnection={updateConnection} method={methodItem}/>
+                        <Url request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
                         <Header items={request.header}/>
-                        <Body source={request.getBodyFields()} connection={connection} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>
+                        <Body source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>
                     </Row>
                 </Col>
                 <br/>
@@ -101,14 +102,14 @@ class Description extends React.Component{
                             <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                             <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
                             <Header items={successResponse.header}/>
-                            <Body source={successResponse.getBodyFields()} readOnly={true} connection={connection} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Success data'}/>
+                            <Body source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Success data'}/>
                             <br/>
                             <br/>
                             <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
                             <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                             <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
                             <Header items={failResponse.header}/>
-                            <Body source={failResponse.getBodyFields()} readOnly={true} connection={connection} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Fail data'}/>
+                            <Body source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Fail data'}/>
                         </Row>
                     </Col>
                 }

@@ -504,6 +504,7 @@ export const ConnectionOverview2Action = {
     SET_DETAILSLOCATION:                       'SET_DETAILSLOCATION',
     SET_BUSINESSLAYOUTLOCATION:                'SET_BUSINESSLAYOUTLOCATION',
     SET_TECHNICALLAYOUTLOCATION:               'SET_TECHNICALLAYOUTLOCATION',
+    SET_COLORMODE:                             'SET_COLORMODE',
 }
 
 /**

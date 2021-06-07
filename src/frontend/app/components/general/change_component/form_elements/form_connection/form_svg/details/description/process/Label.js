@@ -58,7 +58,7 @@ class Label extends React.Component{
     changeLabel(){
         const {labelValue} = this.state;
         const {connection, details, updateConnection, setCurrentTechnicalItem} = this.props;
-        const connector = connection.getConnectorByMethodIndex(details.entity);
+        const connector = connection.getConnectorByType(details.connectorType);
         const method = connector.getMethodByColor(details.entity.color);
         method.label = labelValue;
         const currentItem = connector.getSvgElementByIndex(method.index);

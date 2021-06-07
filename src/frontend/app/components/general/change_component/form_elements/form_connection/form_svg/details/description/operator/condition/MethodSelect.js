@@ -96,7 +96,6 @@ class MethodSelect extends React.Component{
 MethodSelect.propTypes = {
     readOnly: PropTypes.bool,
     hasValue: PropTypes.bool,
-    method: PropTypes.object.isRequired,
     source: PropTypes.array.isRequired,
     updateMethod: PropTypes.func.isRequired,
     style: PropTypes.object,
