@@ -40,7 +40,7 @@ class Description extends React.Component{
                 {
                     operatorItem.iterator &&
                     <React.Fragment>
-                        <Col xs={4} className={styles.col}>{`Iterator`}</Col>
+                        <Col xs={4} className={`${styles.col} ${styles.value}`}>{`Iterator`}</Col>
                         <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }

@@ -26,7 +26,7 @@ import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
-import CreateElementPanel from "../elements/CreateElementPanel";
+import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";

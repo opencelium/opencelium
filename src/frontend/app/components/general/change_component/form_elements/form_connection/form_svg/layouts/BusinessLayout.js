@@ -26,7 +26,7 @@ import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewBusinessLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
-import CreateElementPanel from "../elements/CreateElementPanel";
+import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 
 

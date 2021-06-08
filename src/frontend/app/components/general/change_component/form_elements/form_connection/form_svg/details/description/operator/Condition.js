@@ -215,6 +215,9 @@ class Condition extends React.Component{
         const conditionTextTitle = operator.condition.generateStatementText(true);
         const isLoopOperator = operator.type === LOOP_OPERATOR;
         const isIfOperator = operator.type === IF_OPERATOR;
+        if(isOpenEditDialog){
+            debugger;
+        }
         return(
             <React.Fragment>
                 <Col xs={4} className={styles.col}>{`Condition`}</Col>
@@ -230,6 +233,7 @@ class Condition extends React.Component{
                     >
                         <LeftStatement
                             {...this.props}
+                            operator={operator}
                             condition={condition}
                             connector={connector}
                             isLoopOperator={isLoopOperator}
@@ -253,6 +257,7 @@ class Condition extends React.Component{
                                     {...this.props}
                                     condition={condition}
                                     connector={connector}
+                                    operator={operator}
                                     hasLeftMethod={this.hasLeftMethod()}
                                     hasRightMethod={this.hasRightMethod()}
                                     hasRightParam={this.hasRightParam()}
@@ -271,7 +276,7 @@ class Condition extends React.Component{
 }
 
 Condition.propTypes = {
-    details: PropTypes.oneOfType([PropTypes.instanceOf(CProcess), PropTypes.instanceOf(COperator), null]).isRequired,
+    details: PropTypes.oneOfType([PropTypes.instanceOf(CProcess), PropTypes.instanceOf(COperator), PropTypes.oneOf([null])]).isRequired,
 }
 
 

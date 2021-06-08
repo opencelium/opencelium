@@ -14,7 +14,7 @@
  */
 
 import {consoleLog, isId} from "@utils/app";
-import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "./CConnectorItem";
+import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO, OPERATOR_ITEM, OUTSIDE_ITEM} from "./CConnectorItem";
 import CFieldBinding from "./field_binding/CFieldBinding";
 import CTemplate from "./CTemplate";
 import CBindingItem from "./field_binding/CBindingItem";
@@ -466,6 +466,16 @@ export default class CConnection{
             }
         }
         connector.removeOperator(operator, true, true);
+    }
+
+    addFromConnectorOperator(operator, mode = OUTSIDE_ITEM){
+        this.fromConnector.addOperator(operator, mode);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
+    }
+
+    addToConnectorOperator(operator, mode = OUTSIDE_ITEM){
+        this.toConnector.addOperator(operator, mode);
     }
 
     addFromConnectorMethod(method, mode){
