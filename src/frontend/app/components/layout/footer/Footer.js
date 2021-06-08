@@ -23,9 +23,11 @@ import styles from '@themes/default/layout/footer.scss';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     return {
         authUser: auth.get('authUser'),
         fromLogin: auth.get('fromLogin'),
+        appVersion: app.get('appVersion'),
     };
 }
 
@@ -53,7 +55,7 @@ class Footer extends Component{
 
     render(){
         const {visible} = this.state;
-        const {authUser, t} = this.props;
+        const {authUser, t, appVersion} = this.props;
         if(!visible){
             return null;
         }
@@ -62,7 +64,7 @@ class Footer extends Component{
         return (
             <footer className={styles[classNames.footer]} id={'app_footer'}>
                 <div className={styles[classNames.logo_icon_bottom_right]}/>
-                <div className={styles[classNames.open_celium]}>{t('FOOTER.OPENCELIUM')}</div>
+                <div className={styles[classNames.open_celium]}><span title={appVersion}>{t('FOOTER.OPENCELIUM')}</span></div>
             </footer>
         );
     }

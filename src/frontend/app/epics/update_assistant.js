@@ -51,8 +51,9 @@ const fetchUpdateAppVersionEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = `${urlPrefix}/version`;
+            const currentAppVersion = action.settings.currentAppVersion;
             return doRequest({url},{
-                success: (data) => fetchUpdateAppVersionFulfilled(data, {...action.settings}),
+                success: (data) => fetchUpdateAppVersionFulfilled(data, {...action.settings, background: currentAppVersion === data.version ? true : action.settings.background}),
                 reject: fetchUpdateAppVersionRejected,
             });
         });

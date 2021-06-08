@@ -36,6 +36,7 @@ const ReactGridLayout = WidthProvider(RGL);
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     const updateAssistant = state.get('update_assistant');
     const dashboard = state.get('dashboard');
     return {
@@ -47,6 +48,7 @@ function mapStateToProps(state){
         currentWidget: dashboard.get('currentWidget'),
         layout: dashboard.get('layout').toJS(),
         toolbox: dashboard.get('toolbox').toJS(),
+        appVersion: app.get('appVersion'),
     };
 }
 
@@ -68,9 +70,9 @@ class DashboardView extends Component{
     }
 
     componentDidMount() {
-        const {fetchingUpdateAppVersion, fetchUpdateAppVersion, fetchWidgetSettings} = this.props;
+        const {fetchingUpdateAppVersion, fetchUpdateAppVersion, fetchWidgetSettings, appVersion} = this.props;
         if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START) {
-            fetchUpdateAppVersion();
+            fetchUpdateAppVersion({currentAppVersion: appVersion});
         }
         fetchWidgetSettings();
         componentAppear('app_content');
