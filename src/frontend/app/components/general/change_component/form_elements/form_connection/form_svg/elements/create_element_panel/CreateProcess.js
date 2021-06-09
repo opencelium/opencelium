@@ -44,7 +44,7 @@ class CreateProcess extends React.Component{
     create(){
         let {name, label} = this.state;
         name = name.value;
-        const {connection, currentItem, updateConnection, setCreateElementPanelPosition, itemPosition} = this.props;
+        const {connection, currentItem, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
         const connector = connection.getConnectorByType(currentItem.connectorType);
         let method = {name, label};
         let operation = connector.invoker.operations.find(o => o.name === name);
@@ -57,11 +57,12 @@ class CreateProcess extends React.Component{
         }
         updateConnection(connection);
         setCreateElementPanelPosition({x: 0, y: 0});
+        setIsCreateElementPanelOpened(false);
     }
 
     render(){
         const {name, label} = this.state;
-        const {currentItem, connection, style, beforeLineStyles, afterLineStyles, createIconStyles} = this.props;
+        const {currentItem, connection, style, beforeLineStyles, afterLineStyles, createIconStyles,} = this.props;
         const connector = connection.getConnectorByType(currentItem.connectorType);
         const nameSource = connector.invoker.operations.map(operation => {
             return {label: operation.name, value: operation.name};

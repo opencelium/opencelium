@@ -36,16 +36,16 @@ class CreateOperator extends React.Component{
     create(){
         let {type} = this.state;
         type = type.value;
-        const {connection, currentItem, updateConnection, setCreateElementPanelPosition, itemPosition} = this.props;
+        const {connection, currentItem, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
         let operator = {type};
         if (currentItem.connectorType === CONNECTOR_FROM) {
             connection.addFromConnectorOperator(operator, itemPosition);
         } else{
             connection.addToConnectorOperator(operator, itemPosition);
-
         }
         updateConnection(connection);
         setCreateElementPanelPosition({x: 0, y: 0});
+        setIsCreateElementPanelOpened(false);
     }
 
     render(){
