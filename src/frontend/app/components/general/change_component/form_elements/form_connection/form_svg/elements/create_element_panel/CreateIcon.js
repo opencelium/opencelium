@@ -13,6 +13,7 @@ export const CreateIcon = (props) => {
             value={'add_circle_do_outline'}
             isButton={true}
             disabled={isDisabled}
+            iconStyles={{background: 'white', borderRadius: '50%'}}
         />
     )
 }
