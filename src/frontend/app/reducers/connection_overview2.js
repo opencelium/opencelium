@@ -64,7 +64,7 @@ const reducer = (state = initialState, action) => {
         case ConnectionOverview2Action.SET_CURRENTBUSINESSITEM:
             return state.set('currentItem', action.payload).set('currentSubItem', null);
         case ConnectionOverview2Action.SET_CURRENTECHNICALITEM:
-            return state.set('currentSubItem', action.payload);
+            return state.set('currentSubItem', action.payload).set('isCreateElementPanelOpened', action.payload !== null);
         case ConnectionOverview2Action.SET_DETAILSLOCATION:
             if(action.payload.location === PANEL_LOCATION.SAME_WINDOW)
                 removeLS('connection_overview', 'connection_overview');

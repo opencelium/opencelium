@@ -3,7 +3,7 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import React from "react";
 
 export const CreateIcon = (props) => {
-    const {style, create} = props;
+    const {style, create, isDisabled} = props;
     return(
         <TooltipFontIcon
             onClick={create}
@@ -12,6 +12,7 @@ export const CreateIcon = (props) => {
             tooltip={'Create'}
             value={'add_circle_do_outline'}
             isButton={true}
+            disabled={isDisabled}
         />
     )
 }

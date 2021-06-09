@@ -66,6 +66,7 @@ class CreateProcess extends React.Component{
         const nameSource = connector.invoker.operations.map(operation => {
             return {label: operation.name, value: operation.name};
         });
+        const isAddDisabled = name === '' || name === null;
         return(
             <React.Fragment>
                 <Line style={beforeLineStyles}/>
@@ -82,11 +83,12 @@ class CreateProcess extends React.Component{
                         minMenuHeight={50}
                         label={'Name'}
                         className={styles.input_label}
+                        required={true}
                     />
                     <Input id={'new_request_label'} theme={{input: styles.input_label}} onChange={::this.changeLabel} value={label} label={'Label'}/>
                 </div>
                 <Line style={afterLineStyles}/>
-                <CreateIcon create={::this.create} style={createIconStyles}/>
+                <CreateIcon create={::this.create} style={createIconStyles} isDisabled={isAddDisabled}/>
             </React.Fragment>
         );
     }

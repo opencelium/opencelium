@@ -79,6 +79,7 @@ class FormConnectionSvg extends Component{
             technicalViewBoxYOffset: 0,
             businessLayoutHeight: 300,
             technicalLayoutHeight: 300,
+            isCreateElementPanelOpened: false,
         }
         this.hasInitialPanelGroupSizes = false;
         this.initialBusinessSize = 300;
@@ -93,6 +94,12 @@ class FormConnectionSvg extends Component{
 
     componentWillUnmount() {
         this.props.setCurrentTechnicalItem(null);
+    }
+
+    setIsCreateElementPanelOpened(isCreateElementPanelOpened){
+        this.setState({
+            isCreateElementPanelOpened
+        });
     }
 
 
@@ -301,10 +308,10 @@ class FormConnectionSvg extends Component{
 
     render(){
         const {entity, renderNavigationComponent, renderValidationMessage} = this.props;
-        const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized} = this.state;
+        const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
-            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
+            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`} onClick={() => ::this.setIsCreateElementPanelOpened(false)}>
                 <Details
                     connection={entity}
                     updateConnection={::this.updateEntity}
@@ -343,6 +350,8 @@ class FormConnectionSvg extends Component{
                         detailsPosition={detailsPosition}
                         isDetailsMinimized={isDetailsMinimized}
                         layoutPosition={technicalLayoutPosition}
+                        setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
+                        isCreateElementPanelOpened={isCreateElementPanelOpened}
                     />
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout

@@ -52,6 +52,7 @@ class CreateOperator extends React.Component{
         const {type} = this.state;
         const {style, beforeLineStyles, afterLineStyles, createIconStyles} = this.props;
         const typeSource = COperatorItem.getOperatorTypesForSelect();
+        const isAddDisabled = type === null;
         return(
             <React.Fragment>
                 <Line style={beforeLineStyles}/>
@@ -68,10 +69,11 @@ class CreateOperator extends React.Component{
                         minMenuHeight={50}
                         label={'Type'}
                         className={styles.input_label}
+                        required={true}
                     />
                 </div>
                 <Line style={afterLineStyles}/>
-                <CreateIcon create={::this.create} style={createIconStyles}/>
+                <CreateIcon create={::this.create} style={createIconStyles} isDisabled={isAddDisabled}/>
             </React.Fragment>
         );
     }

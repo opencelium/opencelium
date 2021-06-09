@@ -24,7 +24,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {setArrows, setItems})
+@connect(mapStateToProps, {setArrows, setItems,})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -41,6 +41,9 @@ class CreateElementPanel extends React.Component{
                 type: CREATE_PROCESS,
                 itemPosition: OUTSIDE_ITEM,
             });
+        }
+        if(!(this.props.currentItem === null || this.props.x === 0 && this.props.y === 0) && !this.props.isCreateElementPanelOpened){
+            this.props.setIsCreateElementPanelOpened(true)
         }
     }
 
@@ -61,8 +64,8 @@ class CreateElementPanel extends React.Component{
 
     render(){
         const {type, itemPosition} = this.state;
-        const {x, y, currentItem} = this.props;
-        if(currentItem === null || x === 0 && y === 0){
+        const {x, y, currentItem, isCreateElementPanelOpened} = this.props;
+        if(!isCreateElementPanelOpened){
             return null;
         }
         const isMethodItem = currentItem.entity instanceof CMethodItem;
@@ -71,12 +74,12 @@ class CreateElementPanel extends React.Component{
         const itemTypeLine = isMethodItem ? {top: `${y + 33}px`, left: `${x - 7}px`} : {top: `${y + 26}px`, left: `${x + 111}px`};
         const beforeItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 111}px`} : {top: `${y + 27}px`, left: `${x + 230}px`};
         const afterItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 330}px`} : {top: `${y + 27}px`, left: `${x + 450}px`};
-        const createIconStyles = isMethodItem ? {top: `${y + 22}px`, left: `${x + 350}px`} : {top: `${y + 16}px`, left: `${x + 468}px`};
-        const panelItemPositionStyles = {top: `${y - 8}px`, left: `${x + 12}px`};
-        const panelItemTypeStyles = isMethodItem ? {top: `${y - 1}px`, left: `${x + 12}px`} : {top: `${y - 8}px`, left: `${x + 130}px`};
-        let panelItemStyles = isMethodItem ? {top: y - 26, left: `${x + 130}px`} : {top: y - 33, left: `${x + 250}px`};
+        const createIconStyles = isMethodItem ? {top: `${y + 23}px`, left: `${x + 350}px`} : {top: `${y + 17}px`, left: `${x + 468}px`};
+        const panelItemPositionStyles = {top: `${y - 7}px`, left: `${x + 12}px`};
+        const panelItemTypeStyles = isMethodItem ? {top: `${y}px`, left: `${x + 12}px`} : {top: `${y - 7}px`, left: `${x + 130}px`};
+        let panelItemStyles = isMethodItem ? {top: y - 24, left: `${x + 130}px`} : {top: y - 31, left: `${x + 250}px`};
         if(type === CREATE_OPERATOR){
-            panelItemStyles.top += 30;
+            panelItemStyles.top += 28;
         }
         panelItemStyles.top += 'px';
         return(

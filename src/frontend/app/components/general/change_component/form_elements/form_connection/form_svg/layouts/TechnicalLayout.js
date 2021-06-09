@@ -95,7 +95,7 @@ class TechnicalLayout extends React.Component{
 
     render(){
         const {createElementPanelPosition} = this.state;
-        const {currentSubItem, isBusinessLayoutEmpty, updateConnection} = this.props;
+        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
@@ -147,6 +147,8 @@ class TechnicalLayout extends React.Component{
                     connection={connection}
                     updateConnection={updateConnection}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    isCreateElementPanelOpened={isCreateElementPanelOpened}
+                    setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
                 />
             </div>
         );

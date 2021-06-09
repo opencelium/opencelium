@@ -316,6 +316,7 @@ class Svg extends React.Component {
             viewBox.height *= scaleDelta;
         }
     }
+
     renderItems(){
         const {currentItem, currentSubItem, items, connection, updateConnection} = this.props;
         return items.map((item,key) => {
@@ -357,31 +358,39 @@ class Svg extends React.Component {
         });
     }
 
+    hideCreateElementPanel(){
+        this.props.setCreateElementPanelPosition({x: 0, y: 0});
+        this.props.setIsCreateElementPanelOpened(false);
+    }
+
     render(){
-        const {svgId, fromConnectorPanelParams, toConnectorPanelParams} = this.props;
+        const {svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened, isCreateElementPanelOpened} = this.props;
         return(
-            <svg
-                id={svgId}
-                className={styles.layout_svg}
-                preserveAspectRatio={'xMidYMid slice'}
-                onMouseDown={::this.startDrag}
-                onMouseMove={::this.drag}
-                onMouseUp={::this.endDrag}
-                onMouseLeave={::this.endDrag}
-                ref={this.svgRef}
-            >
-                <defs>
-                    <DefaultMarkers/>
-                    <HighlightedMarkers/>
-                </defs>
-                {fromConnectorPanelParams && toConnectorPanelParams && <ConnectorPanels fromConnectorPanelParams={fromConnectorPanelParams} toConnectorPanelParams={toConnectorPanelParams}/>}
-                {
-                    this.renderArrows()
-                }
-                {
-                    this.renderItems()
-                }
-            </svg>
+            <React.Fragment>
+                <svg
+                    id={svgId}
+                    className={styles.layout_svg}
+                    preserveAspectRatio={'xMidYMid slice'}
+                    onMouseDown={::this.startDrag}
+                    onMouseMove={::this.drag}
+                    onMouseUp={::this.endDrag}
+                    onMouseLeave={::this.endDrag}
+                    ref={this.svgRef}
+                >
+                    <defs>
+                        <DefaultMarkers/>
+                        <HighlightedMarkers/>
+                    </defs>
+                    {fromConnectorPanelParams && toConnectorPanelParams && <ConnectorPanels fromConnectorPanelParams={fromConnectorPanelParams} toConnectorPanelParams={toConnectorPanelParams}/>}
+                    {
+                        this.renderArrows()
+                    }
+                    {
+                        this.renderItems()
+                    }
+                </svg>
+                {isCreateElementPanelOpened && <div className={styles.disable_background} onClick={::this.hideCreateElementPanel}/>}
+            </React.Fragment>
         );
     }
 }

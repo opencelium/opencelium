@@ -126,5 +126,5 @@ export{
     setDetailsLocation,
     setBusinessLayoutLocation,
     setTechnicalLayoutLocation,
-    setColorMode
+    setColorMode,
 };
