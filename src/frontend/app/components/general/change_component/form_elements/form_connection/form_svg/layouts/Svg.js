@@ -188,7 +188,7 @@ class Svg extends React.Component {
             if(isDraggable) {
                 this.selectedElement = e.target.parentNode;
                 if(this.selectedElement.parentNode){
-                    setCreateElementPanelPosition({x: 0, y: 0});
+                    this.hideCreateElementPanel();
                     this.offset = this.getMousePosition(e, this.selectedElement.parentNode);
                     this.offset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
                     this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
@@ -197,7 +197,7 @@ class Svg extends React.Component {
                 this.setCoordinatesForCreateElementPanel(e);
             }
         } else{
-            setCreateElementPanelPosition({x: 0, y: 0});
+            this.hideCreateElementPanel();
             const {svg} = this.state;
             if(svg) {
                 this.isPointerDown = true;

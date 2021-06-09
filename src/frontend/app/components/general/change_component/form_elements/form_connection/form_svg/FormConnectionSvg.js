@@ -311,7 +311,7 @@ class FormConnectionSvg extends Component{
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened} = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
-            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`} onClick={() => ::this.setIsCreateElementPanelOpened(false)}>
+            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
                 <Details
                     connection={entity}
                     updateConnection={::this.updateEntity}

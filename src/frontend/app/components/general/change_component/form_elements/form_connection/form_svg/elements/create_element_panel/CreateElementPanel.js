@@ -65,7 +65,7 @@ class CreateElementPanel extends React.Component{
     render(){
         const {type, itemPosition} = this.state;
         const {x, y, currentItem, isCreateElementPanelOpened} = this.props;
-        if(!isCreateElementPanelOpened){
+        if(!isCreateElementPanelOpened || (x === 0 && y === 0)){
             return null;
         }
         const isMethodItem = currentItem.entity instanceof CMethodItem;
