@@ -24,15 +24,16 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   left: 0;
   width: 100%;
   //height: 100%;
-  background: white;
+  background: #fafafa;
   z-index: 1;
   padding-bottom: 50px;
 }
 .create_element_panel_line{
   position: absolute;
   width: 20px;
-  height: 1px;
-  background: #eee;
+  height: 3px;
+  background: white;
+  box-shadow: 0 4px 2px rgba(0,0,0,0.12), 0 3px 10px rgba(0,0,0,0.24);
 }
 .add_icon{
   position: absolute;
@@ -42,8 +43,8 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   background: white;
   position: absolute;
   width: 100px;
-  border: 1px solid #eee;
   border-radius: 5px;
+  box-shadow: 0 4px 2px rgba(0,0,0,0.12), 0 3px 10px rgba(0,0,0,0.24);
   .input_name{
     padding-bottom: 10px;
   }
@@ -544,4 +545,12 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   color: #bbb;
   text-align: center;
   margin-top: 30px;
+}
+.disable_background{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #b7afaf21;
 }
