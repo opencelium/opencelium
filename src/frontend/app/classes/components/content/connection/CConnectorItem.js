@@ -142,6 +142,9 @@ export default class CConnectorItem{
         if(maxValue !== 0){
             maxValue += PANEL_PADDING_SIDES;
         }
+        if(maxValue < 330){
+            maxValue = 330;
+        }
         return maxValue;
 
     }
