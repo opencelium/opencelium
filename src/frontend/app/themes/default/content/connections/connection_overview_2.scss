@@ -104,9 +104,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   }
 }
 .current_process{
-  rect {
-    fill: $CURRENT_ITEM_FILL;
-  }
+  stroke: #5369a8 !important;
 }
 .highlighting{
   stroke: $SVG_HIGHLIGHT_COLOR;
@@ -119,6 +117,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .current_operator{
   polygon {
     fill: $CURRENT_ITEM_FILL;
+    stroke: #5369a8;
   }
 }
 .highlighted_operator{
@@ -237,6 +236,9 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   .new_window_icon{
     @extend .icon;
   }
+  .configurations_icon{
+    @extend .icon;
+  }
 }
 .layout_settings_panel{
   @extend .settings_panel;
@@ -256,6 +258,9 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   .new_window_icon{
     left: 40px;
   }
+  .configurations_icon{
+    left: 60px;
+  }
 }
 .layout_settings_panel_right{
   @extend .layout_settings_panel;
@@ -267,6 +272,9 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   }
   .new_window_icon{
     right: 40px;
+  }
+  .configurations_icon{
+    right: 60px;
   }
 }
 .details_settings_panel{
@@ -300,6 +308,14 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   .new_window_icon_right{
     @extend .position_icon;
     left: 40px;
+  }
+  .configurations_icon_left{
+    @extend .configurations_icon;
+    right: 60px;
+  }
+  .configurations_icon_right{
+    @extend .position_icon;
+    left: 60px;
   }
 }
 .settings_panel_title{
@@ -553,4 +569,60 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   width: 100%;
   height: 100%;
   background: #b7afaf21;
+}
+.configurations_icon_process_color_title{
+  margin-bottom: 10px;
+}
+
+.configurations_icon_process_color_modes{
+  width: 430px;
+  height: 80px;
+  margin: 0 auto;
+}
+
+.configurations_icon_process_color_mode{
+  width: 130px;
+  height: 80px;
+  cursor: pointer;
+  float: left;
+  margin-right: 20px;
+  border-radius: 10px;
+  border: 2px solid black;
+  position: relative;
+  .text{
+    line-height: 72px;
+    text-align: center;
+    font-size: 18px;
+  }
+}
+.configurations_icon_process_color_mode_1{
+  @extend .configurations_icon_process_color_mode;
+  .label{
+    height: 15px;
+    position: absolute;
+    left: 6px;
+    top: 3px;
+    width: 112px;
+    background: rgb(255, 207, 181);
+    border-radius: 5px;
+  }
+}
+
+.configurations_icon_process_color_mode_2{
+  @extend .configurations_icon_process_color_mode;
+  background: rgb(255, 207, 181);
+}
+
+.configurations_icon_process_color_mode_3{
+  @extend .configurations_icon_process_color_mode;
+  margin-right: 0;
+  .label{
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: rgb(255, 207, 181);
+    border-radius: 50%;
+  }
 }

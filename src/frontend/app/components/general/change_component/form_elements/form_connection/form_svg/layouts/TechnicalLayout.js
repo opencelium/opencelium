@@ -125,6 +125,7 @@ class TechnicalLayout extends React.Component{
                     isReplaceIconDisabled={isReplaceIconDisabled}
                     isMinMaxIconDisabled={isMinMaxIconDisabled}
                     isNewWindowIconDisabled={isNewWindowIconDisabled}
+                    hasConfigurationsIcon={true}
                 />
                 <Svg
                     {...svgProps}

@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {DETAILS_POSITION} from "../FormConnectionSvg";
+import ConfigurationsIcon from "@change_component/form_elements/form_connection/form_svg/details/ConfigurationsIcon";
 
 class SettingsPanel extends React.Component{
     constructor(props) {
@@ -29,6 +30,7 @@ class SettingsPanel extends React.Component{
             detailsPosition, isLayoutMinimized, minimizeLayout, maximizeLayout,
             replaceLayouts, isDetailsMinimized, title, openInNewWindow,
             isReplaceIconDisabled, isMinMaxIconDisabled, isNewWindowIconDisabled,
+            hasConfigurationsIcon,
         } = this.props;
         let settingsPanelClassName = '';
         let minMaxTooltip = 'Minimize';
@@ -87,6 +89,7 @@ class SettingsPanel extends React.Component{
                     disabled={isNewWindowIconDisabled}
                     isButton={true}
                 />
+                <ConfigurationsIcon/>
             </div>
         );
     }
@@ -105,6 +108,7 @@ SettingsPanel.propTypes = {
     isReplaceIconDisabled: PropTypes.bool,
     isMinMaxIconDisabled: PropTypes.bool,
     isNewWindowIconDisabled: PropTypes.bool,
+    hasConfigurationsIcon: PropTypes.bool,
 };
 
 SettingsPanel.defaultProps = {
@@ -112,6 +116,7 @@ SettingsPanel.defaultProps = {
     isReplaceIconDisabled: false,
     isMinMaxIconDisabled: false,
     isNewWindowIconDisabled: false,
+    hasConfigurationsIcon: false,
 };
 
 export default SettingsPanel;

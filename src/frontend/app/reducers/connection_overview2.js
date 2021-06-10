@@ -46,7 +46,7 @@ if(initialState === null){
         detailsLocation: PANEL_LOCATION.SAME_WINDOW,
         businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
-        colorMode: 2,
+        colorMode: 0,
     });
 }
 

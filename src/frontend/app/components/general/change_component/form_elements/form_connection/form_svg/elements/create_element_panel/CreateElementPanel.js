@@ -102,10 +102,12 @@ class CreateElementPanel extends React.Component{
                         <Line style={itemTypeLine}/>
                         <div className={styles.create_element_panel} style={panelItemTypeStyles}>
                             <div className={`${styles.item} ${type === CREATE_PROCESS ? styles.selected_item : ''}`}
-                                 onClick={() => ::this.changeType(CREATE_PROCESS)}>Request
+                                 onClick={() => ::this.changeType(CREATE_PROCESS)}>
+                                {'Process'}
                             </div>
                             <div className={`${styles.item} ${type === CREATE_OPERATOR ? styles.selected_item : ''}`}
-                                 onClick={() => ::this.changeType(CREATE_OPERATOR)}>Operator
+                                 onClick={() => ::this.changeType(CREATE_OPERATOR)}>
+                                {'Operator'}
                             </div>
                         </div>
                     </React.Fragment>
