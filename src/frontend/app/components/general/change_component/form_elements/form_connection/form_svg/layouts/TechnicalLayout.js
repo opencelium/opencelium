@@ -34,13 +34,15 @@ import CConnection from "@classes/components/content/connection/CConnection";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem, currentSubItem} = mapItemsToClasses(state);
+    const {currentItem, currentSubItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
         currentItem,
         currentSubItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+        connection,
+        updateConnection,
     };
 }
 
@@ -101,11 +103,11 @@ class TechnicalLayout extends React.Component{
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
             ...svgProps
         } = this.props;
-        let fromConnectorPanelParams = {panelPosition: connection.fromConnector.getPanelPosition(), rectPosition: connection.fromConnector.getPanelRectPosition(), invokerName: connection.fromConnector.invoker.name};
-        let toConnectorPanelParams = {panelPosition: connection.toConnector.getPanelPosition(), rectPosition: connection.toConnector.getPanelRectPosition(), invokerName: connection.toConnector.invoker.name};
-        if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW){
+        if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
+        let fromConnectorPanelParams = {panelPosition: connection.fromConnector.getPanelPosition(), rectPosition: connection.fromConnector.getPanelRectPosition(), invokerName: connection.fromConnector.invoker.name};
+        let toConnectorPanelParams = {panelPosition: connection.toConnector.getPanelPosition(), rectPosition: connection.toConnector.getPanelRectPosition(), invokerName: connection.toConnector.invoker.name};
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
@@ -113,6 +115,7 @@ class TechnicalLayout extends React.Component{
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
+                    updateConnection={updateConnection}
                     openInNewWindow={::this.openInNewWindow}
                     isLayoutMinimized={isLayoutMinimized}
                     maximizeLayout={maximizeLayout}
@@ -157,7 +160,6 @@ class TechnicalLayout extends React.Component{
 }
 
 TechnicalLayout.propTypes = {
-    connection: PropTypes.instanceOf(CConnection).isRequired,
     detailsPosition: PropTypes.oneOf(['right', 'left']).isRequired,
     isLayoutMinimized: PropTypes.bool.isRequired,
     isBusinessLayoutMinimized: PropTypes.bool.isRequired,

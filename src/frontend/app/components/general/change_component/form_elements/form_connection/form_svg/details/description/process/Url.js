@@ -4,6 +4,7 @@ import styles from "@themes/default/content/connections/connection_overview_2";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Dialog from "@basic_components/Dialog";
 import Endpoint from "@change_component/form_elements/form_connection/form_methods/method/Endpoint";
+import ReactDOM from "react-dom";
 
 class Url extends React.Component{
     constructor(props) {
@@ -15,6 +16,8 @@ class Url extends React.Component{
     }
 
     toggleUrlVisibleIcon(){
+        const {setCurrentInfo, nameOfCurrentInfo} = this.props;
+        setCurrentInfo(nameOfCurrentInfo);
         this.setState({
             isUrlVisible: !this.state.isUrlVisible,
         })
@@ -24,37 +27,54 @@ class Url extends React.Component{
         this.toggleUrlVisibleIcon();
     }
 
+    updateConnection(){
+        const {connection, updateConnection} = this.props;
+        updateConnection(connection);
+    }
+
+    renderInfo(){
+        const {connection, method, connector} = this.props;
+        return(
+            <Endpoint
+                method={connector.getMethodByIndex(method.index)}
+                connector={connector}
+                connection={connection}
+                updateEntity={::this.updateConnection}
+                theme={{
+                    queryInput: styles.url_endpoint_query_input,
+                    paramGenerator: styles.url_endpoint_param_generator,
+                    paramGeneratorForm: styles.url_endpoint_param_generator_form,
+                    generatorFormMethod: styles.url_endpoint_generator_form_method,
+                    generatorFormParam: styles.url_endpoint_generator_form_param,
+                }}
+                isParamGeneratorArrowVisible={false}
+                isParamGeneratorAlwaysVisible={true}
+            />
+        );
+    }
+
     render(){
         const {isUrlVisible} = this.state;
-        const {connection, updateConnection, method, connector} = this.props;
+        const {isExtended, isCurrentInfo} = this.props;
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
                 <Col xs={8} className={`${styles.col}`}>
                     <TooltipFontIcon onClick={::this.toggleUrlVisibleIcon} size={14} value={<span className={styles.more_details}>{`URL`}</span>} tooltip={'URL'}/>
                 </Col>
+                {isExtended && isCurrentInfo &&
+                    ReactDOM.createPortal(
+                        this.renderInfo(), document.getElementById('extended_details_information')
+                    )
+                }
                 <Dialog
                     actions={[{label: 'Apply', onClick: ::this.updateEndpoint, id: 'endpoint_apply'}]}
-                    active={isUrlVisible}
+                    active={isUrlVisible && !isExtended}
                     toggle={::this.toggleUrlVisibleIcon}
                     title={'Endpoint'}
                     theme={{dialog: styles.url_dialog}}
                 >
-                    <Endpoint
-                        method={connector.getMethodByIndex(method.index)}
-                        connector={connector}
-                        connection={connection}
-                        updateEntity={updateConnection}
-                        theme={{
-                            queryInput: styles.url_endpoint_query_input,
-                            paramGenerator: styles.url_endpoint_param_generator,
-                            paramGeneratorForm: styles.url_endpoint_param_generator_form,
-                            generatorFormMethod: styles.url_endpoint_generator_form_method,
-                            generatorFormParam: styles.url_endpoint_generator_form_param,
-                        }}
-                        isParamGeneratorArrowVisible={false}
-                        isParamGeneratorAlwaysVisible={true}
-                    />
+                    {this.renderInfo()}
                 </Dialog>
             </React.Fragment>
         );

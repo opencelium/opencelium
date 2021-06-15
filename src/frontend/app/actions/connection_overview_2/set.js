@@ -17,6 +17,7 @@ import {ConnectionOverview2Action} from "@utils/actions";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {isObject} from "@utils/app";
+import CConnection from "@classes/components/content/connection/CConnection";
 
 
 const setColorMode = (color) => {
@@ -25,6 +26,18 @@ const setColorMode = (color) => {
         payload: color,
     };
 }
+/**
+ * set connection and updateConnection
+ * @param connection
+ * @param updateConnection
+ * @returns {{type: string, payload: {}}}
+ */
+const setConnectionData = (connection = null, updateConnection = null) => {
+    return {
+        type: ConnectionOverview2Action.SET_CONNECTIONDATA,
+        payload: {connection: connection instanceof CConnection ? connection.getObjectForConnectionOverview() : connection, updateConnection},
+    };
+};
 /**
  * set current item
  * @param currentItem - item
@@ -127,4 +140,5 @@ export{
     setBusinessLayoutLocation,
     setTechnicalLayoutLocation,
     setColorMode,
+    setConnectionData,
 };

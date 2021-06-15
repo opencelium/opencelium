@@ -19,6 +19,7 @@ import RightStatement
     from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/RightStatement";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
+import ReactDOM from "react-dom";
 
 
 @connect(null, {setCurrentTechnicalItem})
@@ -119,12 +120,14 @@ class Condition extends React.Component{
     }
 
     toggleEdit(){
+        const {setCurrentInfo, nameOfCurrentInfo} = this.props;
         let newState = {
             isOpenEditDialog: !this.state.isOpenEditDialog,
         }
         if(newState.isOpenEditDialog){
             newState.condition = this.getConditionFromProps(this.props);
         }
+        setCurrentInfo(nameOfCurrentInfo);
         this.setState(newState, () => {
             if(this.state.isOpenEditDialog){
                 setFocusById('details_condition');
@@ -151,7 +154,7 @@ class Condition extends React.Component{
             if(rightMethod) operatorItem.setRightStatementParent(connection.getMethodByColor(rightMethod.color).response.success);
         }
         if(property) operatorItem.setRightStatementRightPropertyValue(property);
-        updateConnection(); 
+        updateConnection(connection);
         let currentItem = connector.getSvgElementByIndex(operator.index);
         setCurrentTechnicalItem(currentItem);
         this.setState({
@@ -205,16 +208,66 @@ class Condition extends React.Component{
         return {hasValue, isRightStatementText, isRightStatementOption, options, isMultiline, popupInputStyles} ;
     }
 
-
-    render(){
-        const {isMouseOver, isOpenEditDialog, condition} = this.state;
+    renderInfo(){
+        const {isOpenEditDialog, condition} = this.state;
         const {connection, details, readOnly} = this.props;
         const operator = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
-        const conditionText = operator.condition.generateStatementText();
-        const conditionTextTitle = operator.condition.generateStatementText(true);
         const isLoopOperator = operator.type === LOOP_OPERATOR;
         const isIfOperator = operator.type === IF_OPERATOR;
+        if(isOpenEditDialog){
+            debugger;
+        }
+        return(
+            <React.Fragment>
+                <LeftStatement
+                    {...this.props}
+                    operator={operator}
+                    condition={condition}
+                    connector={connector}
+                    isLoopOperator={isLoopOperator}
+                    hasLeftMethod={this.hasLeftMethod()}
+                    isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
+                    updateCondition={::this.updateCondition}
+                    getConditionFromProps={::this.getConditionFromProps}
+                    isOperatorHasValue={::this.isOperatorHasValue}
+                />
+                {isIfOperator &&
+                <React.Fragment>
+                    <RelationalOperator
+                        relationalOperator={condition.relationalOperator}
+                        readOnly={readOnly}
+                        hasMethod={this.hasLeftMethod()}
+                        isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
+                        updateRelationalOperator={::this.updateRelationalOperator}
+                        isOperatorHasValue={::this.isOperatorHasValue}
+                    />
+                    <RightStatement
+                        {...this.props}
+                        condition={condition}
+                        connector={connector}
+                        operator={operator}
+                        hasLeftMethod={this.hasLeftMethod()}
+                        hasRightMethod={this.hasRightMethod()}
+                        hasRightParam={this.hasRightParam()}
+                        isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
+                        updateCondition={::this.updateCondition}
+                        getConditionFromProps={::this.getConditionFromProps}
+                        isOperatorHasValue={::this.isOperatorHasValue}
+                    />
+                </React.Fragment>
+                }
+            </React.Fragment>
+        );
+    }
+
+
+    render(){
+        const {isMouseOver, isOpenEditDialog} = this.state;
+        const {details, isExtended, isCurrentInfo} = this.props;
+        const operator = details.entity;
+        const conditionText = operator.condition.generateStatementText();
+        const conditionTextTitle = operator.condition.generateStatementText(true);
         if(isOpenEditDialog){
             debugger;
         }
@@ -224,50 +277,19 @@ class Condition extends React.Component{
                 <Col xs={8} className={styles.col} onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
                     <span className={styles.value} title={conditionTextTitle}>{conditionText}</span>
                     {isMouseOver && !isOpenEditDialog && <EditIcon onClick={::this.toggleEdit}/>}
+                    {isExtended && isCurrentInfo &&
+                        ReactDOM.createPortal(
+                            this.renderInfo(), document.getElementById('extended_details_information')
+                        )
+                    }
                     <Dialog
                         actions={[{label: 'Apply', onClick: ::this.updateConnection, id: 'condition_apply'}]}
-                        active={isOpenEditDialog}
+                        active={isOpenEditDialog && !isExtended}
                         toggle={::this.toggleEdit}
                         title={'Condition'}
                         theme={{dialog: styles.condition_dialog}}
                     >
-                        <LeftStatement
-                            {...this.props}
-                            operator={operator}
-                            condition={condition}
-                            connector={connector}
-                            isLoopOperator={isLoopOperator}
-                            hasLeftMethod={this.hasLeftMethod()}
-                            isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
-                            updateCondition={::this.updateCondition}
-                            getConditionFromProps={::this.getConditionFromProps}
-                            isOperatorHasValue={::this.isOperatorHasValue}
-                        />
-                        {isIfOperator &&
-                            <React.Fragment>
-                                <RelationalOperator
-                                    relationalOperator={condition.relationalOperator}
-                                    readOnly={readOnly}
-                                    hasMethod={this.hasLeftMethod()}
-                                    isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
-                                    updateRelationalOperator={::this.updateRelationalOperator}
-                                    isOperatorHasValue={::this.isOperatorHasValue}
-                                />
-                                <RightStatement
-                                    {...this.props}
-                                    condition={condition}
-                                    connector={connector}
-                                    operator={operator}
-                                    hasLeftMethod={this.hasLeftMethod()}
-                                    hasRightMethod={this.hasRightMethod()}
-                                    hasRightParam={this.hasRightParam()}
-                                    isOperatorHasThreeParams={this.checkIfOperatorHasThreeParams()}
-                                    updateCondition={::this.updateCondition}
-                                    getConditionFromProps={::this.getConditionFromProps}
-                                    isOperatorHasValue={::this.isOperatorHasValue}
-                                />
-                            </React.Fragment>
-                        }
+                        {this.renderInfo()}
                     </Dialog>
                 </Col>
             </React.Fragment>

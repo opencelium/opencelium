@@ -16,7 +16,7 @@
 import {List, fromJS, Map} from 'immutable';
 import {ConnectionOverview2Action} from "@utils/actions";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
-import {getLS, removeLS} from "@utils/LocalStorage";
+import {getLS, removeLS, setLS} from "@utils/LocalStorage";
 import {isExternalWindow} from "@utils/app";
 
 let initialState = null;
@@ -38,6 +38,7 @@ if(initialState === null){
         currentItem: null,
         currentSubItem: null,
         connection: null,
+        updateConnection: null,
         items: List([]),
         arrows: List([]),
         error: null,
@@ -55,6 +56,8 @@ if(initialState === null){
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case ConnectionOverview2Action.SET_CONNECTIONDATA:
+            return state.set('connection', action.payload.connection).set('updateConnection', action.payload.updateConnection);
         case ConnectionOverview2Action.SET_COLORMODE:
             return state.set('colorMode', action.payload);
         case ConnectionOverview2Action.SET_ARROWS:

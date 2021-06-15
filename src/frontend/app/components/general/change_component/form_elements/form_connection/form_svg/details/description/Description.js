@@ -32,7 +32,7 @@ class Description extends React.Component{
     }
 
     renderForOperator(){
-        const {details, connection, updateConnection} = this.props;
+        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo} = this.props;
         const operatorItem = details.entity;
         return(
             <Row className={styles.row}>
@@ -44,14 +44,14 @@ class Description extends React.Component{
                         <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }
-                <Condition updateConnection={updateConnection} connection={connection} details={details} readOnly={false}/>
+                <Condition nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details} readOnly={false}/>
             </Row>
         );
     }
 
     renderForProcess(){
         const {isResponseVisible} = this.state;
-        const {details, connection, updateConnection} = this.props;
+        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo} = this.props;
         const methodItem = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
         const request = methodItem.request;
@@ -84,9 +84,9 @@ class Description extends React.Component{
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
                         <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
-                        <Url request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
-                        <Header items={request.header}/>
-                        <Body source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>
+                        <Url nameOfCurrentInfo={'request_url'} isCurrentInfo={currentInfo === 'request_url'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
+                        <Header nameOfCurrentInfo={'request_header'} isCurrentInfo={currentInfo === 'request_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={request.header}/>
+                        <Body nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>
                     </Row>
                 </Col>
                 <br/>
@@ -101,15 +101,15 @@ class Description extends React.Component{
                             <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Success`}</b></Col>
                             <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                             <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
-                            <Header items={successResponse.header}/>
-                            <Body source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Success data'}/>
+                            <Header nameOfCurrentInfo={'success_header'} isCurrentInfo={currentInfo === 'success_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={successResponse.header}/>
+                            <Body nameOfCurrentInfo={'success_body'} isCurrentInfo={currentInfo === 'success_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Success data'}/>
                             <br/>
                             <br/>
                             <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
                             <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                             <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
-                            <Header items={failResponse.header}/>
-                            <Body source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Fail data'}/>
+                            <Header nameOfCurrentInfo={'fail_header'} isCurrentInfo={currentInfo === 'fail_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={failResponse.header}/>
+                            <Body nameOfCurrentInfo={'fail_body'} isCurrentInfo={currentInfo === 'fail_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Response. Fail data'}/>
                         </Row>
                     </Col>
                 }

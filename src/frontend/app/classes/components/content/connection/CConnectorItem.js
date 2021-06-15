@@ -54,16 +54,16 @@ const PANEL_MARGIN_RECT = 1;
  */
 export default class CConnectorItem{
 
-    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = '', shiftXForSvgItems = 0){
+    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = '', shiftXForSvgItems = 0, currentItemIndex = ''){
         this._id = isId(connectorId) ? connectorId : 0;
         this._title = title === '' ? 'Please, choose connector' : title;
         this._icon = isString(icon) ? icon : '';
         this._invoker = this.convertInvoker(invoker);
-        this._currentItem = null;
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._shiftXForSvgItems = shiftXForSvgItems;
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._currentItem = currentItemIndex !== '' ? this.getItemByIndex(currentItemIndex) : null;
         this._svgItems = [];
         this._arrows = [];
         this._pagination = this.setConnectorPagination();
@@ -81,7 +81,8 @@ export default class CConnectorItem{
         let operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
         let connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
         let shiftXForSvgItems = connectorItem && connectorItem.hasOwnProperty('shiftXForSvgItems') ? connectorItem.shiftXForSvgItems : 0;
-        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems);
+        let currentItemIndex = connectorItem && connectorItem.hasOwnProperty('currentItemIndex') ? connectorItem.currentItemIndex : '';
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex);
     }
 
     static hasIcon(icon){
@@ -833,6 +834,14 @@ export default class CConnectorItem{
         this.addItem(METHOD_ITEM, method, mode);
     }
 
+    getItemByIndex(index){
+        const method = this.getMethodByIndex(index);
+        if(method === null){
+            return this.getOperatorByIndex(index);
+        }
+        return method;
+    }
+
     getMethodByIndex(index){
         let method = this._methods.find(m => m.index === index);
         return method ? method : null;
@@ -1093,5 +1102,14 @@ export default class CConnectorItem{
             obj.connectorId = this._id;
         }
         return obj;
+    }
+
+    getObjectForConnectionOverview(){
+        return {
+            ...this.getObject(),
+            title: this._title,
+            invoker: this._invoker.getObject(),
+            currentItemIndex: this._currentItem ? this._currentItem.index : '',
+        }
     }
 }

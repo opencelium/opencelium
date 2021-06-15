@@ -17,10 +17,16 @@ import {CBusinessProcess} from "@classes/components/content/connection_overview_
 import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import CConnection from "@classes/components/content/connection/CConnection";
 
 export function mapItemsToClasses(state){
     const connectionOverview = state.get('connection_overview');
     let currentItem = connectionOverview.get('currentItem');
+    let connection = connectionOverview.get('connection');
+    if(connection !== null){
+        connection = CConnection.createConnection(connection);
+    }
+    const updateConnection = connectionOverview.get('updateConnection');
     if(currentItem !== null && (!(currentItem instanceof CBusinessProcess) || !(currentItem instanceof CBusinessOperator))){
         if(currentItem.hasOwnProperty('type')){
             currentItem = CBusinessOperator.createBusinessOperator(currentItem);
@@ -54,5 +60,7 @@ export function mapItemsToClasses(state){
         currentItem,
         currentSubItem,
         items: instancesItems,
+        connection,
+        updateConnection,
     }
 }

@@ -35,6 +35,10 @@ class Process extends React.Component{
         super(props)
     }
 
+    onDoubleClick(){
+        this.props.setIsCreateElementPanelOpened(true);
+    }
+
     onMouseDown(){
         this.props.setCurrentItem(this.props.process);
     }
@@ -49,7 +53,7 @@ class Process extends React.Component{
             } else{
                 connection.removeToConnectorMethod(method);
             }
-            updateConnection();
+            updateConnection(connection);
             const currentItem = connector.getCurrentItem();
             if(currentItem){
                 const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
@@ -74,7 +78,7 @@ class Process extends React.Component{
         }
         return(
             <svg x={process.x} y={process.y} className={`${styles.process} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
-                <rect fill={colorMode !== 1 ? '#fff' : method.color} onMouseDown={::this.onMouseDown} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
+                <rect fill={colorMode !== 1 ? '#fff' : method.color} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                       className={`${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                 />
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>

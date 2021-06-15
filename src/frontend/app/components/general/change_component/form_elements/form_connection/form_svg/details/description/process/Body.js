@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom';
 import React from 'react';
 import {Col, Row} from "react-grid-system";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -24,9 +25,12 @@ class Body extends React.Component{
     }
 
     toggleBodyVisible(){
-        const {connection, updateConnection} = this.props;
-        connection.currentEnhancemnet = null;
-        updateConnection();
+        const {connection, updateConnection, setCurrentInfo, nameOfCurrentInfo} = this.props;
+        if(!this.state.isBodyVisible) {
+            connection.currentEnhancemnet = null;
+        }
+        setCurrentInfo(nameOfCurrentInfo);
+        updateConnection(connection);
         this.setState({
             isBodyVisible: !this.state.isBodyVisible,
             currentEnhancement: null,
@@ -76,7 +80,7 @@ class Body extends React.Component{
     updateEntity(){
         const {currentFieldName} = this.state;
         const {connection, updateConnection} = this.props;
-        updateConnection();
+        updateConnection(connection);
         if(currentFieldName !== '') {
             let bindingItem = this.getCurrentBindingItem(currentFieldName);
             if (bindingItem) {
@@ -140,9 +144,28 @@ class Body extends React.Component{
         );
     }
 
+    renderInfo(){
+        const {bodyTitle, connector} = this.props;
+        const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO;
+        return(
+            <React.Fragment>
+                <div className={hasEnhancement ? styles.body_data_with_enhancement : styles.body_data}>
+                    <div><b>{bodyTitle}</b></div>
+                    {this.renderBody()}
+                </div>
+                {hasEnhancement &&
+                <div className={styles.body_enhancement}>
+                    <div><b>{'Enhancement'}</b></div>
+                    {this.renderEnhancement()}
+                </div>
+                }
+            </React.Fragment>
+        );
+    }
+
     render(){
         const {isBodyVisible} = this.state;
-        const {bodyTitle, connector} = this.props;
+        const {connector, isExtended, isCurrentInfo} = this.props;
         const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO;
         return(
             <React.Fragment>
@@ -150,23 +173,19 @@ class Body extends React.Component{
                 <Col xs={8} className={`${styles.col}`}>
                     <TooltipFontIcon onClick={::this.toggleBodyVisible} size={14} value={<span className={styles.more_details}>{`...`}</span>} tooltip={'Body'}/>
                 </Col>
+                {isExtended && isCurrentInfo &&
+                    ReactDOM.createPortal(
+                        this.renderInfo(), document.getElementById('extended_details_information')
+                    )
+                }
                 <Dialog
                     actions={[{label: 'Ok', onClick: ::this.toggleBodyVisible, id: 'header_ok'}]}
-                    active={isBodyVisible}
+                    active={isBodyVisible && !isExtended}
                     toggle={::this.toggleBodyVisible}
                     title={'Body'}
                     theme={{dialog: hasEnhancement ? styles.body_dialog_with_enhancement : styles.body_dialog, content: styles.body_content}}
                 >
-                    <div className={hasEnhancement ? styles.body_data_with_enhancement : styles.body_data}>
-                        <div><b>{bodyTitle}</b></div>
-                        {this.renderBody()}
-                    </div>
-                    {hasEnhancement &&
-                        <div className={styles.body_enhancement}>
-                            <div><b>{'Enhancement'}</b></div>
-                            {this.renderEnhancement()}
-                        </div>
-                    }
+                    {this.renderInfo()}
                 </Dialog>
             </React.Fragment>
         );

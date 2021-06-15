@@ -165,7 +165,7 @@ class Svg extends React.Component {
         }
         const connector = connection.getConnectorByType(currentItem.connectorType);
         connector.setCurrentItem(currentItem.entity);
-        updateConnection();
+        updateConnection(connection);
     }
 
     setItemCoordinates(coordinates){
@@ -263,11 +263,12 @@ class Svg extends React.Component {
         let x = clientRect.x;
         let y = clientRect.y;
         x += clientRect.width + 8;
-        if(e.target.points) {
+        //y += (clientRect.height / 2);
+/*        if(e.target.points) {
             y -= clientRect.height * 1.5;
         } else{
             y -= clientRect.height + 5;
-        }
+        }*/
         if(layoutPosition === LAYOUT_POSITION.BOTTOM) {
             let layoutSvg;
             if (e.currentTarget.id === 'technical_layout_svg') {
@@ -275,7 +276,8 @@ class Svg extends React.Component {
             } else {
                 layoutSvg = document.getElementById('technical_layout_svg');
             }
-            y -= layoutSvg.height.baseVal.value + 5;
+            //y -= (layoutSvg.height.baseVal.value + 86);
+            y -= 106;
         }
         setCreateElementPanelPosition({x, y});
     }
@@ -318,7 +320,7 @@ class Svg extends React.Component {
     }
 
     renderItems(){
-        const {currentItem, currentSubItem, items, connection, updateConnection} = this.props;
+        const {currentItem, currentSubItem, items, connection, updateConnection, setIsCreateElementPanelOpened} = this.props;
         return items.map((item,key) => {
             let isHighlighted = currentItem ? item.id.indexOf(currentItem.id) === 0 : false;
             let isCurrent = currentItem ? currentItem.id === item.id : false;
@@ -329,15 +331,15 @@ class Svg extends React.Component {
             switch (item.type){
                 case 'if':
                     return(
-                        <Operator key={key} type={'if'} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'if'} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <Operator key={key} type={'loop'} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'loop'} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });

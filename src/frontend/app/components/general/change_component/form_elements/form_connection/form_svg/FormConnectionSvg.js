@@ -23,7 +23,9 @@ import Details from "./details/Details";
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {PANEL_LOCATION} from "@utils/constants/app";
 import {setLS} from "@utils/LocalStorage";
-import {setCurrentBusinessItem, setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData} from "@actions/connection_overview_2/set";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {BChannel} from "@utils/store";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -51,17 +53,19 @@ const BUSINESS_DATA = {items: [], arrows: []};
 function mapStateToProps(state){
     const auth = state.get('auth');
     const connectionOverview = state.get('connection_overview');
+    const {connection} = mapItemsToClasses(state);
     return{
         authUser: auth.get('authUser'),
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+        connection,
     };
 }
 
 /**
  * Form for ConnectionSvg
  */
-@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData})
 class FormConnectionSvg extends Component{
 
     constructor(props){
@@ -87,9 +91,12 @@ class FormConnectionSvg extends Component{
     }
 
     componentDidMount() {
-        if(BUSINESS_DATA.items.length === 0 && this.props.entity.toConnector.svgItems.length !== 0) {
+        const {entity} = this.props;
+        if(BUSINESS_DATA.items.length === 0/* && entity.toConnector.svgItems.length !== 0*/) {
             this.minimizeBusinessLayout();
         }
+        this.props.setConnectionData(entity, ::this.updateEntity);
+        BChannel.onmessage = (e) => ::this.updateEntity(e.data);
     }
 
     componentWillUnmount() {
@@ -297,12 +304,15 @@ class FormConnectionSvg extends Component{
     }
 
     updateEntity(e = null){
-        const {authUser, entity, updateEntity} = this.props;
-        setLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, JSON.stringify(entity.getObject()), `connection_${authUser.userId}`);
-        if(e === null) {
-            updateEntity(entity);
-        } else{
-            updateEntity(e);
+        const {authUser, connection, updateEntity, setConnectionData} = this.props;
+        if(connection) {
+            setLS(`${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`, JSON.stringify(connection.getObject()), `connection_${authUser.userId}`);
+            if (e === null) {
+                updateEntity(connection);
+            } else {
+                updateEntity(e);
+                setConnectionData(e, ::this.updateEntity);
+            }
         }
     }
 
@@ -313,8 +323,6 @@ class FormConnectionSvg extends Component{
         return (
             <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
                 <Details
-                    connection={entity}
-                    updateConnection={::this.updateEntity}
                     moveDetailsRight={::this.moveDetailsRight}
                     moveDetailsLeft={::this.moveDetailsLeft}
                     position={detailsPosition}
@@ -338,8 +346,6 @@ class FormConnectionSvg extends Component{
                         />
                     }
                     <TechnicalLayout
-                        connection={entity}
-                        updateConnection={::this.updateEntity}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                         isBusinessLayoutEmpty={BUSINESS_DATA.items.length === 0}

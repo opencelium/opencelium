@@ -42,9 +42,6 @@ class CreateElementPanel extends React.Component{
                 itemPosition: OUTSIDE_ITEM,
             });
         }
-        if(!(this.props.currentItem === null || this.props.x === 0 && this.props.y === 0) && !this.props.isCreateElementPanelOpened){
-            this.props.setIsCreateElementPanelOpened(true)
-        }
     }
 
     changeType(type){
@@ -68,8 +65,11 @@ class CreateElementPanel extends React.Component{
         if(!isCreateElementPanelOpened || (x === 0 && y === 0)){
             return null;
         }
-        const isMethodItem = currentItem.entity instanceof CMethodItem;
-        const isOperatorItem = currentItem.entity instanceof COperatorItem;
+        let isMethodItem = currentItem && currentItem.entity instanceof CMethodItem;
+        const isOperatorItem = currentItem && currentItem.entity instanceof COperatorItem;
+        if(!isMethodItem && !isOperatorItem){
+            isMethodItem = true;
+        }
         const itemPositionLine = {top: `${y + 27}px`, left: `${x - 7}px`};
         const itemTypeLine = isMethodItem ? {top: `${y + 33}px`, left: `${x - 7}px`} : {top: `${y + 26}px`, left: `${x + 111}px`};
         const beforeItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 111}px`} : {top: `${y + 27}px`, left: `${x + 230}px`};
@@ -86,7 +86,7 @@ class CreateElementPanel extends React.Component{
             <div>
                 {isOperatorItem &&
                 <React.Fragment>
-                    <Line style={itemPositionLine}/>
+                    {/*<Line style={itemPositionLine}/>*/}
                     <div className={styles.create_element_panel} style={panelItemPositionStyles}>
                         <div className={`${styles.item} ${itemPosition === OUTSIDE_ITEM ? styles.selected_item : ''}`}
                              onClick={() => ::this.onChangeItemPosition(OUTSIDE_ITEM)}>Out
@@ -99,7 +99,7 @@ class CreateElementPanel extends React.Component{
                 }
                 {isMethodItem || (isOperatorItem && itemPosition !== '') ?
                     <React.Fragment>
-                        <Line style={itemTypeLine}/>
+                        {/*<Line style={itemTypeLine}/>*/}
                         <div className={styles.create_element_panel} style={panelItemTypeStyles}>
                             <div className={`${styles.item} ${type === CREATE_PROCESS ? styles.selected_item : ''}`}
                                  onClick={() => ::this.changeType(CREATE_PROCESS)}>

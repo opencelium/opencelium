@@ -677,4 +677,12 @@ export default class CConnection{
         }
         return obj;
     }
+
+    getObjectForConnectionOverview(){
+        return{
+            ...this.getObject(),
+            fromConnector: this._fromConnector.getObjectForConnectionOverview(),
+            toConnector: this._toConnector.getObjectForConnectionOverview(),
+        }
+    }
 }
