@@ -291,31 +291,33 @@ class Svg extends React.Component {
     }
 
     onWheel(e) {
-        if(e.altKey === true) {
-            const {svg} = this.state;
-            let viewBox = svg.viewBox.baseVal;
-            let point = svg.createSVGPoint();
-            let zoom = {
-                scaleFactor: 1.2,
-                duration: 0.5,
-            };
-            e.preventDefault();
-            let normalized;
-            let delta = e.wheelDelta;
-            if (delta) {
-                normalized = (delta % 120) === 0 ? delta / 120 : delta / 12;
-            } else {
-                delta = e.deltaY || e.detail || 0;
-                normalized = -(delta % 3 ? delta * 10 : delta / 3);
+        if(this.props.isScalable) {
+            if (e.altKey === true) {
+                const {svg} = this.state;
+                let viewBox = svg.viewBox.baseVal;
+                let point = svg.createSVGPoint();
+                let zoom = {
+                    scaleFactor: 1.2,
+                    duration: 0.5,
+                };
+                e.preventDefault();
+                let normalized;
+                let delta = e.wheelDelta;
+                if (delta) {
+                    normalized = (delta % 120) === 0 ? delta / 120 : delta / 12;
+                } else {
+                    delta = e.deltaY || e.detail || 0;
+                    normalized = -(delta % 3 ? delta * 10 : delta / 3);
+                }
+                let scaleDelta = normalized > 0 ? 1 / zoom.scaleFactor : zoom.scaleFactor;
+                point.x = e.clientX;
+                point.y = e.clientY;
+                let startPoint = point.matrixTransform(svg.getScreenCTM().inverse());
+                viewBox.x -= (startPoint.x - viewBox.x) * (scaleDelta - 1);
+                viewBox.y -= (startPoint.y - viewBox.y) * (scaleDelta - 1);
+                viewBox.width *= scaleDelta;
+                viewBox.height *= scaleDelta;
             }
-            let scaleDelta = normalized > 0 ? 1 / zoom.scaleFactor : zoom.scaleFactor;
-            point.x = e.clientX;
-            point.y = e.clientY;
-            let startPoint = point.matrixTransform(svg.getScreenCTM().inverse());
-            viewBox.x -= (startPoint.x - viewBox.x) * (scaleDelta - 1);
-            viewBox.y -= (startPoint.y - viewBox.y) * (scaleDelta - 1);
-            viewBox.width *= scaleDelta;
-            viewBox.height *= scaleDelta;
         }
     }
 
@@ -366,7 +368,7 @@ class Svg extends React.Component {
     }
 
     render(){
-        const {svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened, isCreateElementPanelOpened} = this.props;
+        const {svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened, isCreateElementPanelOpened, connection} = this.props;
         return(
             <React.Fragment>
                 <svg
@@ -383,7 +385,13 @@ class Svg extends React.Component {
                         <DefaultMarkers/>
                         <HighlightedMarkers/>
                     </defs>
-                    {fromConnectorPanelParams && toConnectorPanelParams && <ConnectorPanels fromConnectorPanelParams={fromConnectorPanelParams} toConnectorPanelParams={toConnectorPanelParams}/>}
+                    {fromConnectorPanelParams && toConnectorPanelParams &&
+                        <ConnectorPanels
+                            fromConnectorPanelParams={fromConnectorPanelParams}
+                            toConnectorPanelParams={toConnectorPanelParams}
+                            connection={connection}
+                            setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                        />}
                     {
                         this.renderArrows()
                     }

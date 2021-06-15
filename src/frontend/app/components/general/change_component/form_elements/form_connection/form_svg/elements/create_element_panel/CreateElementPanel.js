@@ -9,22 +9,19 @@ import CreateProcess
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateProcess";
 import CreateOperator
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateOperator";
-import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/components/content/connection/CConnectorItem";
 import {
-    Line
-} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
+    CONNECTOR_FROM,
+    CONNECTOR_TO,
+    INSIDE_ITEM,
+    OUTSIDE_ITEM
+} from "@classes/components/content/connection/CConnectorItem";
+import {Line} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 
 const CREATE_PROCESS = 'CREATE_PROCESS';
 const CREATE_OPERATOR = 'CREATE_OPERATOR';
 
-function mapStateToProps(state){
-    const connectionOverview = state.get('connection_overview');
-    return{
-        items: connectionOverview.get('items').toJS(),
-    };
-}
 
-@connect(mapStateToProps, {setArrows, setItems,})
+@connect(null, {setArrows, setItems,})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -35,7 +32,7 @@ class CreateElementPanel extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((this.props.x === 0 && this.props.y === 0 && this.state.type !== CREATE_PROCESS)
+        if((this.props.x === 0 && this.props.y === 0 && this.state.type !== CREATE_PROCESS && this.props.createElementPanelConnectorType === '')
         || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
             this.setState({
                 type: CREATE_PROCESS,
@@ -61,13 +58,25 @@ class CreateElementPanel extends React.Component{
 
     render(){
         const {type, itemPosition} = this.state;
-        const {x, y, currentItem, isCreateElementPanelOpened} = this.props;
-        if(!isCreateElementPanelOpened || (x === 0 && y === 0)){
+        const {currentItem, isCreateElementPanelOpened, connection, createElementPanelConnectorType} = this.props;
+        let {x, y, connectorType} = this.props;
+        if(!isCreateElementPanelOpened || (x === 0 && y === 0 && createElementPanelConnectorType === '')){
             return null;
+        }
+        let noOperatorType = false;
+        if(createElementPanelConnectorType === CONNECTOR_FROM){
+            x = 0;
+            y = 150;
+            noOperatorType = true;
+        }
+        if(createElementPanelConnectorType === CONNECTOR_TO){
+            x = 410;
+            y = 150;
         }
         let isMethodItem = currentItem && currentItem.entity instanceof CMethodItem;
         const isOperatorItem = currentItem && currentItem.entity instanceof COperatorItem;
-        if(!isMethodItem && !isOperatorItem){
+        if(createElementPanelConnectorType !== ''){
+            connectorType = createElementPanelConnectorType;
             isMethodItem = true;
         }
         const itemPositionLine = {top: `${y + 27}px`, left: `${x - 7}px`};
@@ -76,7 +85,10 @@ class CreateElementPanel extends React.Component{
         const afterItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 330}px`} : {top: `${y + 27}px`, left: `${x + 450}px`};
         const createIconStyles = isMethodItem ? {top: `${y + 23}px`, left: `${x + 350}px`} : {top: `${y + 17}px`, left: `${x + 468}px`};
         const panelItemPositionStyles = {top: `${y - 7}px`, left: `${x + 12}px`};
-        const panelItemTypeStyles = isMethodItem ? {top: `${y}px`, left: `${x + 12}px`} : {top: `${y - 7}px`, left: `${x + 130}px`};
+        let panelItemTypeStyles = isMethodItem ? {top: `${y}px`, left: `${x + 11}px`} : {top: `${y - 7}px`, left: `${x + 129}px`};
+        if(noOperatorType){
+            panelItemTypeStyles.top = `${y + 17}px`;
+        }
         let panelItemStyles = isMethodItem ? {top: y - 24, left: `${x + 130}px`} : {top: y - 31, left: `${x + 250}px`};
         if(type === CREATE_OPERATOR){
             panelItemStyles.top += 28;
@@ -84,14 +96,14 @@ class CreateElementPanel extends React.Component{
         panelItemStyles.top += 'px';
         return(
             <div>
-                {isOperatorItem &&
+                {isOperatorItem && createElementPanelConnectorType === '' &&
                 <React.Fragment>
                     {/*<Line style={itemPositionLine}/>*/}
                     <div className={styles.create_element_panel} style={panelItemPositionStyles}>
-                        <div className={`${styles.item} ${itemPosition === OUTSIDE_ITEM ? styles.selected_item : ''}`}
+                        <div className={`${styles.item_first} ${itemPosition === OUTSIDE_ITEM ? styles.selected_item : ''}`}
                              onClick={() => ::this.onChangeItemPosition(OUTSIDE_ITEM)}>Out
                         </div>
-                        <div className={`${styles.item} ${itemPosition === INSIDE_ITEM ? styles.selected_item : ''}`}
+                        <div className={`${styles.item_second} ${itemPosition === INSIDE_ITEM ? styles.selected_item : ''}`}
                              onClick={() => ::this.onChangeItemPosition(INSIDE_ITEM)}>In
                         </div>
                     </div>
@@ -99,16 +111,18 @@ class CreateElementPanel extends React.Component{
                 }
                 {isMethodItem || (isOperatorItem && itemPosition !== '') ?
                     <React.Fragment>
-                        {/*<Line style={itemTypeLine}/>*/}
+                        {isOperatorItem && createElementPanelConnectorType === '' && <Line style={itemTypeLine}/>}
                         <div className={styles.create_element_panel} style={panelItemTypeStyles}>
-                            <div className={`${styles.item} ${type === CREATE_PROCESS ? styles.selected_item : ''}`}
+                            <div className={`${noOperatorType ? styles.item_one : styles.item_first} ${type === CREATE_PROCESS ? styles.selected_item : ''}`}
                                  onClick={() => ::this.changeType(CREATE_PROCESS)}>
                                 {'Process'}
                             </div>
-                            <div className={`${styles.item} ${type === CREATE_OPERATOR ? styles.selected_item : ''}`}
-                                 onClick={() => ::this.changeType(CREATE_OPERATOR)}>
-                                {'Operator'}
-                            </div>
+                            {!noOperatorType &&
+                                <div className={`${styles.item_second} ${type === CREATE_OPERATOR ? styles.selected_item : ''}`}
+                                     onClick={() => ::this.changeType(CREATE_OPERATOR)}>
+                                    {'Operator'}
+                                </div>
+                            }
                         </div>
                     </React.Fragment>
                     : null
@@ -116,6 +130,9 @@ class CreateElementPanel extends React.Component{
                 {type === CREATE_PROCESS && ((isOperatorItem && itemPosition !== '') || isMethodItem) ?
                     <CreateProcess
                         {...this.props}
+                        x={x}
+                        y={y}
+                        connectorType={connectorType}
                         style={panelItemStyles}
                         itemPosition={itemPosition}
                         beforeLineStyles={beforeItemLineStyles}
@@ -127,6 +144,9 @@ class CreateElementPanel extends React.Component{
                 {type === CREATE_OPERATOR && ((isOperatorItem && itemPosition !== '') || isMethodItem) ?
                     <CreateOperator
                         {...this.props}
+                        x={x}
+                        y={y}
+                        connectorType={connectorType}
                         style={panelItemStyles}
                         itemPosition={itemPosition}
                         beforeLineStyles={beforeItemLineStyles}

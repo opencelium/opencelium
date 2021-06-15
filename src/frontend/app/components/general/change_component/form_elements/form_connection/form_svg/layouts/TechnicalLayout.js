@@ -31,6 +31,7 @@ import CProcess from "@classes/components/content/connection_overview_2/process/
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CConnection from "@classes/components/content/connection/CConnection";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -97,7 +98,7 @@ class TechnicalLayout extends React.Component{
 
     render(){
         const {createElementPanelPosition} = this.state;
-        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened} = this.props;
+        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
@@ -112,6 +113,7 @@ class TechnicalLayout extends React.Component{
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const startingSvgY = isBusinessLayoutEmpty ? -80 : -190;
+        const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
@@ -133,7 +135,7 @@ class TechnicalLayout extends React.Component{
                 <Svg
                     {...svgProps}
                     connection={connection}
-                    items={[...connection.fromConnector.svgItems, ...connection.toConnector.svgItems]}
+                    items={items}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
@@ -145,13 +147,15 @@ class TechnicalLayout extends React.Component{
                     startingSvgY={startingSvgY}
                 />
                 <CreateElementPanel
+                    createElementPanelConnectorType={createElementPanelConnectorType}
                     x={createElementPanelPosition.x}
                     y={createElementPanelPosition.y}
                     currentItem={currentSubItem}
+                    connectorType={currentSubItem ? currentSubItem.connectorType : ''}
                     connection={connection}
                     updateConnection={updateConnection}
-                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                     isCreateElementPanelOpened={isCreateElementPanelOpened}
+                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                     setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
                 />
             </div>

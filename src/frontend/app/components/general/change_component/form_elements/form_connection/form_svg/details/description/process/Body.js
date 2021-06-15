@@ -12,6 +12,7 @@ import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connecti
 import CConnection from "@classes/components/content/connection/CConnection";
 import {subArrayToString} from "@utils/app";
 import CEnhancement from "@classes/components/content/connection/field_binding/CEnhancement";
+import Button from "@basic_components/buttons/Button";
 
 class Body extends React.Component{
     constructor(props) {
@@ -29,7 +30,7 @@ class Body extends React.Component{
         if(!this.state.isBodyVisible) {
             connection.currentEnhancemnet = null;
         }
-        setCurrentInfo(nameOfCurrentInfo);
+        if(setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
         updateConnection(connection);
         this.setState({
             isBodyVisible: !this.state.isBodyVisible,
@@ -145,7 +146,7 @@ class Body extends React.Component{
     }
 
     renderInfo(){
-        const {bodyTitle, connector} = this.props;
+        const {bodyTitle, connector, isExtended, readOnly} = this.props;
         const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO;
         return(
             <React.Fragment>
@@ -154,10 +155,17 @@ class Body extends React.Component{
                     {this.renderBody()}
                 </div>
                 {hasEnhancement &&
-                <div className={styles.body_enhancement}>
-                    <div><b>{'Enhancement'}</b></div>
-                    {this.renderEnhancement()}
-                </div>
+                    <div className={styles.body_enhancement}>
+                        <div><b>{'Enhancement'}</b></div>
+                        {this.renderEnhancement()}
+                    </div>
+                }
+                {isExtended && !readOnly &&
+                    <Button
+                        className={styles.extended_details_button_save_body}
+                        title={'Save'}
+                        onClick={::this.toggleBodyVisible}
+                    />
                 }
             </React.Fragment>
         );

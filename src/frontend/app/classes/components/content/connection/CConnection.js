@@ -683,6 +683,7 @@ export default class CConnection{
             ...this.getObject(),
             fromConnector: this._fromConnector.getObjectForConnectionOverview(),
             toConnector: this._toConnector.getObjectForConnectionOverview(),
+            template: this.template.getObject(),
         }
     }
 }

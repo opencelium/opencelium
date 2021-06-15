@@ -84,6 +84,7 @@ class FormConnectionSvg extends Component{
             businessLayoutHeight: 300,
             technicalLayoutHeight: 300,
             isCreateElementPanelOpened: false,
+            createElementPanelConnectorType: ''
         }
         this.hasInitialPanelGroupSizes = false;
         this.initialBusinessSize = 300;
@@ -103,9 +104,10 @@ class FormConnectionSvg extends Component{
         this.props.setCurrentTechnicalItem(null);
     }
 
-    setIsCreateElementPanelOpened(isCreateElementPanelOpened){
+    setIsCreateElementPanelOpened(isCreateElementPanelOpened, createElementPanelConnectorType = ''){
         this.setState({
-            isCreateElementPanelOpened
+            isCreateElementPanelOpened,
+            createElementPanelConnectorType,
         });
     }
 
@@ -318,7 +320,9 @@ class FormConnectionSvg extends Component{
 
     render(){
         const {entity, renderNavigationComponent, renderValidationMessage} = this.props;
-        const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized, isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened} = this.state;
+        const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized,
+            isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened, createElementPanelConnectorType
+        } = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
@@ -358,6 +362,7 @@ class FormConnectionSvg extends Component{
                         layoutPosition={technicalLayoutPosition}
                         setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
                         isCreateElementPanelOpened={isCreateElementPanelOpened}
+                        createElementPanelConnectorType={createElementPanelConnectorType}
                     />
                     {businessLayoutPosition === LAYOUT_POSITION.BOTTOM &&
                         <BusinessLayout

@@ -5,6 +5,7 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Dialog from "@basic_components/Dialog";
 import Endpoint from "@change_component/form_elements/form_connection/form_methods/method/Endpoint";
 import ReactDOM from "react-dom";
+import Button from "@basic_components/buttons/Button";
 
 class Url extends React.Component{
     constructor(props) {
@@ -17,7 +18,7 @@ class Url extends React.Component{
 
     toggleUrlVisibleIcon(){
         const {setCurrentInfo, nameOfCurrentInfo} = this.props;
-        setCurrentInfo(nameOfCurrentInfo);
+        if(setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
         this.setState({
             isUrlVisible: !this.state.isUrlVisible,
         })
@@ -33,23 +34,32 @@ class Url extends React.Component{
     }
 
     renderInfo(){
-        const {connection, method, connector} = this.props;
+        const {connection, method, connector, isExtended} = this.props;
         return(
-            <Endpoint
-                method={connector.getMethodByIndex(method.index)}
-                connector={connector}
-                connection={connection}
-                updateEntity={::this.updateConnection}
-                theme={{
-                    queryInput: styles.url_endpoint_query_input,
-                    paramGenerator: styles.url_endpoint_param_generator,
-                    paramGeneratorForm: styles.url_endpoint_param_generator_form,
-                    generatorFormMethod: styles.url_endpoint_generator_form_method,
-                    generatorFormParam: styles.url_endpoint_generator_form_param,
-                }}
-                isParamGeneratorArrowVisible={false}
-                isParamGeneratorAlwaysVisible={true}
-            />
+            <React.Fragment>
+                <Endpoint
+                    method={connector.getMethodByIndex(method.index)}
+                    connector={connector}
+                    connection={connection}
+                    updateEntity={::this.updateConnection}
+                    theme={{
+                        queryInput: styles.url_endpoint_query_input,
+                        paramGenerator: styles.url_endpoint_param_generator,
+                        paramGeneratorForm: styles.url_endpoint_param_generator_form,
+                        generatorFormMethod: styles.url_endpoint_generator_form_method,
+                        generatorFormParam: styles.url_endpoint_generator_form_param,
+                    }}
+                    isParamGeneratorArrowVisible={false}
+                    isParamGeneratorAlwaysVisible={true}
+                />
+                {isExtended &&
+                    <Button
+                        className={styles.extended_details_button_save_url}
+                        title={'Save'}
+                        onClick={::this.updateEndpoint}
+                    />
+                }
+            </React.Fragment>
         );
     }
 

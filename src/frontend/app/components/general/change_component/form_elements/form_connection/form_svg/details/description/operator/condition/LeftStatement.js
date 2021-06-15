@@ -42,7 +42,7 @@ class LeftStatement extends React.Component{
         if(isLoopOperator){
             width = '70%';
         }
-        return {float: 'left', width};
+        return {float: 'left', width, position: 'relative'};
     }
 
     render(){

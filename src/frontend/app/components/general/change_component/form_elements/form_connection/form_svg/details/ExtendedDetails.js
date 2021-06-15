@@ -76,7 +76,7 @@ class ExtendedDetails extends React.Component{
         }
         return(
             <div className={detailsClassName} style={detailsStyle}>
-                <div className={styles.details_data}>
+                <div className={styles.extended_details_data}>
                     <div className={styles.title}>
                         Details
                     </div>
@@ -85,7 +85,7 @@ class ExtendedDetails extends React.Component{
                             <Col xs={6} sm={5} md={5} lg={3} className={styles.extended_details_col_description}>
                                 <Description details={details} isExtended={true} updateConnection={::this.updateConnection} connection={connection} currentInfo={currentInfo} setCurrentInfo={::this.setCurrentInfo}/>
                             </Col>
-                            <Col xs={6} sm={7} md={7} lg={9} id={'extended_details_information'}/>
+                            <Col className={styles.extended_details_information} xs={6} sm={7} md={7} lg={9} id={'extended_details_information'}/>
                         </Row>
                         :
                         <div>

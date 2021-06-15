@@ -23,9 +23,7 @@ export function mapItemsToClasses(state){
     const connectionOverview = state.get('connection_overview');
     let currentItem = connectionOverview.get('currentItem');
     let connection = connectionOverview.get('connection');
-    if(connection !== null){
-        connection = CConnection.createConnection(connection);
-    }
+    connection = CConnection.createConnection(connection);
     const updateConnection = connectionOverview.get('updateConnection');
     if(currentItem !== null && (!(currentItem instanceof CBusinessProcess) || !(currentItem instanceof CBusinessOperator))){
         if(currentItem.hasOwnProperty('type')){

@@ -44,26 +44,26 @@ class CreateProcess extends React.Component{
     create(){
         let {name, label} = this.state;
         name = name.value;
-        const {connection, currentItem, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
-        const connector = connection.getConnectorByType(currentItem.connectorType);
+        const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened, connectorType} = this.props;
+        const connector = connection.getConnectorByType(connectorType);
         let method = {name, label};
         let operation = connector.invoker.operations.find(o => o.name === name);
         method.request = operation.request.getObject({bodyOnlyConvert: true});
         method.response = operation.response.getObject({bodyOnlyConvert: true});
-        if (currentItem.connectorType === CONNECTOR_FROM) {
+        if (connectorType === CONNECTOR_FROM) {
             connection.addFromConnectorMethod(method, itemPosition);
         } else {
             connection.addToConnectorMethod(method, itemPosition);
         }
         updateConnection(connection);
-        setCreateElementPanelPosition({x: 0, y: 0});
-        setIsCreateElementPanelOpened(false);
+        if(setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
+        if(setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
     }
 
     render(){
         const {name, label} = this.state;
-        const {currentItem, connection, style, beforeLineStyles, afterLineStyles, createIconStyles,} = this.props;
-        const connector = connection.getConnectorByType(currentItem.connectorType);
+        const {connection, style, beforeLineStyles, afterLineStyles, createIconStyles, connectorType} = this.props;
+        const connector = connection.getConnectorByType(connectorType);
         const nameSource = connector.invoker.operations.map(operation => {
             return {label: operation.name, value: operation.name};
         });

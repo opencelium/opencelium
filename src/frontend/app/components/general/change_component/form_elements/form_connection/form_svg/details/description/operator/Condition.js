@@ -20,6 +20,8 @@ import RightStatement
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import ReactDOM from "react-dom";
+import Endpoint from "@change_component/form_elements/form_connection/form_methods/method/Endpoint";
+import Button from "@basic_components/buttons/Button";
 
 
 @connect(null, {setCurrentTechnicalItem})
@@ -127,7 +129,7 @@ class Condition extends React.Component{
         if(newState.isOpenEditDialog){
             newState.condition = this.getConditionFromProps(this.props);
         }
-        setCurrentInfo(nameOfCurrentInfo);
+        if(setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
         this.setState(newState, () => {
             if(this.state.isOpenEditDialog){
                 setFocusById('details_condition');
@@ -210,14 +212,11 @@ class Condition extends React.Component{
 
     renderInfo(){
         const {isOpenEditDialog, condition} = this.state;
-        const {connection, details, readOnly} = this.props;
+        const {connection, details, readOnly, isExtended} = this.props;
         const operator = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
         const isLoopOperator = operator.type === LOOP_OPERATOR;
         const isIfOperator = operator.type === IF_OPERATOR;
-        if(isOpenEditDialog){
-            debugger;
-        }
         return(
             <React.Fragment>
                 <LeftStatement
@@ -257,6 +256,13 @@ class Condition extends React.Component{
                     />
                 </React.Fragment>
                 }
+                {isExtended &&
+                    <Button
+                        className={styles.extended_details_button_save_condition}
+                        title={'Save'}
+                        onClick={::this.updateConnection}
+                    />
+                }
             </React.Fragment>
         );
     }
@@ -268,9 +274,6 @@ class Condition extends React.Component{
         const operator = details.entity;
         const conditionText = operator.condition.generateStatementText();
         const conditionTextTitle = operator.condition.generateStatementText(true);
-        if(isOpenEditDialog){
-            debugger;
-        }
         return(
             <React.Fragment>
                 <Col xs={4} className={styles.col}>{`Condition`}</Col>
