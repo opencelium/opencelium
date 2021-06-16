@@ -37,11 +37,12 @@ class OperatorType extends React.Component{
     }
 
     render(){
-        const {details} = this.props;
+        const {details, readOnly} = this.props;
         const operatorItem = details.entity;
         return(
             <SelectableInput
                 id={`type_options`}
+                readOnly={readOnly}
                 options={COperatorItem.getOperatorTypesForSelect()}
                 changeValue={::this.changeType}
                 label={'Type'}

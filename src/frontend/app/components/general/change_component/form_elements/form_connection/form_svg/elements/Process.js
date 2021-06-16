@@ -64,7 +64,7 @@ class Process extends React.Component{
     }
 
     render(){
-        const {process, isNotDraggable, isCurrent, isHighlighted, colorMode, setColorMode} = this.props;
+        const {process, isNotDraggable, isCurrent, isHighlighted, colorMode, readOnly} = this.props;
         const method = process.entity;
         const borderRadius = 10;
         const labelX = '50%';
@@ -85,9 +85,9 @@ class Process extends React.Component{
                     {shortLabel}
                 </text>
                 <title>{label}</title>
-                {colorMode === 0 && <rect fill={method.color} x={10} y={5} width={isCurrent ? 95 : 110} height={15} rx={5} ry={5}/>}
+                {colorMode === 0 && <rect fill={method.color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
                 {colorMode === 2 && <circle cx={15} cy={15} r="10" fill={method.color}/>}
-                {isCurrent &&
+                {isCurrent && !readOnly &&
                     <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
                 }
             </svg>

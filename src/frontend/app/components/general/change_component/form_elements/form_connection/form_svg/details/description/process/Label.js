@@ -79,7 +79,7 @@ class Label extends React.Component{
 
     render(){
         const {isMouseOver, isEditOn, labelValue} = this.state;
-        const {details} = this.props;
+        const {details, readOnly} = this.props;
         const methodLabel = details.entity.label;
         return(
             <React.Fragment>
@@ -91,7 +91,7 @@ class Label extends React.Component{
                     :
                         <span className={styles.value}>{methodLabel === '' ? 'is empty' : methodLabel}</span>
                     }
-                    {isMouseOver && !isEditOn && <EditIcon onClick={::this.toggleEdit}/>}
+                    {isMouseOver && !isEditOn && !readOnly && <EditIcon onClick={::this.toggleEdit}/>}
                     {isEditOn && <ApplyIcon onClick={::this.changeLabel}/>}
                     {isEditOn && <CancelIcon onClick={::this.cancelEdit}/>}
                 </Col>

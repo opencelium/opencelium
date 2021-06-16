@@ -80,7 +80,7 @@ class Operator extends React.Component{
     }
 
     renderIfOperator(){
-        const {operator, isNotDraggable, isCurrent, isHighlighted} = this.props;
+        const {operator, isNotDraggable, isCurrent, isHighlighted, readOnly} = this.props;
         const textX = '50%';
         const textY = '50%';
         const closeX = 40;
@@ -93,7 +93,7 @@ class Operator extends React.Component{
                     {'if'}
                 </text>
                 <title>{'if'}</title>
-                {isCurrent &&
+                {isCurrent && !readOnly &&
                 <DeleteIcon svgX={closeX} svgY={closeY} onClick={::this.deleteOperator}/>
                 }
             </svg>

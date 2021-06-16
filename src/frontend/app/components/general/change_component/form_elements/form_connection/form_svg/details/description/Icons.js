@@ -13,3 +13,7 @@ export const ApplyIcon = (props) => {
 export const CancelIcon = (props) => {
     return <TooltipFontIcon className={styles.cancel_icon} tooltipPosition={'left'} size={16} isButton={true} tooltip={'Cancel'} value={'close'} onClick={props.onClick}/>;
 }
+
+export const ViewIcon = (props) => {
+    return <TooltipFontIcon className={styles.edit_icon} tooltipPosition={'left'} size={16} isButton={true} tooltip={'More'} value={'more_vert'} onClick={props.onClick}/>;
+}

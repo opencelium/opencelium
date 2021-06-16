@@ -285,9 +285,20 @@ const ConnectionOverview2 = Loadable({
     loader: () => import(/* webpackChunkName: 'connection_overview_2' */ '@components/content/connection_overview_2/ConnectionOverview2'),
     loading: Loading,
 });
-
 const ConnectionAdd2 =  Loadable({
     loader: () => import(/* webpackChunkName: 'connection_add_2' */ '@components/content/connection_overview_2/add/ConnectionAdd2'),
+    loading: Loading,
+});
+const ConnectionsList2 = Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_list' */ '@components/content/connection_overview_2/list/ConnectionsList'),
+    loading: Loading,
+});
+const ConnectionView2 =  Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_view' */ '@components/content/connection_overview_2/view/ConnectionView'),
+    loading: Loading,
+});
+const ConnectionUpdate2 =  Loadable({
+    loader: () => import(/* webpackChunkName: 'connection_update' */ '@components/content/connection_overview_2/update/ConnectionUpdate'),
     loading: Loading,
 });
 
@@ -375,6 +386,9 @@ export default {
     UpdateAssistant,
     ConnectionOverview2,
     ConnectionAdd2,
+    ConnectionsList2,
+    ConnectionView2,
+    ConnectionUpdate2,
     ConnectionOverviewDetails,
     ConnectionOverviewTechnicalLayout,
     ConnectionOverviewBusinessLayout,

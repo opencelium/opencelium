@@ -83,7 +83,7 @@ class ExtendedDetails extends React.Component{
                     {details ?
                         <Row className={styles.extended_details_row_description}>
                             <Col xs={6} sm={5} md={5} lg={3} className={styles.extended_details_col_description}>
-                                <Description details={details} isExtended={true} updateConnection={::this.updateConnection} connection={connection} currentInfo={currentInfo} setCurrentInfo={::this.setCurrentInfo}/>
+                                <Description readOnly={connection.readOnly} details={details} isExtended={true} updateConnection={::this.updateConnection} connection={connection} currentInfo={currentInfo} setCurrentInfo={::this.setCurrentInfo}/>
                             </Col>
                             <Col className={styles.extended_details_information} xs={6} sm={7} md={7} lg={9} id={'extended_details_information'}/>
                         </Row>

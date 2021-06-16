@@ -44,11 +44,13 @@ class Name extends React.Component{
     }
 
     render(){
-        const invoker = this.props.details.entity.invoker;
+        const {readOnly, details} = this.props;
+        const invoker = details.entity.invoker;
         const name = ::this.getName();
         return(
             <SelectableInput
                 id={`name_options`}
+                readOnly={readOnly}
                 options={invoker.getAllOperationsForSelect()}
                 changeValue={::this.changeName}
                 label={'Name'}

@@ -98,7 +98,7 @@ class TechnicalLayout extends React.Component{
 
     render(){
         const {createElementPanelPosition} = this.state;
-        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType} = this.props;
+        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType, readOnly} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
@@ -146,18 +146,20 @@ class TechnicalLayout extends React.Component{
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
                 />
-                <CreateElementPanel
-                    createElementPanelConnectorType={createElementPanelConnectorType}
-                    x={createElementPanelPosition.x}
-                    y={createElementPanelPosition.y}
-                    currentItem={currentSubItem}
-                    connectorType={currentSubItem ? currentSubItem.connectorType : ''}
-                    connection={connection}
-                    updateConnection={updateConnection}
-                    isCreateElementPanelOpened={isCreateElementPanelOpened}
-                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
-                    setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
-                />
+                {!readOnly &&
+                    <CreateElementPanel
+                        createElementPanelConnectorType={createElementPanelConnectorType}
+                        x={createElementPanelPosition.x}
+                        y={createElementPanelPosition.y}
+                        currentItem={currentSubItem}
+                        connectorType={currentSubItem ? currentSubItem.connectorType : ''}
+                        connection={connection}
+                        updateConnection={updateConnection}
+                        isCreateElementPanelOpened={isCreateElementPanelOpened}
+                        setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                        setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                    />
+                }
             </div>
         );
     }

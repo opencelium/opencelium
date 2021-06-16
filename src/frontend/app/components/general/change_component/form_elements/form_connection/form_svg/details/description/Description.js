@@ -32,11 +32,11 @@ class Description extends React.Component{
     }
 
     renderForOperator(){
-        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo} = this.props;
+        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly} = this.props;
         const operatorItem = details.entity;
         return(
             <Row className={styles.row}>
-                <OperatorType details={details} connection={connection} updateConnection={updateConnection}/>
+                <OperatorType readOnly={readOnly} details={details} connection={connection} updateConnection={updateConnection}/>
                 {
                     operatorItem.iterator &&
                     <React.Fragment>
@@ -44,14 +44,14 @@ class Description extends React.Component{
                         <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
                     </React.Fragment>
                 }
-                <Condition nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details} readOnly={false}/>
+                <Condition readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
             </Row>
         );
     }
 
     renderForProcess(){
         const {isResponseVisible} = this.state;
-        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo} = this.props;
+        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly} = this.props;
         const methodItem = details.entity;
         const connector = connection.getConnectorByType(details.connectorType);
         const request = methodItem.request;
@@ -84,9 +84,9 @@ class Description extends React.Component{
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
                         <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
-                        <Url nameOfCurrentInfo={'request_url'} isCurrentInfo={currentInfo === 'request_url'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
+                        <Url readOnly={readOnly} nameOfCurrentInfo={'request_url'} isCurrentInfo={currentInfo === 'request_url'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} request={request} connection={connection} updateConnection={updateConnection} method={methodItem} connector={connector}/>
                         <Header nameOfCurrentInfo={'request_header'} isCurrentInfo={currentInfo === 'request_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={request.header}/>
-                        <Body nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>
+                        <Body readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={updateConnection} method={methodItem} bodyTitle={'Request data'}/>
                     </Row>
                 </Col>
                 <br/>

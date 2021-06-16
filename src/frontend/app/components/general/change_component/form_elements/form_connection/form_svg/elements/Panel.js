@@ -13,11 +13,11 @@ class Panel extends React.Component{
     }
 
     render(){
-        const {panelPosition, rectPosition, invokerName, namePosition, isEmpty} = this.props;
+        const {panelPosition, rectPosition, invokerName, namePosition, isEmpty, connectorType} = this.props;
         const textX = namePosition === 'right' ? panelPosition.width : 2;
         return(
             <React.Fragment>
-                <svg x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
+                <svg id={`${connectorType}_panel`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
                     <rect onClick={::this.onClick} x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel} style={{cursor: isEmpty ? 'pointer' : 'move'}}/>
                     <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
                         {invokerName}

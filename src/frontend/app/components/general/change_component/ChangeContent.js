@@ -86,9 +86,14 @@ class ChangeContent extends Component{
         addNextPageChangeEntityKeyNavigation(this);
         //addChangeContentActionNavigation(this);
         addFocusDocumentNavigation(this);
+        this.applyExternalComponentSettings();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        this.applyExternalComponentSettings();
+    }
+
+    applyExternalComponentSettings(){
         const {page} = this.state;
         const {contents, isComponentExternalInChangeContent} = this.props;
         const isExternalComponent = contents[page].hasOwnProperty('isExternalComponent') ? contents[page].isExternalComponent : false;

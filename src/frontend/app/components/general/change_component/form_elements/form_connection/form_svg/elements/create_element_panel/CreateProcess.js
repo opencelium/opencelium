@@ -7,6 +7,7 @@ import {
     Line,
 } from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 import {CreateIcon} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateIcon";
+import {setFocusById} from "@utils/app";
 
 
 class CreateProcess extends React.Component{
@@ -17,6 +18,10 @@ class CreateProcess extends React.Component{
             name: '',
             label: '',
         }
+    }
+
+    componentDidMount() {
+        setFocusById('new_request_name');
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

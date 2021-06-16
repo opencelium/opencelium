@@ -34,10 +34,11 @@ class Url extends React.Component{
     }
 
     renderInfo(){
-        const {connection, method, connector, isExtended} = this.props;
+        const {connection, method, connector, isExtended, readOnly} = this.props;
         return(
             <React.Fragment>
                 <Endpoint
+                    readOnly={readOnly}
                     method={connector.getMethodByIndex(method.index)}
                     connector={connector}
                     connection={connection}
@@ -50,7 +51,7 @@ class Url extends React.Component{
                         generatorFormParam: styles.url_endpoint_generator_form_param,
                     }}
                     isParamGeneratorArrowVisible={false}
-                    isParamGeneratorAlwaysVisible={true}
+                    isParamGeneratorAlwaysVisible={!readOnly}
                 />
                 {isExtended &&
                     <Button
@@ -65,7 +66,8 @@ class Url extends React.Component{
 
     render(){
         const {isUrlVisible} = this.state;
-        const {isExtended, isCurrentInfo} = this.props;
+        const {isExtended, isCurrentInfo, readOnly} = this.props;
+        const label = readOnly ? 'Ok' : 'Apply';
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
@@ -78,7 +80,7 @@ class Url extends React.Component{
                     )
                 }
                 <Dialog
-                    actions={[{label: 'Apply', onClick: ::this.updateEndpoint, id: 'endpoint_apply'}]}
+                    actions={[{label, onClick: ::this.updateEndpoint, id: 'endpoint_apply'}]}
                     active={isUrlVisible && !isExtended}
                     toggle={::this.toggleUrlVisibleIcon}
                     title={'Endpoint'}

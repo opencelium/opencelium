@@ -185,14 +185,14 @@ class SelectSearch extends Component{
 
     renderDropdown(){
         const {currentItems, currentItem} = this.state;
-        const {authUser, dropdownClassName} = this.props;
+        const {authUser, dropdownClassName, readOnly} = this.props;
         let classNames = [
             'select_search_dropdown',
             'items',
             'item',
             'item_hover',
         ];
-        if(currentItems.length === 0){
+        if(currentItems.length === 0 || readOnly){
             return null;
         }
         classNames = getThemeClass({classNames, authUser, styles});

@@ -183,7 +183,7 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {isDraggable, setCreateElementPanelPosition} = this.props;
+        const {isDraggable} = this.props;
         if(e.target.classList.contains('draggable')) {
             if(isDraggable) {
                 this.selectedElement = e.target.parentNode;
@@ -199,7 +199,7 @@ class Svg extends React.Component {
         } else{
             this.hideCreateElementPanel();
             const {svg} = this.state;
-            if(svg) {
+            if (svg) {
                 this.isPointerDown = true;
                 this.pointerOrigin = this.getMousePosition(e, svg);
             }
@@ -291,7 +291,7 @@ class Svg extends React.Component {
     }
 
     onWheel(e) {
-        if(this.props.isScalable) {
+        if(this.props.isScalable && this.props.items.length > 0) {
             if (e.altKey === true) {
                 const {svg} = this.state;
                 let viewBox = svg.viewBox.baseVal;
@@ -322,7 +322,7 @@ class Svg extends React.Component {
     }
 
     renderItems(){
-        const {currentItem, currentSubItem, items, connection, updateConnection, setIsCreateElementPanelOpened} = this.props;
+        const {currentItem, currentSubItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
         return items.map((item,key) => {
             let isHighlighted = currentItem ? item.id.indexOf(currentItem.id) === 0 : false;
             let isCurrent = currentItem ? currentItem.id === item.id : false;
@@ -333,15 +333,15 @@ class Svg extends React.Component {
             switch (item.type){
                 case 'if':
                     return(
-                        <Operator key={key} type={'if'} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <Operator key={key} type={'loop'} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} process={item} readOnly={readOnly} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });

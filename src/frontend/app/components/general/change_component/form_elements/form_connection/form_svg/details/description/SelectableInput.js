@@ -141,13 +141,13 @@ class SelectableInput extends React.Component{
 
     render(){
         const {isMouseOver, isEditOn, isConfirmationShown} = this.state;
-        const {label, value} = this.props;
+        const {label, value, readOnly} = this.props;
         return(
             <React.Fragment>
                 <Col xs={4} className={styles.col}>{label}</Col>
                 <Col xs={8} className={isEditOn ? styles.col_select : styles.col} onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
                     {isEditOn ? ::this.renderOptions() : <span className={styles.value}>{value}</span>}
-                    {isMouseOver && !isEditOn && <EditIcon onClick={::this.toggleEdit}/>}
+                    {isMouseOver && !isEditOn && !readOnly && <EditIcon onClick={::this.toggleEdit}/>}
                     {isEditOn && <ApplyIcon onClick={::this.toggleConfirmation}/>}
                     {isEditOn && <CancelIcon onClick={::this.cancelEdit}/>}
                     <Confirmation

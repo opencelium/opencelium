@@ -6,7 +6,7 @@ import styles from "@themes/default/content/connections/connection_overview_2";
 import {setFocusById} from "@utils/app";
 import {setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
 import Dialog from "@basic_components/Dialog";
-import {EditIcon} from "../Icons";
+import {EditIcon, ViewIcon} from "../Icons";
 import LeftStatement
     from "./condition/LeftStatement";
 import {FUNCTIONAL_OPERATORS} from "@classes/components/content/connection/operator/CCondition";
@@ -270,23 +270,25 @@ class Condition extends React.Component{
 
     render(){
         const {isMouseOver, isOpenEditDialog} = this.state;
-        const {details, isExtended, isCurrentInfo} = this.props;
+        const {details, isExtended, isCurrentInfo, readOnly} = this.props;
         const operator = details.entity;
         const conditionText = operator.condition.generateStatementText();
         const conditionTextTitle = operator.condition.generateStatementText(true);
+        const label = readOnly ? 'Ok' : 'Apply';
         return(
             <React.Fragment>
                 <Col xs={4} className={styles.col}>{`Condition`}</Col>
                 <Col xs={8} className={styles.col} onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
                     <span className={styles.value} title={conditionTextTitle}>{conditionText}</span>
-                    {isMouseOver && !isOpenEditDialog && <EditIcon onClick={::this.toggleEdit}/>}
+                    {isMouseOver && !isOpenEditDialog && !readOnly && <EditIcon onClick={::this.toggleEdit}/>}
+                    {isMouseOver && !isOpenEditDialog && readOnly && <ViewIcon onClick={::this.toggleEdit}/>}
                     {isExtended && isCurrentInfo &&
                         ReactDOM.createPortal(
                             this.renderInfo(), document.getElementById('extended_details_information')
                         )
                     }
                     <Dialog
-                        actions={[{label: 'Apply', onClick: ::this.updateConnection, id: 'condition_apply'}]}
+                        actions={[{label, onClick: ::this.updateConnection, id: 'condition_apply'}]}
                         active={isOpenEditDialog && !isExtended}
                         toggle={::this.toggleEdit}
                         title={'Condition'}

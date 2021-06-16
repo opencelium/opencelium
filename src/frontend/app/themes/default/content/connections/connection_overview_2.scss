@@ -182,6 +182,12 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   fill: $REMOVE_ICON_COLOR;
   cursor: pointer;
 }
+.delete:hover{
+  fill: rgba(207, 85, 85, 0.85);
+}
+.delete:active{
+  fill: rgba(162, 47, 47, 0.85);
+}
 .process_delete{
   @extend .delete;
 }

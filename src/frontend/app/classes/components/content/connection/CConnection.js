@@ -47,7 +47,7 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -92,10 +92,14 @@ export default class CConnection{
         }
         this._currentFieldBindingTo = -1;
         this.setError(error);
+        this._readOnly = readOnly;
     }
 
     static createConnection(connection){
         let connectionId = connection && connection.hasOwnProperty('connectionId') ? connection.connectionId : 0;
+        if(connectionId === 0){
+            connectionId = connection && connection.hasOwnProperty('id') ? connection.id : 0;
+        }
         let title = connection && connection.hasOwnProperty('title') ? connection.title : '';
         let description = connection && connection.hasOwnProperty('description') ? connection.description : '';
         let fromConnector = connection && connection.hasOwnProperty('fromConnector') ? connection.fromConnector : null;
@@ -103,7 +107,8 @@ export default class CConnection{
         let fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
         let template = connection && connection.hasOwnProperty('template') ? connection.template : null;
         let error = connection && connection.hasOwnProperty('error') ? connection.error : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error);
+        let readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly);
     }
 
     static duplicateConnection(connection){
@@ -348,6 +353,14 @@ export default class CConnection{
 
     set allTemplates(allTemplates){
         this._allTemplates = allTemplates;
+    }
+
+    get readOnly(){
+        return this._readOnly;
+    }
+
+    set readOnly(readOnly){
+        this._readOnly = readOnly;
     }
 
     getCurrentFieldBindingTo(){
@@ -684,6 +697,7 @@ export default class CConnection{
             fromConnector: this._fromConnector.getObjectForConnectionOverview(),
             toConnector: this._toConnector.getObjectForConnectionOverview(),
             template: this.template.getObject(),
+            readOnly: this._readOnly,
         }
     }
 }

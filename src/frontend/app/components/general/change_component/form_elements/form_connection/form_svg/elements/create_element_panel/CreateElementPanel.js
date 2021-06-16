@@ -45,6 +45,9 @@ class CreateElementPanel extends React.Component{
         if(type === CREATE_PROCESS){
             setFocusById('new_request_name');
         }
+        if(type === CREATE_OPERATOR){
+            setFocusById('new_operator_type');
+        }
         this.setState({
             type,
         });
@@ -65,13 +68,17 @@ class CreateElementPanel extends React.Component{
         }
         let noOperatorType = false;
         if(createElementPanelConnectorType === CONNECTOR_FROM){
-            x = 0;
-            y = 150;
+            const fromConnectorPanel = document.getElementById(`${CONNECTOR_FROM}_panel`);
+            const clientSvg = fromConnectorPanel.getBoundingClientRect();
+            x = clientSvg.x;
+            y = clientSvg.y + 23;
             noOperatorType = true;
         }
         if(createElementPanelConnectorType === CONNECTOR_TO){
-            x = 410;
-            y = 150;
+            const toConnectorPanel = document.getElementById(`${CONNECTOR_TO}_panel`);
+            const clientSvg = toConnectorPanel.getBoundingClientRect();
+            x = clientSvg.x;
+            y = clientSvg.y + 23;
         }
         let isMethodItem = currentItem && currentItem.entity instanceof CMethodItem;
         const isOperatorItem = currentItem && currentItem.entity instanceof COperatorItem;
