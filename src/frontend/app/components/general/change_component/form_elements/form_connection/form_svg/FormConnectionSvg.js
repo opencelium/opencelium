@@ -26,6 +26,7 @@ import {setLS} from "@utils/LocalStorage";
 import {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {BChannel} from "@utils/store";
+import {withTranslation} from "react-i18next";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -66,6 +67,7 @@ function mapStateToProps(state){
  * Form for ConnectionSvg
  */
 @connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData})
+@withTranslation('basic_components')
 class FormConnectionSvg extends Component{
 
     constructor(props){
