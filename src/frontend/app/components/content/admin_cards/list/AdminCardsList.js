@@ -102,7 +102,7 @@ class AdminCardsList extends Component{
                 if(fetchingUpdateAppVersion !== API_REQUEST_STATE.FINISH || fetchingAppVersion !== API_REQUEST_STATE.FINISH){
                     result.subtitle = <Loading className={styles.update_loading}/>;
                 } else {
-                    result.subtitle = appVersion !== updateAppVersion ? t('LIST.NO_UPDATES') : t('LIST.UPDATES');
+                    result.subtitle = appVersion === updateAppVersion ? t('LIST.NO_UPDATES') : t('LIST.UPDATES');
                 }
             }
             return result;
