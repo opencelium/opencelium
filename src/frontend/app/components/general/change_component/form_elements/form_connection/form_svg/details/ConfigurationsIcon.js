@@ -1,7 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import ContentNavigationButton from "@components/general/content/ContentNavigationButton";
 import Dialog from "@basic_components/Dialog";
 import {connect} from "react-redux";
 import {setColorMode} from "@actions/connection_overview_2/set";
@@ -42,17 +42,17 @@ class ConfigurationsIcon extends React.Component{
 
     render(){
         const {isVisibleSettingsWindow, colorMode} = this.state;
-        const isDisabled = false;
+        const {disabled} = this.props;
         return(
             <React.Fragment>
                 <TooltipFontIcon
                     size={20}
                     className={styles.configurations_icon}
                     onClick={::this.toggleIsVisibleSettingsWindow}
-                    tooltip={isDisabled ? '' : 'Settings'}
+                    tooltip={disabled ? '' : 'Settings'}
                     value={'settings'}
                     tooltipPosition={'top'}
-                    disabled={isDisabled}
+                    disabled={disabled}
                     isButton={true}
                 />
                 <Dialog
@@ -88,5 +88,13 @@ class ConfigurationsIcon extends React.Component{
         );
     }
 }
+
+ConfigurationsIcon.propTypes = {
+    disabled: PropTypes.bool,
+};
+
+ConfigurationsIcon.defaultProps = {
+    disabled: false,
+};
 
 export default ConfigurationsIcon;

@@ -25,12 +25,13 @@ class CreateProcess extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((this.props.x === 0 && this.props.y === 0 && this.state.name !== '')
-            || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
-            this.setState({
-                name: '',
-                label: '',
-            });
+        if((this.props.x === 0 && this.props.y === 0) || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
+            if(this.state.name !== '' && this.state.label !== '') {
+                this.setState({
+                    name: '',
+                    label: '',
+                });
+            }
         }
     }
 

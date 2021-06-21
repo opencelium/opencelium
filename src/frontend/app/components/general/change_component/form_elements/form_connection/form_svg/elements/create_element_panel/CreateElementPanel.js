@@ -32,12 +32,14 @@ class CreateElementPanel extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((this.props.x === 0 && this.props.y === 0 && this.state.type !== CREATE_PROCESS && this.props.createElementPanelConnectorType === '')
+        if((this.props.x === 0 && this.props.y === 0 && this.props.createElementPanelConnectorType === '')
         || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
-            this.setState({
-                type: CREATE_PROCESS,
-                itemPosition: OUTSIDE_ITEM,
-            });
+            if(this.state.type !== CREATE_PROCESS && this.state.itemPosition !== OUTSIDE_ITEM) {
+                this.setState({
+                    type: CREATE_PROCESS,
+                    itemPosition: OUTSIDE_ITEM,
+                });
+            }
         }
     }
 
@@ -61,7 +63,7 @@ class CreateElementPanel extends React.Component{
 
     render(){
         const {type, itemPosition} = this.state;
-        const {currentItem, isCreateElementPanelOpened, connection, createElementPanelConnectorType} = this.props;
+        const {currentItem, isCreateElementPanelOpened, connection, createElementPanelConnectorType, yIntend, isOnTheTop} = this.props;
         let {x, y, connectorType} = this.props;
         if(!isCreateElementPanelOpened || (x === 0 && y === 0 && createElementPanelConnectorType === '')){
             return null;
@@ -71,14 +73,24 @@ class CreateElementPanel extends React.Component{
             const fromConnectorPanel = document.getElementById(`${CONNECTOR_FROM}_panel`);
             const clientSvg = fromConnectorPanel.getBoundingClientRect();
             x = clientSvg.x;
-            y = clientSvg.y + 23;
+            y = clientSvg.y - yIntend + clientSvg.height / 2 - 115;
+            if(isOnTheTop){
+                y += 5;
+            }
             noOperatorType = true;
-        }
-        if(createElementPanelConnectorType === CONNECTOR_TO){
+        } else if(createElementPanelConnectorType === CONNECTOR_TO){
             const toConnectorPanel = document.getElementById(`${CONNECTOR_TO}_panel`);
             const clientSvg = toConnectorPanel.getBoundingClientRect();
             x = clientSvg.x;
-            y = clientSvg.y + 23;
+            y = clientSvg.y - yIntend + clientSvg.height / 2 - 115;
+            if(isOnTheTop){
+                y += 5;
+            }
+        } else{
+            y -= yIntend - 30;
+            if(isOnTheTop){
+                y -= 100;
+            }
         }
         let isMethodItem = currentItem && currentItem.entity instanceof CMethodItem;
         const isOperatorItem = currentItem && currentItem.entity instanceof COperatorItem;
@@ -165,6 +177,11 @@ class CreateElementPanel extends React.Component{
             </div>
         );
     }
+}
+
+CreateElementPanel.defaultProps = {
+    yIntend: 0,
+    isOnTheTop: false,
 }
 
 export default CreateElementPanel;

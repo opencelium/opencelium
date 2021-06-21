@@ -33,6 +33,7 @@ import {
 import {isEmptyObject} from '@utils/app';
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {setComponentInChangeContent} from "@actions/app";
+import {withTranslation} from "react-i18next";
 
 
 function mapStateToProps(state){
@@ -46,6 +47,7 @@ function mapStateToProps(state){
  * Change Content Component
  */
 @connect(mapStateToProps, {setComponentInChangeContent})
+@withTranslation('basic_components')
 class ChangeContent extends Component{
 
     constructor(props){
@@ -70,7 +72,7 @@ class ChangeContent extends Component{
         }
         this.state = {
             entity,
-            page: 0,
+            page: 1,
             hasError: false,
             hasRequired: false,
             isValidated: true,

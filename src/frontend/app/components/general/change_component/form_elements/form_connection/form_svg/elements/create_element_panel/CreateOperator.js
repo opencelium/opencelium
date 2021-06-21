@@ -19,11 +19,13 @@ class CreateOperator extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((this.props.x === 0 && this.props.y === 0 && this.state.type !== null)
+        if((this.props.x === 0 && this.props.y === 0)
             || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
-            this.setState({
-                type: null,
-            });
+            if(this.state.type !== null) {
+                this.setState({
+                    type: null,
+                });
+            }
         }
     }
 

@@ -27,6 +27,7 @@ import {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData} from
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {BChannel} from "@utils/store";
 import {withTranslation} from "react-i18next";
+import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -54,11 +55,12 @@ const BUSINESS_DATA = {items: [], arrows: []};
 function mapStateToProps(state){
     const auth = state.get('auth');
     const connectionOverview = state.get('connection_overview');
-    const {connection} = mapItemsToClasses(state);
+    const {currentSubItem, connection} = mapItemsToClasses(state);
     return{
         authUser: auth.get('authUser'),
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+        currentSubItem,
         connection,
     };
 }
@@ -72,7 +74,6 @@ class FormConnectionSvg extends Component{
 
     constructor(props){
         super(props);
-
         this.state = {
             businessLayoutPosition: INITIAL_BUSINESS_LAYOUT_POSITION,
             technicalLayoutPosition: INITIAL_TECHNICAL_LAYOUT_POSITION,
@@ -95,15 +96,19 @@ class FormConnectionSvg extends Component{
 
     componentDidMount() {
         const {entity} = this.props;
-        if(BUSINESS_DATA.items.length === 0/* && entity.toConnector.svgItems.length !== 0*/) {
-            this.minimizeBusinessLayout();
-        }
         this.props.setConnectionData(entity, ::this.updateEntity);
         BChannel.onmessage = (e) => ::this.updateEntity(e.data);
+        CSvg.consoleBaseVal('DID_MOUNT FORM_CONNECTION_SVG');
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        CSvg.consoleBaseVal('DID_UPDATE FORM_CONNECTION_SVG', '__________________________');
     }
 
     componentWillUnmount() {
-        this.props.setCurrentTechnicalItem(null);
+        const {setCurrentTechnicalItem, currentSubItem} = this.props;
+        if(currentSubItem !== null) setCurrentTechnicalItem(null);
+        CSvg.consoleBaseVal('DID_UNMOUNT FORM_CONNECTION_SVG');
     }
 
     setIsCreateElementPanelOpened(isCreateElementPanelOpened, createElementPanelConnectorType = ''){
@@ -296,15 +301,19 @@ class FormConnectionSvg extends Component{
     }
 
     replaceLayouts(){
+        this.setState(this.getReplaceLayoutsState())
+    }
+
+    getReplaceLayoutsState(){
         const {technicalLayoutPosition, businessLayoutPosition, verticalPanelWidths} = this.state;
-        this.setState({
+        return{
             businessLayoutPosition: technicalLayoutPosition,
             technicalLayoutPosition: businessLayoutPosition,
             verticalPanelWidths: [
                 verticalPanelWidths[1],
                 verticalPanelWidths[0],
             ],
-        })
+        };
     }
 
     updateEntity(e = null){
@@ -323,9 +332,10 @@ class FormConnectionSvg extends Component{
     render(){
         const {entity, renderNavigationComponent, renderValidationMessage, data} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized,
-            isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened, createElementPanelConnectorType
+            isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened, createElementPanelConnectorType,
         } = this.state;
         const verticalPanelParams = ::this.getPanelGroupParams();
+        CSvg.consoleBaseVal('RENDER FORM_CONNECTION_SVG');
         return (
             <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
                 <Details
@@ -350,13 +360,14 @@ class FormConnectionSvg extends Component{
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
                             layoutPosition={businessLayoutPosition}
+                            setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
+                            isCreateElementPanelOpened={isCreateElementPanelOpened}
                         />
                     }
                     <TechnicalLayout
                         readOnly={data.readOnly}
                         isLayoutMinimized={isTechnicalLayoutMinimized}
                         isBusinessLayoutMinimized={isBusinessLayoutMinimized}
-                        isBusinessLayoutEmpty={BUSINESS_DATA.items.length === 0}
                         minimizeLayout={::this.minimizeTechnicalLayout}
                         maximizeLayout={::this.maximizeTechnicalLayout}
                         maximizeBusinessLayout={::this.maximizeBusinessLayout}
@@ -380,6 +391,8 @@ class FormConnectionSvg extends Component{
                             replaceLayouts={::this.replaceLayouts}
                             detailsPosition={detailsPosition}
                             layoutPosition={businessLayoutPosition}
+                            setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
+                            isCreateElementPanelOpened={isCreateElementPanelOpened}
                         />
                     }
                 </PanelGroup>

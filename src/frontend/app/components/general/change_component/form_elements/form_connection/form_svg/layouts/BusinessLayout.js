@@ -28,6 +28,7 @@ import {connectionOverviewBusinessLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
 import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 
 function mapStateToProps(state){
@@ -81,10 +82,11 @@ class BusinessLayout extends React.Component{
     }
 
     render(){
+        CSvg.consoleBaseVal('RENDER BUSINESS_LAYOUT');
         const {createElementPanelPosition} = this.state;
-        const {currentItem, items} = this.props;
+        const {currentItem, items, isCreateElementPanelOpened} = this.props;
         const {
-            isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts,
+            isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, setCurrentBusinessItem,
             detailsPosition, businessLayoutLocation, technicalLayoutLocation, isTechnicalLayoutMinimized,
             ...svgProps} = this.props;
         const isReplaceIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
@@ -93,6 +95,7 @@ class BusinessLayout extends React.Component{
         return(
             <div id={this.layoutId} className={`${styles.business_layout}`}>
                 <SettingsPanel
+                    isDisabled={isCreateElementPanelOpened}
                     openInNewWindow={::this.openInNewWindow}
                     isLayoutMinimized={isLayoutMinimized}
                     maximizeLayout={maximizeLayout}
@@ -108,6 +111,8 @@ class BusinessLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    detailsPosition={detailsPosition}
+                    setCurrentItem={setCurrentBusinessItem}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     dragAndDropStep={5}

@@ -29,9 +29,13 @@ import {setLS} from "@utils/LocalStorage";
 import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
-import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import {
+    HAS_LAYOUTS_SCALING,
+    LAYOUT_POSITION
+} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CConnection from "@classes/components/content/connection/CConnection";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -97,11 +101,12 @@ class TechnicalLayout extends React.Component{
     }
 
     render(){
+        CSvg.consoleBaseVal('RENDER TECHNICAL_LAYOUT');
         const {createElementPanelPosition} = this.state;
-        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType, readOnly} = this.props;
+        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType, readOnly, layoutPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
-            detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
+            detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection, setCurrentTechnicalItem,
             ...svgProps
         } = this.props;
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
@@ -112,11 +117,14 @@ class TechnicalLayout extends React.Component{
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
-        const startingSvgY = isBusinessLayoutEmpty ? -80 : -190;
+        const startingSvgY = isBusinessLayoutEmpty ? -80 : -210;
         const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
+        const businessLayoutElement = document.getElementById('business_layout_svg');
+        const yIntend = businessLayoutElement && businessLayoutElement.height.baseVal && layoutPosition === LAYOUT_POSITION.BOTTOM ? document.getElementById('business_layout_svg').height.baseVal.value : 0;
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
+                    isDisabled={isCreateElementPanelOpened}
                     updateConnection={updateConnection}
                     openInNewWindow={::this.openInNewWindow}
                     isLayoutMinimized={isLayoutMinimized}
@@ -134,6 +142,9 @@ class TechnicalLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    isBusinessLayoutMinimized={isBusinessLayoutMinimized}
+                    detailsPosition={detailsPosition}
+                    setCurrentItem={setCurrentTechnicalItem}
                     connection={connection}
                     items={items}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
@@ -148,6 +159,8 @@ class TechnicalLayout extends React.Component{
                 />
                 {!readOnly &&
                     <CreateElementPanel
+                        isOnTheTop={layoutPosition === LAYOUT_POSITION.TOP}
+                        yIntend={yIntend}
                         createElementPanelConnectorType={createElementPanelConnectorType}
                         x={createElementPanelPosition.x}
                         y={createElementPanelPosition.y}
@@ -179,7 +192,7 @@ TechnicalLayout.propTypes = {
 
 TechnicalLayout.defaultProps = {
     isDetailsMinimized: false,
-    isBusinessLayoutEmpty: true,
+    isBusinessLayoutEmpty: false,
 };
 
 export default TechnicalLayout;

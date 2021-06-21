@@ -30,7 +30,7 @@ class SettingsPanel extends React.Component{
             detailsPosition, isLayoutMinimized, minimizeLayout, maximizeLayout,
             replaceLayouts, isDetailsMinimized, title, openInNewWindow,
             isReplaceIconDisabled, isMinMaxIconDisabled, isNewWindowIconDisabled,
-            hasConfigurationsIcon,
+            hasConfigurationsIcon, isDisabled,
         } = this.props;
         let settingsPanelClassName = '';
         let minMaxTooltip = 'Minimize';
@@ -65,7 +65,7 @@ class SettingsPanel extends React.Component{
                     tooltip={isReplaceIconDisabled ? '' : 'Replace'}
                     value={'import_export'}
                     tooltipPosition={minMaxTooltipPosition}
-                    disabled={isReplaceIconDisabled}
+                    disabled={isDisabled || isReplaceIconDisabled}
                     isButton={true}
                 />
                 <div className={titleClassName}>{title}</div>
@@ -76,7 +76,7 @@ class SettingsPanel extends React.Component{
                     tooltip={isMinMaxIconDisabled ? '' : minMaxTooltip}
                     value={minMaxValue}
                     tooltipPosition={minMaxTooltipPosition}
-                    disabled={isMinMaxIconDisabled}
+                    disabled={isDisabled || isMinMaxIconDisabled}
                     isButton={true}
                 />
                 <TooltipFontIcon
@@ -86,10 +86,10 @@ class SettingsPanel extends React.Component{
                     tooltip={isNewWindowIconDisabled ? '' : 'Open in new Window'}
                     value={'open_in_new'}
                     tooltipPosition={'top'}
-                    disabled={isNewWindowIconDisabled}
+                    disabled={isDisabled || isNewWindowIconDisabled}
                     isButton={true}
                 />
-                <ConfigurationsIcon/>
+                {hasConfigurationsIcon && <ConfigurationsIcon disabled={isDisabled}/>}
             </div>
         );
     }
@@ -109,6 +109,7 @@ SettingsPanel.propTypes = {
     isMinMaxIconDisabled: PropTypes.bool,
     isNewWindowIconDisabled: PropTypes.bool,
     hasConfigurationsIcon: PropTypes.bool,
+    isDisabled: PropTypes.bool,
 };
 
 SettingsPanel.defaultProps = {
@@ -117,6 +118,7 @@ SettingsPanel.defaultProps = {
     isMinMaxIconDisabled: false,
     isNewWindowIconDisabled: false,
     hasConfigurationsIcon: false,
+    isDisabled: false,
 };
 
 export default SettingsPanel;
