@@ -409,11 +409,17 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   stroke-width: 2;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
-.connector_empty_text{
+.empty_text{
   cursor: pointer;
   font-weight: bold;
   font-size: $FONT_SIZE_BIG;
   fill: #e5dfdf;
+}
+.business_layout_empty_text{
+  @extend .empty_text;
+}
+.connector_empty_text{
+  @extend .empty_text;
 }
 .connector_item_text{
   font-weight: bold;

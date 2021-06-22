@@ -27,10 +27,10 @@ import Operator from "@change_component/form_elements/form_connection/form_svg/e
 import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 function mapStateToProps(state){
-    const {currentItem, currentSubItem} = mapItemsToClasses(state);
+    const {currentBusinessItem, currentTechnicalItem} = mapItemsToClasses(state);
     return{
-        currentItem,
-        currentSubItem,
+        currentBusinessItem,
+        currentTechnicalItem,
     };
 }
 
@@ -73,7 +73,6 @@ class Svg extends React.Component {
         if(isScalable) {
             this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
         }
-        CSvg.consoleBaseVal('DID_MOUNT SVG');
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -82,7 +81,6 @@ class Svg extends React.Component {
             const x = CSvg.getStartingViewBoxX(detailsPosition);
             CSvg.setViewBox(svgId, {x});
         }
-        CSvg.consoleBaseVal('DID_UPDATE SVG');
     }
 
     componentWillUnmount() {
@@ -91,7 +89,6 @@ class Svg extends React.Component {
             this.svgRef.current.removeEventListener('wheel', ::this.onWheel);
         }
         window.removeEventListener('resize', ::this.setRatio);
-        CSvg.consoleBaseVal('DID_UNMOUNT SVG');
     }
 
     setRatio(){
@@ -116,20 +113,16 @@ class Svg extends React.Component {
     }
 
     setCurrentItem(currentItem){
-        let {items} = this.props;
-        const {setCurrentItem, setItems, connection, updateConnection} = this.props;
-        if(currentItem){
+        const {setCurrentItem, connection, updateConnection} = this.props;
+/*        if(currentItem){
             let index = items.findIndex(item => item.id === currentItem.id);
             if(index !== -1) {
                 items.splice(index, 1);
                 items.push(currentItem);
             }
-        }
+        }*/
         if(setCurrentItem){
             setCurrentItem(currentItem);
-        }
-        if(setItems) {
-            setItems(items);
         }
         const connector = connection.getConnectorByType(currentItem.connectorType);
         connector.setCurrentItem(currentItem.entity);
@@ -163,9 +156,9 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {svgId, isDraggable} = this.props;
+        const {svgId, isItemDraggable, isDraggable} = this.props;
         if(e.target.classList.contains('draggable')) {
-            if(isDraggable) {
+            if(isItemDraggable) {
                 this.selectedElement = e.target.parentNode;
                 if(this.selectedElement.parentNode){
                     this.hideCreateElementPanel();
@@ -177,19 +170,21 @@ class Svg extends React.Component {
                 this.setCoordinatesForCreateElementPanel(e);
             }
         } else{
-            this.hideCreateElementPanel();
-            const svgElement = document.getElementById(svgId);
-            if (svgElement) {
-                this.isPointerDown = true;
-                this.pointerOrigin = CSvg.getMousePosition(e, svgElement);
+            if(isDraggable) {
+                this.hideCreateElementPanel();
+                const svgElement = document.getElementById(svgId);
+                if (svgElement) {
+                    this.isPointerDown = true;
+                    this.pointerOrigin = CSvg.getMousePosition(e, svgElement);
+                }
             }
         }
     }
 
     drag(e){
-        const {isDraggable, dragAndDropStep, svgId} = this.props;
+        const {isItemDraggable, dragAndDropStep, svgId, isDraggable} = this.props;
         if (this.selectedElement) {
-            if(isDraggable) {
+            if(isItemDraggable) {
                 e.preventDefault();
                 if(this.selectedElement.parentNode) {
                     const coordinates = CSvg.getMousePosition(e, this.selectedElement.parentNode);
@@ -213,7 +208,7 @@ class Svg extends React.Component {
                 }
             }
         } else{
-            if (!this.isPointerDown) {
+            if (!this.isPointerDown || !isDraggable) {
                 return;
             }
             e.preventDefault();
@@ -277,13 +272,13 @@ class Svg extends React.Component {
     }
 
     renderItems(){
-        const {currentItem, currentSubItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
+        const {currentItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
         return items.map((item,key) => {
             let isHighlighted = currentItem ? item.id.indexOf(currentItem.id) === 0 : false;
             let isCurrent = currentItem ? currentItem.id === item.id : false;
-            if(!isCurrent && currentSubItem){
-                isCurrent = currentSubItem ? currentSubItem.id === item.id : false;
-                isHighlighted = currentSubItem ? item.id.indexOf(currentSubItem.id) === 0 : false;
+            if(!isCurrent && currentTechnicalItem){
+                isCurrent = currentTechnicalItem ? currentTechnicalItem.id === item.id : false;
+                isHighlighted = currentTechnicalItem ? item.id.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             switch (item.type){
                 case 'if':
@@ -303,13 +298,13 @@ class Svg extends React.Component {
     }
 
     renderArrows(){
-        const {currentItem, currentSubItem, arrows, items} = this.props;
+        const {currentItem, currentTechnicalItem, arrows, items} = this.props;
         return arrows.map((arrow,key) => {
             const from = items.find(item => item.id === arrow.from);
             const to = items.find(item => item.id === arrow.to);
             let isHighlighted = currentItem ? arrow.from.indexOf(currentItem.id) === 0 && arrow.to.indexOf(currentItem.id) === 0 : false;
-            if(!isHighlighted && currentSubItem){
-                isHighlighted = currentSubItem ? arrow.from.indexOf(currentSubItem.id) === 0 && arrow.to.indexOf(currentSubItem.id) === 0 : false;
+            if(!isHighlighted && currentTechnicalItem){
+                isHighlighted = currentTechnicalItem ? arrow.from.indexOf(currentTechnicalItem.id) === 0 && arrow.to.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
                 <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted}/>
@@ -322,9 +317,17 @@ class Svg extends React.Component {
         this.props.setIsCreateElementPanelOpened(false);
     }
 
+    onEmptyTextClick(){
+        const {items, setIsCreateElementPanelOpened} = this.props;
+        if(items.length === 0) setIsCreateElementPanelOpened(true, 'business_layout');
+    }
+
     render(){
-        CSvg.consoleBaseVal('RENDER SVG');
-        const {svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened, isCreateElementPanelOpened, connection} = this.props;
+        const {
+            items, svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
+            isCreateElementPanelOpened, connection, hasEmptyText, createElementPanelConnectorType,
+        } = this.props;
+        const isEmpty = items.length === 0;
         return(
             <React.Fragment>
                 <svg
@@ -347,12 +350,18 @@ class Svg extends React.Component {
                             toConnectorPanelParams={toConnectorPanelParams}
                             connection={connection}
                             setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                            createElementPanelConnectorType={createElementPanelConnectorType}
                         />}
                     {
                         this.renderArrows()
                     }
                     {
                         this.renderItems()
+                    }
+                    {hasEmptyText && isEmpty &&
+                        <text id={'business_layout_empty_text'} onClick={::this.onEmptyTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'25%'} className={styles.connector_empty_text}>
+                            {'Click here to create...'}
+                        </text>
                     }
                 </svg>
                 {isCreateElementPanelOpened && <div className={styles.disable_background} onClick={::this.hideCreateElementPanel}/>}
@@ -365,18 +374,22 @@ Svg.propTypes = {
     layoutId: PropTypes.string.isRequired,
     svgId: PropTypes.string.isRequired,
     dragAndDropStep: PropTypes.number,
+    isItemDraggable: PropTypes.bool,
     isDraggable: PropTypes.bool,
     isScalable: PropTypes.bool,
     startingSvgY : PropTypes.number,
+    hasEmptyText: PropTypes.bool,
 };
 
 Svg.defaultProps = {
     dragAndDropStep: 10,
-    isDraggable: false,
+    isItemDraggable: false,
+    isDraggable: true,
     isScalable: false,
     startingSvgY: -190,
     fromConnectorPanelParams: null,
     toConnectorPanelParams: null,
+    hasEmptyText: false,
 }
 
 export default Svg;

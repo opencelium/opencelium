@@ -28,11 +28,11 @@ import Description from "@change_component/form_elements/form_connection/form_sv
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem, currentSubItem, connection, updateConnection} = mapItemsToClasses(state);
+    const {currentBusinessItem, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentItem,
-        currentSubItem,
+        currentBusinessItem,
+        currentTechnicalItem,
         detailsLocation: connectionOverview.get('detailsLocation'),
         connection,
         updateConnection,
@@ -64,11 +64,11 @@ class Details extends React.Component{
     }
 
     render(){
-        const {readOnly, currentItem, currentSubItem, isMinimized, position, detailsLocation, openInNewWindow, updateConnection, connection} = this.props;
+        const {readOnly, currentBusinessItem, currentTechnicalItem, isMinimized, position, detailsLocation, openInNewWindow, updateConnection, connection} = this.props;
         if(detailsLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
-        let details = currentSubItem ? currentSubItem : currentItem;
+        let details = currentTechnicalItem ? currentTechnicalItem : currentBusinessItem;
         let detailsClassName = '';
         let detailsStyle = {};
         if(isMinimized){

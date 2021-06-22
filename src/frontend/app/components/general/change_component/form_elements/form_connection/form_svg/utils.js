@@ -21,23 +21,23 @@ import CConnection from "@classes/components/content/connection/CConnection";
 
 export function mapItemsToClasses(state){
     const connectionOverview = state.get('connection_overview');
-    let currentItem = connectionOverview.get('currentItem');
+    let currentBusinessItem = connectionOverview.get('currentBusinessItem');
     let connection = connectionOverview.get('connection');
     connection = CConnection.createConnection(connection);
     const updateConnection = connectionOverview.get('updateConnection');
-    if(currentItem !== null && (!(currentItem instanceof CBusinessProcess) || !(currentItem instanceof CBusinessOperator))){
-        if(currentItem.hasOwnProperty('type')){
-            currentItem = CBusinessOperator.createBusinessOperator(currentItem);
+    if(currentBusinessItem !== null && (!(currentBusinessItem instanceof CBusinessProcess) || !(currentBusinessItem instanceof CBusinessOperator))){
+        if(currentBusinessItem.hasOwnProperty('type')){
+            currentBusinessItem = CBusinessOperator.createBusinessOperator(currentBusinessItem);
         } else{
-            currentItem = CBusinessProcess.createBusinessProcess(currentItem);
+            currentBusinessItem = CBusinessProcess.createBusinessProcess(currentBusinessItem);
         }
     }
-    let currentSubItem = connectionOverview.get('currentSubItem');
-    if(currentSubItem !== null && (!(currentSubItem instanceof CTechnicalProcess) || !(currentSubItem instanceof CTechnicalOperator))){
-        if(currentSubItem.hasOwnProperty('type')){
-            currentSubItem = CTechnicalOperator.createTechnicalOperator(currentSubItem);
+    let currentTechnicalItem = connectionOverview.get('currentTechnicalItem');
+    if(currentTechnicalItem !== null && (!(currentTechnicalItem instanceof CTechnicalProcess) || !(currentTechnicalItem instanceof CTechnicalOperator))){
+        if(currentTechnicalItem.hasOwnProperty('type')){
+            currentTechnicalItem = CTechnicalOperator.createTechnicalOperator(currentTechnicalItem);
         } else{
-            currentSubItem = CTechnicalProcess.createTechnicalProcess(currentSubItem);
+            currentTechnicalItem = CTechnicalProcess.createTechnicalProcess(currentTechnicalItem);
         }
     }
     let items = connectionOverview.get('items').toJS();
@@ -55,8 +55,8 @@ export function mapItemsToClasses(state){
     }
     return {
         connectionOverview,
-        currentItem,
-        currentSubItem,
+        currentBusinessItem,
+        currentTechnicalItem,
         items: instancesItems,
         connection,
         updateConnection,

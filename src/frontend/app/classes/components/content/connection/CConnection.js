@@ -20,6 +20,7 @@ import CTemplate from "./CTemplate";
 import CBindingItem from "./field_binding/CBindingItem";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
+import CBusinessLayout from "@classes/components/content/connection_overview_2/CBusinessLayout";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -47,7 +48,7 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, businessLayout = null){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -93,6 +94,7 @@ export default class CConnection{
         this._currentFieldBindingTo = -1;
         this.setError(error);
         this._readOnly = readOnly;
+        this._businessLayout = this.convertBusinessLayout(businessLayout);
     }
 
     static createConnection(connection){
@@ -100,15 +102,16 @@ export default class CConnection{
         if(connectionId === 0){
             connectionId = connection && connection.hasOwnProperty('id') ? connection.id : 0;
         }
-        let title = connection && connection.hasOwnProperty('title') ? connection.title : '';
-        let description = connection && connection.hasOwnProperty('description') ? connection.description : '';
-        let fromConnector = connection && connection.hasOwnProperty('fromConnector') ? connection.fromConnector : null;
-        let toConnector = connection && connection.hasOwnProperty('toConnector') ? connection.toConnector : null;
-        let fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
-        let template = connection && connection.hasOwnProperty('template') ? connection.template : null;
-        let error = connection && connection.hasOwnProperty('error') ? connection.error : null;
-        let readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly);
+        const title = connection && connection.hasOwnProperty('title') ? connection.title : '';
+        const description = connection && connection.hasOwnProperty('description') ? connection.description : '';
+        const fromConnector = connection && connection.hasOwnProperty('fromConnector') ? connection.fromConnector : null;
+        const toConnector = connection && connection.hasOwnProperty('toConnector') ? connection.toConnector : null;
+        const fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
+        const template = connection && connection.hasOwnProperty('template') ? connection.template : null;
+        const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
+        const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
+        const businessLayout = connection && connection.hasOwnProperty('businessLayout') ? connection.businessLayout : null;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, businessLayout);
     }
 
     static duplicateConnection(connection){
@@ -120,15 +123,26 @@ export default class CConnection{
         return new CConnection(duplicate);
     }
 
+    convertBusinessLayout(businessLayout){
+        if(!(businessLayout instanceof CBusinessLayout)){
+            if(businessLayout === null){
+                businessLayout = {};
+            }
+            businessLayout.connection = this;
+            return CBusinessLayout.createBusinessLayout(businessLayout);
+        }
+        return businessLayout;
+    }
+
     convertBindingItem(bindingItem){
-        if(!(bindingItem instanceof CBindingItem) || bindingItem === null) {
+        if(!(bindingItem instanceof CBindingItem)) {
             return CBindingItem.createBindingItem(bindingItem);
         }
         return bindingItem;
     }
 
     convertFieldBindingItem(fieldBindingItem){
-        if(!(fieldBindingItem instanceof CFieldBinding) || fieldBindingItem === null) {
+        if(!(fieldBindingItem instanceof CFieldBinding)) {
             return CFieldBinding.createFieldBinding(fieldBindingItem);
         }
         return fieldBindingItem;
@@ -143,7 +157,7 @@ export default class CConnection{
     }
 
     convertTemplate(template){
-        if(!(template instanceof CTemplate) || template === null) {
+        if(!(template instanceof CTemplate)) {
             return CTemplate.createTemplate(template);
         }
         return template;

@@ -13,7 +13,7 @@ class Panel extends React.Component{
     }
 
     render(){
-        const {panelPosition, rectPosition, invokerName, namePosition, isEmpty, connectorType} = this.props;
+        const {panelPosition, rectPosition, invokerName, namePosition, isEmpty, connectorType, createElementPanelConnectorType} = this.props;
         const textX = namePosition === 'right' ? panelPosition.width : 2;
         return(
             <React.Fragment>
@@ -22,10 +22,10 @@ class Panel extends React.Component{
                     <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
                         {invokerName}
                     </text>
-                    {isEmpty &&
-                    <text onClick={::this.onClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'50%'} y={'50%'} className={styles.connector_empty_text}>
-                        {'Click here to create...'}
-                    </text>
+                    {isEmpty && createElementPanelConnectorType !== connectorType &&
+                        <text onClick={::this.onClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'50%'} y={'50%'} className={styles.connector_empty_text}>
+                            {'Click here to create...'}
+                        </text>
                     }
                     {/*<rect x={1} y={1} width={'100%'} height={'100%'} fill={'none'} stroke={'red'}/>*/}
                 </svg>

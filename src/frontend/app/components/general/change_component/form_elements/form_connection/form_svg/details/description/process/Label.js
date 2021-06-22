@@ -61,9 +61,9 @@ class Label extends React.Component{
         const connector = connection.getConnectorByType(details.connectorType);
         const method = connector.getMethodByColor(details.entity.color);
         method.label = labelValue;
-        const currentItem = connector.getSvgElementByIndex(method.index);
+        const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
         updateConnection(connection);
-        setCurrentTechnicalItem(currentItem);
+        setCurrentTechnicalItem(currentTechnicalItem);
         this.setState({
             isEditOn: false,
             isMouseOver: false,

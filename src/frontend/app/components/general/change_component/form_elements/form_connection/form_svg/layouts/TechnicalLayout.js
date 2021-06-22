@@ -39,11 +39,10 @@ import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem, currentSubItem, connection, updateConnection} = mapItemsToClasses(state);
+    const {currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentItem,
-        currentSubItem,
+        currentTechnicalItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
         connection,
@@ -101,9 +100,8 @@ class TechnicalLayout extends React.Component{
     }
 
     render(){
-        CSvg.consoleBaseVal('RENDER TECHNICAL_LAYOUT');
         const {createElementPanelPosition} = this.state;
-        const {currentSubItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType, readOnly, layoutPosition} = this.props;
+        const {currentTechnicalItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType, readOnly, layoutPosition,setCreateElementPanelPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection, setCurrentTechnicalItem,
@@ -119,8 +117,6 @@ class TechnicalLayout extends React.Component{
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const startingSvgY = isBusinessLayoutEmpty ? -80 : -210;
         const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
-        const businessLayoutElement = document.getElementById('business_layout_svg');
-        const yIntend = businessLayoutElement && businessLayoutElement.height.baseVal && layoutPosition === LAYOUT_POSITION.BOTTOM ? document.getElementById('business_layout_svg').height.baseVal.value : 0;
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
@@ -152,27 +148,11 @@ class TechnicalLayout extends React.Component{
                     toConnectorPanelParams={toConnectorPanelParams}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
-                    isDraggable={false}
+                    isItemDraggable={false}
                     isScalable={HAS_LAYOUTS_SCALING}
-                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
                 />
-                {!readOnly &&
-                    <CreateElementPanel
-                        isOnTheTop={layoutPosition === LAYOUT_POSITION.TOP}
-                        yIntend={yIntend}
-                        createElementPanelConnectorType={createElementPanelConnectorType}
-                        x={createElementPanelPosition.x}
-                        y={createElementPanelPosition.y}
-                        currentItem={currentSubItem}
-                        connectorType={currentSubItem ? currentSubItem.connectorType : ''}
-                        connection={connection}
-                        updateConnection={updateConnection}
-                        isCreateElementPanelOpened={isCreateElementPanelOpened}
-                        setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
-                        setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
-                    />
-                }
             </div>
         );
     }

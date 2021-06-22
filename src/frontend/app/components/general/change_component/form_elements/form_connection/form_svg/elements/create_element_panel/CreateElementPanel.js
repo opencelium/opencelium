@@ -16,6 +16,8 @@ import {
     OUTSIDE_ITEM
 } from "@classes/components/content/connection/CConnectorItem";
 import {Line} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
+import CreateBusinessItem
+    from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateBusinessItem";
 
 const CREATE_PROCESS = 'CREATE_PROCESS';
 const CREATE_OPERATOR = 'CREATE_OPERATOR';
@@ -86,6 +88,15 @@ class CreateElementPanel extends React.Component{
             if(isOnTheTop){
                 y += 5;
             }
+        } else if(createElementPanelConnectorType === 'business_layout'){
+            const toConnectorPanel = document.getElementById(`business_layout_empty_text`);
+            const clientSvg = toConnectorPanel.getBoundingClientRect();
+            x = clientSvg.x;
+            y = clientSvg.y - yIntend + clientSvg.height / 2 - 115;
+            if(isOnTheTop){
+                y += 5;
+            }
+
         } else{
             y -= yIntend - 30;
             if(isOnTheTop){
@@ -101,8 +112,8 @@ class CreateElementPanel extends React.Component{
         const itemPositionLine = {top: `${y + 27}px`, left: `${x - 7}px`};
         const itemTypeLine = isMethodItem ? {top: `${y + 33}px`, left: `${x - 7}px`} : {top: `${y + 26}px`, left: `${x + 111}px`};
         const beforeItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 111}px`} : {top: `${y + 27}px`, left: `${x + 230}px`};
-        const afterItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 330}px`} : {top: `${y + 27}px`, left: `${x + 450}px`};
-        const createIconStyles = isMethodItem ? {top: `${y + 23}px`, left: `${x + 350}px`} : {top: `${y + 17}px`, left: `${x + 468}px`};
+        let afterItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 330}px`} : {top: `${y + 27}px`, left: `${x + 450}px`};
+        let createIconStyles = isMethodItem ? {top: `${y + 23}px`, left: `${x + 350}px`} : {top: `${y + 17}px`, left: `${x + 468}px`};
         const panelItemPositionStyles = {top: `${y - 7}px`, left: `${x + 12}px`};
         let panelItemTypeStyles = isMethodItem ? {top: `${y}px`, left: `${x + 11}px`} : {top: `${y - 7}px`, left: `${x + 129}px`};
         if(noOperatorType){
@@ -113,6 +124,24 @@ class CreateElementPanel extends React.Component{
             panelItemStyles.top += 28;
         }
         panelItemStyles.top += 'px';
+        if(createElementPanelConnectorType === 'business_layout'){
+            panelItemStyles.left = `${x}px`;
+            panelItemStyles.top = `${y}px`;
+            afterItemLineStyles.left = `${x + 200}px`;
+            createIconStyles.left = `${x + 220}px`;
+            return(
+                <CreateBusinessItem
+                    {...this.props}
+                    x={x}
+                    y={y}
+                    connectorType={connectorType}
+                    style={panelItemStyles}
+                    itemPosition={itemPosition}
+                    afterLineStyles={afterItemLineStyles}
+                    createIconStyles={createIconStyles}
+                />
+            )
+        }
         return(
             <div>
                 {isOperatorItem && createElementPanelConnectorType === '' &&
@@ -182,6 +211,7 @@ class CreateElementPanel extends React.Component{
 CreateElementPanel.defaultProps = {
     yIntend: 0,
     isOnTheTop: false,
+    isBusinessLayout: false,
 }
 
 export default CreateElementPanel;

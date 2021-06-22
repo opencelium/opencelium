@@ -24,10 +24,9 @@ import CreateElementPanel from "../elements/create_element_panel/CreateElementPa
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem, items} = mapItemsToClasses(state);
+    const {currentBusinessItem} = mapItemsToClasses(state);
     return{
-        currentItem,
-        items,
+        currentBusinessItem,
         arrows: connectionOverview.get('arrows').toJS(),
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),

@@ -21,18 +21,18 @@ class Name extends React.Component{
             method.name = optionValue.value;
             method.request = operation.request.getObject({bodyOnlyConvert: true});
             method.response = operation.response.getObject({bodyOnlyConvert: true});
-            let currentItem;
+            let currentTechnicalItem;
             if (connector.getConnectorType() === CONNECTOR_FROM) {
                 connection.removeFromConnectorMethod(details.entity, false);
                 connection.addFromConnectorMethod(method);
-                currentItem = connection.fromConnector.getSvgElementByIndex(method.index);
+                currentTechnicalItem = connection.fromConnector.getSvgElementByIndex(method.index);
             } else {
                 connection.removeToConnectorMethod(details.entity, false);
                 connection.addToConnectorMethod(method);
-                currentItem = connection.toConnector.getSvgElementByIndex(method.index);
+                currentTechnicalItem = connection.toConnector.getSvgElementByIndex(method.index);
             }
             updateConnection(connection);
-            setCurrentTechnicalItem(currentItem);
+            setCurrentTechnicalItem(currentTechnicalItem);
         }
     }
 

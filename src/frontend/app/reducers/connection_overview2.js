@@ -35,8 +35,8 @@ if(isExternalWindow()){
 
 if(initialState === null){
     initialState = fromJS({
-        currentItem: null,
-        currentSubItem: null,
+        currentBusinessItem: null,
+        currentTechnicalItem: null,
         connection: null,
         updateConnection: null,
         items: List([]),
@@ -65,9 +65,9 @@ const reducer = (state = initialState, action) => {
         case ConnectionOverview2Action.SET_ITEMS:
             return state.set('items', List(action.payload));
         case ConnectionOverview2Action.SET_CURRENTBUSINESSITEM:
-            return state.set('currentItem', action.payload).set('currentSubItem', null);
+            return state.set('currentBusinessItem', action.payload).set('currentTechnicalItem', null);
         case ConnectionOverview2Action.SET_CURRENTECHNICALITEM:
-            return state.set('currentSubItem', action.payload).set('isCreateElementPanelOpened', action.payload !== null);
+            return state.set('currentTechnicalItem', action.payload).set('isCreateElementPanelOpened', action.payload !== null);
         case ConnectionOverview2Action.SET_DETAILSLOCATION:
             if(action.payload.location === PANEL_LOCATION.SAME_WINDOW)
                 removeLS('connection_overview', 'connection_overview');

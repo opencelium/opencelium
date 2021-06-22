@@ -20,18 +20,18 @@ class OperatorType extends React.Component{
             let connector = connection.getConnectorByType(details.connectorType);
             if(connector) {
                 let operator = {index: operatorItem.index, type: optionValue.value};
-                let currentItem;
+                let currentTechnicalItem;
                 if (connector.getConnectorType() === CONNECTOR_FROM) {
                     connection.removeFromConnectorOperator(operatorItem);
                     connector.addOperator(operator);
-                    currentItem = connection.fromConnector.getSvgElementByIndex(operator.index);
+                    currentTechnicalItem = connection.fromConnector.getSvgElementByIndex(operator.index);
                 } else {
                     connection.removeToConnectorOperator(operatorItem);
                     connector.addOperator(operator);
-                    currentItem = connection.toConnector.getSvgElementByIndex(operator.index);
+                    currentTechnicalItem = connection.toConnector.getSvgElementByIndex(operator.index);
                 }
                 updateConnection(connection);
-                setCurrentTechnicalItem(currentItem);
+                setCurrentTechnicalItem(currentTechnicalItem);
             }
         }
     }

@@ -40,23 +40,23 @@ const setConnectionData = (connection = null, updateConnection = null) => {
 };
 /**
  * set current item
- * @param currentItem - item
+ * @param currentBusinessItem - item
  * @returns {{type: string, payload: {}}}
  */
-const setCurrentBusinessItem = (currentItem) => {
+const setCurrentBusinessItem = (currentBusinessItem) => {
     return {
         type: ConnectionOverview2Action.SET_CURRENTBUSINESSITEM,
-        payload: currentItem instanceof CProcess || currentItem instanceof COperator ? currentItem.getObject() : currentItem,
+        payload: currentBusinessItem instanceof CProcess || currentBusinessItem instanceof COperator ? currentBusinessItem.getObject() : currentBusinessItem,
     };
 };
 
 /**
  * set current item
- * @param currentSubItem - subItem
+ * @param currentTechnicalItem - subItem
  * @returns {{type: string, payload: {}}}
  */
-const setCurrentTechnicalItem = (currentSubItem) => {
-    const payload = currentSubItem instanceof CProcess || currentSubItem instanceof COperator ? currentSubItem.getObject() : currentSubItem;
+const setCurrentTechnicalItem = (currentTechnicalItem) => {
+    const payload = currentTechnicalItem instanceof CProcess || currentTechnicalItem instanceof COperator ? currentTechnicalItem.getObject() : currentTechnicalItem;
     return {
         type: ConnectionOverview2Action.SET_CURRENTECHNICALITEM,
         payload: payload === null ? payload : {...payload},

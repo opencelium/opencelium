@@ -25,10 +25,10 @@ import Description from "@change_component/form_elements/form_connection/form_sv
 import {BChannel} from "@utils/store";
 
 function mapStateToProps(state){
-    const {currentItem, currentSubItem, connection, updateConnection} = mapItemsToClasses(state);
+    const {currentBusinessItem, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
-        currentItem,
-        currentSubItem,
+        currentBusinessItem,
+        currentTechnicalItem,
         connection,
         updateConnection,
     };
@@ -60,11 +60,11 @@ class ExtendedDetails extends React.Component{
         * TODO: send updateEntity and connection throw the redux state
         */
         const {currentInfo} = this.state;
-        const {currentItem, currentSubItem, position, connection} = this.props;
+        const {currentBusinessItem, currentTechnicalItem, position, connection} = this.props;
         if(window.name !== SEPARATE_WINDOW.CONNECTION_OVERVIEW.DETAILS) {
             return <PageNotFound/>;
         }
-        let details = currentSubItem ? currentSubItem : currentItem;
+        let details = currentTechnicalItem ? currentTechnicalItem : currentBusinessItem;
         let detailsClassName = '';
         let detailsStyle = {};
         detailsClassName = styles.details_maximized;

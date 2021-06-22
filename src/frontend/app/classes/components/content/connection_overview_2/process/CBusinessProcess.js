@@ -29,18 +29,20 @@ export class CBusinessProcess extends CProcess{
         return new CBusinessProcess(process);
     }
 
-    convertItems(items){
-        return items.map(item => {
-            if(item instanceof CTechnicalProcess || item instanceof CTechnicalOperator){
-                return item;
+    convertItem(item){
+        if(item instanceof CTechnicalProcess || item instanceof CTechnicalOperator){
+            return item;
+        } else{
+            if(item.hasOwnProperty('type')){
+                return CTechnicalOperator.createTechnicalOperator(item);
             } else{
-                if(item.hasOwnProperty('type')){
-                    return CTechnicalOperator.createTechnicalOperator(item);
-                } else{
-                    return CTechnicalProcess.createTechnicalProcess(item);
-                }
+                return CTechnicalProcess.createTechnicalProcess(item);
             }
-        });
+        }
+    }
+
+    convertItems(items){
+        return items.map(item => this.convertItem(item));
     }
 
     get items(){
@@ -49,6 +51,10 @@ export class CBusinessProcess extends CProcess{
 
     set items(items){
         this._items = this.convertItems(items);
+    }
+
+    addItem(item){
+        this._items.push(this.convertItem(item));
     }
 
     get arrows(){

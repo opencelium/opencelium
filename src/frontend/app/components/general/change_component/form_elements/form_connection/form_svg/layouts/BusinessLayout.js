@@ -27,18 +27,23 @@ import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewBusinessLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
 import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
-import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import {
+    HAS_LAYOUTS_SCALING,
+    LAYOUT_POSITION
+} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem} = mapItemsToClasses(state);
+    const {currentBusinessItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentItem,
+        currentBusinessItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+        connection,
+        updateConnection,
     };
 }
 
@@ -51,7 +56,7 @@ function setLocation(props, data){
     props.maximizeTechnicalLayout();
 }
 
-@connect(mapStateToProps, {setCurrentBusinessItem, setItems, setBusinessLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setBusinessLayoutLocation})
 @NewWindowFeature({url: connectionOverviewBusinessLayoutUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.BUSINESS_LAYOUT, setLocation, isLocationSameWindow})
 class BusinessLayout extends React.Component{
 
@@ -82,16 +87,18 @@ class BusinessLayout extends React.Component{
     }
 
     render(){
-        CSvg.consoleBaseVal('RENDER BUSINESS_LAYOUT');
         const {createElementPanelPosition} = this.state;
-        const {currentItem, items, isCreateElementPanelOpened} = this.props;
+        const {currentBusinessItem, isCreateElementPanelOpened, updateConnection, readOnly, layoutPosition, createElementPanelConnectorType, setIsCreateElementPanelOpened, setCreateElementPanelPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, setCurrentBusinessItem,
             detailsPosition, businessLayoutLocation, technicalLayoutLocation, isTechnicalLayoutMinimized,
-            ...svgProps} = this.props;
+            connection, ...svgProps} = this.props;
         const isReplaceIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
-        const isMinMaxIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isTechnicalLayoutMinimized || items.length === 0;
-        const isNewWindowIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || items.length === 0;
+        const isMinMaxIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isTechnicalLayoutMinimized;
+        const isNewWindowIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
+        const items = [];
+        const technicalLayoutElement = document.getElementById('technical_layout_svg');
+        const yIntend = technicalLayoutElement && technicalLayoutElement.height.baseVal && layoutPosition === LAYOUT_POSITION.BOTTOM ? document.getElementById('business_layout_svg').height.baseVal.value : 0;
         return(
             <div id={this.layoutId} className={`${styles.business_layout}`}>
                 <SettingsPanel
@@ -111,16 +118,19 @@ class BusinessLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    hasEmptyText={createElementPanelConnectorType !== 'business_layout'}
+                    items={items}
+                    arrows={[]}
                     detailsPosition={detailsPosition}
                     setCurrentItem={setCurrentBusinessItem}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     dragAndDropStep={5}
-                    isDraggable={true}
-                    isScalable={HAS_LAYOUTS_SCALING}
-                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    isItemDraggable={true}
+                    isDraggable={items.length > 0}
+                    isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
+                    setCreateElementPanelPosition={setCreateElementPanelPosition}
                 />
-                <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y} currentItem={currentItem}/>
             </div>
         );
     }

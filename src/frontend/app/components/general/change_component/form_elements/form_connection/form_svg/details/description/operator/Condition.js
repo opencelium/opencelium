@@ -157,8 +157,8 @@ class Condition extends React.Component{
         }
         if(property) operatorItem.setRightStatementRightPropertyValue(property);
         updateConnection(connection);
-        let currentItem = connector.getSvgElementByIndex(operator.index);
-        setCurrentTechnicalItem(currentItem);
+        let currentTechnicalItem = connector.getSvgElementByIndex(operator.index);
+        setCurrentTechnicalItem(currentTechnicalItem);
         this.setState({
             isOpenEditDialog: !this.state.isOpenEditDialog,
             isMouseOver: false,

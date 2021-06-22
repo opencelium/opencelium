@@ -15,21 +15,51 @@
 
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import {isString} from "@utils/app";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 
 export class CTechnicalProcess extends CProcess{
 
     constructor(technicalProcess) {
         super(technicalProcess);
+        this._connectorType = technicalProcess && technicalProcess.hasOwnProperty('connectorType') ? technicalProcess.connectorType : '';
+        this._invoker = technicalProcess && technicalProcess.hasOwnProperty('invoker') ? technicalProcess.invoker : null;
+        this._entity = technicalProcess && technicalProcess.hasOwnProperty('entity') ? technicalProcess.entity : null;
+        if(!(this._entity instanceof CMethodItem)){
+            this._entity = CMethodItem.createMethodItem(this._entity);
+        }
     }
 
     static createTechnicalProcess(process){
         return new CTechnicalProcess(process);
     }
 
+    get connectorType(){
+        return this._connectorType;
+    }
+
+    set connectorType(connectorType){
+        this._connectorType = connectorType;
+    }
+
+    get invoker(){
+        return this._invoker;
+    }
+
+    set invoker(invoker){
+        this._invoker = invoker;
+    }
+
+    get entity(){
+        return this._entity;
+    }
+
     getObject(){
         let data = super.getObject();
         return{
             ...data,
+            connectorType: this._connectorType,
+            invoker: this._invoker,
+            entity: this._entity.getObjectForSvgElement(),
         }
     }
 }
