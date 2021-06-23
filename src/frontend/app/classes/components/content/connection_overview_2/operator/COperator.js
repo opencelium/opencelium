@@ -122,6 +122,14 @@ export default class COperator{
         this._arrows = arrows;
     }
 
+    isHighlighted(currentOperator){
+        return currentOperator ? this._id.indexOf(currentOperator.id) === 0 : false;
+    }
+
+    isCurrent(currentOperator){
+        return currentOperator ? currentOperator.id === this._id : false
+    }
+
     setCoordinates(coordinates){
         if(coordinates) {
             if (coordinates.hasOwnProperty('x')) {

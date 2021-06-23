@@ -103,6 +103,14 @@ export default class CProcess{
         this._arrows = arrows;
     }
 
+    isHighlighted(currentProcess){
+        return currentProcess ? this._id.indexOf(currentProcess.id) === 0 : false;
+    }
+
+    isCurrent(currentProcess){
+        return currentProcess ? currentProcess.id === this._id : false
+    }
+
     setProcessWidth(processText) {
         this._width = Math.ceil((processText.length * 9 + PROCESS_LABEL_PADDING * 2) / 10) * 10;
     }

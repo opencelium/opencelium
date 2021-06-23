@@ -25,6 +25,9 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {HighlightedMarkers, DefaultMarkers} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
 import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
 import CSvg from "@classes/components/content/connection_overview_2/CSvg";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 
 function mapStateToProps(state){
     const {currentBusinessItem, currentTechnicalItem} = mapItemsToClasses(state);
@@ -124,9 +127,11 @@ class Svg extends React.Component {
         if(setCurrentItem){
             setCurrentItem(currentItem);
         }
-        const connector = connection.getConnectorByType(currentItem.connectorType);
-        connector.setCurrentItem(currentItem.entity);
-        updateConnection(connection);
+        if(connection) {
+            const connector = connection.getConnectorByType(currentItem.connectorType);
+            connector.setCurrentItem(currentItem.entity);
+            updateConnection(connection);
+        }
     }
 
     setItemCoordinates(coordinates){
@@ -272,14 +277,17 @@ class Svg extends React.Component {
     }
 
     renderItems(){
-        const {currentItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
+        const {currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
         return items.map((item,key) => {
-            let isHighlighted = currentItem ? item.id.indexOf(currentItem.id) === 0 : false;
-            let isCurrent = currentItem ? currentItem.id === item.id : false;
-            if(!isCurrent && currentTechnicalItem){
-                isCurrent = currentTechnicalItem ? currentTechnicalItem.id === item.id : false;
-                isHighlighted = currentTechnicalItem ? item.id.indexOf(currentTechnicalItem.id) === 0 : false;
+            let currentItem = null;
+            if(item instanceof CBusinessProcess && !currentTechnicalItem) {
+                currentItem = currentBusinessItem;
             }
+            if(item instanceof CTechnicalProcess || item instanceof CTechnicalOperator){
+                currentItem = currentTechnicalItem;
+            }
+            let isHighlighted = item.isHighlighted(currentItem);
+            let isCurrent = item.isCurrent(currentItem);
             switch (item.type){
                 case 'if':
                     return(

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {Col} from "react-grid-system";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -18,12 +19,10 @@ class Label extends React.Component{
     constructor(props) {
         super(props);
 
-        const labelValue = props.details && isString(props.details.label) ? props.details.label : '';
-
         this.state = {
             isMouseOver: false,
             isEditOn: false,
-            labelValue,
+            labelValue: props.label,
         }
     }
 
@@ -57,13 +56,8 @@ class Label extends React.Component{
 
     changeLabel(){
         const {labelValue} = this.state;
-        const {connection, details, updateConnection, setCurrentTechnicalItem} = this.props;
-        const connector = connection.getConnectorByType(details.connectorType);
-        const method = connector.getMethodByColor(details.entity.color);
-        method.label = labelValue;
-        const currentTechnicalItem = connector.getSvgElementByIndex(method.index);
-        updateConnection(connection);
-        setCurrentTechnicalItem(currentTechnicalItem);
+        const {changeLabel} = this.props;
+        changeLabel(labelValue);
         this.setState({
             isEditOn: false,
             isMouseOver: false,
@@ -79,17 +73,16 @@ class Label extends React.Component{
 
     render(){
         const {isMouseOver, isEditOn, labelValue} = this.state;
-        const {details, readOnly} = this.props;
-        const methodLabel = details.entity.label;
+        const {label, readOnly} = this.props;
         return(
             <React.Fragment>
                 <Col xs={4} className={styles.col}>{`Label`}</Col>
                 <Col xs={8} className={styles.col} onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
                     {isEditOn
                     ?
-                        <Input id={'details_label'} placeholder={methodLabel} value={labelValue} onChange={::this.setLabelValue} theme={{input: styles.label_input, inputElement: styles.label_input_element}}/>
+                        <Input id={'details_label'} placeholder={label} value={labelValue} onChange={::this.setLabelValue} theme={{input: styles.label_input, inputElement: styles.label_input_element}}/>
                     :
-                        <span className={styles.value}>{methodLabel === '' ? 'is empty' : methodLabel}</span>
+                        <span className={styles.value}>{label === '' ? 'is empty' : label}</span>
                     }
                     {isMouseOver && !isEditOn && !readOnly && <EditIcon onClick={::this.toggleEdit}/>}
                     {isEditOn && <ApplyIcon onClick={::this.changeLabel}/>}
@@ -99,5 +92,10 @@ class Label extends React.Component{
         );
     }
 }
+
+Label.propTypes = {
+    label: PropTypes.string.isRequired,
+    changeLabel: PropTypes.func.isRequired,
+};
 
 export default Label;

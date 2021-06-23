@@ -26,6 +26,15 @@ export default class CBusinessLayout{
         return new CBusinessLayout(connection, svgItems, arrows, currentSvgItem);
     }
 
+    changeItemName(item, newName){
+        if(item instanceof CBusinessProcess){
+            const svgItemIndex = this._svgItems.findIndex(svgItem => svgItem.index === item.index);
+            if(svgItemIndex !== -1){
+                this._svgItems[svgItemIndex].name = newName;
+            }
+        }
+    }
+
     convertItem(item){
         if(!(item instanceof CBusinessProcess)){
             let technicalItems = [];
@@ -68,6 +77,12 @@ export default class CBusinessLayout{
         if(index >= 0 && index < this._svgItems.length) {
             this._svgItems.splice(index, 1);
         }
+    }
+
+    getItemByIndex(index){
+        const svgItem = this._svgItems.find(item => item.index === index);
+        if(svgItem) return svgItem;
+        return null;
     }
 
     getItems(){
