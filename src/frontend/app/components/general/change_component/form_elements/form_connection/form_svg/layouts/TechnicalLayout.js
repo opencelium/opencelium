@@ -115,7 +115,7 @@ class TechnicalLayout extends React.Component{
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
-        const startingSvgY = isBusinessLayoutEmpty ? -80 : -210;
+        const startingSvgY = isBusinessLayoutEmpty ? -80 : -220;
         const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>

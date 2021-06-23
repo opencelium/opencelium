@@ -128,8 +128,7 @@ export default class CConnection{
             if(businessLayout === null){
                 businessLayout = {};
             }
-            businessLayout.connection = this;
-            return CBusinessLayout.createBusinessLayout(businessLayout);
+            return CBusinessLayout.createBusinessLayout({...businessLayout, connection: this});
         }
         return businessLayout;
     }
@@ -375,6 +374,10 @@ export default class CConnection{
 
     set readOnly(readOnly){
         this._readOnly = readOnly;
+    }
+
+    get businessLayout(){
+        return this._businessLayout;
     }
 
     getCurrentFieldBindingTo(){
@@ -712,6 +715,7 @@ export default class CConnection{
             toConnector: this._toConnector.getObjectForConnectionOverview(),
             template: this.template.getObject(),
             readOnly: this._readOnly,
+            businessLayout: this._businessLayout.getObject(),
         }
     }
 }

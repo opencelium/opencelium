@@ -40,19 +40,11 @@ class CreateBusinessItem extends React.Component{
     }
 
     create(){
-        let {name} = this.state;
-        name = name.value;
+        const {name} = this.state;
         const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened, connectorType} = this.props;
-        const connector = connection.getConnectorByType(connectorType);
-        let method = {name, label};
-        let operation = connector.invoker.operations.find(o => o.name === name);
-        method.request = operation.request.getObject({bodyOnlyConvert: true});
-        method.response = operation.response.getObject({bodyOnlyConvert: true});
-        if (connectorType === CONNECTOR_FROM) {
-            connection.addFromConnectorMethod(method, itemPosition);
-        } else {
-            connection.addToConnectorMethod(method, itemPosition);
-        }
+        const x = 100;
+        const y = 100;
+        connection.businessLayout.addItem({name, x, y});
         updateConnection(connection);
         if(setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
         if(setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
@@ -61,7 +53,7 @@ class CreateBusinessItem extends React.Component{
     render(){
         const {name} = this.state;
         const {style, afterLineStyles, createIconStyles} = this.props;
-        const isAddDisabled = name === '' || name === null;
+        const isAddDisabled = name === '';
         return(
             <React.Fragment>
                 <div className={styles.create_element_panel_for_item} style={style}>

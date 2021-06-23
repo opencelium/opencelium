@@ -23,6 +23,7 @@ import {SEPARATE_WINDOW} from "@utils/constants/app";
 import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
 import {BChannel} from "@utils/store";
+import {withTranslation} from "react-i18next";
 
 function mapStateToProps(state){
     const {currentBusinessItem, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
@@ -35,6 +36,7 @@ function mapStateToProps(state){
 }
 
 @connect(mapStateToProps, {})
+@withTranslation('basic_components')
 class ExtendedDetails extends React.Component{
     constructor(props) {
         super(props);

@@ -96,9 +96,7 @@ class BusinessLayout extends React.Component{
         const isReplaceIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isTechnicalLayoutMinimized;
         const isNewWindowIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
-        const items = [];
-        const technicalLayoutElement = document.getElementById('technical_layout_svg');
-        const yIntend = technicalLayoutElement && technicalLayoutElement.height.baseVal && layoutPosition === LAYOUT_POSITION.BOTTOM ? document.getElementById('business_layout_svg').height.baseVal.value : 0;
+        const items = connection.businessLayout.getItems();
         return(
             <div id={this.layoutId} className={`${styles.business_layout}`}>
                 <SettingsPanel

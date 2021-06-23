@@ -71,22 +71,25 @@ class Process extends React.Component{
         const labelY = '50%';
         const closeX = process.width - 15;
         const closeY = 15;
-        let label = method.label ? method.label : method.name ? method.name : '';
+        const methodName = method ? method.label ? method.label : method.name ? method.name : '' : '';
+        const label = methodName === '' ? isString(process.name) ? process.name : '' : methodName;
+        const color = method ? method.color : '';
+        let hasColor = color !== '';
         let shortLabel = label;
         if(isString(label) && label.length > 12){
             shortLabel = `${label.substr(0, 9)}...`;
         }
         return(
             <svg x={process.x} y={process.y} className={`${styles.process} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
-                <rect fill={colorMode !== 1 ? '#fff' : method.color} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
+                <rect fill={colorMode !== 1 || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                       className={`${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                 />
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
                     {shortLabel}
                 </text>
                 <title>{label}</title>
-                {colorMode === 0 && <rect fill={method.color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
-                {colorMode === 2 && <circle cx={15} cy={15} r="10" fill={method.color}/>}
+                {hasColor && colorMode === 0 && <rect fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
+                {hasColor && colorMode === 2 && <circle cx={15} cy={15} r="10" fill={color}/>}
                 {isCurrent && !readOnly &&
                     <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
                 }

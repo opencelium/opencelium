@@ -359,7 +359,7 @@ class Svg extends React.Component {
                         this.renderItems()
                     }
                     {hasEmptyText && isEmpty &&
-                        <text id={'business_layout_empty_text'} onClick={::this.onEmptyTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'25%'} className={styles.connector_empty_text}>
+                        <text id={'business_layout_empty_text'} onClick={::this.onEmptyTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'20%'} className={styles.connector_empty_text}>
                             {'Click here to create...'}
                         </text>
                     }

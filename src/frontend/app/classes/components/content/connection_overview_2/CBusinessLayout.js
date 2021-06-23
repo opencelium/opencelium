@@ -70,6 +70,10 @@ export default class CBusinessLayout{
         }
     }
 
+    getItems(){
+        return this._svgItems;
+    }
+
     setItems(items){
         this._svgItems = this.convertItems(items);
     }
