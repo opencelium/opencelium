@@ -18,12 +18,30 @@ import {
 import {Line} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 import CreateBusinessItem
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateBusinessItem";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import CCreateElementPanel, {
+    CREATE_OPERATOR,
+    CREATE_PROCESS
+} from "@classes/components/content/connection_overview_2/CCreateElementPanel";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import ItemTypePanel
+    from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/ItemTypePanel";
+import ItemPositionPanel
+    from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/ItemPositionPanel";
 
-const CREATE_PROCESS = 'CREATE_PROCESS';
-const CREATE_OPERATOR = 'CREATE_OPERATOR';
 
 
-@connect(null, {setArrows, setItems,})
+function mapStateToProps(state){
+    const {currentTechnicalItem, currentBusinessItem} = mapItemsToClasses(state);
+    return{
+        currentTechnicalItem,
+        currentBusinessItem,
+    };
+}
+
+@connect(mapStateToProps, {setArrows, setItems,})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -64,144 +82,84 @@ class CreateElementPanel extends React.Component{
     }
 
     render(){
-        const {type, itemPosition} = this.state;
-        const {currentItem, isCreateElementPanelOpened, connection, createElementPanelConnectorType, yIntend, isOnTheTop} = this.props;
-        let {x, y, connectorType} = this.props;
+        const {isCreateElementPanelOpened, createElementPanelConnectorType} = this.props;
+        let {x, y} = this.props;
         if(!isCreateElementPanelOpened || (x === 0 && y === 0 && createElementPanelConnectorType === '')){
             return null;
         }
-        let noOperatorType = false;
-        if(createElementPanelConnectorType === CONNECTOR_FROM){
-            const fromConnectorPanel = document.getElementById(`${CONNECTOR_FROM}_panel`);
-            const clientSvg = fromConnectorPanel.getBoundingClientRect();
-            x = clientSvg.x;
-            y = clientSvg.y - yIntend + clientSvg.height / 2 - 115;
-            if(isOnTheTop){
-                y += 5;
-            }
-            noOperatorType = true;
-        } else if(createElementPanelConnectorType === CONNECTOR_TO){
-            const toConnectorPanel = document.getElementById(`${CONNECTOR_TO}_panel`);
-            const clientSvg = toConnectorPanel.getBoundingClientRect();
-            x = clientSvg.x;
-            y = clientSvg.y - yIntend + clientSvg.height / 2 - 115;
-            if(isOnTheTop){
-                y += 5;
-            }
-        } else if(createElementPanelConnectorType === 'business_layout'){
-            const toConnectorPanel = document.getElementById(`business_layout_empty_text`);
-            const clientSvg = toConnectorPanel.getBoundingClientRect();
-            x = clientSvg.x;
-            y = clientSvg.y - yIntend + clientSvg.height / 2 - 115;
-            if(isOnTheTop){
-                y += 5;
-            }
+        const {type, itemPosition} = this.state;
+        let {currentTechnicalItem, currentBusinessItem, connection} = this.props;
+        const {hasLocation, isInBusinessLayout, isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
+        let selectedItem = null;
+        if(!hasLocation){
+            selectedItem = currentTechnicalItem !== null ? currentTechnicalItem : currentBusinessItem;
+        }
+        let noOperatorType = isInTechnicalFromConnectorLayout;
+        const isSelectedItemTechnicalOperator = selectedItem !== null && selectedItem instanceof CTechnicalOperator;
+        const isSelectedItemTechnicalProcess = selectedItem !== null && selectedItem instanceof CTechnicalProcess;
+        const isSelectedItemBusinessProcess = selectedItem !== null && selectedItem instanceof CBusinessProcess;
+        const isTypeCreateOperator = type === CREATE_OPERATOR;
+        const isTypeCreateProcess = type === CREATE_PROCESS;
 
-        } else{
-            y -= yIntend - 30;
-            if(isOnTheTop){
-                y -= 100;
-            }
+        const isSelectedItemOperator = isSelectedItemTechnicalOperator;
+        const isSelectedItemTechnical = isSelectedItemTechnicalOperator || isSelectedItemTechnicalProcess;
+        const isForCreateTechnicalItem = isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout || isSelectedItemTechnical;
+
+        let isForCreateBusinessItem = isInBusinessLayout || isSelectedItemBusinessProcess;
+        const hasCreateBusinessItem = isForCreateBusinessItem;
+        const hasItemPositionPanel = isForCreateTechnicalItem && isSelectedItemOperator;
+        let hasItemTypePanel = isForCreateTechnicalItem;
+        let isFromConnectorEmpty = connection.fromConnector.svgItems.length === 0;
+        if(isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout && isFromConnectorEmpty){
+            hasItemTypePanel = false;
         }
-        let isMethodItem = currentItem && currentItem.entity instanceof CMethodItem;
-        const isOperatorItem = currentItem && currentItem.entity instanceof COperatorItem;
-        if(createElementPanelConnectorType !== ''){
-            connectorType = createElementPanelConnectorType;
-            isMethodItem = true;
-        }
-        const itemPositionLine = {top: `${y + 27}px`, left: `${x - 7}px`};
-        const itemTypeLine = isMethodItem ? {top: `${y + 33}px`, left: `${x - 7}px`} : {top: `${y + 26}px`, left: `${x + 111}px`};
-        const beforeItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 111}px`} : {top: `${y + 27}px`, left: `${x + 230}px`};
-        let afterItemLineStyles = isMethodItem ? {top: `${y + 34}px`, left: `${x + 330}px`} : {top: `${y + 27}px`, left: `${x + 450}px`};
-        let createIconStyles = isMethodItem ? {top: `${y + 23}px`, left: `${x + 350}px`} : {top: `${y + 17}px`, left: `${x + 468}px`};
-        const panelItemPositionStyles = {top: `${y - 7}px`, left: `${x + 12}px`};
-        let panelItemTypeStyles = isMethodItem ? {top: `${y}px`, left: `${x + 11}px`} : {top: `${y - 7}px`, left: `${x + 129}px`};
-        if(noOperatorType){
-            panelItemTypeStyles.top = `${y + 17}px`;
-        }
-        let panelItemStyles = isMethodItem ? {top: y - 24, left: `${x + 130}px`} : {top: y - 31, left: `${x + 250}px`};
-        if(type === CREATE_OPERATOR){
-            panelItemStyles.top += 28;
-        }
-        panelItemStyles.top += 'px';
-        if(createElementPanelConnectorType === 'business_layout'){
-            panelItemStyles.left = `${x}px`;
-            panelItemStyles.top = `${y}px`;
-            afterItemLineStyles.left = `${x + 200}px`;
-            createIconStyles.left = `${x + 220}px`;
-            return(
-                <CreateBusinessItem
-                    {...this.props}
-                    x={x}
-                    y={y}
-                    connectorType={connectorType}
-                    style={panelItemStyles}
-                    itemPosition={itemPosition}
-                    afterLineStyles={afterItemLineStyles}
-                    createIconStyles={createIconStyles}
-                />
-            )
-        }
+        const hasCreateProcess = isForCreateTechnicalItem && isTypeCreateProcess;
+        const hasCreateOperator = isForCreateTechnicalItem && isTypeCreateOperator;
+        const hasLineBeforeItemTypePanel = hasItemPositionPanel;
+        const hasLineBeforeCreateProcess = hasItemTypePanel || hasItemPositionPanel;
         return(
             <div>
-                {isOperatorItem && createElementPanelConnectorType === '' &&
-                <React.Fragment>
-                    {/*<Line style={itemPositionLine}/>*/}
-                    <div className={styles.create_element_panel} style={panelItemPositionStyles}>
-                        <div className={`${styles.item_first} ${itemPosition === OUTSIDE_ITEM ? styles.selected_item : ''}`}
-                             onClick={() => ::this.onChangeItemPosition(OUTSIDE_ITEM)}>Out
-                        </div>
-                        <div className={`${styles.item_second} ${itemPosition === INSIDE_ITEM ? styles.selected_item : ''}`}
-                             onClick={() => ::this.onChangeItemPosition(INSIDE_ITEM)}>In
-                        </div>
-                    </div>
-                </React.Fragment>
+                {hasCreateBusinessItem &&
+                    <CreateBusinessItem
+                        {...this.props}
+                        itemPosition={itemPosition}
+                        selectedItem={selectedItem}
+                        isTypeCreateOperator={isTypeCreateOperator}
+                    />
                 }
-                {isMethodItem || (isOperatorItem && itemPosition !== '') ?
-                    <React.Fragment>
-                        {isOperatorItem && createElementPanelConnectorType === '' && <Line style={itemTypeLine}/>}
-                        <div className={styles.create_element_panel} style={panelItemTypeStyles}>
-                            <div className={`${noOperatorType ? styles.item_one : styles.item_first} ${type === CREATE_PROCESS ? styles.selected_item : ''}`}
-                                 onClick={() => ::this.changeType(CREATE_PROCESS)}>
-                                {'Process'}
-                            </div>
-                            {!noOperatorType &&
-                                <div className={`${styles.item_second} ${type === CREATE_OPERATOR ? styles.selected_item : ''}`}
-                                     onClick={() => ::this.changeType(CREATE_OPERATOR)}>
-                                    {'Operator'}
-                                </div>
-                            }
-                        </div>
-                    </React.Fragment>
-                    : null
+                {hasItemPositionPanel &&
+                    <ItemPositionPanel
+                        {...this.props}
+                        itemPosition={itemPosition}
+                        onChangeItemPosition={::this.onChangeItemPosition}
+                    />
                 }
-                {type === CREATE_PROCESS && ((isOperatorItem && itemPosition !== '') || isMethodItem) ?
+                {hasItemTypePanel &&
+                    <ItemTypePanel
+                        {...this.props}
+                        type={type}
+                        changeType={::this.changeType}
+                        selectedItem={selectedItem}
+                        noOperatorType={noOperatorType}
+                        hasBeforeLine={hasLineBeforeItemTypePanel}
+                    />
+                }
+                {hasCreateProcess &&
                     <CreateProcess
                         {...this.props}
-                        x={x}
-                        y={y}
-                        connectorType={connectorType}
-                        style={panelItemStyles}
+                        hasBeforeLine={hasLineBeforeCreateProcess}
                         itemPosition={itemPosition}
-                        beforeLineStyles={beforeItemLineStyles}
-                        afterLineStyles={afterItemLineStyles}
-                        createIconStyles={createIconStyles}
+                        selectedItem={selectedItem}
+                        isTypeCreateOperator={isTypeCreateOperator}
                     />
-                    : null
                 }
-                {type === CREATE_OPERATOR && ((isOperatorItem && itemPosition !== '') || isMethodItem) ?
+                {hasCreateOperator &&
                     <CreateOperator
                         {...this.props}
-                        x={x}
-                        y={y}
-                        connectorType={connectorType}
-                        style={panelItemStyles}
                         itemPosition={itemPosition}
-                        beforeLineStyles={beforeItemLineStyles}
-                        afterLineStyles={afterItemLineStyles}
-                        createIconStyles={createIconStyles}
+                        selectedItem={selectedItem}
+                        isTypeCreateOperator={isTypeCreateOperator}
                     />
-                    : null
                 }
             </div>
         );
@@ -209,8 +167,7 @@ class CreateElementPanel extends React.Component{
 }
 
 CreateElementPanel.defaultProps = {
-    yIntend: 0,
-    isOnTheTop: false,
+    isOnTheTopLayout: false,
     isBusinessLayout: false,
 }
 

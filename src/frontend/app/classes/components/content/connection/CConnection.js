@@ -255,6 +255,7 @@ export default class CConnection{
             '#D13298', '#B3CDE0', '#F512EA', '#4F3444',];
         this._fieldBinding = [];
         this._allTemplates = [];
+        this._businessLayout = this.convertBusinessLayout(null);
     }
 
     addRestColor(color){

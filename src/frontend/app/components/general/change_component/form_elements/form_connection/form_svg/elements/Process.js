@@ -44,22 +44,8 @@ class Process extends React.Component{
     }
 
     deleteProcess(e){
-        const {connection, process, updateConnection, setCurrentItem} = this.props;
-        const method = process.entity;
-        const connector = connection.getConnectorByType(process.connectorType);
-        if(connector){
-            if(connector.getConnectorType() === CONNECTOR_FROM){
-                connection.removeFromConnectorMethod(method);
-            } else{
-                connection.removeToConnectorMethod(method);
-            }
-            updateConnection(connection);
-            const currentItem = connector.getCurrentItem();
-            if(currentItem){
-                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
-                setCurrentItem(currentSvgElement);
-            }
-        }
+        const {deleteProcess, process} = this.props;
+        deleteProcess(process);
         e.stopPropagation();
     }
 
@@ -103,6 +89,7 @@ Process.propTypes = {
         PropTypes.instanceOf(CBusinessProcess),
         PropTypes.instanceOf(CTechnicalProcess),
     ]),
+    deleteProcess: PropTypes.func.isRequired,
     isNotDraggable: PropTypes.bool,
     setCurrentBusinessItem: PropTypes.func,
     isCurrent: PropTypes.bool,

@@ -7,6 +7,9 @@ import {
     Line,
 } from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 import {CreateIcon} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateIcon";
+import CCreateElementPanel from "@classes/components/content/connection_overview_2/CCreateElementPanel";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 
 
 class CreateOperator extends React.Component{
@@ -19,8 +22,10 @@ class CreateOperator extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((this.props.x === 0 && this.props.y === 0)
-            || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
+        let currentCoordinates = CCreateElementPanel.getCoordinates(this.props);
+        let prevCoordinates = CCreateElementPanel.getCoordinates(prevProps);
+        if((currentCoordinates.x === 0 && currentCoordinates.y === 0)
+            || prevCoordinates.x !== currentCoordinates.x || prevCoordinates.y !== currentCoordinates.y){
             if(this.state.type !== null) {
                 this.setState({
                     type: null,
@@ -38,7 +43,8 @@ class CreateOperator extends React.Component{
     create(){
         let {type} = this.state;
         type = type.value;
-        const {connection, connectorType, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
+        const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
+        let connectorType = CCreateElementPanel.getConnectorType(this.props);
         let operator = {type};
         if (connectorType === CONNECTOR_FROM) {
             connection.addFromConnectorOperator(operator, itemPosition);
@@ -52,13 +58,25 @@ class CreateOperator extends React.Component{
 
     render(){
         const {type} = this.state;
-        const {style, beforeLineStyles, afterLineStyles, createIconStyles} = this.props;
+        const {selectedItem, isTypeCreateOperator, createElementPanelConnectorType} = this.props;
+        let {x, y} = CCreateElementPanel.getCoordinates(this.props);
+        const {isInBusinessLayout,isInTechnicalFromConnectorLayout, isInTechnicalToConnectorLayout} = CCreateElementPanel.getLocationData(createElementPanelConnectorType);
+        let ItemClass = selectedItem;
+        if(selectedItem === null){
+            if(isInBusinessLayout){
+                ItemClass = CBusinessProcess;
+            }
+            if(isInTechnicalFromConnectorLayout || isInTechnicalToConnectorLayout){
+                ItemClass = CTechnicalProcess;
+            }
+        }
+        let {createIconStyles, afterItemLineStyles, beforeItemLineStyles, panelItemStyles} = ItemClass.getCreateElementPanelStyles(x, y, {isTypeCreateOperator});
         const typeSource = COperatorItem.getOperatorTypesForSelect();
         const isAddDisabled = type === null;
         return(
             <React.Fragment>
-                <Line style={beforeLineStyles}/>
-                <div className={styles.create_element_panel_for_item} style={style}>
+                <Line style={beforeItemLineStyles}/>
+                <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
                     <Select
                         id={'new_operator_type'}
                         name={'new_operator_type'}
@@ -74,7 +92,7 @@ class CreateOperator extends React.Component{
                         required={true}
                     />
                 </div>
-                <Line style={afterLineStyles}/>
+                <Line style={afterItemLineStyles}/>
                 <CreateIcon create={::this.create} style={createIconStyles} isDisabled={isAddDisabled}/>
             </React.Fragment>
         );

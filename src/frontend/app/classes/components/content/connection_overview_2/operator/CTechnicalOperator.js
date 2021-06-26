@@ -43,6 +43,27 @@ export class CTechnicalOperator extends COperator{
         this._arrows = arrows;
     }
 
+    getCreateElementPanelStyles(...args){
+        return CTechnicalOperator.getCreateElementPanelStyles(...args);
+    }
+
+    static getCreateElementPanelStyles(x, y, data = {isOnTheTopLayout: false, isTypeCreateOperator:  false, noOperatorType: false,}){
+        let result = {};
+        let panelItemYIntend = data && data.isTypeCreateOperator ? 0 : 28;
+        let panelItemTypeYIntend = 0;
+        let itemTypeLineYIntend = 0;
+        result.itemTypeLine = {top: `${y + 27 + itemTypeLineYIntend}px`, left: `${x + 112}px`};
+        result.panelItemTypeStyles = {top: `${y - 5 + panelItemTypeYIntend}px`, left: `${x + 130}px`};
+        result.beforeItemLineStyles = {top: `${y + 27}px`, left: `${x + 230}px`};
+        result.panelItemStyles = {top: `${y - 3 - panelItemYIntend}px`, left: `${x + 250}px`};
+        result.afterItemLineStyles = {top: `${y + 27}px`, left: `${x + 450}px`};
+        result.createIconStyles = {top: `${y + 17}px`, left: `${x + 468}px`};
+        if(data && data.noOperatorType){
+            result.panelItemTypeStyles.top = `${y + 17}px`;
+        }
+        return result;
+    }
+
     getObject(){
         let data = super.getObject();
         return{

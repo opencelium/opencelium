@@ -65,6 +65,18 @@ export class CBusinessProcess extends CProcess{
         this._arrows = arrows;
     }
 
+    getCreateElementPanelStyles(...args){
+        return CBusinessProcess.getCreateElementPanelStyles(...args);
+    }
+
+    static getCreateElementPanelStyles(x, y){
+        let result = {};
+        result.panelItemStyles = {left: `${x}px`, top: `${y}px`};
+        result.afterItemLineStyles = {left: `${x + 200}px`, top: `${y + 27}px`};
+        result.createIconStyles = {top: `${y + 17}px`, left: `${x + 220}px`};
+        return result;
+    }
+
     getObject(){
         let data = super.getObject();
         let objectItems = [];

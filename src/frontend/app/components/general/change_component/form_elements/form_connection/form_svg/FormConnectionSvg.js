@@ -403,11 +403,10 @@ class FormConnectionSvg extends Component{
                 </PanelGroup>
                 {!data.readOnly &&
                     <CreateElementPanel
-                        isOnTheTop={technicalLayoutPosition === LAYOUT_POSITION.TOP}
+                        isOnTheTopLayout={technicalLayoutPosition === LAYOUT_POSITION.TOP}
                         createElementPanelConnectorType={createElementPanelConnectorType}
                         x={createElementPanelPosition.x}
                         y={createElementPanelPosition.y}
-                        currentItem={createElementPanelConnectorType !== 'business_layout' ? currentTechnicalItem : currentBusinessItem}
                         connectorType={currentTechnicalItem ? currentTechnicalItem.connectorType : ''}
                         connection={connection}
                         updateConnection={updateConnection}

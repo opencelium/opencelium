@@ -6,29 +6,24 @@ import {CTechnicalOperator} from "@classes/components/content/connection_overvie
 
 export default class CBusinessLayout{
 
-    constructor(connection = null, svgItems = [], arrows = [], currentSvgItem = null) {
+    constructor(connection = null, svgItems = [], arrows = [], currentSvgItemId = '') {
         this._connection = connection;
         this._svgItems = this.convertItems(svgItems);
         this._arrows = arrows;
-        this._currentSvgItem = null;
-        if(isString(currentSvgItem)){
-            this.setCurrentSvgItemByIndex(currentSvgItem);
-        } else{
-            this.setCurrentSvgItem(currentSvgItem);
-        }
+        this._currentSvgItem = this.getCurrentSvgItemById(currentSvgItemId);
     }
 
     static createBusinessLayout(businessLayout){
         const connection = businessLayout && businessLayout.hasOwnProperty('connection') ? businessLayout.connection : null;
         const svgItems = businessLayout && businessLayout.hasOwnProperty('svgItems') ? businessLayout.svgItems : [];
         const arrows = businessLayout && businessLayout.hasOwnProperty('arrows') ? businessLayout.arrows : [];
-        const currentSvgItem = businessLayout && businessLayout.hasOwnProperty('currentSvgItem') ? businessLayout.currentSvgItem : null;
-        return new CBusinessLayout(connection, svgItems, arrows, currentSvgItem);
+        const currentSvgItemId = businessLayout && businessLayout.hasOwnProperty('currentSvgItemId') ? businessLayout.currentSvgItemId : '';
+        return new CBusinessLayout(connection, svgItems, arrows, currentSvgItemId);
     }
 
     changeItemName(item, newName){
         if(item instanceof CBusinessProcess){
-            const svgItemIndex = this._svgItems.findIndex(svgItem => svgItem.index === item.index);
+            const svgItemIndex = this._svgItems.findIndex(svgItem => svgItem.id === item.id);
             if(svgItemIndex !== -1){
                 this._svgItems[svgItemIndex].name = newName;
             }
@@ -69,18 +64,45 @@ export default class CBusinessLayout{
         return convertedItems;
     }
 
-    addItem(item){
-        this._svgItems.push(this.convertItem(item));
-    }
-
-    removeItemByIndex(index){
-        if(index >= 0 && index < this._svgItems.length) {
-            this._svgItems.splice(index, 1);
+    refreshIds(startFromId){
+        if(startFromId < this._svgItems.length) {
+            for (let i = startFromId; i < this._svgItems.length; i++) {
+                this._svgItems[i].id = i;
+                if (i > 0) {
+                    this._arrows[i - 1] = {from: i - 1, to: i};
+                }
+            }
         }
     }
 
-    getItemByIndex(index){
-        const svgItem = this._svgItems.find(item => item.index === index);
+    addItem(item){
+        let id = 0;
+        let arrow = null;
+        if(this._currentSvgItem !== null) {
+            id = this._currentSvgItem.id + 1;
+            arrow = {from: this._currentSvgItem.id, to: this._currentSvgItem.id + 1};
+            this._arrows.push(arrow);
+        }
+        this._svgItems.push(this.convertItem({...item, id}));
+        this._currentSvgItem = this._svgItems[id];
+        this.refreshIds(id);
+    }
+
+    deleteItem(item){
+        const index = this._svgItems.findIndex(svgItem => svgItem.id === item.id);
+        if(index !== -1){
+            this._svgItems.splice(index, 1);
+            if(index > 0){
+                this._currentSvgItem = this._svgItems[index - 1];
+                this.refreshIds(index - 1);
+            } else{
+                this._currentSvgItem = null;
+            }
+        }
+    }
+
+    getItemById(id){
+        const svgItem = this._svgItems.find(item => item.id === id);
         if(svgItem) return svgItem;
         return null;
     }
@@ -105,6 +127,10 @@ export default class CBusinessLayout{
         this._arrows = arrows;
     }
 
+    getArrows(){
+        return this._arrows;
+    }
+
     clearArrows(){
         this._arrows = [];
     }
@@ -115,9 +141,9 @@ export default class CBusinessLayout{
         }
     }
 
-    setCurrentSvgItemByIndex(index){
-        const currentSvgItem = this._svgItems.find(svgItem => svgItem.index === index);
-        this._currentSvgItem = currentSvgItem ? currentSvgItem : null;
+    getCurrentSvgItemById(id){
+        const currentSvgItem = this._svgItems.find(svgItem => svgItem.id === id);
+        return currentSvgItem ? currentSvgItem : null;
     }
 
     getCurrentSvgItem(){
@@ -134,6 +160,7 @@ export default class CBusinessLayout{
         return{
             svgItems,
             arrows: this._arrows,
+            currentSvgItemId: this._currentSvgItem ? this._currentSvgItem.id : '',
         }
     }
 }

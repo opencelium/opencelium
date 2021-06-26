@@ -14,7 +14,7 @@ class BusinessProcessDescription extends React.Component{
     changeLabel(label){
         const {connection, details, updateConnection, setCurrentBusinessItem} = this.props;
         connection.businessLayout.changeItemName(details, label);
-        const currentBusinessItem = connection.businessLayout.getItemByIndex(details.index);
+        const currentBusinessItem = connection.businessLayout.getItemById(details.id);
         updateConnection(connection);
         if(currentBusinessItem) setCurrentBusinessItem(currentBusinessItem);
     }

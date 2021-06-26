@@ -73,9 +73,7 @@ class Svg extends React.Component {
             });
             window.addEventListener('resize', ::this.setRatio);
         }
-        if(isScalable) {
-            this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
-        }
+        this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -277,7 +275,7 @@ class Svg extends React.Component {
     }
 
     renderItems(){
-        const {currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly} = this.props;
+        const {currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly, deleteProcess} = this.props;
         return items.map((item,key) => {
             let currentItem = null;
             if(item instanceof CBusinessProcess && !currentTechnicalItem) {
@@ -299,7 +297,7 @@ class Svg extends React.Component {
                     );
                 default:
                     return(
-                        <Process key={key} process={item} readOnly={readOnly} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });
@@ -332,10 +330,9 @@ class Svg extends React.Component {
 
     render(){
         const {
-            items, svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
+            svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
             isCreateElementPanelOpened, connection, hasEmptyText, createElementPanelConnectorType,
         } = this.props;
-        const isEmpty = items.length === 0;
         return(
             <React.Fragment>
                 <svg
@@ -366,7 +363,7 @@ class Svg extends React.Component {
                     {
                         this.renderItems()
                     }
-                    {hasEmptyText && isEmpty &&
+                    {hasEmptyText &&
                         <text id={'business_layout_empty_text'} onClick={::this.onEmptyTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'20%'} className={styles.connector_empty_text}>
                             {'Click here to create...'}
                         </text>
@@ -381,6 +378,7 @@ class Svg extends React.Component {
 Svg.propTypes = {
     layoutId: PropTypes.string.isRequired,
     svgId: PropTypes.string.isRequired,
+    deleteProcess: PropTypes.func.isRequired,
     dragAndDropStep: PropTypes.number,
     isItemDraggable: PropTypes.bool,
     isDraggable: PropTypes.bool,

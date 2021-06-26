@@ -36,6 +36,10 @@ export default class CProcess{
         return this._id;
     }
 
+    set id(id){
+        this._id = id;
+    }
+
     get name(){
         return this._name;
     }
@@ -104,7 +108,7 @@ export default class CProcess{
     }
 
     isHighlighted(currentProcess){
-        return currentProcess ? this._id.indexOf(currentProcess.id) === 0 : false;
+        return currentProcess ? `${this._id}`.indexOf(currentProcess.id) === 0 : false;
     }
 
     isCurrent(currentProcess){

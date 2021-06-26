@@ -26,6 +26,14 @@ class Label extends React.Component{
         }
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.label !== prevProps.label && this.state.labelValue !== prevState.labelValue){
+            this.setState({
+                labelValue: this.props.label,
+            })
+        }
+    }
+
     mouseOver(){
         this.setState({
             isMouseOver: true,

@@ -66,15 +66,6 @@ class TechnicalLayout extends React.Component{
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
-        this.state = {
-            createElementPanelPosition: {x: 0, y: 0},
-        }
-    }
-
-    setCreateElementPanelPosition(position){
-        this.setState({
-            createElementPanelPosition: position,
-        });
     }
 
     setLocation(data){
@@ -99,9 +90,27 @@ class TechnicalLayout extends React.Component{
         this.props.openInNewWindow();
     }
 
+    deleteProcess(process){
+        const {connection, updateConnection, setCurrentTechnicalItem} = this.props;
+        const method = process.entity;
+        const connector = connection.getConnectorByType(process.connectorType);
+        if(connector){
+            if(connector.getConnectorType() === CONNECTOR_FROM){
+                connection.removeFromConnectorMethod(method);
+            } else{
+                connection.removeToConnectorMethod(method);
+            }
+            updateConnection(connection);
+            const currentItem = connector.getCurrentItem();
+            if(currentItem){
+                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+                setCurrentTechnicalItem(currentSvgElement);
+            }
+        }
+    }
+
     render(){
-        const {createElementPanelPosition} = this.state;
-        const {currentTechnicalItem, isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setIsCreateElementPanelOpened, createElementPanelConnectorType, readOnly, layoutPosition,setCreateElementPanelPosition} = this.props;
+        const {isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setCreateElementPanelPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection, setCurrentTechnicalItem,
@@ -152,6 +161,7 @@ class TechnicalLayout extends React.Component{
                     isScalable={HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
+                    deleteProcess={::this.deleteProcess}
                 />
             </div>
         );
