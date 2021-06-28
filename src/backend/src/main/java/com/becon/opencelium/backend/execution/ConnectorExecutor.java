@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
@@ -304,28 +305,6 @@ public class ConnectorExecutor {
         return response;
     }
 
-//    private RestTemplate getRestTemplate() {
-//
-//        try {
-//            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-//                @Override
-//                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-//                    return true;
-//                }
-//            };
-//            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-//            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
-//            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
-//            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-//            requestFactory.setHttpClient(httpClient);
-//            RestTemplate restTemplate = new RestTemplate(requestFactory);
-//            return restTemplate;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//    }
-
     private CloseableHttpClient getHttpClient() {
 
         try {
@@ -412,6 +391,9 @@ public class ConnectorExecutor {
                     Document document = createDocument();
                     XmlTransformer transformer = new XmlTransformer(document);
                     result = transformer.xmlToString(content);
+                    if(invoker.getName().equals("sap")) {
+                        result = Constant.SOAP_HEADER + result + Constant.SOAP_FOOTER;
+                    }
                     break;
                 case "json":
                     result = new ObjectMapper().writeValueAsString(content);
