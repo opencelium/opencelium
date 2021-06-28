@@ -14,6 +14,7 @@
  */
 
 import React from 'react';
+import {Row, Col, Container} from "react-grid-system";
 import styles from "@themes/default/content/connections/connection_overview_2.scss";
 import {connect} from "react-redux";
 import {DETAILS_POSITION} from "../FormConnectionSvg";
@@ -21,30 +22,51 @@ import PageNotFound from "@components/general/app/PageNotFound";
 import {SEPARATE_WINDOW} from "@utils/constants/app";
 import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
+import {BChannel} from "@utils/store";
+import {withTranslation} from "react-i18next";
 
 function mapStateToProps(state){
-    const {currentItem, currentSubItem} = mapItemsToClasses(state);
+    const {currentBusinessItem, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
-        currentItem,
-        currentSubItem,
+        currentBusinessItem,
+        currentTechnicalItem,
+        connection,
+        updateConnection,
     };
 }
 
 @connect(mapStateToProps, {})
+@withTranslation('basic_components')
 class ExtendedDetails extends React.Component{
     constructor(props) {
         super(props);
+
+        this.state = {
+            currentInfo: '',
+        }
+    }
+
+    setCurrentInfo(currentInfo){
+        this.setState({
+            currentInfo,
+        });
+    }
+
+    updateConnection(){
+        const {connection} = this.props;
+        BChannel.postMessage(connection.getObjectForConnectionOverview());
     }
 
     render(){
         /*
         * TODO: send updateEntity and connection throw the redux state
         */
-        const {currentItem, currentSubItem, position, updateEntity} = this.props;
+        const {currentInfo} = this.state;
+        const {currentBusinessItem, currentTechnicalItem, position, connection} = this.props;
         if(window.name !== SEPARATE_WINDOW.CONNECTION_OVERVIEW.DETAILS) {
             return <PageNotFound/>;
         }
-        let details = currentSubItem ? currentSubItem : currentItem;
+        let details = currentTechnicalItem ? currentTechnicalItem : currentBusinessItem;
         let detailsClassName = '';
         let detailsStyle = {};
         detailsClassName = styles.details_maximized;
@@ -56,14 +78,17 @@ class ExtendedDetails extends React.Component{
         }
         return(
             <div className={detailsClassName} style={detailsStyle}>
-                <div className={styles.details_data}>
+                <div className={styles.extended_details_data}>
                     <div className={styles.title}>
                         Details
                     </div>
                     {details ?
-                        <div className={styles.label}>
-                            <Description details={details} isExtended={true} updateEntity={updateEntity}/>
-                        </div>
+                        <Row className={styles.extended_details_row_description}>
+                            <Col xs={6} sm={5} md={5} lg={3} className={styles.extended_details_col_description}>
+                                <Description readOnly={connection.readOnly} details={details} isExtended={true} updateConnection={::this.updateConnection} connection={connection} currentInfo={currentInfo} setCurrentInfo={::this.setCurrentInfo}/>
+                            </Col>
+                            <Col className={styles.extended_details_information} xs={6} sm={7} md={7} lg={9} id={'extended_details_information'}/>
+                        </Row>
                         :
                         <div>
                             {"Please, select an item"}

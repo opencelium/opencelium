@@ -14,15 +14,58 @@
  */
 
 const NodeParams = require('./NodeParams');
+const SETTINGS = require('../settings.json');
+const fs = require("fs");
 
 const mainPort = 8888;
 const proxyPort = 8081;
 const socketPort = 8082;
 const webpackDevServerPort = NodeParams.HAS_BROWSER_SYNC ? proxyPort : mainPort;
 
+function getHttpsSettings(){
+    let https = false;
+    if(SETTINGS.hasOwnProperty('HTTPS')){
+        if(typeof SETTINGS.HTTPS === 'boolean'){
+            https = SETTINGS.HTTPS;
+        } else{
+            https = {};
+            if(SETTINGS.HTTPS.hasOwnProperty('key')){
+                if(fs.existsSync(SETTINGS.HTTPS.key)){
+                    https.key = fs.readFileSync(SETTINGS.HTTPS.key);
+                } else{
+                    console.log('There is no Key file for https connection.')
+                }
+            } else{
+                console.log('There is no Key Parameter for https connection in settings.json file.')
+            }
+            if(SETTINGS.HTTPS.hasOwnProperty('cert')){
+                if(fs.existsSync(SETTINGS.HTTPS.cert)) {
+                    https.cert = fs.readFileSync(SETTINGS.HTTPS.cert);
+                } else{
+                    console.log('There is no Cert file for https connection.')
+                }
+            } else{
+                console.log('There is no Cert Parameter for https connection in settings.json file.')
+            }
+            if(SETTINGS.HTTPS.hasOwnProperty('ca')){
+                if(fs.existsSync(SETTINGS.HTTPS.ca)) {
+                    https.ca = fs.readFileSync(SETTINGS.HTTPS.ca);
+                } else{
+                    console.log('There is no Ca file for https connection.')
+                }
+            }
+            if(!https.hasOwnProperty('key') || !https.hasOwnProperty('cert')){
+                https = false;
+            }
+        }
+    }
+    return https;
+}
+
 /**
  * params for opencelium servers
  */
+let https = getHttpsSettings();
 module.exports = {
     WEBPACK_DEV_SERVER: {
         PORT: webpackDevServerPort,
@@ -35,7 +78,8 @@ module.exports = {
                 "Access-Control-Allow-Origin": "*"
             },
             historyApiFallback: true,
-            watchContentBase: true
+            watchContentBase: true,
+            https,
         }
     },
     SOCKET: {

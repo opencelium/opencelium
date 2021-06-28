@@ -54,16 +54,16 @@ const PANEL_MARGIN_RECT = 1;
  */
 export default class CConnectorItem{
 
-    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = '', shiftXForSvgItems = 0){
+    constructor(connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [], connectorType = '', shiftXForSvgItems = 0, currentItemIndex = ''){
         this._id = isId(connectorId) ? connectorId : 0;
         this._title = title === '' ? 'Please, choose connector' : title;
         this._icon = isString(icon) ? icon : '';
         this._invoker = this.convertInvoker(invoker);
-        this._currentItem = null;
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
         this._shiftXForSvgItems = shiftXForSvgItems;
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
+        this._currentItem = currentItemIndex !== '' ? this.getItemByIndex(currentItemIndex) : null;
         this._svgItems = [];
         this._arrows = [];
         this._pagination = this.setConnectorPagination();
@@ -81,7 +81,8 @@ export default class CConnectorItem{
         let operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
         let connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
         let shiftXForSvgItems = connectorItem && connectorItem.hasOwnProperty('shiftXForSvgItems') ? connectorItem.shiftXForSvgItems : 0;
-        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems);
+        let currentItemIndex = connectorItem && connectorItem.hasOwnProperty('currentItemIndex') ? connectorItem.currentItemIndex : '';
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex);
     }
 
     static hasIcon(icon){
@@ -89,7 +90,15 @@ export default class CConnectorItem{
     }
 
     getPanelPosition(){
-        return {x: this._shiftXForSvgItems - PANEL_PADDING_SIDES, y: -PANEL_LABEL_INTEND - PANEL_PADDING_SIDES, width: this.getMaxXOfSvgItems() - this._shiftXForSvgItems + PANEL_PADDING_SIDES, height: this.getMaxYOfSvgItems() + PANEL_LABEL_INTEND + PANEL_PADDING_SIDES};
+        let width = this.getMaxXOfSvgItems() - this._shiftXForSvgItems + PANEL_PADDING_SIDES;
+        let height = this.getMaxYOfSvgItems() + PANEL_LABEL_INTEND + PANEL_PADDING_SIDES;
+        if(width < 350){
+            width = 350;
+        }
+        if(height < 300){
+            height = 300;
+        }
+        return {x: this._shiftXForSvgItems - PANEL_PADDING_SIDES, y: -PANEL_LABEL_INTEND - PANEL_PADDING_SIDES, width, height};
     }
 
     getPanelRectPosition(){
@@ -133,6 +142,9 @@ export default class CConnectorItem{
         }
         if(maxValue !== 0){
             maxValue += PANEL_PADDING_SIDES;
+        }
+        if(maxValue < 330){
+            maxValue = 330;
         }
         return maxValue;
 
@@ -180,8 +192,9 @@ export default class CConnectorItem{
                 xIterator += 200;
             }
             svgElement.x = xIterator + this._shiftXForSvgItems;
-            svgElement.y = 150 * (currentSplitIndex.length - 1)
-            if(items[i].type){
+            svgElement.y = 150 * (currentSplitIndex.length - 1);
+            svgElement.connectorType = this.getConnectorType();
+            if(items[i].type && items.length !== 1){
                 svgElement.x += 35;
                 svgElement.y += 10;
             }
@@ -508,6 +521,22 @@ export default class CConnectorItem{
         return this._currentItem;
     }
 
+    setHeadersForMethods(invoker = null){
+        if(invoker === null){
+            invoker = this._invoker;
+            if(invoker){
+                for(let i = 0; i < this._methods.length; i++){
+                    const operation = invoker.operations.find(operation => operation.name === this._methods[i].name);
+                    if(operation) {
+                        this._methods[i].request.setHeader(operation.request.header);
+                        this._methods[i].response.success.setHeader(operation.response.success.header);
+                        this._methods[i].response.fail.setHeader(operation.response.fail.header);
+                    }
+                }
+            }
+        }
+    }
+
     setCurrentItem(item){
         this._currentItem = item ? item : null;
         this.reloadOperatorsHistory();
@@ -805,6 +834,14 @@ export default class CConnectorItem{
         this.addItem(METHOD_ITEM, method, mode);
     }
 
+    getItemByIndex(index){
+        const method = this.getMethodByIndex(index);
+        if(method === null){
+            return this.getOperatorByIndex(index);
+        }
+        return method;
+    }
+
     getMethodByIndex(index){
         let method = this._methods.find(m => m.index === index);
         return method ? method : null;
@@ -967,6 +1004,14 @@ export default class CConnectorItem{
         this._connectorType = this.checkConnectorType(connectorType) ? connectorType : '';
     }
 
+    get shiftXForSvgItems(){
+        return this._shiftXForSvgItems;
+    }
+
+    set shiftXForSvgItems(shiftXForSvgItems){
+        this._shiftXForSvgItems = shiftXForSvgItems;
+    }
+
     getMethodByColor(color){
         let method = this._methods.find(m => m.color === color);
         return method ? method : null;
@@ -1057,5 +1102,14 @@ export default class CConnectorItem{
             obj.connectorId = this._id;
         }
         return obj;
+    }
+
+    getObjectForConnectionOverview(){
+        return {
+            ...this.getObject(),
+            title: this._title,
+            invoker: this._invoker.getObject(),
+            currentItemIndex: this._currentItem ? this._currentItem.index : '',
+        }
     }
 }

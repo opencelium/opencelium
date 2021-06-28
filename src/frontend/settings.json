@@ -7,5 +7,10 @@
     "NEO4J": 7474
   },
   "PROTOCOL": "",
-  "HOSTNAME": ""
+  "HOSTNAME": "",
+  "HTTPS": {
+    "cert": "path_to_cert",
+    "key": "path_to_key",
+    "ca": "path_to_ca"
+  }
 }

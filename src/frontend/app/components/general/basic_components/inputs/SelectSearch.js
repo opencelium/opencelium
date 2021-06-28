@@ -24,6 +24,7 @@ import {
     FIELD_TYPE_STRING
 } from "@classes/components/content/connection/method/CMethodItem";
 import Input from "./Input";
+import CResponseResult from "@classes/components/content/invoker/response/CResponseResult";
 
 const PARAM_DELIMITER = '.';
 const MIN_SEARCH_WORD_LENGTH = 0;
@@ -169,7 +170,7 @@ class SelectSearch extends Component{
         if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
-        let result = items ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue, currentConnector) : [];
+        let result = items instanceof CResponseResult ? items.getFields(predicator !== '' ? `${predicator}.${inputValue}` : inputValue, currentConnector) : [];
         if(isArray(result) && result.length > 0) {
             result = result.map(field => {
                 let {value, type} = field;
@@ -184,14 +185,14 @@ class SelectSearch extends Component{
 
     renderDropdown(){
         const {currentItems, currentItem} = this.state;
-        const {authUser} = this.props;
+        const {authUser, dropdownClassName, readOnly} = this.props;
         let classNames = [
             'select_search_dropdown',
             'items',
             'item',
             'item_hover',
         ];
-        if(currentItems.length === 0){
+        if(currentItems.length === 0 || readOnly){
             return null;
         }
         classNames = getThemeClass({classNames, authUser, styles});
@@ -208,7 +209,7 @@ class SelectSearch extends Component{
             );
         });
         return (
-            <div className={styles[classNames.select_search_dropdown]}>
+            <div className={`${styles[classNames.select_search_dropdown]} ${dropdownClassName}`}>
                 <div className={styles[classNames.items]}>
                     {itemElements}
                 </div>
@@ -217,7 +218,7 @@ class SelectSearch extends Component{
     }
 
     render(){
-        let {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, isPopupMultiline, popupRows, ...props} = this.props;
+        let {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, isPopupMultiline, popupRows,dropdownClassName, ...props} = this.props;
         let {theme, className, disabled, placeholder} = this.props;
         let classNames = [
             'input_input_element',
@@ -283,6 +284,7 @@ SelectSearch.defaultProps = {
     popupInputStyles: null,
     isPopupMultiline: false,
     popupRows: 1,
+    dropdownClassName: '',
 };
 
 export default SelectSearch;

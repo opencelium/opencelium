@@ -80,12 +80,19 @@ class FormMode extends Component{
     }
 
     componentDidMount(){
-        const {entity} = this.props;
+        const {entity, updateEntity, data} = this.props;
         if(entity.template.mode === TEMPLATE_MODE && entity.allTemplates.length === 0){
             this.fetchTemplates();
         }
+
+        let connector = data.connectors.find(c => c.id === entity.fromConnector.id);
+        if(connector) entity.fromConnector.invoker = connector.invoker;
+        connector = data.connectors.find(c => c.id === entity.toConnector.id);
+        if(connector) entity.toConnector.invoker = connector.invoker;
+        updateEntity(entity);
+
         window.addEventListener('resize', this.resize, false);
-        setFocusById('button_expert')
+        setFocusById('button_expert');
     }
 
     componentDidUpdate(prevProps){
@@ -220,6 +227,7 @@ class FormMode extends Component{
         templateContent.fromConnector.setConnectorType(CONNECTOR_FROM);
         templateContent.fromConnector.title = entity.fromConnector.title;
         entity.fromConnector = templateContent.fromConnector;
+        entity.fromConnector.setHeadersForMethods();
         //toConnector
         connector = connectors.find(c => c.id === templateContent.toConnector.id);
         templateContent.toConnector.invoker = connector.invoker;
@@ -227,6 +235,7 @@ class FormMode extends Component{
         templateContent.toConnector.title = entity.toConnector.title;
         templateContent.toConnector.setCurrentItem(templateContent.toConnector.methods[templateContent.toConnector.methods.length - 1]);
         entity.toConnector = templateContent.toConnector;
+        entity.toConnector.setHeadersForMethods();
         //fieldBinding
         entity.fieldBinding = templateContent.fieldBinding;
         entity.template.templateId = template.value;

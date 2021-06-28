@@ -35,7 +35,7 @@ import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
 import {removeLS} from "@utils/LocalStorage";
 
 
-const connectionPrefixURL = '/connections';
+const connectionPrefixURL = '/connection_overview_2';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -118,7 +118,7 @@ class ConnectionAdd2 extends Component{
      * to redirect app after adding Connection
      */
     redirect(){
-        this.props.router.push(`${connectionPrefixURL}`);
+        this.props.router.push(`connection_overview_2`);
     }
 
     /**

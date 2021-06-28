@@ -327,6 +327,7 @@
 .input_input_element{
   font-family: $FONT_FAMILY;
   height: 38px;
+  padding-left: 5px !important;
 }
 .input_input_element:focus:not([disabled]):not([readonly]) ~ .input_icon{
   color: $INPUT_SELECT_COLOR !important;

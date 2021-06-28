@@ -154,7 +154,7 @@ class ParamGenerator extends Component {
 
     renderMethodSelect(){
         const {color} = this.state;
-        const {connection, readOnly, selectId} = this.props;
+        const {connection, readOnly, selectId, theme} = this.props;
         let method = connection.toConnector.getMethodByColor(color);
         let connector = connection.toConnector;
         if(!method){
@@ -165,8 +165,10 @@ class ParamGenerator extends Component {
         let selectThemeInputStyle = {width: '70px', float: 'left'};
         let source = this.getOptionsForMethods();
         selectThemeInputStyle.padding = 0;
+        let themeGeneratorFormMethod = '';
+        if(theme && theme.hasOwnProperty('generatorFormMethod')) themeGeneratorFormMethod = theme.generatorFormMethod;
         return (
-            <div style={selectThemeInputStyle}>
+            <div style={selectThemeInputStyle} className={themeGeneratorFormMethod}>
                 <Select
                     id={selectId}
                     name={'...'}
@@ -180,6 +182,9 @@ class ParamGenerator extends Component {
                     openMenuOnClick={true}
                     maxMenuHeight={200}
                     minMenuHeight={50}
+                    selectMenuPlaceholderStyles={{
+                        left: `calc(50% - 10px)`,
+                    }}
                     styles={{
                         container: (provided, {isFocused, isDisabled}) => ({
                             fontSize: '12px',
@@ -212,12 +217,6 @@ class ParamGenerator extends Component {
                                 width: '90%'
                             };
                         },
-                        placeholder: (styles) => {
-                            return{
-                                ...styles,
-                                left: `calc(50% - 10px)`,
-                            }
-                        }
                     }}
                 />
             </div>
@@ -253,13 +252,15 @@ class ParamGenerator extends Component {
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method, connector, submitEdit} = this.props;
+        let {method, connector, submitEdit, theme} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
         let divStyles = {float: 'left', width: '130px'};
         inputTheme.input = styles.param_generator_param;
+        let themeGeneratorFormParam = '';
+        if(theme && theme.hasOwnProperty('generatorFormParam')) themeGeneratorFormParam = theme.generatorFormParam;
         return (
-            <div style={divStyles}>
+            <div style={divStyles} className={themeGeneratorFormParam}>
                 {/*{::this.renderResponseTypeGroup()}*/}
                 <Input
                     placeholder={'param'}
@@ -292,8 +293,8 @@ class ParamGenerator extends Component {
 
     renderArrowIcon(){
         const {showGenerator} = this.state;
-        const {isVisible, readOnly} = this.props;
-        if(readOnly){
+        const {isVisible, readOnly, isArrowVisible} = this.props;
+        if(readOnly || !isArrowVisible){
             return null;
         }
         if(!isVisible) {
@@ -320,18 +321,24 @@ class ParamGenerator extends Component {
 
     renderGenerator(){
         const {showGenerator, color} = this.state;
-        const {isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
+        const {isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
         let hasMethod = color !== '';
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
+        let themeParamGenerator = '';
+        let themeParamGeneratorForm = '';
+        if(theme){
+            if(theme.hasOwnProperty('paramGenerator')) themeParamGenerator = theme.paramGenerator;
+            if(theme.hasOwnProperty('paramGeneratorForm')) themeParamGeneratorForm = theme.paramGeneratorForm;
+        }
         return(
-            <div className={isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} style={parent ? {left: this.left, top: this.top} : {}}>
+            <div className={`${isAbsolute ?  styles.param_generator : styles.param_generator_not_absolute} ${themeParamGenerator}`} style={parent ? {left: this.left, top: this.top} : {}}>
                 {::this.renderArrowIcon()}
                 {
-                    showGenerator || isVisible
+                    showGenerator || isVisible || isAlwaysVisible
                         ?
-                        <div key={2} className={isAbsolute ? styles.param_generator_form : ''}>
+                        <div key={2} className={`${isAbsolute ? styles.param_generator_form : ''} ${themeParamGeneratorForm}`}>
                             {this.renderMethodSelect()}
                             {this.renderParamInput()}
                             <TooltipFontIcon
@@ -371,6 +378,9 @@ ParamGenerator.defaultProps = {
     submitEdit: null,
     actionButtonTooltip: 'Add',
     actionButtonValue: 'add',
+    theme: null,
+    isArrowVisible: true,
+    isAlwaysVisible: false,
 };
 
 export default ParamGenerator;

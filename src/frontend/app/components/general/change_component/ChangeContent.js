@@ -33,6 +33,7 @@ import {
 import {isEmptyObject} from '@utils/app';
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {setComponentInChangeContent} from "@actions/app";
+import {withTranslation} from "react-i18next";
 
 
 function mapStateToProps(state){
@@ -46,6 +47,7 @@ function mapStateToProps(state){
  * Change Content Component
  */
 @connect(mapStateToProps, {setComponentInChangeContent})
+@withTranslation('basic_components')
 class ChangeContent extends Component{
 
     constructor(props){
@@ -70,7 +72,7 @@ class ChangeContent extends Component{
         }
         this.state = {
             entity,
-            page: 0,
+            page: 1,
             hasError: false,
             hasRequired: false,
             isValidated: true,
@@ -86,9 +88,14 @@ class ChangeContent extends Component{
         addNextPageChangeEntityKeyNavigation(this);
         //addChangeContentActionNavigation(this);
         addFocusDocumentNavigation(this);
+        this.applyExternalComponentSettings();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        this.applyExternalComponentSettings();
+    }
+
+    applyExternalComponentSettings(){
         const {page} = this.state;
         const {contents, isComponentExternalInChangeContent} = this.props;
         const isExternalComponent = contents[page].hasOwnProperty('isExternalComponent') ? contents[page].isExternalComponent : false;
@@ -123,7 +130,7 @@ class ChangeContent extends Component{
                             this.setState({makingRequest: true});
                         } else {
                             if (request && request.status === true) {
-                                if (request.result && request.result.message === "EXISTS") {
+                                if (request.result && (request.hasOwnProperty('failCondition') ? request.failCondition(request.result) : request.result.message === "EXISTS")) {
                                     let isValidated = false;
                                     let focusedInput = {name: newInputs.name, label: newInputs.label};
                                     let validationMessage = request.notSuccessMessage;

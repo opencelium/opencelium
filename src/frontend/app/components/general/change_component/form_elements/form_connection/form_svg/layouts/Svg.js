@@ -17,20 +17,23 @@ import React from "react";
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import {DETAILS_POSITION, LAYOUT_POSITION} from "../FormConnectionSvg";
-import IfOperator from "../elements/IfOperator";
 import Process from "../elements/Process";
 import Arrow from "../elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import LoopOperator from "../elements/LoopOperator";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {HighlightedMarkers, DefaultMarkers} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
+import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
+import CSvg from "@classes/components/content/connection_overview_2/CSvg";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 
 function mapStateToProps(state){
-    const {currentItem, currentSubItem} = mapItemsToClasses(state);
+    const {currentBusinessItem, currentTechnicalItem} = mapItemsToClasses(state);
     return{
-        currentItem,
-        currentSubItem,
+        currentBusinessItem,
+        currentTechnicalItem,
     };
 }
 
@@ -49,7 +52,6 @@ class Svg extends React.Component {
         };
         //for panning and zooming
         this.state = {
-            svg: null,
             ratio: 1,
         }
         this.svgRef = React.createRef();
@@ -58,74 +60,41 @@ class Svg extends React.Component {
 
 
     componentDidMount() {
-        const {layoutId, svgId, isScalable, startingSvgY} = this.props;
+        const {layoutId, svgId, isScalable, startingSvgY, detailsPosition} = this.props;
         const layout = document.getElementById(layoutId);
         const layoutSVG = document.getElementById(svgId);
         if(layout && layoutSVG) {
             let width = layout.offsetWidth;
             let ratio = width / layoutSVG.getBoundingClientRect().width;
-            let viewBox = layoutSVG.viewBox.baseVal;
-            if(viewBox) {
-                viewBox.x = ::this.getViewBoxX();
-                viewBox.y = startingSvgY;
-                viewBox.width = 1800;
-                viewBox.height = 715;
-            }
+            const viewBox = {x: CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
+            CSvg.setViewBox(svgId, viewBox);
             this.setState({
-                svg: layoutSVG,
                 ratio,
             });
             window.addEventListener('resize', ::this.setRatio);
         }
-        if(isScalable) {
-            this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
-        }
+        this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        let viewBox = this.state.svg.viewBox.baseVal;
-        if(viewBox && this.props.detailsPosition !== prevProps.detailsPosition){
-            let x = ::this.getViewBoxX();
-            if(x !== viewBox.x) {
-                viewBox.x = x;
-            }
+        const {svgId, detailsPosition} = this.props;
+        if (detailsPosition !== prevProps.detailsPosition) {
+            const x = CSvg.getStartingViewBoxX(detailsPosition);
+            CSvg.setViewBox(svgId, {x});
         }
     }
 
     componentWillUnmount() {
         const {isScalable} = this.props;
-        window.removeEventListener('resize', ::this.setRatio);
         if(isScalable) {
             this.svgRef.current.removeEventListener('wheel', ::this.onWheel);
         }
+        window.removeEventListener('resize', ::this.setRatio);
     }
 
-    resizeSVG(){
-        const {layoutId} = this.props;
-        const layout = document.getElementById(layoutId);
-        if(layout) {
-            let width = layout.offsetWidth;
-            let height = layout.offsetHeight;
-            const {svg} = this.state;
-            if(svg) {
-                const viewBox = svg.viewBox.baseVal;
-                if (viewBox) {
-                    viewBox.width = width + 300;
-                    viewBox.height = height + 300;
-                }
-            }
-        }
-    }
-
-    getViewBoxX(){
-        const {detailsPosition} = this.props;
-        let x = -15;
-        if(detailsPosition === DETAILS_POSITION.LEFT) x = -370;
-        return x;
-    }
-
-    setRatio(e){
-        const svgElement = document.getElementById(this.props.svgId);
+    setRatio(){
+        const {layoutId, svgId} = this.props;
+        const svgElement = document.getElementById(svgId);
         if(svgElement) {
             let viewBox = svgElement.viewBox.baseVal;
             if (viewBox) {
@@ -140,29 +109,26 @@ class Svg extends React.Component {
                     }
                 });
             }
-            this.resizeSVG();
+            CSvg.resizeSVG(layoutId, svgId);
         }
     }
 
     setCurrentItem(currentItem){
-        let {items} = this.props;
-        const {setCurrentBusinessItem, setCurrentTechnicalItem, setItems} = this.props;
-        if(currentItem){
+        const {setCurrentItem, connection, updateConnection} = this.props;
+/*        if(currentItem){
             let index = items.findIndex(item => item.id === currentItem.id);
             if(index !== -1) {
                 items.splice(index, 1);
                 items.push(currentItem);
             }
+        }*/
+        if(setCurrentItem){
+            setCurrentItem(currentItem);
         }
-        if(setCurrentTechnicalItem){
-            setCurrentTechnicalItem(currentItem);
-        } else{
-            if(setCurrentBusinessItem) {
-                setCurrentBusinessItem(currentItem);
-            }
-        }
-        if(setItems) {
-            setItems(items);
+        if(connection) {
+            const connector = connection.getConnectorByType(currentItem.connectorType);
+            connector.setCurrentItem(currentItem.entity);
+            updateConnection(connection);
         }
     }
 
@@ -180,14 +146,26 @@ class Svg extends React.Component {
         }
     }
 
+    setCoordinatesForCreateElementPanel(e){
+        const {setCreateElementPanelPosition, layoutPosition} = this.props;
+        const clientRect = e.target.getBoundingClientRect();
+        let x = clientRect.x;
+        let y = clientRect.y;
+        x += clientRect.width + 8;
+        if(layoutPosition === LAYOUT_POSITION.BOTTOM) {
+            y -= 106;
+        }
+        setCreateElementPanelPosition({x, y});
+    }
+
     startDrag(e){
-        const {isDraggable, setCreateElementPanelPosition} = this.props;
+        const {svgId, isItemDraggable, isDraggable} = this.props;
         if(e.target.classList.contains('draggable')) {
-            if(isDraggable) {
+            if(isItemDraggable) {
                 this.selectedElement = e.target.parentNode;
                 if(this.selectedElement.parentNode){
-                    setCreateElementPanelPosition({x: 0, y: 0});
-                    this.offset = this.getMousePosition(e, this.selectedElement.parentNode);
+                    this.hideCreateElementPanel();
+                    this.offset = CSvg.getMousePosition(e, this.selectedElement.parentNode);
                     this.offset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
                     this.offset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
                 }
@@ -195,22 +173,24 @@ class Svg extends React.Component {
                 this.setCoordinatesForCreateElementPanel(e);
             }
         } else{
-            setCreateElementPanelPosition({x: 0, y: 0});
-            const {svg} = this.state;
-            if(svg) {
-                this.isPointerDown = true;
-                this.pointerOrigin = this.getMousePosition(e, svg);
+            if(isDraggable) {
+                this.hideCreateElementPanel();
+                const svgElement = document.getElementById(svgId);
+                if (svgElement) {
+                    this.isPointerDown = true;
+                    this.pointerOrigin = CSvg.getMousePosition(e, svgElement);
+                }
             }
         }
     }
 
     drag(e){
-        const {isDraggable, dragAndDropStep} = this.props;
+        const {isItemDraggable, dragAndDropStep, svgId, isDraggable} = this.props;
         if (this.selectedElement) {
-            if(isDraggable) {
+            if(isItemDraggable) {
                 e.preventDefault();
                 if(this.selectedElement.parentNode) {
-                    const coordinates = this.getMousePosition(e, this.selectedElement.parentNode);
+                    const coordinates = CSvg.getMousePosition(e, this.selectedElement.parentNode);
                     let currentOffset = {x: coordinates.x, y: coordinates.y};
                     currentOffset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
                     currentOffset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
@@ -231,16 +211,20 @@ class Svg extends React.Component {
                 }
             }
         } else{
-            if (!this.isPointerDown) {
+            if (!this.isPointerDown || !isDraggable) {
                 return;
             }
             e.preventDefault();
-            const {ratio, svg} = this.state;
-            let viewBox = svg.viewBox.baseVal;
-            if(svg) {
-                let pointerPosition = this.getMousePosition(e, svg);
-                viewBox.x -= ((pointerPosition.x - this.pointerOrigin.x) * ratio);
-                viewBox.y -= ((pointerPosition.y - this.pointerOrigin.y) * ratio);
+            const {ratio} = this.state;
+            const svgElement = document.getElementById(svgId)
+            if(svgElement) {
+                let viewBox = svgElement.viewBox.baseVal;
+                let pointerPosition = CSvg.getMousePosition(e, svgElement);
+                if(viewBox) {
+                    const x = viewBox.x - ((pointerPosition.x - this.pointerOrigin.x) * ratio);
+                    const y = viewBox.y - ((pointerPosition.y - this.pointerOrigin.y) * ratio);
+                    CSvg.setViewBox(svgId, {x, y});
+                }
             }
         }
     }
@@ -250,104 +234,83 @@ class Svg extends React.Component {
             this.selectedElement = null;
             this.setCoordinatesForCreateElementPanel(e);
         }
-        if(this.isPointerDown) {
-            this.isPointerDown = false;
-        }
-    }
-
-    setCoordinatesForCreateElementPanel(e){
-        const {setCreateElementPanelPosition, layoutPosition} = this.props;
-        const clientRect = e.target.getBoundingClientRect();
-        let x = clientRect.x;
-        let y = clientRect.y;
-        x += clientRect.width + 8;
-        if(e.target.points) {
-            y -= clientRect.height * 1.5;
-        } else{
-            y -= clientRect.height + 5;
-        }
-        if(layoutPosition === LAYOUT_POSITION.BOTTOM) {
-            let layoutSvg;
-            if (e.currentTarget.id === 'technical_layout_svg') {
-                layoutSvg = document.getElementById('business_layout_svg');
-            } else {
-                layoutSvg = document.getElementById('technical_layout_svg');
-            }
-            y -= layoutSvg.height.baseVal.value + 5;
-        }
-        setCreateElementPanelPosition({x, y});
-    }
-
-    getMousePosition(event, element) {
-        const CTM = element.getScreenCTM();
-        return {
-            x: (event.clientX - CTM.e) / CTM.a,
-            y: (event.clientY - CTM.f) / CTM.d
-        };
+        if(this.isPointerDown) this.isPointerDown = false;
     }
 
     onWheel(e) {
-        if(e.altKey === true) {
-            const {svg} = this.state;
-            let viewBox = svg.viewBox.baseVal;
-            let point = svg.createSVGPoint();
-            let zoom = {
-                scaleFactor: 1.2,
-                duration: 0.5,
-            };
-            e.preventDefault();
-            let normalized;
-            let delta = e.wheelDelta;
-            if (delta) {
-                normalized = (delta % 120) === 0 ? delta / 120 : delta / 12;
-            } else {
-                delta = e.deltaY || e.detail || 0;
-                normalized = -(delta % 3 ? delta * 10 : delta / 3);
+        const {svgId, isScalable, items} = this.props;
+        if(isScalable && items.length > 0) {
+            if (e.shiftKey === true) {
+                const svgElement = document.getElementById(svgId);
+                if(svgElement) {
+                    let point = svgElement.createSVGPoint();
+                    let zoom = {
+                        scaleFactor: 1.2,
+                        duration: 0.5,
+                    };
+                    e.preventDefault();
+                    let normalized;
+                    let delta = e.wheelDelta;
+                    if (delta) {
+                        normalized = (delta % 120) === 0 ? delta / 120 : delta / 12;
+                    } else {
+                        delta = e.deltaY || e.detail || 0;
+                        normalized = -(delta % 3 ? delta * 10 : delta / 3);
+                    }
+                    let scaleDelta = normalized > 0 ? 1 / zoom.scaleFactor : zoom.scaleFactor;
+                    point.x = e.clientX;
+                    point.y = e.clientY;
+                    let startPoint = point.matrixTransform(svgElement.getScreenCTM().inverse());
+                    let viewBox = {x: 0, y: 0, width: 0, height: 0};
+                    if(svgElement.viewBox.baseVal) {
+                        viewBox.x = svgElement.viewBox.baseVal.x - (startPoint.x - viewBox.x) * (scaleDelta - 1);
+                        viewBox.y = svgElement.viewBox.baseVal.y - (startPoint.y - viewBox.y) * (scaleDelta - 1);
+                        viewBox.width = svgElement.viewBox.baseVal.width * scaleDelta;
+                        viewBox.height = svgElement.viewBox.baseVal.height * scaleDelta;
+                        CSvg.setViewBox(svgId, viewBox);
+                    }
+                }
             }
-            let scaleDelta = normalized > 0 ? 1 / zoom.scaleFactor : zoom.scaleFactor;
-            point.x = e.clientX;
-            point.y = e.clientY;
-            let startPoint = point.matrixTransform(svg.getScreenCTM().inverse());
-            viewBox.x -= (startPoint.x - viewBox.x) * (scaleDelta - 1);
-            viewBox.y -= (startPoint.y - viewBox.y) * (scaleDelta - 1);
-            viewBox.width *= scaleDelta;
-            viewBox.height *= scaleDelta;
         }
     }
+
     renderItems(){
-        const {currentItem, currentSubItem, items} = this.props;
+        const {currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly, deleteProcess} = this.props;
         return items.map((item,key) => {
-            let isHighlighted = currentItem ? item.id.indexOf(currentItem.id) === 0 : false;
-            let isCurrent = currentItem ? currentItem.id === item.id : false;
-            if(!isCurrent && currentSubItem){
-                isCurrent = currentSubItem ? currentSubItem.id === item.id : false;
-                isHighlighted = currentSubItem ? item.id.indexOf(currentSubItem.id) === 0 : false;
+            let currentItem = null;
+            if(item instanceof CBusinessProcess && !currentTechnicalItem) {
+                currentItem = currentBusinessItem;
             }
+            if(item instanceof CTechnicalProcess || item instanceof CTechnicalOperator){
+                currentItem = currentTechnicalItem;
+            }
+            let isHighlighted = item.isHighlighted(currentItem);
+            let isCurrent = item.isCurrent(currentItem);
             switch (item.type){
                 case 'if':
                     return(
-                        <IfOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
+                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <LoopOperator key={key} operator={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
+                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} setCurrentItem={::this.setCurrentItem} isCurrent={isCurrent} isHighlighted={isHighlighted}/>
+                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });
     }
 
     renderArrows(){
-        const {currentItem, currentSubItem, arrows, items} = this.props;
+        const {currentItem, currentTechnicalItem, arrows, items} = this.props;
         return arrows.map((arrow,key) => {
             const from = items.find(item => item.id === arrow.from);
             const to = items.find(item => item.id === arrow.to);
             let isHighlighted = currentItem ? arrow.from.indexOf(currentItem.id) === 0 && arrow.to.indexOf(currentItem.id) === 0 : false;
-            if(!isHighlighted && currentSubItem){
-                isHighlighted = currentSubItem ? arrow.from.indexOf(currentSubItem.id) === 0 && arrow.to.indexOf(currentSubItem.id) === 0 : false;
+            if(!isHighlighted && currentTechnicalItem){
+                isHighlighted = currentTechnicalItem ? arrow.from.indexOf(currentTechnicalItem.id) === 0 && arrow.to.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
                 <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted}/>
@@ -355,31 +318,59 @@ class Svg extends React.Component {
         });
     }
 
+    hideCreateElementPanel(){
+        this.props.setCreateElementPanelPosition({x: 0, y: 0});
+        this.props.setIsCreateElementPanelOpened(false);
+    }
+
+    onEmptyTextClick(){
+        const {items, setIsCreateElementPanelOpened} = this.props;
+        if(items.length === 0) setIsCreateElementPanelOpened(true, 'business_layout');
+    }
+
     render(){
-        const {svgId, fromConnectorPanelParams, toConnectorPanelParams} = this.props;
+        const {
+            svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
+            isCreateElementPanelOpened, connection, hasEmptyText, createElementPanelConnectorType,
+        } = this.props;
         return(
-            <svg
-                id={svgId}
-                className={styles.layout_svg}
-                preserveAspectRatio={'xMidYMid slice'}
-                onMouseDown={::this.startDrag}
-                onMouseMove={::this.drag}
-                onMouseUp={::this.endDrag}
-                onMouseLeave={::this.endDrag}
-                ref={this.svgRef}
-            >
-                <defs>
-                    <DefaultMarkers/>
-                    <HighlightedMarkers/>
-                </defs>
-                {fromConnectorPanelParams && toConnectorPanelParams && <ConnectorPanels fromConnectorPanelParams={fromConnectorPanelParams} toConnectorPanelParams={toConnectorPanelParams}/>}
-                {
-                    this.renderArrows()
-                }
-                {
-                    this.renderItems()
-                }
-            </svg>
+            <React.Fragment>
+                <svg
+                    id={svgId}
+                    className={styles.layout_svg}
+                    preserveAspectRatio={'xMidYMid slice'}
+                    onMouseDown={::this.startDrag}
+                    onMouseMove={::this.drag}
+                    onMouseUp={::this.endDrag}
+                    onMouseLeave={::this.endDrag}
+                    ref={this.svgRef}
+                >
+                    <defs>
+                        <DefaultMarkers/>
+                        <HighlightedMarkers/>
+                    </defs>
+                    {fromConnectorPanelParams && toConnectorPanelParams &&
+                        <ConnectorPanels
+                            fromConnectorPanelParams={fromConnectorPanelParams}
+                            toConnectorPanelParams={toConnectorPanelParams}
+                            connection={connection}
+                            setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
+                            createElementPanelConnectorType={createElementPanelConnectorType}
+                        />}
+                    {
+                        this.renderArrows()
+                    }
+                    {
+                        this.renderItems()
+                    }
+                    {hasEmptyText &&
+                        <text id={'business_layout_empty_text'} onClick={::this.onEmptyTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'20%'} className={styles.connector_empty_text}>
+                            {'Click here to create...'}
+                        </text>
+                    }
+                </svg>
+                {isCreateElementPanelOpened && <div className={styles.disable_background} onClick={::this.hideCreateElementPanel}/>}
+            </React.Fragment>
         );
     }
 }
@@ -387,19 +378,24 @@ class Svg extends React.Component {
 Svg.propTypes = {
     layoutId: PropTypes.string.isRequired,
     svgId: PropTypes.string.isRequired,
+    deleteProcess: PropTypes.func.isRequired,
     dragAndDropStep: PropTypes.number,
+    isItemDraggable: PropTypes.bool,
     isDraggable: PropTypes.bool,
     isScalable: PropTypes.bool,
     startingSvgY : PropTypes.number,
+    hasEmptyText: PropTypes.bool,
 };
 
 Svg.defaultProps = {
     dragAndDropStep: 10,
-    isDraggable: false,
+    isItemDraggable: false,
+    isDraggable: true,
     isScalable: false,
     startingSvgY: -190,
     fromConnectorPanelParams: null,
     toConnectorPanelParams: null,
+    hasEmptyText: false,
 }
 
 export default Svg;

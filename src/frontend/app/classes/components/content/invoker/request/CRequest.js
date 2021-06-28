@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {isString} from "@utils/app";
+import {consoleLog, isArray, isString} from "@utils/app";
 import {
     convertHeaderFormatToObject,
     parseHeader
@@ -112,6 +112,17 @@ export default class CRequest{
 
     get invokerBody(){
         return this._invokerBody;
+    }
+
+    setHeader(headerItems){
+        this._header = [];
+        if(isArray(headerItems)) {
+            for (let i = 0; i < headerItems.length; i++) {
+                this._header.push(headerItems[i]);
+            }
+        } else{
+            consoleLog('CRequest. HeaderItems should be an array.');
+        }
     }
 
     addHeader(headerItem){

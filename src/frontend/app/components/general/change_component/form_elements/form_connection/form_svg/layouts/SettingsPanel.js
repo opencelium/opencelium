@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {DETAILS_POSITION} from "../FormConnectionSvg";
+import ConfigurationsIcon from "@change_component/form_elements/form_connection/form_svg/details/ConfigurationsIcon";
 
 class SettingsPanel extends React.Component{
     constructor(props) {
@@ -29,6 +30,7 @@ class SettingsPanel extends React.Component{
             detailsPosition, isLayoutMinimized, minimizeLayout, maximizeLayout,
             replaceLayouts, isDetailsMinimized, title, openInNewWindow,
             isReplaceIconDisabled, isMinMaxIconDisabled, isNewWindowIconDisabled,
+            hasConfigurationsIcon, isDisabled,
         } = this.props;
         let settingsPanelClassName = '';
         let minMaxTooltip = 'Minimize';
@@ -63,7 +65,7 @@ class SettingsPanel extends React.Component{
                     tooltip={isReplaceIconDisabled ? '' : 'Replace'}
                     value={'import_export'}
                     tooltipPosition={minMaxTooltipPosition}
-                    disabled={isReplaceIconDisabled}
+                    disabled={isDisabled || isReplaceIconDisabled}
                     isButton={true}
                 />
                 <div className={titleClassName}>{title}</div>
@@ -74,7 +76,7 @@ class SettingsPanel extends React.Component{
                     tooltip={isMinMaxIconDisabled ? '' : minMaxTooltip}
                     value={minMaxValue}
                     tooltipPosition={minMaxTooltipPosition}
-                    disabled={isMinMaxIconDisabled}
+                    disabled={isDisabled || isMinMaxIconDisabled}
                     isButton={true}
                 />
                 <TooltipFontIcon
@@ -84,9 +86,10 @@ class SettingsPanel extends React.Component{
                     tooltip={isNewWindowIconDisabled ? '' : 'Open in new Window'}
                     value={'open_in_new'}
                     tooltipPosition={'top'}
-                    disabled={isNewWindowIconDisabled}
+                    disabled={isDisabled || isNewWindowIconDisabled}
                     isButton={true}
                 />
+                {hasConfigurationsIcon && <ConfigurationsIcon disabled={isDisabled}/>}
             </div>
         );
     }
@@ -105,6 +108,8 @@ SettingsPanel.propTypes = {
     isReplaceIconDisabled: PropTypes.bool,
     isMinMaxIconDisabled: PropTypes.bool,
     isNewWindowIconDisabled: PropTypes.bool,
+    hasConfigurationsIcon: PropTypes.bool,
+    isDisabled: PropTypes.bool,
 };
 
 SettingsPanel.defaultProps = {
@@ -112,6 +117,8 @@ SettingsPanel.defaultProps = {
     isReplaceIconDisabled: false,
     isMinMaxIconDisabled: false,
     isNewWindowIconDisabled: false,
+    hasConfigurationsIcon: false,
+    isDisabled: false,
 };
 
 export default SettingsPanel;

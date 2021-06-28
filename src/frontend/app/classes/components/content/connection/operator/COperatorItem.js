@@ -49,6 +49,10 @@ export default class COperatorItem{
         return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator);
     }
 
+    static getOperatorTypesForSelect(){
+        return [{label: 'if', value: IF_OPERATOR},{label: 'loop', value: LOOP_OPERATOR}];
+    }
+
     deleteError(){
         this._error = {
             hasError: false,
@@ -107,6 +111,39 @@ export default class COperatorItem{
 
     set condition(condition){
         this._condition = condition;
+    }
+
+    setStatementColorByType(type, color){
+        switch(type){
+            case 'leftStatement':
+                this.setLeftStatementColor(color);
+                break;
+            case 'rightStatement':
+                this.setRightStatementColor(color);
+                break;
+        }
+    }
+
+    setStatementFieldByType(type, field){
+        switch(type){
+            case 'leftStatement':
+                this.setLeftStatementField(field);
+                break;
+            case 'rightStatement':
+                this.setRightStatementField(field);
+                break;
+        }
+    }
+
+    setStatementParentByType(type, parent){
+        switch(type){
+            case 'leftStatement':
+                this.setLeftStatementParent(parent);
+                break;
+            case 'rightStatement':
+                this.setRightStatementParent(parent);
+                break;
+        }
     }
 
     setLeftStatementColor(color){

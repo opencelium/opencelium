@@ -49,6 +49,18 @@ class Enhancement extends Component{
         setFocusById('enhancement_description');
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.enhancement && (prevProps.enhancement.expertVar !== this.props.enhancement.expertVar || prevProps.enhancement.expertCode !== this.props.enhancement.expertCode
+        || prevProps.enhancement.name !== this.props.enhancement.name || prevProps.enhancement.description !== this.props.enhancement.description)){
+            this.setState({
+                expertVar: this.props.enhancement.expertVar,
+                expertCode: this.props.enhancement.expertCode,
+                name: this.props.enhancement.name,
+                description: this.props.enhancement.description,
+            })
+        }
+    }
+
     /**
      * to update description of enhancement
      */

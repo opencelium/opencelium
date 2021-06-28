@@ -17,6 +17,7 @@
 import CStatement from "./CStatement";
 import React from "react";
 import {clearFieldNameFromArraySign} from "@change_component/form_elements/form_connection/form_methods/help";
+import {consoleLog} from "@utils/app";
 
 const OPERATOR_LABELS = {
     IS_TYPE_OF: <span style={{fontSize: '12px'}}>{`<T>`}</span>,
@@ -75,16 +76,27 @@ export default class CCondition{
         return new CCondition(leftStatement, relationalOperator, rightStatement);
     }
 
-    generateStatementText(){
+    getStatementByType(type){
+        switch(type){
+            case 'leftStatement':
+                return this._leftStatement;
+            case 'rightStatement':
+                return this._rightStatement;
+        }
+        consoleLog('CCondition. getStatementByType. Type is incorrect ' + type);
+        return null;
+    }
+
+    generateStatementText(isOnlyText = false){
         let statement = '';
         if(this.relationalOperator === ''){
             if(this.leftStatement && this.leftStatement.field !== '') {
-                statement = (
+                statement = !isOnlyText ? (
                     <span>
                         <span>{`For each element of the `}</span>
                         <b>{clearFieldNameFromArraySign(this.leftStatement.field)}</b>
                     </span>
-                );
+                ) : `For each element of the ${clearFieldNameFromArraySign(this.leftStatement.field)}`;
             }
         } else {
             let leftStatementText = '';
@@ -96,14 +108,14 @@ export default class CCondition{
                 rightStatementText = this.rightStatement.field;
             }
             if(leftStatementText !== '') {
-                statement = (
+                statement = !isOnlyText ? (
                     <span>
                         {`If `}
                         <b>{clearFieldNameFromArraySign(leftStatementText)}</b>
                         <span>{` ${this.relationalOperator} `}</span>
                         <b>{clearFieldNameFromArraySign(rightStatementText)}</b>
                     </span>
-                );
+                ) : `If ${clearFieldNameFromArraySign(leftStatementText)} ${this.relationalOperator} ${clearFieldNameFromArraySign(rightStatementText)}`;
             }
         }
         if(statement === ''){

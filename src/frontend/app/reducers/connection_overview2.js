@@ -16,7 +16,7 @@
 import {List, fromJS, Map} from 'immutable';
 import {ConnectionOverview2Action} from "@utils/actions";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
-import {getLS, removeLS} from "@utils/LocalStorage";
+import {getLS, removeLS, setLS} from "@utils/LocalStorage";
 import {isExternalWindow} from "@utils/app";
 
 let initialState = null;
@@ -35,9 +35,10 @@ if(isExternalWindow()){
 
 if(initialState === null){
     initialState = fromJS({
-        currentItem: null,
-        currentSubItem: null,
+        currentBusinessItem: null,
+        currentTechnicalItem: null,
         connection: null,
+        updateConnection: null,
         items: List([]),
         arrows: List([]),
         error: null,
@@ -46,6 +47,7 @@ if(initialState === null){
         detailsLocation: PANEL_LOCATION.SAME_WINDOW,
         businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
+        colorMode: 0,
     });
 }
 
@@ -54,14 +56,18 @@ if(initialState === null){
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case ConnectionOverview2Action.SET_CONNECTIONDATA:
+            return state.set('connection', action.payload.connection).set('updateConnection', action.payload.updateConnection);
+        case ConnectionOverview2Action.SET_COLORMODE:
+            return state.set('colorMode', action.payload);
         case ConnectionOverview2Action.SET_ARROWS:
             return state.set('arrows', List(action.payload));
         case ConnectionOverview2Action.SET_ITEMS:
             return state.set('items', List(action.payload));
         case ConnectionOverview2Action.SET_CURRENTBUSINESSITEM:
-            return state.set('currentItem', action.payload).set('currentSubItem', null);
+            return state.set('currentBusinessItem', action.payload).set('currentTechnicalItem', null);
         case ConnectionOverview2Action.SET_CURRENTECHNICALITEM:
-            return state.set('currentSubItem', action.payload);
+            return state.set('currentTechnicalItem', action.payload).set('isCreateElementPanelOpened', action.payload !== null);
         case ConnectionOverview2Action.SET_DETAILSLOCATION:
             if(action.payload.location === PANEL_LOCATION.SAME_WINDOW)
                 removeLS('connection_overview', 'connection_overview');

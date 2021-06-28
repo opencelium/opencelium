@@ -45,7 +45,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         updatingSystem: updateAssistant.get('updatingSystem'),
         checkingResetFiles: updateAssistant.get('checkingResetFiles'),
-        checkResetFiles: updateAssistant.get('checkResetFiles'),
+        checkResetFilesResult: updateAssistant.get('checkResetFiles'),
     };
 }
 
@@ -224,7 +224,7 @@ class UpdateAssistant extends Component{
 
     render(){
         const {updateData} = this.state;
-        const {t, authUser, updatingSystem, checkingResetFiles, checkResetFiles} = this.props;
+        const {t, authUser, updatingSystem, checkingResetFiles, checkResetFilesResult} = this.props;
         let contentTranslations = {};
         contentTranslations.header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
         contentTranslations.list_button = '';
@@ -245,8 +245,9 @@ class UpdateAssistant extends Component{
                     request: {
                         inProcess: checkingResetFiles,
                         status: this.startCheckingResetFiles && !checkingResetFiles,
-                        result: checkResetFiles,
-                        notSuccessMessage: t('FORM.RESET_FILES_NOT_EXIST'),
+                        result: checkResetFilesResult,
+                        failCondition: (result) => {return result.message !== 'EXISTS';},
+                        notSuccessMessage: t('FORM.VALIDATION_MESSAGES.RESET_FILES_NOT_EXIST'),
                     },
                 },
             ],

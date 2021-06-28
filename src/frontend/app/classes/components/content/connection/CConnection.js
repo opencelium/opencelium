@@ -14,12 +14,13 @@
  */
 
 import {consoleLog, isId} from "@utils/app";
-import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "./CConnectorItem";
+import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO, OPERATOR_ITEM, OUTSIDE_ITEM} from "./CConnectorItem";
 import CFieldBinding from "./field_binding/CFieldBinding";
 import CTemplate from "./CTemplate";
 import CBindingItem from "./field_binding/CBindingItem";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "../invoker/response/CResponse";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "./operator/CStatement";
+import CBusinessLayout from "@classes/components/content/connection_overview_2/CBusinessLayout";
 
 const DEFAULT_COLOR = '#ffffff';
 
@@ -47,7 +48,7 @@ export const ALL_COLORS = [
  */
 export default class CConnection{
 
-    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null){
+    constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, businessLayout = null){
         if(connectionId !== 0){
             this._id = isId(connectionId) ? connectionId : 0;
         }
@@ -92,18 +93,25 @@ export default class CConnection{
         }
         this._currentFieldBindingTo = -1;
         this.setError(error);
+        this._readOnly = readOnly;
+        this._businessLayout = this.convertBusinessLayout(businessLayout);
     }
 
     static createConnection(connection){
         let connectionId = connection && connection.hasOwnProperty('connectionId') ? connection.connectionId : 0;
-        let title = connection && connection.hasOwnProperty('title') ? connection.title : '';
-        let description = connection && connection.hasOwnProperty('description') ? connection.description : '';
-        let fromConnector = connection && connection.hasOwnProperty('fromConnector') ? connection.fromConnector : null;
-        let toConnector = connection && connection.hasOwnProperty('toConnector') ? connection.toConnector : null;
-        let fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
-        let template = connection && connection.hasOwnProperty('template') ? connection.template : null;
-        let error = connection && connection.hasOwnProperty('error') ? connection.error : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error);
+        if(connectionId === 0){
+            connectionId = connection && connection.hasOwnProperty('id') ? connection.id : 0;
+        }
+        const title = connection && connection.hasOwnProperty('title') ? connection.title : '';
+        const description = connection && connection.hasOwnProperty('description') ? connection.description : '';
+        const fromConnector = connection && connection.hasOwnProperty('fromConnector') ? connection.fromConnector : null;
+        const toConnector = connection && connection.hasOwnProperty('toConnector') ? connection.toConnector : null;
+        const fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
+        const template = connection && connection.hasOwnProperty('template') ? connection.template : null;
+        const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
+        const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
+        const businessLayout = connection && connection.hasOwnProperty('businessLayout') ? connection.businessLayout : null;
+        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, businessLayout);
     }
 
     static duplicateConnection(connection){
@@ -115,15 +123,25 @@ export default class CConnection{
         return new CConnection(duplicate);
     }
 
+    convertBusinessLayout(businessLayout){
+        if(!(businessLayout instanceof CBusinessLayout)){
+            if(businessLayout === null){
+                businessLayout = {};
+            }
+            return CBusinessLayout.createBusinessLayout({...businessLayout, connection: this});
+        }
+        return businessLayout;
+    }
+
     convertBindingItem(bindingItem){
-        if(!(bindingItem instanceof CBindingItem) || bindingItem === null) {
+        if(!(bindingItem instanceof CBindingItem)) {
             return CBindingItem.createBindingItem(bindingItem);
         }
         return bindingItem;
     }
 
     convertFieldBindingItem(fieldBindingItem){
-        if(!(fieldBindingItem instanceof CFieldBinding) || fieldBindingItem === null) {
+        if(!(fieldBindingItem instanceof CFieldBinding)) {
             return CFieldBinding.createFieldBinding(fieldBindingItem);
         }
         return fieldBindingItem;
@@ -138,7 +156,7 @@ export default class CConnection{
     }
 
     convertTemplate(template){
-        if(!(template instanceof CTemplate) || template === null) {
+        if(!(template instanceof CTemplate)) {
             return CTemplate.createTemplate(template);
         }
         return template;
@@ -148,11 +166,35 @@ export default class CConnection{
         return this._fromConnector.methods.length === 0 && this._fromConnector.operators.length === 0 && this._toConnector.methods.length === 0 && this._toConnector.operators.length === 0;
     }
 
-    getConnectorByMethodIndex(method){
-        if(this.fromConnector.methods.findIndex(m => m.color === method.color) !== -1){
+    getMethodByColor(color){
+        let index = this.fromConnector.methods.findIndex(m => m.color === color);
+        if(index !== -1){
+            return this.fromConnector.methods[index];
+        } else{
+            index = this.toConnector.methods.findIndex(m => m.color === color);
+            if(index !== -1){
+                return this.toConnector.methods[index];
+            } else{
+                return null;
+            }
+        }
+    }
+
+    getConnectorByType(type){
+        if(type === CONNECTOR_FROM){
+            return this._fromConnector;
+        }
+        if(type === CONNECTOR_TO){
+            return this._toConnector;
+        }
+        return null;
+    }
+
+    getConnectorByOperatorIndex(operator){
+        if(this.fromConnector.operators.findIndex(o => o.index === operator.index) !== -1){
             return this.fromConnector;
         }
-        if(this.toConnector.methods.findIndex(m => m.color === method.color) !== -1){
+        if(this.toConnector.operators.findIndex(o => o.index === operator.index) !== -1){
             return this.toConnector;
         }
         return null;
@@ -213,6 +255,7 @@ export default class CConnection{
             '#D13298', '#B3CDE0', '#F512EA', '#4F3444',];
         this._fieldBinding = [];
         this._allTemplates = [];
+        this._businessLayout = this.convertBusinessLayout(null);
     }
 
     addRestColor(color){
@@ -324,6 +367,18 @@ export default class CConnection{
 
     set allTemplates(allTemplates){
         this._allTemplates = allTemplates;
+    }
+
+    get readOnly(){
+        return this._readOnly;
+    }
+
+    set readOnly(readOnly){
+        this._readOnly = readOnly;
+    }
+
+    get businessLayout(){
+        return this._businessLayout;
     }
 
     getCurrentFieldBindingTo(){
@@ -444,8 +499,20 @@ export default class CConnection{
         connector.removeOperator(operator, true, true);
     }
 
+    addFromConnectorOperator(operator, mode = OUTSIDE_ITEM){
+        this.fromConnector.addOperator(operator, mode);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
+    }
+
+    addToConnectorOperator(operator, mode = OUTSIDE_ITEM){
+        this.toConnector.addOperator(operator, mode);
+    }
+
     addFromConnectorMethod(method, mode){
         this.addConnectorMethod(CONNECTOR_FROM, method, mode);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
     }
 
     addToConnectorMethod(method, mode){
@@ -454,6 +521,8 @@ export default class CConnection{
 
     removeFromConnectorMethod(method, withRefactorIndexes = true){
         this.removeConnectorMethod(CONNECTOR_FROM, method, withRefactorIndexes);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
     }
 
     removeToConnectorMethod(method, withRefactorIndexes = true){
@@ -462,6 +531,8 @@ export default class CConnection{
 
     removeFromConnectorOperator(operator){
         this.removeConnectorOperator(CONNECTOR_FROM, operator);
+        this.toConnector.shiftXForSvgItems = this.fromConnector.getShiftXOfSvgItems();
+        this.toConnector.setSvgItems();
     }
 
     removeToConnectorOperator(operator){
@@ -636,5 +707,16 @@ export default class CConnection{
             obj.id = this._id;
         }
         return obj;
+    }
+
+    getObjectForConnectionOverview(){
+        return{
+            ...this.getObject(),
+            fromConnector: this._fromConnector.getObjectForConnectionOverview(),
+            toConnector: this._toConnector.getObjectForConnectionOverview(),
+            template: this.template.getObject(),
+            readOnly: this._readOnly,
+            businessLayout: this._businessLayout.getObject(),
+        }
     }
 }

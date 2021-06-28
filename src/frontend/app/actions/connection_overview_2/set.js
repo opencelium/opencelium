@@ -17,29 +17,49 @@ import {ConnectionOverview2Action} from "@utils/actions";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {isObject} from "@utils/app";
+import CConnection from "@classes/components/content/connection/CConnection";
 
+
+const setColorMode = (color) => {
+    return{
+        type: ConnectionOverview2Action.SET_COLORMODE,
+        payload: color,
+    };
+}
 /**
- * set current item
- * @param currentItem - item
+ * set connection and updateConnection
+ * @param connection
+ * @param updateConnection
  * @returns {{type: string, payload: {}}}
  */
-const setCurrentBusinessItem = (currentItem) => {
+const setConnectionData = (connection = null, updateConnection = null) => {
+    return {
+        type: ConnectionOverview2Action.SET_CONNECTIONDATA,
+        payload: {connection: connection instanceof CConnection ? connection.getObjectForConnectionOverview() : connection, updateConnection},
+    };
+};
+/**
+ * set current item
+ * @param currentBusinessItem - item
+ * @returns {{type: string, payload: {}}}
+ */
+const setCurrentBusinessItem = (currentBusinessItem) => {
     return {
         type: ConnectionOverview2Action.SET_CURRENTBUSINESSITEM,
-        payload: currentItem instanceof CProcess || currentItem instanceof COperator ? currentItem.getObject() : currentItem,
+        payload: currentBusinessItem instanceof CProcess || currentBusinessItem instanceof COperator ? currentBusinessItem.getObject() : currentBusinessItem,
     };
 };
 
 /**
  * set current item
- * @param currentSubItem - subItem
+ * @param currentTechnicalItem - subItem
  * @returns {{type: string, payload: {}}}
  */
-const setCurrentTechnicalItem = (currentSubItem) => {
-    const payload = currentSubItem instanceof CProcess || currentSubItem instanceof COperator ? currentSubItem.getObject() : currentSubItem;
+const setCurrentTechnicalItem = (currentTechnicalItem) => {
+    const payload = currentTechnicalItem instanceof CProcess || currentTechnicalItem instanceof COperator ? currentTechnicalItem.getObject() : currentTechnicalItem;
     return {
         type: ConnectionOverview2Action.SET_CURRENTECHNICALITEM,
-        payload: {...payload},
+        payload: payload === null ? payload : {...payload},
     };
 };
 
@@ -119,4 +139,6 @@ export{
     setDetailsLocation,
     setBusinessLayoutLocation,
     setTechnicalLayoutLocation,
+    setColorMode,
+    setConnectionData,
 };

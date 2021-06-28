@@ -38,6 +38,13 @@ This documentation is organized into a couple of sections:
    usecases/manage_invokers
 
 .. toctree::
+   :caption: Tools
+   :maxdepth: 2
+
+   tools/idoit
+   tools/otrs
+
+.. toctree::
    :caption: REST API Reference
    :maxdepth: 2
 
@@ -54,7 +61,7 @@ This documentation is organized into a couple of sections:
 License
 ##################
 
-`becon`_ © 2013-2020 becon GmbH
+`becon`_ © 2013-2021 becon GmbH
 
 .. _becon: LICENSE.html
       

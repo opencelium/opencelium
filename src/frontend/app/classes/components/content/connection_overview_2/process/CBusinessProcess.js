@@ -29,18 +29,20 @@ export class CBusinessProcess extends CProcess{
         return new CBusinessProcess(process);
     }
 
-    convertItems(items){
-        return items.map(item => {
-            if(item instanceof CTechnicalProcess || item instanceof CTechnicalOperator){
-                return item;
+    convertItem(item){
+        if(item instanceof CTechnicalProcess || item instanceof CTechnicalOperator){
+            return item;
+        } else{
+            if(item.hasOwnProperty('type')){
+                return CTechnicalOperator.createTechnicalOperator(item);
             } else{
-                if(item.hasOwnProperty('type')){
-                    return CTechnicalOperator.createTechnicalOperator(item);
-                } else{
-                    return CTechnicalProcess.createTechnicalProcess(item);
-                }
+                return CTechnicalProcess.createTechnicalProcess(item);
             }
-        });
+        }
+    }
+
+    convertItems(items){
+        return items.map(item => this.convertItem(item));
     }
 
     get items(){
@@ -51,12 +53,28 @@ export class CBusinessProcess extends CProcess{
         this._items = this.convertItems(items);
     }
 
+    addItem(item){
+        this._items.push(this.convertItem(item));
+    }
+
     get arrows(){
         return this._arrows;
     }
 
     set arrows(arrows){
         this._arrows = arrows;
+    }
+
+    getCreateElementPanelStyles(...args){
+        return CBusinessProcess.getCreateElementPanelStyles(...args);
+    }
+
+    static getCreateElementPanelStyles(x, y){
+        let result = {};
+        result.panelItemStyles = {left: `${x}px`, top: `${y}px`};
+        result.afterItemLineStyles = {left: `${x + 200}px`, top: `${y + 27}px`};
+        result.createIconStyles = {top: `${y + 17}px`, left: `${x + 220}px`};
+        return result;
     }
 
     getObject(){

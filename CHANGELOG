@@ -1,6 +1,18 @@
 OC Changelog
 --------------------------------------------------------------------------------
 
+1.4
+--------------------------------------------------------------------------------
+[Feature]							Add new dashboard with widgets
+[Feature]							Add update assistant
+[Feature]							Add new operator allow/deny list
+[Feature]							Add params in webhook
+[Feature]							Add tool opencelium-addon for i-doit
+[Feature]							Add tool apiextension for otrs/znuny/otobo
+[Feature]							Add tool webservice configuration for otrs/znuny/otobo
+[Bug][OC-299]						Creates a white method what could not use
+[Bug][OC-330]						Wrong synax generated on a query by using ref generator
+
 1.3.2
 --------------------------------------------------------------------------------
 [Feature]							Equal two ref vars in an if operator

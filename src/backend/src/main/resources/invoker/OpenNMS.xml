@@ -2,7 +2,7 @@
     <name>openNMS</name>
     <description>Open Network Monitoring System: built for scalability, integration, and high levels of configuration since 2000.</description>
     <hint>Open Network Monitoring System. Read api documentation https://docs.opennms.org/opennms/releases/17.0.0/guide-development/guide-development.html</hint>
-    <icon>http://localhost:9090/api/storage/files/null</icon>
+    <icon>opennms.png</icon>
     <requiredData>
         <item name="url" type="string" visibility="public"/>
         <item name="username" type="string" visibility="public"/>

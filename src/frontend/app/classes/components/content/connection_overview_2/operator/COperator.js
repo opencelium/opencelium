@@ -12,7 +12,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 
 export const OPERATOR_SIZE = 60;
@@ -27,7 +26,7 @@ export default class COperator{
         this._y = operator && operator.hasOwnProperty('y') ? operator.y : 0;
         this._width = OPERATOR_SIZE;
         this._height = OPERATOR_SIZE;
-        this._connector = operator && operator.hasOwnProperty('connector') ? operator.connector : null;
+        this._connectorType = operator && operator.hasOwnProperty('connectorType') ? operator.connectorType : '';
         this._invoker = operator && operator.hasOwnProperty('invoker') ? operator.invoker : null;
         this._entity = operator && operator.hasOwnProperty('entity') ? operator.entity : null;
         if(!(this._entity instanceof COperatorItem)){
@@ -87,12 +86,12 @@ export default class COperator{
         this._height = height;
     }
 
-    get connector(){
-        return this._connector;
+    get connectorType(){
+        return this._connectorType;
     }
 
-    set connector(connector){
-        this._connector = connector;
+    set connectorType(connectorType){
+        this._connectorType = connectorType;
     }
 
     get invoker(){
@@ -123,6 +122,14 @@ export default class COperator{
         this._arrows = arrows;
     }
 
+    isHighlighted(currentOperator){
+        return currentOperator ? this._id.indexOf(currentOperator.id) === 0 : false;
+    }
+
+    isCurrent(currentOperator){
+        return currentOperator ? currentOperator.id === this._id : false
+    }
+
     setCoordinates(coordinates){
         if(coordinates) {
             if (coordinates.hasOwnProperty('x')) {
@@ -143,7 +150,7 @@ export default class COperator{
             y: this._y,
             width: this._width,
             height: this._height,
-            connector: this._connector,
+            connectorType: this._connectorType,
             invoker: this._invoker,
             entity: this._entity.getObject(),
         };

@@ -30,16 +30,14 @@ export default class CProcess{
         this._y = process && process.hasOwnProperty('y') ? process.y : 0;
         this._width = PROCESS_WIDTH;
         this._height = PROCESS_HEIGHT;
-        this._connector = process && process.hasOwnProperty('connector') ? process.connector : null;
-        this._invoker = process && process.hasOwnProperty('invoker') ? process.invoker : null;
-        this._entity = process && process.hasOwnProperty('entity') ? process.entity : null;
-        if(!(this._entity instanceof CMethodItem)){
-            this._entity = CMethodItem.createMethodItem(this._entity);
-        }
     }
 
     get id(){
         return this._id;
+    }
+
+    set id(id){
+        this._id = id;
     }
 
     get name(){
@@ -93,26 +91,6 @@ export default class CProcess{
         this._height = height;
     }
 
-    get connector(){
-        return this._connector;
-    }
-
-    set connector(connector){
-        this._connector = connector;
-    }
-
-    get invoker(){
-        return this._invoker;
-    }
-
-    set invoker(invoker){
-        this._invoker = invoker;
-    }
-
-    get entity(){
-        return this._entity;
-    }
-
     get items(){
         return this._items;
     }
@@ -129,6 +107,14 @@ export default class CProcess{
         this._arrows = arrows;
     }
 
+    isHighlighted(currentProcess){
+        return currentProcess ? `${this._id}`.indexOf(currentProcess.id) === 0 : false;
+    }
+
+    isCurrent(currentProcess){
+        return currentProcess ? currentProcess.id === this._id : false
+    }
+
     setProcessWidth(processText) {
         this._width = Math.ceil((processText.length * 9 + PROCESS_LABEL_PADDING * 2) / 10) * 10;
     }
@@ -141,9 +127,6 @@ export default class CProcess{
             y: this._y,
             width: this._width,
             height: this._height,
-            connector: this._connector,
-            invoker: this._invoker,
-            entity: this._entity.getObjectForSvgElement(),
         };
     }
 }

@@ -20,14 +20,13 @@ import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
-import CreateElementPanel from "../elements/CreateElementPanel";
+import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem, items} = mapItemsToClasses(state);
+    const {currentBusinessItem} = mapItemsToClasses(state);
     return{
-        currentItem,
-        items,
+        currentBusinessItem,
         arrows: connectionOverview.get('arrows').toJS(),
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),

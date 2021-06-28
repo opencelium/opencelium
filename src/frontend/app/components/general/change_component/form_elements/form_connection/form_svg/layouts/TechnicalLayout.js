@@ -26,21 +26,27 @@ import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
-import CreateElementPanel from "../elements/CreateElementPanel";
+import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
-import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import {
+    HAS_LAYOUTS_SCALING,
+    LAYOUT_POSITION
+} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CConnection from "@classes/components/content/connection/CConnection";
+import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentItem, currentSubItem} = mapItemsToClasses(state);
+    const {currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
-        currentItem,
-        currentSubItem,
+        currentTechnicalItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+        connection,
+        updateConnection,
     };
 }
 
@@ -60,15 +66,6 @@ class TechnicalLayout extends React.Component{
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
-        this.state = {
-            createElementPanelPosition: {x: 0, y: 0},
-        }
-    }
-
-    setCreateElementPanelPosition(position){
-        this.setState({
-            createElementPanelPosition: position,
-        });
     }
 
     setLocation(data){
@@ -93,26 +90,47 @@ class TechnicalLayout extends React.Component{
         this.props.openInNewWindow();
     }
 
+    deleteProcess(process){
+        const {connection, updateConnection, setCurrentTechnicalItem} = this.props;
+        const method = process.entity;
+        const connector = connection.getConnectorByType(process.connectorType);
+        if(connector){
+            if(connector.getConnectorType() === CONNECTOR_FROM){
+                connection.removeFromConnectorMethod(method);
+            } else{
+                connection.removeToConnectorMethod(method);
+            }
+            updateConnection(connection);
+            const currentItem = connector.getCurrentItem();
+            if(currentItem){
+                const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+                setCurrentTechnicalItem(currentSvgElement);
+            }
+        }
+    }
+
     render(){
-        const {createElementPanelPosition} = this.state;
-        const {currentSubItem, isBusinessLayoutEmpty} = this.props;
+        const {isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setCreateElementPanelPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
-            detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection,
+            detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection, setCurrentTechnicalItem,
             ...svgProps
         } = this.props;
-        let fromConnectorPanelParams = {panelPosition: connection.fromConnector.getPanelPosition(), rectPosition: connection.fromConnector.getPanelRectPosition(), invokerName: connection.fromConnector.invoker.name};
-        let toConnectorPanelParams = {panelPosition: connection.toConnector.getPanelPosition(), rectPosition: connection.toConnector.getPanelRectPosition(), invokerName: connection.toConnector.invoker.name};
-        if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW){
+        if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
+        let fromConnectorPanelParams = {panelPosition: connection.fromConnector.getPanelPosition(), rectPosition: connection.fromConnector.getPanelRectPosition(), invokerName: connection.fromConnector.invoker.name};
+        let toConnectorPanelParams = {panelPosition: connection.toConnector.getPanelPosition(), rectPosition: connection.toConnector.getPanelRectPosition(), invokerName: connection.toConnector.invoker.name};
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
-        const startingSvgY = isBusinessLayoutEmpty ? -80 : -190;
+        const startingSvgY = isBusinessLayoutEmpty ? -80 : -220;
+        const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
+                    isDisabled={isCreateElementPanelOpened}
+                    updateConnection={updateConnection}
                     openInNewWindow={::this.openInNewWindow}
                     isLayoutMinimized={isLayoutMinimized}
                     maximizeLayout={maximizeLayout}
@@ -125,28 +143,32 @@ class TechnicalLayout extends React.Component{
                     isReplaceIconDisabled={isReplaceIconDisabled}
                     isMinMaxIconDisabled={isMinMaxIconDisabled}
                     isNewWindowIconDisabled={isNewWindowIconDisabled}
+                    hasConfigurationsIcon={true}
                 />
                 <Svg
                     {...svgProps}
-                    items={[...connection.fromConnector.svgItems, ...connection.toConnector.svgItems]}
+                    isBusinessLayoutMinimized={isBusinessLayoutMinimized}
+                    detailsPosition={detailsPosition}
+                    setCurrentItem={setCurrentTechnicalItem}
+                    connection={connection}
+                    items={items}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
-                    isDraggable={false}
+                    isItemDraggable={false}
                     isScalable={HAS_LAYOUTS_SCALING}
-                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
+                    deleteProcess={::this.deleteProcess}
                 />
-                <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y} currentItem={currentSubItem}/>
             </div>
         );
     }
 }
 
 TechnicalLayout.propTypes = {
-    connection: PropTypes.instanceOf(CConnection).isRequired,
     detailsPosition: PropTypes.oneOf(['right', 'left']).isRequired,
     isLayoutMinimized: PropTypes.bool.isRequired,
     isBusinessLayoutMinimized: PropTypes.bool.isRequired,
@@ -160,7 +182,7 @@ TechnicalLayout.propTypes = {
 
 TechnicalLayout.defaultProps = {
     isDetailsMinimized: false,
-    isBusinessLayoutEmpty: true,
+    isBusinessLayoutEmpty: false,
 };
 
 export default TechnicalLayout;

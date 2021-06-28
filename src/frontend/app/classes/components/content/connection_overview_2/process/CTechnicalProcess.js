@@ -15,21 +15,81 @@
 
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import {isString} from "@utils/app";
+import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
 
 export class CTechnicalProcess extends CProcess{
 
     constructor(technicalProcess) {
         super(technicalProcess);
+        this._connectorType = technicalProcess && technicalProcess.hasOwnProperty('connectorType') ? technicalProcess.connectorType : '';
+        this._invoker = technicalProcess && technicalProcess.hasOwnProperty('invoker') ? technicalProcess.invoker : null;
+        this._entity = technicalProcess && technicalProcess.hasOwnProperty('entity') ? technicalProcess.entity : null;
+        if(!(this._entity instanceof CMethodItem)){
+            this._entity = CMethodItem.createMethodItem(this._entity);
+        }
     }
 
     static createTechnicalProcess(process){
         return new CTechnicalProcess(process);
     }
 
+    get connectorType(){
+        return this._connectorType;
+    }
+
+    set connectorType(connectorType){
+        this._connectorType = connectorType;
+    }
+
+    get invoker(){
+        return this._invoker;
+    }
+
+    set invoker(invoker){
+        this._invoker = invoker;
+    }
+
+    get entity(){
+        return this._entity;
+    }
+
+    getCreateElementPanelStyles(...args){
+        return CTechnicalProcess.getCreateElementPanelStyles(...args);
+    }
+
+    static getCreateElementPanelStyles(x, y, data = {isOnTheTopLayout: false, isTypeCreateOperator: false, noOperatorType: false, hasBeforeItem: false}){
+        let result = {};
+        let xIntend = data.hasBeforeItem ? 100 : 0;
+        let panelItemYIntend = 0;
+        if(data.isTypeCreateOperator){
+            xIntend += 100;
+            panelItemYIntend = 30;
+        }
+        let panelItemTypeYIntend = 0;
+        let itemTypeLineYIntend = 0;
+        if(data.isOnTheTopLayout){
+            itemTypeLineYIntend = -99;
+            y -= 3;
+        }
+        result.itemTypeLine = {top: `${y + 2 + itemTypeLineYIntend}px`, left: `${x - 7}px`};
+        result.panelItemTypeStyles = {top: `${y + 2 + panelItemTypeYIntend}px`, left: `${x + 11}px`};
+        result.beforeItemLineStyles = {top: `${y + 34}px`, left: `${x + 111}px`};
+        result.panelItemStyles = {top: `${y - 24 + panelItemYIntend}px`, left: `${x + xIntend + 30}px`};
+        result.afterItemLineStyles = {top: `${y + 34}px`, left: `${x + xIntend + 230}px`};
+        result.createIconStyles = {top: `${y + 23}px`, left: `${x + xIntend + 250}px`};
+        if(data && data.noOperatorType){
+            result.panelItemTypeStyles.top = `${y + 17}px`;
+        }
+        return result;
+    }
+
     getObject(){
         let data = super.getObject();
         return{
             ...data,
+            connectorType: this._connectorType,
+            invoker: this._invoker,
+            entity: this._entity.getObjectForSvgElement(),
         }
     }
 }

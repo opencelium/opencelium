@@ -70,10 +70,7 @@ class Select extends Component{
     render(){
         const {inputValue} = this.state;
         const {styles, tourStep, icon, iconTooltip, label, required, isFocused, hasFocusStyle, className, tooltipTourStep, ...props} = this.props;
-        let {
-            selectClassName, selectMenuStyles, selectMenuDropdownIndicatorStyles, selectMenuIndicatorContainerStyles, selectMenuPlaceholderStyles,
-            selectMenuIndicatorSeparatorStyles, selectMenuControlStyles, selectMenuValueContainer, selectMenuSingleValueStyles,
-        } = this.props;
+        let {selectClassName, selectMenuStyles, selectMenuControlStyles, selectMenuValueContainer} = this.props;
         return (
             <ToolboxThemeInput
                 tourStep={tourStep}
@@ -136,26 +133,6 @@ class Select extends Component{
                             ...provided,
                             border: 'none',
                         }),
-                        dropdownIndicator:(provided) => ({
-                            ...provided,
-                            ...selectMenuDropdownIndicatorStyles,
-                        }),
-                        indicatorSeparator:(provided) => ({
-                            ...provided,
-                            ...selectMenuIndicatorSeparatorStyles,
-                        }),
-                        indicatorContainer:(provided) => ({
-                            ...provided,
-                            ...selectMenuIndicatorContainerStyles,
-                        }),
-                        singleValue:(provided) => ({
-                            ...provided,
-                            ...selectMenuSingleValueStyles,
-                        }),
-                        placeholder:(provided) => ({
-                            ...provided,
-                            ...selectMenuPlaceholderStyles,
-                        })
                     }}
                 />
             </ToolboxThemeInput>
@@ -185,11 +162,6 @@ Select.defaultProps = {
     selectMenuStyles: {},
     selectMenuValueContainer: {},
     selectMenuControlStyles: {},
-    selectMenuDropdownIndicatorStyles: {},
-    selectMenuIndicatorSeparatorStyles: {},
-    selectMenuIndicatorContainerStyles: {},
-    selectMenuSingleValueStyles: {},
-    selectMenuPlaceholderStyles: {},
 };
 
 export default Select
