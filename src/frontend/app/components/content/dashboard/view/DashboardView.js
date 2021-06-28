@@ -71,11 +71,18 @@ class DashboardView extends Component{
 
     componentDidMount() {
         const {fetchingUpdateAppVersion, fetchUpdateAppVersion, fetchWidgetSettings, appVersion} = this.props;
-        if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START) {
+        if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START && appVersion !== '') {
             fetchUpdateAppVersion({currentAppVersion: appVersion});
         }
         fetchWidgetSettings();
         componentAppear('app_content');
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {appVersion, fetchUpdateAppVersion} = this.props;
+        if(prevProps.appVersion !== appVersion){
+            fetchUpdateAppVersion({currentAppVersion: appVersion});
+        }
     }
 
     toggleWidgetEdit(){
