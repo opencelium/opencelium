@@ -83,7 +83,7 @@ export default class CBusinessLayout{
             arrow = {from: this._currentSvgItem.id, to: this._currentSvgItem.id + 1};
             this._arrows.push(arrow);
         }
-        this._svgItems.push(this.convertItem({...item, id}));
+        this._svgItems.splice(id, 0, this.convertItem({...item, id}));
         this._currentSvgItem = this._svgItems[id];
         this.refreshIds(id);
     }

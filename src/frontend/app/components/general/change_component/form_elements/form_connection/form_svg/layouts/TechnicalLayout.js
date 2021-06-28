@@ -109,6 +109,16 @@ class TechnicalLayout extends React.Component{
         }
     }
 
+    setCurrentItem(currentItem){
+        const {setCurrentTechnicalItem, connection, updateConnection} = this.props;
+        setCurrentTechnicalItem(currentItem);
+        if(connection) {
+            const connector = connection.getConnectorByType(currentItem.connectorType);
+            connector.setCurrentItem(currentItem.entity);
+            updateConnection(connection);
+        }
+    }
+
     render(){
         const {isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setCreateElementPanelPosition} = this.props;
         const {
@@ -150,7 +160,7 @@ class TechnicalLayout extends React.Component{
                     currentItem={currentTechnicalItem}
                     isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                     detailsPosition={detailsPosition}
-                    setCurrentItem={setCurrentTechnicalItem}
+                    setCurrentItem={::this.setCurrentItem}
                     connection={connection}
                     items={items}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}

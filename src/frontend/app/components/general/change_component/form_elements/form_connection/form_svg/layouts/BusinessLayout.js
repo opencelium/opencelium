@@ -92,8 +92,17 @@ class BusinessLayout extends React.Component{
         updateConnection(connection);
     }
 
+    setCurrentItem(currentItem){
+        const {setCurrentBusinessItem, connection, updateConnection} = this.props;
+        setCurrentBusinessItem(currentItem);
+        if(connection) {
+            connection.businessLayout.setCurrentSvgItem(currentItem);
+            updateConnection(connection);
+        }
+    }
+
     render(){
-        const {isCreateElementPanelOpened, createElementPanelConnectorType, setCreateElementPanelPosition} = this.props;
+        const {isCreateElementPanelOpened, setCreateElementPanelPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, setCurrentBusinessItem,
             detailsPosition, businessLayoutLocation, technicalLayoutLocation, isTechnicalLayoutMinimized,
@@ -128,7 +137,7 @@ class BusinessLayout extends React.Component{
                     items={items}
                     arrows={arrows}
                     detailsPosition={detailsPosition}
-                    setCurrentItem={setCurrentBusinessItem}
+                    setCurrentItem={::this.setCurrentItem}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     dragAndDropStep={5}
@@ -137,6 +146,7 @@ class BusinessLayout extends React.Component{
                     isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     deleteProcess={::this.deleteProcess}
+                    shouldUnselectOnDraggingPanel={true}
                 />
             </div>
         );

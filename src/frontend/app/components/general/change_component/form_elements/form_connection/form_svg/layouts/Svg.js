@@ -16,7 +16,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
-import {DETAILS_POSITION, LAYOUT_POSITION} from "../FormConnectionSvg";
+import {LAYOUT_POSITION} from "../FormConnectionSvg";
 import Process from "../elements/Process";
 import Arrow from "../elements/Arrow";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -60,7 +60,7 @@ class Svg extends React.Component {
 
 
     componentDidMount() {
-        const {layoutId, svgId, isScalable, startingSvgY, detailsPosition} = this.props;
+        const {layoutId, svgId, startingSvgY, detailsPosition} = this.props;
         const layout = document.getElementById(layoutId);
         const layoutSVG = document.getElementById(svgId);
         if(layout && layoutSVG) {
@@ -77,10 +77,14 @@ class Svg extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {svgId, detailsPosition} = this.props;
+        const {svgId, detailsPosition, items, startingSvgY, isDraggable} = this.props;
         if (detailsPosition !== prevProps.detailsPosition) {
             const x = CSvg.getStartingViewBoxX(detailsPosition);
             CSvg.setViewBox(svgId, {x});
+        }
+        if(items.length === 0 && !isDraggable){
+            const viewBox = {x: CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
+            CSvg.setViewBox(svgId, viewBox);
         }
     }
 
@@ -113,25 +117,6 @@ class Svg extends React.Component {
         }
     }
 
-    setCurrentItem(currentItem){
-        const {setCurrentItem, connection, updateConnection} = this.props;
-/*        if(currentItem){
-            let index = items.findIndex(item => item.id === currentItem.id);
-            if(index !== -1) {
-                items.splice(index, 1);
-                items.push(currentItem);
-            }
-        }*/
-        if(setCurrentItem){
-            setCurrentItem(currentItem);
-        }
-        if(connection) {
-            const connector = connection.getConnectorByType(currentItem.connectorType);
-            connector.setCurrentItem(currentItem.entity);
-            updateConnection(connection);
-        }
-    }
-
     setItemCoordinates(coordinates){
         const {currentItem, updateItems, items} = this.props;
         if(currentItem) {
@@ -159,7 +144,7 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {svgId, isItemDraggable, isDraggable} = this.props;
+        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem} = this.props;
         if(e.target.classList.contains('draggable')) {
             if(isItemDraggable) {
                 this.selectedElement = e.target.parentNode;
@@ -179,6 +164,9 @@ class Svg extends React.Component {
                 if (svgElement) {
                     this.isPointerDown = true;
                     this.pointerOrigin = CSvg.getMousePosition(e, svgElement);
+                }
+                if(shouldUnselectOnDraggingPanel){
+                    setCurrentItem(null);
                 }
             }
         }
@@ -275,7 +263,10 @@ class Svg extends React.Component {
     }
 
     renderItems(){
-        const {currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly, deleteProcess} = this.props;
+        const {
+            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection,
+            setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem,
+        } = this.props;
         return items.map((item,key) => {
             let currentItem = null;
             if(item instanceof CBusinessProcess && !currentTechnicalItem) {
@@ -289,15 +280,15 @@ class Svg extends React.Component {
             switch (item.type){
                 case 'if':
                     return(
-                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={::this.setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });
@@ -398,6 +389,7 @@ Svg.defaultProps = {
     fromConnectorPanelParams: null,
     toConnectorPanelParams: null,
     hasEmptyText: false,
+    shouldUnselectOnDraggingPanel: false,
 }
 
 export default Svg;
