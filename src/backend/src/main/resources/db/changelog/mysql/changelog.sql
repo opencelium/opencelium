@@ -168,8 +168,6 @@ ALTER TABLE enhancement MODIFY expert_code TEXT;
 -- -----------------------------------------------------
 -- Table `mydb`.`widget`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `widget` ;
-
 CREATE TABLE IF NOT EXISTS `widget` (
   `id` INT NOT NULL,
   `name` VARCHAR(45) NULL,
@@ -183,8 +181,6 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `mydb`.`widget_setting`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `widget_setting` ;
-
 CREATE TABLE IF NOT EXISTS `widget_setting` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `x_axis` INT NULL,
