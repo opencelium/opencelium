@@ -1,21 +1,14 @@
 import React from 'react';
-import styles from "@themes/default/content/connections/connection_overview_2";
 import {setFocusById} from "@utils/app";
-import {setItems, setArrows} from "@actions/connection_overview_2/set";
+import {setArrows} from "@actions/connection_overview_2/set";
 import {connect} from "react-redux";
-import CMethodItem from "@classes/components/content/connection/method/CMethodItem";
-import COperatorItem from "@classes/components/content/connection/operator/COperatorItem";
 import CreateProcess
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateProcess";
 import CreateOperator
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateOperator";
 import {
-    CONNECTOR_FROM,
-    CONNECTOR_TO,
-    INSIDE_ITEM,
     OUTSIDE_ITEM
 } from "@classes/components/content/connection/CConnectorItem";
-import {Line} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 import CreateBusinessItem
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateBusinessItem";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
@@ -41,7 +34,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {setArrows, setItems,})
+@connect(mapStateToProps, {setArrows})
 class CreateElementPanel extends React.Component{
     constructor(props) {
         super(props);
@@ -54,7 +47,7 @@ class CreateElementPanel extends React.Component{
     componentDidUpdate(prevProps, prevState, snapshot) {
         if((this.props.x === 0 && this.props.y === 0 && this.props.createElementPanelConnectorType === '')
         || prevProps.x !== this.props.x || prevProps.y !== this.props.y){
-            if(this.state.type !== CREATE_PROCESS && this.state.itemPosition !== OUTSIDE_ITEM) {
+            if(this.state.type !== CREATE_PROCESS || this.state.itemPosition !== OUTSIDE_ITEM) {
                 this.setState({
                     type: CREATE_PROCESS,
                     itemPosition: OUTSIDE_ITEM,

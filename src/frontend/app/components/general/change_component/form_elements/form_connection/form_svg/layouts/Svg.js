@@ -133,10 +133,10 @@ class Svg extends React.Component {
     }
 
     setItemCoordinates(coordinates){
-        const {currentItem, setItems, items} = this.props;
+        const {currentItem, updateItems, items} = this.props;
         if(currentItem) {
-            if(setItems) {
-                setItems(items.map(item => {
+            if(updateItems) {
+                updateItems(items.map(item => {
                     if (item.id === currentItem.id) {
                         item.setCoordinates(coordinates);
                     }
@@ -308,9 +308,11 @@ class Svg extends React.Component {
         return arrows.map((arrow,key) => {
             const from = items.find(item => item.id === arrow.from);
             const to = items.find(item => item.id === arrow.to);
-            let isHighlighted = currentItem ? arrow.from.indexOf(currentItem.id) === 0 && arrow.to.indexOf(currentItem.id) === 0 : false;
+            const fromIndex = `${arrow.from}`;
+            const toIndex = `${arrow.to}`;
+            let isHighlighted = currentItem ? fromIndex.indexOf(currentItem.id) === 0 && toIndex.indexOf(currentItem.id) === 0 : false;
             if(!isHighlighted && currentTechnicalItem){
-                isHighlighted = currentTechnicalItem ? arrow.from.indexOf(currentTechnicalItem.id) === 0 && arrow.to.indexOf(currentTechnicalItem.id) === 0 : false;
+                isHighlighted = currentTechnicalItem ? fromIndex.indexOf(currentTechnicalItem.id) === 0 && toIndex.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
                 <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted}/>

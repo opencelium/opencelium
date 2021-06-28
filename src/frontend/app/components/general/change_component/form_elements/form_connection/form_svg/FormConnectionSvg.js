@@ -52,8 +52,6 @@ const INITIAL_BUSINESS_LAYOUT_POSITION = LAYOUT_POSITION.TOP;
 const INITIAL_TECHNICAL_LAYOUT_POSITION = LAYOUT_POSITION.BOTTOM;
 const INITIAL_DETAILS_POSITION = DETAILS_POSITION.RIGHT;
 
-const BUSINESS_DATA = {items: [], arrows: []};
-
 function mapStateToProps(state){
     const auth = state.get('auth');
     const connectionOverview = state.get('connection_overview');

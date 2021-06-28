@@ -114,7 +114,7 @@ class TechnicalLayout extends React.Component{
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection, setCurrentTechnicalItem,
-            ...svgProps
+            currentTechnicalItem, ...svgProps
         } = this.props;
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
@@ -147,6 +147,7 @@ class TechnicalLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    currentItem={currentTechnicalItem}
                     isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                     detailsPosition={detailsPosition}
                     setCurrentItem={setCurrentTechnicalItem}

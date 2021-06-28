@@ -15,7 +15,7 @@
 
 import React from 'react';
 import {connect} from 'react-redux';
-import {setCurrentBusinessItem, setItems} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -86,12 +86,18 @@ class BusinessLayout extends React.Component{
         setCurrentBusinessItem(currentSvgElement);
     }
 
+    updateItems(items){
+        const {connection, updateConnection} = this.props;
+        connection.businessLayout.setItems(items);
+        updateConnection(connection);
+    }
+
     render(){
         const {isCreateElementPanelOpened, createElementPanelConnectorType, setCreateElementPanelPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, setCurrentBusinessItem,
             detailsPosition, businessLayoutLocation, technicalLayoutLocation, isTechnicalLayoutMinimized,
-            connection, ...svgProps} = this.props;
+            connection, currentBusinessItem, ...svgProps} = this.props;
         const isReplaceIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isTechnicalLayoutMinimized;
         const isNewWindowIconDisabled = technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
@@ -116,6 +122,8 @@ class BusinessLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    currentItem={currentBusinessItem}
+                    updateItems={::this.updateItems}
                     hasEmptyText={items.length === 0}
                     items={items}
                     arrows={arrows}
