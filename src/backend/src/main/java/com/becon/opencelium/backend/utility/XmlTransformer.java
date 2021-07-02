@@ -77,18 +77,25 @@ public class XmlTransformer {
                 continue;
             }
 
-            List<Attr> attrs = getAttributes(tag.getValue());
+            List<Attr> attrs = null;
+            if(tag.getValue() instanceof Map) {
+                attrs = getAttributes(tag.getValue());
+            }
+
             if (attrs != null) {
                 attrs.forEach(element::setAttributeNode);
             }
-            String ocValue = getOcValue(tag.getValue());
 
-            if(ocValue != null && !ocValue.isEmpty()) {
+            String ocValue = null;
+            if (tag.getValue() instanceof String) {
+                ocValue = getOcValue(tag.getValue());
+            }
+
+            if(ocValue != null) {
                 element.appendChild(document.createTextNode(ocValue));
                 elements.add(element);
                 continue;
             }
-
             List<Element> childElem = mapToNode((Map<String, Object>) tag.getValue());
             childElem.forEach(element::appendChild);
 
