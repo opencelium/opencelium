@@ -391,9 +391,6 @@ public class ConnectorExecutor {
                     Document document = createDocument();
                     XmlTransformer transformer = new XmlTransformer(document);
                     result = transformer.xmlToString(content);
-                    if(invoker.getName().equals("sap")) {
-                        result = Constant.SOAP_HEADER + result + Constant.SOAP_FOOTER;
-                    }
                     break;
                 case "json":
                     result = new ObjectMapper().writeValueAsString(content);
