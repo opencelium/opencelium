@@ -133,7 +133,7 @@ class BusinessLayout extends React.Component{
                     {...svgProps}
                     currentItem={currentBusinessItem}
                     updateItems={::this.updateItems}
-                    hasEmptyText={items.length === 0}
+                    hasCreateCentralText={items.length === 0}
                     items={items}
                     arrows={arrows}
                     detailsPosition={detailsPosition}

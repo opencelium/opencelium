@@ -48,6 +48,7 @@ if(initialState === null){
         businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         colorMode: 0,
+        isAssignMode: false,
     });
 }
 
@@ -56,6 +57,8 @@ if(initialState === null){
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case ConnectionOverview2Action.SET_ISASSIGNMODE:
+            return state.set('isAssignMode', action.payload);
         case ConnectionOverview2Action.SET_CONNECTIONDATA:
             return state.set('connection', action.payload.connection).set('updateConnection', action.payload.updateConnection);
         case ConnectionOverview2Action.SET_COLORMODE:

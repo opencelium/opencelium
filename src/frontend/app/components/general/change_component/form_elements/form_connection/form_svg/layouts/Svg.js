@@ -28,16 +28,19 @@ import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {setIsAssignMode} from "@actions/connection_overview_2/set";
 
 function mapStateToProps(state){
+    const connectionOverview = state.get('connection_overview');
     const {currentBusinessItem, currentTechnicalItem} = mapItemsToClasses(state);
     return{
         currentBusinessItem,
         currentTechnicalItem,
+        isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setIsAssignMode})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -144,7 +147,7 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem} = this.props;
+        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, setIsAssignMode} = this.props;
         if(e.target.classList.contains('draggable')) {
             if(isItemDraggable) {
                 this.selectedElement = e.target.parentNode;
@@ -165,8 +168,9 @@ class Svg extends React.Component {
                     this.isPointerDown = true;
                     this.pointerOrigin = CSvg.getMousePosition(e, svgElement);
                 }
-                if(shouldUnselectOnDraggingPanel){
+                if(shouldUnselectOnDraggingPanel && e.target.id === svgId){
                     setCurrentItem(null);
+                    setIsAssignMode(false);
                 }
             }
         }
@@ -277,18 +281,19 @@ class Svg extends React.Component {
             }
             let isHighlighted = item.isHighlighted(currentItem);
             let isCurrent = item.isCurrent(currentItem);
+            let isAssignedToBusinessProcess = CSvg.isAssigned(item, currentBusinessItem);
             switch (item.type){
                 case 'if':
                     return(
-                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });
@@ -321,15 +326,29 @@ class Svg extends React.Component {
         if(items.length === 0) setIsCreateElementPanelOpened(true, 'business_layout');
     }
 
+    onAssignTextClick(){
+        const {setIsAssignMode} = this.props;
+        setIsAssignMode(true);
+    }
+
     render(){
         const {
             svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
-            isCreateElementPanelOpened, connection, hasEmptyText, createElementPanelConnectorType,
+            isCreateElementPanelOpened, connection, hasCreateCentralText, createElementPanelConnectorType,
+            hasAssignCentralText, isAssignMode,
         } = this.props;
+        let svgStyle = this.props.style;
+        if(hasCreateCentralText || hasAssignCentralText && !isAssignMode){
+            if(svgStyle === null){
+                svgStyle = {};
+            }
+            svgStyle.cursor = 'default';
+        }
         return(
             <React.Fragment>
                 <svg
                     id={svgId}
+                    style={svgStyle}
                     className={styles.layout_svg}
                     preserveAspectRatio={'xMidYMid slice'}
                     onMouseDown={::this.startDrag}
@@ -356,10 +375,15 @@ class Svg extends React.Component {
                     {
                         this.renderItems()
                     }
-                    {hasEmptyText &&
-                        <text id={'business_layout_empty_text'} onClick={::this.onEmptyTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'20%'} className={styles.connector_empty_text}>
-                            {'Click here to create...'}
-                        </text>
+                    {hasCreateCentralText &&
+                    <text id={'business_layout_empty_text'} onClick={::this.onEmptyTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'20%'} className={styles.connector_empty_text}>
+                        {'Click here to create...'}
+                    </text>
+                    }
+                    {hasAssignCentralText && !isAssignMode &&
+                    <text id={'technical_layout_assign_text'} onClick={::this.onAssignTextClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'40%'} y={'20%'} className={styles.connector_empty_text}>
+                        {'Click here to assign...'}
+                    </text>
                     }
                 </svg>
                 {isCreateElementPanelOpened && <div className={styles.disable_background} onClick={::this.hideCreateElementPanel}/>}
@@ -377,7 +401,8 @@ Svg.propTypes = {
     isDraggable: PropTypes.bool,
     isScalable: PropTypes.bool,
     startingSvgY : PropTypes.number,
-    hasEmptyText: PropTypes.bool,
+    hasCreateCentralText: PropTypes.bool,
+    hasAssignCentralText: PropTypes.bool,
 };
 
 Svg.defaultProps = {
@@ -388,8 +413,10 @@ Svg.defaultProps = {
     startingSvgY: -190,
     fromConnectorPanelParams: null,
     toConnectorPanelParams: null,
-    hasEmptyText: false,
+    hasCreateCentralText: false,
+    hasAssignCentralText: false,
     shouldUnselectOnDraggingPanel: false,
+    style: null,
 }
 
 export default Svg;

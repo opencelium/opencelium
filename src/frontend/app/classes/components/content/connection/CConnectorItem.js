@@ -89,50 +89,50 @@ export default class CConnectorItem{
         return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null';
     }
 
-    getPanelPosition(){
-        let width = this.getMaxXOfSvgItems() - this._shiftXForSvgItems + PANEL_PADDING_SIDES;
-        let height = this.getMaxYOfSvgItems() + PANEL_LABEL_INTEND + PANEL_PADDING_SIDES;
+    static getPanelPosition(items, shiftXForSvgItems){
+        let width = CConnectorItem.getMaxXOfSvgItems(items) - shiftXForSvgItems + PANEL_PADDING_SIDES;
+        let height = CConnectorItem.getMaxYOfSvgItems(items) + PANEL_LABEL_INTEND + PANEL_PADDING_SIDES;
         if(width < 350){
             width = 350;
         }
         if(height < 300){
             height = 300;
         }
-        return {x: this._shiftXForSvgItems - PANEL_PADDING_SIDES, y: -PANEL_LABEL_INTEND - PANEL_PADDING_SIDES, width, height};
+        return {x: shiftXForSvgItems - PANEL_PADDING_SIDES, y: -PANEL_LABEL_INTEND - PANEL_PADDING_SIDES, width, height};
     }
 
-    getPanelRectPosition(){
-        const panelPosition = this.getPanelPosition();
+    static getPanelRectPosition(items, shiftXForSvgItems){
+        const panelPosition = CConnectorItem.getPanelPosition(items, shiftXForSvgItems);
         return { x: PANEL_MARGIN_RECT, y: PANEL_LABEL_INTEND - PANEL_MARGIN_RECT, width: panelPosition.width - PANEL_MARGIN_RECT, height: panelPosition.height - PANEL_LABEL_INTEND - PANEL_MARGIN_RECT};
     }
 
     getShiftXOfSvgItems(){
-        return this.getMaxXOfSvgItems() + PANEL_DISTANT;
+        return CConnectorItem.getMaxXOfSvgItems(this._svgItems) + PANEL_DISTANT;
     }
 
-    getMaxCoordinateOfSvgItems(coordinateType){
+    static getMaxCoordinateOfSvgItems(coordinateType, items = []){
         let maxValue = 0;
         let isProcess = false;
         let isOperator = false;
         const processSize = coordinateType === 'x' ? PROCESS_WIDTH : PROCESS_HEIGHT;
-        for(let i = 0; i < this._svgItems.length; i++){
-            if(this._svgItems[i] instanceof CProcess){
-                if(this._svgItems[i][coordinateType] + processSize > maxValue) {
+        for(let i = 0; i < items.length; i++){
+            if(items[i] instanceof CProcess){
+                if(items[i][coordinateType] + processSize > maxValue) {
                     isProcess = true;
                     isOperator = false;
-                    maxValue = this._svgItems[i][coordinateType] + processSize;
+                    maxValue = items[i][coordinateType] + processSize;
                 }
             }
-            if(this._svgItems[i] instanceof COperator){
-                if(this._svgItems[i][coordinateType] + OPERATOR_SIZE > maxValue) {
+            if(items[i] instanceof COperator){
+                if(items[i][coordinateType] + OPERATOR_SIZE > maxValue) {
                     isProcess = false;
                     isOperator = true;
-                    maxValue = this._svgItems[i][coordinateType] + OPERATOR_SIZE;
+                    maxValue = items[i][coordinateType] + OPERATOR_SIZE;
                 }
             }
         }
 
-        if(maxValue === 0 && this._svgItems.length > 0){
+        if(maxValue === 0 && items.length > 0){
             if(isOperator){
                 maxValue += OPERATOR_SIZE + PANEL_PADDING_SIDES;
             }
@@ -150,12 +150,12 @@ export default class CConnectorItem{
 
     }
 
-    getMaxXOfSvgItems(){
-        return this.getMaxCoordinateOfSvgItems('x');
+    static getMaxXOfSvgItems(items){
+        return CConnectorItem.getMaxCoordinateOfSvgItems('x', items);
     }
 
-    getMaxYOfSvgItems(){
-        return this.getMaxCoordinateOfSvgItems('y');
+    static getMaxYOfSvgItems(items){
+        return CConnectorItem.getMaxCoordinateOfSvgItems('y', items);
     }
 
     getSvgElementByIndex(index){

@@ -20,6 +20,13 @@ import {isObject} from "@utils/app";
 import CConnection from "@classes/components/content/connection/CConnection";
 
 
+const setIsAssignMode = (isAssignMode) => {
+    return{
+        type: ConnectionOverview2Action.SET_ISASSIGNMODE,
+        payload: isAssignMode,
+    };
+}
+
 const setColorMode = (color) => {
     return{
         type: ConnectionOverview2Action.SET_COLORMODE,
@@ -141,4 +148,5 @@ export{
     setTechnicalLayoutLocation,
     setColorMode,
     setConnectionData,
+    setIsAssignMode,
 };

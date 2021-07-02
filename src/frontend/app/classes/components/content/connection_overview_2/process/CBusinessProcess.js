@@ -57,6 +57,17 @@ export class CBusinessProcess extends CProcess{
         this._items.push(this.convertItem(item));
     }
 
+    isExistItem(item){
+        return this._items.findIndex(i => i.id === item.id) !== -1;
+    }
+
+    removeItem(item){
+        let index = this._items.findIndex(i => i.id === item.id);
+        if(index !== -1){
+            this._items.splice(index, 1);
+        }
+    }
+
     get arrows(){
         return this._arrows;
     }
