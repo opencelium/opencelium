@@ -117,6 +117,7 @@ class ChangeTag extends Component{
         let tags = [];
         let clipboardPromise = '';
         let clipboardXml = null;
+        let clipboardText = '';
         switch (valueType) {
             case TAG_VALUE_TYPES.EMPTY:
                 tags = null;
@@ -128,31 +129,29 @@ class ChangeTag extends Component{
                 tags = isArray(tag.tags) ? tag.tags : [];
                 break;
             case TAG_VALUE_TYPES.CLIPBOARD:
-                clipboardPromise = getStringFromClipboard();
-                clipboardPromise.then(text => {
-                    try {
-                        clipboardXml = CXmlEditor.createXmlEditor(text);
-                        tags = clipboardXml ? clipboardXml.tag : [];
-                        tags.parent = parent;
-                        switch (mode) {
-                            case 'add':
-                                referenceToNewTag = parent.addTag(tags);
-                                break;
-                            case 'update':
-                                tag.updateTag(tags);
-                                break;
-                        }
-                        if(referenceToNewTag !== null){
-                            CXmlEditor.setLastEditElement(referenceToNewTag, referenceToNewTag.tags, referenceToNewTag.tags, mode);
-                        } else{
-                            CXmlEditor.setLastEditElement(tag, tag.tags, tag.tags, mode);
-                        }
-                        change();
-                        close();
-                    } catch(e){
-                        alert(translate('XML_EDITOR.TAG.VALIDATIONS.WRONG_FORMAT'));
+                clipboardText = text;
+                try {
+                    clipboardXml = CXmlEditor.createXmlEditor(clipboardText);
+                    tags = clipboardXml ? clipboardXml.tag : [];
+                    tags.parent = parent;
+                    switch (mode) {
+                        case 'add':
+                            referenceToNewTag = parent.addTag(tags);
+                            break;
+                        case 'update':
+                            tag.updateTag(tags);
+                            break;
                     }
-                });
+                    if(referenceToNewTag !== null){
+                        CXmlEditor.setLastEditElement(referenceToNewTag, referenceToNewTag.tags, referenceToNewTag.tags, mode);
+                    } else{
+                        CXmlEditor.setLastEditElement(tag, tag.tags, tag.tags, mode);
+                    }
+                    change();
+                    close();
+                } catch(e){
+                    alert(translate('XML_EDITOR.TAG.VALIDATIONS.WRONG_FORMAT'));
+                }
                 return;
         }
         switch(mode){
@@ -187,6 +186,7 @@ class ChangeTag extends Component{
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
                 <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
                 <TagType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>
+                {valueType === TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_text`} rows={2} multiline={true} value={text} onChange={::this.changeText} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')} theme={{input: styles.change_tag_name}}/>}
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}
                 {valueType === TAG_VALUE_TYPES.TEXT && <Value translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.TAG.ADD') : translate('XML_EDITOR.TAG.UPDATE')}/>
