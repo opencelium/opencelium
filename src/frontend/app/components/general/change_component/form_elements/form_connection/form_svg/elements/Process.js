@@ -55,11 +55,13 @@ class Process extends React.Component{
     }
 
     onMouseDown(){
-        const {isAssignMode, setCurrentItem, process} = this.props;
-        if(isAssignMode){
-            this.assignProcess();
-        } else{
-            setCurrentItem(process);
+        const {isAssignMode, setCurrentItem, process, isDisabled} = this.props;
+        if(!isDisabled) {
+            if (isAssignMode) {
+                this.assignProcess();
+            } else {
+                setCurrentItem(process);
+            }
         }
     }
 
@@ -75,7 +77,7 @@ class Process extends React.Component{
     }
 
     render(){
-        const {process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, colorMode, readOnly, isAssignMode} = this.props;
+        const {process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isDisabled, colorMode, readOnly, isAssignMode} = this.props;
         const method = process.entity;
         const borderRadius = 10;
         const labelX = '50%';
@@ -94,8 +96,9 @@ class Process extends React.Component{
         }
         const assignStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
         const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
+        const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         return(
-            <svg x={process.x} y={process.y} className={`${styles.process} ${assignStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
+            <svg x={process.x} y={process.y} className={`${styles.process} ${assignStyle} ${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
                 <rect fill={colorMode !== 1 || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                       className={`${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                 />
@@ -127,6 +130,7 @@ Process.propTypes = {
     isCurrent: PropTypes.bool,
     isHighlighted: PropTypes.bool,
     isAssignedToBusinessProcess: PropTypes.bool,
+    isDisabled: PropTypes.bool,
 };
 
 Process.defaultProps = {
@@ -134,6 +138,7 @@ Process.defaultProps = {
     isCurrent: false,
     isHighlighted: false,
     isAssignedToBusinessProcess: false,
+    isDisabled: false,
 };
 
 export default Process;

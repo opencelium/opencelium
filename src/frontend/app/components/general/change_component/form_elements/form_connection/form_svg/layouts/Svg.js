@@ -147,7 +147,7 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, setIsAssignMode} = this.props;
+        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, setIsAssignMode, connection, updateConnection} = this.props;
         if(e.target.classList.contains('draggable')) {
             if(isItemDraggable) {
                 this.selectedElement = e.target.parentNode;
@@ -171,6 +171,10 @@ class Svg extends React.Component {
                 if(shouldUnselectOnDraggingPanel && e.target.id === svgId){
                     setCurrentItem(null);
                     setIsAssignMode(false);
+                    if(connection) {
+                        connection.businessLayout.setCurrentSvgItem(null);
+                        updateConnection(connection);
+                    }
                 }
             }
         }
@@ -268,9 +272,12 @@ class Svg extends React.Component {
 
     renderItems(){
         const {
-            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection,
-            setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem,
+            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, isAssignMode,
+            setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
         } = this.props;
+        if(hasAssignCentralText){
+            return null;
+        }
         return items.map((item,key) => {
             let currentItem = null;
             if(item instanceof CBusinessProcess && !currentTechnicalItem) {
@@ -281,29 +288,37 @@ class Svg extends React.Component {
             }
             let isHighlighted = item.isHighlighted(currentItem);
             let isCurrent = item.isCurrent(currentItem);
-            let isAssignedToBusinessProcess = CSvg.isAssigned(item, currentBusinessItem);
+            let isAssignedToBusinessProcess = CSvg.isTechnicalItemAssigned(item, currentBusinessItem);
+            let isDisabled = connection ? CSvg.isTechnicalItemDisabled(item, connection.businessLayout, isAssignMode) : false;
             switch (item.type){
                 case 'if':
                     return(
-                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });
     }
 
     renderArrows(){
-        const {currentItem, currentTechnicalItem, arrows, items} = this.props;
+        const {currentItem, currentTechnicalItem, arrows, items, hasAssignCentralText, connection, isAssignMode} = this.props;
+        if(hasAssignCentralText){
+            return null;
+        }
         return arrows.map((arrow,key) => {
             const from = items.find(item => item.id === arrow.from);
             const to = items.find(item => item.id === arrow.to);
+
+            const isDisabledFrom = connection ? CSvg.isTechnicalItemDisabled(from, connection.businessLayout, isAssignMode) : false;
+            const isDisabledTo = connection ? CSvg.isTechnicalItemDisabled(to, connection.businessLayout, isAssignMode) : false;
+            const isDisabled = isDisabledFrom || isDisabledTo;
             const fromIndex = `${arrow.from}`;
             const toIndex = `${arrow.to}`;
             let isHighlighted = currentItem ? fromIndex.indexOf(currentItem.id) === 0 && toIndex.indexOf(currentItem.id) === 0 : false;
@@ -311,7 +326,7 @@ class Svg extends React.Component {
                 isHighlighted = currentTechnicalItem ? fromIndex.indexOf(currentTechnicalItem.id) === 0 && toIndex.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
-                <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted}/>
+                <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
             );
         });
     }

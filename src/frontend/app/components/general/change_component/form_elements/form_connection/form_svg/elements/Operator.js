@@ -53,11 +53,13 @@ class Operator extends React.Component{
     }
 
     onMouseDown(){
-        const {isAssignMode, setCurrentItem, operator} = this.props;
-        if(isAssignMode){
-            this.assignOperator();
-        } else{
-            setCurrentItem(operator);
+        const {isAssignMode, setCurrentItem, operator, isDisabled} = this.props;
+        if(!isDisabled) {
+            if (isAssignMode) {
+                this.assignOperator();
+            } else {
+                setCurrentItem(operator);
+            }
         }
     }
 
@@ -81,13 +83,14 @@ class Operator extends React.Component{
     }
 
     renderLoopOperator(){
-        const {operator, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isAssignMode} = this.props;
+        const {operator, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isAssignMode, isDisabled} = this.props;
         const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         const closeX = 40;
         const closeY = 0;
         const assignStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_operator : '';
+        const isDisabledStyle = isDisabled ? styles.disabled_operator : '';
         return(
-            <svg x={operator.x} y={operator.y} className={`${isNotDraggable ? styles.not_draggable : ''} ${assignStyle}  ${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+            <svg x={operator.x} y={operator.y} className={`${isNotDraggable ? styles.not_draggable : ''} ${assignStyle} ${isDisabledStyle} ${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
                 <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} points={points}/>
                 <svg className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} onMouseDown={::this.onMouseDown} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
                     <path onMouseDown={::this.onMouseDown} d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
@@ -107,15 +110,16 @@ class Operator extends React.Component{
     }
 
     renderIfOperator(){
-        const {operator, isNotDraggable, isCurrent, isHighlighted, readOnly, isAssignedToBusinessProcess, isAssignMode} = this.props;
+        const {operator, isNotDraggable, isCurrent, isHighlighted, readOnly, isAssignedToBusinessProcess, isAssignMode, isDisabled} = this.props;
         const textX = '50%';
         const textY = '50%';
         const closeX = 40;
         const closeY = 0;
         const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         const assignStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_operator : '';
+        const isDisabledStyle = isDisabled ? styles.disabled_operator : '';
         return(
-            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${assignStyle}  ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${assignStyle} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
                 <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} points={points}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
                     {'if'}
@@ -148,12 +152,14 @@ Operator.propTypes = {
     setCurrentItem: PropTypes.func,
     isCurrent: PropTypes.bool,
     isHighlighted: PropTypes.bool,
+    isDisabled: PropTypes.bool,
 };
 
 Operator.defaultProps = {
     isNotDraggable: true,
     isCurrent: false,
     isHighlighted: false,
+    isDisabled: false,
 };
 
 export default Operator;

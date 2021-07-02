@@ -141,9 +141,22 @@ $CURRENT_ITEM_FILL: #f4f4f4;
     stroke: $SVG_ASSIGN_COLOR;
   }
 }
+.disabled_process{
+  opacity: 0.3;
+  rect{
+    cursor: default;
+  }
+}
 .assigned_operator{
   polygon{
     stroke: $SVG_ASSIGN_COLOR;
+  }
+}
+.disabled_operator{
+  opacity: 0.3;
+  cursor: default;
+  polygon{
+    cursor: default;
   }
 }
 .current_operator{
@@ -165,6 +178,9 @@ $CURRENT_ITEM_FILL: #f4f4f4;
     @extend .highlighting;
     fill: $SVG_HIGHLIGHT_COLOR;
   }
+}
+.disabled_arrow{
+  opacity: 0.3;
 }
 .process_rect{
   cursor: move;

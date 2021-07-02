@@ -121,51 +121,6 @@ class TechnicalLayout extends React.Component{
         }
     }
 
-    getItems(){
-        const {connection, currentBusinessItem, isAssignMode} = this.props;
-        const allItems = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
-        let items;
-        if(currentBusinessItem === null || isAssignMode) {
-            items = allItems;
-            if(isAssignMode){
-                const businessLayoutItems = connection.businessLayout.getItems();
-                for(let i = 0; i < businessLayoutItems.length; i++){
-                    if(businessLayoutItems[i].id !== currentBusinessItem.id){
-                        items = items.filter(item => businessLayoutItems[i].items.findIndex(technicalItem => technicalItem.id === item.id) === -1);
-                    }
-                }
-            }
-        } else{
-            items = currentBusinessItem.items;
-        }
-        let xIterator = 0;
-        let shiftXForSvgItems = 0;
-        let firstItemId = items.length > 0 ? items[0].id : '0';
-        let isFirstItem = true;
-        for(let i = 0; i < items.length; i++){
-            if(items[i].connectorType === CONNECTOR_FROM){
-                shiftXForSvgItems = connection.fromConnector.shiftXForSvgItems;
-            }
-            if(items[i].connectorType === CONNECTOR_TO && shiftXForSvgItems !== connection.toConnector.shiftXForSvgItems){
-                shiftXForSvgItems = connection.toConnector.shiftXForSvgItems;
-                xIterator = 0;
-                isFirstItem = true;
-            }
-            let currentSplitIndex = items[i].id.split('_');
-            if(currentSplitIndex[currentSplitIndex.length - 1] !== '0' && !isFirstItem){
-                xIterator += 200;
-            }
-            items[i].x = xIterator + shiftXForSvgItems;
-            items[i].y = 150 * (currentSplitIndex.length - 2 - (firstItemId.split('_').length - 2));
-            if(items[i].type && items.length !== 1){
-                items[i].x += 35;
-                items[i].y += 10;
-            }
-            isFirstItem = false;
-        }
-        return items;
-    }
-
     getPanelParams(allItems){
         const {connection, isAssignMode, currentBusinessItem} = this.props;
         let fromConnectorItems = [];
@@ -199,7 +154,7 @@ class TechnicalLayout extends React.Component{
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
-        const items = this.getItems();
+        const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
         const isSelectedBusinessItem = currentBusinessItem !== null;
         const isSelectedBusinessItemNotEmpty = isSelectedBusinessItem && currentBusinessItem.items.length !== 0;
@@ -252,7 +207,7 @@ class TechnicalLayout extends React.Component{
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
                     deleteProcess={::this.deleteProcess}
-                    hasAssignCentralText={isSelectedBusinessItemEmpty}
+                    hasAssignCentralText={isSelectedBusinessItemEmpty && !isAssignMode}
                     isDraggable={!(isSelectedBusinessItemEmpty && !isAssignMode)}
                 />
             </div>

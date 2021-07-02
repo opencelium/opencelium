@@ -2,6 +2,7 @@ import {DETAILS_POSITION} from "@change_component/form_elements/form_connection/
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import CBusinessLayout from "@classes/components/content/connection_overview_2/CBusinessLayout";
 
 export default class CSvg{
 
@@ -51,7 +52,7 @@ export default class CSvg{
             }
     }
 
-    static isAssigned(technicalItem, businessProcess){
+    static isTechnicalItemAssigned(technicalItem, businessProcess){
         let isAssigned = false;
         if((technicalItem instanceof CTechnicalProcess || technicalItem instanceof CTechnicalOperator) && businessProcess instanceof CBusinessProcess){
             let index = businessProcess.items.findIndex(item => item.id === technicalItem.id);
@@ -60,5 +61,31 @@ export default class CSvg{
             }
         }
         return isAssigned;
+    }
+
+    static isTechnicalItemDisabled(technicalItem, businessLayout, isAssignMode){
+        if(businessLayout) {
+            const currentBusinessSvgItem = businessLayout.getCurrentSvgItem();
+            if (isAssignMode) {
+                if ((technicalItem instanceof CTechnicalProcess || technicalItem instanceof CTechnicalOperator) && businessLayout instanceof CBusinessLayout) {
+                    let businessProcesses = businessLayout.getItems();
+                    for (let i = 0; i < businessProcesses.length; i++) {
+                        if (currentBusinessSvgItem && businessProcesses[i].id !== currentBusinessSvgItem.id) {
+                            for (let j = 0; j < businessProcesses[i].items.length; j++) {
+                                if (businessProcesses[i].items[j].id === technicalItem.id) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if(currentBusinessSvgItem) {
+                    const currentBusinessSvgItemItems = currentBusinessSvgItem.items;
+                    return currentBusinessSvgItemItems.findIndex(item => item.id === technicalItem.id) === -1;
+                }
+            }
+        }
+        return false;
     }
 }

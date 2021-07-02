@@ -136,7 +136,7 @@ export default class CBusinessLayout{
     }
 
     setCurrentSvgItem(currentSvgItem){
-        if(currentSvgItem instanceof CBusinessProcess){
+        if(currentSvgItem instanceof CBusinessProcess || currentSvgItem === null){
             this._currentSvgItem = currentSvgItem;
         }
     }
