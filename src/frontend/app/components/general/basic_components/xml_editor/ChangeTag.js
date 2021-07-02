@@ -44,6 +44,7 @@ class ChangeTag extends Component{
             name: props.tag.name ? props.tag.name : '',
             valueType: props.mode === 'add' ? TAG_VALUE_TYPES.ITEM : props.tag.valueType,
             text: isString(props.tag.tags) ? props.tag.tags : '',
+            clipboardText: '',
         };
         const {top, left} = findTopLeft(props.correspondedId);
         this.top = top;
@@ -78,6 +79,15 @@ class ChangeTag extends Component{
     }
 
     /**
+     * to change clipboard text
+     */
+    changeClipboardText(clipboardText){
+        this.setState({
+            clipboardText,
+        });
+    }
+
+    /**
      * to change text
      */
     changeText(text){
@@ -102,7 +112,7 @@ class ChangeTag extends Component{
      * to change tag (add or update)
      */
     change(){
-        const {name, valueType, text} = this.state;
+        const {name, valueType, text, clipboardText} = this.state;
         const {translate, change, tag, close, mode, parent, ReferenceComponent} = this.props;
         let referenceToNewTag = null;
         if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
@@ -117,7 +127,6 @@ class ChangeTag extends Component{
         let tags = [];
         let clipboardPromise = '';
         let clipboardXml = null;
-        let clipboardText = '';
         switch (valueType) {
             case TAG_VALUE_TYPES.EMPTY:
                 tags = null;
@@ -129,7 +138,6 @@ class ChangeTag extends Component{
                 tags = isArray(tag.tags) ? tag.tags : [];
                 break;
             case TAG_VALUE_TYPES.CLIPBOARD:
-                clipboardText = text;
                 try {
                     clipboardXml = CXmlEditor.createXmlEditor(clipboardText);
                     tags = clipboardXml ? clipboardXml.tag : [];
@@ -180,13 +188,13 @@ class ChangeTag extends Component{
     }
 
     render(){
-        const {name, valueType, text} = this.state;
+        const {name, valueType, text, clipboardText} = this.state;
         const {translate, tag, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
                 <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
                 <TagType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>
-                {valueType === TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_text`} rows={2} multiline={true} value={text} onChange={::this.changeText} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')} theme={{input: styles.change_tag_name}}/>}
+                {valueType === TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_clipboard_text`} rows={2} multiline={true} value={clipboardText} onChange={::this.changeClipboardText} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')} theme={{input: styles.change_tag_name}}/>}
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}
                 {valueType === TAG_VALUE_TYPES.TEXT && <Value translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.TAG.ADD') : translate('XML_EDITOR.TAG.UPDATE')}/>
