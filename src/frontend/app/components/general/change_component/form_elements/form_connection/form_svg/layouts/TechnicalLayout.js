@@ -34,19 +34,21 @@ import {
     LAYOUT_POSITION
 } from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CConnection from "@classes/components/content/connection/CConnection";
-import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
+    const {currentTechnicalItem, currentBusinessItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
         currentTechnicalItem,
+        currentBusinessItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
         connection,
-        updateConnection,
+            updateConnection,
+            isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
@@ -119,23 +121,99 @@ class TechnicalLayout extends React.Component{
         }
     }
 
+    getItems(){
+        const {connection, currentBusinessItem, isAssignMode} = this.props;
+        const allItems = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
+        let items;
+        if(currentBusinessItem === null || isAssignMode) {
+            items = allItems;
+            if(isAssignMode){
+                const businessLayoutItems = connection.businessLayout.getItems();
+                for(let i = 0; i < businessLayoutItems.length; i++){
+                    if(businessLayoutItems[i].id !== currentBusinessItem.id){
+                        items = items.filter(item => businessLayoutItems[i].items.findIndex(technicalItem => technicalItem.id === item.id) === -1);
+                    }
+                }
+            }
+        } else{
+            items = currentBusinessItem.items;
+        }
+        let xIterator = 0;
+        let shiftXForSvgItems = 0;
+        let firstItemId = items.length > 0 ? items[0].id : '0';
+        let isFirstItem = true;
+        for(let i = 0; i < items.length; i++){
+            if(items[i].connectorType === CONNECTOR_FROM){
+                shiftXForSvgItems = connection.fromConnector.shiftXForSvgItems;
+            }
+            if(items[i].connectorType === CONNECTOR_TO && shiftXForSvgItems !== connection.toConnector.shiftXForSvgItems){
+                shiftXForSvgItems = connection.toConnector.shiftXForSvgItems;
+                xIterator = 0;
+                isFirstItem = true;
+            }
+            let currentSplitIndex = items[i].id.split('_');
+            if(currentSplitIndex[currentSplitIndex.length - 1] !== '0' && !isFirstItem){
+                xIterator += 200;
+            }
+            items[i].x = xIterator + shiftXForSvgItems;
+            items[i].y = 150 * (currentSplitIndex.length - 2 - (firstItemId.split('_').length - 2));
+            if(items[i].type && items.length !== 1){
+                items[i].x += 35;
+                items[i].y += 10;
+            }
+            isFirstItem = false;
+        }
+        return items;
+    }
+
+    getPanelParams(allItems){
+        const {connection, isAssignMode, currentBusinessItem} = this.props;
+        let fromConnectorItems = [];
+        let toConnectorItems = [];
+        for(let i = 0; i < allItems.length; i++){
+            if(allItems[i].connectorType === CONNECTOR_FROM){
+                fromConnectorItems.push(allItems[i]);
+            }
+            if(allItems[i].connectorType === CONNECTOR_TO){
+                toConnectorItems.push(allItems[i]);
+            }
+        }
+        let fromConnectorPanelParams = {panelPosition: CConnectorItem.getPanelPosition(fromConnectorItems, connection.fromConnector.shiftXForSvgItems), rectPosition: CConnectorItem.getPanelRectPosition(fromConnectorItems, connection.fromConnector.shiftXForSvgItems), invokerName: connection.fromConnector.invoker.name};
+        let toConnectorPanelParams = {panelPosition: CConnectorItem.getPanelPosition(toConnectorItems, connection.toConnector.shiftXForSvgItems), rectPosition: CConnectorItem.getPanelRectPosition(toConnectorItems, connection.toConnector.shiftXForSvgItems), invokerName: connection.toConnector.invoker.name};
+        const isSelectedBusinessItem = currentBusinessItem !== null;
+        const isSelectedBusinessItemEmpty = isSelectedBusinessItem && currentBusinessItem.items.length === 0;
+        if(isSelectedBusinessItemEmpty && !isAssignMode){
+            fromConnectorPanelParams = null;
+            toConnectorPanelParams = null;
+        }
+        return {fromConnectorPanelParams, toConnectorPanelParams};
+    }
+
     render(){
-        const {isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setCreateElementPanelPosition} = this.props;
+        const {isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setCreateElementPanelPosition, isAssignMode} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection, setCurrentTechnicalItem,
-            currentTechnicalItem, ...svgProps
+            currentTechnicalItem, currentBusinessItem, ...svgProps
         } = this.props;
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
-        let fromConnectorPanelParams = {panelPosition: connection.fromConnector.getPanelPosition(), rectPosition: connection.fromConnector.getPanelRectPosition(), invokerName: connection.fromConnector.invoker.name};
-        let toConnectorPanelParams = {panelPosition: connection.toConnector.getPanelPosition(), rectPosition: connection.toConnector.getPanelRectPosition(), invokerName: connection.toConnector.invoker.name};
+        const items = this.getItems();
+        const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
+        const isSelectedBusinessItem = currentBusinessItem !== null;
+        const isSelectedBusinessItemNotEmpty = isSelectedBusinessItem && currentBusinessItem.items.length !== 0;
+        const isSelectedBusinessItemEmpty = isSelectedBusinessItem && currentBusinessItem.items.length === 0;
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const startingSvgY = isBusinessLayoutEmpty ? -80 : -220;
-        const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
+        let svgStyle = {};
+        let settingsPanelTitle = 'Technical Layout';
+        if(isAssignMode){
+            svgStyle.background = '#d7dcf2';
+            settingsPanelTitle += ' (assign mode)';
+        }
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
                 <SettingsPanel
@@ -149,7 +227,7 @@ class TechnicalLayout extends React.Component{
                     detailsPosition={detailsPosition}
                     setLocation={::this.setLocation}
                     location={technicalLayoutLocation}
-                    title={'Technical Layout'}
+                    title={settingsPanelTitle}
                     isReplaceIconDisabled={isReplaceIconDisabled}
                     isMinMaxIconDisabled={isMinMaxIconDisabled}
                     isNewWindowIconDisabled={isNewWindowIconDisabled}
@@ -157,6 +235,7 @@ class TechnicalLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    style={svgStyle}
                     currentItem={currentTechnicalItem}
                     isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                     detailsPosition={detailsPosition}
@@ -173,6 +252,8 @@ class TechnicalLayout extends React.Component{
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
                     deleteProcess={::this.deleteProcess}
+                    hasAssignCentralText={isSelectedBusinessItemEmpty}
+                    isDraggable={!(isSelectedBusinessItemEmpty && !isAssignMode)}
                 />
             </div>
         );

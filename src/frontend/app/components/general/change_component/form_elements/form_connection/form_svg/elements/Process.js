@@ -20,16 +20,19 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {isString} from "@utils/app";
-import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
+import {setCurrentBusinessItem, setIsAssignMode} from "@actions/connection_overview_2/set";
+import {AssignIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 
 function mapStateToProps(store){
+    const connectionOverview = store.get('connection_overview');
     return{
-        colorMode: store.get('connection_overview').get('colorMode'),
+        colorMode: connectionOverview.get('colorMode'),
+        isAssignMode: connectionOverview.get('isAssignMode'),
     }
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setCurrentBusinessItem, setIsAssignMode})
 class Process extends React.Component{
     constructor(props) {
         super(props)
@@ -39,8 +42,25 @@ class Process extends React.Component{
         this.props.setIsCreateElementPanelOpened(true);
     }
 
+    assignProcess(){
+        const {connection, updateConnection, process, setCurrentBusinessItem} = this.props;
+        let currentBusinessItem = connection.businessLayout.getCurrentSvgItem();
+        if(currentBusinessItem.isExistItem(process)){
+            currentBusinessItem.removeItem(process);
+        } else{
+            currentBusinessItem.addItem(process);
+        }
+        setCurrentBusinessItem(currentBusinessItem);
+        updateConnection(connection);
+    }
+
     onMouseDown(){
-        this.props.setCurrentItem(this.props.process);
+        const {isAssignMode, setCurrentItem, process} = this.props;
+        if(isAssignMode){
+            this.assignProcess();
+        } else{
+            setCurrentItem(process);
+        }
     }
 
     deleteProcess(e){
@@ -49,14 +69,21 @@ class Process extends React.Component{
         e.stopPropagation();
     }
 
+    setAssignMode(){
+        const {setIsAssignMode} = this.props;
+        setIsAssignMode(true);
+    }
+
     render(){
-        const {process, isNotDraggable, isCurrent, isHighlighted, colorMode, readOnly} = this.props;
+        const {process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, colorMode, readOnly, isAssignMode} = this.props;
         const method = process.entity;
         const borderRadius = 10;
         const labelX = '50%';
         const labelY = '50%';
         const closeX = process.width - 15;
         const closeY = 15;
+        const assignX = process.width - 45;
+        const assignY = 15;
         const methodName = method ? method.label ? method.label : method.name ? method.name : '' : '';
         const label = methodName === '' ? isString(process.name) ? process.name : '' : methodName;
         const color = method ? method.color : '';
@@ -65,8 +92,10 @@ class Process extends React.Component{
         if(isString(label) && label.length > 12){
             shortLabel = `${label.substr(0, 9)}...`;
         }
+        const assignStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
+        const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
         return(
-            <svg x={process.x} y={process.y} className={`${styles.process} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
+            <svg x={process.x} y={process.y} className={`${styles.process} ${assignStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
                 <rect fill={colorMode !== 1 || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                       className={`${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                 />
@@ -78,6 +107,9 @@ class Process extends React.Component{
                 {hasColor && colorMode === 2 && <circle cx={15} cy={15} r="10" fill={color}/>}
                 {isCurrent && !readOnly &&
                     <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
+                }
+                {hasAssignIcon &&
+                    <AssignIcon svgX={85} svgY={2} x={assignX} y={assignY} onClick={::this.setAssignMode}/>
                 }
             </svg>
         );
@@ -94,12 +126,14 @@ Process.propTypes = {
     setCurrentBusinessItem: PropTypes.func,
     isCurrent: PropTypes.bool,
     isHighlighted: PropTypes.bool,
+    isAssignedToBusinessProcess: PropTypes.bool,
 };
 
 Process.defaultProps = {
     isNotDraggable: true,
     isCurrent: false,
     isHighlighted: false,
+    isAssignedToBusinessProcess: false,
 };
 
 export default Process;

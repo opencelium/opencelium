@@ -22,14 +22,15 @@ class Label extends React.Component{
         this.state = {
             isMouseOver: false,
             isEditOn: false,
-            labelValue: props.label,
+            labelValue: '',
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.label !== prevProps.label && this.state.labelValue !== prevState.labelValue){
             this.setState({
-                labelValue: this.props.label,
+                isMouseOver: false,
+                isEditOn: false,
             })
         }
     }
@@ -63,19 +64,23 @@ class Label extends React.Component{
     }
 
     changeLabel(){
-        const {labelValue} = this.state;
-        const {changeLabel} = this.props;
+        let {labelValue} = this.state;
+        const {changeLabel, label} = this.props;
+        if(labelValue === '') {
+            labelValue = label;
+        }
         changeLabel(labelValue);
         this.setState({
             isEditOn: false,
             isMouseOver: false,
+            labelValue: '',
         })
     }
 
     cancelEdit(){
         this.setState({
-            isMouseOver: false,
             isEditOn: false,
+            isMouseOver: false,
         });
     }
 

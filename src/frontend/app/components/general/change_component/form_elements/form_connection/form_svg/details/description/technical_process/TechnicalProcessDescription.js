@@ -1,4 +1,5 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import {isString} from "@utils/app";
 import {Col, Row} from "react-grid-system";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -10,7 +11,9 @@ import Header
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Header";
 import Body from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/Body";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
 
+@connect(null, {setCurrentTechnicalItem})
 class TechnicalProcessDescription extends React.Component{
     constructor(props) {
         super(props);

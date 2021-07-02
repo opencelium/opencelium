@@ -1,4 +1,7 @@
 import {DETAILS_POSITION} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 
 export default class CSvg{
 
@@ -46,5 +49,16 @@ export default class CSvg{
                 console.log(prefix, document.getElementById('technical_layout_svg').viewBox.baseVal);
                 if(suffix !== '') console.log(suffix);
             }
+    }
+
+    static isAssigned(technicalItem, businessProcess){
+        let isAssigned = false;
+        if((technicalItem instanceof CTechnicalProcess || technicalItem instanceof CTechnicalOperator) && businessProcess instanceof CBusinessProcess){
+            let index = businessProcess.items.findIndex(item => item.id === technicalItem.id);
+            if(index !== -1){
+                isAssigned = true;
+            }
+        }
+        return isAssigned;
     }
 }

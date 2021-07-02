@@ -136,6 +136,16 @@ $CURRENT_ITEM_FILL: #f4f4f4;
     @extend .highlighting;
   }
 }
+.assigned_process{
+  rect{
+    stroke: $SVG_ASSIGN_COLOR;
+  }
+}
+.assigned_operator{
+  polygon{
+    stroke: $SVG_ASSIGN_COLOR;
+  }
+}
 .current_operator{
   polygon {
     fill: $CURRENT_ITEM_FILL;
@@ -190,6 +200,20 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 }
 .process_delete{
   @extend .delete;
+}
+.process_assign_rect{
+  fill: white;
+  cursor: pointer;
+}
+.process_assign{
+  cursor: pointer;
+  fill: $SVG_ASSIGN_COLOR;
+}
+.process_assign:hover{
+  fill: #8bcf93;
+}
+.process_assign:active{
+  fill: #53ae5f;
 }
 .operator_delete{
   @extend .delete;
@@ -443,7 +467,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
     float: left;
   }
   .label_input_element{
-    padding: 0;
+    padding: 0 0 0 3px;
     font-size: 14px;
     height: 16px;
     font-family: $FONT_FAMILY;
