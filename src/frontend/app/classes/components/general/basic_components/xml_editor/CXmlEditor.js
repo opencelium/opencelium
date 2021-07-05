@@ -101,16 +101,34 @@ export default class CXmlEditor extends CBodyEditor{
         let namespaces = [];
         let parent = null;
         let name = '';
+        let prevItemIndex = '';
         if(item instanceof CTag || item instanceof CProperty) {
             name = item instanceof CProperty ? `@${item.name}` : item.name;
             if(item.parent) {
                 parent = item.parent;
                 while (true) {
+                    let namespaceItem = '';
+                    let prevItemArrayIndex = '';
                     if(!(parent instanceof CXmlEditor)){
-                        namespaces.unshift(parent instanceof CProperty ? `@${parent.name}` : parent.name);
+                        namespaceItem = parent instanceof CProperty ? `@${parent.name}` : parent.name;
+                        if(namespaces.length > 0 && prevItemIndex !== ''){
+                            let prevItem = parent.tags.find(tag => tag.uniqueIndex === prevItemIndex);
+                            if(prevItem){
+                                let prevItemArray = parent.tags.filter(tag => tag.name === prevItem.name);
+                                let isPrevItemArray = prevItemArray.length > 1;
+                                if(isPrevItemArray){
+                                    prevItemArrayIndex = prevItemArray.findIndex(p => p.uniqueIndex === prevItemIndex);
+                                    if(prevItemArrayIndex !== -1){
+                                        namespaces[0] = `${namespaces[0]}[${prevItemArrayIndex}]`
+                                    }
+                                }
+                            }
+                        }
+                        namespaces.unshift(namespaceItem);
                         if (!parent.parent) {
                             break;
                         } else {
+                            prevItemIndex = parent.uniqueIndex;
                             parent = parent.parent;
                         }
                     } else{
