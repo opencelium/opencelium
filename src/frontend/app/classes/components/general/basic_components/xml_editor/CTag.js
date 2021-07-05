@@ -16,6 +16,7 @@
 import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
 import {copyStringToClipboard, isArray, isString} from "@utils/app";
 import {instanceOf} from "prop-types";
+import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
 
 export const TAG_VALUE_TYPES = {
     EMPTY: 'EMPTY',
@@ -29,7 +30,7 @@ const BACKEND_ATTRIBUTE_PROPERTY = '__oc__attributes';
 const BACKEND_VALUE_PROPERTY = '__oc__value';
 
 export default class CTag{
-    constructor(name, tags, properties = {}, parent = null) {
+    constructor(name, tags, properties = {}, parent = null, xml = null) {
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._name = name;
         this._tags = tags;
@@ -37,9 +38,11 @@ export default class CTag{
         this._minimized = false;
         this._valueType = this.getValueType();
         this._parent = parent;
+        this._xml = xml;
+        this._isArray = this.getIsArray();
     }
 
-    static createTag(name = '', node = null, parent = null){
+    static createTag(name = '', node = null, parent = null, xml = null){
         let tags = [];
         let attributes = {};
         let newTag = new CTag(name);
@@ -62,10 +65,10 @@ export default class CTag{
                     if (subNode !== BACKEND_ATTRIBUTE_PROPERTY && subNode !== '_attributes' && subNode !== BACKEND_VALUE_PROPERTY && subNode !== '_text') {
                         if(isArray(node[subNode])){
                             for(let i = 0; i < node[subNode].length; i++){
-                                tags.push(CTag.createTag(subNode, node[subNode][i], newTag));
+                                tags.push(CTag.createTag(subNode, node[subNode][i], newTag, xml));
                             }
                         } else {
-                            tags.push(CTag.createTag(subNode, node[subNode], newTag));
+                            tags.push(CTag.createTag(subNode, node[subNode], newTag, xml));
                         }
                     }
                 }
@@ -77,7 +80,36 @@ export default class CTag{
         newTag.properties = attributes;
         newTag.tags = tags;
         newTag.parent = parent;
+        newTag.xml = xml;
         return newTag;
+    }
+
+    getIsArray(){
+        let result = false;
+        if(this._xml){
+            let path = [this.name];
+            let parent = this._parent;
+            while(true){
+                if(parent && !(parent instanceof CXmlEditor)){
+                    path.unshift(parent.name);
+                    parent = parent.parent;
+                } else{
+                    break;
+                }
+            }
+            let xmlItem = this._xml;
+            for(let i = 0; i < path.length; i++){
+                if(xmlItem.hasOwnProperty(path[i])){
+                    xmlItem = xmlItem[path[i]];
+                } else{
+                    break;
+                }
+            }
+            if(isArray(xmlItem)){
+                result = true;
+            }
+        }
+        return result;
     }
 
     convertProperties(properties){
@@ -98,6 +130,11 @@ export default class CTag{
         return TAG_VALUE_TYPES.EMPTY;
     }
 
+    set xml(xml){
+        this._xml = xml;
+        this._isArray = this.getIsArray();
+    }
+
     get name(){
         return this._name;
     }
@@ -115,7 +152,7 @@ export default class CTag{
         if(nameOrTag instanceof CTag){
             this.tags.push(nameOrTag);
         } else {
-            const newTag = new CTag(nameOrTag, tags, {}, this);
+            const newTag = new CTag(nameOrTag, tags, {}, this, this._xml);
             if (isArray(this._tags)) {
                 this._tags.push(newTag);
             } else {
@@ -197,6 +234,11 @@ export default class CTag{
 
     set parent(parent){
         this._parent = parent;
+        this._isArray = this.getIsArray();
+    }
+
+    get isArray(){
+        return this._isArray;
     }
 
     copyToClipboard(){
@@ -274,7 +316,11 @@ export default class CTag{
                         }
                         tag[this._tags[i].name].push(this._tags[i].convertToBackendXml());
                     } else{
-                        tag[this._tags[i].name] = this._tags[i].convertToBackendXml();
+                        if(this._tags[i].isArray){
+                            tag[this._tags[i].name] = [this._tags[i].convertToBackendXml()];
+                        } else{
+                            tag[this._tags[i].name] = this._tags[i].convertToBackendXml();
+                        }
                     }
                 }
                 break;

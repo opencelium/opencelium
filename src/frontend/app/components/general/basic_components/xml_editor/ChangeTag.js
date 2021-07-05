@@ -113,7 +113,7 @@ class ChangeTag extends Component{
      */
     change(){
         const {name, valueType, text, clipboardText} = this.state;
-        const {translate, change, tag, close, mode, parent, ReferenceComponent} = this.props;
+        const {translate, change, tag, close, mode, parent, ReferenceComponent, xml} = this.props;
         let referenceToNewTag = null;
         if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
             if (name === '') {
@@ -142,6 +142,7 @@ class ChangeTag extends Component{
                     clipboardXml = CXmlEditor.createXmlEditor(clipboardText);
                     tags = clipboardXml ? clipboardXml.tag : [];
                     tags.parent = parent;
+                    tags.xml = xml ? xml.xml : null;
                     switch (mode) {
                         case 'add':
                             referenceToNewTag = parent.addTag(tags);
@@ -205,6 +206,7 @@ class ChangeTag extends Component{
 }
 
 ChangeTag.propTypes = {
+    xml: PropTypes.instanceOf(CXmlEditor),
     parent: PropTypes.instanceOf(CTag),
     tag: PropTypes.instanceOf(CTag).isRequired,
     change: PropTypes.func.isRequired,
