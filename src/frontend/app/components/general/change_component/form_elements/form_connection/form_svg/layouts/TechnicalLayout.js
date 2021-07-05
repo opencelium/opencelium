@@ -203,7 +203,7 @@ class TechnicalLayout extends React.Component{
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isItemDraggable={false}
-                    isScalable={HAS_LAYOUTS_SCALING}
+                    isScalable={HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode)}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
                     deleteProcess={::this.deleteProcess}

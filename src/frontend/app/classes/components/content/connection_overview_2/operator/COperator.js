@@ -141,6 +141,10 @@ export default class COperator{
         }
     }
 
+    static getItem(props){
+        return props.operator;
+    }
+
     getObject(){
         return {
             id: this._id,

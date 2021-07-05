@@ -135,6 +135,18 @@ export default class CBusinessLayout{
         this._arrows = [];
     }
 
+
+    isTechnicalItemAssigned(technicalProcess){
+        for(let i = 0; i < this._svgItems.length; i++){
+            for(let j = 0; j < this._svgItems[i].items.length; j++){
+                if(technicalProcess.id === this._svgItems[i].items[j].id){
+                    return this._svgItems[i];
+                }
+            }
+        }
+        return false;
+    }
+
     setCurrentSvgItem(currentSvgItem){
         if(currentSvgItem instanceof CBusinessProcess || currentSvgItem === null){
             this._currentSvgItem = currentSvgItem;

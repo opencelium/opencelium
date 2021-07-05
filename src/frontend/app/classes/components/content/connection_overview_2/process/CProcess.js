@@ -119,6 +119,10 @@ export default class CProcess{
         this._width = Math.ceil((processText.length * 9 + PROCESS_LABEL_PADDING * 2) / 10) * 10;
     }
 
+    static getItem(props){
+        return props.process;
+    }
+
     getObject(){
         return {
             id: this._id,

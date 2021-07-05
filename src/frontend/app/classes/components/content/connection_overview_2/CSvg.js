@@ -63,16 +63,16 @@ export default class CSvg{
         return isAssigned;
     }
 
-    static isTechnicalItemDisabled(technicalItem, businessLayout, isAssignMode){
-        if(businessLayout) {
+    static isTechnicalItemDisabled(svgItem, businessLayout, isAssignMode){
+        if(businessLayout instanceof CBusinessLayout) {
             const currentBusinessSvgItem = businessLayout.getCurrentSvgItem();
             if (isAssignMode) {
-                if ((technicalItem instanceof CTechnicalProcess || technicalItem instanceof CTechnicalOperator) && businessLayout instanceof CBusinessLayout) {
+                if (svgItem instanceof CTechnicalProcess || svgItem instanceof CTechnicalOperator) {
                     let businessProcesses = businessLayout.getItems();
                     for (let i = 0; i < businessProcesses.length; i++) {
                         if (currentBusinessSvgItem && businessProcesses[i].id !== currentBusinessSvgItem.id) {
                             for (let j = 0; j < businessProcesses[i].items.length; j++) {
-                                if (businessProcesses[i].items[j].id === technicalItem.id) {
+                                if (businessProcesses[i].items[j].id === svgItem.id) {
                                     return true;
                                 }
                             }
@@ -82,10 +82,16 @@ export default class CSvg{
             } else {
                 if(currentBusinessSvgItem) {
                     const currentBusinessSvgItemItems = currentBusinessSvgItem.items;
-                    return currentBusinessSvgItemItems.findIndex(item => item.id === technicalItem.id) === -1;
+                    return currentBusinessSvgItemItems.findIndex(item => item.id === svgItem.id) === -1;
                 }
             }
         }
         return false;
+    }
+
+    static isBusinessItemDisabled(item, currentBusinessItem, isAssignMode){
+        if(isAssignMode && item instanceof CBusinessProcess && item.id !== currentBusinessItem.id){
+            return true;
+        }
     }
 }

@@ -17,6 +17,17 @@
 
 $CURRENT_ITEM_FILL: #f4f4f4;
 
+.process_rect{
+  stroke: #000;
+  stroke-width: 2;
+}
+.process_color_rect{
+  pointer-events: none;
+}
+.process_color_circle{
+  pointer-events: none;
+}
+
 .connection_editor{
   height: calc(100vh - 121px);
   position: absolute;
@@ -118,8 +129,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .operator_loop_icon{
   cursor: grab;
 }
-.process{
-}
 .operator{
   text{
     font-size: $FONT_SIZE_SMALL;
@@ -137,15 +146,10 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   }
 }
 .assigned_process{
-  rect{
-    stroke: $SVG_ASSIGN_COLOR;
-  }
+  stroke: $SVG_ASSIGN_COLOR;
 }
 .disabled_process{
   opacity: 0.3;
-  rect{
-    cursor: default;
-  }
 }
 .assigned_operator{
   polygon{
@@ -155,9 +159,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .disabled_operator{
   opacity: 0.3;
   cursor: default;
-  polygon{
-    cursor: default;
-  }
 }
 .current_operator{
   polygon {
@@ -181,12 +182,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 }
 .disabled_arrow{
   opacity: 0.3;
-}
-.process_rect{
-  cursor: move;
-  stroke: #000;
-  //stroke: #00000021;
-  stroke-width: 2;
 }
 .not_draggable{
   cursor: pointer;
@@ -238,14 +233,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   text{
     pointer-events: none;
   }
-}
-.if_operator_rect{
-  @extend .process_rect;
-  text{
-    pointer-events: none;
-  }
-  transform: rotate(45deg);
-  transform-origin: center center;
 }
 
 .details{

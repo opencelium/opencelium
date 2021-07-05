@@ -23,6 +23,8 @@ import {isString} from "@utils/app";
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
 import {setCurrentBusinessItem, setIsAssignMode} from "@actions/connection_overview_2/set";
 import {AssignIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
+import {SvgItem} from "@decorators/SvgItem";
+import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 
 function mapStateToProps(store){
     const connectionOverview = store.get('connection_overview');
@@ -33,34 +35,52 @@ function mapStateToProps(store){
 }
 
 @connect(mapStateToProps, {setCurrentBusinessItem, setIsAssignMode})
+@SvgItem(CProcess)
 class Process extends React.Component{
     constructor(props) {
         super(props)
+
+        this.state = {
+            rectStyle: {},
+        }
+    }
+
+    onMouseOver(){
+        const {isAssignMode} = this.props;
+        if(isAssignMode) {
+            this.setState({
+                rectStyle: {stroke: '#79c883'}
+            });
+        }
+    }
+
+    onMouseLeave(){
+        const {isAssignMode} = this.props;
+        if(isAssignMode) {
+            this.setState({
+                rectStyle: {},
+            });
+        }
     }
 
     onDoubleClick(){
-        this.props.setIsCreateElementPanelOpened(true);
-    }
-
-    assignProcess(){
-        const {connection, updateConnection, process, setCurrentBusinessItem} = this.props;
-        let currentBusinessItem = connection.businessLayout.getCurrentSvgItem();
-        if(currentBusinessItem.isExistItem(process)){
-            currentBusinessItem.removeItem(process);
-        } else{
-            currentBusinessItem.addItem(process);
+        const {isDisabled, isAssignMode} = this.props;
+        if(!isDisabled && !isAssignMode) {
+            this.props.setIsCreateElementPanelOpened(true);
         }
-        setCurrentBusinessItem(currentBusinessItem);
-        updateConnection(connection);
     }
 
-    onMouseDown(){
-        const {isAssignMode, setCurrentItem, process, isDisabled} = this.props;
+    onClick(){
+        const {isAssignMode, setCurrentItem, process, assign, isDisabled, toggleReassignConfirmation} = this.props;
         if(!isDisabled) {
             if (isAssignMode) {
-                this.assignProcess();
+                assign();
             } else {
                 setCurrentItem(process);
+            }
+        } else{
+            if (isAssignMode) {
+                toggleReassignConfirmation();
             }
         }
     }
@@ -77,7 +97,11 @@ class Process extends React.Component{
     }
 
     render(){
-        const {process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isDisabled, colorMode, readOnly, isAssignMode} = this.props;
+        const {rectStyle} = this.state;
+        const {
+            process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isDisabled,
+            colorMode, readOnly, isAssignMode,
+        } = this.props;
         const method = process.entity;
         const borderRadius = 10;
         const labelX = '50%';
@@ -94,20 +118,20 @@ class Process extends React.Component{
         if(isString(label) && label.length > 12){
             shortLabel = `${label.substr(0, 9)}...`;
         }
-        const assignStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
+        const assignedStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
         const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         return(
-            <svg x={process.x} y={process.y} className={`${styles.process} ${assignStyle} ${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
-                <rect fill={colorMode !== 1 || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
-                      className={`${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+            <svg x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
+                <rect style={rectStyle} fill={colorMode !== 1 || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onClick={::this.onClick} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
+                      className={`${styles.process_rect} ${assignedStyle} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                 />
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
                     {shortLabel}
                 </text>
                 <title>{label}</title>
-                {hasColor && colorMode === 0 && <rect fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
-                {hasColor && colorMode === 2 && <circle cx={15} cy={15} r="10" fill={color}/>}
+                {hasColor && colorMode === 0 && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
+                {hasColor && colorMode === 2 && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
                 {isCurrent && !readOnly &&
                     <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
                 }

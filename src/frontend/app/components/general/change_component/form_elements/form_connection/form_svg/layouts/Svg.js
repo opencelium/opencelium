@@ -290,6 +290,9 @@ class Svg extends React.Component {
             let isCurrent = item.isCurrent(currentItem);
             let isAssignedToBusinessProcess = CSvg.isTechnicalItemAssigned(item, currentBusinessItem);
             let isDisabled = connection ? CSvg.isTechnicalItemDisabled(item, connection.businessLayout, isAssignMode) : false;
+            if(!isDisabled){
+                isDisabled = CSvg.isBusinessItemDisabled(item, currentBusinessItem, isAssignMode);
+            }
             switch (item.type){
                 case 'if':
                     return(
@@ -308,7 +311,7 @@ class Svg extends React.Component {
     }
 
     renderArrows(){
-        const {currentItem, currentTechnicalItem, arrows, items, hasAssignCentralText, connection, isAssignMode} = this.props;
+        const {currentItem, currentTechnicalItem, currentBusinessItem, arrows, items, hasAssignCentralText, connection, isAssignMode} = this.props;
         if(hasAssignCentralText){
             return null;
         }
@@ -316,8 +319,14 @@ class Svg extends React.Component {
             const from = items.find(item => item.id === arrow.from);
             const to = items.find(item => item.id === arrow.to);
 
-            const isDisabledFrom = connection ? CSvg.isTechnicalItemDisabled(from, connection.businessLayout, isAssignMode) : false;
-            const isDisabledTo = connection ? CSvg.isTechnicalItemDisabled(to, connection.businessLayout, isAssignMode) : false;
+            let isDisabledFrom = connection ? CSvg.isTechnicalItemDisabled(from, connection.businessLayout, isAssignMode) : false;
+            if(!isDisabledFrom){
+                isDisabledFrom = CSvg.isBusinessItemDisabled(from, currentBusinessItem, isAssignMode);
+            }
+            let isDisabledTo = connection ? CSvg.isTechnicalItemDisabled(to, connection.businessLayout, isAssignMode) : false;
+            if(!isDisabledTo){
+                isDisabledTo = CSvg.isBusinessItemDisabled(to, currentBusinessItem, isAssignMode);
+            }
             const isDisabled = isDisabledFrom || isDisabledTo;
             const fromIndex = `${arrow.from}`;
             const toIndex = `${arrow.to}`;
