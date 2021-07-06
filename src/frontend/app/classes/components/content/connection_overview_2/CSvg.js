@@ -4,6 +4,18 @@ import {CBusinessProcess} from "@classes/components/content/connection_overview_
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import CBusinessLayout from "@classes/components/content/connection_overview_2/CBusinessLayout";
 
+export const COLOR_MODE = {
+    RECTANGLE_TOP: 'RECTANGLE_TOP',
+    BACKGROUND: 'BACKGROUND_COLOR',
+    CIRCLE_LEFT_TOP: 'CIRCLE_LEFT_TOP',
+};
+
+export const BUSINESS_LABEL_MODE = {
+    NOT_VISIBLE: 'NOT_VISIBLE',
+    VISIBLE: 'VISIBLE',
+    VISIBLE_ON_PRESS_KEY: 'VISIBLE_ON_PRESS_KEY'
+};
+
 export default class CSvg{
 
     static setViewBox(elementId, viewBox = {x: 0, y: 0, width: 0, height: 0}){

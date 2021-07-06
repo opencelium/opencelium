@@ -18,6 +18,7 @@ import {ConnectionOverview2Action} from "@utils/actions";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {getLS, removeLS, setLS} from "@utils/LocalStorage";
 import {isExternalWindow} from "@utils/app";
+import {BUSINESS_LABEL_MODE, COLOR_MODE} from "@classes/components/content/connection_overview_2/CSvg";
 
 let initialState = null;
 if(isExternalWindow()){
@@ -47,8 +48,10 @@ if(initialState === null){
         detailsLocation: PANEL_LOCATION.SAME_WINDOW,
         businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
-        colorMode: 0,
+        colorMode: COLOR_MODE.RECTANGLE_TOP,
         isAssignMode: false,
+        businessLabelMode: BUSINESS_LABEL_MODE.NOT_VISIBLE,
+        isVisibleBusinessLabelKeyPressed: false,
     });
 }
 
@@ -57,6 +60,12 @@ if(initialState === null){
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case ConnectionOverview2Action.SET_ISVISIBLEBUSINESSLABELKEYPRESSED:
+            return state.set('isVisibleBusinessLabelKeyPressed', action.payload);
+        case ConnectionOverview2Action.SET_PANELCONFIGURATIONS:
+            return state.set('businessLabelMode', action.payload.businessLabelMode).set('colorMode', action.payload.colorMode);
+        case ConnectionOverview2Action.SET_BUSINESSLABELMODE:
+            return state.set('businessLabelMode', action.payload);
         case ConnectionOverview2Action.SET_ISASSIGNMODE:
             return state.set('isAssignMode', action.payload);
         case ConnectionOverview2Action.SET_CONNECTIONDATA:

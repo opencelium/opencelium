@@ -14,6 +14,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {BUSINESS_LABEL_MODE} from "@classes/components/content/connection_overview_2/CSvg";
+
 /**
  * variable that switch navigation from app to List component and vice versa
  */
@@ -31,6 +33,15 @@ function removeNavigationListener(that, navigation){
     navigation.that = that;
     document.removeEventListener('keydown', navigation);
 }
+function addNavigationListenerOnKeyUp(that, navigation){
+    navigation.that = that;
+    document.addEventListener('keyup', navigation);
+}
+
+function removeNavigationListenerOnKeyUp(that, navigation){
+    navigation.that = that;
+    document.removeEventListener('keyup', navigation);
+}
 
 function doAction(event, action){
     if(typeof document.activeElement.type === 'undefined' && !event.ctrlKey) {
@@ -38,6 +49,73 @@ function doAction(event, action){
             action();
         }
     }
+}
+
+/**
+ * pressing up B to hide business labels in technical layout
+ */
+let HideBusinessLabelKeyNavigation = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keyup':
+                hideBusinessLabel(event, this.that);
+                break;
+        }
+
+    }
+};
+function hideBusinessLabel(e, that){
+    let key = e.keyCode;
+    switch (key) {
+        //B
+        case 66:
+            doAction(e, () => {
+                if(that.props.businessLabelMode === BUSINESS_LABEL_MODE.VISIBLE_ON_PRESS_KEY && that.props.isVisibleBusinessLabelKeyPressed === true){
+                    that.props.setIsVisibleBusinessLabelKeyPressed(false);
+                }
+            });
+            break;
+
+    }
+}
+function addHideBusinessLabelKeyNavigation(that){
+    addNavigationListenerOnKeyUp(that, HideBusinessLabelKeyNavigation);
+}
+function removeHideBusinessLabelKeyNavigation(that){
+    removeNavigationListenerOnKeyUp(that, HideBusinessLabelKeyNavigation);
+}
+/**
+ * pressing down B to show business labels in technical layout
+ */
+let ShowBusinessLabelKeyNavigation = {
+    handleEvent(event) {
+        switch (event.type) {
+            case 'keydown':
+                showBusinessLabel(event, this.that);
+                break;
+        }
+
+    }
+};
+function showBusinessLabel(e, that){
+    let key = e.keyCode;
+    switch (key) {
+        //B
+        case 66:
+            doAction(e, () => {
+                if(that.props.businessLabelMode === BUSINESS_LABEL_MODE.VISIBLE_ON_PRESS_KEY && that.props.isVisibleBusinessLabelKeyPressed === false){
+                    that.props.setIsVisibleBusinessLabelKeyPressed(true);
+                }
+            });
+            break;
+
+    }
+}
+function addShowBusinessLabelKeyNavigation(that){
+    addNavigationListener(that, ShowBusinessLabelKeyNavigation);
+}
+function removeShowBusinessLabelKeyNavigation(that){
+    removeNavigationListener(that, ShowBusinessLabelKeyNavigation);
 }
 /**
  * pressing ARROW_DOWN select next option in select
@@ -1049,4 +1127,8 @@ export{
     removeMenuInvokersKeyNavigation,
     addCloseParamGeneratorNavigation,
     removeCloseParamGeneratorNavigation,
+    addShowBusinessLabelKeyNavigation,
+    removeShowBusinessLabelKeyNavigation,
+    addHideBusinessLabelKeyNavigation,
+    removeHideBusinessLabelKeyNavigation,
 };

@@ -101,6 +101,14 @@ export default class CBusinessLayout{
         }
     }
 
+    getItemByTechnicalItem(technicalItem){
+        if(technicalItem instanceof CTechnicalProcess || technicalItem instanceof CTechnicalOperator){
+            const item = this._svgItems.find(svgItem => svgItem.items.findIndex(elem => elem.id === technicalItem.id) !== -1);
+            if(item) return item;
+        }
+        return null;
+    }
+
     getItemById(id){
         const svgItem = this._svgItems.find(item => item.id === id);
         if(svgItem) return svgItem;
@@ -134,7 +142,6 @@ export default class CBusinessLayout{
     clearArrows(){
         this._arrows = [];
     }
-
 
     isTechnicalItemAssigned(technicalProcess){
         for(let i = 0; i < this._svgItems.length; i++){

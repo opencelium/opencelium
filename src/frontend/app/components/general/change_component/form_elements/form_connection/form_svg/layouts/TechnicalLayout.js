@@ -21,21 +21,22 @@ import Svg from "../layouts/Svg";
 import PropTypes from "prop-types";
 import SettingsPanel from "../layouts/SettingsPanel";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
+import {setTechnicalLayoutLocation, setIsVisibleBusinessLabelKeyPressed} from "@actions/connection_overview_2/set";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
-import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {
     HAS_LAYOUTS_SCALING,
-    LAYOUT_POSITION
 } from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
-import CConnection from "@classes/components/content/connection/CConnection";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import CSvg from "@classes/components/content/connection_overview_2/CSvg";
+import {
+    addHideBusinessLabelKeyNavigation,
+    addShowBusinessLabelKeyNavigation, removeHideBusinessLabelKeyNavigation,
+    removeShowBusinessLabelKeyNavigation
+} from "@utils/key_navigation";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -46,9 +47,11 @@ function mapStateToProps(state){
         currentBusinessItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+        businessLabelMode: connectionOverview.get('businessLabelMode'),
+        isVisibleBusinessLabelKeyPressed: connectionOverview.get('isVisibleBusinessLabelKeyPressed'),
         connection,
-            updateConnection,
-            isAssignMode: connectionOverview.get('isAssignMode'),
+        updateConnection,
+        isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
@@ -61,13 +64,23 @@ function setLocation(props, data){
     props.maximizeBusinessLayout();
 }
 
-@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation, setIsVisibleBusinessLabelKeyPressed})
 @NewWindowFeature({url: connectionOverviewTechnicalLayoutUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.TECHNICAL_LAYOUT, setLocation, isLocationSameWindow})
 class TechnicalLayout extends React.Component{
 
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
+    }
+
+    componentDidMount() {
+        addShowBusinessLabelKeyNavigation(this);
+        addHideBusinessLabelKeyNavigation(this);
+    }
+
+    componentWillUnmount() {
+        removeShowBusinessLabelKeyNavigation(this);
+        removeHideBusinessLabelKeyNavigation(this);
     }
 
     setLocation(data){

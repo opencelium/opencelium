@@ -27,6 +27,27 @@ const setIsAssignMode = (isAssignMode) => {
     };
 }
 
+const setIsVisibleBusinessLabelKeyPressed = (isVisibleBusinessLabelKeyPressed) => {
+    return{
+        type: ConnectionOverview2Action.SET_ISVISIBLEBUSINESSLABELKEYPRESSED,
+        payload: isVisibleBusinessLabelKeyPressed,
+    };
+}
+
+const setPanelConfigurations = (configurations) => {
+    return{
+        type: ConnectionOverview2Action.SET_PANELCONFIGURATIONS,
+        payload: configurations,
+    };
+}
+
+const setBusinessLabelMode = (mode) => {
+    return{
+        type: ConnectionOverview2Action.SET_BUSINESSLABELMODE,
+        payload: mode,
+    };
+}
+
 const setColorMode = (color) => {
     return{
         type: ConnectionOverview2Action.SET_COLORMODE,
@@ -149,4 +170,7 @@ export{
     setColorMode,
     setConnectionData,
     setIsAssignMode,
+    setBusinessLabelMode,
+    setPanelConfigurations,
+    setIsVisibleBusinessLabelKeyPressed,
 };

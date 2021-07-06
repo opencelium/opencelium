@@ -35,7 +35,7 @@ class RadioButtons extends React.Component{
             return(
                 <React.Fragment key={label}>
                     <Input type="radio" {...props} checked={value === radio.value} onChange={::this.onChange} style={inputStyle} className={inputClassName ? inputClassName : ''}/>
-                    <span className={`${styles.radio_button_label} ${labelClassName ? labelClassName : ''}`} style={labelStyle}>{label}</span>
+                    <span onClick={() => ::this.onChange({target: {value: radio.value}})} className={`${styles.radio_button_label} ${labelClassName ? labelClassName : ''}`} style={labelStyle}>{label}</span>
                 </React.Fragment>
             );
         });

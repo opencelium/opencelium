@@ -47,6 +47,7 @@ class Svg extends React.Component {
         //for dragging
         this.selectedElement = false;
         this.offset = {x: 0, y: 0};
+        this.dragCoordinates = null;
         //for panning
         this.isPointerDown = false;
         this.pointerOrigin = {
@@ -190,19 +191,19 @@ class Svg extends React.Component {
                     let currentOffset = {x: coordinates.x, y: coordinates.y};
                     currentOffset.x -= parseFloat(this.selectedElement.getAttributeNS(null, "x"));
                     currentOffset.y -= parseFloat(this.selectedElement.getAttributeNS(null, "y"));
-                    let newCoordinates = null;
+                    this.dragCoordinates = null;
                     if (Math.abs(currentOffset.x - this.offset.x) >= dragAndDropStep) {
-                        newCoordinates = {};
-                        newCoordinates.x = Math.round((coordinates.x - this.offset.x) / dragAndDropStep) * dragAndDropStep;
+                        this.dragCoordinates = {};
+                        this.dragCoordinates.x = Math.round((coordinates.x - this.offset.x) / dragAndDropStep) * dragAndDropStep;
                     }
                     if (Math.abs(currentOffset.y - this.offset.y) >= dragAndDropStep) {
-                        if(newCoordinates === null){
-                            newCoordinates = {};
+                        if(this.dragCoordinates === null){
+                            this.dragCoordinates = {};
                         }
-                        newCoordinates.y = Math.round((coordinates.y - this.offset.y) / dragAndDropStep) * dragAndDropStep;
+                        this.dragCoordinates.y = Math.round((coordinates.y - this.offset.y) / dragAndDropStep) * dragAndDropStep;
                     }
-                    if(newCoordinates !== null) {
-                        ::this.setItemCoordinates(newCoordinates)
+                    if(this.dragCoordinates !== null) {
+                        ::this.setItemCoordinates(this.dragCoordinates)
                     }
                 }
             }

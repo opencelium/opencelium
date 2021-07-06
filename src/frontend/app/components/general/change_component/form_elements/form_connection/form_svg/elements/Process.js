@@ -25,12 +25,18 @@ import {setCurrentBusinessItem, setIsAssignMode} from "@actions/connection_overv
 import {AssignIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 import {SvgItem} from "@decorators/SvgItem";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
+import {BUSINESS_LABEL_MODE, COLOR_MODE} from "@classes/components/content/connection_overview_2/CSvg";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 
-function mapStateToProps(store){
-    const connectionOverview = store.get('connection_overview');
+function mapStateToProps(state){
+    const connectionOverview = state.get('connection_overview');
+    const {currentBusinessItem} = mapItemsToClasses(state);
     return{
         colorMode: connectionOverview.get('colorMode'),
         isAssignMode: connectionOverview.get('isAssignMode'),
+        businessLabelMode: connectionOverview.get('businessLabelMode'),
+        isVisibleBusinessLabelKeyPressed: connectionOverview.get('isVisibleBusinessLabelKeyPressed'),
+        currentBusinessItem,
     }
 }
 
@@ -41,24 +47,24 @@ class Process extends React.Component{
         super(props)
 
         this.state = {
-            rectStyle: {},
+            technicalRectClassName: '',
         }
     }
 
     onMouseOver(){
-        const {isAssignMode} = this.props;
-        if(isAssignMode) {
+        const {isAssignMode, process} = this.props;
+        if(isAssignMode && process instanceof CTechnicalProcess) {
             this.setState({
-                rectStyle: {stroke: '#79c883'}
+                technicalRectClassName: styles.process_assign,
             });
         }
     }
 
     onMouseLeave(){
-        const {isAssignMode} = this.props;
-        if(isAssignMode) {
+        const {isAssignMode, process} = this.props;
+        if(isAssignMode && process instanceof CTechnicalProcess) {
             this.setState({
-                rectStyle: {},
+                technicalRectClassName: '',
             });
         }
     }
@@ -97,10 +103,11 @@ class Process extends React.Component{
     }
 
     render(){
-        const {rectStyle} = this.state;
+        const {technicalRectClassName} = this.state;
         const {
-            process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isDisabled,
-            colorMode, readOnly, isAssignMode,
+            process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess,
+            isDisabled, colorMode, readOnly, isAssignMode, businessLabelMode, connection,
+            isVisibleBusinessLabelKeyPressed,
         } = this.props;
         const method = process.entity;
         const borderRadius = 10;
@@ -111,7 +118,28 @@ class Process extends React.Component{
         const assignX = process.width - 45;
         const assignY = 15;
         const methodName = method ? method.label ? method.label : method.name ? method.name : '' : '';
-        const label = methodName === '' ? isString(process.name) ? process.name : '' : methodName;
+        let label = methodName === '' ? isString(process.name) ? process.name : '' : methodName;
+        if(!isAssignMode && process instanceof CTechnicalProcess){
+            let businessItem = null;
+            switch (businessLabelMode){
+                case BUSINESS_LABEL_MODE.NOT_VISIBLE:
+                    break;
+                case BUSINESS_LABEL_MODE.VISIBLE:
+                case BUSINESS_LABEL_MODE.VISIBLE_ON_PRESS_KEY:
+                    if(businessLabelMode === BUSINESS_LABEL_MODE.VISIBLE_ON_PRESS_KEY){
+                        if(!isVisibleBusinessLabelKeyPressed){
+                            break;
+                        }
+                    }
+                    businessItem = connection ? connection.businessLayout.getItemByTechnicalItem(process) : null;
+                    if(businessItem){
+                        label = businessItem.name;
+                    } else{
+                        label = '';
+                    }
+                    break;
+            }
+        }
         const color = method ? method.color : '';
         let hasColor = color !== '';
         let shortLabel = label;
@@ -123,15 +151,14 @@ class Process extends React.Component{
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         return(
             <svg x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
-                <rect style={rectStyle} fill={colorMode !== 1 || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onClick={::this.onClick} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
-                      className={`${styles.process_rect} ${assignedStyle} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                <rect fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onClick={::this.onClick} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
+                      className={`${technicalRectClassName} ${styles.process_rect} ${assignedStyle} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                 />
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
                     {shortLabel}
                 </text>
-                <title>{label}</title>
-                {hasColor && colorMode === 0 && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
-                {hasColor && colorMode === 2 && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
+                {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
+                {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
                 {isCurrent && !readOnly &&
                     <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
                 }

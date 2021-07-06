@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {DETAILS_POSITION} from "../FormConnectionSvg";
-import ConfigurationsIcon from "@change_component/form_elements/form_connection/form_svg/details/ConfigurationsIcon";
+import ConfigurationsIcon from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ConfigurationsIcon";
 
 class SettingsPanel extends React.Component{
     constructor(props) {
