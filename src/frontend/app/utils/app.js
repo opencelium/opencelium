@@ -797,10 +797,16 @@ export function copyStringToClipboard(text) {
 /**
  * to get text from a clipboard
  */
-export async function getStringFromClipboard() {
+export function getStringFromClipboard() {
     try {
-        const text = await navigator.clipboard.readText();
-        return text;
+        var pasteTarget = document.createElement("div");
+        pasteTarget.contentEditable = true;
+        var actElem = document.activeElement.appendChild(pasteTarget).parentNode;
+        pasteTarget.focus();
+        document.execCommand("Paste", null, null);
+        var paste = pasteTarget.innerText;
+        actElem.removeChild(pasteTarget);
+        return paste;
     } catch (err) {
         console.error('Failed to read clipboard contents: ', err);
     }

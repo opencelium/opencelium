@@ -10,6 +10,7 @@ import {CreateIcon} from "@change_component/form_elements/form_connection/form_s
 import CCreateElementPanel from "@classes/components/content/connection_overview_2/CCreateElementPanel";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import {setFocusById} from "@utils/app";
 
 
 class CreateOperator extends React.Component{
@@ -40,20 +41,30 @@ class CreateOperator extends React.Component{
         });
     }
 
+    onKeyDown(e){
+        if(e.keyCode === 13){
+            this.create();
+        }
+    }
+
     create(){
         let {type} = this.state;
-        type = type.value;
-        const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
-        let connectorType = CCreateElementPanel.getConnectorType(this.props);
-        let operator = {type};
-        if (connectorType === CONNECTOR_FROM) {
-            connection.addFromConnectorOperator(operator, itemPosition);
+        if(type) {
+            type = type.value;
+            const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
+            let connectorType = CCreateElementPanel.getConnectorType(this.props);
+            let operator = {type};
+            if (connectorType === CONNECTOR_FROM) {
+                connection.addFromConnectorOperator(operator, itemPosition);
+            } else {
+                connection.addToConnectorOperator(operator, itemPosition);
+            }
+            updateConnection(connection);
+            setCreateElementPanelPosition({x: 0, y: 0});
+            setIsCreateElementPanelOpened(false);
         } else{
-            connection.addToConnectorOperator(operator, itemPosition);
+            setFocusById('new_operator_type');
         }
-        updateConnection(connection);
-        setCreateElementPanelPosition({x: 0, y: 0});
-        setIsCreateElementPanelOpened(false);
     }
 
     render(){
@@ -82,6 +93,7 @@ class CreateOperator extends React.Component{
                         name={'new_operator_type'}
                         value={type}
                         onChange={::this.changeType}
+                        onKeyDown={::this.onKeyDown}
                         options={typeSource}
                         closeOnSelect={false}
                         placeholder={'Type'}

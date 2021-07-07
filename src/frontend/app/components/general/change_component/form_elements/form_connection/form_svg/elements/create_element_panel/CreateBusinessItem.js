@@ -44,17 +44,27 @@ class CreateBusinessItem extends React.Component{
         });
     }
 
+    onKeyDown(e){
+        if(e.keyCode === 13){
+            this.create();
+        }
+    }
+
     create(){
         const {name} = this.state;
-        const {connection, updateConnection, setCreateElementPanelPosition, setIsCreateElementPanelOpened, setCurrentBusinessItem} = this.props;
-        const currentSvgItem = connection.businessLayout.getCurrentSvgItem();
-        const x = currentSvgItem ? currentSvgItem.x + currentSvgItem.width + 20 : 100;
-        const y = currentSvgItem ? currentSvgItem.y : 100;
-        connection.businessLayout.addItem({name, x, y});
-        updateConnection(connection);
-        setCurrentBusinessItem(connection.businessLayout.getCurrentSvgItem());
-        if(setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
-        if(setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
+        if(name) {
+            const {connection, updateConnection, setCreateElementPanelPosition, setIsCreateElementPanelOpened, setCurrentBusinessItem} = this.props;
+            const currentSvgItem = connection.businessLayout.getCurrentSvgItem();
+            const x = currentSvgItem ? currentSvgItem.x + currentSvgItem.width + 20 : 100;
+            const y = currentSvgItem ? currentSvgItem.y : 100;
+            connection.businessLayout.addItem({name, x, y});
+            updateConnection(connection);
+            setCurrentBusinessItem(connection.businessLayout.getCurrentSvgItem());
+            if (setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
+            if (setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
+        } else{
+            setFocusById('new_business_item_name');
+        }
     }
 
     render(){
@@ -70,7 +80,7 @@ class CreateBusinessItem extends React.Component{
         return(
             <React.Fragment>
                 <div className={styles.create_element_panel_for_item} style={panelItemStyles}>
-                    <Input id={'new_business_item_name'} theme={{input: styles.input_label}} onChange={::this.changeName} value={name} label={'Name'}/>
+                    <Input id={'new_business_item_name'} theme={{input: styles.input_label}} onChange={::this.changeName} onKeyDown={::this.onKeyDown} value={name} label={'Name'}/>
                 </div>
                 <Line style={afterItemLineStyles}/>
                 <CreateIcon create={::this.create} style={createIconStyles} isDisabled={isAddDisabled}/>

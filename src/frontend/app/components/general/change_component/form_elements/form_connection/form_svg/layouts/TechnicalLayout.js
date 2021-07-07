@@ -21,21 +21,22 @@ import Svg from "../layouts/Svg";
 import PropTypes from "prop-types";
 import SettingsPanel from "../layouts/SettingsPanel";
 import styles from "@themes/default/content/connections/connection_overview_2";
-import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
+import {setTechnicalLayoutLocation, setIsVisibleBusinessLabelKeyPressed} from "@actions/connection_overview_2/set";
 import {PANEL_LOCATION, SEPARATE_WINDOW} from "@utils/constants/app";
 import {NewWindowFeature} from "@decorators/NewWindowFeature";
 import {connectionOverviewTechnicalLayoutUrl} from "@utils/constants/url";
 import {setLS} from "@utils/LocalStorage";
-import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 import {
     HAS_LAYOUTS_SCALING,
-    LAYOUT_POSITION
 } from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
-import CConnection from "@classes/components/content/connection/CConnection";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import CSvg from "@classes/components/content/connection_overview_2/CSvg";
+import {
+    addHideBusinessLabelKeyNavigation,
+    addShowBusinessLabelKeyNavigation, removeHideBusinessLabelKeyNavigation,
+    removeShowBusinessLabelKeyNavigation
+} from "@utils/key_navigation";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -46,9 +47,11 @@ function mapStateToProps(state){
         currentBusinessItem,
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
+        businessLabelMode: connectionOverview.get('businessLabelMode'),
+        isVisibleBusinessLabelKeyPressed: connectionOverview.get('isVisibleBusinessLabelKeyPressed'),
         connection,
-            updateConnection,
-            isAssignMode: connectionOverview.get('isAssignMode'),
+        updateConnection,
+        isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
@@ -61,13 +64,23 @@ function setLocation(props, data){
     props.maximizeBusinessLayout();
 }
 
-@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation, setIsVisibleBusinessLabelKeyPressed})
 @NewWindowFeature({url: connectionOverviewTechnicalLayoutUrl, windowName: SEPARATE_WINDOW.CONNECTION_OVERVIEW.TECHNICAL_LAYOUT, setLocation, isLocationSameWindow})
 class TechnicalLayout extends React.Component{
 
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
+    }
+
+    componentDidMount() {
+        addShowBusinessLabelKeyNavigation(this);
+        addHideBusinessLabelKeyNavigation(this);
+    }
+
+    componentWillUnmount() {
+        removeShowBusinessLabelKeyNavigation(this);
+        removeHideBusinessLabelKeyNavigation(this);
     }
 
     setLocation(data){
@@ -121,51 +134,6 @@ class TechnicalLayout extends React.Component{
         }
     }
 
-    getItems(){
-        const {connection, currentBusinessItem, isAssignMode} = this.props;
-        const allItems = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
-        let items;
-        if(currentBusinessItem === null || isAssignMode) {
-            items = allItems;
-            if(isAssignMode){
-                const businessLayoutItems = connection.businessLayout.getItems();
-                for(let i = 0; i < businessLayoutItems.length; i++){
-                    if(businessLayoutItems[i].id !== currentBusinessItem.id){
-                        items = items.filter(item => businessLayoutItems[i].items.findIndex(technicalItem => technicalItem.id === item.id) === -1);
-                    }
-                }
-            }
-        } else{
-            items = currentBusinessItem.items;
-        }
-        let xIterator = 0;
-        let shiftXForSvgItems = 0;
-        let firstItemId = items.length > 0 ? items[0].id : '0';
-        let isFirstItem = true;
-        for(let i = 0; i < items.length; i++){
-            if(items[i].connectorType === CONNECTOR_FROM){
-                shiftXForSvgItems = connection.fromConnector.shiftXForSvgItems;
-            }
-            if(items[i].connectorType === CONNECTOR_TO && shiftXForSvgItems !== connection.toConnector.shiftXForSvgItems){
-                shiftXForSvgItems = connection.toConnector.shiftXForSvgItems;
-                xIterator = 0;
-                isFirstItem = true;
-            }
-            let currentSplitIndex = items[i].id.split('_');
-            if(currentSplitIndex[currentSplitIndex.length - 1] !== '0' && !isFirstItem){
-                xIterator += 200;
-            }
-            items[i].x = xIterator + shiftXForSvgItems;
-            items[i].y = 150 * (currentSplitIndex.length - 2 - (firstItemId.split('_').length - 2));
-            if(items[i].type && items.length !== 1){
-                items[i].x += 35;
-                items[i].y += 10;
-            }
-            isFirstItem = false;
-        }
-        return items;
-    }
-
     getPanelParams(allItems){
         const {connection, isAssignMode, currentBusinessItem} = this.props;
         let fromConnectorItems = [];
@@ -199,7 +167,7 @@ class TechnicalLayout extends React.Component{
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
-        const items = this.getItems();
+        const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
         const isSelectedBusinessItem = currentBusinessItem !== null;
         const isSelectedBusinessItemNotEmpty = isSelectedBusinessItem && currentBusinessItem.items.length !== 0;
@@ -248,11 +216,11 @@ class TechnicalLayout extends React.Component{
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isItemDraggable={false}
-                    isScalable={HAS_LAYOUTS_SCALING}
+                    isScalable={HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode)}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
                     deleteProcess={::this.deleteProcess}
-                    hasAssignCentralText={isSelectedBusinessItemEmpty}
+                    hasAssignCentralText={isSelectedBusinessItemEmpty && !isAssignMode}
                     isDraggable={!(isSelectedBusinessItemEmpty && !isAssignMode)}
                 />
             </div>

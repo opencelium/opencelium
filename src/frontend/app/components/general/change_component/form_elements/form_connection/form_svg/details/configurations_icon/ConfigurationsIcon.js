@@ -4,15 +4,20 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import Dialog from "@basic_components/Dialog";
 import {connect} from "react-redux";
-import {setColorMode} from "@actions/connection_overview_2/set";
+import {setPanelConfigurations} from "@actions/connection_overview_2/set";
+import ColorMode from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ColorMode";
+import BusinessLabelMode
+    from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/BusinessLabelMode";
 
 function mapStateToProps(store){
+    const connectionOverview = store.get('connection_overview');
     return{
-        colorMode: store.get('connection_overview').get('colorMode'),
+        colorMode: connectionOverview.get('colorMode'),
+        businessLabelMode: connectionOverview.get('businessLabelMode'),
     }
 }
 
-@connect(mapStateToProps, {setColorMode})
+@connect(mapStateToProps, {setPanelConfigurations})
 class ConfigurationsIcon extends React.Component{
     constructor(props) {
         super(props);
@@ -20,12 +25,17 @@ class ConfigurationsIcon extends React.Component{
         this.state = {
             isVisibleSettingsWindow: false,
             colorMode: props.colorMode,
+            businessLabelMode: props.businessLabelMode,
         };
     }
 
     toggleIsVisibleSettingsWindow(){
         this.setState({
             isVisibleSettingsWindow: !this.state.isVisibleSettingsWindow,
+        }, () => {
+            if(!this.state.isVisibleSettingsWindow){
+                setTimeout(() => document.activeElement.blur(), 500);
+            }
         })
     }
 
@@ -35,13 +45,21 @@ class ConfigurationsIcon extends React.Component{
         })
     }
 
+    onChangeBusinessLabelMode(businessLabelMode){
+        this.setState({
+            businessLabelMode,
+        })
+    }
+
     save(){
-        this.props.setColorMode(this.state.colorMode);
+        const {colorMode, businessLabelMode} = this.state;
+        const {setPanelConfigurations} = this.props;
+        setPanelConfigurations({colorMode, businessLabelMode});
         this.toggleIsVisibleSettingsWindow();
     }
 
     render(){
-        const {isVisibleSettingsWindow, colorMode} = this.state;
+        const {isVisibleSettingsWindow, colorMode, businessLabelMode} = this.state;
         const {disabled} = this.props;
         return(
             <React.Fragment>
@@ -62,26 +80,8 @@ class ConfigurationsIcon extends React.Component{
                     title={'Settings'}
                 >
                     <React.Fragment>
-                        <div className={styles.configurations_icon_process_color_title}>Position of the process color:</div>
-                        <div className={styles.configurations_icon_process_color_modes}>
-                            <div style={{borderColor: colorMode === 0 ? '#5369a8' : 'black'}} className={styles.configurations_icon_process_color_mode_1} onClick={() => ::this.onChangeColorMode(0)}>
-                                <div className={styles.label}/>
-                                <div className={styles.text}>
-                                    {'Process'}
-                                </div>
-                            </div>
-                            <div style={{borderColor: colorMode === 1 ? '#5369a8' : 'black'}} className={styles.configurations_icon_process_color_mode_2} onClick={() => ::this.onChangeColorMode(1)}>
-                                <div className={styles.text}>
-                                    {'Process'}
-                                </div>
-                            </div>
-                            <div style={{borderColor: colorMode === 2 ? '#5369a8' : 'black'}} className={styles.configurations_icon_process_color_mode_3} onClick={() => ::this.onChangeColorMode(2)}>
-                                <div className={styles.label}/>
-                                <div className={styles.text}>
-                                    {'Process'}
-                                </div>
-                            </div>
-                        </div>
+                        <ColorMode colorMode={colorMode} onChangeColorMode={::this.onChangeColorMode}/>
+                        <BusinessLabelMode businessLabelMode={businessLabelMode} onChangeBusinessLabelMode={::this.onChangeBusinessLabelMode}/>
                     </React.Fragment>
                 </Dialog>
             </React.Fragment>

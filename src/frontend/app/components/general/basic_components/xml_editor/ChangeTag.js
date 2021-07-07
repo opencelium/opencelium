@@ -44,6 +44,7 @@ class ChangeTag extends Component{
             name: props.tag.name ? props.tag.name : '',
             valueType: props.mode === 'add' ? TAG_VALUE_TYPES.ITEM : props.tag.valueType,
             text: isString(props.tag.tags) ? props.tag.tags : '',
+            clipboardText: '',
         };
         const {top, left} = findTopLeft(props.correspondedId);
         this.top = top;
@@ -78,6 +79,15 @@ class ChangeTag extends Component{
     }
 
     /**
+     * to change clipboard text
+     */
+    changeClipboardText(clipboardText){
+        this.setState({
+            clipboardText,
+        });
+    }
+
+    /**
      * to change text
      */
     changeText(text){
@@ -102,8 +112,8 @@ class ChangeTag extends Component{
      * to change tag (add or update)
      */
     change(){
-        const {name, valueType, text} = this.state;
-        const {translate, change, tag, close, mode, parent, ReferenceComponent} = this.props;
+        const {name, valueType, text, clipboardText} = this.state;
+        const {translate, change, tag, close, mode, parent, ReferenceComponent, xml} = this.props;
         let referenceToNewTag = null;
         if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
             if (name === '') {
@@ -128,31 +138,29 @@ class ChangeTag extends Component{
                 tags = isArray(tag.tags) ? tag.tags : [];
                 break;
             case TAG_VALUE_TYPES.CLIPBOARD:
-                clipboardPromise = getStringFromClipboard();
-                clipboardPromise.then(text => {
-                    try {
-                        clipboardXml = CXmlEditor.createXmlEditor(text);
-                        tags = clipboardXml ? clipboardXml.tag : [];
-                        tags.parent = parent;
-                        switch (mode) {
-                            case 'add':
-                                referenceToNewTag = parent.addTag(tags);
-                                break;
-                            case 'update':
-                                tag.updateTag(tags);
-                                break;
-                        }
-                        if(referenceToNewTag !== null){
-                            CXmlEditor.setLastEditElement(referenceToNewTag, referenceToNewTag.tags, referenceToNewTag.tags, mode);
-                        } else{
-                            CXmlEditor.setLastEditElement(tag, tag.tags, tag.tags, mode);
-                        }
-                        change();
-                        close();
-                    } catch(e){
-                        alert(translate('XML_EDITOR.TAG.VALIDATIONS.WRONG_FORMAT'));
+                try {
+                    clipboardXml = CXmlEditor.createXmlEditor(clipboardText);
+                    tags = clipboardXml ? clipboardXml.tag : [];
+                    tags.parent = parent;
+                    tags.xml = xml ? xml.xml : null;
+                    switch (mode) {
+                        case 'add':
+                            referenceToNewTag = parent.addTag(tags);
+                            break;
+                        case 'update':
+                            tag.updateTag(tags);
+                            break;
                     }
-                });
+                    if(referenceToNewTag !== null){
+                        CXmlEditor.setLastEditElement(referenceToNewTag, referenceToNewTag.tags, referenceToNewTag.tags, mode);
+                    } else{
+                        CXmlEditor.setLastEditElement(tag, tag.tags, tag.tags, mode);
+                    }
+                    change();
+                    close();
+                } catch(e){
+                    alert(translate('XML_EDITOR.TAG.VALIDATIONS.WRONG_FORMAT'));
+                }
                 return;
         }
         switch(mode){
@@ -181,12 +189,13 @@ class ChangeTag extends Component{
     }
 
     render(){
-        const {name, valueType, text} = this.state;
+        const {name, valueType, text, clipboardText} = this.state;
         const {translate, tag, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
                 <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
                 <TagType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>
+                {valueType === TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_clipboard_text`} rows={2} multiline={true} value={clipboardText} onChange={::this.changeClipboardText} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')} theme={{input: styles.change_tag_name}}/>}
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}
                 {valueType === TAG_VALUE_TYPES.TEXT && <Value translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.TAG.ADD') : translate('XML_EDITOR.TAG.UPDATE')}/>
@@ -197,6 +206,7 @@ class ChangeTag extends Component{
 }
 
 ChangeTag.propTypes = {
+    xml: PropTypes.instanceOf(CXmlEditor),
     parent: PropTypes.instanceOf(CTag),
     tag: PropTypes.instanceOf(CTag).isRequired,
     change: PropTypes.func.isRequired,

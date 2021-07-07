@@ -52,24 +52,34 @@ class CreateProcess extends React.Component{
         });
     }
 
+    onKeyDown(e){
+        if(e.keyCode === 13){
+            this.create();
+        }
+    }
+
     create(){
         let {name, label} = this.state;
-        name = name.value;
-        const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
-        let connectorType = CCreateElementPanel.getConnectorType(this.props);
-        const connector = connection.getConnectorByType(connectorType);
-        let method = {name, label};
-        let operation = connector.invoker.operations.find(o => o.name === name);
-        method.request = operation.request.getObject({bodyOnlyConvert: true});
-        method.response = operation.response.getObject({bodyOnlyConvert: true});
-        if (connectorType === CONNECTOR_FROM) {
-            connection.addFromConnectorMethod(method, itemPosition);
-        } else {
-            connection.addToConnectorMethod(method, itemPosition);
+        if(name) {
+            name = name.value;
+            const {connection, updateConnection, setCreateElementPanelPosition, itemPosition, setIsCreateElementPanelOpened} = this.props;
+            let connectorType = CCreateElementPanel.getConnectorType(this.props);
+            const connector = connection.getConnectorByType(connectorType);
+            let method = {name, label};
+            let operation = connector.invoker.operations.find(o => o.name === name);
+            method.request = operation.request.getObject({bodyOnlyConvert: true});
+            method.response = operation.response.getObject({bodyOnlyConvert: true});
+            if (connectorType === CONNECTOR_FROM) {
+                connection.addFromConnectorMethod(method, itemPosition);
+            } else {
+                connection.addToConnectorMethod(method, itemPosition);
+            }
+            updateConnection(connection);
+            if (setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
+            if (setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
+        } else{
+            setFocusById('new_request_name')
         }
-        updateConnection(connection);
-        if(setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
-        if(setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);
     }
 
     render(){
@@ -103,6 +113,7 @@ class CreateProcess extends React.Component{
                         name={'new_request_name'}
                         value={name}
                         onChange={::this.changeName}
+                        onKeyDown={::this.onKeyDown}
                         options={nameSource}
                         closeOnSelect={false}
                         placeholder={'Name'}
@@ -112,7 +123,7 @@ class CreateProcess extends React.Component{
                         className={styles.input_label}
                         required={true}
                     />
-                    <Input id={'new_request_label'} theme={{input: styles.input_label}} onChange={::this.changeLabel} value={label} label={'Label'}/>
+                    <Input id={'new_request_label'} theme={{input: styles.input_label}} onKeyDown={::this.onKeyDown} onChange={::this.changeLabel} value={label} label={'Label'}/>
                 </div>
                 <Line style={afterItemLineStyles}/>
                 <CreateIcon create={::this.create} style={createIconStyles} isDisabled={isAddDisabled}/>

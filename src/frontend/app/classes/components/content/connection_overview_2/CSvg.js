@@ -2,6 +2,19 @@ import {DETAILS_POSITION} from "@change_component/form_elements/form_connection/
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
+import CBusinessLayout from "@classes/components/content/connection_overview_2/CBusinessLayout";
+
+export const COLOR_MODE = {
+    RECTANGLE_TOP: 'RECTANGLE_TOP',
+    BACKGROUND: 'BACKGROUND_COLOR',
+    CIRCLE_LEFT_TOP: 'CIRCLE_LEFT_TOP',
+};
+
+export const BUSINESS_LABEL_MODE = {
+    NOT_VISIBLE: 'NOT_VISIBLE',
+    VISIBLE: 'VISIBLE',
+    VISIBLE_ON_PRESS_KEY: 'VISIBLE_ON_PRESS_KEY'
+};
 
 export default class CSvg{
 
@@ -51,7 +64,7 @@ export default class CSvg{
             }
     }
 
-    static isAssigned(technicalItem, businessProcess){
+    static isTechnicalItemAssigned(technicalItem, businessProcess){
         let isAssigned = false;
         if((technicalItem instanceof CTechnicalProcess || technicalItem instanceof CTechnicalOperator) && businessProcess instanceof CBusinessProcess){
             let index = businessProcess.items.findIndex(item => item.id === technicalItem.id);
@@ -60,5 +73,37 @@ export default class CSvg{
             }
         }
         return isAssigned;
+    }
+
+    static isTechnicalItemDisabled(svgItem, businessLayout, isAssignMode){
+        if(businessLayout instanceof CBusinessLayout) {
+            const currentBusinessSvgItem = businessLayout.getCurrentSvgItem();
+            if (isAssignMode) {
+                if (svgItem instanceof CTechnicalProcess || svgItem instanceof CTechnicalOperator) {
+                    let businessProcesses = businessLayout.getItems();
+                    for (let i = 0; i < businessProcesses.length; i++) {
+                        if (currentBusinessSvgItem && businessProcesses[i].id !== currentBusinessSvgItem.id) {
+                            for (let j = 0; j < businessProcesses[i].items.length; j++) {
+                                if (businessProcesses[i].items[j].id === svgItem.id) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if(currentBusinessSvgItem) {
+                    const currentBusinessSvgItemItems = currentBusinessSvgItem.items;
+                    return currentBusinessSvgItemItems.findIndex(item => item.id === svgItem.id) === -1;
+                }
+            }
+        }
+        return false;
+    }
+
+    static isBusinessItemDisabled(item, currentBusinessItem, isAssignMode){
+        if(isAssignMode && item instanceof CBusinessProcess && item.id !== currentBusinessItem.id){
+            return true;
+        }
     }
 }

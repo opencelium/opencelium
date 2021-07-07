@@ -45,7 +45,7 @@ class Tag extends Component{
             hasUpdateTagPopup: false,
             hasAddTagPopup: false,
             hasAddTagIcon: false,
-            addTag: CTag.createTag('', null, props.tag),
+            addTag: CTag.createTag('', null, props.tag, props.xml ? props.xml.xml : null),
             hasCopyToClipboardIcon: false,
         };
     }
@@ -243,7 +243,7 @@ class Tag extends Component{
     }
 
     renderSubTags(){
-        const {translate, tag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
+        const {translate, tag, update, readOnly, ReferenceComponent, onReferenceClick, xml} = this.props;
         if(tag.minimized){
             return <TooltipFontIcon
                 size={14}
@@ -274,6 +274,7 @@ class Tag extends Component{
             return <Tag
                 key={`${t.name}_${index}`}
                 translate={translate}
+                xml={xml}
                 tag={t}
                 update={update}
                 deleteTag={(e) => ::this.deleteTag(e, index)}
@@ -286,7 +287,7 @@ class Tag extends Component{
 
     render() {
         const {hasAddPropertyIcon, hasDeleteTagIcon, hasMinimizerIcon, hasAddPropertyPopup, property, hasUpdateTagPopup, hasAddTagPopup, addTag, hasAddTagIcon, hasCopyToClipboardIcon} = this.state;
-        const {translate, tag, isDeclaration, deleteTag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
+        const {xml, translate, tag, isDeclaration, deleteTag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         const hasMinimizer = !isString(tag.tags) && tag.tags !== null && hasMinimizerIcon;
         const isMinimized = tag.minimized;
         return(
@@ -296,8 +297,8 @@ class Tag extends Component{
                     <span onMouseOver={::this.showTagIcons} onMouseLeave={::this.hideTagIcons} className={styles.tag_open}>
                         <span className={styles.bracket}>{`<${isDeclaration ? '?' : ''}`}</span>
                         <span className={`${styles.name_open} ${!readOnly ? styles.name_open_hovered : ''}`} onClick={!readOnly ? ::this.showUpdateTagPopup : null} id={`${tag.uniqueIndex}_tag_name`}>{tag.name}</span>
-                        {hasUpdateTagPopup && !readOnly && <ChangeTag translate={translate} correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
-                        {hasAddTagPopup && !readOnly && <ChangeTag translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
+                        {hasUpdateTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
+                        {hasAddTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
                         {this.renderProperties()}
                         {hasAddPropertyIcon && !readOnly && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
                         {hasAddPropertyPopup && !readOnly && <ChangeProperty translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
@@ -325,6 +326,7 @@ class Tag extends Component{
 }
 
 Tag.propTypes = {
+    xml: PropTypes.instanceOf(CXmlEditor).isRequired,
     tag: PropTypes.instanceOf(CTag).isRequired,
     isDeclaration: PropTypes.bool,
     update: PropTypes.func.isRequired,

@@ -53,6 +53,10 @@ export default class CXmlEditor extends CBodyEditor{
                 if(isArray(xmlData.existingValue)){
                     for(let i = 0; i < xmlData.existingValue.length; i++){
                         let newValue = xmlData.mode === 'remove' ? '' : xmlData.existingValue[i].tags;
+                        let lastNamespaceName = xmlData.name;
+                        if(xmlData.arrayItemIndex !== -1){
+                            lastNamespaceName += `[${xmlData.arrayItemIndex}]`;
+                        }
                         CXmlEditor.updateFieldsBinding(
                             connection,
                             connector,
@@ -61,7 +65,7 @@ export default class CXmlEditor extends CBodyEditor{
                                 ...xmlData,
                                 existingValue: xmlData.existingValue[i].tags,
                                 newValue,
-                                namespaces: [...xmlData.namespaces, xmlData.name],
+                                namespaces: [...xmlData.namespaces, lastNamespaceName],
                                 name: xmlData.existingValue[i].name,
                                 item: xmlData.existingValue[i]
                             }
@@ -101,16 +105,38 @@ export default class CXmlEditor extends CBodyEditor{
         let namespaces = [];
         let parent = null;
         let name = '';
+        let prevItemIndex = '';
+        let arrayItemIndex = -1;
         if(item instanceof CTag || item instanceof CProperty) {
             name = item instanceof CProperty ? `@${item.name}` : item.name;
             if(item.parent) {
                 parent = item.parent;
+                if(item.isArray && parent){
+                    let arrayItem = parent.tags.filter(tag => tag.name === item.name);
+                    arrayItemIndex = arrayItem.findIndex(elem => elem.uniqueIndex === item.uniqueIndex);
+                }
                 while (true) {
+                    let namespaceItem = '';
+                    let prevItemArrayIndex = '';
                     if(!(parent instanceof CXmlEditor)){
-                        namespaces.unshift(parent instanceof CProperty ? `@${parent.name}` : parent.name);
+                        namespaceItem = parent instanceof CProperty ? `@${parent.name}` : parent.name;
+                        if(namespaces.length > 0 && prevItemIndex !== ''){
+                            let prevItem = parent.tags.find(tag => tag.uniqueIndex === prevItemIndex);
+                            if(prevItem){
+                                let prevItemArray = parent.tags.filter(tag => tag.name === prevItem.name);
+                                if(prevItem.isArray){
+                                    prevItemArrayIndex = prevItemArray.findIndex(p => p.uniqueIndex === prevItemIndex);
+                                    if(prevItemArrayIndex !== -1){
+                                        namespaces[0] = `${namespaces[0]}[${prevItemArrayIndex}]`
+                                    }
+                                }
+                            }
+                        }
+                        namespaces.unshift(namespaceItem);
                         if (!parent.parent) {
                             break;
                         } else {
+                            prevItemIndex = parent.uniqueIndex;
                             parent = parent.parent;
                         }
                     } else{
@@ -127,6 +153,7 @@ export default class CXmlEditor extends CBodyEditor{
                 name,
                 mode,
                 item,
+                arrayItemIndex,
             };
         }
     }
@@ -145,6 +172,7 @@ export default class CXmlEditor extends CBodyEditor{
                 existingValue: lastEditElement.prevValue,
                 item: lastEditElement.item,
                 mode: lastEditElement.mode,
+                arrayItemIndex: lastEditElement.arrayItemIndex,
             };
         }
         return null;
@@ -156,7 +184,7 @@ export default class CXmlEditor extends CBodyEditor{
         }
         for(let node in this._xml){
             if(node !== '_declaration'){
-                this._tag = CTag.createTag(node, this._xml[node], this);
+                this._tag = CTag.createTag(node, this._xml[node], this, this._xml);
                 break;
             }
         }
@@ -168,6 +196,10 @@ export default class CXmlEditor extends CBodyEditor{
 
     removeDeclaration(){
         this._declaration = null;
+    }
+
+    get xml(){
+        return this._xml;
     }
 
     get declaration(){
@@ -183,7 +215,7 @@ export default class CXmlEditor extends CBodyEditor{
     }
 
     addTag(name, tags){
-        this._tag = new CTag(name, tags, {}, this);
+        this._tag = new CTag(name, tags, {}, this, this._xml);
         return this._tag;
     }
 

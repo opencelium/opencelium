@@ -15,7 +15,43 @@
 
 @import "../../constants";
 
+$ITEM_HOVER_COLOR: #5d5b5b;
+$ITEM_ACTIVE_COLOR: #5b6c8d;
 $CURRENT_ITEM_FILL: #f4f4f4;
+$ASSIGN_COLOR: #79c883;
+$ASSIGNED_COLOR: #79c883;
+$ASSIGN_HOVER_COLOR: #9ee7a4;
+$ASSIGN_ACTIVE_COLOR: #5c9966;
+$SVG_DISABLED_HIGHLIGHT_COLOR: #499f54;
+$SVG_NOT_ASSIGNABLE_COLOR: #eee;
+$HIGHLIGHT_COLOR: #8a9dd7;
+
+.process_rect{
+  stroke: #000;
+  stroke-width: 2;
+}
+.process_rect:hover{
+  stroke: #5d5b5b;
+}
+.process_rect:active{
+  stroke: #5b6c8d;
+}
+.operator:hover{
+  polygon{
+    stroke: #5d5b5b;
+  }
+}
+.operator:active{
+  polygon{
+    stroke: #5b6c8d;
+  }
+}
+.process_color_rect{
+  pointer-events: none;
+}
+.process_color_circle{
+  pointer-events: none;
+}
 
 .connection_editor{
   height: calc(100vh - 121px);
@@ -118,8 +154,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .operator_loop_icon{
   cursor: grab;
 }
-.process{
-}
 .operator{
   text{
     font-size: $FONT_SIZE_SMALL;
@@ -129,7 +163,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   stroke: #5369a8 !important;
 }
 .highlighting{
-  stroke: $SVG_HIGHLIGHT_COLOR;
+  stroke: $HIGHLIGHT_COLOR;
 }
 .highlighted_process{
   rect {
@@ -137,14 +171,19 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   }
 }
 .assigned_process{
-  rect{
-    stroke: $SVG_ASSIGN_COLOR;
-  }
+  stroke: $ASSIGNED_COLOR;
+}
+.disabled_process{
+  opacity: 0.3;
 }
 .assigned_operator{
   polygon{
-    stroke: $SVG_ASSIGN_COLOR;
+    stroke: $ASSIGNED_COLOR;
   }
+}
+.disabled_operator{
+  opacity: 0.3;
+  cursor: default;
 }
 .current_operator{
   polygon {
@@ -163,14 +202,11 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .highlighted_marker{
   polygon {
     @extend .highlighting;
-    fill: $SVG_HIGHLIGHT_COLOR;
+    fill: $HIGHLIGHT_COLOR;
   }
 }
-.process_rect{
-  cursor: move;
-  stroke: #000;
-  //stroke: #00000021;
-  stroke-width: 2;
+.disabled_arrow{
+  opacity: 0.3;
 }
 .not_draggable{
   cursor: pointer;
@@ -182,6 +218,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   cursor: grabbing;
 }
 .process_label{
+  user-select: none;
   font-family: $FONT_FAMILY;
   pointer-events: none;
   font-size: $FONT_SIZE_MEDIUM;
@@ -205,15 +242,25 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   fill: white;
   cursor: pointer;
 }
+
 .process_assign{
-  cursor: pointer;
-  fill: $SVG_ASSIGN_COLOR;
+  stroke: $ASSIGN_COLOR !important;
 }
 .process_assign:hover{
-  fill: #8bcf93;
+  stroke: $ASSIGN_HOVER_COLOR !important;
 }
 .process_assign:active{
-  fill: #53ae5f;
+  stroke: $ASSIGN_ACTIVE_COLOR !important;
+}
+.assign_icon{
+  cursor: pointer;
+  fill: $ASSIGN_COLOR;
+}
+.assign_icon:hover{
+  fill: $ASSIGN_HOVER_COLOR;
+}
+.assign_icon:active{
+  fill: $ASSIGN_ACTIVE_COLOR;
 }
 .operator_delete{
   @extend .delete;
@@ -222,14 +269,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   text{
     pointer-events: none;
   }
-}
-.if_operator_rect{
-  @extend .process_rect;
-  text{
-    pointer-events: none;
-  }
-  transform: rotate(45deg);
-  transform-origin: center center;
 }
 
 .details{
@@ -457,10 +496,6 @@ $CURRENT_ITEM_FILL: #f4f4f4;
 .description{
   font-size: 14px;
   text-align: left;
-  .value{
-    font-family: $FONT_FAMILY;
-    padding-left: 3px;
-  }
   .label_input{
     padding: 0;
     width: 150px;
@@ -481,6 +516,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
     margin: 0 !important;
   }
   .col{
+    font-family: $FONT_FAMILY;
     padding: 0 !important;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -489,6 +525,10 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   .col_select{
     @extend .col;
     overflow: visible;
+  }
+  .value{
+    font-family: $FONT_FAMILY;
+    padding-left: 3px !important;
   }
   .entry_padding{
     padding-left: 15px !important;
@@ -639,7 +679,7 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   height: 100%;
   background: #b7afaf21;
 }
-.configurations_icon_process_color_title{
+.configurations_icon_title{
   margin-bottom: 10px;
 }
 
@@ -647,6 +687,10 @@ $CURRENT_ITEM_FILL: #f4f4f4;
   width: 430px;
   height: 80px;
   margin: 0 auto;
+}
+
+.configurations_icon_business_label_mode{
+  margin-top: 20px;
 }
 
 .configurations_icon_process_color_mode{

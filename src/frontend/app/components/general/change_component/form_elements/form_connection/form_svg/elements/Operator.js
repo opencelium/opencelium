@@ -21,6 +21,10 @@ import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorI
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
 import {connect} from "react-redux";
 import {setCurrentBusinessItem} from "@actions/connection_overview_2/set";
+import {IF_OPERATOR, LOOP_OPERATOR} from "@classes/components/content/connection/operator/COperatorItem";
+import Confirmation from "@components/general/app/Confirmation";
+import {SvgItem} from "@decorators/SvgItem";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 
 
 function mapStateToProps(store){
@@ -31,33 +35,50 @@ function mapStateToProps(store){
 }
 
 @connect(mapStateToProps, {setCurrentBusinessItem})
+@SvgItem(COperator)
 class Operator extends React.Component{
     constructor(props) {
         super(props)
+
+        this.state = {
+            polygonStyle: {},
+        }
+    }
+
+    onMouseOver(){
+        const {isAssignMode} = this.props;
+        if(isAssignMode) {
+            this.setState({
+                polygonStyle: {stroke: '#79c883'}
+            });
+        }
+    }
+
+    onMouseLeave(){
+        const {isAssignMode} = this.props;
+        if(isAssignMode) {
+            this.setState({
+                polygonStyle: {},
+            });
+        }
     }
 
     onDoubleClick(){
         this.props.setIsCreateElementPanelOpened(true);
     }
 
-    assignOperator(){
-        const {connection, updateConnection, operator, setCurrentBusinessItem} = this.props;
-        let currentBusinessItem = connection.businessLayout.getCurrentSvgItem();
-        if(currentBusinessItem.isExistItem(operator)){
-            currentBusinessItem.removeItem(operator);
+    onClick(){
+        const {isAssignMode, setCurrentItem, operator, isDisabled, assign, toggleReassignConfirmation} = this.props;
+        if(!isDisabled) {
+            if (isAssignMode) {
+                assign();
+            } else {
+                setCurrentItem(operator);
+            }
         } else{
-            currentBusinessItem.addItem(operator);
-        }
-        setCurrentBusinessItem(currentBusinessItem);
-        updateConnection(connection);
-    }
-
-    onMouseDown(){
-        const {isAssignMode, setCurrentItem, operator} = this.props;
-        if(isAssignMode){
-            this.assignOperator();
-        } else{
-            setCurrentItem(operator);
+            if (isAssignMode) {
+                toggleReassignConfirmation();
+            }
         }
     }
 
@@ -81,17 +102,19 @@ class Operator extends React.Component{
     }
 
     renderLoopOperator(){
-        const {operator, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isAssignMode} = this.props;
+        const {polygonStyle} = this.state;
+        const {operator, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isAssignMode, isDisabled} = this.props;
         const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         const closeX = 40;
         const closeY = 0;
         const assignStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_operator : '';
+        const isDisabledStyle = isDisabled ? styles.disabled_operator : '';
         return(
-            <svg x={operator.x} y={operator.y} className={`${isNotDraggable ? styles.not_draggable : ''} ${assignStyle}  ${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
-                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} points={points}/>
-                <svg className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} onMouseDown={::this.onMouseDown} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
-                    <path onMouseDown={::this.onMouseDown} d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                    <path onMouseDown={::this.onMouseDown} d="M0 0h24v24H0z" fill="none"/>
+            <svg x={operator.x} y={operator.y} className={`${isNotDraggable ? styles.not_draggable : ''} ${assignStyle} ${isDisabledStyle} ${styles.operator} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+                <polygon onDoubleClick={::this.onDoubleClick} onClick={::this.onClick} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} style={polygonStyle} className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} points={points}/>
+                <svg style={{pointerEvents: 'none'}} className={`${isNotDraggable ? styles.not_draggable : ''} ${styles.operator_loop_icon}`} fill="#000000" width="30px" height="30px" viewBox="0 0 24 24" x="15px" y="14px">
+                    <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                    <path d="M0 0h24v24H0z" fill="none"/>
                 </svg>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={'40'} y={'42'}>
                     {operator.entity.iterator}
@@ -107,16 +130,18 @@ class Operator extends React.Component{
     }
 
     renderIfOperator(){
-        const {operator, isNotDraggable, isCurrent, isHighlighted, readOnly, isAssignedToBusinessProcess, isAssignMode} = this.props;
+        const {polygonStyle} = this.state;
+        const {operator, isNotDraggable, isCurrent, isHighlighted, readOnly, isAssignedToBusinessProcess, isAssignMode, isDisabled} = this.props;
         const textX = '50%';
         const textY = '50%';
         const closeX = 40;
         const closeY = 0;
         const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         const assignStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_operator : '';
+        const isDisabledStyle = isDisabled ? styles.disabled_operator : '';
         return(
-            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${assignStyle}  ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
-                <polygon className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onDoubleClick={::this.onDoubleClick} onMouseDown={::this.onMouseDown} points={points}/>
+            <svg x={operator.x} y={operator.y} className={`${styles.operator} ${assignStyle} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={operator.width} height={operator.height}>
+                <polygon onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} style={polygonStyle} className={`${styles.operator_polygon} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`} onDoubleClick={::this.onDoubleClick} onClick={::this.onClick} points={points}/>
                 <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={textX} y={textY}>
                     {'if'}
                 </text>
@@ -130,13 +155,12 @@ class Operator extends React.Component{
 
     render(){
         const {type} = this.props;
-        switch(type){
-            case 'if':
-                return ::this.renderIfOperator();
-            case 'loop':
-                return ::this.renderLoopOperator();
-        }
-        return null;
+        return(
+            <React.Fragment>
+                {type === IF_OPERATOR && ::this.renderIfOperator()}
+                {type === LOOP_OPERATOR && ::this.renderLoopOperator()}
+            </React.Fragment>
+        );
     }
 }
 
@@ -148,12 +172,14 @@ Operator.propTypes = {
     setCurrentItem: PropTypes.func,
     isCurrent: PropTypes.bool,
     isHighlighted: PropTypes.bool,
+    isDisabled: PropTypes.bool,
 };
 
 Operator.defaultProps = {
     isNotDraggable: true,
     isCurrent: false,
     isHighlighted: false,
+    isDisabled: false,
 };
 
 export default Operator;

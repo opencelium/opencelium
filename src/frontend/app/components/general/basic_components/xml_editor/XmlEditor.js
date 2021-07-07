@@ -32,7 +32,7 @@ class XmlEditor extends Component{
         const xml = CXmlEditor.createXmlEditor(props.xml);
         this.state = {
             xml,
-            addTag: CTag.createTag('', null, xml),
+            addTag: CTag.createTag('', null, null, xml.xml),
             hasAddTagPopup: false,
         };
     }
@@ -103,7 +103,7 @@ class XmlEditor extends Component{
         return(
             <div className={`${styles.xml_editor} ${className}`}>
                 {xml && xml.declaration ?
-                    <Tag translate={translate} tag={xml.declaration} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration}
+                    <Tag translate={translate} tag={xml.declaration} xml={xml} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration}
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
@@ -112,14 +112,14 @@ class XmlEditor extends Component{
                     </React.Fragment>
                 }
                 {xml && xml.tag ?
-                    <Tag translate={translate} tag={xml.tag} update={::this.updateXml} deleteTag={::this.deleteCoreTag}
+                    <Tag translate={translate} tag={xml.tag} xml={xml} update={::this.updateXml} deleteTag={::this.deleteCoreTag}
                          readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                 :
                     <React.Fragment>
                         <TooltipFontIcon id={`xml_add_tag`} size={14} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
                         {
                             hasAddTagPopup && !readOnly &&
-                                <ChangeTag translate={translate} correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}
+                                <ChangeTag xml={xml} translate={translate} correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}
                                     mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
                         }
                     </React.Fragment>
