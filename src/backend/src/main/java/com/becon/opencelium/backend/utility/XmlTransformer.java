@@ -139,7 +139,7 @@ public class XmlTransformer {
         Map<String, Object> tag = (Map<String, Object>) object;
 
         Map<String, Object> attrsMap = null;
-        if (tag.get("__oc__attribute") instanceof Map) {
+        if (tag.get("__oc__attributes") instanceof Map) {
             attrsMap = (Map<String, Object>) tag.get("__oc__attributes");
         }
 
