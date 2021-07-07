@@ -115,6 +115,7 @@ class ChangeTag extends Component{
         const {name, valueType, text, clipboardText} = this.state;
         const {translate, change, tag, close, mode, parent, ReferenceComponent, xml} = this.props;
         let referenceToNewTag = null;
+        const prevValue = tag.tags;
         if(valueType !== TAG_VALUE_TYPES.CLIPBOARD) {
             if (name === '') {
                 alert(translate('XML_EDITOR.TAG.VALIDATIONS.REQUIRED_NAME'));
@@ -175,7 +176,7 @@ class ChangeTag extends Component{
             if(referenceToNewTag !== null){
                 CXmlEditor.setLastEditElement(referenceToNewTag, text, referenceToNewTag.tags, mode);
             } else{
-                CXmlEditor.setLastEditElement(tag, text, tag.tags, mode);
+                CXmlEditor.setLastEditElement(tag, text, prevValue, mode);
             }
         }
         if(ReferenceComponent) {
