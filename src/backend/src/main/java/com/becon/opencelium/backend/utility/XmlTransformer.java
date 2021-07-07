@@ -51,8 +51,8 @@ public class XmlTransformer {
             }
             Element element = document.createElement(tag.getKey());
 
-            if (tag.getValue() instanceof ArrayList) {
-                ArrayList<Map<String, Object>> arrayItems = (ArrayList) tag.getValue();
+            if (tag.getValue() instanceof List) {
+                List<Map<String, Object>> arrayItems = (List) tag.getValue();
 
                 for (Map<String, Object> item : arrayItems) {
                     element = document.createElement(tag.getKey());
@@ -86,16 +86,17 @@ public class XmlTransformer {
                 attrs.forEach(element::setAttributeNode);
             }
 
-            String ocValue = null;
-            if (tag.getValue() instanceof String) {
-                ocValue = getOcValue(tag.getValue());
-            }
+            String ocValue = getOcValue(tag.getValue());
+//            if (tag.getValue() instanceof String) {
+//                ocValue = getOcValue(tag.getValue());
+//            }
 
             if(ocValue != null) {
                 element.appendChild(document.createTextNode(ocValue));
                 elements.add(element);
                 continue;
             }
+
             List<Element> childElem = mapToNode((Map<String, Object>) tag.getValue());
             childElem.forEach(element::appendChild);
 
@@ -116,7 +117,7 @@ public class XmlTransformer {
 
         Map<String, Object> tag = (Map<String, Object>) object;
 
-        if (tag.get("__oc__value") == null) {
+        if (!tag.containsKey("__oc__value") || tag.get("__oc__value") == null || tag.get("__oc__value") instanceof Map) {
             return null;
         }
 

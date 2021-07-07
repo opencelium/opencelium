@@ -139,9 +139,6 @@ public class InvokerRequestBuilder{
                     .setSSLContext(sslContext)
                     .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                     .build();
-
-
-
             return httpClient;
         } catch (Exception e) {
             throw new RuntimeException(e);

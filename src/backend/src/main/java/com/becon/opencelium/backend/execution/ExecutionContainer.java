@@ -67,7 +67,7 @@ public class ExecutionContainer {
 
     public Object getValueFromEnhancementData(FieldNode outgoingFiled){
         Enhancement enhancement = enhancementService.findByFieldId(outgoingFiled.getId());
-        List<FieldNode> incomingFields = fieldNodeService.findIncoming(outgoingFiled.getId());
+//        List<FieldNode> incomingFields = fieldNodeService.findIncoming(outgoingFiled.getId());
 
         // var_result : #456osdk.(response).success.result[];
         Map<String, String> enhVars = parseExpertVars(enhancement.getExpertVar());
@@ -82,7 +82,10 @@ public class ExecutionContainer {
 
         MethodNode outMethod = methodNodeService.getByFieldNodeId(outgoingFiled.getId())
                 .orElseThrow(() -> new RuntimeException("Method not found"));
-        String outFieldPath = fieldNodeService.getPath(outMethod, outgoingFiled);
+//        String outFieldPath = fieldNodeService.getPath(outMethod, outgoingFiled);
+        String outFieldPath = enhVars.entrySet().stream()
+                .filter(e -> e.getValue().equals("RESULT_VAR"))
+                .map(e -> e.getKey()).findFirst().get();
         String outFieldValue = fieldNodeService.getFieldValue(outgoingFiled);
         outFieldPath = outFieldPath.replace("__oc__attributes.", "@").replace(".__oc__value", "");
         expertVarProperties.put(outFieldPath, outFieldValue);
