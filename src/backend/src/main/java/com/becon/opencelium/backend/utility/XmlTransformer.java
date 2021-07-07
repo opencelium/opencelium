@@ -137,7 +137,12 @@ public class XmlTransformer {
             throw new RuntimeException("Attributes is not an object");
         }
         Map<String, Object> tag = (Map<String, Object>) object;
-        Map<String, Object> attrsMap = (Map<String, Object>) tag.get("__oc__attributes");
+
+        Map<String, Object> attrsMap = null;
+        if (tag.get("__oc__attributes") instanceof Map) {
+            attrsMap = (Map<String, Object>) tag.get("__oc__attributes");
+        }
+
         //TODO
         if (attrsMap == null) {
             return null;
