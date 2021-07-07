@@ -81,6 +81,9 @@ export default class CTag{
         newTag.tags = tags;
         newTag.parent = parent;
         newTag.xml = xml;
+        if(parent instanceof CXmlEditor){
+            newTag.updateIsArrayItem();
+        }
         return newTag;
     }
 
@@ -102,6 +105,9 @@ export default class CTag{
                 if(xmlItem.hasOwnProperty(path[i])){
                     xmlItem = xmlItem[path[i]];
                 } else{
+                    if(isArray(xmlItem) && xmlItem.length > 0){
+                        xmlItem = xmlItem[0][path[i]];
+                    }
                     break;
                 }
             }
@@ -110,6 +116,15 @@ export default class CTag{
             }
         }
         return result;
+    }
+
+    updateIsArrayItem(){
+        this._isArray = this.getIsArray();
+        if(isArray(this._tags)) {
+            for (let i = 0; i < this._tags.length; i++) {
+                this._tags[i].updateIsArrayItem();
+            }
+        }
     }
 
     convertProperties(properties){
