@@ -14,51 +14,31 @@
  */
 
 @import '../constants';
-/*===== VARIABLES CSS =====*/
-:root{
-  --nav-width: 92px;
 
-  /*===== Colors =====*/
-  --first-color: rgb(0, 172, 194);
-  --bg-color: rgb(1, 46, 85);
-  --sub-color: #fff;
-  --white-color: #FFF;
+$NAVIGATION_WIDTH: 92px;
+$HIGHLIGHT_MENU_COLOR: #00ACC2;
+$BACKGROUND_MENU_COLOR: #012E55;
+$MENU_COLOR: #eee;
 
-  /*===== Fuente y tipografia =====*/
-  --body-font: $FONT_FAMILY;
-  --normal-font-size: 1rem;
-  --small-font-size: .875rem;
-
-  /*===== z index =====*/
-  --z-fixed: 100;
-}
-
-
-/*===== BASE =====*/
 .html_body{
   position: relative;
   margin: 0;
   padding: 2rem 0 0 6.75rem;
-  font-family: var(--body-font);
-  font-size: var(--normal-font-size);
   transition: .5s;
 }
-
-/*===== l NAV =====*/
 .navbar{
   position: fixed;
   top: 0;
   left: 0;
-  width: var(--nav-width);
+  width: $NAVIGATION_WIDTH;
   height: 100vh;
-  background-color: var(--bg-color);
-  color: var(--white-color);
+  background-color: $BACKGROUND_MENU_COLOR;
+  color: $MENU_COLOR;
   padding: 1.5rem 1.5rem 2rem;
   transition: .5s;
-  z-index: var(--z-fixed);
+  z-index: 100;
 }
 
-/*===== NAV =====*/
 .main_menu_nav{
   height: 100%;
   display: flex;
@@ -88,10 +68,11 @@
   margin-bottom: 40px;
 }
 .nav_logo_text{
-  color: var(--white-color);
+  color: $MENU_COLOR;
   font-weight: 600;
   cursor: default;
   margin-bottom: 40px;
+  font-size: $FONT_SIZE_MEDIUM
 }
 
 .nav_link{
@@ -100,7 +81,7 @@
   align-items: center;
   column-gap: .75rem;
   padding: .75rem;
-  color: var(--white-color);
+  color: $MENU_COLOR;
   border-radius: .5rem;
   margin-bottom: 1rem;
   transition: .3s;
@@ -108,7 +89,7 @@
 }
 .nav_link:hover{
   color: white;
-  background-color: var(--first-color);
+  background-color: $HIGHLIGHT_MENU_COLOR;
   text-decoration: none;
 }
 .nav_icon{
@@ -116,25 +97,20 @@
 }
 .nav_name{
   margin-left: 5px;
-  font-size: var(--small-font-size);
+  font-size: $FONT_SIZE_SMALL;
 }
 
-/*Expander menu*/
 .expander{
-  width: calc(var(--nav-width) + 9.25rem);
+  width: calc(#{$NAVIGATION_WIDTH} + 9.25rem);
 }
 
-/*Add padding body*/
 .body_pd{
   padding: 2rem 0 0 16rem;
 }
-
-/*Active links menu*/
 .active{
-  background-color: var(--first-color);
+  background-color: $HIGHLIGHT_MENU_COLOR;
 }
 
-/*===== COLLAPSE =====*/
 .main_menu_collapse{
   grid-template-columns: 20px max-content 1fr;
 }
@@ -155,20 +131,18 @@
 }
 .main_menu_collapse_sublink{
   display: block;
-  color: var(--sub-color);
-  font-size: var(--small-font-size);
+  color: $MENU_COLOR;
+  font-size: $FONT_SIZE_SMALL;
 }
 .main_menu_collapse_sublink:hover{
-  color: var(--white-color);
+  color: $MENU_COLOR;
   text-decoration: underline;
 }
 
-/*Show collapse*/
 .show_sub_links{
   display: block;
 }
 
-/*Rotate icon*/
 .rotate{
   transform: rotate(180deg);
 }

@@ -18,7 +18,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import {Roles} from '@utils/constants/app';
 
-import {componentAppear, getThemeClass} from "@utils/app";
+import {componentAppear} from "@utils/app";
 import styles from '@themes/default/layout/menu.scss';
 import ConnectorsMenuItem from "@components/layout/menu/ConnectorsMenuItem";
 import AdminMenuItem from "@components/layout/menu/AdminMenuItem";

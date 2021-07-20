@@ -135,8 +135,8 @@ class Layout extends Component{
 
     renderHeader(){
         if(this.props.isAuth && hasHeader(this.props)){
-            //return <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
-            return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
+            return <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
+            //return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
         }
         return null;
     }
