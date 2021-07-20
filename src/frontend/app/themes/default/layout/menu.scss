@@ -19,9 +19,9 @@
   --nav-width: 92px;
 
   /*===== Colors =====*/
-  --first-color: #0C5DF4;
-  --bg-color: #12192C;
-  --sub-color: #B6CEFC;
+  --first-color: rgb(0, 172, 194);
+  --bg-color: rgb(1, 46, 85);
+  --sub-color: #fff;
   --white-color: #FFF;
 
   /*===== Fuente y tipografia =====*/
@@ -71,16 +71,27 @@
   grid-template-columns: max-content max-content;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 .nav_toggle{
   font-size: 1.25rem;
   padding: .75rem;
   cursor: pointer;
 }
-.nav_logo{
+.nav_toggle:hover{
+  color: #6ee2f0;
+}
+.logo_image{
+  width: 2.5rem;
+  height: auto;
+  margin-left: 4px;
+  margin-bottom: 40px;
+}
+.nav_logo_text{
   color: var(--white-color);
   font-weight: 600;
+  cursor: default;
+  margin-bottom: 40px;
 }
 
 .nav_link{
@@ -129,9 +140,12 @@
 }
 .main_menu_collapse_link{
   justify-self: flex-end;
-  transition: .5s;
+  transition: all .5s, font-weight 0.1s;
   vertical-align: text-bottom;
   float: right;
+}
+.main_menu_collapse_link:hover{
+  font-weight: 600;
 }
 .main_menu_collapse_menu{
   margin: 0;
@@ -146,7 +160,7 @@
 }
 .main_menu_collapse_sublink:hover{
   color: var(--white-color);
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 /*Show collapse*/

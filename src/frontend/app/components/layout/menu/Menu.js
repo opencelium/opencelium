@@ -25,8 +25,8 @@ import AdminMenuItem from "@components/layout/menu/AdminMenuItem";
 import FontIcon from "@basic_components/FontIcon";
 import ConnectionsMenuItem from "@components/layout/menu/ConnectionsMenuItem";
 import SchedulesMenuItem from "@components/layout/menu/SchedulesMenuItem";
-import {MenuLink} from "@components/layout/menu/MenuLink";
 import LogoutMenuItem from "@components/layout/menu/LogoutMenuItem";
+import LogoOcWhiteImagePath from "@images/logo_oc_white.png";
 
 
 function mapStateToProps(state){
@@ -55,6 +55,7 @@ class Menu extends Component{
             visible: !props.fromLogin,
             isExpanded: false,
             currentPath: props.router.getCurrentLocation().pathname,
+            isMouseOver: false,
         };
     }
 
@@ -73,6 +74,18 @@ class Menu extends Component{
                 currentPath: pathName,
             });
         }
+    }
+
+    setMouseOver(){
+        this.setState({
+            isMouseOver: true,
+        });
+    }
+
+    setMouseLeave(){
+        this.setState({
+            isMouseOver: false,
+        });
     }
 
     showComponent(){
@@ -104,7 +117,8 @@ class Menu extends Component{
     }
 
     render(){
-        const {isExpanded, visible} = this.state;
+        const {visible, isMouseOver} = this.state;
+        let isExpanded = isMouseOver ? true : this.state.isExpanded;
         if(!visible){
             return null;
         }
@@ -113,12 +127,15 @@ class Menu extends Component{
             navbarClassName += ` ${styles.expander}`;
         }
         return(
-            <div className={navbarClassName} id="navbar">
+            <div className={navbarClassName} id="navbar" onMouseOver={::this.setMouseOver} onMouseLeave={::this.setMouseLeave}>
                 <nav className={styles.main_menu_nav}>
                     <div>
                         <div className={styles.nav_brand}>
-                            <FontIcon className={styles.nav_toggle} value={'menu'} onClick={::this.onToggleMenu}/>
-                            <a href="#" className={styles.nav_logo}>OpenCelium</a>
+                            <img className={styles.logo_image} src={LogoOcWhiteImagePath} alt={'OpenCelium'}/>
+                            <span className={styles.nav_logo_text}>
+                                <span>{'OpenCelium'}</span>
+                            </span>
+                            <FontIcon className={styles.nav_toggle} value={this.state.isExpanded ? 'menu_open' : 'menu'} onClick={::this.onToggleMenu}/>
                         </div>
                         <div>
                             <ConnectorsMenuItem/>
