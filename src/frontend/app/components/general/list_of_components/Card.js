@@ -298,7 +298,7 @@ class ListCard extends Component{
                 <div className={styles[classNames.card_actions]}>
                     {hasView && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
                     {hasUpdate && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/>}
-                    <CardButton hasTab={false} className={`${currentCardStyle}`} index={index} text={exceptionLabel} permission={permissions.READ}/>
+                    {/*<CardButton hasTab={false} className={`${currentCardStyle}`} index={index} text={exceptionLabel} permission={permissions.READ}/>*/}
                 </div>
             );
         }

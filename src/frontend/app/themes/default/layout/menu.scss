@@ -15,15 +15,16 @@
 
 @import '../constants';
 
-$NAVIGATION_WIDTH: 92px;
+$NAVIGATION_WIDTH: 95px;
 $HIGHLIGHT_MENU_COLOR: #00ACC2;
 $BACKGROUND_MENU_COLOR: #012E55;
 $MENU_COLOR: #eee;
 
 .html_body{
+  background: #eee;
   position: relative;
   margin: 0;
-  padding: 2rem 0 0 6.75rem;
+  padding: 2rem 2rem 0 7.75rem;
   transition: .5s;
 }
 .navbar{
@@ -105,7 +106,7 @@ $MENU_COLOR: #eee;
 }
 
 .body_pd{
-  padding: 2rem 0 0 16rem;
+  padding: 2rem 2rem 0 17rem;
 }
 .active{
   background-color: $HIGHLIGHT_MENU_COLOR;

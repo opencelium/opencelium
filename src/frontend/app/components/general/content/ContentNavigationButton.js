@@ -99,13 +99,11 @@ class ContentNavigationButton extends Component{
             title = ::this.renderTitle();
         }
         return (
-            <Row className={className}>
-                <Col>
-                    <Button authUser={authUser} icon={icon} onClick={::this.click} className={buttonClassname} id={formatHtmlId(`button_${title}`)}>
-                        {title}
-                    </Button>
-                </Col>
-            </Row>
+            <div className={className}>
+                <Button authUser={authUser} icon={icon} onClick={::this.click} className={buttonClassname} id={formatHtmlId(`button_${title}`)}>
+                    {title}
+                </Button>
+            </div>
         );
     }
 }

@@ -23,7 +23,7 @@ import PrevPage from "./PrevPage";
 import Pages from "./Pages";
 import NextPage from "./NextPage";
 
-export const ENTITIES_PRO_PAGE = 4;
+export const ENTITIES_PRO_PAGE = 12;
 
 
 /**
@@ -112,9 +112,9 @@ class Pagination extends Component{
             return null;
         }
         return (
-            <Row className={styles.row}>
+            <div className={styles.row}>
                 <div className={styles.container}>
-                    <BootPagination className='justify-content-center'>
+                    <BootPagination className='justify-content-left'>
                         {this.renderPrev()}
                             {/*<span className={styles.pagination}>*/}
                                 <Pages current={current} total={total} link={link} loadPage={loadPage}/>
@@ -122,7 +122,7 @@ class Pagination extends Component{
                         {this.renderNext()}
                     </BootPagination>
                 </div>
-            </Row>
+            </div>
         );
     }
 }

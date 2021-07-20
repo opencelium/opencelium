@@ -48,6 +48,29 @@
     color: #6eb9f7;
   }
 }
+
+
+.turquoise_theme{
+  >span{
+    color: #00ACC2;
+    transition: background 0.8s;
+  }
+  >span:hover {
+    color: #03c1d9;
+  }
+  >span:active {
+    color: #69dee3;
+    background-size: 100%;
+    transition: background 0s;
+  }
+}
+.turquoise_theme:focus-within{
+  outline: none !important;
+  >span {
+    color: #69dee3;
+  }
+}
+
 .dark_theme{
   >span{
     color: #000;

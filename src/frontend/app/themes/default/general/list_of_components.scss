@@ -15,12 +15,61 @@
 
 @import '../constants';
 
+.cards_list{
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.cards_item_grid_view{
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+.cards_item_grid_view_5{
+  @extend .cards_item_grid_view;
+  width: 19%;
+  margin-right: 1.25%;
+}
+
+.cards_item_grid_view_5:nth-child(5n){
+  margin-right: 0;
+}
+
+.cards_item_grid_view_4{
+  @extend .cards_item_grid_view;
+  width: 24%;
+  margin-right: 1.33%;
+}
+
+.cards_item_grid_view_4:nth-child(4n){
+  margin-right: 0;
+}
+
+.cards_item_grid_view_3{
+  @extend .cards_item_grid_view;
+  width: 32.5%;
+  margin-right: 1.25%;
+}
+
+.cards_item_grid_view_3:nth-child(3n){
+  margin-right: 0;
+}
+
+.cards_item_grid_view_2{
+  @extend .cards_item_grid_view;
+  width: 49%;
+  margin-right: 2%;
+}
+
+.cards_item_grid_view_2:nth-child(2n){
+  margin-right: 0;
+}
+
 .card{
+  width: auto;
+  margin-right: 2px;
   font-family: $FONT_FAMILY;
-  min-height: 150px;
-  margin-bottom: 15px;
-  padding: 10px;
-  background: #eeeeee;
+  padding: 1vw;
+  background: #fff;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
@@ -82,14 +131,13 @@
 
 .top_section{
   width: 100%;
-  height: 70px;
+  height: 5vw;
 }
 
 .card_title{
   font-family: $FONT_FAMILY;
-  padding-top: 10px;
   float:left;
-  width: 65%;
+  width: 100%;
   padding-left: 8px;
 }
 
@@ -99,7 +147,7 @@
   white-space: nowrap;
   max-width: 100%;
   font-family: $FONT_FAMILY;
-  font-size: $FONT_SIZE_MEDIUM;
+  font-size: 2vw;
   color: #000000;
   font-weight: normal;
 }
@@ -139,8 +187,10 @@
 }
 
 .card_actions{
+  overflow: hidden;
+  display: flex;
   font-family: $FONT_FAMILY;
-  margin-top: 50px;
+  margin-top: 0.5vw;
 }
 
 .button {
@@ -151,7 +201,7 @@
   color: #000000;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_SMALL;
-  padding: 6px 8px;
+  padding: .5vw;
   text-decoration: none;
   text-shadow: 0 1px 0 #ffffff;
 }
@@ -166,7 +216,7 @@
 .button_delete{
   font-family: $FONT_FAMILY;
   color: $ERROR_COLOR;
-  float: right;
+  margin-left: auto;
 }
 
 .only_button_delete{
@@ -177,6 +227,20 @@
 .add_button{
   font-family: $FONT_FAMILY;
   margin-top: 20px;
+  button{
+    span:nth-child(2){
+
+    }
+  }
+}
+@media only screen and (max-width: 600px)  {
+  .add_button{
+    button{
+      span:nth-child(2){
+        display: none;
+      }
+    }
+  }
 }
 
 .update_button{
@@ -242,6 +306,7 @@
   background: transparent;
   border: none;
   height: 100%;
+  font-size: 1.1vw;
 }
 .card_button:focus{
   text-decoration: underline;
@@ -264,4 +329,34 @@
   animation-fill-mode: forwards;
   animation-timing-function:ease-in;
   outline: none !important;
+}
+
+.list_header{
+  text-align: left;
+}
+
+.search_field{
+  width: 200px;
+  margin-left: 10px;
+}
+
+.list_view_icon{
+  margin-left: auto;
+  align-self: center;
+  display: grid;
+  grid-template-columns: max-content max-content;
+}
+.grid_dropdown_menu{
+  min-width: 100px;
+  top: -7px;
+  left: -100px;
+}
+.grid_menu_item{
+  display: flex;
+  margin-bottom: 5px;
+  cursor: pointer;
+  padding: 2px;
+}
+.grid_menu_item:hover{
+  background: #eee;
 }
