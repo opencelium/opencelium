@@ -61,7 +61,7 @@ class ContentHeader extends Component{
 
     render(){
         const {authUser} = this.props;
-        let {header} = this.props;
+        let {header, className} = this.props;
         let title = header;
         let hasHelp = false;
         if(header.hasOwnProperty('title')){
@@ -73,7 +73,7 @@ class ContentHeader extends Component{
         let classNames = ['header'];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <div className={`${styles[classNames.header]}`}>
+            <div className={`${styles[classNames.header]} ${className}`}>
                 {this.renderBreadcrumbs()}
                 {title}
                 {
@@ -86,6 +86,10 @@ class ContentHeader extends Component{
             </div>
         );
     }
+}
+
+ContentHeader.defaultProps = {
+    className: '',
 }
 
 export default ContentHeader;

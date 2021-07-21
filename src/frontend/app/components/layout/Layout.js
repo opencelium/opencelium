@@ -34,6 +34,7 @@ import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
 import {getLS} from "@utils/LocalStorage";
 import {API_REQUEST_STATE, TEST} from "@utils/constants/app";
 import {hasHeader} from "@utils/app";
+import Menu from "@components/layout/menu/Menu";
 
 let checkTokenInterval;
 
@@ -134,12 +135,14 @@ class Layout extends Component{
 
     renderHeader(){
         if(this.props.isAuth && hasHeader(this.props)){
-            return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
+            return <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
+            //return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
         }
         return null;
     }
 
     renderFooter(){
+        return null;
         if(this.props.isAuth){
             return <Footer/>;
         }

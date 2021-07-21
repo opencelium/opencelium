@@ -52,14 +52,18 @@ export function LayoutComponent(componentSingleName = '', componentPluralName = 
 
                 render(){
                     const {children, isComponentExternalInChangeContent} = this.props;
+                    let containerStyles = {};
+                    if(isComponentExternalInChangeContent){
+                        containerStyles.position = 'relative';
+                    }
                     return (
-                        <Container style={isComponentExternalInChangeContent ? {position: 'initial'} : {}}>
+                        <div style={containerStyles}>
                             <Suspense fallback={(<Loading/>)}>
                                 <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: componentSingleName}}>
                                     {children}
                                 </ComponentError>
                             </Suspense>
-                        </Container>
+                        </div>
                     );
                 }
             }

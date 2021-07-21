@@ -17,6 +17,8 @@ import React, {Component} from 'react';
 
 import ContentHeader from '../content/ContentHeader';
 
+import styles from '@themes/default/general/list_of_components.scss';
+
 /**
  * Header for List of Components
  */
@@ -29,7 +31,7 @@ class ListHeader extends Component{
     render(){
         const {header} = this.props;
         return (
-            <ContentHeader header={header}/>
+            <ContentHeader header={header} className={styles.list_header}/>
         );
     }
 }

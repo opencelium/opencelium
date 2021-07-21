@@ -54,6 +54,8 @@ import {
 } from "@utils/app";
 import styles from '@themes/default/general/list_of_components.scss';
 import Input from "@basic_components/inputs/Input";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import GridViewMenu from "@components/general/list_of_components/GridViewMenu";
 
 
 function mapStateToProps(state){
@@ -76,6 +78,7 @@ class List extends Component{
             keyNavigateType: '',
             isPressedAddEntity: false,
             searchValue: '',
+            gridViewType: '4',
         };
     }
 
@@ -142,6 +145,12 @@ class List extends Component{
                 break;
             }
         }
+    }
+
+    setGridViewType(type){
+        this.setState({
+            gridViewType: `${type}`,
+        });
     }
 
     changeSearchValue(searchValue){
@@ -262,23 +271,49 @@ class List extends Component{
 
     render(){
         const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems} = this.props;
-        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue} = this.state;
+        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType} = this.state;
         let {page, translations} = this.props;
-        let classNames = ['empty_list'];
+        let classNames = ['empty_list', 'search_field'];
         classNames = getThemeClass({classNames, authUser, styles});
         page.entitiesLength = this.searchEntities().length;
         return(
             <Row id={'app_list'}>
-                <Col xl={8} lg={10} md={12} sm={12} offset={{ xl: 2, lg: 1 }} >
-                    <Container style={{...containerStyles, marginBottom: '70px'}}>
+                <Col sm={12}>
+                    <div style={{...containerStyles, marginBottom: '70px'}}>
                         <ListHeader header={translations.header}/>
-                        {
-                            entities.length > 0 && !noSearchField &&
-                                <div className={'tour-step-search-1'}>
+                        <div style={{display: 'flex'}}>
+                            {
+                                mapEntity.hasOwnProperty('getAddLink') ?
+                                    <AddButton
+                                        hasTour={translations.header.hasOwnProperty('onHelpClick')}
+                                        title={<span>{translations.add_button}</span>}
+                                        link={mapEntity.getAddLink}
+                                        isPressedAddEntity={isPressedAddEntity}
+                                        permission={permissions.CREATE}
+                                        authUser={authUser}
+                                    />
+                                    :
+                                    mapEntity.hasOwnProperty('AddButton') &&
+                                    <mapEntity.AddButton/>
+                            }
+                            {
+                                mapEntity.hasOwnProperty('AdditionalButton') && mapEntity.AdditionalButton
+                            }
+                            {
+                                entities.length > 0 && !noSearchField &&
+                                <div className={`${styles[classNames.search_field]} tour-step-search-1`}>
                                     <Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'} id={'search_field'}/>
                                 </div>
-                        }
-                        <Row>
+                            }
+                            {
+                                entities.length > 0 &&
+                                    <span className={styles.list_view_icon}>
+                                        <TooltipFontIcon tooltip={'List View'} value={'view_list'} isButton={true} blueTheme/>
+                                        <GridViewMenu setGridViewType={::this.setGridViewType}/>
+                                    </span>
+                            }
+                        </div>
+                        <div className={styles.cards_list}>
                             {
                                 currentPageItems.length > 0
                                     ?
@@ -297,7 +332,7 @@ class List extends Component{
                                                 isSelectedCard = true;
                                             }
                                             return (
-                                                <Col xs={12} sm={6} key={key}>
+                                                <div key={key} className={styles[`cards_item_grid_view_${gridViewType}`]}>
                                                     <CardError>
                                                         <Card
                                                             hasTour={translations.header.hasOwnProperty('onHelpClick') && (key === 0 || key === 1)}
@@ -323,7 +358,7 @@ class List extends Component{
                                                             isButton={onCardClickLink !== ''}
                                                         />
                                                     </CardError>
-                                                </Col>
+                                                </div>
                                             );
                                         })
                                     :
@@ -332,26 +367,9 @@ class List extends Component{
                                         <span className={styles[classNames.empty_list]}>{this.props.translations.empty_list}</span>
                                     </Col>
                             }
-                        </Row>
+                        </div>
                         <Pagination page={page} setTotalPages={setTotalPages}/>
-                        {
-                            mapEntity.hasOwnProperty('getAddLink') ?
-                                <AddButton
-                                    hasTour={translations.header.hasOwnProperty('onHelpClick')}
-                                    title={translations.add_button}
-                                    link={mapEntity.getAddLink}
-                                    isPressedAddEntity={isPressedAddEntity}
-                                    permission={permissions.CREATE}
-                                    authUser={authUser}
-                                />
-                                :
-                                    mapEntity.hasOwnProperty('AddButton') &&
-                                        <mapEntity.AddButton/>
-                        }
-                        {
-                            mapEntity.hasOwnProperty('AdditionalButton') && mapEntity.AdditionalButton
-                        }
-                    </Container>
+                    </div>
                 </Col>
             </Row>
         );

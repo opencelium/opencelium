@@ -62,7 +62,7 @@
   "LIST": {
     "HEADER": "Groups",
     "EMPTY_LIST": "The list of groups is empty",
-    "ADD_BUTTON": "Add Group",
+    "ADD_BUTTON": "Add",
     "CURRENT_USER_GROUP": "Current group"
   }
 }
