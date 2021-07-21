@@ -77,7 +77,7 @@ class List extends Component{
         super(props);
 
         this.state = {
-            viewType: 'list',
+            viewType: 'grid',
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
@@ -161,10 +161,13 @@ class List extends Component{
     }
 
     setListView(){
-        this.setState({
-            viewType: 'list',
-            entitiesProPage: 10,
-        }, this.setCurrentPageItems)
+        const {mapListViewData, listViewDataHeader} = this.props;
+        if(mapListViewData && listViewDataHeader) {
+            this.setState({
+                viewType: 'list',
+                entitiesProPage: 10,
+            }, this.setCurrentPageItems);
+        }
     }
 
     changeSearchValue(searchValue){
@@ -297,6 +300,7 @@ class List extends Component{
         if(viewType === 'list'){
             listViewData = currentPageItems.map(item => mapListViewData(item));
         }
+        const isListViewIconDisabled = !(mapListViewData && listViewDataHeader);
         return(
             <Row id={'app_list'}>
                 <Col sm={12}>
@@ -329,7 +333,7 @@ class List extends Component{
                             {
                                 entities.length > 0 &&
                                     <span className={styles.list_view_icon}>
-                                        <TooltipFontIcon onClick={::this.setListView} tooltip={'List View'} value={'view_list'} isButton={true} turquoiseTheme/>
+                                        <TooltipFontIcon onClick={::this.setListView} tooltip={'List View'} value={'view_list'} isButton={true} turquoiseTheme disabled={isListViewIconDisabled}/>
                                         <GridViewMenu setGridViewType={::this.setGridViewType}/>
                                     </span>
                             }
