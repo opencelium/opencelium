@@ -70,6 +70,7 @@
     "UPDATE_USERDETAIL": "There is an error updating userdetail.",
     "DELETE_USER": "There is an error deleting user.",
     "LOG_IN": {
+      "UNAUTHORIZED": "Wrong email or password",
       "WRONG_CREDENTIALS": "Wrong email or password",
       "SERVER_NOT_FOUND": "The server connection problem."
     },

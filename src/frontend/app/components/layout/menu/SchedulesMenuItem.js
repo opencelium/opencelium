@@ -61,7 +61,7 @@ class SchedulesMenuItem extends Component{
         return(
             <MenuLink
                 to={'/schedules'}
-                value={'hourglass_top'}
+                value={'update'}
                 label={'Schedules'}
             />
         );

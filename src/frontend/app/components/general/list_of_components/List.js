@@ -21,7 +21,7 @@ import { Container, Row, Col } from "react-grid-system";
 
 import ListHeader from './Header';
 import Card from './Card';
-import Pagination, {ENTITIES_PRO_PAGE} from "@basic_components/pagination/Pagination";
+import Pagination from "@basic_components/pagination/Pagination";
 import CardError from "./CardError";
 import AddButton from "./AddButton";
 import {setCurrentPageItems} from "@actions/app";
@@ -56,7 +56,10 @@ import styles from '@themes/default/general/list_of_components.scss';
 import Input from "@basic_components/inputs/Input";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import GridViewMenu from "@components/general/list_of_components/GridViewMenu";
+import ListView from "@components/general/list_of_components/ListView";
 
+
+const AMOUNT_OF_ROWS = 3;
 
 function mapStateToProps(state){
     const app = state.get('app');
@@ -74,11 +77,13 @@ class List extends Component{
         super(props);
 
         this.state = {
+            viewType: 'list',
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
             searchValue: '',
             gridViewType: '4',
+            entitiesProPage: 4 * AMOUNT_OF_ROWS,
         };
     }
 
@@ -149,8 +154,17 @@ class List extends Component{
 
     setGridViewType(type){
         this.setState({
+            viewType: 'grid',
             gridViewType: `${type}`,
-        });
+            entitiesProPage: parseInt(type) * AMOUNT_OF_ROWS,
+        }, this.setCurrentPageItems);
+    }
+
+    setListView(){
+        this.setState({
+            viewType: 'list',
+            entitiesProPage: 10,
+        }, this.setCurrentPageItems)
     }
 
     changeSearchValue(searchValue){
@@ -185,8 +199,9 @@ class List extends Component{
      * to set keyNavigateType state
      */
     keyNavigate(type){
+        const {entitiesProPage} = this.state;
         const {entities} = this.props;
-        let max = entities.length < ENTITIES_PRO_PAGE ? entities.length : ENTITIES_PRO_PAGE;
+        let max = entities.length < entitiesProPage ? entities.length : entitiesProPage;
         if(this.state.selectedCard > -1 && this.state.selectedCard < max) {
             switch (type) {
                 case 'enter':
@@ -216,9 +231,10 @@ class List extends Component{
      * to set selectedCard
      */
     selectCard(cardNumber){
+        const {entitiesProPage} = this.state;
         const {entities} = this.props;
         let selectedCard = -1;
-        let max = entities.length < ENTITIES_PRO_PAGE ? entities.length : ENTITIES_PRO_PAGE;
+        let max = entities.length < entitiesProPage ? entities.length : entitiesProPage;
         if(cardNumber >= 0 && cardNumber < max){
             selectedCard = cardNumber;
             switchUserListKeyNavigation(true);
@@ -254,6 +270,7 @@ class List extends Component{
      * to filter entities depending of the page
      */
     filterEntities(){
+        const {entitiesProPage} = this.state;
         const {entities} = this.props;
         let {pageNumber} = this.props.page;
         if(entities.length === 0){
@@ -263,19 +280,23 @@ class List extends Component{
             pageNumber = 1;
         }
         return this.sortEntities().filter((entity, key) => {
-            if(key >= (pageNumber - 1)*ENTITIES_PRO_PAGE && key <= pageNumber*ENTITIES_PRO_PAGE - 1) {
+            if(key >= (pageNumber - 1)*entitiesProPage && key <= pageNumber*entitiesProPage - 1) {
                 return entity;
             }
         });
     }
 
     render(){
-        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems} = this.props;
-        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType} = this.state;
+        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems, mapListViewData, listViewDataHeader} = this.props;
+        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType} = this.state;
         let {page, translations} = this.props;
         let classNames = ['empty_list', 'search_field'];
         classNames = getThemeClass({classNames, authUser, styles});
         page.entitiesLength = this.searchEntities().length;
+        let listViewData = [];
+        if(viewType === 'list'){
+            listViewData = currentPageItems.map(item => mapListViewData(item));
+        }
         return(
             <Row id={'app_list'}>
                 <Col sm={12}>
@@ -308,15 +329,17 @@ class List extends Component{
                             {
                                 entities.length > 0 &&
                                     <span className={styles.list_view_icon}>
-                                        <TooltipFontIcon tooltip={'List View'} value={'view_list'} isButton={true} blueTheme/>
+                                        <TooltipFontIcon onClick={::this.setListView} tooltip={'List View'} value={'view_list'} isButton={true} turquoiseTheme/>
                                         <GridViewMenu setGridViewType={::this.setGridViewType}/>
                                     </span>
                             }
                         </div>
-                        <div className={styles.cards_list}>
-                            {
-                                currentPageItems.length > 0
-                                    ?
+                        {viewType === 'list' && <ListView items={listViewData} header={listViewDataHeader}/>}
+                        {viewType === 'grid' &&
+                            <div className={styles.grid_view}>
+                                {
+                                    currentPageItems.length > 0
+                                        ?
                                         currentPageItems.map((entity, key) => {
                                             let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
                                             let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
@@ -328,7 +351,7 @@ class List extends Component{
                                             let hasGraph = isString(graphLink) && graphLink !== '';
                                             let hasDelete = onDelete !== null;
                                             let isSelectedCard = false;
-                                            if(selectedCard === key){
+                                            if (selectedCard === key) {
                                                 isSelectedCard = true;
                                             }
                                             return (
@@ -361,14 +384,17 @@ class List extends Component{
                                                 </div>
                                             );
                                         })
-                                    :
+                                        :
 
-                                    <Col xs={12} sm={6}>
-                                        <span className={styles[classNames.empty_list]}>{this.props.translations.empty_list}</span>
-                                    </Col>
-                            }
-                        </div>
-                        <Pagination page={page} setTotalPages={setTotalPages}/>
+                                        <div>
+                                            <span className={styles[classNames.empty_list]}>
+                                                {this.props.translations.empty_list}
+                                            </span>
+                                        </div>
+                                }
+                            </div>
+                        }
+                        <Pagination page={page} setTotalPages={setTotalPages} entitiesProPage={entitiesProPage}/>
                     </div>
                 </Col>
             </Row>

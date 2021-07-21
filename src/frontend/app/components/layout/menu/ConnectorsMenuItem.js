@@ -57,7 +57,7 @@ class ConnectorsMenuItem extends Component{
         return(
             <MenuLink
                 to={'/connectors'}
-                value={'read_more'}
+                value={'settings_input_hdmi'}
                 label={'Connectors'}
             />
         );

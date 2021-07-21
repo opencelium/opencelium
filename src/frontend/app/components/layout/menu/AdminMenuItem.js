@@ -63,7 +63,7 @@ class AdminMenuItem extends Component{
         return(
             <MenuLinkWithSubLinks
                 to={'/admin_cards'}
-                value={'more_horiz'}
+                value={'settings'}
                 label={'Admin'}
                 subLinks={[
                     {to: '/users', label: 'Users'},

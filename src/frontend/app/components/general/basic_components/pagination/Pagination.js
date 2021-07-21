@@ -23,7 +23,6 @@ import PrevPage from "./PrevPage";
 import Pages from "./Pages";
 import NextPage from "./NextPage";
 
-export const ENTITIES_PRO_PAGE = 12;
 
 
 /**
@@ -46,9 +45,6 @@ class Pagination extends Component{
      */
     setPageSettings(props){
         let {setTotalPages, entitiesProPage} = this.props;
-        if(!entitiesProPage){
-            entitiesProPage = ENTITIES_PRO_PAGE;
-        }
         if(typeof setTotalPages === 'function') {
             const {pageNumber, entitiesLength, link} = props.page;
             if (typeof pageNumber !== 'undefined') {
@@ -129,6 +125,7 @@ class Pagination extends Component{
 
 Pagination.defaultProps = {
     loadPage: null,
+    entitiesProPage: 12,
 };
 
 export default withRouter(Pagination);
