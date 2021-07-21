@@ -176,6 +176,7 @@ public class MessageContainer {
             if(part.isEmpty()){
                 continue;
             }
+            part = part.contains(":") ? part.split(":")[1] : part;
             condition = condition + "." + part;
             String array = ConditionUtility.getLastArray(condition);// need to find index
             int index = 0;
