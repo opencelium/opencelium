@@ -82,7 +82,7 @@ class CurrentSchedules extends Component{
                 );
             });
         } else{
-            return <div className={styles.schedule_list_empty}>{t('LIST.EMPTY_CURRENT_LIST')}</div>;
+            return <div className={styles.current_schedule_list_empty}>{t('LIST.EMPTY_CURRENT_LIST')}</div>;
         }
     }
 

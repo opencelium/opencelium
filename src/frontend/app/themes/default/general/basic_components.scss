@@ -18,7 +18,7 @@
 
 /*font icon*/
 .clear_button{
-  cursor: pointer;
+  cursor: default;
   background: transparent;
   border: none;
   padding: 0;
@@ -563,6 +563,7 @@
     }
     .disabled_item{
       color: #8e7575;
+      cursor: default;
     }
     .selected_item{
       background-color: #DEEBFF;

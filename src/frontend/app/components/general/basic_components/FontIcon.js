@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import {FontIcon as ToolboxFontIcon} from "react-toolbox/lib/font_icon/FontIcon";
 import styles from "@themes/default/general/basic_components.scss";
 import Loading from "@loading";
-import {isString} from "@utils/app";
+import {isNumber, isString} from "@utils/app";
 import Icons from "@utils/constants/icons";
 
 
@@ -61,6 +61,7 @@ class FontIcon extends Component{
             value = Icons[value];
         }
         const isImageValue = isString(value) && value.indexOf('/') !== -1;
+        let fontSize = isNumber(size) ? `${size}px` : size;
         if (isButton) {
             return (
                 <button ref={myRef ? myRef : this.icon} disabled={disabled} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
@@ -69,7 +70,7 @@ class FontIcon extends Component{
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}}/>
                     :
                         <ToolboxFontIcon value={value} className={iconClassName} {...props}
-                                         style={{...iconStyles, fontSize: `${size}px`}}/>
+                                         style={{...iconStyles, fontSize}}/>
                     }
                 </button>
             );
@@ -81,7 +82,7 @@ class FontIcon extends Component{
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}} onClick={onClick} id={id}/>
                     :
                         <ToolboxFontIcon value={value} className={className}
-                                         style={{...iconStyles, fontSize: `${size}px`}} {...props} onClick={onClick}
+                                         style={{...iconStyles, fontSize}} {...props} onClick={onClick}
                                          id={id}/>
                     }
                 </span>

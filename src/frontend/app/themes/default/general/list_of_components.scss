@@ -14,17 +14,12 @@
  */
 
 @import '../constants';
+@use '../constants';
 
 .list_view{
+  @extend .card_style;
   overflow-x: auto;
   margin-bottom: 20px;
-  background: #fff;
-  padding: 1.5vw;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
 }
 
 .grid_view{
@@ -77,16 +72,9 @@
 }
 
 .card{
+  @extend .card_style;
   width: auto;
   margin-right: 2px;
-  font-family: $FONT_FAMILY;
-  padding: 1vw;
-  background: #fff;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
 }
 
 @keyframes Aselected_card {
@@ -150,7 +138,7 @@
   font-family: $FONT_FAMILY;
   float:left;
   width: 100%;
-  padding-left: 8px;
+  padding-left: 0.5vw;
 }
 
 .title{
@@ -166,7 +154,7 @@
 
 .subtitle{
   font-family: $FONT_FAMILY;
-  font-size: $FONT_SIZE_TINY;
+  font-size: 0.9vw;
   color: #797979;
 }
 
@@ -176,6 +164,7 @@
   margin-top: 5px;
   transform-origin: 90% 25%;
   transition: all 0.1s;
+  width: 30%;
 }
 
 .avatar{
@@ -184,13 +173,20 @@
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
   border-radius: 8px;
-  height: 42px;
-  padding: 3px 5px
+  width: 70%;
+  padding: 3px 5px;
+  text-align: right;
 }
 
 .card_avatar_default{
+  text-align: right;
+  cursor: pointer;
   float: right;
-  margin-top: 5px;
+  width: 30%;
+  img{
+    width: 70% !important;
+    height: 70% !important;
+  }
 }
 
 .avatar_default{
@@ -326,6 +322,7 @@
 }
 
 .card_as_button{
+  padding: 0;
   width: 100%;
   cursor: pointer;
   background: transparent;

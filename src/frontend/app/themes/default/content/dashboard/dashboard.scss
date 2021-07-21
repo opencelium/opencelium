@@ -65,10 +65,15 @@
   border: none !important;
   margin-bottom: 70px !important;
 }
-.dashboard_layout,.dashboard_view{
-  width: 100%;
-  max-width: 100% !important;
-  margin: 10px 0 40px;
+.dashboard_layout{
+  width: calc(100% + 20px);
+  max-width: calc(100% + 20px) !important;
+}
+.dashboard_view{
+  width: calc(100% + 20px);
+  max-width: calc(100% + 20px) !important;
+  margin-left: -20px;
+  margin-top: -10px;
 }
 .dashboard_grid_edit_on{
   padding: 0;
@@ -177,6 +182,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   height: 100%;
+  @extend .card_style;
 }
 
 .connection_overview_widget{

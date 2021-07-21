@@ -64,13 +64,13 @@ class DashboardLayout extends Component{
     render(){
         const {authUser} = this.props;
         return (
-            <Container className={styles.dashboard_layout}>
+            <div className={styles.dashboard_layout}>
                 <Suspense fallback={(<Loading authUser={authUser}/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
                         <DashboardView/>
                     </ComponentError>
                 </Suspense>
-            </Container>
+            </div>
         );
     }
 }

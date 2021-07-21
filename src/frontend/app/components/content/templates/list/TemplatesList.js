@@ -141,7 +141,13 @@ class TemplatesList extends Component{
             }
             result.id = template.templateId;
             result.title = template.name;
-            result.subtitle = <span style={{color: '#797979'}}><span style={{display: 'block', float: 'left', fontSize: '14px'}}>{fromInvokerName}</span><FontIcon value={'arrow_right_alt'} style={{float: 'left', fontSize: '22px'}}/><span style={{display: 'block', float: 'left', fontSize: '14px'}}>{toInvokerName}</span></span>;
+            result.subtitle = (
+                <span className={styles.template_item_subtitle}>
+                    <span style={{display: 'block', float: 'left'}}>{fromInvokerName}</span>
+                    <FontIcon value={'arrow_right_alt'} style={{float: 'left', fontSize: '1.4vw'}}/>
+                    <span style={{display: 'block', float: 'left'}}>{toInvokerName}</span>
+                </span>
+            );
             result.avatar = avatarElement;
             return result;
         };
