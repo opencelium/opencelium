@@ -131,7 +131,7 @@ class ImageCropView extends React.Component{
             <div>
                 <div className={styles.image_crop} onMouseOver={::this.onMouseOverImage} onMouseLeave={::this.onMouseLeaveImage}>
                     <CardIcon authUser={authUser} title={title} icon={icon} onClick={::this.toggleShowDialog} style={cardIconStyles}/>
-                    {isMouseOverImage && <TooltipFontIcon onClick={::this.toggleShowDialog} className={styles.upload_icon} tooltip={'Upload'} value={'upload'}/>}
+                    {isMouseOverImage && <TooltipFontIcon onClick={::this.toggleShowDialog} className={styles.upload_icon} size={'2vw'} tooltip={'Upload'} value={'upload'}/>}
                 </div>
                 {::this.renderDialog()}
             </div>

@@ -146,7 +146,6 @@ class DashboardView extends Component{
         const {layout, toolbox, t} = this.props;
         let gridSettings = {
             className: `layout`,
-            cols: 12,
             rowHeight: 100,
             width: 1200,
             isBounded: true,

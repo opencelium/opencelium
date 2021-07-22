@@ -33,8 +33,9 @@ class FontIcon extends Component{
     }
 
     render(){
-        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, value, size, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
+        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, value, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
+        let size = isNumber(this.props.size) ? `${this.props.size}px` : this.props.size;
         let sizeStyle = {width: `${size}px`, height: `${size}px`};
         if(turquoiseTheme === true){
             theme = styles.turquoise_theme;
@@ -61,7 +62,6 @@ class FontIcon extends Component{
             value = Icons[value];
         }
         const isImageValue = isString(value) && value.indexOf('/') !== -1;
-        let fontSize = isNumber(size) ? `${size}px` : size;
         if (isButton) {
             return (
                 <button ref={myRef ? myRef : this.icon} disabled={disabled} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
@@ -70,7 +70,7 @@ class FontIcon extends Component{
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}}/>
                     :
                         <ToolboxFontIcon value={value} className={iconClassName} {...props}
-                                         style={{...iconStyles, fontSize}}/>
+                                         style={{...iconStyles, fontSize: size}}/>
                     }
                 </button>
             );
@@ -82,7 +82,7 @@ class FontIcon extends Component{
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}} onClick={onClick} id={id}/>
                     :
                         <ToolboxFontIcon value={value} className={className}
-                                         style={{...iconStyles, fontSize}} {...props} onClick={onClick}
+                                         style={{...iconStyles, fontSize: size}} {...props} onClick={onClick}
                                          id={id}/>
                     }
                 </span>

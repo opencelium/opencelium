@@ -18,6 +18,7 @@ import FontIcon from "@basic_components/FontIcon";
 import { Container, Row, Col } from "react-grid-system";
 
 import styles from '@themes/default/content/connections/list.scss'
+import listOfComponentsStyles from '@themes/default/general/list_of_components.scss';
 import {checkImage, isString} from "@utils/app";
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
 
@@ -85,18 +86,19 @@ export default class ConnectionCardTitle extends React.Component{
             opacity: 0.5,
         };
         let fromStyles = {
-            minHeight: '20px !important',
-            lineHeight: '20px',
+            //minHeight: '20px !important',
+            //lineHeight: '20px',
         };
         let toStyles = {
-            minHeight: '20px !important',
-            lineHeight: '20px',
+            //minHeight: '20px !important',
+            //lineHeight: '20px',
         };
         let arrowIconStyles = {
             marginTop: 0,
+            fontSize: '1vw',
         };
         let imgStyles = {
-            maxHeight: '20px',
+            maxHeight: '2vw',
             borderRadius: '5px',
         };
         if(isMouseOver){
@@ -104,47 +106,42 @@ export default class ConnectionCardTitle extends React.Component{
                 opacity: 1,
             }
             fromStyles = {
-                minHeight: '40px !important',
-                lineHeight: '40px',
+                //minHeight: '40px !important',
             };
             toStyles = {
-                minHeight: '40px !important',
-                lineHeight: '40px',
-            };
-            arrowIconStyles = {
-                marginTop: '8px',
+                //minHeight: '40px !important',
             };
             imgStyles = {
-                maxHeight: '40px',
+                maxHeight: '3vw',
                 borderRadius: '5px',
             };
         }
 
         return (
-            <Container className={styles.connection_card_title} onMouseOver={::this.handleMouseOver} onMouseLeave={::this.handleMouseLeave}>
-                <Row>
-                    <Col className={styles.title} md={12}>{title}</Col>
-                </Row>
-                <Row className={styles.icons} style={iconsStyles}>
-                    <Col md={5} className={styles.from} style={fromStyles}>
+            <div className={styles.connection_card_title} onMouseOver={::this.handleMouseOver} onMouseLeave={::this.handleMouseLeave}>
+                <div className={listOfComponentsStyles.card_title}>
+                    <div className={listOfComponentsStyles.title} title={title}>{title}</div>
+                </div>
+                <div className={styles.icons} style={iconsStyles}>
+                    <div className={styles.from} style={fromStyles}>
                         {isCorrectFromIcon ?
                             <img alt={fromConnector.title} src={fromIcon} style={imgStyles}/>
                         :
                             <DefaultIcon title={fromConnector.title} isMouseOver={isMouseOver}/>
                         }
-                    </Col>
-                    <Col md={2} className={styles.arrow}>
+                    </div>
+                    <div className={styles.arrow}>
                         <FontIcon value={'arrow_forward'} className={styles.arrow_icon} style={arrowIconStyles}/>
-                    </Col>
-                    <Col md={5} className={styles.to} style={toStyles}>
+                    </div>
+                    <div className={styles.to} style={toStyles}>
                         {isCorrectToIcon ?
                             <img alt={toConnector.title} src={toIcon} style={imgStyles}/>
                             :
                             <DefaultIcon name={toConnector.title} isMouseOver={isMouseOver}/>
                         }
-                    </Col>
-                </Row>
-            </Container>
+                    </div>
+                </div>
+            </div>
         )
     }
 }

@@ -131,12 +131,12 @@
 
 .top_section{
   width: 100%;
-  height: 5vw;
+  height: 6vw;
+  display: flex;
 }
 
 .card_title{
   font-family: $FONT_FAMILY;
-  float:left;
   width: 100%;
   padding-left: 0.5vw;
 }
@@ -156,6 +156,9 @@
   font-family: $FONT_FAMILY;
   font-size: 0.9vw;
   color: #797979;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .card_avatar{
@@ -283,9 +286,9 @@
   cursor: default;
   color: #179221;
   opacity: 0.0;
-  font-family: $FONT_FAMILY;
-  font-size: $FONT_SIZE_SMALL;
-  padding: 6px 8px;
+  font-family: "Open Sans", "Arial", sans-serif;
+  font-size: 1.1vw;
+  padding: .5vw;
   text-decoration: none;
   text-shadow: 0 1px 0 #ffffff;
 }

@@ -40,6 +40,15 @@ $MENU_COLOR: #eee;
   z-index: 100;
 }
 
+.menu_link_logo{
+  margin-bottom: 35px !important;
+  padding-bottom: 10px;
+}
+.menu_link_logo:hover{
+  border-bottom: 2px solid #00ACC2;
+  padding-bottom: 8px;
+}
+
 .main_menu_nav{
   height: 100%;
   display: flex;
@@ -48,15 +57,21 @@ $MENU_COLOR: #eee;
   overflow: hidden;
 }
 .nav_brand{
-  display: grid;
-  grid-template-columns: max-content max-content;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  a {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    column-gap: .75rem;
+  }
+  a:hover{
+    text-decoration: none;
+  }
 }
 .nav_toggle{
   font-size: 1.25rem;
-  padding: .75rem;
+  padding: 0.75rem 0.55rem;
   cursor: pointer;
 }
 .nav_toggle:hover{
@@ -66,13 +81,10 @@ $MENU_COLOR: #eee;
   width: 2.5rem;
   height: auto;
   margin-left: 4px;
-  margin-bottom: 40px;
 }
 .nav_logo_text{
   color: $MENU_COLOR;
   font-weight: 600;
-  cursor: default;
-  margin-bottom: 40px;
   font-size: $FONT_SIZE_MEDIUM
 }
 
@@ -81,7 +93,7 @@ $MENU_COLOR: #eee;
   grid-template-columns: max-content max-content;
   align-items: center;
   column-gap: .75rem;
-  padding: .75rem;
+  padding: .55rem;
   color: $MENU_COLOR;
   border-radius: .5rem;
   margin-bottom: 1rem;
@@ -113,7 +125,7 @@ $MENU_COLOR: #eee;
 }
 
 .main_menu_collapse{
-  grid-template-columns: 20px max-content 1fr;
+  grid-template-columns: 30px max-content 1fr;
 }
 .main_menu_collapse_link{
   justify-self: flex-end;
@@ -128,7 +140,7 @@ $MENU_COLOR: #eee;
   margin: 0;
   list-style: none;
   display: none;
-  padding: .75rem 2.25rem;
+  padding: .75rem 2.25rem .75rem calc(2.25rem + 10px);
 }
 .main_menu_collapse_sublink{
   display: block;

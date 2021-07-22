@@ -719,19 +719,30 @@ let SelectCardKeyNavigation = {
 };
 function selectCardNavigate(e, that){
     let key = e.keyCode;
+    let arrowDirection = '';
     switch (key) {
-        //1, 2, 3, 4, 5
+        //esc, left, top, right, bottom
         case 27:
-        case 49:
-        case 50:
-        case 51:
-        case 52:
-        case 53:
-            doAction(e, () => {
-                if (typeof that.selectCard === 'function')
-                    that.selectCard(key - 49);
-            });
+            arrowDirection = 'cancel';
             break;
+        case 37:
+            arrowDirection = 'left';
+            break
+        case 38:
+            arrowDirection = 'top';
+            break
+        case 39:
+            arrowDirection = 'right';
+            break;
+        case 40:
+            arrowDirection = 'bottom';
+            break;
+    }
+    if(arrowDirection !== ''){
+        doAction(e, () => {
+            if (typeof that.selectCard === 'function')
+                that.selectCard(arrowDirection);
+        });
     }
 }
 function addSelectCardKeyNavigation(that){
@@ -985,14 +996,16 @@ let PrevPageKeyNavigation = {
 };
 function prevPageNavigate(e, that){
     let key = e.keyCode;
-    switch (key) {
-        //<-
-        case 37:
-            doAction(e, () => {
-                if (typeof that.openPrevPage === 'function')
-                    that.openPrevPage();
-            });
-            break;
+    if(e.ctrlKey) {
+        switch (key) {
+            //<-
+            case 37:
+                doAction(e, () => {
+                    if (typeof that.openPrevPage === 'function')
+                        that.openPrevPage();
+                });
+                break;
+        }
     }
 }
 function addPrevPageKeyNavigation(that){
@@ -1017,14 +1030,16 @@ let NextPageKeyNavigation = {
 };
 function nextPageNavigate(e, that){
     let key = e.keyCode;
-    switch (key) {
-        //->
-        case 39:
-            doAction(e, () => {
-                if (typeof that.openNextPage === 'function')
-                    that.openNextPage();
-            });
-            break;
+    if(e.ctrlKey) {
+        switch (key) {
+            //->
+            case 39:
+                doAction(e, () => {
+                    if (typeof that.openNextPage === 'function')
+                        that.openNextPage();
+                });
+                break;
+        }
     }
 }
 function addNextPageKeyNavigation(that){

@@ -22,11 +22,11 @@ import {componentAppear} from "@utils/app";
 import styles from '@themes/default/layout/menu.scss';
 import ConnectorsMenuItem from "@components/layout/menu/ConnectorsMenuItem";
 import AdminMenuItem from "@components/layout/menu/AdminMenuItem";
-import FontIcon from "@basic_components/FontIcon";
 import ConnectionsMenuItem from "@components/layout/menu/ConnectionsMenuItem";
 import SchedulesMenuItem from "@components/layout/menu/SchedulesMenuItem";
 import LogoutMenuItem from "@components/layout/menu/LogoutMenuItem";
 import LogoOcWhiteImagePath from "@images/logo_oc_white.png";
+import {MenuIcon, MenuLinkLogo} from "@components/layout/menu/MenuLink";
 
 
 function mapStateToProps(state){
@@ -131,11 +131,8 @@ class Menu extends Component{
                 <nav className={styles.main_menu_nav}>
                     <div>
                         <div className={styles.nav_brand}>
-                            <img className={styles.logo_image} src={LogoOcWhiteImagePath} alt={'OpenCelium'}/>
-                            <span className={styles.nav_logo_text}>
-                                <span>{'OpenCelium'}</span>
-                            </span>
-                            <FontIcon className={styles.nav_toggle} value={this.state.isExpanded ? 'menu_open' : 'menu'} onClick={::this.onToggleMenu}/>
+                            <MenuLinkLogo/>
+                            <MenuIcon className={styles.nav_toggle} value={this.state.isExpanded ? 'menu_open' : 'menu'} onClick={::this.onToggleMenu}/>
                         </div>
                         <div>
                             <ConnectorsMenuItem/>

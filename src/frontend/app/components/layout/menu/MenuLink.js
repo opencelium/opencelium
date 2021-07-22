@@ -2,7 +2,15 @@ import FontIcon from "@basic_components/FontIcon";
 import styles from "@themes/default/layout/menu";
 import React from "react";
 import {Link as ReactRouterLink} from "react-router";
+import LogoOcWhiteImagePath from "assets/logo_oc_white.png";
 
+const LinkLogo = (props) => {
+    return (
+        <div {...props}>
+            {props.children}
+        </div>
+    );
+};
 const Link = (props) => {
     return (
         <a {...props}>
@@ -10,6 +18,12 @@ const Link = (props) => {
         </a>
     );
 };
+
+export const MenuIcon = (props) => {
+    return(
+        <FontIcon className={styles.nav_icon} size={30} {...props}/>
+    );
+}
 
 export const MenuLink = (props) => {
     return(
@@ -21,8 +35,24 @@ export const MenuLink = (props) => {
             component={Link}
             onClick={props.onClick ? props.onClick : () => {}}
         >
-            <FontIcon className={styles.nav_icon} value={props.value} size={20}/>
+            <MenuIcon value={props.value}/>
             <span className={styles.nav_name}>{props.label}</span>
+        </ReactRouterLink>
+    )
+}
+export const MenuLinkLogo = (props) => {
+    return(
+        <ReactRouterLink
+            onlyActiveOnIndex={true}
+            to={'/'}
+            className={styles.menu_link_logo}
+            component={LinkLogo}
+            onClick={props.onClick ? props.onClick : () => {}}
+        >
+            <img className={styles.logo_image} src={LogoOcWhiteImagePath} alt={'OpenCelium'}/>
+            <span className={styles.nav_logo_text}>
+                <span>{'OpenCelium'}</span>
+            </span>
         </ReactRouterLink>
     )
 }
@@ -69,7 +99,7 @@ export class MenuLinkWithSubLinks extends React.Component{
                 to={to}
                 component={Link}
             >
-                <FontIcon className={styles.nav_icon} size={20} value={value}/>
+                <MenuIcon value={value}/>
                 <span className={styles.nav_name}>{label}</span>
                 <FontIcon className={collapseIconClassName} size={18} value={'expand_more'} onClick={::this.onToggleCollapse}/>
                 <ul className={collapseMenuClassName}>

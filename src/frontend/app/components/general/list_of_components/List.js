@@ -233,16 +233,49 @@ class List extends Component{
      * cardNumber from 0
      * to set selectedCard
      */
-    selectCard(cardNumber){
+    selectCard(arrowDirection){
         const {entitiesProPage} = this.state;
         const {entities} = this.props;
-        let selectedCard = -1;
+        let gridViewType = parseInt(this.state.gridViewType);
+        let {selectedCard} = this.state;
         let max = entities.length < entitiesProPage ? entities.length : entitiesProPage;
-        if(cardNumber >= 0 && cardNumber < max){
-            selectedCard = cardNumber;
-            switchUserListKeyNavigation(true);
+        switch(arrowDirection){
+            case 'cancel':
+                selectedCard = -1;
+                break;
+            case 'left':
+                if(selectedCard === -1){
+                    selectedCard = 0;
+                } else{
+                    selectedCard = selectedCard === 0 ? 0 : selectedCard - 1;
+                }
+                break;
+            case 'top':
+                if(selectedCard === -1){
+                    selectedCard = 0;
+                } else{
+                    selectedCard = selectedCard - gridViewType < 0 ? selectedCard : selectedCard - gridViewType;
+                }
+                break;
+            case 'right':
+                if(selectedCard === -1){
+                    selectedCard = 0;
+                } else{
+                    selectedCard = selectedCard === max - 1 ? selectedCard : selectedCard + 1;
+                }
+                break;
+            case 'bottom':
+                if(selectedCard === -1){
+                    selectedCard = 0;
+                } else{
+                    selectedCard = selectedCard + gridViewType >= max ? selectedCard : selectedCard + gridViewType;
+                }
+                break;
+
         }
-        if(selectedCard === -1){
+        if(selectedCard !== -1){
+            switchUserListKeyNavigation(true);
+        } else{
             switchUserListKeyNavigation(false);
         }
         this.setState({selectedCard, keyNavigateType: ''});

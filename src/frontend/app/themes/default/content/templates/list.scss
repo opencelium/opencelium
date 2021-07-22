@@ -21,14 +21,8 @@
   left: 130px;
 }
 .template_list_conversion{
-  display: flex;
-  float: right;
-  .loading{
-    margin-right: 5px;
-    width: 24px;
-    height: 24px;
-    vertical-align: baseline;
-  }
+  margin-left: auto;
+  font-size: 1.6vw;
 }
 
 .export{
