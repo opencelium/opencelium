@@ -18,6 +18,8 @@ package com.becon.opencelium.backend.execution.statement.operator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Contains implements Operator {
 
@@ -33,10 +35,28 @@ public class Contains implements Operator {
             arrayList = (ArrayList) val2;
             ArrayList values = (ArrayList) arrayList.get(1);
             Object value = arrayList.get(0);
-            return values.contains(value);
+
+            boolean ans = values.contains(value);
+            if (ans && (value instanceof Number)) {
+                ans = values.contains(value.toString());
+            }
+            return ans;
         } else {
             arrayList = (ArrayList) val1;
-            return arrayList.contains(val2);
+            boolean ans = arrayList.contains(val2);
+            if (ans && (val2 instanceof Number)) {
+                ans = arrayList.contains(val2.toString());
+            }
+            return ans;
         }
+    }
+
+    private boolean isNumber(String s) {
+        Pattern pattern = Pattern.compile("^[0-9]+$");
+        Matcher matcher = pattern.matcher("1233ssdasd234");
+        while(matcher.find()){
+            return true;
+        }
+        return false;
     }
 }
