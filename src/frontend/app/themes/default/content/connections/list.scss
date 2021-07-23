@@ -17,11 +17,12 @@
 @import '../../constants';
 
 .connection_card_title{
+  width: 100%;
   .icons{
+    display: flex;
+    justify-content: center;
     .from{
       padding: 0 !important;
-      min-height: 20px !important;
-      line-height: 20px;
       text-align: right;
       transition: all 0.3s;
     }
@@ -30,14 +31,13 @@
       text-align: center;
       align-self: center;
       .arrow_icon{
-        margin-top: 0px;
+        margin-top: 0;
         transition: all 0.3s;
+        vertical-align: middle;
       }
     }
     .to{
       padding: 0 !important;
-      min-height: 20px !important;
-      line-height: 20px;
       text-align: left;
       transition: all 0.3s;
     }
@@ -50,11 +50,10 @@
     padding: 0 !important;
     text-align: left;
     font-family: $FONT_FAMILY;
-    margin-bottom: 15px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     padding-left: 8px !important;
-    font-size: $FONT_SIZE_SMALL;
+    font-size: 1.6vw;
   }
 }

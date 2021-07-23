@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import {FontIcon as ToolboxFontIcon} from "react-toolbox/lib/font_icon/FontIcon";
 import styles from "@themes/default/general/basic_components.scss";
 import Loading from "@loading";
-import {isString} from "@utils/app";
+import {isNumber, isString} from "@utils/app";
 import Icons from "@utils/constants/icons";
 
 
@@ -33,8 +33,9 @@ class FontIcon extends Component{
     }
 
     render(){
-        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, value, size, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
+        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, value, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
+        let size = isNumber(this.props.size) ? `${this.props.size}px` : this.props.size;
         let sizeStyle = {width: `${size}px`, height: `${size}px`};
         if(turquoiseTheme === true){
             theme = styles.turquoise_theme;
@@ -69,7 +70,7 @@ class FontIcon extends Component{
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}}/>
                     :
                         <ToolboxFontIcon value={value} className={iconClassName} {...props}
-                                         style={{...iconStyles, fontSize: `${size}px`}}/>
+                                         style={{...iconStyles, fontSize: size}}/>
                     }
                 </button>
             );
@@ -81,7 +82,7 @@ class FontIcon extends Component{
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}} onClick={onClick} id={id}/>
                     :
                         <ToolboxFontIcon value={value} className={className}
-                                         style={{...iconStyles, fontSize: `${size}px`}} {...props} onClick={onClick}
+                                         style={{...iconStyles, fontSize: size}} {...props} onClick={onClick}
                                          id={id}/>
                     }
                 </span>

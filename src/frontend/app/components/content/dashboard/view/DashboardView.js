@@ -31,6 +31,7 @@ import DashboardToolbox from "@components/content/dashboard/view/DashboardToolbo
 import {fetchWidgetSettings, fetchWidgets, fetchWidgetsRejected} from "@actions/dashboard/fetch";
 import {updateWidgetSettings} from "@actions/dashboard/update";
 import {ListComponent} from "@decorators/ListComponent";
+import ListHeader from "@components/general/list_of_components/Header";
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -142,10 +143,9 @@ class DashboardView extends Component{
 
     render(){
         const {isWidgetEditOn} = this.state;
-        const {layout, toolbox} = this.props;
+        const {layout, toolbox, t} = this.props;
         let gridSettings = {
             className: `layout`,
-            cols: 12,
             rowHeight: 100,
             width: 1200,
             isBounded: true,
@@ -163,26 +163,23 @@ class DashboardView extends Component{
             gridSettings.className += ` ${styles.dashboard_no_widgets}`;
         }
         return (
-            <Row id={'app_content'}>
-                <Col xl={12} lg={12} md={12} sm={12}>
-                    <Container className={styles.dashboard_view}>
-                        {HAS_DASHBOARD_WIDGET_ENGINE && <TooltipFontIcon isButton={true} wrapClassName={styles.dashboard_edit_icon} tooltip={isWidgetEditOn ? 'Apply' : 'Edit'} value={isWidgetEditOn ? 'check_circle_outline' : 'edit'} onClick={::this.toggleWidgetEdit}/>}
-                        <Row style={{ marginLeft: 0, marginRight: 0}}>
-                            <Col md={12}>
-                                {isWidgetEditOn &&
-                                    <DashboardToolbox
-                                        items={toolbox || []}
-                                        onTakeItem={::this.onTakeItem}
-                                    />
-                                }
-                                <ReactGridLayout {...gridSettings}>
-                                    {::this.renderWidgets()}
-                                </ReactGridLayout>
-                            </Col>
-                        </Row>
-                    </Container>
-                </Col>
-            </Row>
+            <div id={'app_content'}>
+                <ListHeader header={t('dashboard:HEADER')}/>
+                <div className={styles.dashboard_view}>
+                    {HAS_DASHBOARD_WIDGET_ENGINE && <TooltipFontIcon isButton={true} wrapClassName={styles.dashboard_edit_icon} tooltip={isWidgetEditOn ? 'Apply' : 'Edit'} value={isWidgetEditOn ? 'check_circle_outline' : 'edit'} onClick={::this.toggleWidgetEdit}/>}
+                    <div>
+                        {isWidgetEditOn &&
+                            <DashboardToolbox
+                                items={toolbox || []}
+                                onTakeItem={::this.onTakeItem}
+                            />
+                        }
+                        <ReactGridLayout {...gridSettings}>
+                            {::this.renderWidgets()}
+                        </ReactGridLayout>
+                    </div>
+                </div>
+            </div>
         );
     }
 }

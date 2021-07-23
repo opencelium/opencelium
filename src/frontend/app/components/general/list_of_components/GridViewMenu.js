@@ -47,7 +47,7 @@ class GridViewMenu extends React.Component{
                     data-toggle="dropdown"
                     aria-expanded={isMenuOpen}
                 >
-                    <TooltipFontIcon tooltip={'Grid View'} value={'grid_view'} isButton={true} blueTheme/>
+                    <TooltipFontIcon tooltip={'Grid View'} value={'grid_view'} isButton={true} turquoiseTheme/>
                 </DropdownToggle>
                 <DropdownMenu className={styles.grid_dropdown_menu}>
                     <Types setGridViewType={setGridViewType} number={2}/>

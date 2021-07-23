@@ -64,8 +64,15 @@
   margin-top: 20px;
 }
 .schedule_list_empty{
+  margin-left: 10px;
   margin-top: 20px;
   font-family: $FONT_FAMILY;
+}
+
+.current_schedule_list_empty{
+  @extend .schedule_list_empty;
+  margin-top: -20px;
+
 }
 
 .schedule_list_status{
@@ -294,6 +301,7 @@
 
 .current_schedule_header{
   margin-bottom: 30px;
+  margin-left: 10px;
 }
 
 /*webhook*/

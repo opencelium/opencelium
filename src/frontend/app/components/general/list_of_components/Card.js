@@ -320,11 +320,17 @@ class ListCard extends Component{
         if(hasSelectedCardEffect){
             cardStyle.cursor = 'pointer';
         }
+        const avatar = this.renderAvatar();
+        let hasAvatar = avatar !== null;
+        let cardTitleStyle = {};
+        if(hasAvatar){
+            cardTitleStyle.width = '70%';
+        }
         return (
             <div id={`list_card_${index}`} className={cardClassName} style={cardStyle} onClick={!isButton ? ::this.onCardClick : null} onMouseOver={::this.onMouseOverCard} onMouseLeave={::this.onMouseLeaveCard}>
                 <div className={styles[classNames.top_section]}>
                         {isString(entity.title) &&
-                            <div className={styles[classNames.card_title]}>
+                            <div className={styles[classNames.card_title]} style={cardTitleStyle}>
                                 <div className={styles[classNames.title]} title={entity.title}>{entity.title}</div>
                                 {this.renderSubtitle()}
                             </div>
@@ -332,7 +338,7 @@ class ListCard extends Component{
                         {!isString(entity.title) &&
                             entity.title
                         }
-                    {this.renderAvatar()}
+                    {avatar}
                 </div>
                 {this.renderActions()}
                 <Confirmation

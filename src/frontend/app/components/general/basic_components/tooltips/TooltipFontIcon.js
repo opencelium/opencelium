@@ -16,7 +16,7 @@ import ReactDOM from 'react-dom';
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import FontIcon from "../FontIcon";
-import {findTopLeftPosition} from "@utils/app";
+import {findTopLeftPosition, isNumber} from "@utils/app";
 import theme from "react-toolbox/lib/tooltip/theme.css";
 
 /**
@@ -78,7 +78,8 @@ class TooltipFontIcon extends Component{
 
     render(){
         const {showTooltip, left, top} = this.state;
-        const {tooltip, tooltipPosition, wrapClassName, wrapStyles, ...props} = this.props;
+        let {tooltip, tooltipPosition, wrapClassName, wrapStyles, ...props} = this.props;
+        let fontSize = this.props.size ? isNumber(this.props.size) ? `${this.props.size}px` : this.props.size : '24px';
         let position = '';
         switch (tooltipPosition) {
             case 'top':
@@ -92,7 +93,7 @@ class TooltipFontIcon extends Component{
                 break;
         }
         return (
-            <span onMouseOver={::this.show} onMouseLeave={::this.hide} className={wrapClassName} style={wrapStyles}>
+            <span onMouseOver={::this.show} onMouseLeave={::this.hide} className={wrapClassName} style={{fontSize, ...wrapStyles}}>
                 {showTooltip && this.tooltip && tooltip !== '' && ReactDOM.createPortal(<span className={`${theme.tooltip} ${position} ${theme.tooltipActive}`} style={{left, top, zIndex: 1000000}}><span className={theme.tooltipInner}>{tooltip}</span></span>, this.tooltip)}
                 <FontIcon myRef={this.icon} onButtonFocus={::this.show} onButtonBlur={::this.hide} {...props}/>
             </span>
@@ -103,6 +104,10 @@ class TooltipFontIcon extends Component{
 TooltipFontIcon.propTypes = {
     tooltip: PropTypes.string.isRequired,
     isButton: PropTypes.bool,
+    blueTheme: PropTypes.bool,
+    turquoiseTheme: PropTypes.bool,
+    grayTheme: PropTypes.bool,
+    disabled: PropTypes.bool,
 };
 
 TooltipFontIcon.defaultProps = {

@@ -61,7 +61,7 @@ class ConnectionsMenuItem extends Component{
         return(
             <MenuLink
                 to={'/connections'}
-                value={'share'}
+                value={'sync_alt'}
                 label={'Connections'}
             />
         );
