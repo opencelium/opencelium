@@ -22,4 +22,7 @@ public interface SecurityConstant {
     public static final long ACTIVITY_TIME = 5 * 60 * 60;
     public static final String BEARER = "Bearer";
     public static final char LOCKED = '1';
+    int CONN_REQ_TIMEOUT = 5 * 1000; //milliseconds
+    int READ_TIMEOUT = 5 * 1000; //milliseconds
+    int CONN_TIMEOUT = 5 * 1000; //milliseconds
 }
