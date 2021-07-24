@@ -38,7 +38,7 @@ export const EntitiesWithNotification = [
     {name: UsersAction.DELETE_USER, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: UserGroupsAction.ADD_USERGROUP, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: UserGroupsAction.ADD_GROUPICON, types: ['FULFILLED']},
-    {name: UserGroupsAction.FETCH_USERGROUPS, types: ['FULFILLED', 'REJECTED']},
+    //{name: UserGroupsAction.FETCH_USERGROUPS, types: ['FULFILLED', 'REJECTED']},
     {name: UserGroupsAction.UPDATE_USERGROUP, types: ['FULFILLED', 'REJECTED', 'STORE']},
     {name: UserGroupsAction.UPDATE_GROUPICON, types: ['FULFILLED']},
     {name: UserGroupsAction.DELETE_USERGROUP, types: ['FULFILLED', 'REJECTED', 'STORE']},

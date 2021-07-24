@@ -127,13 +127,13 @@ $MENU_COLOR: #eee;
 .main_menu_collapse{
   grid-template-columns: 30px max-content 1fr;
 }
-.main_menu_collapse_link{
+.main_menu_collapse_icon{
   justify-self: flex-end;
   transition: all .5s, font-weight 0.1s;
   vertical-align: text-bottom;
   float: right;
 }
-.main_menu_collapse_link:hover{
+.main_menu_collapse_icon:hover{
   font-weight: 600;
 }
 .main_menu_collapse_menu{
@@ -150,6 +150,11 @@ $MENU_COLOR: #eee;
 .main_menu_collapse_sublink:hover{
   color: $MENU_COLOR;
   text-decoration: underline;
+}
+
+.main_menu_collapse_link{
+  @extend .nav_name;
+  @extend .main_menu_collapse_sublink;
 }
 
 .show_sub_links{

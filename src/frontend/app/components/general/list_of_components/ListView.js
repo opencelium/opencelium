@@ -4,6 +4,7 @@ import styles from "@themes/default/general/list_of_components";
 import ListViewItem from "@components/general/list_of_components/ListViewItem";
 import ListViewHeader from "@components/general/list_of_components/ListViewHeader";
 import Table from "@basic_components/table/Table";
+import {withRouter} from "react-router";
 
 class ListView extends React.Component{
     constructor(props) {
@@ -11,14 +12,31 @@ class ListView extends React.Component{
     }
 
     render(){
-        const {items, header} = this.props;
+        const {items, header, ...listViewItemProps} = this.props;
         return(
             <div className={styles.list_view}>
                 <Table>
                     <ListViewHeader header={header}/>
                     <tbody>
                         {
-                            items.map((item) => <ListViewItem item={item}/>)
+                            items.map((item, index) => {
+                                let key = item.find(element => element.name === 'id');
+                                if(!key){
+                                    key = item.find(element => element.name === 'name');
+                                }
+                                if(!key){
+                                    key = item.find(element => element.name === 'label');
+                                }
+                                if(!key){
+                                    key = item.find(element => element.name === 'title');
+                                }
+                                if(!key){
+                                    key = index;
+                                } else{
+                                    key = key.value;
+                                }
+                                return(<ListViewItem key={key} item={item} {...listViewItemProps}/>);
+                            })
                         }
                     </tbody>
                 </Table>
@@ -32,4 +50,4 @@ ListView.propTypes = {
     header: PropTypes.array.isRequired,
 }
 
-export default ListView;
+export default withRouter(ListView);

@@ -62,6 +62,9 @@
   "LIST": {
     "HEADER": "Groups",
     "EMPTY_LIST": "The list of groups is empty",
+    "COMPONENTS": "Components",
+    "NAME": "Name",
+    "DESCRIPTION": "Description",
     "ADD_BUTTON": "Add",
     "CURRENT_USER_GROUP": "Current group"
   }

@@ -51,6 +51,12 @@ $ANIMATION_SCALE_DISAPPEAR: AScaleDisappear;
 $ANIMATION_EMPHASIZE: AEmphasize;
 
 
+.overflow_text{
+  font-family: $FONT_FAMILY;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
 
 .card_style{
   font-family: $FONT_FAMILY;

@@ -68,7 +68,7 @@ function filterGroupSteps(tourSteps){
  */
 @connect(mapStateToProps, {fetchUserGroups, fetchUserGroupsCanceled, deleteUserGroup})
 @permission(UserGroupPermissions.READ, true)
-@withTranslation('userGroups')
+@withTranslation(['userGroups', 'app'])
 @ListComponent('userGroups')
 @tour(LIST_TOURS, filterGroupSteps)
 class UserGroupsList extends Component{
@@ -84,24 +84,22 @@ class UserGroupsList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
-        const listViewDataHeader = [{width: '20%', value: 'Name'}, {width: '25%', value: 'Description'}, {value: 'Components'}];
         let mapListViewData = (userGroup) => {
-            return [userGroup.name, userGroup.description, userGroup.components.map(component => component.name).join(', ')];
-        }
-        let mapUserGroup = {};
-        mapUserGroup.map = (userGroup) => {
-            let result = {};
-            result.id = userGroup.id;
-            result.title = userGroup.role;
-            return result;
-        };
-        mapUserGroup.getViewLink = (userGroup) => {return `${prefixUrl}/${userGroup.id}/view`;};
+            return [{name: 'id', value: userGroup.id}, {name: t('LIST.NAME'), value: userGroup.name, width: '20%'}, {name: t('LIST.DESCRIPTION'), value: userGroup.description, width: '25%'}, {name: t('LIST.COMPONENTS'), value: userGroup.components.map(component => t(`app:COMPONENTS.${component.name}`)).join(', ')}];
+                }
+                let mapUserGroup = {};
+                mapUserGroup.map = (userGroup) => {
+                    let result = {};
+                    result.id = userGroup.id;
+                    result.title = userGroup.role;
+                    return result;
+                };
+                mapUserGroup.getViewLink = (userGroup) => {return `${prefixUrl}/${userGroup.id}/view`;};
         mapUserGroup.getUpdateLink = (userGroup) => {return `${prefixUrl}/${userGroup.id}/update`;};
         mapUserGroup.getAddLink = `${prefixUrl}/add`;
         mapUserGroup.onDelete = deleteUserGroup;
         return <List
             entities={userGroups}
-            listViewDataHeader={listViewDataHeader}
             mapListViewData={mapListViewData}
             exceptionEntities={{label: t('LIST.CURRENT_USER_GROUP'), exceptions: exceptionUserGroups}}
             translations={translations}

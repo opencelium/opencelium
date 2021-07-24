@@ -61,6 +61,13 @@ import ListView from "@components/general/list_of_components/ListView";
 
 const AMOUNT_OF_ROWS = 3;
 
+const AMOUNT_OF_ITEMS_FOR_LIST = 10;
+
+const VIEW_TYPE = {
+    LIST: 'LIST',
+    GRID: 'GRID',
+};
+
 function mapStateToProps(state){
     const app = state.get('app');
     return {
@@ -77,7 +84,7 @@ class List extends Component{
         super(props);
 
         this.state = {
-            viewType: 'grid',
+            viewType: VIEW_TYPE.GRID,
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
@@ -110,6 +117,7 @@ class List extends Component{
             addAddEntityKeyNavigation(this);
         }
         addFocusDocumentNavigation(this);
+        document.addEventListener('mousedown', ::this.onMouseDownOnDocument)
         setFocusById('search_field');
         componentAppear('app_list');
     }
@@ -135,6 +143,7 @@ class List extends Component{
         if(mapEntity.hasOwnProperty('getAddLink')) {
             removeAddEntityKeyNavigation(this);
         }
+        document.removeEventListener('mousedown', ::this.onMouseDownOnDocument)
         removeFocusDocumentNavigation(this);
         switchUserListKeyNavigation(false);
     }
@@ -152,20 +161,35 @@ class List extends Component{
         }
     }
 
+    onMouseDownOnDocument(){
+        if(this.state.selectedCard !== -1){
+            this.setState({
+                selectedCard: -1,
+                keyNavigateType: '',
+            });
+        }
+    }
+
     setGridViewType(type){
+        switchUserListKeyNavigation(false);
         this.setState({
-            viewType: 'grid',
+            viewType: VIEW_TYPE.GRID,
             gridViewType: `${type}`,
             entitiesProPage: parseInt(type) * AMOUNT_OF_ROWS,
+            selectedCard: -1,
+            keyNavigateType: '',
         }, this.setCurrentPageItems);
     }
 
     setListView(){
-        const {mapListViewData, listViewDataHeader} = this.props;
-        if(mapListViewData && listViewDataHeader) {
+        const {mapListViewData} = this.props;
+        switchUserListKeyNavigation(false);
+        if(mapListViewData) {
             this.setState({
-                viewType: 'list',
-                entitiesProPage: 10,
+                viewType: VIEW_TYPE.LIST,
+                entitiesProPage: AMOUNT_OF_ITEMS_FOR_LIST,
+                selectedCard: -1,
+                keyNavigateType: '',
             }, this.setCurrentPageItems);
         }
     }
@@ -278,6 +302,9 @@ class List extends Component{
         } else{
             switchUserListKeyNavigation(false);
         }
+        if(selectedCard >= max){
+            selectedCard = max - 1;
+        }
         this.setState({selectedCard, keyNavigateType: ''});
     }
 
@@ -323,17 +350,18 @@ class List extends Component{
     }
 
     render(){
-        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems, mapListViewData, listViewDataHeader} = this.props;
+        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems, mapListViewData} = this.props;
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType} = this.state;
         let {page, translations} = this.props;
         let classNames = ['empty_list', 'search_field'];
         classNames = getThemeClass({classNames, authUser, styles});
         page.entitiesLength = this.searchEntities().length;
         let listViewData = [];
-        if(viewType === 'list'){
+        if(viewType === VIEW_TYPE.LIST){
             listViewData = currentPageItems.map(item => mapListViewData(item));
         }
-        const isListViewIconDisabled = !(mapListViewData && listViewDataHeader);
+        const isListViewIconDisabled = !(mapListViewData);
+        const listViewDataHeader = listViewData.length > 0 ? listViewData[0].map(element => {return {value: element.name, width: element.width};}) : [];
         return(
             <Row id={'app_list'}>
                 <Col sm={12}>
@@ -371,8 +399,8 @@ class List extends Component{
                                     </span>
                             }
                         </div>
-                        {viewType === 'list' && <ListView items={listViewData} header={listViewDataHeader}/>}
-                        {viewType === 'grid' &&
+                        {viewType === VIEW_TYPE.LIST && <ListView items={listViewData} header={listViewDataHeader} mapEntity={mapEntity}/>}
+                        {viewType === VIEW_TYPE.GRID &&
                             <div className={styles.grid_view}>
                                 {
                                     currentPageItems.length > 0

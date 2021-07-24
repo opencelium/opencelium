@@ -12,8 +12,8 @@ class ListViewHeader extends React.Component{
         return(
             <thead>
                 <tr>
-                    {header.map(item => <th style={item.width ? {width: item.width} : null}>{item.value}</th>)}
-                    <th style={{width: '20%'}}>Actions</th>
+                    {header.map(item => item.value === 'id' ? null : <th key={item.value} style={item.width ? {width: item.width} : null} title={item.value}>{item.value}</th>)}
+                    <th>Actions</th>
                 </tr>
             </thead>
         );
