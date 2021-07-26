@@ -82,6 +82,14 @@ class InvokersList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'invokerIds',
+            deleteSelected: () => {},
+            map: (invoker) => {
+                return [{name: 'id', value: invoker.id}, {name: 'name', label: t('LIST.NAME'), value: invoker.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: invoker.description, width: '25%'}, {name: 'auth_type', label: t('LIST.AUTH_TYPE'), value: invoker.authType}, {name: 'operations', label: t('LIST.OPERATIONS'), value: invoker.operations.map(operation => operation.name).join(', ')}]
+            },
+        }
         let mapEntity = {};
         mapEntity.map = (invoker) => {
             let result = {};
@@ -95,6 +103,7 @@ class InvokersList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteInvoker;
         return <List
+            listViewData={listViewData}
             entities={invokers}
             translations={translations}
             mapEntity={mapEntity}

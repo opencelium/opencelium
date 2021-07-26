@@ -3,7 +3,11 @@
     "ADD_BUTTON": "Add Invoker",
     "EMPTY_LIST": "The list of Invokers is empty",
     "HEADER": "Invokers",
-    "HEADER_ADMIN_CARDS": "Admin Cards"
+    "HEADER_ADMIN_CARDS": "Admin Cards",
+    "NAME": "Name",
+    "DESCRIPTION": "Description",
+    "AUTH_TYPE": "Auth Type",
+    "OPERATIONS": "Operations"
   },
   "ADD":{
     "FORM":{

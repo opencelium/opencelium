@@ -5,6 +5,8 @@
     "HEADER": "Apps",
     "HEADER_ADMIN_CARDS": "Admin Cards",
     "APP_DOWN": "Disabled",
-    "APP_UP": "Enabled"
+    "APP_UP": "Enabled",
+    "NAME": "Name",
+    "STATUS": "Status"
   }
 }

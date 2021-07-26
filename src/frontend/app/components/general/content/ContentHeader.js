@@ -95,6 +95,7 @@ class ContentHeader extends Component{
 
 ContentHeader.defaultProps = {
     className: '',
+    icons: [],
 }
 
 export default ContentHeader;

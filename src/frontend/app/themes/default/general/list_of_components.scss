@@ -242,14 +242,17 @@
 .add_button{
   font-family: $FONT_FAMILY;
   margin-top: 20px;
-  button{
-    span:nth-child(2){
-
-    }
-  }
 }
-@media only screen and (max-width: 600px)  {
-  .add_button{
+.additional_button{
+  @extend .add_button;
+  margin-left: 10px;
+}
+.delete_selected_button{
+  @extend .add_button;
+  margin-left: 10px;
+}
+@media only screen and (max-width: 756px)  {
+  .add_button,.delete_selected_button{
     button{
       span:nth-child(2){
         display: none;

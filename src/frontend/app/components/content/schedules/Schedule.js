@@ -28,6 +28,7 @@ import {SCHEDULE_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 import {ListComponent} from "@decorators/ListComponent";
 import CurrentSchedules from "./current_schedules/CurrentSchedules";
+import {ComponentHasCheckboxes} from "@decorators/ComponentHasCheckboxes";
 
 
 const connectorPrefixURL = '/schedule';
@@ -42,6 +43,8 @@ function mapStateToProps(state){
         connections: connections.get('connections').toJS(),
         fetchingSchedules: schedules.get('fetchingSchedules'),
         fetchingConnections: connections.get('fetchingConnections'),
+        entitiesName: 'schedules',
+        entityIdName: 'schedulerId',
     };
 }
 
@@ -61,6 +64,7 @@ function filterScheduleSteps(tourSteps){
 @permission(SchedulePermissions.READ, true)
 @withTranslation('schedules')
 @ListComponent('schedules')
+@ComponentHasCheckboxes()
 @tour(SCHEDULE_TOURS, filterScheduleSteps, true)
 class Scheduler extends Component{
 
@@ -68,101 +72,27 @@ class Scheduler extends Component{
         super(props);
 
         this.state = {
-            checks: [],
-            allChecked: false,
             isTourOpen: true,
         };
     }
 
-    /**
-     * to set all checkboxes true or false
-     */
-    setAllChecked(value){
-        this.setState({
-            allChecked: value,
-        });
-    }
-
-    /**
-     * to set checks state with data
-     */
-    checkOneSchedule(e, data){
-        let {checks, allChecked} = this.state;
-        let index = checks.findIndex(c => c.id === data.id);
-        if(typeof checks[index] === 'undefined') {
-            checks.push({value: true, id: data.id});
-        } else {
-            let val = !checks[index].value;
-            checks[index] = {value: val, id: data.id};
-        }
-        allChecked = this.isAllChecked(checks);
-        this.setState({checks, allChecked});
-    }
-
-    /**
-     * to delete data from checks state
-     */
-    deleteCheck(e, data){
-        let {checks} = this.state;
-        let allChecked = true;
-        let index = checks.findIndex(c => c.id === data.key);
-        checks.splice(index, 1);
-        if(checks.length > 0) {
-            for (let i = 0; i < checks.length; i++) {
-                if (!checks[i].value) {
-                    allChecked = false;
-                }
-            }
-        } else{
-            allChecked = false;
-        }
-        this.setState({checks, allChecked});
-    }
-
-    /**
-     * to set checks state with schedules
-     */
-    checkAllSchedules(){
-        let {schedules} = this.props;
-        let checks = [];
-        for(let i = 0; i < schedules.length; i++){
-            checks.push({value: !this.state.allChecked, id: schedules[i].schedulerId});
-        }
-        this.setState({checks, allChecked: !this.state.allChecked});
-    }
-
-    /**
-     * to check if all checks are checked
-     */
-    isAllChecked(checks){
-        const {schedules} = this.props;
-        if(schedules.length !== checks.length){
-            return false;
-        }
-        for(let i = 0; i < checks.length; i++){
-            if(!checks[i].value){
-                return false;
-            }
-        }
-        return true;
-    }
-
     render(){
-        const {t, authUser, schedules, openTour} = this.props;
-        const {checks, allChecked} = this.state;
+        const {t, authUser, schedules, openTour, connections} = this.props;
+        const {checks, allChecked, setAllChecked, checkAllEntities, checkOneEntity, deleteCheck, isOneChecked} = this.props;
         let contentTranslations = {};
         contentTranslations.header = {title: t('HEADER'), onHelpClick: openTour};
         let getListLink = `${connectorPrefixURL}`;
         return (
             <Content translations={contentTranslations} getListLink={getListLink} style={{marginBottom: '60px'}} authUser={authUser}>
-                <ScheduleAdd schedules={schedules} connections={this.props.connections} setAllChecked={::this.setAllChecked}/>
+                <ScheduleAdd schedules={schedules} connections={connections} setAllChecked={setAllChecked}/>
                 <ScheduleList
                     schedules={schedules}
                     checks={checks}
                     allChecked={allChecked}
-                    checkAllSchedules={::this.checkAllSchedules}
-                    checkOneSchedule={::this.checkOneSchedule}
-                    deleteCheck={::this.deleteCheck}
+                    checkAllSchedules={checkAllEntities}
+                    checkOneSchedule={checkOneEntity}
+                    deleteCheck={deleteCheck}
+                    isOneChecked={isOneChecked}
                 />
                 <CurrentSchedules/>
             </Content>

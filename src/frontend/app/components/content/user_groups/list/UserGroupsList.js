@@ -17,7 +17,7 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchUserGroups, fetchUserGroupsCanceled} from '@actions/usergroups/fetch';
-import {deleteUserGroup} from '@actions/usergroups/delete';
+import {deleteUserGroup, deleteUserGroups} from '@actions/usergroups/delete';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -66,7 +66,7 @@ function filterGroupSteps(tourSteps){
 /**
  * List of the UserGroups
  */
-@connect(mapStateToProps, {fetchUserGroups, fetchUserGroupsCanceled, deleteUserGroup})
+@connect(mapStateToProps, {fetchUserGroups, fetchUserGroupsCanceled, deleteUserGroup, deleteUserGroups})
 @permission(UserGroupPermissions.READ, true)
 @withTranslation(['userGroups', 'app'])
 @ListComponent('userGroups')
@@ -78,29 +78,34 @@ class UserGroupsList extends Component{
     }
 
     render(){
-        const {authUser, t, userGroups, deleteUserGroup, params, setTotalPages, openTour} = this.props;
+        const {authUser, t, userGroups, deleteUserGroup, deleteUserGroups, params, setTotalPages, openTour} = this.props;
         let exceptionUserGroups = authUser && authUser.hasOwnProperty('userGroup') && authUser.userGroup && authUser.userGroup.hasOwnProperty('groupId') ? [authUser.userGroup.groupId] : [];
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
-        let mapListViewData = (userGroup) => {
-            return [{name: 'id', value: userGroup.id}, {name: t('LIST.NAME'), value: userGroup.name, width: '20%'}, {name: t('LIST.DESCRIPTION'), value: userGroup.description, width: '25%'}, {name: t('LIST.COMPONENTS'), value: userGroup.components.map(component => t(`app:COMPONENTS.${component.name}`)).join(', ')}];
-                }
-                let mapUserGroup = {};
-                mapUserGroup.map = (userGroup) => {
-                    let result = {};
-                    result.id = userGroup.id;
-                    result.title = userGroup.role;
-                    return result;
-                };
-                mapUserGroup.getViewLink = (userGroup) => {return `${prefixUrl}/${userGroup.id}/view`;};
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'userGroupIds',
+            deleteSelected: deleteUserGroups,
+            map: (userGroup) => {
+                return [{name: 'id', value: userGroup.id}, {name: 'name', label: t('LIST.NAME'), value: userGroup.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: userGroup.description, width: '25%'}, {name: 'components', label: t('LIST.COMPONENTS'), value: userGroup.components.map(component => t(`app:COMPONENTS.${component.name}`)).join(', ')}]
+            },
+        }
+        let mapUserGroup = {};
+        mapUserGroup.map = (userGroup) => {
+            let result = {};
+            result.id = userGroup.id;
+            result.title = userGroup.role;
+            return result;
+        };
+        mapUserGroup.getViewLink = (userGroup) => {return `${prefixUrl}/${userGroup.id}/view`;};
         mapUserGroup.getUpdateLink = (userGroup) => {return `${prefixUrl}/${userGroup.id}/update`;};
         mapUserGroup.getAddLink = `${prefixUrl}/add`;
         mapUserGroup.onDelete = deleteUserGroup;
         return <List
             entities={userGroups}
-            mapListViewData={mapListViewData}
+            listViewData={listViewData}
             exceptionEntities={{label: t('LIST.CURRENT_USER_GROUP'), exceptions: exceptionUserGroups}}
             translations={translations}
             mapEntity={mapUserGroup}

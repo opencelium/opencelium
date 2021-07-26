@@ -1,18 +1,42 @@
 import React from 'react';
-import styles from "@themes/default/general/list_of_components";
 import PropTypes from "prop-types";
+import Checkbox from "@basic_components/inputs/Checkbox";
+import styles from "@themes/default/content/schedules/schedules";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 class ListViewHeader extends React.Component{
     constructor(props) {
         super(props);
     }
 
+    onCheckAll(){
+        this.props.onCheckAll(this.props.setChecks);
+    }
+
     render(){
-        const {header} = this.props;
+        const {header, allChecked, sortType, toggleSortType} = this.props;
+        const sortTooltip = sortType === 'asc' ? 'Asc' : 'Desc';
+        const sortValue = sortType === 'asc' ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
         return(
             <thead>
                 <tr>
-                    {header.map(item => item.value === 'id' ? null : <th key={item.value} style={item.width ? {width: item.width} : null} title={item.value}>{item.value}</th>)}
+                    <th style={{width: '50px'}}>
+                        <Checkbox
+                            id='input_check_all'
+                            checked={allChecked}
+                            onChange={::this.onCheckAll}
+                            labelClassName={styles.checkbox_label}
+                            inputClassName={styles.checkbox_field}
+                        />
+                    </th>
+                    {header.map(item => {
+                        return item.value === 'id' ? null :
+                            <th key={item.value} style={item.width ? {width: item.width} : null}
+                                title={item.label}>
+                                {item.label}
+                                {item.value === 'name' && <TooltipFontIcon isButton={true} blueTheme tooltip={sortTooltip} value={sortValue} onClick={toggleSortType}/>}
+                            </th>
+                    })}
                     <th>Actions</th>
                 </tr>
             </thead>

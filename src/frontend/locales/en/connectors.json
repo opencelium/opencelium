@@ -5,7 +5,10 @@
   "LIST":{
     "ADD_BUTTON": "Add Connector",
     "EMPTY_LIST": "The list of Connectors is empty",
-    "HEADER": "Connectors"
+    "HEADER": "Connectors",
+    "NAME": "Name",
+    "DESCRIPTION": "Description",
+    "INVOKER": "Invoker"
   },
   "ADD":{
     "FORM":{

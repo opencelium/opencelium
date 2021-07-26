@@ -317,7 +317,7 @@ export function sleepApp(milliseconds) {
 /**
  * a callback to sort by name
  */
-export function sortByNameFunction(a, b){
+function sortByNameFunction(a, b){
     let propertyA = a && a.hasOwnProperty('name') ? a.name.toUpperCase() : a.hasOwnProperty('title') ? a.title.toUpperCase() : '';
     let propertyB = b && b.hasOwnProperty('name') ? b.name.toUpperCase() : b.hasOwnProperty('title') ? b.title.toUpperCase() : '';
     if(propertyA === '' && propertyB === ''){
@@ -331,7 +331,16 @@ export function sortByNameFunction(a, b){
             return 1;
         }
     }
+    return {propertyA, propertyB};
+}
+
+export function ascSortByNameFunction(a, b){
+    const {propertyA, propertyB} = sortByNameFunction(a, b);
     if(propertyA < propertyB){return -1;} if(propertyA > propertyB){return 1;} return 0;
+}
+export function descSortByNameFunction(a, b){
+    const {propertyA, propertyB} = sortByNameFunction(a, b);
+    if(propertyA > propertyB){return -1;} if(propertyA < propertyB){return 1;} return 0;
 }
 
 /**

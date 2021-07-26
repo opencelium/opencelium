@@ -124,6 +124,14 @@ class TemplatesList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}]};
         translations.add_button = t('LIST.IMPORT_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'templateIds',
+            deleteSelected: () => {},
+            map: (template) => {
+                return [{name: 'id', value: template.id}, {name: 'name', label: t('LIST.NAME'), value: template.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: template.description}, {name: 'from_invoker', label: t('LIST.FROM_INVOKER'), value: template.connection.fromConnector.invoker.name, width: '20%'}, {name: 'to_invoker', label: t('LIST.TO_INVOKER'), value: template.connection.toConnector.invoker.name, width: '20%'}]
+            },
+        }
         let mapEntity = {};
         mapEntity.map = (template, key) => {
             let result = {};
@@ -152,9 +160,10 @@ class TemplatesList extends Component{
             return result;
         };
         mapEntity.AddButton = TemplateImport;
-        mapEntity.AdditionalButton = <Button className={styles.convert_all} authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
+        mapEntity.AdditionalButton = <Button authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
         mapEntity.onDelete = deleteTemplate;
         return <List
+            listViewData={listViewData}
             rerenderDependency={convertingTemplates.length}
             entities={templates}
             translations={translations}

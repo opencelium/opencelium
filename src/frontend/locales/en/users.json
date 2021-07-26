@@ -89,7 +89,9 @@
     "HEADER": "User List",
     "EMPTY_LIST": "The list of users is empty",
     "ADD_BUTTON": "Add User",
-    "CURRENT_USER": "Current user"
+    "CURRENT_USER": "Current user",
+    "EMAIL": "E-mail",
+    "ASSIGNED_GROUPS": "Assigned Groups"
   },
   "VIEW": {
     "HEADER": "User View",

@@ -43,7 +43,7 @@ class CurrentSchedulerWidget extends React.Component{
         const {authUser, schedules} = this.props;
         return(
             <div className={styles.current_scheduler_widget}>
-                <SubHeader title={'Current Scheduler'} authUser={authUser} className={styles.widget_subheader}/>
+                <SubHeader title={'Current Scheduler'} authUser={authUser}/>
                 <ScheduleList
                     schedules={schedules}
                     readOnly={true}

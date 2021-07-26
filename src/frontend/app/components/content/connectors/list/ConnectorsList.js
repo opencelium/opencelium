@@ -88,6 +88,14 @@ class ConnectorsList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'connectorIds',
+            deleteSelected: () => {},
+            map: (connector) => {
+                return [{name: 'id', value: connector.id}, {name: 'name', label: t('LIST.NAME'), value: connector.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: connector.description, width: '25%'}, {name: 'invoker', label: t('LIST.INVOKER'), value: connector.invoker.name}]
+            },
+        }
         let mapEntity = {};
         mapEntity.map = (connector) => {
             let result = {};
@@ -102,6 +110,7 @@ class ConnectorsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnector;
         return <List
+            listViewData={listViewData}
             rerenderDependency={addingConnectorIcon}
             entities={connectors}
             translations={translations}

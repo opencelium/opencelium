@@ -5,37 +5,41 @@ import ListViewItem from "@components/general/list_of_components/ListViewItem";
 import ListViewHeader from "@components/general/list_of_components/ListViewHeader";
 import Table from "@basic_components/table/Table";
 import {withRouter} from "react-router";
+import {ComponentHasCheckboxes} from "@decorators/ComponentHasCheckboxes";
 
+
+@ComponentHasCheckboxes()
 class ListView extends React.Component{
     constructor(props) {
         super(props);
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.checks && prevProps.checks.length !== this.props.checks.length){
+            this.props.setChecks(this.props.checks);
+        }
+    }
+
+    setChecks(){
+        this.props.setChecks(this.props.checks);
+    }
+
     render(){
-        const {items, header, ...listViewItemProps} = this.props;
+        const {items, header, allChecked, checkAllEntities, checkOneEntity, checks, deleteCheck, sortType, toggleSortType, ...listViewItemProps} = this.props;
         return(
             <div className={styles.list_view}>
                 <Table>
-                    <ListViewHeader header={header}/>
+                    <ListViewHeader header={header} allChecked={allChecked} onCheckAll={checkAllEntities} setChecks={::this.setChecks} sortType={sortType} toggleSortType={toggleSortType}/>
                     <tbody>
                         {
                             items.map((item, index) => {
                                 let key = item.find(element => element.name === 'id');
                                 if(!key){
-                                    key = item.find(element => element.name === 'name');
-                                }
-                                if(!key){
-                                    key = item.find(element => element.name === 'label');
-                                }
-                                if(!key){
-                                    key = item.find(element => element.name === 'title');
-                                }
-                                if(!key){
                                     key = index;
                                 } else{
                                     key = key.value;
                                 }
-                                return(<ListViewItem key={key} item={item} {...listViewItemProps}/>);
+                                return(<ListViewItem key={key} index={key} item={item} checks={checks} checkOneEntity={checkOneEntity} deleteCheck={deleteCheck} {...listViewItemProps} setChecks={::this.setChecks}/>);
                             })
                         }
                     </tbody>
@@ -48,6 +52,7 @@ class ListView extends React.Component{
 ListView.propTypes = {
     items: PropTypes.array.isRequired,
     header: PropTypes.array.isRequired,
+    entityIdName: PropTypes.string.isRequired,
 }
 
 export default withRouter(ListView);

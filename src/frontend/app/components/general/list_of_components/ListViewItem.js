@@ -3,6 +3,8 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {isString} from "@utils/app";
 import Confirmation from "@components/general/app/Confirmation";
 import {withTranslation} from "react-i18next";
+import Checkbox from "@basic_components/inputs/Checkbox";
+import styles from "@themes/default/content/schedules/schedules";
 
 @withTranslation('app')
 class ListViewItem extends React.Component{
@@ -60,10 +62,14 @@ class ListViewItem extends React.Component{
      * to delete item
      */
     doDelete(){
-        const {mapEntity} = this.props;
+        const {mapEntity, deleteCheck, index, item, entityIdName} = this.props;
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
         let data = this.getObjectDataFromItem();
         if(onDelete) {
+            deleteCheck({
+                key: index,
+                id: data[entityIdName]
+            });
             onDelete(data);
         }
         this.toggleConfirm();
@@ -76,16 +82,31 @@ class ListViewItem extends React.Component{
         this.toggleConfirm();
     }
 
+    checkOneEntity(...args){
+        this.props.checkOneEntity(...args, this.props.setChecks);
+    }
+
     render(){
         const {showConfirm} = this.state;
-        const {t, item, mapEntity} = this.props;
+        const {t, item, mapEntity, checks, index, entityIdName} = this.props;
         const {viewLink, updateLink} = this.getLinks();
+        let data = this.getObjectDataFromItem();
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
         let hasView = isString(viewLink) && viewLink !== '';
         let hasUpdate = isString(updateLink) && updateLink !== '';
         let hasDelete = onDelete !== null;
+        let checked = checks.findIndex(c => c[entityIdName] === data[entityIdName] && c.value) !== -1;
         return(
             <tr>
+                <td>
+                    <Checkbox
+                        id={`input_check_${index}`}
+                        checked={checked}
+                        onChange={(e) => ::this.checkOneEntity(e, {key: index, id: data[entityIdName]})}
+                        labelClassName={styles.checkbox_label}
+                        inputClassName={styles.checkbox_field}
+                    />
+                </td>
                 {item.map((element) => {
                     if(element.name === 'id') return null;
                     let shortText = isString(element.value) && element.value.length > 128 ? `${element.value.substr(0, 128)}...` : element.value;
