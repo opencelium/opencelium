@@ -92,6 +92,27 @@
   }
 }
 
+.white_theme{
+  >span{
+    color: #fff;
+    transition: background 0.8s;
+  }
+  >span:hover {
+    color: #fff;
+  }
+  >span:active {
+    color: #fff;
+    background-size: 100%;
+    transition: background 0s;
+  }
+}
+.white_theme:focus-within{
+  outline: none !important;
+  >span {
+    color: #ecedef;
+  }
+}
+
 .gray_theme{
   >span{
     color: #777;

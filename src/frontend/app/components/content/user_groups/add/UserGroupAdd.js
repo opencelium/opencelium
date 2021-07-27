@@ -29,6 +29,7 @@ import {automaticallyShowTour, USERGROUP_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {setFocusById} from "@utils/app";
+import FormComponent from "@change_component/FormComponent";
 
 const userGroupPrefixURL = '/usergroups';
 
@@ -188,7 +189,7 @@ class UserGroupAdd extends Component{
         let changeContentTranslations = {};
         changeContentTranslations.addButton = t('ADD.ADD_BUTTON');
         let getListLink = `${userGroupPrefixURL}`;
-        let breadcrumbsItems = [t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_2'), t('ADD.FORM.PAGE_3')];
+        let breadcrumbsItems = [t('ADD.FORM.PAGE_1'), [t('ADD.FORM.PAGE_2'), t('ADD.FORM.PAGE_3')]];
         let contents = [{
             inputs: [
                 {...INPUTS.ROLE,
@@ -208,7 +209,7 @@ class UserGroupAdd extends Component{
                 {...INPUTS.ICON, label: t('ADD.FORM.USER_GROUP_PICTURE'), browseTitle: t('ADD.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
-        },{
+        },[{
             inputs:[
                 {...INPUTS.COMPONENTS,
                     label: t('ADD.FORM.COMPONENTS'),
@@ -233,11 +234,11 @@ class UserGroupAdd extends Component{
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
-        },
+        }],
         ];
         return (
-            <Content translations={contentTranslations} getListLink={getListLink} permissions={UserGroupPermissions} authUser={authUser}>
-                <ChangeContent
+            <div>
+                <FormComponent
                     breadcrumbsItems={breadcrumbsItems}
                     contents={contents}
                     translations={changeContentTranslations}
@@ -251,7 +252,7 @@ class UserGroupAdd extends Component{
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />
-            </Content>
+            </div>
         );
     }
 }

@@ -29,6 +29,7 @@ import {automaticallyShowTour, USER_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {setFocusById} from "@utils/app";
+import FormComponent from "@change_component/FormComponent";
 
 const userPrefixURL = '/users';
 
@@ -262,41 +263,8 @@ class UserAdd extends Component{
         let changeContentTranslations = {};
         changeContentTranslations.addButton = t('ADD.ADD_BUTTON');
         let getListLink = `${userPrefixURL}`;
-        let breadcrumbsItems = [t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_2'), t('ADD.FORM.PAGE_3')];
+        let breadcrumbsItems = [t('ADD.FORM.PAGE_2'), [t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_3')]];
         let contents = [{
-                inputs: [
-                    {...INPUTS.EMAIL,
-                        label: t('ADD.FORM.EMAIL'),
-                        tourStep: USER_TOURS.page_1[0].selector,
-                        maxLength: 255,
-                        required: true,
-                        defaultValue: '',
-                        check: (e, entity) => ::this.validateEmail(e, entity),
-                        request: {
-                            inProcess: checkingUserEmail,
-                            status: this.startCheckingEmail && !checkingUserEmail,
-                            result: checkEmailResult,
-                            notSuccessMessage: t('ADD.VALIDATION_MESSAGES.EMAIL_EXIST'),
-                        }},
-                    {...INPUTS.PASSWORD,
-                        label: t('ADD.FORM.PASSWORD'),
-                        tourStep: USER_TOURS.page_1[1].selector,
-                        maxLength: 16,
-                        required: true,
-                        defaultValue: '',
-                        check: (e, entity) => ::this.validatePassword(e, entity)
-                    },
-                    {...INPUTS.REPEAT_PASSWORD,
-                        label: t('ADD.FORM.REPEAT_PASSWORD'),
-                        tourStep: USER_TOURS.page_1[2].selector,
-                        maxLength: 16,
-                        required: true,
-                        defaultValue: '',
-                        check: (e, entity) => ::this.validateRepeatPassword(e, entity)
-                    },
-                ],
-                hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
-            },{
                 inputs:[
                     {...INPUTS.USER_TITLE, label: t('ADD.FORM.USER_TITLE'), defaultValue: ''},
                     {...INPUTS.NAME,
@@ -321,7 +289,40 @@ class UserAdd extends Component{
                     {...INPUTS.PROFILE_PICTURE, label: t('ADD.FORM.PROFILE_PICTURE'), browseTitle: t('ADD.FORM.PROFILE_PICTURE_PLACEHOLDER')},
                 ],
                 hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
-            },{
+            },[{
+            inputs: [
+                {...INPUTS.EMAIL,
+                    label: t('ADD.FORM.EMAIL'),
+                    tourStep: USER_TOURS.page_1[0].selector,
+                    maxLength: 255,
+                    required: true,
+                    defaultValue: '',
+                    check: (e, entity) => ::this.validateEmail(e, entity),
+                    request: {
+                        inProcess: checkingUserEmail,
+                        status: this.startCheckingEmail && !checkingUserEmail,
+                        result: checkEmailResult,
+                        notSuccessMessage: t('ADD.VALIDATION_MESSAGES.EMAIL_EXIST'),
+                    }},
+                {...INPUTS.PASSWORD,
+                    label: t('ADD.FORM.PASSWORD'),
+                    tourStep: USER_TOURS.page_1[1].selector,
+                    maxLength: 16,
+                    required: true,
+                    defaultValue: '',
+                    check: (e, entity) => ::this.validatePassword(e, entity)
+                },
+                {...INPUTS.REPEAT_PASSWORD,
+                    label: t('ADD.FORM.REPEAT_PASSWORD'),
+                    tourStep: USER_TOURS.page_1[2].selector,
+                    maxLength: 16,
+                    required: true,
+                    defaultValue: '',
+                    check: (e, entity) => ::this.validateRepeatPassword(e, entity)
+                },
+            ],
+            hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
+        },{
                 inputs:[
                     {...INPUTS.USER_GROUP,
                         label: t('ADD.FORM.USER_GROUP'),
@@ -334,11 +335,11 @@ class UserAdd extends Component{
                     }
                 ],
                 hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
-            },
+            }],
         ];
         return (
-            <Content translations={contentTranslations} getListLink={getListLink} permissions={UserPermissions} authUser={authUser}>
-                <ChangeContent
+            <div>
+                <FormComponent
                     breadcrumbsItems={breadcrumbsItems}
                     contents={contents}
                     translations={changeContentTranslations}
@@ -352,7 +353,7 @@ class UserAdd extends Component{
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />
-            </Content>
+            </div>
         );
     }
 }

@@ -107,6 +107,7 @@ TooltipFontIcon.propTypes = {
     blueTheme: PropTypes.bool,
     turquoiseTheme: PropTypes.bool,
     grayTheme: PropTypes.bool,
+    whiteTheme: PropTypes.bool,
     disabled: PropTypes.bool,
 };
 

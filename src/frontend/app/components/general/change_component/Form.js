@@ -21,8 +21,6 @@ import FormInputImage from "./form_elements/FormInputImage";
 import FormSelectDescription from "./form_elements/FormSelectDescription";
 import FormMultiSelect from "./form_elements/FormMultiSelect";
 import FormPermissionTable from "./form_elements/FormPermissionTable";
-
-import styles from '@themes/default/general/change_component.scss';
 import FormSecretInput from "./form_elements/FormSecretInput";
 import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
 import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
@@ -42,6 +40,9 @@ import FormNotificationTemplateType from './form_elements/form_notification_temp
 import FormContent from "./form_elements/form_notification_template/FormContent";
 import FormComponent from "@change_component/form_elements/FormComponent";
 import FormConnectionSvg from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+
+import styles from '@themes/default/general/change_component.scss';
+import formComponentStyles from '@themes/default/general/form_component.scss';
 
 
 /**
@@ -262,11 +263,12 @@ class Form extends Component{
     }
 
     render(){
-        const {authUser} = this.props;
-        let classNames = ['form'];
-        classNames = getThemeClass({classNames, authUser, styles});
+        const {breadcrumbItem, isSubForm} = this.props;
         return (
-            <div className={styles[classNames.form]}>
+            <div className={!isSubForm ? formComponentStyles.form : ''}>
+                <div className={formComponentStyles.form_title}>
+                    <span>{breadcrumbItem}</span>
+                </div>
                 {this.generateInputs()}
             </div>
         );
@@ -280,10 +282,12 @@ Form.propTypes = {
     focusedInput: PropTypes.string,
     authUser: PropTypes.object.isRequired,
     clearValidationMessage: PropTypes.func.isRequired,
+    isSubForm: PropTypes.bool,
 };
 
 Form.defaultProps = {
     focusedInput: '',
+    isSubForm: false,
 };
 
 export default Form;

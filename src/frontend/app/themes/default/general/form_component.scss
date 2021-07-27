@@ -1,0 +1,39 @@
+@import "../constants";
+
+.form{
+  @extend .card_style;
+  padding: 70px 20px 0 0;
+  margin: 0;
+  position: relative;
+  .form_title{
+    top: -20px;
+    left: 10px;
+    position: absolute;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: $TURQUOISE_COLOR;
+    >span{
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: $FONT_FAMILY;
+      text-transform: uppercase;
+    }
+  }
+}
+
+.form_component{
+  display: grid;
+  grid-template-columns: 50% 50%;
+  row-gap: 40px;
+  column-gap: 20px;
+}
+
+.subform{
+  display: grid;
+  grid-template-columns: 100%;
+  row-gap: 40px;
+  >div{
+    @extend .form;
+  }
+}

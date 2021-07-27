@@ -16,7 +16,7 @@
 @import '../constants';
 
 $NAVIGATION_WIDTH: 95px;
-$HIGHLIGHT_MENU_COLOR: #00ACC2;
+$HIGHLIGHT_MENU_COLOR: $TURQUOISE_COLOR;
 $BACKGROUND_MENU_COLOR: #012E55;
 $MENU_COLOR: #eee;
 
@@ -107,6 +107,7 @@ $MENU_COLOR: #eee;
 }
 .nav_icon{
   vertical-align: text-bottom;
+  color: $MENU_COLOR;
 }
 .nav_name{
   margin-left: 5px;
