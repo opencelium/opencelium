@@ -70,7 +70,7 @@ export const EntitiesWithNotification = [
     {name: SchedulesAction.ENABLE_SCHEDULES, types: ['FULFILLED', 'REJECTED',]},
     {name: SchedulesAction.DISABLE_SCHEDULES, types: ['FULFILLED', 'REJECTED',]},
     {name: SchedulesAction.START_SCHEDULES, types: ['FULFILLED', 'REJECTED',]},
-    {name: TemplatesAction.FETCH_TEMPLATES, types: ['FULFILLED', 'REJECTED']},
+    //{name: TemplatesAction.FETCH_TEMPLATES, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.ADD_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.CONVERT_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.CONVERT_TEMPLATES, types: ['FULFILLED', 'REJECTED']},

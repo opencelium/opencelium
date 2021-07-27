@@ -62,10 +62,10 @@ class CardButton extends Component{
         if(hasTab) {
             return (
                 <React.Fragment>
+                    {value && <TooltipFontIcon wrapClassName={`${className} ${styles.card_button_icon}`} size={'3vw'} tooltip={tooltip} value={value} onClick={onClick} id={id} isButton={true} turquoiseTheme/>}
                     <button className={`${styles.card_button} ${className}`} onClick={onClick} id={id}>
                         <div>{text}</div>
                     </button>
-                    {value && <TooltipFontIcon wrapClassName={className} className={styles.card_button_icon} size={'3vw'} tooltip={tooltip} value={value} onClick={onClick} id={id} isButton={true} turquoiseTheme/>}
                 </React.Fragment>
             );
         } else{

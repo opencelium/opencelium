@@ -125,11 +125,11 @@ class TemplatesList extends Component{
         translations.add_button = t('LIST.IMPORT_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         let listViewData = {
-            entityIdName: 'id',
+            entityIdName: 'templateId',
             entityIdsName: 'templateIds',
             deleteSelected: () => {},
             map: (template) => {
-                return [{name: 'id', value: template.id}, {name: 'name', label: t('LIST.NAME'), value: template.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: template.description}, {name: 'from_invoker', label: t('LIST.FROM_INVOKER'), value: template.connection.fromConnector.invoker.name, width: '20%'}, {name: 'to_invoker', label: t('LIST.TO_INVOKER'), value: template.connection.toConnector.invoker.name, width: '20%'}]
+                return [{name: 'id', value: template.templateId}, {name: 'name', label: t('LIST.NAME'), value: template.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: template.description}, {name: 'from_invoker', label: t('LIST.FROM_INVOKER'), value: template.connection.fromConnector.invoker.name, width: '20%'}, {name: 'to_invoker', label: t('LIST.TO_INVOKER'), value: template.connection.toConnector.invoker.name, width: '20%'}]
             },
         }
         let mapEntity = {};

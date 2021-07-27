@@ -62,13 +62,13 @@ class ListViewItem extends React.Component{
      * to delete item
      */
     doDelete(){
-        const {mapEntity, deleteCheck, index, item, entityIdName} = this.props;
+        const {mapEntity, deleteCheck, index} = this.props;
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
         let data = this.getObjectDataFromItem();
         if(onDelete) {
             deleteCheck({
                 key: index,
-                id: data[entityIdName]
+                id: data.id
             });
             onDelete(data);
         }
@@ -88,21 +88,21 @@ class ListViewItem extends React.Component{
 
     render(){
         const {showConfirm} = this.state;
-        const {t, item, mapEntity, checks, index, entityIdName} = this.props;
+        const {t, item, mapEntity, checks, index} = this.props;
         const {viewLink, updateLink} = this.getLinks();
         let data = this.getObjectDataFromItem();
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
         let hasView = isString(viewLink) && viewLink !== '';
         let hasUpdate = isString(updateLink) && updateLink !== '';
         let hasDelete = onDelete !== null;
-        let checked = checks.findIndex(c => c[entityIdName] === data[entityIdName] && c.value) !== -1;
+        let checked = checks.findIndex(c => c.id === data.id && c.value) !== -1;
         return(
             <tr>
                 <td>
                     <Checkbox
                         id={`input_check_${index}`}
                         checked={checked}
-                        onChange={(e) => ::this.checkOneEntity(e, {key: index, id: data[entityIdName]})}
+                        onChange={(e) => ::this.checkOneEntity(e, {key: index, id: data.id})}
                         labelClassName={styles.checkbox_label}
                         inputClassName={styles.checkbox_field}
                     />
