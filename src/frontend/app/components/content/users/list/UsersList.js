@@ -93,11 +93,20 @@ class UsersList extends Component{
             result.avatar = user.userDetail.photo_s;
             return result;
         };
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'userIds',
+            deleteSelected: () => {},
+            map: (user) => {
+                return [{name: 'id', value: user.id}, {name: 'email', label: t('LIST.EMAIL'), value: user.email, width: '30%'}, {name: 'groups', label: t('LIST.ASSIGNED_GROUPS'), value: user.userGroups.name}]
+            },
+        }
         mapEntity.getViewLink = (user) => {return `${prefixUrl}/${user.id}/view`;};
         mapEntity.getUpdateLink = (user) => {return `${prefixUrl}/${user.id}/update`;};
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteUser;
         return <List
+            listViewData={listViewData}
             entities={users}
             exceptionEntities={{label: t('LIST.CURRENT_USER'), exceptions: exceptionUsers}}
             translations={translations}

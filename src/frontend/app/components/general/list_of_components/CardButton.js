@@ -19,6 +19,7 @@ import {connect} from 'react-redux';
 import {permission} from "@decorators/permission";
 import {formatHtmlId} from "@utils/app";
 import styles from "@themes/default/general/list_of_components.scss";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -40,13 +41,32 @@ class CardButton extends Component{
     }
 
     render(){
-        const {className, onClick, text, index, hasTab} = this.props;
+        const {className, onClick, text, index, hasTab, type} = this.props;
         let id = formatHtmlId(`button_${text}_${index}`);
+        let value = '';
+        let tooltip = '';
+        switch (type){
+            case 'view':
+                value = 'visibility';
+                tooltip = 'View';
+                break;
+            case 'update':
+                value = 'edit';
+                tooltip = 'Update';
+                break;
+            case 'delete':
+                value = 'delete';
+                tooltip = 'Delete';
+                break;
+        }
         if(hasTab) {
             return (
-                <button className={`${styles.card_button} ${className}`} onClick={onClick} id={id}>
-                    <div>{text}</div>
-                </button>
+                <React.Fragment>
+                    {value && <TooltipFontIcon wrapClassName={`${className} ${styles.card_button_icon}`} size={'3vw'} tooltip={tooltip} value={value} onClick={onClick} id={id} isButton={true} turquoiseTheme/>}
+                    <button className={`${styles.card_button} ${className}`} onClick={onClick} id={id}>
+                        <div>{text}</div>
+                    </button>
+                </React.Fragment>
             );
         } else{
             return (

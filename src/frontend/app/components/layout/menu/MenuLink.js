@@ -4,20 +4,16 @@ import React from "react";
 import {Link as ReactRouterLink} from "react-router";
 import LogoOcWhiteImagePath from "assets/logo_oc_white.png";
 
-const LinkLogo = (props) => {
-    return (
-        <div {...props}>
-            {props.children}
-        </div>
-    );
-};
-const Link = (props) => {
-    return (
-        <a {...props}>
-            {props.children}
-        </a>
-    );
-};
+const LinkBlock = React.forwardRef((props, ref) => (
+    <div ref={ref} {...props}>
+        {props.children}
+    </div>
+))
+const Link = React.forwardRef((props, ref) => (
+    <a ref={ref} {...props}>
+        {props.children}
+    </a>
+))
 
 export const MenuIcon = (props) => {
     return(
@@ -35,10 +31,13 @@ export const MenuLink = (props) => {
             component={Link}
             onClick={props.onClick ? props.onClick : () => {}}
         >
-            <MenuIcon value={props.value}/>
+            <MenuIcon value={props.value} size={props.size}/>
             <span className={styles.nav_name}>{props.label}</span>
         </ReactRouterLink>
     )
+}
+MenuLink.defaultProps = {
+    size: 30,
 }
 export const MenuLinkLogo = (props) => {
     return(
@@ -46,7 +45,7 @@ export const MenuLinkLogo = (props) => {
             onlyActiveOnIndex={true}
             to={'/'}
             className={styles.menu_link_logo}
-            component={LinkLogo}
+            component={LinkBlock}
             onClick={props.onClick ? props.onClick : () => {}}
         >
             <img className={styles.logo_image} src={LogoOcWhiteImagePath} alt={'OpenCelium'}/>
@@ -86,26 +85,20 @@ export class MenuLinkWithSubLinks extends React.Component{
         const {isCollapsed} = this.state;
         const {isMainMenuExpanded, to, value, label, subLinks} = this.props;
         let collapseMenuClassName = styles.main_menu_collapse_menu;
-        let collapseIconClassName = styles.main_menu_collapse_link;
+        let collapseIconClassName = styles.main_menu_collapse_icon;
         if(!isCollapsed && isMainMenuExpanded){
             collapseMenuClassName += ` ${styles.show_sub_links}`;
             collapseIconClassName += ` ${styles.rotate}`
         }
         return(
-            <ReactRouterLink
-                className={`${styles.nav_link} ${styles.main_menu_collapse}`}
-                onlyActiveOnIndex={true}
-                activeClassName={styles.active}
-                to={to}
-                component={Link}
-            >
+            <div className={`${styles.nav_link} ${styles.main_menu_collapse}`}>
                 <MenuIcon value={value}/>
-                <span className={styles.nav_name}>{label}</span>
+                <ReactRouterLink key={label} onlyActiveOnIndex to={to} className={`${styles.main_menu_collapse_link}`}>{label}</ReactRouterLink>
                 <FontIcon className={collapseIconClassName} size={18} value={'expand_more'} onClick={::this.onToggleCollapse}/>
                 <ul className={collapseMenuClassName}>
                     {subLinks.map(subLink => <ReactRouterLink key={subLink.label} onlyActiveOnIndex to={subLink.to} className={`${styles.main_menu_collapse_sublink}`}>{subLink.label}</ReactRouterLink>)}
                 </ul>
-            </ReactRouterLink>
+            </div>
         )
     }
 }

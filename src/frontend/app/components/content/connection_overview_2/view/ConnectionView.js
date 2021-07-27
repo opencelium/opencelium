@@ -28,7 +28,7 @@ import CConnection from "@classes/components/content/connection/CConnection";
 import {CONNECTION_ADD_TOURS} from "@utils/constants/tours";
 
 
-const connectionPrefixURL = '/connection_overview_2';
+const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
     const auth = state.get('auth');

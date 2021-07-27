@@ -102,6 +102,7 @@ class LogoutMenuItem extends Component{
                 onClick={::this.wantLogout}
                 value={'logout'}
                 label={'Log Out'}
+                size={24}
             />,
             <Confirmation
                 key={'confirmation'}

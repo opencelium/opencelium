@@ -15,11 +15,11 @@
 
 import {List, fromJS} from 'immutable';
 
-import {UserGroupsAction} from '../utils/actions';
-import { addUserGroupSubscriber, updateUserGroupSubscriber, deleteUserGroupSubscriber } from '../utils/socket/userGroups';
+import {UserGroupsAction} from '@utils/actions';
+import { addUserGroupSubscriber, updateUserGroupSubscriber, deleteUserGroupSubscriber } from '@utils/socket/userGroups';
 
-import {updateObj} from '../utils/app';
-import {API_REQUEST_STATE} from "../utils/constants/app";
+import {updateObj} from '@utils/app';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const initialState = fromJS({
@@ -33,6 +33,7 @@ const initialState = fromJS({
     fetchingUserGroups: API_REQUEST_STATE.INITIAL,
     deletingUserGroup: API_REQUEST_STATE.INITIAL,
     deletingUserGroupIcon: API_REQUEST_STATE.INITIAL,
+    deletingUserGroups: false,
     userGroup: {},
     userGroups: List([]),
     error: null,
@@ -43,12 +44,14 @@ const initialState = fromJS({
 let userGroup = {};
 let userGroups = [];
 let index = 0;
+let indexes = [];
 
 /**
  * redux reducer for userGroups
  */
 const reducer = (state = initialState, action) => {
     userGroups = state.get('userGroups');
+    indexes = [];
     switch (action.type) {
         case UserGroupsAction.CHECK_USERGROUPNAME:
             return state.set('checkingUserGroupName', true).set('checkNameResult', null).set('error', null);
@@ -130,6 +133,25 @@ const reducer = (state = initialState, action) => {
             return state.set('updatingUserGroup', API_REQUEST_STATE.FINISH).set('deletingUserGroupIcon', API_REQUEST_STATE.FINISH);
         case UserGroupsAction.DELETE_USERGROUPICON_REJECTED:
             return state.set('updatingUserGroup', API_REQUEST_STATE.ERROR).set('deletingUserGroupIcon', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case UserGroupsAction.DELETE_USERGROUPS:
+            return state.set('deletingUserGroups', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case UserGroupsAction.DELETE_USERGROUPS_FULFILLED:
+            for(let i = 0; i < action.payload.userGroupIds.length; i++) {
+                indexes.push(userGroups.findIndex(function (group) {
+                    return group.id === action.payload.userGroupIds[i];
+                }));
+            }
+            if(indexes.length >= 0) {
+                for(let i = indexes.length - 1; i >= 0; i--){
+                    if(indexes[i] >= 0) {
+                        userGroups = userGroups.delete(indexes[i]);
+                    }
+                }
+                return state.set('deletingUserGroups', false).set('userGroups', userGroups);
+            }
+            return state.set('deletingUserGroups', false);
+        case UserGroupsAction.DELETE_USERGROUPS_REJECTED:
+            return state.set('deletingUserGroups', false).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

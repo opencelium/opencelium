@@ -210,19 +210,6 @@ class ScheduleList extends Component{
     }
 
     /**
-     * to check if at least one of checks state true
-     */
-    isOneChecked(){
-        let {checks} = this.props;
-        for(let i = 0; i < checks.length; i++){
-            if(checks[i].value){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * to sort all schedules by id
      */
     sortAllCurrentSchedules(){
@@ -426,7 +413,7 @@ class ScheduleList extends Component{
 
     render(){
         const {currentSchedules} = this.state;
-        const {authUser, readOnly} = this.props;
+        const {authUser, readOnly, isOneChecked} = this.props;
         let classNames = [
             'schedule_list',
             'checkbox',
@@ -448,13 +435,13 @@ class ScheduleList extends Component{
                         currentSchedules.length !== 0 && !readOnly &&
                             <div className={styles[classNames.bulk_actions]}>
                                 <Button authUser={authUser} title={'Start'} className={styles[classNames.action_item]}
-                                        onClick={::this.startSelectedSchedules} disabled={!this.isOneChecked()}/>
+                                        onClick={::this.startSelectedSchedules} disabled={!isOneChecked()}/>
                                 <Button authUser={authUser} title={'Enable'} className={styles[classNames.action_item]}
-                                        onClick={::this.enableSelectedSchedules} disabled={!this.isOneChecked()}/>
+                                        onClick={::this.enableSelectedSchedules} disabled={!isOneChecked()}/>
                                 <Button authUser={authUser} title={'Disable'} className={styles[classNames.action_item]}
-                                        onClick={::this.disableSelectedSchedules} disabled={!this.isOneChecked()}/>
+                                        onClick={::this.disableSelectedSchedules} disabled={!isOneChecked()}/>
                                 <Button authUser={authUser} title={'Delete'} onClick={::this.deleteSelectedSchedules}
-                                        disabled={!this.isOneChecked()}/>
+                                        disabled={!isOneChecked()}/>
                             </div>
                     }
                     {this.renderPagination()}

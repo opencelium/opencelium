@@ -5,7 +5,11 @@
   "LIST":{
     "ADD_BUTTON": "Add Connection",
     "HEADER": "Connections",
-    "EMPTY_LIST": "The list of Connections is empty"
+    "EMPTY_LIST": "The list of Connections is empty",
+    "TITLE": "Title",
+    "DESCRIPTION": "Description",
+    "FROM_CONNECTOR": "From Connector",
+    "TO_CONNECTOR": "To Connector"
   },
   "ADD":{
     "FORM":{

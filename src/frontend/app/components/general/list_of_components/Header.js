@@ -29,11 +29,15 @@ class ListHeader extends Component{
     }
 
     render(){
-        const {header} = this.props;
+        const {header, icons} = this.props;
         return (
-            <ContentHeader header={header} className={styles.list_header}/>
+            <ContentHeader header={header} icons={icons} className={styles.list_header}/>
         );
     }
+}
+
+ListHeader.defaultProps = {
+    icons: [],
 }
 
 

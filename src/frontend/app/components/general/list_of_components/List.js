@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import { withRouter } from 'react-router';
-import { Container, Row, Col } from "react-grid-system";
+import { Row, Col } from "react-grid-system";
 
 import ListHeader from './Header';
 import Card from './Card';
@@ -45,21 +45,29 @@ import {
     removeFocusDocumentNavigation,
 } from "@utils/key_navigation";
 import {
-    componentAppear,
+    ascSortByNameFunction,
+    componentAppear, descSortByNameFunction, formatHtmlId,
     getThemeClass,
     isString,
     searchByNameFunction,
     setFocusById,
-    sortByNameFunction
 } from "@utils/app";
 import styles from '@themes/default/general/list_of_components.scss';
 import Input from "@basic_components/inputs/Input";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import GridViewMenu from "@components/general/list_of_components/GridViewMenu";
 import ListView from "@components/general/list_of_components/ListView";
+import Button from "@basic_components/buttons/Button";
 
 
 const AMOUNT_OF_ROWS = 3;
+
+const AMOUNT_OF_ITEMS_FOR_LIST = 10;
+
+const VIEW_TYPE = {
+    LIST: 'LIST',
+    GRID: 'GRID',
+};
 
 function mapStateToProps(state){
     const app = state.get('app');
@@ -77,13 +85,15 @@ class List extends Component{
         super(props);
 
         this.state = {
-            viewType: 'grid',
+            viewType: VIEW_TYPE.GRID,
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
             searchValue: '',
             gridViewType: '4',
             entitiesProPage: 4 * AMOUNT_OF_ROWS,
+            checks: [],
+            sortType: 'asc',
         };
     }
 
@@ -110,6 +120,7 @@ class List extends Component{
             addAddEntityKeyNavigation(this);
         }
         addFocusDocumentNavigation(this);
+        document.addEventListener('mousedown', ::this.onMouseDownOnDocument)
         setFocusById('search_field');
         componentAppear('app_list');
     }
@@ -135,6 +146,7 @@ class List extends Component{
         if(mapEntity.hasOwnProperty('getAddLink')) {
             removeAddEntityKeyNavigation(this);
         }
+        document.removeEventListener('mousedown', ::this.onMouseDownOnDocument)
         removeFocusDocumentNavigation(this);
         switchUserListKeyNavigation(false);
     }
@@ -152,20 +164,47 @@ class List extends Component{
         }
     }
 
-    setGridViewType(type){
+    toggleSortType(){
         this.setState({
-            viewType: 'grid',
+            sortType: this.state.sortType === 'asc' ? 'desc' : 'asc',
+        }, ::this.setCurrentPageItems)
+    }
+
+    setChecks(checks){
+        this.setState({
+            checks,
+        });
+    }
+
+    onMouseDownOnDocument(){
+        if(this.state.selectedCard !== -1){
+            this.setState({
+                selectedCard: -1,
+                keyNavigateType: '',
+            });
+        }
+    }
+
+    setGridViewType(type){
+        switchUserListKeyNavigation(false);
+        this.setState({
+            viewType: VIEW_TYPE.GRID,
             gridViewType: `${type}`,
             entitiesProPage: parseInt(type) * AMOUNT_OF_ROWS,
+            selectedCard: -1,
+            keyNavigateType: '',
         }, this.setCurrentPageItems);
     }
 
     setListView(){
-        const {mapListViewData, listViewDataHeader} = this.props;
-        if(mapListViewData && listViewDataHeader) {
+        const {listViewData} = this.props;
+        switchUserListKeyNavigation(false);
+        if(listViewData) {
             this.setState({
-                viewType: 'list',
-                entitiesProPage: 10,
+                viewType: VIEW_TYPE.LIST,
+                entitiesProPage: AMOUNT_OF_ITEMS_FOR_LIST,
+                selectedCard: -1,
+                keyNavigateType: '',
             }, this.setCurrentPageItems);
         }
     }
@@ -278,6 +317,9 @@ class List extends Component{
         } else{
             switchUserListKeyNavigation(false);
         }
+        if(selectedCard >= max){
+            selectedCard = max - 1;
+        }
         this.setState({selectedCard, keyNavigateType: ''});
     }
 
@@ -295,9 +337,11 @@ class List extends Component{
      * to sort entities by name/title
      */
     sortEntities(){
+        const {sortType} = this.state;
         let result = this.searchEntities();
         if(result.length > 1){
-            result = result.sort(sortByNameFunction);
+            let sortFunction = sortType === 'asc' ? ascSortByNameFunction : descSortByNameFunction;
+            result = result.sort(sortFunction);
         }
         return result;
     }
@@ -322,18 +366,39 @@ class List extends Component{
         });
     }
 
+    deleteSelected(){
+        const {checks} = this.state;
+        const {listViewData} = this.props;
+        let entityIds = checks.filter(c => c.value);
+        entityIds = entityIds.map(c => c.id);
+        listViewData.deleteSelected({[listViewData.entityIdsName]: entityIds});
+    }
+
+    isOneChecked(){
+        let {checks} = this.state;
+        for(let i = 0; i < checks.length; i++){
+            if(checks[i].value){
+                return true;
+            }
+        }
+        return false;
+    }
+
     render(){
-        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems, mapListViewData, listViewDataHeader} = this.props;
-        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType} = this.state;
+        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems, listViewData} = this.props;
+        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType} = this.state;
         let {page, translations} = this.props;
         let classNames = ['empty_list', 'search_field'];
         classNames = getThemeClass({classNames, authUser, styles});
         page.entitiesLength = this.searchEntities().length;
-        let listViewData = [];
-        if(viewType === 'list'){
-            listViewData = currentPageItems.map(item => mapListViewData(item));
+        let listViewEntities = [];
+        if(viewType === VIEW_TYPE.LIST){
+            listViewEntities = currentPageItems.map(item => listViewData.map(item));
         }
-        const isListViewIconDisabled = !(mapListViewData && listViewDataHeader);
+        const isListViewIconDisabled = !(listViewData);
+        const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width};}) : [];
+        const entityIdName = listViewData ? listViewData.entityIdName : '';
+        const isDeleteSelectedButtonDisabled = !::this.isOneChecked();
         return(
             <Row id={'app_list'}>
                 <Col sm={12}>
@@ -341,7 +406,8 @@ class List extends Component{
                         <ListHeader header={translations.header}/>
                         <div style={{display: 'flex'}}>
                             {
-                                mapEntity.hasOwnProperty('getAddLink') ?
+                                mapEntity.hasOwnProperty('getAddLink')
+                                ?
                                     <AddButton
                                         hasTour={translations.header.hasOwnProperty('onHelpClick')}
                                         title={<span>{translations.add_button}</span>}
@@ -350,12 +416,21 @@ class List extends Component{
                                         permission={permissions.CREATE}
                                         authUser={authUser}
                                     />
-                                    :
-                                    mapEntity.hasOwnProperty('AddButton') &&
-                                    <mapEntity.AddButton/>
+                                :
+                                    mapEntity.hasOwnProperty('AddButton') && <mapEntity.AddButton/>
                             }
                             {
-                                mapEntity.hasOwnProperty('AdditionalButton') && mapEntity.AdditionalButton
+                                viewType === VIEW_TYPE.LIST &&
+                                <div className={styles.delete_selected_button}>
+                                    <Button icon={'delete'} onClick={::this.deleteSelected} id={formatHtmlId(`button_delete_selected`)} disabled={isDeleteSelectedButtonDisabled}>
+                                        <span>{'Delete Selected'}</span>
+                                    </Button>
+                                </div>
+                            }
+                            {mapEntity.hasOwnProperty('AdditionalButton') &&
+                                <div className={styles.additional_button}>
+                                    {mapEntity.AdditionalButton}
+                                </div>
                             }
                             {
                                 entities.length > 0 && !noSearchField &&
@@ -371,8 +446,8 @@ class List extends Component{
                                     </span>
                             }
                         </div>
-                        {viewType === 'list' && <ListView items={listViewData} header={listViewDataHeader}/>}
-                        {viewType === 'grid' &&
+                        {viewType === VIEW_TYPE.LIST && <ListView sortType={sortType} toggleSortType={::this.toggleSortType} setChecks={::this.setChecks} entitiesName={'allEntities'} entityIdName={entityIdName} allEntities={entities} items={listViewEntities} header={listViewEntitiesHeader} mapEntity={mapEntity}/>}
+                        {viewType === VIEW_TYPE.GRID &&
                             <div className={styles.grid_view}>
                                 {
                                     currentPageItems.length > 0

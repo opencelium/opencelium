@@ -60,7 +60,7 @@ class ContentHeader extends Component{
     }
 
     render(){
-        const {authUser} = this.props;
+        const {authUser, icons} = this.props;
         let {header, className} = this.props;
         let title = header;
         let hasHelp = false;
@@ -83,6 +83,11 @@ class ContentHeader extends Component{
                         :
                             null
                 }
+                <sup>
+                    {
+                        icons.map((Icon, key) => <React.Fragment key={key}>{Icon}</React.Fragment>)
+                    }
+                </sup>
             </div>
         );
     }
@@ -90,6 +95,7 @@ class ContentHeader extends Component{
 
 ContentHeader.defaultProps = {
     className: '',
+    icons: [],
 }
 
 export default ContentHeader;

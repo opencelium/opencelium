@@ -84,6 +84,14 @@ class ConnectionsList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        let listViewData = {
+            entityIdName: 'connectionId',
+            entityIdsName: 'connectionIds',
+            deleteSelected: () => {},
+            map: (connection) => {
+                return [{name: 'id', value: connection.connectionId}, {name: 'title', label: t('LIST.TITLE'), value: connection.title, width: '15%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: connection.description}, {name: 'from_connector', label: t('LIST.FROM_CONNECTOR'), value: connection.fromConnector.title, width: '15%'}, {name: 'to_connector', label: t('LIST.TO_CONNECTOR'), value: connection.toConnector.title, width: '15%'}]
+            },
+        }
         let mapEntity = {};
         mapEntity.map = (connection, key) => {
             let result = {};
@@ -97,6 +105,7 @@ class ConnectionsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnection;
         return <List
+            listViewData={listViewData}
             entities={connections}
             translations={translations}
             mapEntity={mapEntity}

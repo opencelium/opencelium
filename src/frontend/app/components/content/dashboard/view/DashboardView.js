@@ -162,11 +162,13 @@ class DashboardView extends Component{
         if(layout.length === 0){
             gridSettings.className += ` ${styles.dashboard_no_widgets}`;
         }
+        const EditDashboardIcon = HAS_DASHBOARD_WIDGET_ENGINE && <TooltipFontIcon isButton={true} size={16} grayTheme tooltip={isWidgetEditOn ? 'Apply' : 'Edit'} value={isWidgetEditOn ? 'check_circle_outline' : 'edit'} onClick={::this.toggleWidgetEdit}/>;
+        const icons = [EditDashboardIcon];
         return (
             <div id={'app_content'}>
-                <ListHeader header={t('dashboard:HEADER')}/>
+                <ListHeader header={t('dashboard:HEADER')} icons={icons}/>
                 <div className={styles.dashboard_view}>
-                    {HAS_DASHBOARD_WIDGET_ENGINE && <TooltipFontIcon isButton={true} wrapClassName={styles.dashboard_edit_icon} tooltip={isWidgetEditOn ? 'Apply' : 'Edit'} value={isWidgetEditOn ? 'check_circle_outline' : 'edit'} onClick={::this.toggleWidgetEdit}/>}
+
                     <div>
                         {isWidgetEditOn &&
                             <DashboardToolbox

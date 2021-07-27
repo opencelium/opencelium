@@ -3,6 +3,10 @@
     "IMPORT_BUTTON": "Import template",
     "EMPTY_LIST": "The list of Templates is empty",
     "HEADER": "Templates",
-    "HEADER_ADMIN_CARDS": "Admin Cards"
+    "HEADER_ADMIN_CARDS": "Admin Cards",
+    "NAME": "Name",
+    "DESCRIPTION": "Description",
+    "FROM_INVOKER": "From Invoker",
+    "TO_INVOKER": "To Invoker"
   }
 }

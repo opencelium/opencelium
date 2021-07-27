@@ -20,6 +20,16 @@
   @extend .card_style;
   overflow-x: auto;
   margin-bottom: 20px;
+  table{
+    table-layout: fixed;
+    td{
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    th{
+      @extend .overflow_text;
+    }
+  }
 }
 
 .grid_view{
@@ -142,23 +152,17 @@
 }
 
 .title{
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  @extend .overflow_text;
   max-width: 100%;
-  font-family: $FONT_FAMILY;
-  font-size: 1.6vw;
+  font-size: 1.4vw;
   color: #000000;
   font-weight: normal;
 }
 
 .subtitle{
-  font-family: $FONT_FAMILY;
+  @extend .overflow_text;
   font-size: 0.9vw;
   color: #797979;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
 }
 
 .card_avatar{
@@ -238,14 +242,17 @@
 .add_button{
   font-family: $FONT_FAMILY;
   margin-top: 20px;
-  button{
-    span:nth-child(2){
-
-    }
-  }
 }
-@media only screen and (max-width: 600px)  {
-  .add_button{
+.additional_button{
+  @extend .add_button;
+  margin-left: 10px;
+}
+.delete_selected_button{
+  @extend .add_button;
+  margin-left: 10px;
+}
+@media only screen and (max-width: 756px)  {
+  .add_button,.delete_selected_button{
     button{
       span:nth-child(2){
         display: none;
@@ -322,6 +329,30 @@
 .card_button:focus{
   text-decoration: underline;
   outline: none !important;
+}
+.card_button_icon{
+  height: 100%;
+  display: none;
+  padding: 0 !important;
+}
+.card_delete_button_icon{
+  margin-left: auto;
+}
+@media only screen and (max-width: 768px){
+  .card_button{
+    display: none;
+  }
+  .card_button_icon{
+    display: block;
+  }
+}
+@media only screen and (min-width: 768px){
+  .card_button{
+    display: block;
+  }
+  .card_button_icon{
+    display: none;
+  }
 }
 
 .card_as_button{

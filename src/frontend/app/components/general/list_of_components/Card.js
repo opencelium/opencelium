@@ -280,24 +280,24 @@ class ListCard extends Component{
         if(this.hasNotActions()){
             return (
                 <div className={styles[classNames.card_actions]}>
-                    <CardButton hasTab={false} className={styles[classNames.no_actions_card]} text={'nothing'} permission={permissions.READ} index={index}/>
+                    <CardButton type={'nothing'} hasTab={false} className={styles[classNames.no_actions_card]} text={'nothing'} permission={permissions.READ} index={index}/>
                 </div>
             );
         }
         if(!isException){
             return (
                 <div className={styles[classNames.card_actions]} style={!hasView && !hasUpdate && !hasGraph ? {textAlign: 'right'} : null}>
-                    {hasView && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
-                    {hasUpdate && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/>}
+                    {hasView && <CardButton type={'view'} className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
+                    {hasUpdate && <CardButton type={'update'} className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/>}
                     {hasGraph && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-graph-${index + 1}` : ''}`} index={index} onClick={::this.viewGraph} text={graphButtonText} permission={permissions.READ}/>}
-                    {hasDelete && <CardButton className={`${deleteButtonStyle} ${hasTour ? `tour-step-delete-${index + 1}` : ''}`} index={index} onClick={::this.wantDelete} text={deleteButtonText} permission={permissions.DELETE}/>}
+                    {hasDelete && <CardButton type={'delete'} className={`${deleteButtonStyle} ${hasTour ? `tour-step-delete-${index + 1}` : ''}`} index={index} onClick={::this.wantDelete} text={deleteButtonText} permission={permissions.DELETE}/>}
                 </div>
             );
         } else{
             return (
                 <div className={styles[classNames.card_actions]}>
-                    {hasView && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
-                    {hasUpdate && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/>}
+                    {hasView && <CardButton type={'view'} className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
+                    {hasUpdate && <CardButton type={'update'} className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/>}
                     {/*<CardButton hasTab={false} className={`${currentCardStyle}`} index={index} text={exceptionLabel} permission={permissions.READ}/>*/}
                 </div>
             );

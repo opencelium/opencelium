@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { UserGroupsAction } from '@utils/actions';
+import {SchedulesAction, UserGroupsAction} from '@utils/actions';
 
 
 /**
@@ -90,6 +90,42 @@ const deleteUserGroupIconRejected = (error) => {
     });
 };
 
+/**
+ * delete userGroups
+ * @param userGroups
+ * @returns {{type: string, payload: *}}
+ */
+const deleteUserGroups = (userGroups) => {
+    return {
+        type: UserGroupsAction.DELETE_USERGROUPS,
+        payload: userGroups,
+    };
+};
+
+/**
+ * delete userGroups fulfilled
+ * @param status
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteUserGroupsFulfilled = (status) => {
+    return {
+        type: UserGroupsAction.DELETE_USERGROUPS_FULFILLED,
+        payload: status,
+    };
+};
+
+/**
+ * delete userGroups rejected
+ * @param error
+ * @returns {promise}
+ */
+const deleteUserGroupsRejected = (error) => {
+    return Rx.Observable.of({
+        type: UserGroupsAction.DELETE_USERGROUPS_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteUserGroup,
@@ -97,5 +133,8 @@ export{
     deleteUserGroupRejected,
     deleteUserGroupIcon,
     deleteUserGroupIconFulfilled,
-    deleteUserGroupIconRejected
+    deleteUserGroupIconRejected,
+    deleteUserGroups,
+    deleteUserGroupsFulfilled,
+    deleteUserGroupsRejected,
 };

@@ -35,7 +35,7 @@ import {setFocusById} from "@utils/app";
 import {removeLS} from "@utils/LocalStorage";
 
 
-const connectionPrefixURL = '/connection_overview_2';
+const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
     const auth = state.get('auth');

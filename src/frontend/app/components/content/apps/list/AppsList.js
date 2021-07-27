@@ -62,6 +62,14 @@ class AppsList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'appIds',
+            deleteSelected: () => {},
+            map: (app) => {
+                return [{name: 'id', value: app.id}, {name: 'name', label: t('LIST.NAME'), value: app.name, width: '30%'}, {name: 'status', label: t('LIST.STATUS'), value: app.status, width: '25%'}]
+            },
+        }
         let mapEntity = {};
         mapEntity.map = (app) => {
             let result = {};
@@ -87,6 +95,7 @@ class AppsList extends Component{
         };
         mapEntity.getOnCardClickLink = (app) => {return `${app.link}`;};
         return <List
+            listViewData={listViewData}
             entities={apps}
             translations={translations}
             mapEntity={mapEntity}

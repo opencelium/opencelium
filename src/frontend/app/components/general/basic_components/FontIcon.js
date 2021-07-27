@@ -92,7 +92,7 @@ class FontIcon extends Component{
 }
 
 FontIcon.propTypes = {
-    size: PropTypes.number,
+    size: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     isButton: PropTypes.bool,
     iconStyles: PropTypes.object,
     darkTheme: PropTypes.bool,
