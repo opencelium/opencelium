@@ -72,7 +72,6 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header == null || !header.startsWith(SecurityConstant.BEARER)){
             chain.doFilter(request, response);

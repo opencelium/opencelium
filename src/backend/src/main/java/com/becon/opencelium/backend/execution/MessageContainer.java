@@ -155,29 +155,14 @@ public class MessageContainer {
             message = data.get(loopIndex);
         }
 
-//        if (loopingArrays == null || loopingArrays.isEmpty()){
-//            message = data.get(loopIndex);
-//        } else {
-////            if (currentLoopArr == null) {
-////                currentLoopArr = loopingArrays.stream().reduce((f,s)->s).get();
-////            }
-////            String arr = currentLoopArr.replaceAll("\\[([a-z,*]+)\\]", "[]");
-////            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
-////            message = data.get(loopIndex);
-//
-//            String arr = loopingArrays.stream().reduce((f,s)->s).get();
-//            loopIndex = loopStack.containsKey(arr) ? loopStack.get(arr) : 0;
-//            message = data.get(loopIndex);
-//        }
-
         int size = conditionParts.size() - 1;
         int i = 0;
         for (String part : conditionParts){
             if(part.isEmpty()){
                 continue;
             }
-            part = part.contains(":") ? part.split(":")[1] : part;
             condition = condition + "." + part;
+            part = part.contains(":") ? part.split(":")[1] : part;
             String array = ConditionUtility.getLastArray(condition);// need to find index
             int index = 0;
             boolean hasLoop = false;
@@ -203,8 +188,7 @@ public class MessageContainer {
                 }
                 part = part + "[" + xmlIndex + "]";
             } else if((part.contains("[]") || part.contains("[*]")) && !hasLoop){
-                part = part.replace("[]", "");
-                part = part + "[*]";
+                part = part.contains("[*]") ? part : part.replace("[]", "") + "[*]";
             }
 
             xpathQuery = xpathQuery + part + "/";
