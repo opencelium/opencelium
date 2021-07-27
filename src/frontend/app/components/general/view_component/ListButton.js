@@ -31,14 +31,10 @@ class ListButton extends Component{
     }
 
     render(){
-        const {authUser} = this.props;
-        let classNames = ['list_button'];
-        classNames = getThemeClass({classNames, authUser, styles});
         return (
             <ContentNavigationButton
                 {...this.props}
                 icon={'list_alt'}
-                className={styles[classNames.list_button]}
                 type={'list'}
             />
         );
@@ -48,7 +44,6 @@ class ListButton extends Component{
 ListButton.propTypes = {
     link: PropTypes.string.isRequired,
     permission: PropTypes.object.isRequired,
-    authUser: PropTypes.object.isRequired,
 };
 
 export default ListButton;

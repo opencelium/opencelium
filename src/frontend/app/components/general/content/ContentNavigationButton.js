@@ -112,7 +112,6 @@ ContentNavigationButton.propTypes = {
     link: PropTypes.string.isRequired,
     isPressedButton: PropTypes.bool,
     permission: PropTypes.object.isRequired,
-    authUser: PropTypes.object.isRequired,
     type: PropTypes.string,
 };
 

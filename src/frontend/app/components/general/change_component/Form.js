@@ -1,293 +1,149 @@
-/*
- * Copyright (C) <2021>  <becon GmbH>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+import React from 'react';
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import FormInput from "./form_elements/FormInput";
-import FormSelect from "./form_elements/FormSelect";
-import FormInputImage from "./form_elements/FormInputImage";
-import FormSelectDescription from "./form_elements/FormSelectDescription";
-import FormMultiSelect from "./form_elements/FormMultiSelect";
-import FormPermissionTable from "./form_elements/FormPermissionTable";
-import FormSecretInput from "./form_elements/FormSecretInput";
-import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
-import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
-import {getThemeClass, isString} from "@utils/app";
-import FormMode from "./form_elements/form_connection/FormMode";
-import FormConnectionTitle from "./form_elements/form_connection/FormTitle";
-import FormUserTitle from "./form_elements/FormUserTitle";
-import FormInvokerName from './form_elements/form_invoker/FormName';
-import FormInvokerDescription from './form_elements/form_invoker/FormDescription';
-import FormInvokerHint from './form_elements/form_invoker/FormHint';
-import FormInvokerIcon from './form_elements/form_invoker/FormIcon';
-import FormAuthentication from "./form_elements/form_invoker/FormAuthentication";
-import FormConnection from "./form_elements/form_invoker/FormConnection";
-import FormOperations from "./form_elements/form_invoker/FormOperations";
-import FormNotificationTemplateName from './form_elements/form_notification_template/FormName';
-import FormNotificationTemplateType from './form_elements/form_notification_template/FormType';
-import FormContent from "./form_elements/form_notification_template/FormContent";
-import FormComponent from "@change_component/form_elements/FormComponent";
-import FormConnectionSvg from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import styles from '@themes/default/general/form_component.scss';
+import FormSection from "@change_component/FormSection";
+import {isArray, isEmptyObject} from "@utils/app";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {Col, Row} from "react-grid-system";
+import ListHeader from "@components/general/list_of_components/Header";
+import AddButton from "@components/general/list_of_components/AddButton";
+import ListButton from "@components/general/view_component/ListButton";
 
-import styles from '@themes/default/general/change_component.scss';
-import formComponentStyles from '@themes/default/general/form_component.scss';
-
-
-/**
- * Form Component
- */
-class Form extends Component{
-
-    constructor(props){
+class Form extends React.Component{
+    constructor(props) {
         super(props);
-    }
-
-    /**
-     * to map Field Inputs correspondingly
-     */
-    mapInputs(data, key){
-        const {entity, updateEntity, clearValidationMessage, renderNavigationComponent, renderValidationMessage} = this.props;
-        switch(data.type){
-            case 'select+description':
-                return <FormSelectDescription
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'select':
-                return <FormSelect
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'multiselect':
-                return <FormMultiSelect
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    />;
-            case 'permission_table':
-                return <FormPermissionTable
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'file':
-                return <FormInputImage
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'secret':
-                return <FormSecretInput
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'component':
-                return <FormComponent
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'password':
-            case 'text':
-            case 'email':
-            case 'textarea':
-                return <FormInput
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'connection_title':
-                return <FormConnectionTitle
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    clearValidationMessage={clearValidationMessage}
-                />;
-            case 'connectors':
-                return <FormConnectors
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'connection_mode':
-                return <FormMode
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    clearValidationMessage={clearValidationMessage}
-                />;
-            case 'methods':
-                return <FormMethods
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'connection_svg':
-                return <FormConnectionSvg
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    renderNavigationComponent={renderNavigationComponent}
-                    renderValidationMessage={renderValidationMessage}
-                />;
-            case 'invoker_name':
-                return <FormInvokerName
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    clearValidationMessage={clearValidationMessage}
-                />;
-            case 'invoker_description':
-                return <FormInvokerDescription
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'invoker_hint':
-                return <FormInvokerHint
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'invoker_icon':
-                return <FormInvokerIcon
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'invoker_connection':
-                return <FormConnection
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'invoker_authentication':
-                return <FormAuthentication
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'invoker_operations':
-                return <FormOperations
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'user_title':
-                return <FormUserTitle
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                />;
-            case 'notification_template_name':
-                return <FormNotificationTemplateName
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    clearValidationMessage={clearValidationMessage}
-                />;
-            case 'notification_template_type':
-                return <FormNotificationTemplateType
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    clearValidationMessage={clearValidationMessage}
-                />;
-            case 'notification_template_content':
-                return <FormContent
-                    key={key}
-                    entity={entity}
-                    updateEntity={updateEntity}
-                    data={data}
-                    clearValidationMessage={clearValidationMessage}
-                />;
-
+        let onlyInputs = [];
+        for(let i = 0; i < props.contents.length; i++){
+            if(isArray(props.contents[i])){
+                for(let j = 0; j < props.contents[i].length; j++){
+                    onlyInputs = onlyInputs.concat(props.contents[i][j].inputs);
+                }
+            } else{
+                onlyInputs = onlyInputs.concat(props.contents[i].inputs);
+            }
         }
-        return null;
+        let entity = [];
+        if(isEmptyObject(props.entity)){
+            entity = this.getInputsState(onlyInputs);
+        } else{
+            entity = props.entity;
+        }
+        for(let i = 0; i < onlyInputs.length; i++){
+            if(onlyInputs[i].hasOwnProperty('callback')){
+                if(typeof onlyInputs[i].callback === 'function'){
+                    onlyInputs[i].callback(entity[onlyInputs[i].name]);
+                }
+            }
+        }
+        this.state = {
+            entity,
+            page: 0,
+            hasError: false,
+            hasRequired: false,
+            isValidated: true,
+            focusedInput: {name: '', label: ''},
+            validationMessage: '',
+            makingRequest: false,
+            contentsLength: props.contents ? props.contents.length : 0,
+        };
     }
 
-    /**
-     * to generate Input Fields
-     */
-    generateInputs(){
-        let result;
-        const {inputs, focusedInput, setFocusInput} = this.props;
+    getInputsState(inputs){
+        let obj = {};
         if(Array.isArray(inputs)) {
-            result = inputs.map((data, key) => {
-                data['tourStep'] = data['tourStep'] && isString(data['tourStep']) ? data['tourStep'].substr(1) : data['tourStep'];
-                data['setFocusInput'] = setFocusInput;
-                data['focused'] = focusedInput !== '' && focusedInput === data.name;
-                data['visible'] = data.hasOwnProperty('visible') ? data.visible : true;
-                return this.mapInputs(data, key);
+            inputs.forEach(input => {
+                return input.hasOwnProperty('defaultValue') ? obj[input.name] = input.defaultValue : obj[input.name] = '';
             });
         }
-        return result.map(Element => {return Element;});
+        return obj;
+    }
+
+    updateEntity(entity){
+        this.setState({
+            entity,
+            focusedInput: {name: '', label: ''},
+        });
+    }
+
+    clearValidationMessage(){
+
     }
 
     render(){
-        const {authUser, breadcrumbItem} = this.props;
-        let classNames = ['form'];
-        classNames = getThemeClass({classNames, authUser, styles});
-        return (
-            <div className={styles[classNames.form]}>
-                <div className={formComponentStyles.form_title}>
-                    <span>{breadcrumbItem}</span>
-                </div>
-                {this.generateInputs()}
-            </div>
+        const {entity} = this.state;
+        const {contents, translations, permissions} = this.props;
+        return(
+            <Row id={'form_component'}>
+                <Col sm={12}>
+                    <div style={{marginBottom: '50px'}}>
+                        <ListHeader header={translations.header}/>
+                        <div className={styles.buttons_panel}>
+                            <AddButton
+                                permission={permissions.CREATE}
+                                title={<span>{translations.add_button.title}</span>}
+                                link={translations.add_button.link}
+                            />
+                            <ListButton
+                                title={translations.list_button.title}
+                                link={translations.list_button.link}
+                                permission={permissions.READ}
+                            />
+                        </div>
+                        <div className={styles.form_component}>
+                            {
+                                contents.map((form, key1) => {
+                                    if(isArray((form))){
+                                        return(
+                                            <div key={key1} className={styles.subform}>
+                                                {
+                                                    form.map((subform, key2) => {
+                                                        const inputs = contents[key1][key2].inputs;
+                                                        return (
+                                                            <FormSection
+                                                                key={`${key1}_${key2}`}
+                                                                isSubFormSection={true}
+                                                                header={contents[key1][key2].header}
+                                                                visible={contents[key1][key2].visible}
+                                                                inputs={inputs}
+                                                                entity={entity}
+                                                                updateEntity={::this.updateEntity}
+                                                                clearValidationMessage={::this.clearValidationMessage}
+                                                            />
+                                                        );
+                                                    })
+                                                }
+                                            </div>
+                                        )
+                                    } else {
+                                        const inputs = contents[key1].inputs;
+                                        return (
+                                            <FormSection
+                                                key={key1}
+                                                isSubFormSection={false}
+                                                header={contents[key1].header}
+                                                visible={contents[key1].visible}
+                                                inputs={inputs}
+                                                entity={entity}
+                                                updateEntity={::this.updateEntity}
+                                                clearValidationMessage={::this.clearValidationMessage}
+                                            />
+                                        );
+                                    }
+                                })
+                            }
+                        </div>
+                    </div>
+                </Col>
+            </Row>
         );
     }
 }
-
-Form.propTypes = {
-    inputs: PropTypes.array.isRequired,
-    entity: PropTypes.object.isRequired,
-    updateEntity: PropTypes.func.isRequired,
-    focusedInput: PropTypes.string,
-    authUser: PropTypes.object.isRequired,
-    clearValidationMessage: PropTypes.func.isRequired,
-};
-
 Form.defaultProps = {
-    focusedInput: '',
+    entity: {},
+    type: 'add',
+    isActionInProcess: API_REQUEST_STATE.INITIAL,
+    initiateTestStatus: null,
+    extraAction: '',
 };
 
 export default Form;

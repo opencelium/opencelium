@@ -39,10 +39,13 @@ class FormMultiSelect extends Component{
      * to change multi select value
      */
     handleChange(value){
-        const {name} = this.props.data;
+        const {name, callback} = this.props.data;
         const {entity, updateEntity} = this.props;
         entity[name] = value;
         updateEntity(entity);
+        if(typeof callback === 'function'){
+            callback(value);
+        }
     }
 
     /**

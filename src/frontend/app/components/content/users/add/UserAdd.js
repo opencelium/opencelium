@@ -16,8 +16,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import Content from "../../../general/content/Content";
-import ChangeContent from "@change_component/ChangeContent";
 
 import {checkUserEmail} from '@actions/users/fetch';
 import {addUser} from '@actions/users/add';
@@ -29,7 +27,7 @@ import {automaticallyShowTour, USER_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {setFocusById} from "@utils/app";
-import FormComponent from "@change_component/FormComponent";
+import Form from "@change_component/Form";
 
 const userPrefixURL = '/users';
 
@@ -87,7 +85,7 @@ class UserAdd extends Component{
     }
 
     componentDidMount(){
-        setFocusById('input_email');
+        setFocusById('input_mr');
     }
 
     /**
@@ -258,18 +256,15 @@ class UserAdd extends Component{
         let {userGroups, descriptions} = this.mapUserGroups();
         const {t, authUser, checkingUserEmail, checkEmailResult, addingUser, doAction} = this.props;
         let contentTranslations = {};
-        contentTranslations.header = t('ADD.HEADER');
-        contentTranslations.list_button = t('ADD.LIST_BUTTON');
-        let changeContentTranslations = {};
-        changeContentTranslations.addButton = t('ADD.ADD_BUTTON');
-        let getListLink = `${userPrefixURL}`;
-        let breadcrumbsItems = [t('ADD.FORM.PAGE_2'), t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_3')];
+        contentTranslations.header = {title: t('ADD.HEADER'), onHelpClick: ::this.openTour};
+        contentTranslations.list_button = {title: t('ADD.LIST_BUTTON'), link: userPrefixURL};
+        contentTranslations.add_button = {title: t('ADD.ADD_BUTTON'), link: userPrefixURL};
         let contents = [{
                 inputs:[
                     {...INPUTS.USER_TITLE, label: t('ADD.FORM.USER_TITLE'), defaultValue: ''},
                     {...INPUTS.NAME,
                         label: t('ADD.FORM.NAME'),
-                        tourStep: USER_TOURS.page_2[0].selector,
+                        tourStep: USER_TOURS.page_1[0].selector,
                         maxLength: 128,
                         required: true,
                         defaultValue: '',
@@ -277,7 +272,7 @@ class UserAdd extends Component{
                     },
                     {...INPUTS.SURNAME,
                         label: t('ADD.FORM.SURNAME'),
-                        tourStep: USER_TOURS.page_2[1].selector,
+                        tourStep: USER_TOURS.page_1[1].selector,
                         maxLength: 128,
                         required: true,
                         defaultValue: '',
@@ -289,11 +284,12 @@ class UserAdd extends Component{
                     {...INPUTS.PROFILE_PICTURE, label: t('ADD.FORM.PROFILE_PICTURE'), browseTitle: t('ADD.FORM.PROFILE_PICTURE_PLACEHOLDER')},
                 ],
                 hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
-            },{
+                header: t('ADD.FORM.PAGE_2'),
+            },[{
             inputs: [
                 {...INPUTS.EMAIL,
                     label: t('ADD.FORM.EMAIL'),
-                    tourStep: USER_TOURS.page_1[0].selector,
+                    tourStep: USER_TOURS.page_1[2].selector,
                     maxLength: 255,
                     required: true,
                     defaultValue: '',
@@ -306,7 +302,7 @@ class UserAdd extends Component{
                     }},
                 {...INPUTS.PASSWORD,
                     label: t('ADD.FORM.PASSWORD'),
-                    tourStep: USER_TOURS.page_1[1].selector,
+                    tourStep: USER_TOURS.page_1[3].selector,
                     maxLength: 16,
                     required: true,
                     defaultValue: '',
@@ -314,7 +310,7 @@ class UserAdd extends Component{
                 },
                 {...INPUTS.REPEAT_PASSWORD,
                     label: t('ADD.FORM.REPEAT_PASSWORD'),
-                    tourStep: USER_TOURS.page_1[2].selector,
+                    tourStep: USER_TOURS.page_1[4].selector,
                     maxLength: 16,
                     required: true,
                     defaultValue: '',
@@ -322,11 +318,12 @@ class UserAdd extends Component{
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
+            header: t('ADD.FORM.PAGE_1'),
         },{
                 inputs:[
                     {...INPUTS.USER_GROUP,
                         label: t('ADD.FORM.USER_GROUP'),
-                        tourStep: USER_TOURS.page_3[0].selector,
+                        tourStep: USER_TOURS.page_1[5].selector,
                         source: userGroups,
                         required: true,
                         defaultValue: 0,
@@ -335,25 +332,26 @@ class UserAdd extends Component{
                     }
                 ],
                 hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
-            },
+                header: t('ADD.FORM.PAGE_3'),
+            }],
         ];
         return (
-            <Content translations={contentTranslations} getListLink={getListLink} permissions={UserPermissions} authUser={authUser}>
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
+            <div>
+                <Form
+                    translations={contentTranslations}
                     contents={contents}
-                    translations={changeContentTranslations}
                     action={doAction}
                     isActionInProcess={addingUser}
                     authUser={authUser}
                     onPageSwitch={::this.setCurrentTour}
+                    permissions={UserPermissions}
                 />
                 <OCTour
                     steps={USER_TOURS[this.state.currentTour]}
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />
-            </Content>
+            </div>
         );
     }
 }

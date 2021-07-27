@@ -237,6 +237,9 @@
   color: #fff !important;
   background-color: #007bff !important;
   border-color: #007bff;
+  input{
+    display: none;
+  }
 }
 .input_file_browse:active{
   color: #fff !important;

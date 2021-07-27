@@ -241,7 +241,6 @@
 
 .add_button{
   font-family: $FONT_FAMILY;
-  margin-top: 20px;
 }
 .additional_button{
   @extend .add_button;
@@ -381,6 +380,9 @@
 .search_field{
   width: 200px;
   margin-left: 10px;
+  .input{
+    padding: 0;
+  }
 }
 
 .list_view_icon{

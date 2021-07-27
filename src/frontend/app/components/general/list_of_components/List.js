@@ -402,9 +402,9 @@ class List extends Component{
         return(
             <Row id={'app_list'}>
                 <Col sm={12}>
-                    <div style={{...containerStyles, marginBottom: '70px'}}>
+                    <div style={{...containerStyles, marginBottom: '50px'}}>
                         <ListHeader header={translations.header}/>
-                        <div style={{display: 'flex'}}>
+                        <div style={{display: 'flex', marginBottom: '20px'}}>
                             {
                                 mapEntity.hasOwnProperty('getAddLink')
                                 ?
@@ -435,7 +435,13 @@ class List extends Component{
                             {
                                 entities.length > 0 && !noSearchField &&
                                 <div className={`${styles[classNames.search_field]} tour-step-search-1`}>
-                                    <Input value={searchValue} onChange={::this.changeSearchValue} label={'Search field'} id={'search_field'}/>
+                                    <Input
+                                        value={searchValue}
+                                        onChange={::this.changeSearchValue}
+                                        placeholder={'Search field'}
+                                        id={'search_field'}
+                                        theme={{input: styles.input}}
+                                    />
                                 </div>
                             }
                             {

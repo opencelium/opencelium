@@ -32,6 +32,7 @@ import {automaticallyShowTour, CONNECTOR_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {capitalize, setFocusById} from "@utils/app";
+import Form from "@change_component/Form";
 
 
 const connectorPrefixURL = '/connectors';
@@ -88,6 +89,7 @@ class ConnectorAdd extends Component{
             isTested: -1,
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
+            hasAuthenticationInputsSection: false,
         };
     }
 
@@ -227,8 +229,15 @@ class ConnectorAdd extends Component{
                         authenticationFields[field] = false;
                     }
                 }
-                this.setState({authenticationFields});
+                this.setState({
+                    authenticationFields,
+                    hasAuthenticationInputsSection: true,
+                });
             }
+        } else{
+            this.setState({
+                hasAuthenticationInputsSection: false,
+            });
         }
     }
 
@@ -320,16 +329,14 @@ class ConnectorAdd extends Component{
     }
 
     render(){
+        const {hasAuthenticationInputsSection} = this.state;
         const {t, authUser, addingConnector, testingConnector} = this.props;
         let {invokers, descriptions} = this.mapInvokers();
         let contentTranslations = {};
-        contentTranslations.header = t('ADD.HEADER');
-        contentTranslations.list_button = t('ADD.LIST_BUTTON');
-        let changeContentTranslations = {};
-        changeContentTranslations.addButton = t('ADD.ADD_BUTTON');
-        changeContentTranslations.testButton = t('ADD.TEST_BUTTON');
-        let getListLink = `${connectorPrefixURL}`;
-        let breadcrumbsItems = [t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_2')];
+        contentTranslations.header = {title: t('ADD.HEADER'), onHelpClick: ::this.openTour};
+        contentTranslations.list_button = {title: t('ADD.LIST_BUTTON'), link: connectorPrefixURL};
+        contentTranslations.add_button = {title: t('ADD.ADD_BUTTON'), link: connectorPrefixURL};
+        contentTranslations.testButton = t('ADD.TEST_BUTTON');
         let authenticationInputs = this.generateAuthenticationInputs();
         let contents = [{
             inputs: [
@@ -362,31 +369,34 @@ class ConnectorAdd extends Component{
                 },
             ],
             hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
+            header: t('ADD.FORM.PAGE_1'),
         },{
             inputs: authenticationInputs,
             hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
             test: {isTested: this.state.isTested, callback: ::this.testConnector},
+            header: t('ADD.FORM.PAGE_2'),
+            visible: hasAuthenticationInputsSection,
         },
         ];
         let steps = this.filterSteps(authenticationInputs);
         return (
-            <Content translations={contentTranslations} getListLink={getListLink} permissions={ConnectorPermissions} authUser={authUser}>
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
+            <div>
+                <Form
                     contents={contents}
-                    translations={changeContentTranslations}
+                    translations={contentTranslations}
                     action={::this.doAction}
                     isActionInProcess={addingConnector === API_REQUEST_STATE.START || testingConnector === API_REQUEST_STATE.START ? API_REQUEST_STATE.START : API_REQUEST_STATE.INITIAL}
                     initiateTestStatus={::this.initiateTestStatus}
                     authUser={authUser}
                     onPageSwitch={::this.setCurrentTour}
+                    permissions={ConnectorPermissions}
                 />
                 <OCTour
                     steps={steps}
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />
-            </Content>
+            </div>
         );
     }
 }

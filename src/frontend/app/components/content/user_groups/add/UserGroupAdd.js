@@ -16,8 +16,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import Content from "../../../general/content/Content";
-import ChangeContent from "@change_component/ChangeContent";
 
 import {addUserGroup} from '@actions/usergroups/add';
 import {checkUserGroupName} from "@actions/usergroups/fetch";
@@ -29,7 +27,7 @@ import {automaticallyShowTour, USERGROUP_TOURS} from "@utils/constants/tours";
 import OCTour from "@basic_components/OCTour";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {setFocusById} from "@utils/app";
-import FormComponent from "@change_component/FormComponent";
+import Form from "@change_component/Form";
 
 const userGroupPrefixURL = '/usergroups';
 
@@ -80,6 +78,7 @@ class UserGroupAdd extends Component{
         this.state = {
             currentTour: 'page_1',
             isTourOpen: automaticallyShowTour(authUser),
+            hasPermissionsFormSection: false,
         };
     }
 
@@ -134,6 +133,12 @@ class UserGroupAdd extends Component{
         });
     }
 
+    togglePermissionsFormSection(components){
+        this.setState({
+            hasPermissionsFormSection: components.length > 0,
+        })
+    }
+
     /**
      * to validate role name if empty
      */
@@ -181,15 +186,13 @@ class UserGroupAdd extends Component{
     }
 
     render(){
+        const {hasPermissionsFormSection} = this.state;
         const {t, authUser, addingUserGroup, doAction, checkingUserGroupName, checkNameResult} = this.props;
         let mappedComponents = this.mapComponents();
         let contentTranslations = {};
-        contentTranslations.header = t('ADD.HEADER');
-        contentTranslations.list_button = t('ADD.LIST_BUTTON');
-        let changeContentTranslations = {};
-        changeContentTranslations.addButton = t('ADD.ADD_BUTTON');
-        let getListLink = `${userGroupPrefixURL}`;
-        let breadcrumbsItems = [t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_2'), t('ADD.FORM.PAGE_3')];
+        contentTranslations.header = {title: t('ADD.HEADER'), onHelpClick: ::this.openTour};
+        contentTranslations.list_button = {title: t('ADD.LIST_BUTTON'), link: userGroupPrefixURL};
+        contentTranslations.add_button = {title: t('ADD.ADD_BUTTON'), link: userGroupPrefixURL};
         let contents = [{
             inputs: [
                 {...INPUTS.ROLE,
@@ -208,51 +211,58 @@ class UserGroupAdd extends Component{
                 {...INPUTS.DESCRIPTION, label: t('ADD.FORM.DESCRIPTION'), defaultValue: ''},
                 {...INPUTS.ICON, label: t('ADD.FORM.USER_GROUP_PICTURE'), browseTitle: t('ADD.FORM.USER_GROUP_PICTURE_PLACEHOLDER')},
             ],
-            hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour},
-        },{
-            inputs:[
-                {...INPUTS.COMPONENTS,
-                    label: t('ADD.FORM.COMPONENTS'),
-                    tourStep: USERGROUP_TOURS.page_2[0].selector,
-                    placeholder: t('ADD.FORM.COMPONENTS_PLACEHOLDER'),
-                    source: mappedComponents,
-                    defaultValue: [],
-                    required: true,
-                    check: (e, entity) => ::this.validateComponents(e, entity),
-                },
-            ],
-            hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
-        },{
-            inputs:[
-                {...INPUTS.PERMISSIONS,
-                    label: t('ADD.FORM.PERMISSIONS'),
-                    tourStep: USERGROUP_TOURS.page_3[0].selector,
-                    dataSource: 'components',
-                    defaultValue: {},
-                    required: true,
-                    check: (e, entity) => ::this.validatePermissions(e, entity),
-                },
-            ],
-            hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
-        },
-        ];
+            hint: {text: t('ADD.FORM.HINT_1'), openTour: ::this.openTour,},
+            header: t('ADD.FORM.PAGE_1'),
+        },[
+            {
+                inputs:[
+                    {...INPUTS.COMPONENTS,
+                        label: t('ADD.FORM.COMPONENTS'),
+                        tourStep: USERGROUP_TOURS.page_1[1].selector,
+                        placeholder: t('ADD.FORM.COMPONENTS_PLACEHOLDER'),
+                        source: mappedComponents,
+                        defaultValue: [],
+                        required: true,
+                        callback: ::this.togglePermissionsFormSection,
+                        check: (e, entity) => ::this.validateComponents(e, entity),
+                    },
+                ],
+                hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour,},
+                header: t('ADD.FORM.PAGE_2'),
+            },
+            {
+                inputs:[
+                    {...INPUTS.PERMISSIONS,
+                        label: t('ADD.FORM.PERMISSIONS'),
+                        tourStep: USERGROUP_TOURS.page_1[2].selector,
+                        dataSource: 'components',
+                        defaultValue: {},
+                        required: true,
+                        check: (e, entity) => ::this.validatePermissions(e, entity),
+                    },
+                ],
+                hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour,},
+                header: t('ADD.FORM.PAGE_3'),
+                visible: hasPermissionsFormSection,
+            }
+        ]];
         return (
-            <Content translations={contentTranslations} getListLink={getListLink} permissions={UserGroupPermissions} authUser={authUser}>
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
+            <div>
+                <Form
                     contents={contents}
-                    translations={changeContentTranslations}
+                    translations={contentTranslations}
                     action={doAction}
                     isActionInProcess={addingUserGroup}
                     authUser={authUser}
                     onPageSwitch={::this.setCurrentTour}
+                    permissions={UserGroupPermissions}
                 />
                 <OCTour
                     steps={USERGROUP_TOURS[this.state.currentTour]}
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />
-            </Content>
+            </div>
         );
     }
 }

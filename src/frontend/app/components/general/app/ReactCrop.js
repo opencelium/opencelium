@@ -141,7 +141,7 @@ class ReactCrop extends React.Component{
 }
 
 ReactCrop.propTypes = {
-    src: PropTypes.any.isRequired,
+    src: PropTypes.any,
     setCroppedImage: PropTypes.func.isRequired,
 };
 

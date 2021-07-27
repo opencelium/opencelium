@@ -59,9 +59,8 @@ export const USERGROUP_TOURS = {
             content:
                 <SwitchOffTour>
                     Provide unique name
-                </SwitchOffTour>,},
-    ],
-    page_2: [
+                </SwitchOffTour>,
+        },
         {
             selector: '.tour-page-2-step-1',
             content:
@@ -69,8 +68,6 @@ export const USERGROUP_TOURS = {
                     Select components
                 </SwitchOffTour>,
         },
-    ],
-    page_3: [
         {
             selector: '.tour-page-3-step-1',
             content:
@@ -83,6 +80,17 @@ export const USERGROUP_TOURS = {
 
 export const USER_TOURS = {
     page_1: [
+        {
+            selector: '.tour-page-2-step-1',
+            content:
+                <SwitchOffTour>
+                    Prodive name of user
+                </SwitchOffTour>,
+        },
+        {
+            selector: '.tour-page-2-step-2',
+            content: 'Provide surname of user',
+        },
         {
             selector: '.tour-page-1-step-1',
             content:
@@ -97,21 +105,6 @@ export const USER_TOURS = {
             selector: '.tour-page-1-step-3',
             content: 'Repeat password',
         },
-    ],
-    page_2: [
-        {
-            selector: '.tour-page-2-step-1',
-            content:
-                <SwitchOffTour>
-                    Prodive name of user
-                </SwitchOffTour>,
-        },
-        {
-            selector: '.tour-page-2-step-2',
-            content: 'Provide surname of user',
-        },
-    ],
-    page_3: [
         {
             selector: '.tour-page-3-step-1',
             content:
@@ -119,7 +112,6 @@ export const USER_TOURS = {
                     Assign user to usergroup
                 </SwitchOffTour>,
         },
-
     ],
 };
 

@@ -59,7 +59,6 @@ class AddButton extends Component{
 AddButton.propTypes = {
     isPressedAddEntity: PropTypes.bool,
     link: PropTypes.string.isRequired,
-    authUser: PropTypes.object.isRequired,
 };
 
 AddButton.defaultProps = {
