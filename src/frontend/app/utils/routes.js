@@ -51,14 +51,14 @@ export const createRoutes = (store) => {
                 <Route path='/connectors/:id/view' component={LoadableRouteComponents.ConnectorView}/>
                 <Route path='/connectors/:id/update' component={LoadableRouteComponents.ConnectorUpdate}/>
             </Route>
-            <Route path='/connections' component={isAuth(LoadableRouteComponents.ConnectionLayout, store)}>
+            {/*<Route path='/connections' component={isAuth(LoadableRouteComponents.ConnectionLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.ConnectionsList}/>
                 <Route path='/connections/add' component={LoadableRouteComponents.ConnectionAdd}/>
                 <Route path='/connections/page/:pageNumber' component={LoadableRouteComponents.ConnectionsList}/>
                 <Route path='/connections/:id/view' component={LoadableRouteComponents.ConnectionView}/>
                 <Route path='/connections/:id/graph' component={LoadableRouteComponents.ConnectionGraph}/>
                 <Route path='/connections/:id/update' component={LoadableRouteComponents.ConnectionUpdate}/>
-            </Route>
+            </Route>*/}
             <Route path='/schedules' component={isAuth(LoadableRouteComponents.ScheduleLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.Scheduler}/>
             </Route>
@@ -89,12 +89,12 @@ export const createRoutes = (store) => {
                 <Route path='/notification_templates/:id/view' component={LoadableRouteComponents.NotificationTemplateView}/>
                 <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
-            <Route path='/connection_overview_2' component={isAuth(LoadableRouteComponents.ConnectionOverview2, store)}>
+            <Route path='/connections' component={isAuth(LoadableRouteComponents.ConnectionOverview2, store)}>
                 <IndexRoute component={LoadableRouteComponents.ConnectionsList2}/>
-                <Route path='/connection_overview_2/add' component={LoadableRouteComponents.ConnectionAdd2}/>
-                <Route path='/connection_overview_2/page/:pageNumber' component={LoadableRouteComponents.ConnectionsList2}/>
-                <Route path='/connection_overview_2/:id/view' component={LoadableRouteComponents.ConnectionView2}/>
-                <Route path='/connection_overview_2/:id/update' component={LoadableRouteComponents.ConnectionUpdate2}/>
+                <Route path='/connections/add' component={LoadableRouteComponents.ConnectionAdd2}/>
+                <Route path='/connections/page/:pageNumber' component={LoadableRouteComponents.ConnectionsList2}/>
+                <Route path='/connections/:id/view' component={LoadableRouteComponents.ConnectionView2}/>
+                <Route path='/connections/:id/update' component={LoadableRouteComponents.ConnectionUpdate2}/>
             </Route>
             <Route path='/connection_overview_details' component={isAuth(LoadableRouteComponents.ConnectionOverviewDetails, store)}/>
             <Route path='/connection_overview_technical_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewTechnicalLayout, store)}/>

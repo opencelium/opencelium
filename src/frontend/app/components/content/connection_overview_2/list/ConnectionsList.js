@@ -28,7 +28,7 @@ import {tour} from "@decorators/tour";
 import ConnectionCardTitle from "@components/content/connections/list/ConnectionCardTitle";
 
 
-const prefixUrl = '/connection_overview_2';
+const prefixUrl = '/connections';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
