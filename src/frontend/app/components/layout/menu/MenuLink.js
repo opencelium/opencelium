@@ -94,7 +94,7 @@ export class MenuLinkWithSubLinks extends React.Component{
             <div className={`${styles.nav_link} ${styles.main_menu_collapse}`}>
                 <MenuIcon value={value}/>
                 <ReactRouterLink key={label} onlyActiveOnIndex to={to} className={`${styles.main_menu_collapse_link}`}>{label}</ReactRouterLink>
-                <FontIcon whiteTheme isButton className={collapseIconClassName} size={18} value={'expand_more'} onClick={::this.onToggleCollapse}/>
+                <FontIcon className={collapseIconClassName} size={18} value={'expand_more'} onClick={::this.onToggleCollapse}/>
                 <ul className={collapseMenuClassName}>
                     {subLinks.map(subLink => <ReactRouterLink key={subLink.label} onlyActiveOnIndex to={subLink.to} className={`${styles.main_menu_collapse_sublink}`}>{subLink.label}</ReactRouterLink>)}
                 </ul>

@@ -263,9 +263,11 @@ class Form extends Component{
     }
 
     render(){
-        const {breadcrumbItem, isSubForm} = this.props;
+        const {authUser, breadcrumbItem} = this.props;
+        let classNames = ['form'];
+        classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <div className={!isSubForm ? formComponentStyles.form : ''}>
+            <div className={styles[classNames.form]}>
                 <div className={formComponentStyles.form_title}>
                     <span>{breadcrumbItem}</span>
                 </div>
@@ -282,12 +284,10 @@ Form.propTypes = {
     focusedInput: PropTypes.string,
     authUser: PropTypes.object.isRequired,
     clearValidationMessage: PropTypes.func.isRequired,
-    isSubForm: PropTypes.bool,
 };
 
 Form.defaultProps = {
     focusedInput: '',
-    isSubForm: false,
 };
 
 export default Form;

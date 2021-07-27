@@ -263,7 +263,7 @@ class UserAdd extends Component{
         let changeContentTranslations = {};
         changeContentTranslations.addButton = t('ADD.ADD_BUTTON');
         let getListLink = `${userPrefixURL}`;
-        let breadcrumbsItems = [t('ADD.FORM.PAGE_2'), [t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_3')]];
+        let breadcrumbsItems = [t('ADD.FORM.PAGE_2'), t('ADD.FORM.PAGE_1'), t('ADD.FORM.PAGE_3')];
         let contents = [{
                 inputs:[
                     {...INPUTS.USER_TITLE, label: t('ADD.FORM.USER_TITLE'), defaultValue: ''},
@@ -289,7 +289,7 @@ class UserAdd extends Component{
                     {...INPUTS.PROFILE_PICTURE, label: t('ADD.FORM.PROFILE_PICTURE'), browseTitle: t('ADD.FORM.PROFILE_PICTURE_PLACEHOLDER')},
                 ],
                 hint: {text: t('ADD.FORM.HINT_2'), openTour: ::this.openTour},
-            },[{
+            },{
             inputs: [
                 {...INPUTS.EMAIL,
                     label: t('ADD.FORM.EMAIL'),
@@ -335,11 +335,11 @@ class UserAdd extends Component{
                     }
                 ],
                 hint: {text: t('ADD.FORM.HINT_3'), openTour: ::this.openTour},
-            }],
+            },
         ];
         return (
-            <div>
-                <FormComponent
+            <Content translations={contentTranslations} getListLink={getListLink} permissions={UserPermissions} authUser={authUser}>
+                <ChangeContent
                     breadcrumbsItems={breadcrumbsItems}
                     contents={contents}
                     translations={changeContentTranslations}
@@ -353,7 +353,7 @@ class UserAdd extends Component{
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />
-            </div>
+            </Content>
         );
     }
 }
