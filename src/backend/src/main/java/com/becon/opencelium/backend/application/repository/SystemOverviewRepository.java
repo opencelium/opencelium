@@ -72,14 +72,14 @@ public class SystemOverviewRepository {
         }
 
         // get elasticsearch version
-        try {
-            NodesInfoResponse nodesInfoResponse = client.admin().cluster().prepareNodesInfo().all().execute().actionGet();
-            NodeInfo nodeInfo = nodesInfoResponse.getNodes().stream().findFirst().orElseThrow(() -> new RuntimeException("Node not found"));
-            systemOverview.setElasticSearch(nodeInfo.getVersion().toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-            systemOverview.setElasticSearch("Service is down. Unable to detect version. ");
-        }
+//        try {
+//            NodesInfoResponse nodesInfoResponse = client.admin().cluster().prepareNodesInfo().all().execute().actionGet();
+//            NodeInfo nodeInfo = nodesInfoResponse.getNodes().stream().findFirst().orElseThrow(() -> new RuntimeException("Node not found"));
+//            systemOverview.setElasticSearch(nodeInfo.getVersion().toString());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            systemOverview.setElasticSearch("Service is down. Unable to detect version. ");
+//        }
 
         return systemOverview;
     }

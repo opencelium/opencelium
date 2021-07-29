@@ -269,6 +269,7 @@ public class InvokerServiceImp implements InvokerService{
         }
         Map<String, Object> fields = new HashMap<>();
 
+        Object r = null;
         for (Map.Entry<String, Object> entry : body.entrySet()) {
             String k = entry.getKey();
             Object object = entry.getValue();
@@ -278,12 +279,18 @@ public class InvokerServiceImp implements InvokerService{
             }
 
             if((object instanceof HashMap)){
-               return findField(field, (Map<String, Object>) object);
+               r = findField(field, (Map<String, Object>) object);
+
             } else if (object instanceof ArrayList){
                if(!((ArrayList) object).isEmpty() && ((ArrayList) object).get(0) instanceof HashMap){
                     Map<String, Object> subFields = ((ArrayList<Map<String, Object>>) object).get(0);
-                    return findField(field, subFields);
+                    r = findField(field, subFields);
+
                 }
+            }
+
+            if (r != null) {
+                return r;
             }
         }
 
