@@ -46,6 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -191,6 +192,15 @@ public class ConnectorController {
             }
         }
         return true;
+    }
+
+    @GetMapping("/exists/{title}")
+    public ResponseEntity<?> roleExists(@PathVariable("title") String title) throws IOException{
+        if (connectorService.existByTitle(title)){
+            throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
+        } else {
+            throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
+        }
     }
 
 
