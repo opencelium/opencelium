@@ -47,7 +47,6 @@ class UpdateButton extends Component{
 
 UpdateButton.propTypes = {
     link: PropTypes.string.isRequired,
-    authUser: PropTypes.object.isRequired,
 };
 
 export default UpdateButton;

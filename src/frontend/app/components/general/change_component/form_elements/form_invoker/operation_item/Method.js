@@ -72,6 +72,7 @@ class Method extends Component{
                     METHOD_TYPES.map((type, key) => {
                         return (
                             <button
+                                key={key}
                                 className={styles.invoker_request_item_method_button}
                                 onClick={readOnly ? null : (e) => ::this.chooseMethod(e, type.value)}
                                 onKeyDown={readOnly ? null : (e) => onEnter(e, (e) => ::this.chooseMethod(e, type.value))}

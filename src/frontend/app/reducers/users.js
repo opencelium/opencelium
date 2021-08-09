@@ -23,7 +23,7 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
 
 
 const initialState = fromJS({
-    checkingUserEmail: false,
+    checkingUserEmail: API_REQUEST_STATE.INITIAL,
     checkEmailResult: null,
     userEmailData: {},
     fetchingUser: API_REQUEST_STATE.INITIAL,
@@ -52,11 +52,11 @@ const reducer = (state = initialState, action) => {
     users = state.get('users');
     switch (action.type) {
         case UsersAction.CHECK_USEREMAIL:
-            return state.set('checkingUserEmail', true).set('checkEmailResult', null).set('error', null);
+            return state.set('checkingUserEmail', API_REQUEST_STATE.START).set('checkEmailResult', null).set('error', null);
         case UsersAction.CHECK_USEREMAIL_FULFILLED:
-            return state.set('checkingUserEmail', false).set('checkEmailResult', action.payload);
+            return state.set('checkingUserEmail', API_REQUEST_STATE.FINISH).set('checkEmailResult', action.payload);
         case UsersAction.CHECK_USEREMAIL_REJECTED:
-            return state.set('checkingUserEmail', false).set('error', null).set('checkEmailResult', action.payload);
+            return state.set('checkingUserEmail', API_REQUEST_STATE.ERROR).set('error', null).set('checkEmailResult', action.payload);
         case UsersAction.FETCH_USER:
             return state.set('fetchingUser', API_REQUEST_STATE.START).set('error', null);
         case UsersAction.FETCH_USER_FULFILLED:

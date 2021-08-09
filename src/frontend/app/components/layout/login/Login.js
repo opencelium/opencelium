@@ -21,6 +21,7 @@ import {onEnter, setFocusById} from "@utils/app";
 import {loginUser} from '@actions/auth';
 import Input from "@basic_components/inputs/Input";
 import styles from '@themes/default/layout/login.scss';
+import menuStyles from '@themes/default/layout/menu.scss';
 import {
     addFocusDocumentNavigation, addLoginKeyNavigation,
     removeFocusDocumentNavigation,
@@ -51,6 +52,8 @@ class Login extends Component{
             password: '',
             validationMessage: '',
         };
+        let bodyElement = document.querySelector('body');
+        if(bodyElement) bodyElement.classList.remove(menuStyles.body_pd);
     }
 
     componentDidMount(){

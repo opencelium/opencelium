@@ -113,6 +113,27 @@
   }
 }
 
+.dark_blue_theme{
+  >span{
+    color: #012E55;
+    transition: background 0.8s;
+  }
+  >span:hover {
+    color: #022748;
+  }
+  >span:active {
+    color: #023d6e;
+    background-size: 100%;
+    transition: background 0s;
+  }
+}
+.dark_blue_theme:focus-within{
+  outline: none !important;
+  >span {
+    color: #023d6e;
+  }
+}
+
 .gray_theme{
   >span{
     color: #777;
@@ -137,10 +158,14 @@
   min-height: 0 !important;
   display: inline-block;
   margin-top: 0 !important;
+  width: 24px;
 }
 
 .loading_icon>div{
+  color: white !important;
   display: inline-flex;
+  width: 20px;
+  height: 20px;
 }
 /*font icon dialog*/
 /*dialog*/
@@ -375,6 +400,7 @@
   font-family: $FONT_FAMILY;
   height: 38px;
   padding-left: 5px !important;
+  margin-top: 0 !important;
 }
 .input_input_element:focus:not([disabled]):not([readonly]) ~ .input_icon{
   color: $INPUT_SELECT_COLOR !important;
@@ -386,6 +412,23 @@
   background-color: $INPUT_SELECT_COLOR !important;
 }
 .input_icon{
+}
+.input_error{
+  position: absolute;
+}
+
+.input_loading{
+  margin: 0 !important;
+  min-height: 0 !important;
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  right: 0;
+  top: 25px;
+  >div{
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .highlighted_input_input_element{

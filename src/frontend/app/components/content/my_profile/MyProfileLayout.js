@@ -14,7 +14,6 @@
  */
 
 import React, {Component, Suspense} from 'react';
-import {Container} from "react-grid-system";
 import Loading from "@loading";
 import ComponentError from "@components/general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
@@ -31,13 +30,13 @@ class MyProfileLayout extends Component{
     render(){
         const {children} = this.props;
         return(
-            <Container>
+            <div>
                 <Suspense fallback={(<Loading/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
                         {children}
                     </ComponentError>
                 </Suspense>
-            </Container>
+            </div>
         );
     }
 }

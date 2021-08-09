@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import FontIcon from "@basic_components/FontIcon";
 import theme from "react-toolbox/lib/input/theme.css";
 import styles from "@themes/default/hocs.scss";
+import basicComponentsStyles from "@themes/default/general/basic_components.scss";
 import {isString} from "@utils/app";
 import Loading from "@loading";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
@@ -28,7 +29,7 @@ class ToolboxThemeInput extends React.Component{
     }
 
     render(){
-        const {icon, tourStep, style, label, required, iconClassName, hasFocusStyle, className, isFocused, labelClassName, inputElementClassName, iconTooltip, tooltipTourStep, inputElementText, inputElementStyle, hideInput, ...props} = this.props;
+        const {icon, tourStep, style, label, required, iconClassName, hasFocusStyle, className, isFocused, labelClassName, inputElementClassName, iconTooltip, tooltipTourStep, inputElementText, inputElementStyle, hideInput, error, ...props} = this.props;
         return(
             <div className={`${className} ${icon !== '' ? theme.withIcon : ''} ${label !== '' ? theme.input : ''} ${styles.toolbox_theme_input} ${hasFocusStyle ? styles.input : ''} ${tourStep ? tourStep : ''}`} style={style} {...props}>
                 {label !== '' && <div style={inputElementStyle} className={`${theme.inputElement} ${theme.filled} ${styles.label} ${inputElementClassName} ${hideInput ? styles.hide_label : ''}`}>{inputElementText}</div>}
@@ -42,12 +43,13 @@ class ToolboxThemeInput extends React.Component{
                 <span className={theme.bar}/>
                 {
                     label !== '' && (
-                        <label className={`${theme.label} ${styles.label} ${labelClassName} ${isFocused ? styles.focused : ''}`}>
+                        <label style={error ? {color: '#de3226'} : null} className={`${theme.label} ${styles.label} ${labelClassName} ${isFocused ? styles.focused : ''}`}>
                             {label}
                             {required && <span className={theme.required}> *</span>}
                         </label>
                     )
                 }
+                {error && <span className={`${theme.error} ${basicComponentsStyles.input_error}`}>{error}</span>}
             </div>
         );
     }
@@ -87,6 +89,7 @@ ToolboxThemeInput.defaultProps = {
     tooltipTourStep: '',
     inputElementStyle: {},
     hideInput: false,
+    error: '',
 };
 
 export default ToolboxThemeInput;

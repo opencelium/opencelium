@@ -84,7 +84,7 @@ class TemplateImport extends Component{
         const {authUser} = this.props;
         let {showDialog} = this.state;
         return (
-            <div style={{marginTop: '20px'}}>
+            <div>
                 <ContentNavigationButton
                     authUser={authUser}
                     title={'Import'}

@@ -50,11 +50,11 @@ class FormSecretInput extends Component{
         const {name} = this.props.data;
         const {entity, updateEntity} = this.props;
         entity[name] = value;
-        updateEntity(entity);
+        updateEntity(entity, name);
     }
 
     render(){
-        const {name, label, icon, maxLength, required, tourStep} = this.props.data;
+        const {name, label, icon, maxLength, required, tourStep, error} = this.props.data;
         const {entity} = this.props;
         let type = 'password';
         let value = entity[name];
@@ -68,6 +68,7 @@ class FormSecretInput extends Component{
         return (
             <div className={`${styles.input_secret} ${tourClassName}`}>
                 <Input
+                    error={error}
                     onChange={::this.handleInput}
                     name={name}
                     id={'input_'+name}

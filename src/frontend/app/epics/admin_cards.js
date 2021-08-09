@@ -20,15 +20,24 @@ import {
 } from '@actions/admin_cards/fetch';
 import {doRequest} from "@utils/auth";
 import {invokerUrl, appUrl} from "@utils/constants/url";
+import {
+    AppPermissions,
+    InvokerPermissions, NO_NEED_PERMISSION, NotificationTemplatePermissions,
+    TemplatePermissions,
+    UserGroupPermissions,
+    UserPermissions
+} from "@utils/constants/permissions";
 
 
 const adminCards = [
-    {id: 1, name: 'App', link: '/apps'},
-    {id: 2, name: 'Invokers', link: '/invokers'},
-    {id: 3, name: 'Templates', link: '/templates'},
-    {id: 4, name: 'Converter', link: '/template_converter'},
-    {id: 5, name: 'Notification Templates', link: '/notification_templates'},
-    {id: 6, name: 'Available Updates', link: '/update_assistant'},
+    {id: 1, name: 'Users', link: '/users', permission: UserPermissions.READ},
+    {id: 2, name: 'Groups', link: '/usergroups', permission: UserGroupPermissions.READ},
+    {id: 3, name: 'App', link: '/apps', permission: AppPermissions.READ},
+    {id: 4, name: 'Invokers', link: '/invokers', permission: InvokerPermissions.READ},
+    {id: 5, name: 'Templates', link: '/templates', permission: TemplatePermissions.READ},
+    {id: 6, name: 'Converter', link: '/template_converter'},
+    {id: 7, name: 'Notification Templates', link: '/notification_templates', permission: NotificationTemplatePermissions.READ},
+    {id: 8, name: 'Available Updates', link: '/update_assistant'},
 ];
 
 /**

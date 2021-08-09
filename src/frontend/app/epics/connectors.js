@@ -17,6 +17,7 @@ import {ConnectorsAction} from '@utils/actions';
 import {
     fetchConnectorFulfilled, fetchConnectorRejected,
     fetchConnectorsFulfilled, fetchConnectorsRejected,
+    checkConnectorTitleFulfilled, checkConnectorTitleRejected,
 } from '@actions/connectors/fetch';
 import {
     addConnectorFulfilled ,addConnectorRejected,
@@ -29,7 +30,6 @@ import {
 } from '@actions/connectors/update';
 import {deleteConnectorFulfilled, deleteConnectorRejected} from '@actions/connectors/delete';
 import {doRequest} from "@utils/auth";
-import {addProfilePicture, addUserFulfilled, addUserRejected} from "@actions/users/add";
 import {API_METHOD} from "@utils/constants/app";
 import {isString} from "@utils/app";
 
@@ -199,6 +199,21 @@ const deleteConnectorEpic = (action$, store) => {
         });
 };
 
+/**
+ * check connector's title on existing
+ */
+const checkConnectorTitleEpic = (action$, store) => {
+    return action$.ofType(ConnectorsAction.CHECK_CONNECTORTITLE)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/exists/${action.payload.title}`;
+            return doRequest({url},{
+                success: checkConnectorTitleFulfilled,
+                reject: checkConnectorTitleRejected,
+            });
+        });
+};
+
 
 export {
     fetchConnectorEpic,
@@ -209,4 +224,5 @@ export {
     updateConnectorIconEpic,
     deleteConnectorEpic,
     testConnectorEpic,
+    checkConnectorTitleEpic,
 };

@@ -17,7 +17,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import WebHook from "./WebHook";
 import styles from '@themes/default/content/schedules/schedules.scss';
-import {EMPHASIZE_DURATION_ANIMATION} from "./ScheduleList";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
 
 
 /**
@@ -50,7 +50,7 @@ class TitleCell extends Component{
         const {schedule, index} = this.props;
         return (
             <td style={{position: 'relative'}}>
-                <WebHook index={index} schedule={schedule}/>
+                <WebHook index={index} schedule={CSchedule.createSchedule(schedule)}/>
                 <div className={`${styles.title_cell} ${styles.schedule_list_title} ${appearClassName}`} style={{animationDelay: '0.5s'}} title={schedule.title}>
                     <span>{schedule.title}</span>
                 </div>

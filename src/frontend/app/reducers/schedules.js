@@ -26,26 +26,26 @@ const initialState = fromJS({
     deletingWebHook: false,
     triggeringScheduleSuccessfully: false,
     triggeringSchedule: false,
-    fetchingSchedule: false,
+    fetchingSchedule: API_REQUEST_STATE.INITIAL,
     fetchingScheduleNotification: API_REQUEST_STATE.INITIAL,
     fetchingScheduleNotificationTemplates: API_REQUEST_STATE.INITIAL,
     fetchingNotificationTargetGroup: API_REQUEST_STATE.INITIAL,
     addingSchedule: API_REQUEST_STATE.INITIAL,
     addingScheduleNotification: API_REQUEST_STATE.INITIAL,
-    updatingSchedule: false,
+    updatingSchedule: API_REQUEST_STATE.INITIAL,
     updatingScheduleNotification: API_REQUEST_STATE.INITIAL,
     updatingScheduleStore: false,
-    updatingScheduleStatus: false,
+    updatingScheduleStatus: API_REQUEST_STATE.INITIAL,
     fetchingSchedules: API_REQUEST_STATE.INITIAL,
     fetchingScheduleNotifications: API_REQUEST_STATE.INITIAL,
     fetchingSchedulesByIds: false,
     fetchingCurrentSchedules: false,
     deletingSchedule: false,
     deletingScheduleNotification: API_REQUEST_STATE.INITIAL,
-    deletingSchedules: false,
-    startingSchedules: false,
-    enablingSchedules: false,
-    disablingSchedules: false,
+    deletingSchedules: API_REQUEST_STATE.INITIAL,
+    startingSchedules: API_REQUEST_STATE.INITIAL,
+    enablingSchedules: API_REQUEST_STATE.INITIAL,
+    disablingSchedules: API_REQUEST_STATE.INITIAL,
     testingSchedule: false,
     schedule: {},
     notification: {},
@@ -95,11 +95,11 @@ const reducer = (state = initialState, action) => {
         case SchedulesAction.TRIGGER_SCHEDULE_REJECTED:
             return state.set('triggeringSchedule', false).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.FETCH_SCHEDULE:
-            return state.set('fetchingSchedule', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+            return state.set('fetchingSchedule', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.FETCH_SCHEDULE_FULFILLED:
-            return state.set('fetchingSchedule', false).set('schedule', action.payload);
+            return state.set('fetchingSchedule', API_REQUEST_STATE.FINISH).set('schedule', action.payload);
         case SchedulesAction.FETCH_SCHEDULE_REJECTED:
-            return state.set('fetchingSchedule', false).set('isRejected', true).set('error', action.payload);
+            return state.set('fetchingSchedule', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.FETCH_SCHEDULENOTIFICATION:
             return state.set('fetchingScheduleNotification', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.FETCH_SCHEDULENOTIFICATION_FULFILLED:
@@ -229,18 +229,18 @@ const reducer = (state = initialState, action) => {
         case SchedulesAction.ADD_SCHEDULENOTIFICATION_REJECTED:
             return state.set('addingScheduleNotification', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.UPDATE_SCHEDULE:
-            return state.set('updatingSchedule', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+            return state.set('updatingSchedule', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.UPDATE_SCHEDULE_FULFILLED:
             updateScheduleSubscriber(action.payload);
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.schedulerId;
             });
             if(index >= 0) {
-                return state.set('updatingSchedule', false).set('schedules', schedules.set(index, action.payload));
+                return state.set('updatingSchedule', API_REQUEST_STATE.FINISH).set('schedules', schedules.set(index, action.payload));
             }
-            return state.set('updatingSchedule', false);
+            return state.set('updatingSchedule', API_REQUEST_STATE.FINISH);
         case SchedulesAction.UPDATE_SCHEDULE_REJECTED:
-            return state.set('updatingSchedule', false).set('isRejected', true).set('error', action.payload);
+            return state.set('updatingSchedule', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.UPDATE_SCHEDULE_STORE:
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.id;
@@ -262,7 +262,7 @@ const reducer = (state = initialState, action) => {
         case SchedulesAction.UPDATE_SCHEDULENOTIFICATION_REJECTED:
             return state.set('updatingScheduleNotification', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.UPDATE_SCHEDULESTATUS:
-            return state.set('updatingScheduleStatus', true).set('isRejected', false).set('isCanceled', false).set('schedule', action.payload).set('error', null);
+            return state.set('updatingScheduleStatus', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('schedule', action.payload).set('error', null);
         case SchedulesAction.UPDATE_SCHEDULESTATUS_FULFILLED:
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.id;
@@ -270,11 +270,11 @@ const reducer = (state = initialState, action) => {
             if(index >= 0) {
                 schedule = schedules.get(index);
                 schedule.status = action.payload.status;
-                return state.set('updatingScheduleStatus', false).set('schedule', action.payload).set('schedules', schedules.set(index, schedule));
+                return state.set('updatingScheduleStatus', API_REQUEST_STATE.FINISH).set('schedule', action.payload).set('schedules', schedules.set(index, schedule));
             }
-            return state.set('updatingScheduleStatus', false);
+            return state.set('updatingScheduleStatus', API_REQUEST_STATE.FINISH);
         case SchedulesAction.UPDATE_SCHEDULESTATUS_REJECTED:
-            return state.set('updatingScheduleStatus', false).set('isRejected', true).set('error', action.payload);
+            return state.set('updatingScheduleStatus', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.DELETE_SCHEDULE:
             return state.set('deletingSchedule', true).set('isRejected', false).set('isCanceled', false).set('error', null).set('schedule', action.payload);
         case SchedulesAction.DELETE_SCHEDULE_FULFILLED:
@@ -301,7 +301,7 @@ const reducer = (state = initialState, action) => {
         case SchedulesAction.DELETE_SCHEDULENOTIFICATION_REJECTED:
             return state.set('deletingScheduleNotification', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.DELETE_SCHEDULES:
-            return state.set('deletingSchedules', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+            return state.set('deletingSchedules', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.DELETE_SCHEDULES_FULFILLED:
             deleteSchedulesSubscriber(action.payload);
             for(let i = 0; i < action.payload.schedulerIds.length; i++) {
@@ -315,19 +315,19 @@ const reducer = (state = initialState, action) => {
                         schedules = schedules.delete(indexes[i]);
                     }
                 }
-                return state.set('deletingSchedules', false).set('schedules', schedules);
+                return state.set('deletingSchedules', API_REQUEST_STATE.FINISH).set('schedules', schedules);
             }
-            return state.set('deletingSchedules', false);
+            return state.set('deletingSchedules', API_REQUEST_STATE.FINISH);
         case SchedulesAction.DELETE_SCHEDULES_REJECTED:
-            return state.set('deletingSchedules', false).set('isRejected', true).set('error', action.payload);
+            return state.set('deletingSchedules', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.START_SCHEDULES:
-            return state.set('startingSchedules', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+            return state.set('startingSchedules', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.START_SCHEDULES_FULFILLED:
-            return state.set('startingSchedules', false);
+            return state.set('startingSchedules', API_REQUEST_STATE.FINISH);
         case SchedulesAction.START_SCHEDULES_REJECTED:
-            return state.set('startingSchedules', false).set('isRejected', true).set('error', action.payload);
+            return state.set('startingSchedules', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.ENABLE_SCHEDULES:
-            return state.set('enablingSchedules', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+            return state.set('enablingSchedules', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.ENABLE_SCHEDULES_FULFILLED:
             for(let i = 0; i < action.payload.schedulerIds.length; i++) {
                 indexes.push(schedules.findIndex(function (schedule) {
@@ -341,13 +341,13 @@ const reducer = (state = initialState, action) => {
                         schedules[indexes[i]].status = true;
                     }
                 }
-                return state.set('enablingSchedules', false).set('schedules', List(schedules));
+                return state.set('enablingSchedules', API_REQUEST_STATE.FINISH).set('schedules', List(schedules));
             }
-            return state.set('enablingSchedules', false);
+            return state.set('enablingSchedules', API_REQUEST_STATE.FINISH);
         case SchedulesAction.ENABLE_SCHEDULES_REJECTED:
-            return state.set('enablingSchedules', false).set('isRejected', true).set('error', action.payload);
+            return state.set('enablingSchedules', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.DISABLE_SCHEDULES:
-            return state.set('disablingSchedules', true).set('isRejected', false).set('isCanceled', false).set('error', null);
+            return state.set('disablingSchedules', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.DISABLE_SCHEDULES_FULFILLED:
             for(let i = 0; i < action.payload.schedulerIds.length; i++) {
                 indexes.push(schedules.findIndex(function (schedule) {
@@ -361,11 +361,11 @@ const reducer = (state = initialState, action) => {
                         schedules[indexes[i]].status = false;
                     }
                 }
-                return state.set('disablingSchedules', false).set('schedules', List(schedules));
+                return state.set('disablingSchedules', API_REQUEST_STATE.FINISH).set('schedules', List(schedules));
             }
-            return state.set('disablingSchedules', false);
+            return state.set('disablingSchedules', API_REQUEST_STATE.FINISH);
         case SchedulesAction.DISABLE_SCHEDULES_REJECTED:
-            return state.set('disablingSchedules', false).set('isRejected', true).set('error', action.payload);
+            return state.set('disablingSchedules', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case WebHooksAction.ADD_WEBHOOK:
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.schedule.id;

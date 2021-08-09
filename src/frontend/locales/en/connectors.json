@@ -35,7 +35,9 @@
     },
     "VALIDATION_MESSAGES": {
       "TITLE_REQUIRED": "The title is a required field",
-      "INVOKER_REQUIRED": "The invoker is a required field"
+      "TITLE_EXIST": "Such title already exists",
+      "INVOKER_REQUIRED": "The invoker is a required field",
+      "WRONG_CREDENTIAL_DATA": "Wrong credential data"
     },
     "LIST_BUTTON": "Connectors",
     "ADD_BUTTON": "Add",
@@ -64,6 +66,12 @@
       "PAGE_2": "Credentials",
       "HINT_1": "Provide general information",
       "HINT_2": "Provide credentials and test"
+    },
+    "VALIDATION_MESSAGES": {
+      "TITLE_REQUIRED": "The title is a required field",
+      "TITLE_EXIST": "Such title already exists",
+      "INVOKER_REQUIRED": "The invoker is a required field",
+      "WRONG_CREDENTIAL_DATA": "Wrong credential data"
     },
     "LIST_BUTTON": "Connectors",
     "UPDATE_BUTTON": "Update",

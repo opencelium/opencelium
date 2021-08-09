@@ -19,6 +19,7 @@ import Input from '@basic_components/inputs/Input';
 
 import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
+import {checkCronExpression, isString} from "@utils/app";
 
 /**
  * Component for Form Input
@@ -31,14 +32,17 @@ class FormInput extends Component{
     }
 
     handleInput(value){
-        const {name} = this.props.data;
+        const {name, validateOnChange} = this.props.data;
         const {entity, updateEntity} = this.props;
-        entity[name] = value;
-        updateEntity(entity);
+        if((typeof validateOnChange === 'function' && validateOnChange(value))
+        || typeof validateOnChange !== 'function'){
+                entity[name] = value;
+                updateEntity(entity, name);
+        }
     }
 
     render(){
-        const {name, label, icon, maxLength, readonly, required} = this.props.data;
+        const {name, label, icon, maxLength, readonly, required, error, isLoading, value} = this.props.data;
         const {entity} = this.props;
         let {type, tourStep} = this.props.data;
         let multiline = false;
@@ -55,9 +59,11 @@ class FormInput extends Component{
         if(readonly){
             isReadonly = true;
         }
-        let value = entity[name];
+        let inputValue = isString(value) ? value : entity[name];
         return (
             <Input
+                isLoading={isLoading}
+                error={error}
                 onChange={::this.handleInput}
                 name={name}
                 id={'input_'+name}
@@ -65,7 +71,7 @@ class FormInput extends Component{
                 type={type}
                 icon={icon}
                 maxLength={maxLength}
-                value={value}
+                value={inputValue}
                 multiline={multiline}
                 rows={4}
                 readOnly={isReadonly}

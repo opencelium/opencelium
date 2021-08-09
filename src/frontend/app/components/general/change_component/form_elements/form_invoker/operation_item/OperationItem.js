@@ -34,7 +34,6 @@ class OperationItem extends Component{
 
     constructor(props){
         super(props);
-        const method = props.operation.request.method;
         this.state = {
             tabKey: 'request',
         };

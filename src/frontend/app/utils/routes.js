@@ -60,7 +60,11 @@ export const createRoutes = (store) => {
                 <Route path='/connections/:id/update' component={LoadableRouteComponents.ConnectionUpdate}/>
             </Route>
             <Route path='/schedules' component={isAuth(LoadableRouteComponents.ScheduleLayout, store)}>
-                <IndexRoute component={LoadableRouteComponents.Scheduler}/>
+                <IndexRoute component={LoadableRouteComponents.SchedulesList}/>
+                <Route path='/schedules/add' component={LoadableRouteComponents.ScheduleAdd}/>
+                <Route path='/schedules/page/:pageNumber' component={LoadableRouteComponents.SchedulesList}/>
+                <Route path='/schedules/:id/view' component={LoadableRouteComponents.ScheduleView}/>
+                <Route path='/schedules/:id/update' component={LoadableRouteComponents.ScheduleUpdate}/>
             </Route>
             <Route path='/apps' component={isAuth(LoadableRouteComponents.AppLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.AppsList}/>
@@ -89,13 +93,6 @@ export const createRoutes = (store) => {
                 <Route path='/notification_templates/:id/view' component={LoadableRouteComponents.NotificationTemplateView}/>
                 <Route path='/notification_templates/:id/update' component={LoadableRouteComponents.NotificationTemplateUpdate}/>
             </Route>
-            {/*<Route path='/connections' component={isAuth(LoadableRouteComponents.ConnectionOverview2, store)}>
-                <IndexRoute component={LoadableRouteComponents.ConnectionsList2}/>
-                <Route path='/connections/add' component={LoadableRouteComponents.ConnectionAdd2}/>
-                <Route path='/connections/page/:pageNumber' component={LoadableRouteComponents.ConnectionsList2}/>
-                <Route path='/connections/:id/view' component={LoadableRouteComponents.ConnectionView2}/>
-                <Route path='/connections/:id/update' component={LoadableRouteComponents.ConnectionUpdate2}/>
-            </Route>*/}
             <Route path='/connection_overview_details' component={isAuth(LoadableRouteComponents.ConnectionOverviewDetails, store)}/>
             <Route path='/connection_overview_technical_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewTechnicalLayout, store)}/>
             <Route path='/connection_overview_business_layout' component={isAuth(LoadableRouteComponents.ConnectionOverviewBusinessLayout, store)}/>

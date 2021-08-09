@@ -37,7 +37,7 @@ class FormBody extends Component{
     }
 
     render(){
-        const {readOnly, required} = this.props.data;
+        const {readOnly, required, error} = this.props.data;
         const {contentItem} = this.props;
         let {tourStep} = this.props.data;
         let isReadonly = false;
@@ -51,6 +51,7 @@ class FormBody extends Component{
         }
         return (
             <Input
+                error={error ? error.body : ''}
                 onChange={::this.handleInput}
                 name={'input_body'}
                 id={'input_body'}

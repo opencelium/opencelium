@@ -18,8 +18,9 @@ import RejectedRequest from "@components/general/app/RejectedRequest";
 import Loading from "@loading";
 import PageNotFound from "@components/general/app/PageNotFound";
 
-import {capitalize, consoleLog, isEmptyObject} from '@utils/app';
+import {capitalize, consoleLog, isEmptyObject, setFocusById} from '@utils/app';
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import {automaticallyShowTour} from "@utils/constants/tours";
 
 
 /**
@@ -47,6 +48,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
                     hasStartedTriggeringCommand: false,
                     hasStartedFetchingResources: false,
                     hasWrongURL: false,
+                    isTourOpen: automaticallyShowTour(props.authUser),
                 };
             }
 
@@ -98,6 +100,65 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
                     if (resources.length !== additionalResources.length && !fetchingResource) {
                         this.fetchResource();
                     }
+                }
+            }
+
+            /**
+             * to close current Tour
+             */
+            closeTour(){
+                this.setState({
+                    isTourOpen: false,
+                });
+            }
+
+            /**
+             * to open current Tour
+             */
+            openTour(){
+                this.setState({
+                    isTourOpen: true,
+                });
+            }
+
+            checkValidationRequest(thisComponentScope, propertyName, propertyWasChecked, checkingResult, validationMessage){
+                if(thisComponentScope.startDoingAction && propertyWasChecked){
+                    if(checkingResult){
+                        if(checkingResult.message === 'EXISTS') {
+                            thisComponentScope.setState({
+                                validationMessages: {
+                                    ...thisComponentScope.state.validationMessages,
+                                    [propertyName]: validationMessage
+                                }
+                            });
+                            setFocusById(`input_${propertyName}`)
+                            thisComponentScope.startDoingAction = false;
+                        } else{
+                            let isFreeToDoAction = true;
+                            for(let param in thisComponentScope.state.validationMessages){
+                                if(thisComponentScope.state.validationMessages[param] !== ''){
+                                    setFocusById(`input_${param}`);
+                                    isFreeToDoAction = false;
+                                    break;
+                                }
+                            }
+                            if(isFreeToDoAction){
+                                this.doAction(thisComponentScope.state.entity);
+                            }
+                            thisComponentScope.startDoingAction = false;
+                        }
+                    }
+                }
+            }
+
+            setValidationMessage(thisComponentScope, name, value){
+                if(thisComponentScope.state.validationMessages.hasOwnProperty(name)) {
+                    thisComponentScope.setState({
+                        validationMessages: {
+                            ...thisComponentScope.state.validationMessages,
+                            [name]: value,
+                        }
+                    })
                 }
             }
 
@@ -174,7 +235,48 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
                 return null;
             }
 
-            doAction(entity){
+            doAction(entity, thisComponentScope = null){
+                if(thisComponentScope !== null){
+                    const {validationMessages} = thisComponentScope.state;
+                    thisComponentScope.startDoingAction = true;
+                    let validationNames = Object.keys(validationMessages);
+                    let isValidationPassed = true;
+                    let validations = {};
+                    let firstValidationName = '';
+                    for(let i = 0; i < validationNames.length; i++){
+                        if(typeof thisComponentScope[`validate${capitalize(validationNames[i])}`] === 'function') {
+                            const result = thisComponentScope[`validate${capitalize(validationNames[i])}`](entity);
+                            if (!result.value) {
+                                validations[validationNames[i]] = result.message;
+                                if (isValidationPassed) {
+                                    isValidationPassed = false;
+                                    firstValidationName = validationNames[i];
+                                }
+                            } else {
+                                validations[validationNames[i]] = '';
+                            }
+                        }
+                    }
+                    if(isValidationPassed){
+                        this.action(entity);
+                        thisComponentScope.startDoingAction = false;
+                    } else{
+                        thisComponentScope.setState({
+                            validationMessages: {...validationMessages, ...validations},
+                            entity: Object.assign({}, entity),
+                        });
+                        if(firstValidationName !== ''){
+                            if(validations[firstValidationName] !== '') {
+                                setFocusById(`input_${firstValidationName}`);
+                            }
+                        }
+                    }
+                } else{
+                    this.action(entity);
+                }
+            }
+
+            action(entity){
                 this.setState({hasStartedTriggeringCommand: true});
                 let actionName = '';
                 switch(command){
@@ -200,11 +302,20 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
             }
 
             render(){
+                const {isTourOpen} = this.state;
                 let checkEntity = this.checkEntity();
                 if(checkEntity !== null){
                     return checkEntity;
                 }
-                return <Component {...this.props} doAction={::this.doAction}/>;
+                return <Component
+                    {...this.props}
+                    doAction={::this.doAction}
+                    checkValidationRequest={::this.checkValidationRequest}
+                    setValidationMessage={::this.setValidationMessage}
+                    isTourOpen={isTourOpen}
+                    openTour={::this.openTour}
+                    closeTour={::this.closeTour}
+                />;
             }
         };
     };

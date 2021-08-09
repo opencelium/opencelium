@@ -37,7 +37,7 @@ class FormHint extends Component{
         const {hint} = this.state;
         let {entity, updateEntity} = this.props;
         entity.hint = hint;
-        updateEntity(entity);
+        updateEntity(entity, 'hint');
     }
 
     handleInput(hint){

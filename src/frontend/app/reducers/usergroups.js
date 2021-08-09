@@ -23,7 +23,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const initialState = fromJS({
-    checkingUserGroupName: false,
+    checkingUserGroupName: API_REQUEST_STATE.INITIAL,
     checkNameResult: null,
     fetchingUserGroup: API_REQUEST_STATE.INITIAL,
     addingUserGroup: API_REQUEST_STATE.INITIAL,
@@ -54,11 +54,11 @@ const reducer = (state = initialState, action) => {
     indexes = [];
     switch (action.type) {
         case UserGroupsAction.CHECK_USERGROUPNAME:
-            return state.set('checkingUserGroupName', true).set('checkNameResult', null).set('error', null);
+            return state.set('checkingUserGroupName', API_REQUEST_STATE.START).set('checkNameResult', null).set('error', null);
         case UserGroupsAction.CHECK_USERGROUPNAME_FULFILLED:
-            return state.set('checkingUserGroupName', false).set('checkNameResult', action.payload);
+            return state.set('checkingUserGroupName', API_REQUEST_STATE.FINISH).set('checkNameResult', action.payload);
         case UserGroupsAction.CHECK_USERGROUPNAME_REJECTED:
-            return state.set('checkingUserGroupName', false).set('error', null).set('checkNameResult', action.payload);
+            return state.set('checkingUserGroupName', API_REQUEST_STATE.ERROR).set('error', null).set('checkNameResult', action.payload);
         case UserGroupsAction.FETCH_USERGROUP:
             return state.set('fetchingUserGroup', API_REQUEST_STATE.START).set('error', null);
         case UserGroupsAction.FETCH_USERGROUP_FULFILLED:

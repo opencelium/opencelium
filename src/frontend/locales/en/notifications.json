@@ -72,6 +72,7 @@
     "LOG_IN": {
       "UNAUTHORIZED": "Wrong email or password",
       "WRONG_CREDENTIALS": "Wrong email or password",
+      "__DEFAULT__": "There is an error during the login",
       "SERVER_NOT_FOUND": "The server connection problem."
     },
     "DO_REQUEST": {
@@ -135,7 +136,7 @@
       "TITLE_EMPTY": "Title should not be empty",
       "CONNECTION_NULL": "You should choose connection",
       "START_TIME_OLD": "Start time is in the past",
-      "CRON_EXP_NOT_VALID": "Cron expression is invalid",
+      "BAD_CRON_EXPRESSION": "Cron expression is invalid",
       "__DEFAULT__": "The schedule was not added",
       "PERIODICITY_NOT_FOUND": "Periodicity not found",
       "CONNECTION_NOT_FOUND": "Connection not found"

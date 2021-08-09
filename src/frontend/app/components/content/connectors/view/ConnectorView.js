@@ -17,7 +17,6 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchConnector} from '@actions/connectors/fetch';
-import Content from "../../../general/content/Content";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {permission} from "@decorators/permission";
 import {ConnectorPermissions} from "@utils/constants/permissions";
@@ -25,6 +24,7 @@ import General from "./General";
 import Invoker from "./Invoker";
 import Operations from "./Operations";
 import Hint from "./Hint";
+import ViewComponent from "@components/general/view_component/ViewComponent";
 
 
 const prefixUrl = '/connectors';
@@ -54,18 +54,16 @@ class ConnectorView extends Component{
     }
 
     render(){
-        const {t, connector, authUser} = this.props;
-        let translations = {};
-        translations.header = t('VIEW.HEADER');
-        translations.list_button = t('VIEW.LIST_BUTTON');
-        let getListLink = `${prefixUrl}`;
+        const {t, connector} = this.props;
+        const header = t('VIEW.HEADER');
+        const listButton = {title: t('VIEW.LIST_BUTTON'), link: `${prefixUrl}`, permission: ConnectorPermissions.READ};
         return (
-            <Content translations={translations} getListLink={getListLink} permissions={ConnectorPermissions} authUser={authUser}>
+            <ViewComponent header={header} listButton={listButton} permission={ConnectorPermissions.READ}>
                 <General connector={connector}/>
                 <Invoker connector={connector}/>
                 <Hint connector={connector}/>
                 <Operations connector={connector}/>
-            </Content>
+            </ViewComponent>
         );
     }
 }

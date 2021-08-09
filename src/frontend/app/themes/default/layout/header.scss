@@ -146,3 +146,30 @@
     }
   }
 }
+
+.top_bar{
+  z-index: 1000;
+  position: absolute;
+  right: 30px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  >:nth-child(n){
+    margin-right: 10px;
+  }
+  >:first-child,>:last-child{
+    margin-right: 0;
+  }
+  .search_input{
+    float: left;
+    >div{
+      padding: 0;
+    }
+  }
+  .search_icon{
+    font-size: 20px;
+    border-radius: 50px;
+    background: white;
+    padding: 4px;
+  }
+}

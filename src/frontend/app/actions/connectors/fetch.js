@@ -15,7 +15,7 @@
 
 import Rx from 'rxjs/Rx';
 
-import { ConnectorsAction } from '@utils/actions';
+import {ConnectorsAction} from '@utils/actions';
 
 
 /**
@@ -118,6 +118,42 @@ const fetchConnectorsCanceled = (message) => {
     };
 };
 
+/**
+ * check uniqueness of the title
+ * @param connector
+ * @returns {{type: string, payload: {}}}
+ */
+const checkConnectorTitle = (connector) => {
+    return {
+        type: ConnectorsAction.CHECK_CONNECTORTITLE,
+        payload: connector,
+    };
+};
+
+/**
+ * check uniqueness of the title fulfilled
+ * @param connector
+ * @returns {{type: string, payload: {}}}
+ */
+const checkConnectorTitleFulfilled = (connector) => {
+    return {
+        type: ConnectorsAction.CHECK_CONNECTORTITLE_FULFILLED,
+        payload: connector,
+    };
+};
+
+/**
+ * check uniqueness of the title rejected
+ * @param error
+ * @returns {promise}
+ */
+const checkConnectorTitleRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectorsAction.CHECK_CONNECTORTITLE_REJECTED,
+        payload: error
+    });
+};
+
 export {
     fetchConnectors,
     fetchConnectorsFulfilled,
@@ -127,4 +163,7 @@ export {
     fetchConnectorFulfilled,
     fetchConnectorRejected,
     fetchConnectorCanceled,
+    checkConnectorTitle,
+    checkConnectorTitleFulfilled,
+    checkConnectorTitleRejected,
 };

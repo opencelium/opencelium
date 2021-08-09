@@ -48,6 +48,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 import ScheduleNotification from "./notification/ScheduleNotification";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
+import {Link as ReactRouterLink} from "react-router";
 
 export const EMPHASIZE_DURATION_ANIMATION = 900;
 
@@ -377,7 +378,16 @@ class ScheduleList extends Component{
                                         />
                                     </td>}
                                     <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>
-                                    <td className={styles[classNames.schedule_list_title]}><span title={schedule.connection.title}>{schedule.connection.title}</span></td>
+                                    <td className={styles[classNames.schedule_list_title]}>
+                                        <ReactRouterLink
+                                            onlyActiveOnIndex={true}
+                                            to={`/connections/${schedule.connection.connectionId}/view`}
+                                        >
+                                            <span title={schedule.connection.title}>
+                                                {schedule.connection.title}
+                                            </span>
+                                        </ReactRouterLink>
+                                    </td>
                                     <CronCell authUser={authUser} schedule={schedule} isFirst={key === 0}/>
                                     <LastSuccessCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>
                                     <LastFailureCell index={key} schedule={schedule} hasElasticSearch={checkingAppResult ? `${checkingAppResult.status}` === APP_STATUS_UP : false}/>

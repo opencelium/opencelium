@@ -58,13 +58,14 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import GridViewMenu from "@components/general/list_of_components/GridViewMenu";
 import ListView from "@components/general/list_of_components/ListView";
 import Button from "@basic_components/buttons/Button";
+import {NO_NEED_PERMISSION} from "@utils/constants/permissions";
 
 
 const AMOUNT_OF_ROWS = 3;
 
 const AMOUNT_OF_ITEMS_FOR_LIST = 10;
 
-const VIEW_TYPE = {
+export const VIEW_TYPE = {
     LIST: 'LIST',
     GRID: 'GRID',
 };
@@ -85,7 +86,7 @@ class List extends Component{
         super(props);
 
         this.state = {
-            viewType: VIEW_TYPE.GRID,
+            viewType: VIEW_TYPE.LIST,
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
@@ -371,7 +372,9 @@ class List extends Component{
         const {listViewData} = this.props;
         let entityIds = checks.filter(c => c.value);
         entityIds = entityIds.map(c => c.id);
-        listViewData.deleteSelected({[listViewData.entityIdsName]: entityIds});
+        if(listViewData.hasOwnProperty('deleteSelected')) {
+            listViewData.deleteSelected({[listViewData.entityIdsName]: entityIds});
+        }
     }
 
     isOneChecked(){
@@ -385,26 +388,35 @@ class List extends Component{
     }
 
     render(){
-        const {mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles, noSearchField, currentPageItems, listViewData} = this.props;
+        const {
+            mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles,
+            noSearchField, currentPageItems, listViewData,
+        } = this.props;
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType} = this.state;
-        let {page, translations} = this.props;
+        let {page, translations, hasDeleteSelectedButtons} = this.props;
         let classNames = ['empty_list', 'search_field'];
         classNames = getThemeClass({classNames, authUser, styles});
         page.entitiesLength = this.searchEntities().length;
         let listViewEntities = [];
         if(viewType === VIEW_TYPE.LIST){
-            listViewEntities = currentPageItems.map(item => listViewData.map(item));
+            listViewEntities = currentPageItems.map(item => listViewData.map(item, this));
         }
         const isListViewIconDisabled = !(listViewData);
         const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width};}) : [];
         const entityIdName = listViewData ? listViewData.entityIdName : '';
         const isDeleteSelectedButtonDisabled = !::this.isOneChecked();
+        const hasAddButton = mapEntity.hasOwnProperty('getAddLink') || mapEntity.hasOwnProperty('AddButton');
+        if(hasDeleteSelectedButtons){
+            hasDeleteSelectedButtons = viewType === VIEW_TYPE.LIST;
+        }
+        const hasAdditionalButton = mapEntity.hasOwnProperty('AdditionalButton');
+        const hasNoButtons = !hasAddButton && !hasDeleteSelectedButtons && !hasAdditionalButton;
         return(
             <Row id={'app_list'}>
                 <Col sm={12}>
                     <div style={{...containerStyles, marginBottom: '50px'}}>
                         <ListHeader header={translations.header}/>
-                        <div style={{display: 'flex', marginBottom: '20px'}}>
+                        <div className={styles.action_panel}>
                             {
                                 mapEntity.hasOwnProperty('getAddLink')
                                 ?
@@ -420,16 +432,17 @@ class List extends Component{
                                     mapEntity.hasOwnProperty('AddButton') && <mapEntity.AddButton/>
                             }
                             {
-                                viewType === VIEW_TYPE.LIST &&
+                                hasDeleteSelectedButtons &&
                                 <div className={styles.delete_selected_button}>
                                     <Button icon={'delete'} onClick={::this.deleteSelected} id={formatHtmlId(`button_delete_selected`)} disabled={isDeleteSelectedButtonDisabled}>
                                         <span>{'Delete Selected'}</span>
                                     </Button>
                                 </div>
                             }
-                            {mapEntity.hasOwnProperty('AdditionalButton') &&
+                            {
+                                hasAdditionalButton &&
                                 <div className={styles.additional_button}>
-                                    {mapEntity.AdditionalButton}
+                                    {typeof mapEntity.AdditionalButton === 'function' ? mapEntity.AdditionalButton(this) : mapEntity.AdditionalButton}
                                 </div>
                             }
                             {
@@ -452,66 +465,69 @@ class List extends Component{
                                     </span>
                             }
                         </div>
-                        {viewType === VIEW_TYPE.LIST && <ListView sortType={sortType} toggleSortType={::this.toggleSortType} setChecks={::this.setChecks} entitiesName={'allEntities'} entityIdName={entityIdName} allEntities={entities} items={listViewEntities} header={listViewEntitiesHeader} mapEntity={mapEntity}/>}
-                        {viewType === VIEW_TYPE.GRID &&
-                            <div className={styles.grid_view}>
-                                {
-                                    currentPageItems.length > 0
-                                        ?
-                                        currentPageItems.map((entity, key) => {
-                                            let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
-                                            let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
-                                            let graphLink = mapEntity.hasOwnProperty('getGraphLink') ? mapEntity.getGraphLink(entity) : '';
-                                            let onCardClickLink = mapEntity.hasOwnProperty('getOnCardClickLink') ? mapEntity.getOnCardClickLink(entity.mappedEntity) : '';
-                                            let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
-                                            let hasView = isString(viewLink) && viewLink !== '';
-                                            let hasUpdate = isString(updateLink) && updateLink !== '';
-                                            let hasGraph = isString(graphLink) && graphLink !== '';
-                                            let hasDelete = onDelete !== null;
-                                            let isSelectedCard = false;
-                                            if (selectedCard === key) {
-                                                isSelectedCard = true;
-                                            }
-                                            return (
-                                                <div key={key} className={styles[`cards_item_grid_view_${gridViewType}`]}>
-                                                    <CardError>
-                                                        <Card
-                                                            hasTour={translations.header.hasOwnProperty('onHelpClick') && (key === 0 || key === 1)}
-                                                            index={key}
-                                                            keyNavigateType={keyNavigateType}
-                                                            entity={entity.mappedEntity}
-                                                            isException={exceptionEntities.exceptions.indexOf(entity.mappedEntity.id) !== -1}
-                                                            exceptionLabel={exceptionEntities.label}
-                                                            viewLink={viewLink}
-                                                            updateLink={updateLink}
-                                                            graphLink={graphLink}
-                                                            onDelete={onDelete}
-                                                            isSelectedCard={isSelectedCard}
-                                                            permissions={permissions}
-                                                            authUser={authUser}
-                                                            hasView={hasView}
-                                                            hasUpdate={hasUpdate}
-                                                            hasGraph={hasGraph}
-                                                            hasDelete={hasDelete}
-                                                            onCardClickLink={onCardClickLink}
-                                                            keyNavigate={::this.keyNavigate}
-                                                            load={load}
-                                                            isButton={onCardClickLink !== ''}
-                                                        />
-                                                    </CardError>
-                                                </div>
-                                            );
-                                        })
-                                        :
-
-                                        <div>
-                                            <span className={styles[classNames.empty_list]}>
-                                                {this.props.translations.empty_list}
-                                            </span>
-                                        </div>
-                                }
-                            </div>
+                        {
+                            currentPageItems.length === 0
+                            ?
+                                <div className={styles[classNames.empty_list]}>
+                                    <span>
+                                        {this.props.translations.empty_list}
+                                    </span>
+                                </div>
+                            :
+                                <React.Fragment>
+                                    {viewType === VIEW_TYPE.LIST && <ListView translations={translations} sortType={sortType} toggleSortType={::this.toggleSortType} setChecks={::this.setChecks} entitiesName={'allEntities'} entityIdName={entityIdName} allEntities={entities} items={listViewEntities} header={listViewEntitiesHeader} mapEntity={mapEntity}/>}
+                                    {viewType === VIEW_TYPE.GRID &&
+                                    <div className={styles.grid_view}>
+                                        {
+                                            currentPageItems.map((entity, key) => {
+                                                let viewLink = mapEntity.hasOwnProperty('getViewLink') ? mapEntity.getViewLink(entity) : '';
+                                                let updateLink = mapEntity.hasOwnProperty('getUpdateLink') ? mapEntity.getUpdateLink(entity) : '';
+                                                let graphLink = mapEntity.hasOwnProperty('getGraphLink') ? mapEntity.getGraphLink(entity) : '';
+                                                let onCardClickLink = mapEntity.hasOwnProperty('getOnCardClickLink') ? mapEntity.getOnCardClickLink(entity.mappedEntity) : '';
+                                                let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
+                                                let hasView = isString(viewLink) && viewLink !== '';
+                                                let hasUpdate = isString(updateLink) && updateLink !== '';
+                                                let hasGraph = isString(graphLink) && graphLink !== '';
+                                                let hasDelete = onDelete !== null;
+                                                let isSelectedCard = false;
+                                                if (selectedCard === key) {
+                                                    isSelectedCard = true;
+                                                }
+                                                return (
+                                                    <Card
+                                                        key={key}
+                                                        permission={entity.permission ? entity.permission : NO_NEED_PERMISSION}
+                                                        gridViewType={gridViewType}
+                                                        hasTour={translations.header.hasOwnProperty('onHelpClick') && (key === 0 || key === 1)}
+                                                        index={key}
+                                                        keyNavigateType={keyNavigateType}
+                                                        entity={entity.mappedEntity}
+                                                        isException={exceptionEntities.exceptions.indexOf(entity.mappedEntity.id) !== -1}
+                                                        exceptionLabel={exceptionEntities.label}
+                                                        viewLink={viewLink}
+                                                        updateLink={updateLink}
+                                                        graphLink={graphLink}
+                                                        onDelete={onDelete}
+                                                        isSelectedCard={isSelectedCard}
+                                                        permissions={permissions}
+                                                        authUser={authUser}
+                                                        hasView={hasView}
+                                                        hasUpdate={hasUpdate}
+                                                        hasGraph={hasGraph}
+                                                        hasDelete={hasDelete}
+                                                        onCardClickLink={onCardClickLink}
+                                                        keyNavigate={::this.keyNavigate}
+                                                        load={load}
+                                                        isButton={onCardClickLink !== ''}
+                                                    />
+                                                );
+                                            })
+                                        }
+                                    </div>
+                                    }
+                                </React.Fragment>
                         }
+
                         <Pagination page={page} setTotalPages={setTotalPages} entitiesProPage={entitiesProPage}/>
                     </div>
                 </Col>
@@ -529,6 +545,7 @@ List.propTypes = {
     containerStyles: PropTypes.object,
     noSearchField: PropTypes.bool,
     mapDependencies: PropTypes.object,
+    hasDeleteSelectedButtons: PropTypes.bool,
 };
 
 List.defaultProps = {
@@ -537,6 +554,7 @@ List.defaultProps = {
     containerStyles: {},
     noSearchField: false,
     mapDependencies: {},
+    hasDeleteSelectedButtons: true,
 };
 
 export default withRouter(List);

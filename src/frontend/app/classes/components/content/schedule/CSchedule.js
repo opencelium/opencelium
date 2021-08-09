@@ -39,6 +39,9 @@ export default class CSchedule{
 
     static createSchedule(schedule){
         let id = schedule && schedule.hasOwnProperty('schedulerId') ? schedule.schedulerId : 0;
+        if(id === 0){
+            id = schedule && schedule.hasOwnProperty('id') ? schedule.id : 0;
+        }
         let title = schedule && schedule.hasOwnProperty('title') ? schedule.title : '';
         let cronExp = schedule && schedule.hasOwnProperty('cronExp') ? schedule.cronExp : '';
         let status = schedule && schedule.hasOwnProperty('status') ? schedule.status : false;

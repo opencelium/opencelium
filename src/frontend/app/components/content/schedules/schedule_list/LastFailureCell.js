@@ -21,6 +21,7 @@ import {NO_DATA} from "@utils/constants/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {EMPHASIZE_DURATION_ANIMATION} from "./ScheduleList";
 import {kibanaUrl} from "@utils/constants/url";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
 
 /**
  * Cell Component to display last failure for ScheduleList
@@ -36,10 +37,12 @@ class LastFailureCell extends Component{
 
     componentDidUpdate(prevProps){
         const {appearClassName} = this.state;
-        let newTime = this.props.schedule.getFailEndTime();
-        let newId = this.props.schedule.id;
-        let oldTime = prevProps.schedule.getFailEndTime();
-        let oldId = prevProps.schedule.id;
+        const curSchedule = CSchedule.createSchedule(this.props.schedule);
+        const prevSchedule = CSchedule.createSchedule(prevProps.schedule);
+        let newTime = curSchedule.getFailEndTime();
+        let newId = curSchedule.id;
+        let oldTime = prevSchedule.getFailEndTime();
+        let oldId = prevSchedule.id;
         if(newTime !== NO_DATA) {
             if(newId === oldId && newTime !== oldTime && appearClassName !== styles.emphasize_cell) {
                 this.setState({appearClassName: styles.emphasize_cell});
@@ -54,7 +57,8 @@ class LastFailureCell extends Component{
 
     renderData(){
         const {appearClassName} = this.state;
-        let {schedule, hasElasticSearch, index} = this.props;
+        let {hasElasticSearch} = this.props;
+        const schedule = CSchedule.createSchedule(this.props.schedule);
         let time = schedule.getFailEndTime();
         let taId = schedule.getFailTaId();
         let executionId = schedule.getFailExecutionId();
@@ -79,7 +83,7 @@ class LastFailureCell extends Component{
                         ?
                             <span>#{executionId}</span>
                         :
-                            <a id={`last_fail_${index}`} href={url} target={'_blank'}>#{executionId}</a>
+                            <a id={`last_fail_${schedule.id}`} href={url} target={'_blank'}>#{executionId}</a>
                 }
             </div>
         );
@@ -97,7 +101,6 @@ class LastFailureCell extends Component{
 LastFailureCell.propTypes = {
     schedule: PropTypes.object.isRequired,
     hasElasticSearch: PropTypes.bool,
-    index: PropTypes.number.isRequired,
 };
 
 LastFailureCell.defaultProps = {

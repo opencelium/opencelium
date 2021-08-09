@@ -37,7 +37,7 @@ class FormDescription extends Component{
         const {description} = this.state;
         let {entity, updateEntity} = this.props;
         entity.description = description;
-        updateEntity(entity);
+        updateEntity(entity, 'description');
     }
 
     handleInput(description){

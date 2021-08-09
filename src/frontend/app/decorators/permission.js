@@ -17,6 +17,7 @@ import React, { Component } from 'react';
 
 import NoPermissions from '@components/general/app/NoPermission';
 import {ErrorPermissions} from "@utils/constants/errors";
+import {NO_NEED_PERMISSION} from "@utils/constants/permissions";
 
 /**
  * check the component on the permission
@@ -74,6 +75,9 @@ function getAuthUserPermissions(props){
  * @returns {boolean}
  */
 function hasPermissions(comingPermission, userPermissions){
+    if(comingPermission === NO_NEED_PERMISSION){
+        return true;
+    }
     let result = false;
     if(comingPermission === '' || userPermissions.length === 0){
         return result;

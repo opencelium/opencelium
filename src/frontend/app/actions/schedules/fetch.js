@@ -88,6 +88,17 @@ const triggerScheduleCanceled = (message) => {
 };
 
 /**
+ * fetch schedule
+ * @param schedule
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchSchedule = (schedule) => {
+    return {
+        type: SchedulesAction.FETCH_SCHEDULE,
+        payload: schedule,
+    };
+};
+/**
  * fetch schedule fulfilled
  * @param schedule
  * @returns {{type: string, payload: {}}}
@@ -512,6 +523,7 @@ export {
     fetchSchedulesFulfilled,
     fetchSchedulesRejected,
     fetchSchedulesCanceled,
+    fetchSchedule,
     fetchScheduleFulfilled,
     fetchScheduleRejected,
     fetchScheduleCanceled,

@@ -16,18 +16,17 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import Content from "../../../general/content/Content";
-import ChangeContent from "@change_component/ChangeContent";
-
 import {fetchNotificationTemplate} from '@actions/notification_templates/fetch';
 import {NotificationTemplatePermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
-import {INPUTS} from "@utils/constants/inputs";
-import {automaticallyShowTour} from "@utils/constants/tours";
 import {SingleComponent} from "@decorators/SingleComponent";
-import CNotificationTemplate from "@classes/components/content/schedule/notification/CNotificationTemplate";
+import ViewComponent from "@components/general/view_component/ViewComponent";
+import Form from "@change_component/Form";
+import {API_REQUEST_STATE} from "@utils/constants/app";
+import {INPUTS} from "@utils/constants/inputs";
+import {NOTIFICATION_TEMPLATE_TOURS} from "@utils/constants/tours";
 
-const notificationTemplatePrefixURL = '/notification_templates';
+const notificationTemplatePrefixUrl = '/notification_templates';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -47,67 +46,63 @@ function mapStateToProps(state){
 @permission(NotificationTemplatePermissions.READ, true)
 @withTranslation(['notification_templates', 'app', 'schedules'])
 @SingleComponent('notificationTemplate')
-class NotificationTmeplateView extends Component{
+class NotificationTemplateView extends Component{
 
     constructor(props){
         super(props);
     }
 
     render(){
-        const {t, authUser, notificationTemplate} = this.props;
+        const {t, openTour, notificationTemplate} = this.props;
         let contentTranslations = {};
-        contentTranslations.header = t('VIEW.HEADER');
-        contentTranslations.list_button = t('VIEW.LIST_BUTTON');
-        let changeContentTranslations = {};
-        changeContentTranslations.updateButton = t('VIEW.VIEW_BUTTON');
-        let getListLink = `${notificationTemplatePrefixURL}`;
-        let breadcrumbsItems = [t('VIEW.FORM.PAGE_1'), t('VIEW.FORM.PAGE_2'), t('VIEW.FORM.PAGE_3'), t('VIEW.FORM.PAGE_4')];
+        contentTranslations.header = {title: t(`VIEW.HEADER`), onHelpClick: openTour};
+        contentTranslations.list_button = {title: t(`VIEW.LIST_BUTTON`), link: notificationTemplatePrefixUrl};
         let contents = [{
             inputs: [
                 {
                     ...INPUTS.NOTIFICATION_TEMPLATE_NAME,
-                    label: t('VIEW.FORM.NAME'),
+                    tourStep: NOTIFICATION_TEMPLATE_TOURS.page_1[0].selector,
+                    label: t(`VIEW.FORM.NAME`),
                     required: true,
                     maxLength: 255,
+                    defaultValue: '',
                     readOnly: true,
-                },{
+                },
+                {
                     ...INPUTS.NOTIFICATION_TEMPLATE_TYPE,
-                    label: t('VIEW.FORM.TYPE'),
+                    tourStep: NOTIFICATION_TEMPLATE_TOURS.page_1[1].selector,
+                    label: t(`VIEW.FORM.TYPE`),
                     required: true,
-                    readOnly: true,
+                    defaultValue: 0,
                     t,
-                },{
-                    ...INPUTS.NOTIFICATION_TEMPLATE_CONTENT,
-                    label: t('VIEW.FORM.CONTENT'),
-                    required: true,
                     readOnly: true,
-                    t,
                 },
             ],
-            hint: {text: t('VIEW.FORM.HINT_1')},
+            hint: {text: t(`VIEW.FORM.HINT_1`), openTour},
+            header: t(`VIEW.FORM.PAGE_1`),
+        },{
+            inputs: [
+                {
+                    ...INPUTS.NOTIFICATION_TEMPLATE_CONTENT,
+                    tourStep: NOTIFICATION_TEMPLATE_TOURS,
+                    label: t(`VIEW.FORM.CONTENT`),
+                    required: true,
+                    readOnly: true,
+                },
+            ],
+            hint: {text: t(`VIEW.FORM.HINT_2`), openTour},
+            header: t(`VIEW.FORM.PAGE_2`),
         }];
         return (
-            <Content
+            <Form
+                contents={contents}
                 translations={contentTranslations}
-                getListLink={getListLink}
                 permissions={NotificationTemplatePermissions}
-                authUser={authUser}
-            >
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
-                    contents={contents}
-                    translations={changeContentTranslations}
-                    authUser={authUser}
-                    entity={CNotificationTemplate.createNotificationTemplate(notificationTemplate)}
-                    action={null}
-                    isActionInProcess={false}
-                    noBreadcrumbs={true}
-                    noHint={true}
-                    noNavigation={true}
-                />
-            </Content>
+                entity={notificationTemplate}
+                type={'view'}
+            />
         );
     }
 }
 
-export default NotificationTmeplateView;
+export default NotificationTemplateView;

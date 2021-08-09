@@ -17,12 +17,12 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchUser} from '@actions/users/fetch';
-import Content from "../../../general/content/Content";
 import UserDetails from "./UserDetails";
 import UserGroup from "./UserGroup";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {permission} from "@decorators/permission";
 import {UserPermissions} from "@utils/constants/permissions";
+import ViewComponent from "@components/general/view_component/ViewComponent";
 
 
 
@@ -53,17 +53,15 @@ class UserView extends Component{
     }
 
     render(){
-        const {t, user, authUser} = this.props;
+        const {t, user} = this.props;
         const usergroup = user.userGroups;
-        let translations = {};
-        translations.header = t('VIEW.HEADER');
-        translations.list_button = t('VIEW.LIST_BUTTON');
-        let getListLink = `${prefixUrl}`;
+        const listButton = {title: t('VIEW.LIST_BUTTON'), link: `${prefixUrl}`, permission: UserPermissions.READ};
+        const header = t('VIEW.HEADER');
         return (
-            <Content translations={translations} getListLink={getListLink} permissions={UserPermissions} authUser={authUser}>
+            <ViewComponent header={header} listButton={listButton} permission={UserPermissions.READ}>
                 <UserDetails user={user}/>
                 <UserGroup usergroup={usergroup}/>
-            </Content>
+            </ViewComponent>
         );
     }
 }

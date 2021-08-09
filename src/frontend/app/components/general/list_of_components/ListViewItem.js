@@ -111,11 +111,15 @@ class ListViewItem extends React.Component{
                     if(element.name === 'id') return null;
                     let shortText = isString(element.value) && element.value.length > 128 ? `${element.value.substr(0, 128)}...` : element.value;
                     let fullText = isString(element.value) ? element.value : '';
+                    if(React.isValidElement(shortText)){
+                        return shortText;
+                    }
                     return (
                         <td key={element.name} title={fullText}>
                             {shortText}
                         </td>
-                    );})}
+                    );
+                })}
                 <td>
                     {hasView && <TooltipFontIcon tooltip={'View'} value={'visibility'} onClick={::this.view} isButton={true} turquoiseTheme/>}
                     {hasUpdate && <TooltipFontIcon tooltip={'Edit'} value={'edit'} onClick={::this.update} isButton={true} turquoiseTheme/>}

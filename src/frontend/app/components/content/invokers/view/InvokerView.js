@@ -16,17 +16,16 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import Content from "../../../general/content/Content";
-import ChangeContent from "@change_component/ChangeContent";
 
 import {fetchInvoker} from '@actions/invokers/fetch';
 import {InvokerPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {INPUTS} from "@utils/constants/inputs";
 import {SingleComponent} from "@decorators/SingleComponent";
+import Form from "@change_component/Form";
 import CInvoker from "@classes/components/content/invoker/CInvoker";
 
-const invokerPrefixURL = '/invokers';
+const invokerPrefixUrl = '/invokers';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -38,7 +37,6 @@ function mapStateToProps(state){
         error: invokers.get('error'),
     };
 }
-
 
 
 /**
@@ -55,14 +53,10 @@ class InvokerView extends Component{
     }
 
     render(){
-        const {t, authUser, invoker, updatingInvoker, doAction} = this.props;
+        const {t, invoker} = this.props;
         let contentTranslations = {};
-        contentTranslations.header = t('VIEW.HEADER');
-        contentTranslations.list_button = t('VIEW.LIST_BUTTON');
-        let changeContentTranslations = {};
-        changeContentTranslations.updateButton = t('VIEW.VIEW_BUTTON');
-        let getListLink = `${invokerPrefixURL}`;
-        let breadcrumbsItems = [t('VIEW.FORM.PAGE_1'), t('VIEW.FORM.PAGE_2'), t('VIEW.FORM.PAGE_3'), t('VIEW.FORM.PAGE_4')];
+        contentTranslations.header = {title: t(`VIEW.HEADER`)};
+        contentTranslations.list_button = {title: t(`VIEW.LIST_BUTTON`), link: invokerPrefixUrl};
         let contents = [{
             inputs: [
                 {
@@ -102,23 +96,13 @@ class InvokerView extends Component{
             hint: {text: t('VIEW.FORM.HINT_4')},},
         ];
         return (
-            <Content
+            <Form
+                contents={contents}
                 translations={contentTranslations}
-                getListLink={getListLink}
                 permissions={InvokerPermissions}
-                authUser={authUser}
-            >
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
-                    contents={contents}
-                    translations={changeContentTranslations}
-                    authUser={authUser}
-                    action={doAction}
-                    isActionInProcess={updatingInvoker}
-                    entity={CInvoker.createInvoker(invoker)}
-                    type={'view'}
-                />
-            </Content>
+                entity={CInvoker.createInvoker(invoker)}
+                type={'view'}
+            />
         );
     }
 }

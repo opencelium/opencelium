@@ -35,6 +35,7 @@ import {getLS} from "@utils/LocalStorage";
 import {API_REQUEST_STATE, TEST} from "@utils/constants/app";
 import {hasHeader} from "@utils/app";
 import Menu from "@components/layout/menu/Menu";
+import TopBar from "@components/layout/header/TopBar";
 
 let checkTokenInterval;
 
@@ -135,7 +136,12 @@ class Layout extends Component{
 
     renderHeader(){
         if(this.props.isAuth && hasHeader(this.props)){
-            return <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
+            return (
+                <div id={'app_header'}>
+                    <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>
+                    <TopBar/>
+                </div>
+            );
             //return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
         }
         return null;

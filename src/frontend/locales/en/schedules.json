@@ -63,6 +63,9 @@
     }
   },
   "LIST":{
+    "HEADER": "Schedules",
+    "ADD_BUTTON": "Add Schedule",
+    "CRON_EXP": "Cron",
     "EMPTY_LIST": "The list of Schedulers is empty",
     "EMPTY_CURRENT_LIST": "The list of current jobs is empty",
     "TOOLTIP_START_ICON": "Start",
@@ -88,16 +91,61 @@
     "WEBHOOK_TOOLS_TOOLTIP_DELETE": "Delete Webhook"
   },
   "UPDATE":{
-    "UPDATE_BUTTON": "update"
-  },
-  "ADD":{
+    "HEADER": "Update Schedule",
     "TITLE_PLACEHOLDER": "Title",
     "SEARCH_PLACEHOLDER": "Search by title",
     "CONNECTION_PLACEHOLDER": "Connection",
     "CRONEXP_PLACEHOLDER": "Cron Job",
     "CRON_ICON_TOOLTIP": "Generate cron expression",
-    "ADD_BUTTON_TITLE": "Add Job",
-    "ADD_BUTTON_TITLE_SHORT": "Add",
-    "COLOR_TITLE": "Color"
+    "UPDATE_BUTTON": "Update",
+    "LIST_BUTTON": "Schedules",
+    "COLOR_TITLE": "Color",
+    "FORM": {
+      "PAGE_1": "General Data",
+      "TITLE": "Title",
+      "CONNECTION": "Connection",
+      "CONNECTION_PLACEHOLDER": "Choose connection...",
+      "DESCRIPTION_DEFAULT": "Here you will see the description of the connection",
+      "CRON_EXP": "Cron Expression"
+    },
+    "VALIDATION_MESSAGES": {
+      "TITLE_REQUIRED": "Title is a required field",
+      "CONNECTION_REQUIRED": "Connection is a required field",
+      "CRON_EXP_REQUIRED": "Cron Expression is a required field"
+    }
+  },
+  "ADD":{
+    "HEADER": "Add Schedule",
+    "TITLE_PLACEHOLDER": "Title",
+    "SEARCH_PLACEHOLDER": "Search by title",
+    "CONNECTION_PLACEHOLDER": "Connection",
+    "CRONEXP_PLACEHOLDER": "Cron Job",
+    "CRON_ICON_TOOLTIP": "Generate cron expression",
+    "ADD_BUTTON": "Add",
+    "LIST_BUTTON": "Schedules",
+    "COLOR_TITLE": "Color",
+    "FORM": {
+      "PAGE_1": "General Data",
+      "TITLE": "Title",
+      "CONNECTION": "Connection",
+      "CONNECTION_PLACEHOLDER": "Choose connection...",
+      "DESCRIPTION_DEFAULT": "Here you will see the description of the connection",
+      "CRON_EXP": "Cron Expression"
+    },
+    "VALIDATION_MESSAGES": {
+      "TITLE_REQUIRED": "Title is a required field",
+      "CONNECTION_REQUIRED": "Connection is a required field",
+      "CRON_EXP_REQUIRED": "Cron Expression is a required field"
+    }
+  },
+  "VIEW":{
+    "HEADER": "View Schedule",
+    "LIST_BUTTON": "Schedules",
+    "FORM": {
+      "PAGE_1": "General Data",
+      "TITLE": "Title",
+      "CONNECTION": "Connection",
+      "CRON_EXP": "Cron Expression"
+    }
   }
 }

@@ -16,6 +16,7 @@
 @import '../constants';
 @use '../constants';
 
+
 .list_view{
   @extend .card_style;
   overflow-x: auto;
@@ -300,6 +301,7 @@
 }
 
 .empty_list{
+  @extend .card_style;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_SMALL;
   display: block;
@@ -385,11 +387,21 @@
   }
 }
 
-.list_view_icon{
-  margin-left: auto;
-  align-self: center;
-  display: grid;
-  grid-template-columns: max-content max-content;
+.action_panel{
+  display: flex;
+  margin-bottom: 20px;
+  >:nth-child(n){
+    margin-left: 10px;
+  }
+  >:first-child{
+    margin-left: 0;
+  }
+  .list_view_icon{
+    margin-left: auto;
+    align-self: center;
+    display: grid;
+    grid-template-columns: max-content max-content;
+  }
 }
 .grid_dropdown_menu{
   min-width: 100px;

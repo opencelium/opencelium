@@ -50,13 +50,13 @@ class FormType extends Component{
     handleChange(type){
         let {entity, updateEntity} = this.props;
         entity.setTypeFromSelect(type);
-        updateEntity(entity);
+        updateEntity(entity, 'type');
     }
 
     render(){
         const {focused} = this.state;
         const {entity, data} = this.props;
-        const {name, label, icon, readOnly, required, placeholder, t} = data;
+        const {name, label, icon, readOnly, required, placeholder, t, error} = data;
         let {tourStep} = this.props.data;
         let isReadonly = false;
         if(readOnly){
@@ -67,6 +67,7 @@ class FormType extends Component{
         return(
             <Select
                 id={`input_${name}`}
+                error={error}
                 tourStep={tourStep}
                 label={label}
                 required={required}

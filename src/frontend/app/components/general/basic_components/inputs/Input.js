@@ -19,6 +19,7 @@ import {Input as ToolboxInput} from "react-toolbox/lib/input";
 import styles from '@themes/default/general/basic_components.scss';
 import {formatHtmlId, getThemeClass, setFocusById} from "@utils/app";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import Loading from "@components/general/app/Loading";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -130,36 +131,43 @@ class Input extends Component{
     }
 
     render(){
-        let {authUser, onChange, onBlur, isPopupInput, id, hasFocus, popupInputStyles, isPopupMultiline, popupRows, ...props} = this.props;
+        let {authUser, onChange, onBlur, isPopupInput, id, hasFocus, popupInputStyles, isPopupMultiline, popupRows, isLoading, ...props} = this.props;
         props.id = id ? id : `input_${formatHtmlId(props.name ? props.name : props.label)}`;
         let {theme, className} = this.props;
         let classNames = [
             'input_input_element',
             'input_bar',
             'input_icon',
+            'input_error',
+            'input_loading',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         let inputElement = theme && theme.hasOwnProperty('inputElement') ? theme.inputElement : styles[classNames.input_input_element];
         let bar = theme && theme.hasOwnProperty('bar') ? theme.bar : styles[classNames.input_bar];
         let icon = theme && theme.hasOwnProperty('icon') ? theme.icon : styles[classNames.input_icon];
+        let error = theme && theme.hasOwnProperty('error') ? theme.error : styles[classNames.input_error];
         if(theme === null){
             theme = {};
         }
         theme.inputElement = inputElement;
         theme.bar = bar;
         theme.icon = icon;
+        theme.error = error;
         if(!isPopupInput){
             return (
-                <ToolboxInput
-                    {...props}
-                    className={className}
-                    theme={theme}
-                    onClick={null}
-                    onChange={onChange}
-                    onBlur={::this.onBlur}
-                    onFocus={::this.onFocus}
-                >{null}
-                </ToolboxInput>
+                <div style={{position: 'relative'}}>
+                    {isLoading && <Loading className={styles[classNames.input_loading]}/>}
+                    <ToolboxInput
+                        {...props}
+                        className={className}
+                        theme={theme}
+                        onClick={null}
+                        onChange={onChange}
+                        onBlur={::this.onBlur}
+                        onFocus={::this.onFocus}
+                    >{null}
+                    </ToolboxInput>
+                </div>
             );
         }
         return (
@@ -188,6 +196,7 @@ Input.defaultProps = {
     popupInputStyles: null,
     isPopupMultiline: false,
     popupRows: 1,
+    isLoading: false,
 };
 
 export default Input;

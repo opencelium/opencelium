@@ -43,8 +43,10 @@ const ICONNECTION = {
 
 //CONNECTOR
 const INVOKER = {name: 'invoker', type: 'select+description', icon: 'web_asset'};
+const TEST_BUTTON = {type: 'test_button'};
 const ICONNECTOR = {
     INVOKER,
+    TEST_BUTTON,
 };
 
 //USER GROUP
@@ -105,6 +107,19 @@ const IINVOKER = {
     INVOKER_OPERATIONS,
 };
 
+const SCHEDULE_TITLE = {name: 'title', type: 'text', maxLength: 256, icon: 'title'};
+const SCHEDULE_CONNECTION = {name: 'connection', type: 'select+description', icon: 'supervised_user_circle'};
+const SCHEDULE_CONNECTION_TEXT = {name: 'connection', type: 'text', icon: 'supervised_user_circle'};
+const SCHEDULE_CRON_EXPRESSION = {name: 'cronExp', type: 'text', maxLength: 256, icon: 'title'};
+
+//SCHEDULE
+const ISCHEDULE = {
+    SCHEDULE_TITLE,
+    SCHEDULE_CONNECTION,
+    SCHEDULE_CONNECTION_TEXT,
+    SCHEDULE_CRON_EXPRESSION,
+}
+
 //NOTIFICATION TEMPLATE
 const NOTIFICATION_TEMPLATE_NAME = {name: 'name', type: 'notification_template_name', maxLength: 256, icon: 'title'};
 const NOTIFICATION_TEMPLATE_TYPE = {name: 'type', type: 'notification_template_type', maxLength: 256, icon: 'mail'};
@@ -124,6 +139,7 @@ export const INPUTS = {
     ...IUSER,
     ...IINVOKER,
     ...INOTIFICATION_TEMPLATE,
+    ...ISCHEDULE,
 };
 
 export const BACKSPACE_KEY_CODE = 8;

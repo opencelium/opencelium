@@ -33,7 +33,7 @@ class FontIcon extends Component{
     }
 
     render(){
-        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, whiteTheme, value, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
+        let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, darkBlueTheme, whiteTheme, value, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
         let size = isNumber(this.props.size) ? `${this.props.size}px` : this.props.size;
         let sizeStyle = {width: `${size}px`, height: `${size}px`};
@@ -48,6 +48,9 @@ class FontIcon extends Component{
         }
         if(whiteTheme === true){
             theme = styles.white_theme;
+        }
+        if(darkBlueTheme === true){
+            theme = styles.dark_blue_theme;
         }
         if(disabled){
             theme = styles.disabled_item;
@@ -102,6 +105,7 @@ FontIcon.propTypes = {
     turquoiseTheme: PropTypes.bool,
     grayTheme: PropTypes.bool,
     whiteTheme: PropTypes.bool,
+    darkBlueTheme: PropTypes.bool,
     blueTheme: PropTypes.bool,
     onButtonBlur: PropTypes.func,
     onButtonFocus: PropTypes.func,
@@ -118,6 +122,7 @@ FontIcon.defaultProps = {
     turquoiseTheme: false,
     blueTheme: false,
     whiteTheme: false,
+    darkBlueTheme: false,
     grayTheme: false,
     myRef: null,
     onButtonBlur: () => {},

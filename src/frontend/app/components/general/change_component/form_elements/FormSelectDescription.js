@@ -33,11 +33,11 @@ class FormSelectDescription extends Component{
     }
 
     render(){
-        const {name} = this.props.data;
+        const {name, error} = this.props.data;
         const {entity} = this.props;
         const description = this.props.data.description;
         let value = entity[name];
-        if(value.hasOwnProperty('value')){
+        if(value && value.hasOwnProperty('value')){
             value = value.value;
         }
         let descriptionValue = description.values[value];

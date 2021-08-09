@@ -24,6 +24,7 @@ import {copyToClipboardWebHookFulfilled} from "@actions/webhooks/fetch";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
 
 
 function mapStateToProps(state){
@@ -85,7 +86,7 @@ class WebHook extends Component{
 }
 
 WebHook.propTypes = {
-    schedule: PropTypes.object.isRequired,
+    schedule: PropTypes.instanceOf(CSchedule).isRequired,
     index: PropTypes.number.isRequired,
 };
 

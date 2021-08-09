@@ -23,9 +23,11 @@ import styles from '@themes/default/content/schedules/schedules.scss';
 import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
 import TooltipSwitch from "@basic_components/tooltips/TooltipSwitch";
-import {NO_DATA} from "@utils/constants/app";
+import {API_REQUEST_STATE, NO_DATA} from "@utils/constants/app";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
+import Loading from "@components/general/app/Loading";
 
 
 function mapStateToProps(state){
@@ -60,6 +62,9 @@ class StatusCell extends Component{
             CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
             CVoiceControl.initCommands({component: this}, CScheduleControl);
         }
+        if(prevProps.updatingScheduleStatus === API_REQUEST_STATE.START && this.props.updatingScheduleStatus === API_REQUEST_STATE.FINISH){
+            this.props.updateCurrentItems();
+        }
     }
 
     componentWillUnmount(){
@@ -70,13 +75,15 @@ class StatusCell extends Component{
      * to change status of the schedule
      */
     manageScheduleStatus(){
-        const {schedule, updateScheduleStatus} = this.props;
+        const {updateScheduleStatus} = this.props;
+        let schedule = {...this.props.schedule};
         schedule.status = !schedule.status;
-        updateScheduleStatus(schedule.getObject());
+        updateScheduleStatus(schedule);
     }
 
     render(){
-        const {schedule, currentSchedule, updatingScheduleStatus, triggeringSchedule, triggeringScheduleSuccessfully, authUser, t, index} = this.props;
+        const {currentSchedule, authUser, t, updatingScheduleStatus} = this.props;
+        const schedule = CSchedule.createSchedule(this.props.schedule);
         let classNames = [
             'schedule_list_status',
             'schedule_list_status_red',
@@ -88,7 +95,7 @@ class StatusCell extends Component{
             'schedule_list_status_disable',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        const isLoading = (updatingScheduleStatus || triggeringSchedule || triggeringScheduleSuccessfully) && currentSchedule.id === schedule.id;
+        const isLoading = (updatingScheduleStatus === API_REQUEST_STATE.START) && currentSchedule.id === schedule.id;
         const {status, lastExecution} = schedule;
         let backgroundStyle = styles[classNames.schedule_list_status_created];
         if(lastExecution) {
@@ -112,7 +119,7 @@ class StatusCell extends Component{
         return (
             <td className={backgroundStyle}>
                 <TooltipSwitch
-                    id={`switch_status_${index}`}
+                    id={`switch_status_${schedule.id}`}
                     isLoading={isLoading}
                     authUser={authUser}
                     tooltip={schedule.status ? t('LIST.TOOLTIP_ENABLE_SWITCH_FALSE') : t('LIST.TOOLTIP_ENABLE_SWITCH_TRUE')}
@@ -127,7 +134,6 @@ class StatusCell extends Component{
 
 StatusCell.propTypes = {
     schedule: PropTypes.object.isRequired,
-    index: PropTypes.number.isRequired,
 };
 
 export default StatusCell;

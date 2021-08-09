@@ -49,7 +49,8 @@
     "FORM":{
       "NAME": "Name",
       "TYPE": "Type",
-      "PAGE_1": "General Data"
+      "PAGE_1": "General Data",
+      "PAGE_2": "Template content"
     },
     "LIST_BUTTON": "Notification Templates",
     "HEADER": "View Template"

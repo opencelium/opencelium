@@ -151,14 +151,22 @@ class AccordionItem extends Component{
     render(){
         const {isVisible, isMouseOver} = this.state;
         const {index, forConnection, entity, operation, readOnly, connector, addMethod, ...props} = this.props;
-        const connectorType = connector.getConnectorType();
+        const connectorType = connector ? connector.getConnectorType() : '';
         const requestData = this.getRequestData();
         const hasAddMethod = typeof addMethod === 'function';
+        let accordionToggleStyle = {};
+        let accordionToggleDivStyle = null;
+        if(connectorType){
+            accordionToggleStyle = {textAlign: connectorType === CONNECTOR_FROM ? 'left' : 'right'};
+            accordionToggleDivStyle = {float: connectorType === CONNECTOR_FROM ? 'left' : 'right'};
+        } else{
+            accordionToggleStyle.marginLeft = '20px';
+        }
         return(
             <div onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
                 {this.renderAddMethod()}
-                <Accordion.Toggle as={Card.Header} eventKey={index} style={connectorType === CONNECTOR_FROM ? {textAlign: 'left'} : {textAlign: 'right'}} className={forConnection ? styles.invoker_operation_header_for_connection : styles.invoker_operation_header} onClick={::this.toggleIsVisible}>
-                    <div style={{float: connectorType === CONNECTOR_FROM ? 'left' : 'right'}} className={`${forConnection ? styles.invoker_item_method_for_connection : styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
+                <Accordion.Toggle as={Card.Header} eventKey={index} style={accordionToggleStyle} className={forConnection ? styles.invoker_operation_header_for_connection : styles.invoker_operation_header} onClick={::this.toggleIsVisible}>
+                    <div style={accordionToggleDivStyle} className={`${forConnection ? styles.invoker_item_method_for_connection : styles.invoker_item_method} ${styles[`invoker_method_${operation.request.method.toLowerCase()}`]}`}>{operation.request.method}</div>
                     <span className={`${forConnection ? styles.invoker_item_name_for_connection : styles.invoker_item_name}`}>{operation.name}</span>
                     {readOnly && operation.type === METHOD_TYPE_TEST && !forConnection ? <div className={styles.invoker_item_method_test}>Connection Test</div> : null}
                     {forConnection ? <RequestIcon request={operation.request} isVisible={isMouseOver} connectorType={connectorType} requestData={requestData} hasAddMethod={hasAddMethod}/> : null}

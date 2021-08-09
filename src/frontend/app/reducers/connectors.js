@@ -15,14 +15,14 @@
 
 import {List, fromJS} from 'immutable';
 
-import {ConnectorsAction, UserGroupsAction} from '../utils/actions';
-import { addConnectorSubscriber, updateConnectorSubscriber, deleteConnectorSubscriber } from '../utils/socket/connectors';
-import {API_REQUEST_STATE} from "../utils/constants/app";
-import {updateObj} from "../utils/app";
-import {updateUserGroupSubscriber} from "../utils/socket/userGroups";
+import {ConnectorsAction} from '@utils/actions';
+import { addConnectorSubscriber, updateConnectorSubscriber, deleteConnectorSubscriber } from '@utils/socket/connectors';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const initialState = fromJS({
+    checkingConnectorTitle: API_REQUEST_STATE.INITIAL,
+    checkTitleResult: null,
     fetchingConnector: API_REQUEST_STATE.INITIAL,
     addingConnector: API_REQUEST_STATE.INITIAL,
     addingConnectorIcon: API_REQUEST_STATE.INITIAL,
@@ -49,6 +49,12 @@ let index = 0;
 const reducer = (state = initialState, action) => {
     connectors = state.get('connectors');
     switch (action.type) {
+        case ConnectorsAction.CHECK_CONNECTORTITLE:
+            return state.set('checkingConnectorTitle', API_REQUEST_STATE.START).set('checkTitleResult', null).set('error', null);
+        case ConnectorsAction.CHECK_CONNECTORTITLE_FULFILLED:
+            return state.set('checkingConnectorTitle', API_REQUEST_STATE.FINISH).set('checkTitleResult', action.payload);
+        case ConnectorsAction.CHECK_CONNECTORTITLE_REJECTED:
+            return state.set('checkingConnectorTitle', API_REQUEST_STATE.ERROR).set('error', null).set('checkTitleResult', action.payload);
         case ConnectorsAction.FETCH_CONNECTOR:
             return state.set('fetchingConnector', API_REQUEST_STATE.START).set('error', null);
         case ConnectorsAction.FETCH_CONNECTOR_FULFILLED:

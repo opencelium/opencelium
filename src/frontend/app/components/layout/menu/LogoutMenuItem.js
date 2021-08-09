@@ -21,8 +21,6 @@ import {withTranslation} from "react-i18next";
 import {
     addLogoutKeyNavigation, removeLogoutKeyNavigation,
 } from "@utils/key_navigation";
-import {permission} from "@decorators/permission";
-import {ConnectorPermissions} from "@utils/constants/permissions";
 import {MenuLink} from "@components/layout/menu/MenuLink";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import Confirmation from "@components/general/app/Confirmation";
@@ -41,7 +39,6 @@ function mapStateToProps(state){
  * Menu Connectors
  */
 @connect(mapStateToProps, {logoutUserFulfilled})
-@permission(ConnectorPermissions.READ)
 @withTranslation('layout')
 class LogoutMenuItem extends Component{
 
@@ -50,8 +47,6 @@ class LogoutMenuItem extends Component{
         this.state = {
             showConfirm: false,
         };
-
-        this.isConfirmationToggledMainMenu = false;
     }
 
     componentDidMount(){
@@ -66,15 +61,7 @@ class LogoutMenuItem extends Component{
      * to toggle confirmation dialog
      */
     toggleConfirm(){
-        const {isMainMenuExpanded, onToggleMainMenu} = this.props;
         this.setState({showConfirm: !this.state.showConfirm});
-        if(isMainMenuExpanded || this.isConfirmationToggledMainMenu && this.state.showConfirm){
-            onToggleMainMenu();
-            this.isConfirmationToggledMainMenu = true;
-        }
-        if(!this.state.showConfirm && !isMainMenuExpanded){
-            this.isConfirmationToggledMainMenu = false;
-        }
     }
 
     /**

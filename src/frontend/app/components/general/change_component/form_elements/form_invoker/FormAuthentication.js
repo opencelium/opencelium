@@ -52,7 +52,7 @@ class FormAuthentication extends Component{
         if(!readonly) {
             const {entity, updateEntity} = this.props;
             entity[name] = value;
-            updateEntity(entity);
+            updateEntity(entity, name);
         }
     }
 
@@ -86,9 +86,10 @@ class FormAuthentication extends Component{
         const {entity} = this.props;
         let {tourStep} = this.props.data;
         let value = entity[name];
+        let typeValue = types.find(t => t.value === value);
         if(readOnly) {
             return (
-                <Input className={`${tourStep ? tourStep : ''}`} readOnly={readOnly} value={types.find(t => t.value === value).label} label={label} icon={icon}/>
+                <Input className={`${tourStep ? tourStep : ''}`} readOnly={readOnly} value={typeValue ? typeValue.label : ''} label={label} icon={icon}/>
             );
         }
         return(

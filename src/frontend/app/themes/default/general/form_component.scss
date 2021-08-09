@@ -21,7 +21,7 @@
 }
 .form{
   @extend .card_style;
-  padding: 70px 20px 0 0;
+  padding: 50px 20px 10px 0;
   margin: 20px 0 0;
   position: relative;
   .form_section_header{
@@ -51,5 +51,15 @@
   }
   >:nth-child(2){
     margin: 0;
+  }
+}
+
+.action_button_loading{
+  width: 24px;
+  height: 18px;
+  >div {
+    color: white !important;
+    width: 15px;
+    height: 15px;
   }
 }

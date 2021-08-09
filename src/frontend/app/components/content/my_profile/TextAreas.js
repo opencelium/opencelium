@@ -64,8 +64,8 @@ class TextAreas extends Component{
                 {data.map((elem, key) => {
                     return (
                         <Row key={key} className={styles[classNames.user_details_textarea]}>
-                            <Col xs={6} md={6}>{elem.lang}</Col>
-                            <Col xs={6} md={6} className={styles[classNames.user_details_value]}>{elem.value || '-'}</Col>
+                            <Col xs={3} md={3}>{elem.lang}</Col>
+                            <Col xs={3} md={3} className={styles[classNames.user_details_value]}>{elem.value || '-'}</Col>
                         </Row>
                     );
                 })}

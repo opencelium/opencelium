@@ -42,6 +42,7 @@ import FormComponent from "@change_component/form_elements/FormComponent";
 import FormConnectionSvg from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 
 import styles from '@themes/default/general/form_component.scss';
+import TestButton from "@change_component/form_elements/TestButton";
 
 
 /**
@@ -57,7 +58,7 @@ class FormSection extends Component{
      * to map Field Inputs correspondingly
      */
     mapInputs(data, key){
-        const {entity, updateEntity, clearValidationMessage, renderNavigationComponent, renderValidationMessage} = this.props;
+        const {entity, updateEntity, renderNavigationComponent, renderValidationMessage} = this.props;
         switch(data.type){
             case 'select+description':
                 return <FormSelectDescription
@@ -124,7 +125,6 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
-                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'connectors':
                 return <FormConnectors
@@ -139,7 +139,6 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
-                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'methods':
                 return <FormMethods
@@ -163,7 +162,6 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
-                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'invoker_description':
                 return <FormInvokerDescription
@@ -220,7 +218,6 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
-                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'notification_template_type':
                 return <FormNotificationTemplateType
@@ -228,7 +225,6 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
-                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'notification_template_content':
                 return <FormContent
@@ -236,7 +232,12 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
-                    clearValidationMessage={clearValidationMessage}
+                />;
+            case 'test_button':
+                return <TestButton
+                    key={key}
+                    entity={entity}
+                    data={data}
                 />;
 
         }
@@ -255,7 +256,7 @@ class FormSection extends Component{
                 data['setFocusInput'] = setFocusInput;
                 data['focused'] = focusedInput !== '' && focusedInput === data.name;
                 data['visible'] = data.hasOwnProperty('visible') ? data.visible : true;
-                return this.mapInputs(data, key);
+                return this.mapInputs(Object.assign({}, data), key);
             });
         }
         return result.map(Element => {return Element;});
@@ -287,7 +288,6 @@ FormSection.propTypes = {
     entity: PropTypes.object.isRequired,
     updateEntity: PropTypes.func.isRequired,
     focusedInput: PropTypes.string,
-    clearValidationMessage: PropTypes.func.isRequired,
     isSubFormSection: PropTypes.bool,
     header: PropTypes.string,
     visible: PropTypes.bool,

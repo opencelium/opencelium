@@ -19,6 +19,7 @@ import {NO_DATA} from "@utils/constants/app";
 
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {EMPHASIZE_DURATION_ANIMATION} from "./ScheduleList";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
 
 /**
  * Cell Component to display last success duration for ScheduleList
@@ -35,10 +36,12 @@ class LastDurationCell extends Component{
     }
     componentDidUpdate(prevProps){
         const {appearClassName} = this.state;
-        let newTime = this.props.schedule.getSuccessDuration();
-        let newId = this.props.schedule.id;
-        let oldTime = prevProps.schedule.getSuccessDuration();
-        let oldId = prevProps.schedule.id;
+        const curSchedule = CSchedule.createSchedule(this.props.schedule);
+        const prevSchedule = CSchedule.createSchedule(prevProps.schedule);
+        let newTime = curSchedule.getSuccessDuration();
+        let newId = curSchedule.id;
+        let oldTime = prevSchedule.getSuccessDuration();
+        let oldId = prevSchedule.id;
         if(newTime !== NO_DATA) {
             if(newId === oldId && newTime !== oldTime && appearClassName !== styles.emphasize_cell) {
                 this.setState({appearClassName: styles.emphasize_cell});
@@ -53,7 +56,8 @@ class LastDurationCell extends Component{
 
     render(){
         const {appearClassName} = this.state;
-        const {t, schedule} = this.props;
+        const {t} = this.props;
+        const schedule = CSchedule.createSchedule(this.props.schedule);
         let duration = schedule.getSuccessDuration();
         if(duration){
             duration = parseInt(duration / 1000);

@@ -37,13 +37,10 @@ class FormName extends Component{
         const {nameValue} = this.state;
         let {entity, updateEntity} = this.props;
         entity.name = nameValue;
-        updateEntity(entity);
+        updateEntity(entity, 'name');
     }
 
     handleInput(nameValue){
-        if(typeof this.props.clearValidationMessage === 'function'){
-            this.props.clearValidationMessage();
-        }
         this.setState({nameValue});
     }
 

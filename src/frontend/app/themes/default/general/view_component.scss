@@ -15,19 +15,9 @@
 
 @import '../constants';
 
-.content{
-  margin-bottom: 20px !important;
-  border: 1px solid #eee;
-  padding: 20px 30px;
-  margin: 0 20px;
-  min-height: 430px !important;
-  overflow: initial !important;
-}
-
-.content_with_external_component{
-  @extend .content;
-  min-height: initial !important;
-  position: initial !important;
+.view_component{
+  @extend .card_style;
+  margin: 20px 0 50px;
 }
 
 .title{

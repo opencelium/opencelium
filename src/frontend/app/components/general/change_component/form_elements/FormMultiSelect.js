@@ -42,7 +42,7 @@ class FormMultiSelect extends Component{
         const {name, callback} = this.props.data;
         const {entity, updateEntity} = this.props;
         entity[name] = value;
-        updateEntity(entity);
+        updateEntity(entity, name);
         if(typeof callback === 'function'){
             callback(value);
         }
@@ -78,7 +78,7 @@ class FormMultiSelect extends Component{
     }
     
     render(){
-        const {icon, source, name, placeholder, tourStep} = this.props.data;
+        const {icon, source, name, placeholder, tourStep, error} = this.props.data;
         const {entity} = this.props;
         let value = entity[name];
         let iconClassName = '';
@@ -96,6 +96,7 @@ class FormMultiSelect extends Component{
             >
                 <Select
                     id={`input_${name}`}
+                    error={error}
                     name={name}
                     value={value}
                     onChange={::this.handleChange}

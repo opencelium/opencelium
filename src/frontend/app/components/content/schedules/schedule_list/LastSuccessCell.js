@@ -21,6 +21,7 @@ import {NO_DATA} from "@utils/constants/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {EMPHASIZE_DURATION_ANIMATION} from "./ScheduleList";
 import {kibanaUrl} from "@utils/constants/url";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
 
 /**
  * Cell Component to display last success for ScheduleList
@@ -36,10 +37,12 @@ class LastSuccessCell extends Component{
 
     componentDidUpdate(prevProps){
         const {appearClassName} = this.state;
-        let newTime = this.props.schedule.getSuccessEndTime();
-        let newId = this.props.schedule.id;
-        let oldTime = prevProps.schedule.getSuccessEndTime();
-        let oldId = prevProps.schedule.id;
+        const curSchedule = CSchedule.createSchedule(this.props.schedule);
+        const prevSchedule = CSchedule.createSchedule(prevProps.schedule);
+        let newTime = curSchedule.getSuccessEndTime();
+        let newId = curSchedule.id;
+        let oldTime = prevSchedule.getSuccessEndTime();
+        let oldId = prevSchedule.id;
         if(newTime !== NO_DATA) {
             if(newId === oldId && newTime !== oldTime && appearClassName !== styles.emphasize_cell) {
                 this.setState({appearClassName: styles.emphasize_cell});
@@ -54,7 +57,8 @@ class LastSuccessCell extends Component{
 
     renderData(){
         const {appearClassName} = this.state;
-        let {schedule, hasElasticSearch, index} = this.props;
+        let {hasElasticSearch} = this.props;
+        const schedule = CSchedule.createSchedule(this.props.schedule);
         let time = schedule.getSuccessEndTime();
         let taId = schedule.getSuccessTaId();
         let executionId = schedule.getSuccessExecutionId();
@@ -79,14 +83,14 @@ class LastSuccessCell extends Component{
                         ?
                             <span>#{executionId}</span>
                         :
-                            <a id={`last_success_${index}`} href={url} target={'_blank'}>#{executionId}</a>
+                            <a id={`last_success_${schedule.id}`} href={url} target={'_blank'}>#{executionId}</a>
                 }
             </div>
         );
     }
 
     render(){
-        return (
+        return(
             <td>
                 {::this.renderData()}
             </td>
@@ -97,7 +101,6 @@ class LastSuccessCell extends Component{
 LastSuccessCell.propTypes = {
     schedule: PropTypes.object.isRequired,
     hasElasticSearch: PropTypes.bool,
-    index: PropTypes.number.isRequired,
 };
 
 LastSuccessCell.defaultProps = {

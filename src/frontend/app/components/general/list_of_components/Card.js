@@ -28,12 +28,24 @@ import CardIcon from "../../icons/CardIcon";
 
 import styles from '@themes/default/general/list_of_components.scss';
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import CardError from "@components/general/list_of_components/CardError";
+import {permission} from "@decorators/permission";
+import {connect} from "react-redux";
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return {
+        authUser: auth.get('authUser'),
+    };
+}
 
 
 /**
  * Card component for Item of the List
  */
 @withTranslation('app')
+@connect(mapStateToProps, {})
+@permission()
 class ListCard extends Component{
 
     constructor(props){
@@ -353,16 +365,21 @@ class ListCard extends Component{
     }
 
     render(){
-        const {isButton} = this.props;
-        if(isButton){
-            return(
-                <button className={styles.card_as_button} onClick={::this.onCardClick}>
-                    {this.renderCard()}
-                </button>
-            );
-        } else{
-            return this.renderCard();
-        }
+        const {isButton, gridViewType} = this.props;
+        return(
+            <div className={styles[`cards_item_grid_view_${gridViewType}`]}>
+                <CardError>
+                    {isButton
+                    ?
+                        <button className={styles.card_as_button} onClick={::this.onCardClick}>
+                            {this.renderCard()}
+                        </button>
+                    :
+                        this.renderCard()
+                    }
+                </CardError>
+            </div>
+        )
     }
 }
 

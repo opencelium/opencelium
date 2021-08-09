@@ -62,7 +62,7 @@ export const EntitiesWithNotification = [
     {name: SchedulesAction.TRIGGER_SCHEDULE, types: ['FULFILLED', 'REJECTED']},
     {name: SchedulesAction.TRIGGER_SCHEDULESUCCESS, types: ['FULFILLED']},
     {name: SchedulesAction.ADD_SCHEDULE, types: ['FULFILLED', 'REJECTED',]},
-    {name: SchedulesAction.FETCH_SCHEDULES, types: ['FULFILLED', 'REJECTED']},
+    //{name: SchedulesAction.FETCH_SCHEDULES, types: ['FULFILLED', 'REJECTED']},
     {name: SchedulesAction.DELETE_SCHEDULE, types: ['FULFILLED', 'REJECTED',]},
     {name: SchedulesAction.UPDATE_SCHEDULE, types: ['FULFILLED', 'REJECTED',]},
     {name: SchedulesAction.UPDATE_SCHEDULESTATUS, types: ['FULFILLED', 'REJECTED',]},

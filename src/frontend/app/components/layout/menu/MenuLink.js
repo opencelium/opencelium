@@ -3,6 +3,31 @@ import styles from "@themes/default/layout/menu";
 import React from "react";
 import {Link as ReactRouterLink} from "react-router";
 import LogoOcWhiteImagePath from "assets/logo_oc_white.png";
+import {permission} from "@decorators/permission";
+import {connect} from "react-redux";
+
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return {
+        authUser: auth.get('authUser'),
+    };
+}
+
+@connect(mapStateToProps, {})
+@permission()
+class PermissionLink extends React.Component{
+    constructor(props) {
+        super(props);
+    }
+
+    render(){
+        const {children, permission, authUser, ...props} = this.props;
+        return(
+            <ReactRouterLink {...props}>{children}</ReactRouterLink>
+        )
+    }
+}
 
 const LinkBlock = React.forwardRef((props, ref) => (
     <div ref={ref} {...props}>
@@ -96,7 +121,7 @@ export class MenuLinkWithSubLinks extends React.Component{
                 <ReactRouterLink key={label} onlyActiveOnIndex to={to} className={`${styles.main_menu_collapse_link}`}>{label}</ReactRouterLink>
                 <FontIcon className={collapseIconClassName} size={18} value={'expand_more'} onClick={::this.onToggleCollapse}/>
                 <ul className={collapseMenuClassName}>
-                    {subLinks.map(subLink => <ReactRouterLink key={subLink.label} onlyActiveOnIndex to={subLink.to} className={`${styles.main_menu_collapse_sublink}`}>{subLink.label}</ReactRouterLink>)}
+                    {subLinks.map(subLink => <PermissionLink key={subLink.label} permission={subLink.permission} onlyActiveOnIndex to={subLink.to} className={`${styles.main_menu_collapse_sublink}`}>{subLink.label}</PermissionLink>)}
                 </ul>
             </div>
         )

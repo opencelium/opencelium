@@ -92,6 +92,7 @@ const checkUserGroupNameEpic = (action$, store) => {
             });
         });
 };
+
 /**
  * add one usergroup
  */

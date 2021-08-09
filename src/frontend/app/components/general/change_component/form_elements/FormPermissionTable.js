@@ -24,6 +24,8 @@ import Checkbox from "@basic_components/inputs/Checkbox";
 import {formatHtmlId} from "@utils/app";
 import Table from "@basic_components/table/Table";
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
+import theme from "react-toolbox/lib/input/theme.css";
+import basicComponentsStyles from "@themes/default/general/basic_components";
 
 
 /**
@@ -129,12 +131,12 @@ class FormPermissionTable extends Component{
             }
         }
         entity[name] = permissions;
-        updateEntity(entity);
+        updateEntity(entity, name);
     }
 
     render(){
         const {focused} = this.state;
-        const {label, name, dataSource, icon, tourStep} = this.props.data;
+        const {label, name, dataSource, icon, tourStep, error} = this.props.data;
         const {t, entity} = this.props;
         let components = entity[dataSource];
         let values = entity[name];
@@ -237,6 +239,7 @@ class FormPermissionTable extends Component{
                             })}
                         </tbody>
                     </Table>
+                    {error && <span className={`${theme.error} ${basicComponentsStyles.input_error}`}>{error}</span>}
                 </div>
             </ToolboxThemeInput>
         );

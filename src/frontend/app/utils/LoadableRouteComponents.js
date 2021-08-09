@@ -125,8 +125,20 @@ const ScheduleLayout = Loadable({
     loader: () => import(/* webpackChunkName: 'schedule_layout' */ '@components/content/schedules/ScheduleLayout'),
     loading: Loading,
 });
-const Scheduler = Loadable({
-    loader: () => import(/* webpackChunkName: 'scheduler' */ '@components/content/schedules/Schedule'),
+const SchedulesList = Loadable({
+    loader: () => import(/* webpackChunkName: 'connector_list' */ '@components/content/schedules/list/SchedulesList'),
+    loading: Loading,
+});
+const ScheduleAdd =  Loadable({
+    loader: () => import(/* webpackChunkName: 'connector_add' */ '@components/content/schedules/add/ScheduleAdd'),
+    loading: Loading,
+});
+const ScheduleView =  Loadable({
+    loader: () => import(/* webpackChunkName: 'connector_view' */ '@components/content/schedules/view/ScheduleView'),
+    loading: Loading,
+});
+const ScheduleUpdate =  Loadable({
+    loader: () => import(/* webpackChunkName: 'connector_update' */ '@components/content/schedules/update/ScheduleUpdate'),
     loading: Loading,
 });
 
@@ -357,7 +369,10 @@ export default {
     ConnectionGraph,
     ConnectionUpdate,
     ScheduleLayout,
-    Scheduler,
+    ScheduleAdd,
+    ScheduleUpdate,
+    ScheduleView,
+    SchedulesList,
     AppLayout,
     AppsList,
     MyProfileLayout,

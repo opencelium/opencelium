@@ -52,7 +52,7 @@ class FormSubject extends Component{
     render(){
         const {subject} = this.state;
         const {data} = this.props;
-        const {readOnly, required, tourStep} = data;
+        const {readOnly, required, tourStep, error} = data;
         let isReadonly = false;
         let inputStyle = styles.form_input;
         if(tourStep){
@@ -64,6 +64,7 @@ class FormSubject extends Component{
         return(
             <Input
                 id={`input_subject`}
+                error={error ? error.subject : ''}
                 onChange={::this.changeSubject}
                 onBlur={::this.onBlurSubject}
                 name={'input_subject'}

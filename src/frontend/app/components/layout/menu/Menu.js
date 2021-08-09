@@ -141,7 +141,7 @@ class Menu extends Component{
                             <AdminMenuItem isMainMenuExpanded={isExpanded}/>
                         </div>
                     </div>
-                    <LogoutMenuItem isMainMenuExpanded={isExpanded} onToggleMainMenu={::this.onToggleMenu}/>
+                    <LogoutMenuItem/>
                 </nav>
             </div>
         );

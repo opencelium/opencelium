@@ -23,7 +23,13 @@ import {
     addMenuInvokersKeyNavigation, removeMenuInvokersKeyNavigation,
 } from "@utils/key_navigation";
 import {permission} from "@decorators/permission";
-import {AppPermissions} from "@utils/constants/permissions";
+import {
+    AppPermissions,
+    InvokerPermissions,
+    TemplatePermissions,
+    UserGroupPermissions,
+    UserPermissions
+} from "@utils/constants/permissions";
 import FontIcon from "@basic_components/FontIcon";
 import styles from "@themes/default/layout/menu.scss";
 import {MenuLink, MenuLinkWithSubLinks} from "@components/layout/menu/MenuLink";
@@ -66,11 +72,11 @@ class AdminMenuItem extends Component{
                 value={'settings'}
                 label={'Admin'}
                 subLinks={[
-                    {to: '/users', label: 'Users'},
-                    {to: '/usergroups', label: 'Groups'},
-                    {to: '/apps', label: 'Apps'},
-                    {to: '/invokers', label: 'Invokers'},
-                    {to: '/templates', label: 'Templates'},
+                    {to: '/users', label: 'Users', permission: UserPermissions.READ},
+                    {to: '/usergroups', label: 'Groups', permission: UserGroupPermissions.READ},
+                    {to: '/apps', label: 'Apps', permission: AppPermissions.READ},
+                    {to: '/invokers', label: 'Invokers', permission: InvokerPermissions.READ},
+                    {to: '/templates', label: 'Templates', permission: TemplatePermissions.READ},
                 ]}
                 isMainMenuExpanded={isMainMenuExpanded}
             />

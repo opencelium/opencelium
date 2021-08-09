@@ -59,7 +59,7 @@ class FormSelect extends Component{
         const {name, callback} = this.props.data;
         const {entity, updateEntity} = this.props;
         entity[name] = value.hasOwnProperty('value') ? value.value : value;
-        updateEntity(entity);
+        updateEntity(entity, name);
         if(typeof callback === 'function'){
             callback(value);
         }
@@ -76,12 +76,13 @@ class FormSelect extends Component{
 
     render(){
         const {focused} = this.state;
-        const {icon, source, name, placeholder, selectClassName, tourStep, tourStepHint, label, required} = this.props.data;
+        const {icon, source, name, placeholder, selectClassName, tourStep, tourStepHint, label, required, error, readonly} = this.props.data;
         const {id, handleChange, hasHintTour, isDisabled} = this.props;
         let value = this.getValue();
         return (
             <Select
                 id={id}
+                error={error}
                 className={selectClassName ? selectClassName : ''}
                 name={name}
                 value={value}
@@ -93,7 +94,7 @@ class FormSelect extends Component{
                 placeholder={placeholder}
                 maxMenuHeight={200}
                 minMenuHeight={50}
-                isDisabled={isDisabled}
+                isDisabled={isDisabled || readonly}
                 iconTooltip={value && value.hasOwnProperty('hint') ? value.hint : ''}
                 icon={icon}
                 isFocused={focused}

@@ -1433,3 +1433,16 @@
     top: -3px;
   }
 }
+.test_button{
+  margin: 20px 0;
+  float: right;
+}
+.test_button_loading{
+  width: 24px;
+  height: 18px;
+  >div {
+    color: white !important;
+    width: 15px;
+    height: 15px;
+  }
+}

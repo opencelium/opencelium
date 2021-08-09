@@ -19,14 +19,10 @@ import {connect} from "react-redux";
 import {withTranslation} from "react-i18next";
 
 import {
-    addMenuConnectionsKeyNavigation,
-    addMenuConnectorsKeyNavigation, removeMenuConnectionsKeyNavigation,
-    removeMenuConnectorsKeyNavigation
+    addMenuConnectionsKeyNavigation, removeMenuConnectionsKeyNavigation,
 } from "@utils/key_navigation";
 import {permission} from "@decorators/permission";
-import {ConnectorPermissions} from "@utils/constants/permissions";
-import FontIcon from "@basic_components/FontIcon";
-import styles from "@themes/default/layout/menu.scss";
+import {ConnectionPermissions} from "@utils/constants/permissions";
 import {MenuLink} from "@components/layout/menu/MenuLink";
 
 
@@ -41,7 +37,7 @@ function mapStateToProps(state){
  * Menu Connectors
  */
 @connect(mapStateToProps, {})
-@permission(ConnectorPermissions.READ)
+@permission(ConnectionPermissions.READ)
 @withTranslation('layout')
 class ConnectionsMenuItem extends Component{
 

@@ -17,7 +17,6 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchUserGroup} from '@actions/usergroups/fetch';
-import Content from "../../../general/content/Content";
 import { Row, Col, Visible, Hidden } from "react-grid-system";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {Permissions} from '@utils/constants/app';
@@ -27,6 +26,7 @@ import UserGroupIcon from "../../../icons/UserGroupIcon";
 import {permission} from "@decorators/permission";
 import {getThemeClass} from "@utils/app";
 import Table from "@basic_components/table/Table";
+import ViewComponent from "@components/general/view_component/ViewComponent";
 
 
 const prefixUrl = '/usergroups';
@@ -69,12 +69,10 @@ class UserGroupView extends Component{
             'row_cell'];
         classNames = getThemeClass({classNames, authUser, styles});
         let components = userGroup.components;
-        let translations = {};
-        translations.header = t('VIEW.HEADER');
-        translations.list_button = t('VIEW.LIST_BUTTON');
-        let getListLink = `${prefixUrl}`;
+        const header = t('VIEW.HEADER');
+        const listButton = {title: t('VIEW.LIST_BUTTON'), link: `${prefixUrl}`, permission: UserGroupPermissions.READ};
         return (
-            <Content translations={translations} getListLink={getListLink} permissions={UserGroupPermissions} authUser={authUser}>
+            <ViewComponent header={header} listButton={listButton} permission={UserGroupPermissions.READ}>
                 <Row className={styles[classNames.user_group]}>
                     <Col md={12}>
                         <Row>
@@ -131,7 +129,7 @@ class UserGroupView extends Component{
                         </Row>
                     </Col>
                 </Row>
-            </Content>
+            </ViewComponent>
         );
     }
 }

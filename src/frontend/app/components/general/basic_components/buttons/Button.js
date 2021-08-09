@@ -31,7 +31,7 @@ class Button extends Component{
     }
 
     render(){
-        const {authUser, icon, disabled, onClick, isActive, theme, style, ...props} = this.props;
+        const {authUser, icon, disabled, onClick, isActive, theme, style, iconSize, iconClassName, ...props} = this.props;
         let buttonClassName = this.props.className;
         let {title} = this.props;
         let {id} = this.props;
@@ -48,7 +48,7 @@ class Button extends Component{
         return (
             <BootstrapButton {...props} disabled={disabled} active={isActive} style={{...style, overflow: 'hidden'}} className={`${buttonClassName} ${styles[classNames.ripple]}`} color="primary" onClick={disabled || isActive ? null : onClick} id={id}>
                 {
-                    icon !== '' && <FontIcon theme={theme} value={icon} className={styles[classNames.button_icon]}/>
+                    icon !== '' && <FontIcon whiteTheme size={iconSize} theme={theme} value={icon} className={`${styles[classNames.button_icon]} ${iconClassName}`}/>
                 }
                 {
                     title !== ''
@@ -64,7 +64,6 @@ class Button extends Component{
 
 Button.propTypes = {
     authUser: PropTypes.object,
-    title: PropTypes.string,
     icon: PropTypes.string,
     disabled: PropTypes.bool,
     isActive: PropTypes.bool,
@@ -78,6 +77,8 @@ Button.defaultProps = {
     title: '',
     isActive: false,
     id: '',
+    iconSize: 24,
+    iconClassName: '',
 };
 
 export default Button;

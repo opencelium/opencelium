@@ -85,7 +85,7 @@ class Operations extends Component{
                 <Card key={key}>
                     <AccordionItem
                         {...props}
-                        index={key}
+                        index={operation.name}
                         entity={entity}
                         operation={operation}
                         readOnly={readOnly}

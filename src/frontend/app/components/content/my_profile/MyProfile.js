@@ -13,13 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component, Suspense} from 'react';
+import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {Container} from "react-grid-system";
 
 import {fetchUser} from '@actions/users/fetch';
-import Content from "../../general/content/Content";
 import UserDetails from "./UserDetails";
 import UserGroup from "./UserGroup";
 import {SingleComponent} from "@decorators/SingleComponent";
@@ -27,10 +25,7 @@ import {permission} from "@decorators/permission";
 import {MyProfilePermissions} from "@utils/constants/permissions";
 import Themes from "./Themes";
 import AppTour from "./AppTour";
-import Loading from "@loading";
-import ComponentError from "../../general/app/ComponentError";
-import {ERROR_TYPE} from "@utils/constants/app";
-import CVoiceControl from "@classes/voice_control/CVoiceControl";
+import ViewComponent from "@components/general/view_component/ViewComponent";
 
 
 function mapStateToProps(state){
@@ -58,17 +53,16 @@ class MyProfile extends Component{
     }
 
     render(){
-        const {t, user, authUser} = this.props;
+        const {t, user} = this.props;
         const userGroup = user.userGroups;
-        let translations = {};
-        translations.header = t('HEADER');
+        const header = t('HEADER');
         return (
-            <Content translations={translations} getUpdateLink={''} permissions={MyProfilePermissions} authUser={authUser}>
+            <ViewComponent header={header} permission={MyProfilePermissions.READ}>
                 <UserDetails user={user}/>
                 <UserGroup usergroup={userGroup}/>
                 <Themes/>
                 <AppTour/>
-            </Content>
+            </ViewComponent>
         );
     }
 }

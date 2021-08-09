@@ -152,7 +152,10 @@ export default class CNotification{
     static getAllNotificationTypesForSelect(translate){
         let types = [];
         for(const key in NOTIFICATION_TYPE) {
-            types.push({label: translate(`schedules:NOTIFICATION.TYPE.${key.toUpperCase()}`), value: NOTIFICATION_TYPE[key]});
+            types.push({
+                label: translate(`schedules:NOTIFICATION.TYPE.${key.toUpperCase()}`),
+                value: NOTIFICATION_TYPE[key],
+            });
         }
         return types;
     }

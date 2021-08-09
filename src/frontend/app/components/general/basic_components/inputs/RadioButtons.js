@@ -64,7 +64,7 @@ RadioButtons.propTypes = {
     required: PropTypes.bool,
     inline: PropTypes.bool,
     label: PropTypes.string.isRequired,
-    icon: PropTypes.string,
+    icon: PropTypes.any,
     tourStep: PropTypes.string,
     value: PropTypes.string.isRequired,
     handleChange: PropTypes.func.isRequired,

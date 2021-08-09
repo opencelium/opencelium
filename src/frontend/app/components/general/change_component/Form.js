@@ -1,13 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import styles from '@themes/default/general/form_component.scss';
 import FormSection from "@change_component/FormSection";
 import {isArray, isEmptyObject} from "@utils/app";
-import {API_REQUEST_STATE} from "@utils/constants/app";
 import {Col, Row} from "react-grid-system";
 import ListHeader from "@components/general/list_of_components/Header";
-import AddButton from "@components/general/list_of_components/AddButton";
 import ListButton from "@components/general/view_component/ListButton";
+import {ActionButton, SubFormSections} from "@change_component/FormComponents";
 
 class Form extends React.Component{
     constructor(props) {
@@ -23,7 +23,7 @@ class Form extends React.Component{
             }
         }
         let entity = [];
-        if(isEmptyObject(props.entity)){
+        if(!props.entity || isEmptyObject(props.entity)){
             entity = this.getInputsState(onlyInputs);
         } else{
             entity = props.entity;
@@ -58,62 +58,61 @@ class Form extends React.Component{
         return obj;
     }
 
-    updateEntity(entity){
+    updateEntity(entity, name){
         this.setState({
             entity,
-            focusedInput: {name: '', label: ''},
         });
+        this.props.clearValidationMessage(name);
     }
 
-    clearValidationMessage(){
-
+    doAction(){
+        const {entity} = this.state;
+        const {action} = this.props;
+        if(typeof action === 'function'){
+            action(entity);
+        }
     }
 
     render(){
         const {entity} = this.state;
-        const {contents, translations, permissions} = this.props;
+        const {contents, translations, permissions, isActionInProcess} = this.props;
+        const hasActionButton = translations && translations.action_button;
+        const hasListButton = translations && translations.list_button;
         return(
             <Row id={'form_component'}>
                 <Col sm={12}>
                     <div style={{marginBottom: '50px'}}>
                         <ListHeader header={translations.header}/>
                         <div className={styles.buttons_panel}>
-                            <AddButton
-                                permission={permissions.CREATE}
-                                title={<span>{translations.add_button.title}</span>}
-                                link={translations.add_button.link}
-                            />
-                            <ListButton
-                                title={translations.list_button.title}
-                                link={translations.list_button.link}
-                                permission={permissions.READ}
-                            />
+                            {hasActionButton &&
+                                <ActionButton
+                                    {...this.props}
+                                    doAction={::this.doAction}
+                                    isActionInProcess={isActionInProcess}
+                                />
+                            }
+                            {hasListButton &&
+                                <ListButton
+                                    title={translations.list_button.title}
+                                    link={translations.list_button.link}
+                                    permission={permissions.READ}
+                                />
+                            }
                         </div>
                         <div className={styles.form_component}>
                             {
                                 contents.map((form, key1) => {
                                     if(isArray((form))){
-                                        return(
-                                            <div key={key1} className={styles.subform}>
-                                                {
-                                                    form.map((subform, key2) => {
-                                                        const inputs = contents[key1][key2].inputs;
-                                                        return (
-                                                            <FormSection
-                                                                key={`${key1}_${key2}`}
-                                                                isSubFormSection={true}
-                                                                header={contents[key1][key2].header}
-                                                                visible={contents[key1][key2].visible}
-                                                                inputs={inputs}
-                                                                entity={entity}
-                                                                updateEntity={::this.updateEntity}
-                                                                clearValidationMessage={::this.clearValidationMessage}
-                                                            />
-                                                        );
-                                                    })
-                                                }
-                                            </div>
-                                        )
+                                        return (
+                                            <SubFormSections
+                                                key={key1}
+                                                key1={key1}
+                                                form={form}
+                                                contents={contents}
+                                                entity={entity}
+                                                updateEntity={::this.updateEntity}
+                                            />
+                                        );
                                     } else {
                                         const inputs = contents[key1].inputs;
                                         return (
@@ -125,7 +124,6 @@ class Form extends React.Component{
                                                 inputs={inputs}
                                                 entity={entity}
                                                 updateEntity={::this.updateEntity}
-                                                clearValidationMessage={::this.clearValidationMessage}
                                             />
                                         );
                                     }
@@ -138,12 +136,36 @@ class Form extends React.Component{
         );
     }
 }
+
+Form.propTypes = {
+    type: PropTypes.string,
+    contents: PropTypes.array,
+    translations: PropTypes.shape({
+        header: PropTypes.shape({
+            title: PropTypes.string.isRequired,
+            onHelpClick: PropTypes.func,
+        }),
+        list_button: PropTypes.shape({
+            title: PropTypes.string.isRequired,
+            link: PropTypes.string.isRequired,
+        }),
+        action_button: PropTypes.shape({
+            title: PropTypes.string.isRequired,
+            link: PropTypes.string.isRequired,
+        })
+    }),
+    isActionInProcess: PropTypes.bool,
+    permissions: PropTypes.object,
+    clearValidationMessage: PropTypes.func,
+    action: PropTypes.func,
+}
+
 Form.defaultProps = {
-    entity: {},
     type: 'add',
-    isActionInProcess: API_REQUEST_STATE.INITIAL,
-    initiateTestStatus: null,
-    extraAction: '',
+    contents: [],
+    isActionInProcess: false,
+    clearValidationMessage: () => {},
+    action: () => {},
 };
 
 export default Form;
