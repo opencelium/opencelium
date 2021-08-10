@@ -25,6 +25,8 @@ import {getThemeClass} from "@utils/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -76,7 +78,7 @@ class ScheduleStart extends Component{
     }
 
     render(){
-        const {t, authUser, stateSchedule, schedule, triggeringSchedule, index} = this.props;
+        const {t, authUser, stateSchedule, schedule, triggeringSchedule} = this.props;
         let classNames = ['schedule_list_action', 'trigger_schedule_start_off', 'schedule_start_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
         let trigger_schedule_start = styles[classNames.schedule_list_action];
@@ -84,25 +86,24 @@ class ScheduleStart extends Component{
             trigger_schedule_start = styles[classNames.trigger_schedule_start_off];
         }
         let icon = 'play_arrow';
-        if(stateSchedule && stateSchedule.id === schedule.id && triggeringSchedule){
+        if(stateSchedule && stateSchedule.id === schedule.id && triggeringSchedule === API_REQUEST_STATE.START){
             icon = 'loading';
         }
         return (
             <TooltipFontIcon
                 isButton={true}
-                id={`schedule_start_${index}`}
+                id={`schedule_start_${schedule.id}`}
                 iconClassName={trigger_schedule_start}
                 value={icon}
                 tooltip={t('LIST.TOOLTIP_START_ICON')}
-                blueTheme={true}
+                turquoiseTheme
                 onClick={::this.triggerSchedule}/>
         );
     }
 }
 
 ScheduleStart.propTypes = {
-    schedule: PropTypes.object.isRequired,
-    index: PropTypes.number.isRequired,
+    schedule: PropTypes.instanceOf(CSchedule).isRequired,
 };
 
 export default ScheduleStart;

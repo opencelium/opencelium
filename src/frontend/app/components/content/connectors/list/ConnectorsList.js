@@ -110,8 +110,7 @@ class ConnectorsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnector;
         return <List
-            listViewData={listViewData}
-            rerenderDependency={addingConnectorIcon}
+            reducerName={'connectors'}
             entities={connectors}
             translations={translations}
             mapEntity={mapEntity}
@@ -119,6 +118,8 @@ class ConnectorsList extends Component{
             setTotalPages={setTotalPages}
             permissions={ConnectorPermissions}
             authUser={authUser}
+            listViewData={listViewData}
+            rerenderDependency={addingConnectorIcon}
         />;
     }
 }

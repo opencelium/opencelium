@@ -58,7 +58,7 @@ function mapSchedule(schedule){
 @connect(mapStateToProps, {updateSchedule, fetchSchedule, fetchConnections})
 @permission(SchedulePermissions.UPDATE, true)
 @withTranslation(['schedules', 'app'])
-@SingleComponent('schedule', 'updating', ['connections'], mapSchedule)
+@SingleComponent('schedule', 'updating', [], mapSchedule)
 @ScheduleChange('update')
 class ScheduleUpdate extends Component{}
 

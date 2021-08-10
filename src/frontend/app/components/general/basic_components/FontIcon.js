@@ -57,7 +57,7 @@ class FontIcon extends Component{
         }
         if(value === 'loading'){
             return(
-                <Loading className={`${styles.loading_icon} ${className}`} spinnerStyle={{...sizeStyle}}/>
+                <Loading className={`${styles.loading_icon} ${className} ${theme}`} spinnerStyle={{...sizeStyle}}/>
             );
         }
         //rework it

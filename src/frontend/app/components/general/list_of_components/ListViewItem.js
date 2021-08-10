@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from "prop-types";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {isString} from "@utils/app";
 import Confirmation from "@components/general/app/Confirmation";
 import {withTranslation} from "react-i18next";
 import Checkbox from "@basic_components/inputs/Checkbox";
-import styles from "@themes/default/content/schedules/schedules";
+import styles from "@themes/default/general/list_of_components.scss";
 
 @withTranslation('app')
 class ListViewItem extends React.Component{
@@ -13,6 +14,7 @@ class ListViewItem extends React.Component{
 
         this.state = {
             showConfirm: false,
+            showActions: false,
         }
     }
 
@@ -21,6 +23,24 @@ class ListViewItem extends React.Component{
      */
     toggleConfirm(){
         this.setState({showConfirm: !this.state.showConfirm});
+    }
+
+    /**
+     * to show actions
+     */
+    showActions(){
+        if(this.props.actionsShouldBeMinimized) {
+            this.setState({showActions: true});
+        }
+    }
+
+    /**
+     * to hide actions
+     */
+    hideActions(){
+        if(this.props.actionsShouldBeMinimized){
+            this.setState({showActions: false});
+        }
     }
 
     getObjectDataFromItem(){
@@ -87,8 +107,8 @@ class ListViewItem extends React.Component{
     }
 
     render(){
-        const {showConfirm} = this.state;
-        const {t, item, mapEntity, checks, index} = this.props;
+        const {showConfirm, showActions} = this.state;
+        const {t, item, mapEntity, checks, index, renderAdditionalActions, allEntities, readOnly, actionsShouldBeMinimized} = this.props;
         const {viewLink, updateLink} = this.getLinks();
         let data = this.getObjectDataFromItem();
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
@@ -96,17 +116,23 @@ class ListViewItem extends React.Component{
         let hasUpdate = isString(updateLink) && updateLink !== '';
         let hasDelete = onDelete !== null;
         let checked = checks.findIndex(c => c.id === data.id && c.value) !== -1;
+        const entity = allEntities.find(entity => entity.id === item[0].value);
+        const isCheckboxesVisible = !readOnly;
+        const isActionsVisible = !readOnly;
+        let areActionsMinimized = showActions || !actionsShouldBeMinimized;
         return(
             <tr>
-                <td>
-                    <Checkbox
-                        id={`input_check_${index}`}
-                        checked={checked}
-                        onChange={(e) => ::this.checkOneEntity(e, {key: index, id: data.id})}
-                        labelClassName={styles.checkbox_label}
-                        inputClassName={styles.checkbox_field}
-                    />
-                </td>
+                {isCheckboxesVisible &&
+                    <td>
+                        <Checkbox
+                            id={`input_check_${index}`}
+                            checked={checked}
+                            onChange={(e) => ::this.checkOneEntity(e, {key: index, id: data.id})}
+                            labelClassName={styles.checkbox_label}
+                            inputClassName={styles.checkbox_field}
+                        />
+                    </td>
+                }
                 {item.map((element) => {
                     if(element.name === 'id') return null;
                     let shortText = isString(element.value) && element.value.length > 128 ? `${element.value.substr(0, 128)}...` : element.value;
@@ -120,21 +146,56 @@ class ListViewItem extends React.Component{
                         </td>
                     );
                 })}
-                <td>
-                    {hasView && <TooltipFontIcon tooltip={'View'} value={'visibility'} onClick={::this.view} isButton={true} turquoiseTheme/>}
-                    {hasUpdate && <TooltipFontIcon tooltip={'Edit'} value={'edit'} onClick={::this.update} isButton={true} turquoiseTheme/>}
-                    {hasDelete && <TooltipFontIcon tooltip={'Delete'} value={'delete'} onClick={::this.wantDelete} isButton={true} turquoiseTheme/>}
-                    <Confirmation
-                        okClick={::this.doDelete}
-                        cancelClick={::this.toggleConfirm}
-                        active={showConfirm}
-                        title={t('LIST.CARD.CONFIRMATION_TITLE')}
-                        message={t('LIST.CARD.CONFIRMATION_MESSAGE')}
-                    />
-                </td>
+                {isActionsVisible &&
+                    <td className={styles.list_view_actions}>
+                        {!areActionsMinimized ?
+                            <div className={styles.actions}>
+                                <div>
+                                    <TooltipFontIcon tooltip={'More'} value={'more_horiz'} isButton turquoiseTheme
+                                                     onClick={::this.showActions}/>
+                                </div>
+                            </div>
+                        :
+                            <div className={actionsShouldBeMinimized ? styles.minimized_actions : styles.actions} onMouseLeave={::this.hideActions}>
+                                <div>
+                                    {hasView &&
+                                    <TooltipFontIcon tooltip={'View'} value={'visibility'} onClick={::this.view}
+                                                     isButton={true}
+                                                     turquoiseTheme/>}
+                                    {hasUpdate &&
+                                    <TooltipFontIcon tooltip={'Edit'} value={'edit'} onClick={::this.update}
+                                                     isButton={true}
+                                                     turquoiseTheme/>}
+                                    {hasDelete &&
+                                    <TooltipFontIcon tooltip={'Delete'} value={'delete'} onClick={::this.wantDelete}
+                                                     isButton={true} turquoiseTheme/>}
+                                    {typeof renderAdditionalActions === 'function' && renderAdditionalActions(entity)}
+                                </div>
+                            </div>
+                        }
+                        <Confirmation
+                            okClick={::this.doDelete}
+                            cancelClick={::this.toggleConfirm}
+                            active={showConfirm}
+                            title={t('LIST.CARD.CONFIRMATION_TITLE')}
+                            message={t('LIST.CARD.CONFIRMATION_MESSAGE')}
+                        />
+                    </td>
+                }
             </tr>
         );
     }
+}
+
+
+ListViewItem.propTypes = {
+    readOnly: PropTypes.bool,
+    actionsShouldBeMinimized: PropTypes.bool,
+}
+
+ListViewItem.defaultProps = {
+    readOnly: false,
+    actionsShouldBeMinimized: false,
 }
 
 export default ListViewItem;

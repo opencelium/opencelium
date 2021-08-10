@@ -81,7 +81,7 @@ class FormConnectors extends Component{
      */
     handleChange(value, connectorType){
         let {entity, updateEntity, data} = this.props;
-        let {connectors} = data;
+        let {connectors, callback} = data;
         let connector = connectors ? connectors.find(c => c.id === value.value) : null;
         if(connector) {
             let invoker = connector.invoker;
@@ -101,6 +101,9 @@ class FormConnectors extends Component{
             }
             entity.resetToEmptyTemplate();
             updateEntity(entity);
+            if(typeof callback === 'function'){
+                callback(value, connectorType);
+            }
         }
     }
 
@@ -200,7 +203,7 @@ class FormConnectors extends Component{
     }
 
     renderConnectors(){
-        const {source, placeholders} = this.props.data;
+        const {source, placeholders, error} = this.props.data;
         const {entity} = this.props;
         let fromConnectorValue = entity.fromConnector ? source && source.find(s => s.value === entity.fromConnector.id) : {label: 'Please, select connector', value: 0};
         let toConnectorValue = entity.toConnector ? source && source.find(s => s.value === entity.toConnector.id) : {label: 'Please, select connector', value: 0};
@@ -210,7 +213,8 @@ class FormConnectors extends Component{
             <Row>
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <Select
-                        id={'from_connector'}
+                        id={'input_fromConnector'}
+                        error={error}
                         value={fromConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'fromConnector')}
                         options={source}
@@ -225,7 +229,8 @@ class FormConnectors extends Component{
                 </Col>
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <Select
-                        id={'to_connector'}
+                        id={'input_toConnector'}
+                        error={error}
                         value={toConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'toConnector')}
                         options={source}

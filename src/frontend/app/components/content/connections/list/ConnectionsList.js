@@ -99,12 +99,13 @@ class ConnectionsList extends Component{
             result.title = <ConnectionCardTitle title={connection.title} fromConnector={connection.fromConnector} toConnector={connection.toConnector}/>;
             return result;
         };
-        mapEntity.getViewLink = (connection) => {return `${prefixUrl}/${connection.connectionId}/view`;};
-        mapEntity.getUpdateLink = (connection) => {return `${prefixUrl}/${connection.connectionId}/update`;};
+        mapEntity.getViewLink = (connection) => {const id = connection.hasOwnProperty('id') ? connection.id : connection.connectionId; return `${prefixUrl}/${id}/view`;};
+        mapEntity.getUpdateLink = (connection) => {const id = connection.hasOwnProperty('id') ? connection.id : connection.connectionId; return `${prefixUrl}/${id}/update`;};
         //mapEntity.getGraphLink = (connection) => {return `${prefixUrl}/${connection.connectionId}/graph`;};
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnection;
         return <List
+            reducerName={'connections'}
             listViewData={listViewData}
             entities={connections}
             translations={translations}

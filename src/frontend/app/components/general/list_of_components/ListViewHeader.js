@@ -14,30 +14,36 @@ class ListViewHeader extends React.Component{
     }
 
     render(){
-        const {header, allChecked, sortType, toggleSortType} = this.props;
+        const {header, allChecked, sortType, toggleSortType, readOnly} = this.props;
         const sortTooltip = sortType === 'asc' ? 'Asc' : 'Desc';
         const sortValue = sortType === 'asc' ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
+        const isCheckboxesVisible = !readOnly;
+        const isActionsVisible = !readOnly;
         return(
             <thead>
                 <tr>
-                    <th style={{width: '50px'}}>
-                        <Checkbox
-                            id='input_check_all'
-                            checked={allChecked}
-                            onChange={::this.onCheckAll}
-                            labelClassName={styles.checkbox_label}
-                            inputClassName={styles.checkbox_field}
-                        />
-                    </th>
+                    {isCheckboxesVisible &&
+                        <th style={{width: '50px'}}>
+                            <Checkbox
+                                id='input_check_all'
+                                checked={allChecked}
+                                onChange={::this.onCheckAll}
+                                labelClassName={styles.checkbox_label}
+                                inputClassName={styles.checkbox_field}
+                            />
+                        </th>
+                    }
                     {header.map(item => {
                         return item.value === 'id' ? null :
                             <th key={item.value} style={item.width ? {width: item.width} : null}
                                 title={item.label}>
                                 {item.label}
-                                {item.value === 'name' && <TooltipFontIcon isButton={true} blueTheme tooltip={sortTooltip} value={sortValue} onClick={toggleSortType}/>}
+                                {(item.value === 'name' || item.value === 'title') && <TooltipFontIcon isButton={true} blueTheme tooltip={sortTooltip} value={sortValue} onClick={toggleSortType}/>}
                             </th>
                     })}
-                    <th>Actions</th>
+                    {isActionsVisible &&
+                        <th>Actions</th>
+                    }
                 </tr>
             </thead>
         );
@@ -46,6 +52,11 @@ class ListViewHeader extends React.Component{
 
 ListViewHeader.propTypes = {
     header: PropTypes.array.isRequired,
+    readOnly: PropTypes.bool,
+}
+
+ListViewHeader.defaulProps = {
+    readOnly: false,
 }
 
 export default ListViewHeader;

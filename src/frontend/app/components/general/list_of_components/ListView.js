@@ -25,11 +25,15 @@ class ListView extends React.Component{
     }
 
     render(){
-        const {items, header, allChecked, checkAllEntities, checkOneEntity, checks, deleteCheck, sortType, toggleSortType, ...listViewItemProps} = this.props;
+        const {items, header, allChecked, checkAllEntities, checkOneEntity, checks, deleteCheck, sortType, toggleSortType, renderItemActions, readOnly, actionsShouldBeMinimized, ...listViewItemProps} = this.props;
+        let listViewStyles = {overflow: 'hidden'};
+        if(actionsShouldBeMinimized){
+            listViewStyles.overflow = 'visible';
+        }
         return(
-            <div className={styles.list_view}>
+            <div className={styles.list_view} style={listViewStyles}>
                 <Table>
-                    <ListViewHeader header={header} allChecked={allChecked} onCheckAll={checkAllEntities} setChecks={::this.setChecks} sortType={sortType} toggleSortType={toggleSortType}/>
+                    <ListViewHeader readOnly={readOnly} header={header} allChecked={allChecked} onCheckAll={checkAllEntities} setChecks={::this.setChecks} sortType={sortType} toggleSortType={toggleSortType}/>
                     <tbody>
                         {
                             items.map((item, index) => {
@@ -39,7 +43,7 @@ class ListView extends React.Component{
                                 } else{
                                     key = key.value;
                                 }
-                                return(<ListViewItem key={key} index={key} item={item} checks={checks} checkOneEntity={checkOneEntity} deleteCheck={deleteCheck} {...listViewItemProps} setChecks={::this.setChecks}/>);
+                                return(<ListViewItem key={key} index={key} readOnly={readOnly} actionsShouldBeMinimized={actionsShouldBeMinimized} renderAdditionalActions={renderItemActions} item={item} checks={checks} checkOneEntity={checkOneEntity} deleteCheck={deleteCheck} {...listViewItemProps} setChecks={::this.setChecks}/>);
                             })
                         }
                     </tbody>
@@ -53,6 +57,14 @@ ListView.propTypes = {
     items: PropTypes.array.isRequired,
     header: PropTypes.array.isRequired,
     entityIdName: PropTypes.string.isRequired,
+    renderItemAction: PropTypes.func,
+    readOnly: PropTypes.bool,
+    actionsShouldBeMinimized: PropTypes.bool,
+}
+
+ListView.defaultProps = {
+    readOnly: false,
+    actionsShouldBeMinimized: false,
 }
 
 export default withRouter(ListView);

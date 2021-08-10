@@ -26,7 +26,7 @@ const ICOMMON = {
 };
 
 //CONNECTION
-const CONNECTION_TITLE = {name: 'connection_title', type: 'connection_title', maxLength: 256, icon: 'title'};
+const CONNECTION_TITLE = {name: 'title', type: 'connection_title', maxLength: 256, icon: 'title'};
 const CONNECTOR = {name: 'connectors', type: 'connectors', icon: 'device_hub'};
 const CONNECTOR_READONLY = {name: 'connectors_readonly', type: 'connectors', icon: 'device_hub'};
 const MODE = {name: 'mode', type: 'connection_mode'};

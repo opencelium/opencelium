@@ -38,7 +38,7 @@ class FormTitle extends Component{
         const {title} = this.state;
         let {entity, updateEntity} = this.props;
         entity.title = title;
-        updateEntity(entity);
+        updateEntity(entity, 'title');
     }
 
     handleInput(title){
@@ -50,7 +50,7 @@ class FormTitle extends Component{
 
     render(){
         const {title} = this.state;
-        const {name, label, icon, maxLength, readOnly, required} = this.props.data;
+        const {name, label, icon, maxLength, readOnly, required, error} = this.props.data;
         let {tourStep} = this.props.data;
         let isReadonly = false;
         let inputStyle = styles.form_input;
@@ -62,6 +62,7 @@ class FormTitle extends Component{
         }
         return (
             <Input
+                error={error}
                 onChange={::this.handleInput}
                 onBlur={::this.onBlur}
                 name={'form_connection_title'}

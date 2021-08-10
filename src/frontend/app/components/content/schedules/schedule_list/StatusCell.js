@@ -15,9 +15,10 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from "react-redux";
 
 import {updateScheduleStatus} from '@actions/schedules/update';
-import {connect} from "react-redux";
+import {setCurrentPageItems} from "@actions/app";
 
 import styles from '@themes/default/content/schedules/schedules.scss';
 import {getThemeClass} from "@utils/app";
@@ -27,15 +28,17 @@ import {API_REQUEST_STATE, NO_DATA} from "@utils/constants/app";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
 import CSchedule from "@classes/components/content/schedule/CSchedule";
-import Loading from "@components/general/app/Loading";
 
 
 function mapStateToProps(state){
+    const app = state.get('app');
     const auth = state.get('auth');
     const schedules = state.get('schedules');
     return{
+        currentPageItems: app.get('currentPageItems').toJS(),
         authUser: auth.get('authUser'),
         currentSchedule: schedules.get('schedule'),
+        schedules: schedules.get('schedules').toJS(),
         updatingScheduleStatus: schedules.get('updatingScheduleStatus'),
         triggeringSchedule: schedules.get('triggeringSchedule'),
         triggeringScheduleSuccessfully: schedules.get('triggeringScheduleSuccessfully'),
@@ -45,7 +48,7 @@ function mapStateToProps(state){
 /**
  * Cell Component to display status for ScheduleList
  */
-@connect(mapStateToProps, {updateScheduleStatus})
+@connect(mapStateToProps, {setCurrentPageItems, updateScheduleStatus})
 @withTranslation('schedules')
 class StatusCell extends Component{
 
@@ -62,8 +65,17 @@ class StatusCell extends Component{
             CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
             CVoiceControl.initCommands({component: this}, CScheduleControl);
         }
-        if(prevProps.updatingScheduleStatus === API_REQUEST_STATE.START && this.props.updatingScheduleStatus === API_REQUEST_STATE.FINISH){
-            this.props.updateCurrentItems();
+        const shouldUpdateStatus = prevProps.updatingScheduleStatus === API_REQUEST_STATE.START && this.props.updatingScheduleStatus === API_REQUEST_STATE.FINISH
+        if(shouldUpdateStatus && this.props.schedule.id === this.props.currentSchedule.id){
+            let updatedCurrentPageItems = [...this.props.currentPageItems];
+            const updatedSchedule = this.props.schedules.find(schedule => schedule.schedulerId === this.props.schedule.id);
+            if(updatedSchedule) {
+                const index = updatedCurrentPageItems.findIndex(item => item.id === updatedSchedule.schedulerId);
+                if(index !== -1) {
+                    updatedCurrentPageItems[index].status = !updatedCurrentPageItems[index].status;
+                    this.props.setCurrentPageItems({items: updatedCurrentPageItems});
+                }
+            }
         }
     }
 

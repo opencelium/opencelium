@@ -52,6 +52,16 @@ class FormSection extends Component{
 
     constructor(props){
         super(props);
+
+        this.state = {
+            isFormSectionMinimized: false,
+        }
+    }
+
+    toggle(){
+        this.setState({
+            isFormSectionMinimized: !this.state.isFormSectionMinimized,
+        })
     }
 
     /**
@@ -249,9 +259,9 @@ class FormSection extends Component{
      */
     generateInputs(){
         let result;
-        const {inputs, focusedInput, setFocusInput} = this.props;
-        if(Array.isArray(inputs)) {
-            result = inputs.map((data, key) => {
+        const {content, focusedInput, setFocusInput} = this.props;
+        if(Array.isArray(content.inputs)) {
+            result = content.inputs.map((data, key) => {
                 data['tourStep'] = data['tourStep'] && isString(data['tourStep']) ? data['tourStep'].substr(1) : data['tourStep'];
                 data['setFocusInput'] = setFocusInput;
                 data['focused'] = focusedInput !== '' && focusedInput === data.name;
@@ -263,18 +273,25 @@ class FormSection extends Component{
     }
 
     render(){
-        const {header, isSubFormSection, visible} = this.props;
+        const {isFormSectionMinimized} = this.state;
+        const {isSubFormSection} = this.props;
         let style = {};
-        if(!visible){
+        const content = {
+            visible: true,
+            header: '',
+            formClassName: '',
+            ...this.props.content,
+        };
+        if(!content.visible){
             style.height = 0;
             style.overflow = 'hidden';
             style.padding = 0;
         }
         return (
-            <div className={!isSubFormSection ? styles.form : ''} style={style}>
-                {header !== '' &&
-                    <div className={styles.form_section_header}>
-                        <span>{header}</span>
+            <div className={`${!isSubFormSection ? styles.form : ''} ${content.formClassName} ${isFormSectionMinimized ? styles.minimized_form : ''}`} style={style}>
+                {content.header !== '' &&
+                    <div className={styles.form_section_header} onClick={::this.toggle}>
+                        <span>{content.header}</span>
                     </div>
                 }
                 {this.generateInputs()}
@@ -284,20 +301,21 @@ class FormSection extends Component{
 }
 
 FormSection.propTypes = {
-    inputs: PropTypes.array.isRequired,
     entity: PropTypes.object.isRequired,
     updateEntity: PropTypes.func.isRequired,
     focusedInput: PropTypes.string,
     isSubFormSection: PropTypes.bool,
-    header: PropTypes.string,
-    visible: PropTypes.bool,
+    content: PropTypes.shape({
+        header: PropTypes.string,
+        visible: PropTypes.bool,
+        inputs: PropTypes.array.isRequired,
+        formClassName: PropTypes.string,
+    }).isRequired,
 };
 
 FormSection.defaultProps = {
     focusedInput: '',
     isSubFormSection: false,
-    header: '',
-    visible: true,
 };
 
 export default FormSection;

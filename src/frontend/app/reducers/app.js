@@ -33,6 +33,7 @@ const initialState = fromJS({
     currentMenu: {},
     error: null,
     message: {},
+    reducerName: '',
 });
 
 /**
@@ -61,7 +62,7 @@ const reducer = (state = initialState, action) => {
         case AppAction.FETCH_APPVERSION_REJECTED:
             return state.set('fetchingAppVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case AppAction.SET_CURRENT_PAGE_ITEMS:
-            return state.set('currentPageItems', List(action.payload));
+            return state.set('currentPageItems', List(action.payload.items)).set('reducerName', action.payload.reducerName);
         default:
             return state;
     }

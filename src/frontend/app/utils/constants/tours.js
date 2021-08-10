@@ -115,7 +115,7 @@ export const USER_TOURS = {
     ],
 };
 
-export const CONNECTION_ADD_TOURS = {
+export const CONNECTION_TOURS = {
     page_1: [
         {
             selector: '.page-1-first-tour-step',
@@ -138,33 +138,6 @@ export const CONNECTION_ADD_TOURS = {
         }
     ],
     page_3: [
-        {
-            selector: '.page-3-first-tour-step',
-            content:
-                <SwitchOffTour>
-                    This is a method panel
-                </SwitchOffTour>,},
-        {
-            selector: '.page-3-second-tour-step',
-            content: 'This is a field panel',
-        },
-    ],
-};
-
-export const CONNECTION_UPDATE_TOURS = {
-    page_1: [
-        {
-            selector: '.page-1-first-tour-step',
-            content:
-                <SwitchOffTour>
-                    Give a name to the connection
-                </SwitchOffTour>,},
-        {
-            selector: '.page-1-second-tour-step',
-            content: 'Here you choose connectors from where your data should be gathered and where they should be used',
-        },
-    ],
-    page_2: [
         {
             selector: '.page-3-first-tour-step',
             content:

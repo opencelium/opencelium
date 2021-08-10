@@ -22,10 +22,10 @@ import {API_REQUEST_STATE} from "../utils/constants/app";
 
 
 const initialState = fromJS({
-    addingWebHook: false,
-    deletingWebHook: false,
+    addingWebHook: API_REQUEST_STATE.INITIAL,
+    deletingWebHook: API_REQUEST_STATE.INITIAL,
     triggeringScheduleSuccessfully: false,
-    triggeringSchedule: false,
+    triggeringSchedule: API_REQUEST_STATE.INITIAL,
     fetchingSchedule: API_REQUEST_STATE.INITIAL,
     fetchingScheduleNotification: API_REQUEST_STATE.INITIAL,
     fetchingScheduleNotificationTemplates: API_REQUEST_STATE.INITIAL,
@@ -89,11 +89,11 @@ const reducer = (state = initialState, action) => {
         case SchedulesAction.TRIGGER_SCHEDULESUCCESS_FULFILLED:
             return state.set('triggeringScheduleSuccessfully', false);
         case SchedulesAction.TRIGGER_SCHEDULE:
-            return state.set('triggeringSchedule', true).set('schedule', action.payload).set('isRejected', false).set('isCanceled', false).set('error', null);
+            return state.set('triggeringSchedule', API_REQUEST_STATE.START).set('schedule', action.payload).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.TRIGGER_SCHEDULE_FULFILLED:
-            return state.set('triggeringSchedule', false);
+            return state.set('triggeringSchedule', API_REQUEST_STATE.FINISH);
         case SchedulesAction.TRIGGER_SCHEDULE_REJECTED:
-            return state.set('triggeringSchedule', false).set('isRejected', true).set('error', action.payload);
+            return state.set('triggeringSchedule', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.FETCH_SCHEDULE:
             return state.set('fetchingSchedule', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.FETCH_SCHEDULE_FULFILLED:
@@ -372,9 +372,9 @@ const reducer = (state = initialState, action) => {
             });
             if(index >= 0) {
                 schedule = schedules.get(index);
-                return state.set('addingWebHook', true).set('schedule', schedule).set('error', null);
+                return state.set('addingWebHook', API_REQUEST_STATE.START).set('schedule', schedule).set('error', null);
             }
-            return state.set('addingWebHook', true).set('error', null);
+            return state.set('addingWebHook', API_REQUEST_STATE.START).set('error', null);
         case WebHooksAction.ADD_WEBHOOK_FULFILLED:
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.id;
@@ -382,20 +382,20 @@ const reducer = (state = initialState, action) => {
             if(index >= 0) {
                 schedule = schedules.get(index);
                 schedule.webhook = action.payload.webhook;
-                return state.set('addingWebHook', false).set('schedules', schedules.set(index, schedule));
+                return state.set('addingWebHook', API_REQUEST_STATE.FINISH).set('schedules', schedules.set(index, schedule));
             }
-            return state.set('addingWebHook', false);
+            return state.set('addingWebHook', API_REQUEST_STATE.FINISH);
         case WebHooksAction.ADD_WEBHOOK_REJECTED:
-            return state.set('addingWebHook', false).set('error', action.payload);
+            return state.set('addingWebHook', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case WebHooksAction.DELETE_WEBHOOK:
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.schedulerId;
             });
             if(index >= 0) {
                 schedule = schedules.get(index);
-                return state.set('deletingWebHook', true).set('schedule', schedule);
+                return state.set('deletingWebHook', API_REQUEST_STATE.START).set('schedule', schedule);
             }
-            return state.set('deletingWebHook', true).set('error', null);
+            return state.set('deletingWebHook', API_REQUEST_STATE.START).set('error', null);
         case WebHooksAction.DELETE_WEBHOOK_FULFILLED:
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.schedulerId;
@@ -403,11 +403,11 @@ const reducer = (state = initialState, action) => {
             if(index >= 0) {
                 schedule = schedules.get(index);
                 schedule.webhook = null;
-                return state.set('deletingWebHook', false).set('schedules', schedules.set(index, schedule));
+                return state.set('deletingWebHook', API_REQUEST_STATE.FINISH).set('schedules', schedules.set(index, schedule));
             }
-            return state.set('deletingWebHook', false);
+            return state.set('deletingWebHook', API_REQUEST_STATE.FINISH);
         case WebHooksAction.DELETE_WEBHOOK_REJECTED:
-            return state.set('deletingWebHook', false).set('error', action.payload);
+            return state.set('deletingWebHook', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case WebHooksAction.COPYTOCLIPBOARD_WEBHOOK_FULFILLED:
             return state;
         default:

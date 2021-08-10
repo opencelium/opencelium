@@ -3,7 +3,9 @@
     "ADD_BUTTON": "Add Template",
     "EMPTY_LIST": "The list of Notification Templates is empty",
     "HEADER": "Notification Templates",
-    "HEADER_ADMIN_CARDS": "Admin Cards"
+    "HEADER_ADMIN_CARDS": "Admin Cards",
+    "NAME": "Name",
+    "TYPE": "Type"
   },
   "ADD":{
     "FORM":{

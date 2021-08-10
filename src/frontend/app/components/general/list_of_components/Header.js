@@ -30,6 +30,9 @@ class ListHeader extends Component{
 
     render(){
         const {header, icons} = this.props;
+        if(!header){
+            return null;
+        }
         return (
             <ContentHeader header={header} icons={icons} className={styles.list_header}/>
         );

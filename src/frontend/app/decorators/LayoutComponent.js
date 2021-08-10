@@ -47,7 +47,7 @@ export function LayoutComponent(componentSingleName = '', componentPluralName = 
 
                 componentWillUnmount(){
                     CVoiceControl.removeCommands({component: this, currentItems: this.props.currentPageItems, componentSingleName, componentPluralName, url, deleteActionName, exceptions}, CListVoiceControl);
-                    this.props.setCurrentPageItems([]);
+                    this.props.setCurrentPageItems({items: []});
                 }
 
                 render(){

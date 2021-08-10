@@ -30,6 +30,8 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 import CNotification from "@classes/components/content/schedule/notification/CNotification";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
+import {schedules} from "@root/app/reducers/schedules";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
 
 
 function mapStateToProps(state){
@@ -122,10 +124,10 @@ class ScheduleNotification extends Component{
 
     renderDialogScheduleNotification(){
         const {animationName, showScheduleNotifications} = this.state;
-        const {schedule, notifications, index} = this.props;
+        const {schedule, notifications} = this.props;
         if(showScheduleNotifications) {
             return <NotificationList
-                index={index}
+                index={schedule.id}
                 schedule={schedule}
                 notifications={notifications}
                 closeNotificationList={::this.closeNotificationList}
@@ -137,7 +139,7 @@ class ScheduleNotification extends Component{
 
     render(){
         const {startFetchingScheduleNotifications} = this.state;
-        const {t, authUser, index} = this.props;
+        const {t, authUser, schedule} = this.props;
         let classNames = ['schedule_list_action', 'notifications_loading'];
         classNames = getThemeClass({classNames, authUser, styles});
         let icon = 'mail';
@@ -149,11 +151,11 @@ class ScheduleNotification extends Component{
                 <TooltipFontIcon
                     isButton={true}
                     iconClassName={styles[classNames.schedule_list_action]}
-                    id={`schedule_update_${index}`}
+                    id={`schedule_update_${schedule.id}`}
                     value={icon}
                     tooltip={t('LIST.TOOLTIP_NOTIFICATION_ICON')}
                     onClick={::this.toggleScheduleNotification}
-                    blueTheme={true}
+                    turquoiseTheme
                 />
                 {this.renderDialogScheduleNotification()}
             </span>
@@ -162,8 +164,7 @@ class ScheduleNotification extends Component{
 }
 
 ScheduleNotification.propTypes = {
-    schedule: PropTypes.object.isRequired,
-    index: PropTypes.number.isRequired,
+    schedule: PropTypes.instanceOf(CSchedule).isRequired,
 };
 
 export default ScheduleNotification;

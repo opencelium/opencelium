@@ -18,19 +18,25 @@ import PropTypes from 'prop-types';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {addWebHook} from "@actions/webhooks/add";
 import {deleteWebHook} from "@actions/webhooks/delete";
+import {setCurrentPageItems} from "@actions/app";
 import styles from '@themes/default/content/schedules/schedules.scss';
-import {formatHtmlId, getThemeClass} from "@utils/app";
+import {getThemeClass} from "@utils/app";
 import {connect} from "react-redux";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CScheduleControl from "@classes/voice_control/CScheduleControl";
+import CSchedule from "@classes/components/content/schedule/CSchedule";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
+    const app = state.get('app');
     const auth = state.get('auth');
     const schedules = state.get('schedules');
     return {
+        currentPageItems: app.get('currentPageItems').toJS(),
         authUser: auth.get('authUser'),
         stateSchedule: schedules.get('schedule'),
+        schedules: schedules.get('schedules').toJS(),
         addingWebHook: schedules.get('addingWebHook'),
         deletingWebHook: schedules.get('deletingWebHook'),
     };
@@ -40,7 +46,7 @@ function mapStateToProps(state){
 /**
  * WebHookTools Component
  */
-@connect(mapStateToProps, {addWebHook, deleteWebHook})
+@connect(mapStateToProps, {setCurrentPageItems, addWebHook, deleteWebHook})
 class WebHookTools extends Component{
 
     constructor(props){
@@ -55,6 +61,19 @@ class WebHookTools extends Component{
         if(this.props.schedule.title !== prevProps.schedule.title){
             CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
             CVoiceControl.initCommands({component: this}, CScheduleControl);
+        }
+        const shouldAddWebhook = prevProps.addingWebHook === API_REQUEST_STATE.START && this.props.addingWebHook === API_REQUEST_STATE.FINISH;
+        const shouldDeleteWebhook = prevProps.deletingWebHook === API_REQUEST_STATE.START && this.props.deletingWebHook === API_REQUEST_STATE.FINISH;
+        if((shouldAddWebhook || shouldDeleteWebhook) && this.props.schedule.id === this.props.stateSchedule.schedulerId){
+            let updatedCurrentPageItems = [...this.props.currentPageItems];
+            const updatedSchedule = this.props.schedules.find(schedule => schedule.schedulerId === this.props.stateSchedule.schedulerId);
+            if(updatedSchedule) {
+                const index = updatedCurrentPageItems.findIndex(item => item.id === updatedSchedule.schedulerId);
+                if(index !== -1) {
+                    updatedCurrentPageItems[index].webhook = shouldDeleteWebhook ? null : updatedSchedule.webhook;
+                    this.props.setCurrentPageItems({items: updatedCurrentPageItems});
+                }
+            }
         }
     }
 
@@ -95,7 +114,7 @@ class WebHookTools extends Component{
     }
     
     render(){
-        const {authUser, addingWebHook, deletingWebHook, t, stateSchedule, schedule, index} = this.props;
+        const {authUser, addingWebHook, deletingWebHook, t, stateSchedule, schedule} = this.props;
         let classNames = ['webhook_tools', 'webhook_loading', 'webhook_icon'];
         classNames = getThemeClass({classNames, authUser, styles});
         let icon = 'link';
@@ -104,7 +123,7 @@ class WebHookTools extends Component{
             icon = 'link_off';
             tooltip = t('LIST.WEBHOOK_TOOLS_TOOLTIP_DELETE');
         }
-        if(stateSchedule && stateSchedule.schedulerId === schedule.id && (addingWebHook || deletingWebHook)){
+        if(stateSchedule && stateSchedule.schedulerId === schedule.id && (addingWebHook === API_REQUEST_STATE.START || deletingWebHook === API_REQUEST_STATE.START)){
             icon = 'loading';
         }
         return (
@@ -112,11 +131,11 @@ class WebHookTools extends Component{
                 <TooltipFontIcon
                     iconClassName={styles[classNames.webhook_icon]}
                     isButton={true}
-                    id={`webhook_tools_${index}`}
+                    id={`webhook_tools_${schedule.id}`}
                     value={icon}
                     tooltip={tooltip}
                     onClick={::this.onClick}
-                    blueTheme={true}
+                    turquoiseTheme
                 />
             </span>
         );
@@ -124,8 +143,7 @@ class WebHookTools extends Component{
 }
 
 WebHookTools.propTypes = {
-    schedule: PropTypes.object.isRequired,
-    index: PropTypes.number.isRequired,
+    schedule: PropTypes.instanceOf(CSchedule).isRequired,
 };
 
 export default WebHookTools;

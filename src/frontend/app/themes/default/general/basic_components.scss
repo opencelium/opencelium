@@ -23,14 +23,15 @@
   border: none;
   padding: 0;
 }
+//icon, tooltip, button themes
 .disable_theme{
-  >span{
-    color: #eee;
+  >span,>div{
+    color: #eee !important;
   }
 }
 .blue_theme{
-  >span{
-    color: $BUTTON_COLOR;
+  >span,>div{
+    color: $BUTTON_COLOR !important;
     transition: background 0.8s;
   }
   >span:hover {
@@ -49,10 +50,9 @@
   }
 }
 
-
 .turquoise_theme{
-  >span{
-    color: #00ACC2;
+  >span,>div{
+    color: #00ACC2 !important;
     transition: background 0.8s;
   }
   >span:hover {
@@ -72,8 +72,8 @@
 }
 
 .dark_theme{
-  >span{
-    color: #000;
+  >span,>div{
+    color: #000 !important;
     transition: background 0.8s;
   }
   >span:hover {
@@ -93,8 +93,8 @@
 }
 
 .white_theme{
-  >span{
-    color: #fff;
+  >span,>div{
+    color: #fff !important;
     transition: background 0.8s;
   }
   >span:hover {
@@ -114,8 +114,8 @@
 }
 
 .dark_blue_theme{
-  >span{
-    color: #012E55;
+  >span,>div{
+    color: #012E55 !important;
     transition: background 0.8s;
   }
   >span:hover {
@@ -135,8 +135,8 @@
 }
 
 .gray_theme{
-  >span{
-    color: #777;
+  >span,>div{
+    color: #777 !important;
     transition: background 0.8s;
   }
   >span:hover {
@@ -162,7 +162,7 @@
 }
 
 .loading_icon>div{
-  color: white !important;
+  vertical-align: baseline;
   display: inline-flex;
   width: 20px;
   height: 20px;

@@ -25,6 +25,8 @@
   margin: 20px 0 0;
   position: relative;
   .form_section_header{
+    transition: top 0.3s cubic-bezier(.25,.8,.25,1);
+    cursor: pointer;
     top: -20px;
     left: 10px;
     position: absolute;
@@ -38,6 +40,14 @@
       font-family: $FONT_FAMILY;
       text-transform: uppercase;
     }
+  }
+}
+
+.minimized_form{
+  height: 20px;
+  overflow: hidden;
+  .form_section_header{
+    top: 4px !important;
   }
 }
 

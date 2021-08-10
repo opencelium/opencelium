@@ -104,6 +104,7 @@ class UserGroupsList extends Component{
         mapUserGroup.getAddLink = `${prefixUrl}/add`;
         mapUserGroup.onDelete = deleteUserGroup;
         return <List
+            reducerName={'userGroups'}
             entities={userGroups}
             listViewData={listViewData}
             exceptionEntities={{label: t('LIST.CURRENT_USER_GROUP'), exceptions: exceptionUserGroups}}

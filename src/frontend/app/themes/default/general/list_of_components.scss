@@ -19,7 +19,6 @@
 
 .list_view{
   @extend .card_style;
-  overflow-x: auto;
   margin-bottom: 20px;
   table{
     table-layout: fixed;
@@ -27,8 +26,43 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    td.list_view_actions{
+      overflow: visible;
+      position: relative;
+    }
     th{
       @extend .overflow_text;
+    }
+  }
+  .checkbox_label{
+    margin: 0;
+  }
+  .checkbox_field{
+    margin: 0;
+    position: relative;
+  }
+  .actions{
+    position: absolute;
+    top: calc(50% - 15px);
+    left: 50%;
+    >div{
+      left: -50%;
+      position: relative;
+      white-space: nowrap;
+      >span{
+        display: inline-block;
+      }
+    }
+  }
+  .minimized_actions{
+    @extend .actions;
+    top: calc(50% - 19px);
+    left: unset;
+    right: 0;
+    >div{
+      @extend .card_style;
+      left: unset;
+      padding: 3px 3px 0;
     }
   }
 }
@@ -251,7 +285,7 @@
   @extend .add_button;
   margin-left: 10px;
 }
-@media only screen and (max-width: 756px)  {
+@media only screen and (max-width: 1024px)  {
   .add_button,.delete_selected_button{
     button{
       span:nth-child(2){

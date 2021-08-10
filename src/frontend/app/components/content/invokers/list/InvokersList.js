@@ -103,6 +103,7 @@ class InvokersList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteInvoker;
         return <List
+            reducerName={'invokers'}
             listViewData={listViewData}
             entities={invokers}
             translations={translations}

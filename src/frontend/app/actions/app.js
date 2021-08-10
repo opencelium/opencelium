@@ -144,10 +144,10 @@ const fetchAppVersionRejected = (error) => {
  * set current page items
  * @returns {{type: string, payload: {}}}
  */
-const setCurrentPageItems = (currentItems) => {
+const setCurrentPageItems = (data) => {
     return {
         type: AppAction.SET_CURRENT_PAGE_ITEMS,
-        payload: currentItems,
+        payload: {reducerName: '', items: [], ...data},
     };
 };
 

@@ -30,7 +30,7 @@ const initialState = fromJS({
     checkingConnection: API_REQUEST_STATE.INITIAL,
     sendingOperationRequest: API_REQUEST_STATE.INITIAL,
     checkingNeo4j: false,
-    checkingConnectionTitle: false,
+    checkingConnectionTitle: API_REQUEST_STATE.INITIAL,
     checkTitleResult: null,
     validatingFormMethods: false,
     validateFormMethodsResult: null,
@@ -67,11 +67,11 @@ const reducer = (state = initialState, action) => {
         case ConnectionsAction.VALIDATE_FORMMETHODS_REJECTED:
             return state.set('validatingFormMethods', false).set('error', null).set('validateFormMethodsResult', action.payload);
         case ConnectionsAction.CHECK_CONNECTIONTITLE:
-            return state.set('checkingConnectionTitle', true).set('checkTitleResult', null).set('error', null);
+            return state.set('checkingConnectionTitle', API_REQUEST_STATE.START).set('checkTitleResult', null).set('error', null);
         case ConnectionsAction.CHECK_CONNECTIONTITLE_FULFILLED:
-            return state.set('checkingConnectionTitle', false).set('checkTitleResult', action.payload);
+            return state.set('checkingConnectionTitle', API_REQUEST_STATE.FINISH).set('checkTitleResult', action.payload);
         case ConnectionsAction.CHECK_CONNECTIONTITLE_REJECTED:
-            return state.set('checkingConnectionTitle', false).set('error', null).set('checkTitleResult', action.payload);
+            return state.set('checkingConnectionTitle', API_REQUEST_STATE.ERROR).set('error', null).set('checkTitleResult', action.payload);
         case ConnectionsAction.FETCH_CONNECTION:
             return state.set('fetchingConnection', API_REQUEST_STATE.START).set('error', null);
         case ConnectionsAction.FETCH_CONNECTION_FULFILLED:

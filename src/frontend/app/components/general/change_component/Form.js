@@ -114,14 +114,11 @@ class Form extends React.Component{
                                             />
                                         );
                                     } else {
-                                        const inputs = contents[key1].inputs;
                                         return (
                                             <FormSection
                                                 key={key1}
                                                 isSubFormSection={false}
-                                                header={contents[key1].header}
-                                                visible={contents[key1].visible}
-                                                inputs={inputs}
+                                                content={form}
                                                 entity={entity}
                                                 updateEntity={::this.updateEntity}
                                             />

@@ -14,11 +14,13 @@
  */
 
 import React, { Component }  from 'react';
+import PropTypes from "prop-types";
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchSchedules, fetchSchedulesCanceled} from '@actions/schedules/fetch';
 import {deleteSchedule, deleteSchedules} from '@actions/schedules/delete';
 import {enableSchedules, disableSchedules, startSchedules} from "@actions/schedules/update";
+import {setCurrentPageItems} from "@actions/app";
 
 import {ListComponent} from "@decorators/ListComponent";
 import {permission} from "@decorators/permission";
@@ -37,19 +39,25 @@ import CSchedule from "@classes/components/content/schedule/CSchedule";
 import Confirmation from "@components/general/app/Confirmation";
 import TitleCell from "@components/content/schedules/schedule_list/TitleCell";
 import {Link as ReactRouterLink} from "react-router";
+import WebHookTools from "@components/content/schedules/schedule_list/WebHookTools";
+import ScheduleNotification from "@components/content/schedules/schedule_list/notification/ScheduleNotification";
+import ScheduleStart from "@components/content/schedules/schedule_list/ScheduleStart";
+import CurrentSchedules from "@components/content/schedules/current_schedules/CurrentSchedules";
 
 
 const prefixUrl = '/schedules';
 
 function mapStateToProps(state){
-    const schedules = state.get('schedules');
+    const app = state.get('app');
     const auth = state.get('auth');
+    const schedules = state.get('schedules');
     return {
+        currentPageItems: app.get('currentPageItems').toJS(),
         authUser: auth.get('authUser'),
         fetchingSchedules: schedules.get('fetchingSchedules'),
         deletingSchedule: schedules.get('deletingSchedule'),
         deletingSchedules: schedules.get('deletingSchedules'),
-        startingSchedule: schedules.get('startingSchedules'),
+        startingSchedules: schedules.get('startingSchedules'),
         enablingSchedules: schedules.get('enablingSchedules'),
         disablingSchedules: schedules.get('disablingSchedules'),
         schedules: schedules.get('schedules').toJS(),
@@ -82,7 +90,7 @@ function filterScheduleSteps(tourSteps){
 /**
  * List of Schedules
  */
-@connect(mapStateToProps, {fetchSchedules, fetchSchedulesCanceled, deleteSchedule, enableSchedules, disableSchedules, startSchedules, deleteSchedules})
+@connect(mapStateToProps, {setCurrentPageItems, fetchSchedules, fetchSchedulesCanceled, deleteSchedule, enableSchedules, disableSchedules, startSchedules, deleteSchedules})
 @permission(SchedulePermissions.READ, true)
 @withTranslation(['schedules', 'app'])
 @ListComponent('schedules')
@@ -104,11 +112,16 @@ class SchedulesList extends Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if((prevProps.enablingSchedules === API_REQUEST_STATE.START && this.props.enablingSchedules === API_REQUEST_STATE.FINISH)
-        || (prevProps.disablingSchedules === API_REQUEST_STATE.START && this.props.disablingSchedules === API_REQUEST_STATE.FINISH)){
-            if(typeof this.state.callbackAfterAction === "function"){
-                this.state.callbackAfterAction();
+        const shouldEnableSchedules = prevProps.enablingSchedules === API_REQUEST_STATE.START && this.props.enablingSchedules === API_REQUEST_STATE.FINISH;
+        const shouldDisableSchedules = prevProps.disablingSchedules === API_REQUEST_STATE.START && this.props.disablingSchedules === API_REQUEST_STATE.FINISH;
+        if((shouldEnableSchedules || shouldDisableSchedules) && this.state.checks){
+            let updatedCurrentPageItems = [...this.props.currentPageItems];
+            for(let i = 0; i < updatedCurrentPageItems.length; i++){
+                if(this.state.checks.findIndex(check => check.id === updatedCurrentPageItems[i].id && check.value) !== -1){
+                    updatedCurrentPageItems[i].status = shouldEnableSchedules;
+                }
             }
+            this.props.setCurrentPageItems({items: updatedCurrentPageItems, reducerName: this.props.reducerName});
         }
     }
 
@@ -125,27 +138,21 @@ class SchedulesList extends Component{
     /**
      * to enable selected schedules
      */
-    enableSelectedSchedules(checks, callback){
+    enableSelectedSchedules(checks){
         const {enableSchedules} = this.props;
         let schedulerIds = checks.filter(c => c.value);
         schedulerIds = schedulerIds.map(c => c.id);
-        enableSchedules({schedulerIds});
-        this.setState({
-            callbackAfterAction: callback,
-        });
+        this.setState({checks},() => enableSchedules({schedulerIds}));
     }
 
     /**
      * to disable selected schedules
      */
-    disableSelectedSchedules(checks, callback){
+    disableSelectedSchedules(checks){
         const {disableSchedules} = this.props;
         let schedulerIds = checks.filter(c => c.value);
         schedulerIds = schedulerIds.map(c => c.id);
-        disableSchedules({schedulerIds});
-        this.setState({
-            callbackAfterAction: callback,
-        });
+        this.setState({checks},() => disableSchedules({schedulerIds}));
     }
 
     wantDeleteSelectedSchedules(checks){
@@ -191,26 +198,37 @@ class SchedulesList extends Component{
 
     render(){
         const {showConfirm} = this.state;
-        const {t, params, setTotalPages, authUser, openTour, startingSchedules, enablingSchedules, disablingSchedules, deletingSchedules} = this.props;
+        const {t, viewType, noHeader, readOnly, params, setTotalPages, authUser, openTour, startingSchedules, enablingSchedules, disablingSchedules, deletingSchedules} = this.props;
         const schedules = this.convertSchedules();
         let translations = {};
-        translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
+        translations.header = noHeader ? null : {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         let mapEntity = {};
         mapEntity.map = (schedule) => {
             return schedule.getObject();
         };
+        const renderListViewItemActions = (schedule) => {
+            return (
+                <React.Fragment>
+                    <WebHookTools schedule={schedule} t={t}/>
+                    <ScheduleNotification schedule={schedule}/>
+                    <ScheduleStart schedule={schedule}/>
+                </React.Fragment>
+            );
+        }
         let listViewData = {
+            actionsShouldBeMinimized: true,
+            renderItemActions: renderListViewItemActions,
             entityIdName: 'id',
             entityIdsName: 'scheduleIds',
             map: (schedule, thisListScope) => {
-                return [
+                let result = [
                     {name: 'id', value: schedule.id},
                     {name: 'title', label: t('LIST.TITLE'), value: <TitleCell key={`title_${schedule.schedulerId}`} schedule={schedule}/>},
                     {name: 'connection', label: t('LIST.CONNECTION'),
                         value: (
-                            <td className={styles.schedule_list_title}>
+                            <td key={`connection_title_${schedule.schedulerId}`} className={styles.schedule_list_title}>
                                 <ReactRouterLink
                                     onlyActiveOnIndex={true}
                                     to={`/connections/${schedule.connection.connectionId}/view`}
@@ -225,8 +243,11 @@ class SchedulesList extends Component{
                     {name: 'lastSuccess', label: t('LIST.LAST_SUCCESS'), value: <LastSuccessCell key={`last_success_${schedule.schedulerId}`} schedule={schedule}/>},
                     {name: 'lastFailure', label: t('LIST.LAST_FAILURE'), value: <LastFailureCell key={`last_failure_${schedule.schedulerId}`} schedule={schedule}/>},
                     {name: 'lastDuration', label: t('LIST.LAST_DURATION'), value: <LastDurationCell key={`last_duration_${schedule.schedulerId}`} schedule={schedule} t={t}/>},
-                    {name: 'status', label: t('LIST.STATUS'), value: <StatusCell key={`status_${schedule.schedulerId}`} schedule={schedule} updateCurrentItems={::thisListScope.setCurrentPageItems}/>},
-                ]
+                ];
+                if(!readOnly){
+                    result.push({name: 'status', label: t('LIST.STATUS'), value: <StatusCell key={`status_${schedule.schedulerId}`} schedule={schedule}/>});
+                }
+                return result;
             },
         }
         mapEntity.getViewLink = (schedule) => {
@@ -246,9 +267,9 @@ class SchedulesList extends Component{
             const disabled = !::thisListScope.isOneChecked();
             return (
                 <div className={styles.actions}>
-                    <Button icon={startingSchedules === API_REQUEST_STATE.START ? 'loading' : 'play_arrow'} title={'Start'} disabled={disabled || startingSchedules === API_REQUEST_STATE.START } onClick={() => ::this.startSelectedSchedules(thisListScope.state.checks, ::thisListScope.setCurrentPageItems)}/>
-                    <Button icon={enablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'radio_button_unchecked'} title={'Enable'} disabled={disabled || enablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.enableSelectedSchedules(thisListScope.state.checks, ::thisListScope.setCurrentPageItems)}/>
-                    <Button icon={disablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'highlight_off'} title={'Disable'} disabled={disabled || disablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.disableSelectedSchedules(thisListScope.state.checks, ::thisListScope.setCurrentPageItems)}/>
+                    <Button icon={startingSchedules === API_REQUEST_STATE.START ? 'loading' : 'play_arrow'} title={'Start'} disabled={disabled || startingSchedules === API_REQUEST_STATE.START } onClick={() => ::this.startSelectedSchedules(thisListScope.state.checks)}/>
+                    <Button icon={enablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'radio_button_unchecked'} title={'Enable'} disabled={disabled || enablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.enableSelectedSchedules(thisListScope.state.checks)}/>
+                    <Button icon={disablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'highlight_off'} title={'Disable'} disabled={disabled || disablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.disableSelectedSchedules(thisListScope.state.checks)}/>
                     <Button icon={deletingSchedules === API_REQUEST_STATE.START ? 'loading' : 'delete'} title={'Delete'} disabled={disabled || deletingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.wantDeleteSelectedSchedules(thisListScope.state.checks)}/>
                 </div>
             );
@@ -256,16 +277,22 @@ class SchedulesList extends Component{
         return (
             <React.Fragment>
                 <List
+                    viewType={viewType}
+                    readOnly={readOnly}
                     listViewData={listViewData}
                     entities={schedules}
                     translations={translations}
                     mapEntity={mapEntity}
-                    page={{pageNumber: params.pageNumber, link: `${prefixUrl}/page/`, entitiesLength: schedules.length}}
+                    page={{pageNumber: params ? params.pageNumber : 1, link: `${prefixUrl}/page/`, entitiesLength: schedules.length}}
                     setTotalPages={setTotalPages}
                     permissions={SchedulePermissions}
                     authUser={authUser}
                     hasDeleteSelectedButtons={false}
+                    reducerName={'schedules'}
                 />
+                <div className={styles.card_style}>
+                    <CurrentSchedules/>
+                </div>
                 <Confirmation
                     okClick={::this.deleteSelectedSchedules}
                     cancelClick={::this.toggleConfirm}
@@ -276,6 +303,16 @@ class SchedulesList extends Component{
             </React.Fragment>
         );
     }
+}
+
+SchedulesList.propTypes = {
+    viewType: PropTypes.oneOf(['GRID', 'LIST']),
+}
+
+SchedulesList.defaultProps = {
+    readOnly: false,
+    viewType: 'LIST',
+    noHeader: false,
 }
 
 

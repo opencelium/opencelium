@@ -82,6 +82,14 @@ class NotificationTemplatesList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'notificationTemplateIds',
+            deleteSelected: () => {},
+            map: (notificationTemplate) => {
+                return [{name: 'id', value: notificationTemplate.id}, {name: 'name', label: t('LIST.NAME'), value: notificationTemplate.name, width: '30%'}, {name: 'type', label: t('LIST.TYPE'), value: notificationTemplate.type, width: '35%'}]
+            },
+        }
         let mapEntity = {};
         mapEntity.map = (notificationTemplate) => {
             let result = {};
@@ -95,6 +103,7 @@ class NotificationTemplatesList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteNotificationTemplate;
         return <List
+            reducerName={'notificationTemplates'}
             entities={notificationTemplates}
             translations={translations}
             mapEntity={mapEntity}
@@ -102,6 +111,7 @@ class NotificationTemplatesList extends Component{
             setTotalPages={setTotalPages}
             permissions={NotificationTemplatePermissions}
             authUser={authUser}
+            listViewData={listViewData}
         />;
     }
 }

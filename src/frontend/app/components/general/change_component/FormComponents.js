@@ -29,19 +29,16 @@ export const ActionButton = (props) => {
 }
 
 export const SubFormSections = (props) => {
-    const {key1, form, contents, entity, updateEntity, clearValidationMessage} = props;
+    const {key1, form, entity, updateEntity, clearValidationMessage} = props;
     return(
         <div className={styles.subform}>
             {
                 form.map((subform, key2) => {
-                    const inputs = contents[key1][key2].inputs;
                     return (
                         <FormSection
                             key={`${key1}_${key2}`}
                             isSubFormSection={true}
-                            header={contents[key1][key2].header}
-                            visible={contents[key1][key2].visible}
-                            inputs={inputs}
+                            content={subform}
                             entity={entity}
                             updateEntity={updateEntity}
                             clearValidationMessage={clearValidationMessage}

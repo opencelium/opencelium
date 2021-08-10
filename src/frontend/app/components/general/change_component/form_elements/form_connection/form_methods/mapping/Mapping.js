@@ -185,7 +185,7 @@ class Mapping extends Component{
         }
         let fieldBindingItems = [];
         let nodes = [];
-        let fromConnectorLeft = (mappingElemWidth * 10)/100;
+        let fromConnectorLeft = (mappingElemWidth * 10)/100 + 65;
         let toConnectorLeft = (mappingElemWidth * 75)/100;
 
         switch(connectorType){

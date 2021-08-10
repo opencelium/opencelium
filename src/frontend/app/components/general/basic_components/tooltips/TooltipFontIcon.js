@@ -103,6 +103,7 @@ class TooltipFontIcon extends Component{
 
 TooltipFontIcon.propTypes = {
     tooltip: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
     isButton: PropTypes.bool,
     blueTheme: PropTypes.bool,
     darkBlueTheme: PropTypes.bool,

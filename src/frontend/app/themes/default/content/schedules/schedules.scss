@@ -15,7 +15,6 @@
 
 @import '../../constants';
 
-
 .actions{
   >:not(:last-child){
     margin-right: 10px;
@@ -304,7 +303,7 @@
 }
 
 .current_schedules{
-  margin-top: 30px;
+  margin: 20px 0;
 }
 
 .schedule_add_loading{
@@ -320,7 +319,7 @@
 }
 
 .current_schedule_header{
-  margin-bottom: 30px;
+  margin-bottom: 30px !important;
 }
 
 /*webhook*/
