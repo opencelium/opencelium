@@ -27,7 +27,7 @@ import {permission} from "@decorators/permission";
 import {setFocusById} from "@utils/app";
 import {INPUTS} from "@utils/constants/inputs";
 import OCTour from "@basic_components/OCTour";
-import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "@utils/constants/tours";
+import {automaticallyShowTour, CONNECTION_TOURS} from "@utils/constants/tours";
 import CConnection, {ALL_COLORS} from "@classes/components/content/connection/CConnection";
 import ChangeContent from "@change_component/ChangeContent";
 import {SingleComponent} from "@decorators/SingleComponent";
@@ -252,7 +252,7 @@ class ConnectionAdd2 extends Component{
             inputs: [
                 {
                     ...INPUTS.CONNECTION_TITLE,
-                    tourStep: CONNECTION_ADD_TOURS.page_1[0].selector,
+                    tourStep: CONNECTION_TOURS.page_1[0].selector,
                     label: t('ADD.FORM.TITLE'),
                     maxLength: 256,
                     required: true,
@@ -265,7 +265,7 @@ class ConnectionAdd2 extends Component{
                     }},
                 {
                     ...INPUTS.CONNECTOR,
-                    tourStep: CONNECTION_ADD_TOURS.page_1[1].selector,
+                    tourStep: CONNECTION_TOURS.page_1[1].selector,
                     label: t('ADD.FORM.CONNECTORS'),
                     placeholders: [t('ADD.FORM.CONNECTORS_PLACEHOLDER_1'), t('ADD.FORM.CONNECTORS_PLACEHOLDER_2')],
                     required: true,
@@ -287,7 +287,7 @@ class ConnectionAdd2 extends Component{
                     readOnly: true,
                 },{
                     ...INPUTS.MODE,
-                    tourStep: CONNECTION_ADD_TOURS.page_2[0].selector,
+                    tourStep: CONNECTION_TOURS.page_2[0].selector,
                     label: t('ADD.FORM.MODE'),
                     confirmationLabels:{title: t('ADD.CONFIRMATION.TITLE'), message: t('ADD.CONFIRMATION.MESSAGE')},
                     modeLabels: {expert: t('ADD.FORM.EXPERT_MODE'), template: t('ADD.FORM.TEMPLATE_MODE')},
@@ -302,7 +302,7 @@ class ConnectionAdd2 extends Component{
             inputs: [
                 {
                     ...INPUTS.CONNECTION_SVG,
-                    tourSteps: CONNECTION_ADD_TOURS.page_3,
+                    tourSteps: CONNECTION_TOURS.page_3,
                     label: t('ADD.FORM.METHODS'),
                     templateLabels: {addTemplate: t('ADD.FORM.ADD_TEMPLATE'), addTemplateTitle: t('ADD.FORM.ADD_TEMPLATE_TITLE')},
                     actions: {addTemplate: ::this.addTemplate},
@@ -332,7 +332,7 @@ class ConnectionAdd2 extends Component{
                     onPageSwitch={::this.setCurrentTour}
                 />
                 <OCTour
-                    steps={CONNECTION_ADD_TOURS[this.state.currentTour]}
+                    steps={CONNECTION_TOURS[this.state.currentTour]}
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />

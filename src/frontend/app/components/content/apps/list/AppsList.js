@@ -95,7 +95,6 @@ class AppsList extends Component{
         };
         mapEntity.getOnCardClickLink = (app) => {return `${app.link}`;};
         return <List
-            reducerName={'apps'}
             listViewData={listViewData}
             entities={apps}
             translations={translations}

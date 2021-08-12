@@ -15,6 +15,9 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from "react-redux";
+import {setFullScreenFormSection} from "@actions/app";
+
 import FormInput from "./form_elements/FormInput";
 import FormSelect from "./form_elements/FormSelect";
 import FormInputImage from "./form_elements/FormInputImage";
@@ -24,7 +27,7 @@ import FormPermissionTable from "./form_elements/FormPermissionTable";
 import FormSecretInput from "./form_elements/FormSecretInput";
 import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
 import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
-import {getThemeClass, isString} from "@utils/app";
+import {findTopLeft, getThemeClass, isString} from "@utils/app";
 import FormMode from "./form_elements/form_connection/FormMode";
 import FormConnectionTitle from "./form_elements/form_connection/FormTitle";
 import FormUserTitle from "./form_elements/FormUserTitle";
@@ -43,11 +46,20 @@ import FormConnectionSvg from "@change_component/form_elements/form_connection/f
 
 import styles from '@themes/default/general/form_component.scss';
 import TestButton from "@change_component/form_elements/TestButton";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
+
+function mapStateToProps(state){
+    const app = state.get('app');
+    return{
+        isOneFormSectionFullScreen: app.get('isFullScreen'),
+    }
+}
 
 /**
  * FormSection Component
  */
+@connect(mapStateToProps, {setFullScreenFormSection})
 class FormSection extends Component{
 
     constructor(props){
@@ -55,13 +67,24 @@ class FormSection extends Component{
 
         this.state = {
             isFormSectionMinimized: false,
+            isFullScreen: false,
         }
     }
 
     toggle(){
+        if(!this.props.content.hasFullScreenFunction) {
+            this.setState({
+                isFormSectionMinimized: !this.state.isFormSectionMinimized,
+            }, )
+        }
+    }
+
+    toggleFullScreen(){
+        const {content} = this.props;
         this.setState({
-            isFormSectionMinimized: !this.state.isFormSectionMinimized,
-        })
+            isFullScreen: !this.state.isFullScreen,
+        }, () => window.scrollTo({top: findTopLeft(`form_section_header_${content.header.toLowerCase()}`).top - 4, behavior: "instant"}));
+        this.props.setFullScreenFormSection(!this.state.isFullScreen)
     }
 
     /**
@@ -259,13 +282,16 @@ class FormSection extends Component{
      */
     generateInputs(){
         let result;
-        const {content, focusedInput, setFocusInput} = this.props;
+        const {content, focusedInput, setFocusInput, isOneFormSectionFullScreen} = this.props;
         if(Array.isArray(content.inputs)) {
             result = content.inputs.map((data, key) => {
                 data['tourStep'] = data['tourStep'] && isString(data['tourStep']) ? data['tourStep'].substr(1) : data['tourStep'];
                 data['setFocusInput'] = setFocusInput;
                 data['focused'] = focusedInput !== '' && focusedInput === data.name;
                 data['visible'] = data.hasOwnProperty('visible') ? data.visible : true;
+                if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){
+                    data['visible'] = false;
+                }
                 return this.mapInputs(Object.assign({}, data), key);
             });
         }
@@ -273,13 +299,15 @@ class FormSection extends Component{
     }
 
     render(){
-        const {isFormSectionMinimized} = this.state;
+        const {isFormSectionMinimized, isFullScreen} = this.state;
         const {isSubFormSection} = this.props;
         let style = {};
         const content = {
             visible: true,
             header: '',
             formClassName: '',
+            hasFullScreenFunction: false,
+            AdditionalIcon: null,
             ...this.props.content,
         };
         if(!content.visible){
@@ -288,11 +316,18 @@ class FormSection extends Component{
             style.padding = 0;
         }
         return (
-            <div className={`${!isSubFormSection ? styles.form : ''} ${content.formClassName} ${isFormSectionMinimized ? styles.minimized_form : ''}`} style={style}>
+            <div className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
                 {content.header !== '' &&
-                    <div className={styles.form_section_header} onClick={::this.toggle}>
+                    <div id={`form_section_header_${content.header.toLowerCase()}`} className={styles.form_section_header} onClick={::this.toggle}>
                         <span>{content.header}</span>
                     </div>
+                }
+                {
+                    content.hasFullScreenFunction &&
+                    <TooltipFontIcon isButton className={styles.full_screen_icon} value={isFullScreen ? 'close_fullscreen' : 'open_in_full'} tooltip={isFullScreen ? 'Minimize' : 'Maximize'} onClick={::this.toggleFullScreen}/>
+                }
+                {
+                    content.AdditionalIcon
                 }
                 {this.generateInputs()}
             </div>

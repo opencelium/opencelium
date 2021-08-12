@@ -218,9 +218,10 @@ class List extends Component{
     }
 
     setCurrentPageItems(){
-        const {mapEntity, setCurrentPageItems, reducerName} = this.props;
+        const {mapEntity, setCurrentPageItems} = this.props;
         let filteredEntities = this.filterEntities().map((entity, key) => {let data = entity.getObject ? entity.getObject() : entity; return {...data, mappedEntity: mapEntity.map(entity, key)};});
-        setCurrentPageItems({items: filteredEntities, reducerName});
+        console.log('set', filteredEntities);
+        setCurrentPageItems(filteredEntities);
     }
 
     /**
@@ -330,7 +331,10 @@ class List extends Component{
     searchEntities(){
         const {searchValue} = this.state;
         const {entities} = this.props;
+        console.log('entities', entities);
         let result = entities.filter((value) => searchByNameFunction(value, searchValue));
+
+        console.log('search', result);
         return result;
     }
 
@@ -344,6 +348,7 @@ class List extends Component{
             let sortFunction = sortType === 'asc' ? ascSortByNameFunction : descSortByNameFunction;
             result = result.sort(sortFunction);
         }
+        console.log('sort', result);
         return result;
     }
 
@@ -392,6 +397,7 @@ class List extends Component{
             mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles,
             noSearchField, currentPageItems, listViewData, readOnly,
         } = this.props;
+        console.log('render List');
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType} = this.state;
         let {page, translations, hasDeleteSelectedButtons} = this.props;
         let classNames = ['empty_list', 'search_field'];
@@ -399,6 +405,7 @@ class List extends Component{
         page.entitiesLength = this.searchEntities().length;
         let listViewEntities = [];
         if(viewType === VIEW_TYPE.LIST && listViewData){
+            console.log(currentPageItems);
             listViewEntities = currentPageItems.map(item => listViewData.map(item, this));
         }
         const isListViewIconDisabled = !(listViewData);
@@ -565,7 +572,6 @@ List.propTypes = {
     hasDeleteSelectedButtons: PropTypes.bool,
     readOnly: PropTypes.bool,
     viewType: PropTypes.oneOf(['GRID', 'LIST']),
-    reducerName: PropTypes.string.isRequired,
 };
 
 List.defaultProps = {

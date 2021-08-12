@@ -93,6 +93,7 @@ class ConnectorsList extends Component{
             entityIdsName: 'connectorIds',
             deleteSelected: () => {},
             map: (connector) => {
+                console.log(connector);
                 return [{name: 'id', value: connector.id}, {name: 'name', label: t('LIST.NAME'), value: connector.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: connector.description, width: '25%'}, {name: 'invoker', label: t('LIST.INVOKER'), value: connector.invoker.name}]
             },
         }
@@ -110,7 +111,6 @@ class ConnectorsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnector;
         return <List
-            reducerName={'connectors'}
             entities={connectors}
             translations={translations}
             mapEntity={mapEntity}

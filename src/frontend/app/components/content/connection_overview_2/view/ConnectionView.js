@@ -25,7 +25,7 @@ import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {INPUTS} from "@utils/constants/inputs";
 import CConnection from "@classes/components/content/connection/CConnection";
-import {CONNECTION_ADD_TOURS} from "@utils/constants/tours";
+import {CONNECTION_TOURS} from "@utils/constants/tours";
 
 
 const connectionPrefixURL = '/connections';
@@ -77,7 +77,7 @@ class ConnectionView extends Component{
             inputs: [
                 {
                     ...INPUTS.CONNECTION_SVG,
-                    tourSteps: CONNECTION_ADD_TOURS.page_3,
+                    tourSteps: CONNECTION_TOURS.page_3,
                     label: t('ADD.FORM.METHODS'),
                     source: Object.freeze(connectors),
                     readOnly: true,

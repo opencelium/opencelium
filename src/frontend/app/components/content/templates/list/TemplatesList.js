@@ -163,7 +163,6 @@ class TemplatesList extends Component{
         mapEntity.AdditionalButton = <Button authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
         mapEntity.onDelete = deleteTemplate;
         return <List
-            reducerName={'templates'}
             listViewData={listViewData}
             rerenderDependency={convertingTemplates.length}
             entities={templates}

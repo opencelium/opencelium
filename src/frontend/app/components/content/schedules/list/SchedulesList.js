@@ -55,6 +55,7 @@ function mapStateToProps(state){
         currentPageItems: app.get('currentPageItems').toJS(),
         authUser: auth.get('authUser'),
         fetchingSchedules: schedules.get('fetchingSchedules'),
+        fetchingSchedulesByIds: schedules.get('fetchingSchedulesByIds'),
         deletingSchedule: schedules.get('deletingSchedule'),
         deletingSchedules: schedules.get('deletingSchedules'),
         startingSchedules: schedules.get('startingSchedules'),
@@ -101,7 +102,7 @@ class SchedulesList extends Component{
         super(props);
 
         this.state = {
-            callbackAfterAction: () => {},
+            updateSchedules: () => {},
             checks: [],
             showConfirm: false,
         }
@@ -114,6 +115,7 @@ class SchedulesList extends Component{
     componentDidUpdate(prevProps, prevState, snapshot) {
         const shouldEnableSchedules = prevProps.enablingSchedules === API_REQUEST_STATE.START && this.props.enablingSchedules === API_REQUEST_STATE.FINISH;
         const shouldDisableSchedules = prevProps.disablingSchedules === API_REQUEST_STATE.START && this.props.disablingSchedules === API_REQUEST_STATE.FINISH;
+        const shouldUpdateSchedules = prevProps.fetchingSchedulesByIds === API_REQUEST_STATE.START && this.props.fetchingSchedulesByIds === API_REQUEST_STATE.FINISH;
         if((shouldEnableSchedules || shouldDisableSchedules) && this.state.checks){
             let updatedCurrentPageItems = [...this.props.currentPageItems];
             for(let i = 0; i < updatedCurrentPageItems.length; i++){
@@ -121,18 +123,24 @@ class SchedulesList extends Component{
                     updatedCurrentPageItems[i].status = shouldEnableSchedules;
                 }
             }
-            this.props.setCurrentPageItems({items: updatedCurrentPageItems, reducerName: this.props.reducerName});
+            this.props.setCurrentPageItems(updatedCurrentPageItems);
+        }
+        if(shouldUpdateSchedules){
+            this.state.updateSchedules();
         }
     }
 
     /**
      * to start selected schedules
      */
-    startSelectedSchedules(checks){
+    startSelectedSchedules(checks, setCurrentPageItems){
         const {startSchedules} = this.props;
         let schedulerIds = checks.filter(c => c.value);
         schedulerIds = schedulerIds.map(c => c.id);
         startSchedules({schedulerIds});
+        this.setState({
+            updateSchedules: setCurrentPageItems,
+        }, () => startSchedules({schedulerIds}));
     }
 
     /**
@@ -267,7 +275,7 @@ class SchedulesList extends Component{
             const disabled = !::thisListScope.isOneChecked();
             return (
                 <div className={styles.actions}>
-                    <Button icon={startingSchedules === API_REQUEST_STATE.START ? 'loading' : 'play_arrow'} title={'Start'} disabled={disabled || startingSchedules === API_REQUEST_STATE.START } onClick={() => ::this.startSelectedSchedules(thisListScope.state.checks)}/>
+                    <Button icon={startingSchedules === API_REQUEST_STATE.START ? 'loading' : 'play_arrow'} title={'Start'} disabled={disabled || startingSchedules === API_REQUEST_STATE.START } onClick={() => ::this.startSelectedSchedules(thisListScope.state.checks, thisListScope.setCurrentPageItems)}/>
                     <Button icon={enablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'radio_button_unchecked'} title={'Enable'} disabled={disabled || enablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.enableSelectedSchedules(thisListScope.state.checks)}/>
                     <Button icon={disablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'highlight_off'} title={'Disable'} disabled={disabled || disablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.disableSelectedSchedules(thisListScope.state.checks)}/>
                     <Button icon={deletingSchedules === API_REQUEST_STATE.START ? 'loading' : 'delete'} title={'Delete'} disabled={disabled || deletingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.wantDeleteSelectedSchedules(thisListScope.state.checks)}/>
@@ -288,11 +296,8 @@ class SchedulesList extends Component{
                     permissions={SchedulePermissions}
                     authUser={authUser}
                     hasDeleteSelectedButtons={false}
-                    reducerName={'schedules'}
                 />
-                <div className={styles.card_style}>
-                    <CurrentSchedules/>
-                </div>
+                <CurrentSchedules/>
                 <Confirmation
                     okClick={::this.deleteSelectedSchedules}
                     cancelClick={::this.toggleConfirm}

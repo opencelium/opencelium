@@ -92,7 +92,6 @@ class FormMode extends Component{
         updateEntity(entity);
 
         window.addEventListener('resize', this.resize, false);
-        setFocusById('button_expert');
     }
 
     componentDidUpdate(prevProps){

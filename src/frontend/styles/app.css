@@ -54,6 +54,14 @@ body{
   transition: all .3s ease-in-out;
 }
 
+#current_schedules{
+  opacity: 0;
+  -webkit-transition: all .3s ease-in-out;
+  -moz-transition: all .3s ease-in-out;
+  -o-transition: all .3s ease-in-out;
+  transition: all .3s ease-in-out;
+}
+
 #app_header{
   opacity: 0;
   -webkit-transition: all .3s ease-in-out;
@@ -112,6 +120,7 @@ textarea{
 }
 
 #atlwdg-trigger{
+  z-index: 100;
   top: 25% !important;
 }
 #atlwdg-trigger:focus{

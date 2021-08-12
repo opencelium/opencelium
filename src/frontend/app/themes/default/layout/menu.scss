@@ -27,6 +27,12 @@ $MENU_COLOR: #eee;
   padding: 2rem 2rem 0 7.75rem;
   transition: .5s;
 }
+.body_pd{
+  padding: 2rem 2rem 0 17rem;
+}
+.body_without_menu{
+  padding: 2rem !important;
+}
 .navbar{
   position: fixed;
   top: 0;
@@ -37,7 +43,7 @@ $MENU_COLOR: #eee;
   color: $MENU_COLOR;
   padding: 1.5rem 1.5rem 2rem;
   transition: .5s;
-  z-index: 100;
+  z-index: 10000;
 }
 
 .menu_link_logo{
@@ -118,9 +124,11 @@ $MENU_COLOR: #eee;
   width: calc(#{$NAVIGATION_WIDTH} + 9.25rem);
 }
 
-.body_pd{
-  padding: 2rem 2rem 0 17rem;
+.hidden{
+  width: 0;
+  padding: 0;
 }
+
 .active{
   background-color: $HIGHLIGHT_MENU_COLOR;
 }

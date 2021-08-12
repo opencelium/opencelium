@@ -1,6 +1,17 @@
 .methods_form{
   grid-column-start: 1;
+  /* autoprefixer: off */
   grid-column-end: 3;
   grid-row-start: 2;
+  /* autoprefixer: off */
   grid-row-end: 3;
+  height: auto;
+  min-height: 735px;
+}
+
+.switch_view_icon{
+  position: absolute;
+  right: 50px;
+  top: 15px;
+  z-index: 100;
 }

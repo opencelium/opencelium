@@ -103,7 +103,6 @@ class NotificationTemplatesList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteNotificationTemplate;
         return <List
-            reducerName={'notificationTemplates'}
             entities={notificationTemplates}
             translations={translations}
             mapEntity={mapEntity}

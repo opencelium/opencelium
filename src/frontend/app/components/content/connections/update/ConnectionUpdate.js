@@ -16,8 +16,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import Content from "../../../general/content/Content";
-import ChangeContent from "@change_component/ChangeContent";
 
 import {checkConnectionTitle} from '@actions/connections/fetch';
 import {fetchConnection} from "@actions/connections/fetch";
@@ -26,17 +24,10 @@ import {addTemplate} from "@actions/templates/add";
 import {fetchConnectors} from '@actions/connectors/fetch';
 import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
-import {INPUTS} from "@utils/constants/inputs";
-import OCTour from "@basic_components/OCTour";
-import {automaticallyShowTour, CONNECTION_UPDATE_TOURS} from "@utils/constants/tours";
 import {SingleComponent} from "@decorators/SingleComponent";
-import CConnection from "@classes/components/content/connection/CConnection";
-import {setFocusById} from "@utils/app";
-import {removeLS} from "@utils/LocalStorage";
 import {ConnectionChange} from "@components/content/connections/ConnectionChange";
 
 
-const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
     const auth = state.get('auth');

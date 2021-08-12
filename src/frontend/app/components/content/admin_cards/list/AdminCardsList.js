@@ -109,7 +109,6 @@ class AdminCardsList extends Component{
         };
         mapEntity.getOnCardClickLink = (adminCard) => {return `${adminCard.link}`;};
         return <List
-            reducerName={'admincards'}
             entities={adminCards}
             translations={translations}
             mapEntity={mapEntity}

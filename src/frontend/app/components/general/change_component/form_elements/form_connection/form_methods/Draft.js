@@ -23,16 +23,19 @@ import CConnection from "@classes/components/content/connection/CConnection";
 import {getLS, removeLS} from "@utils/LocalStorage";
 import {connect} from "react-redux";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
+import {setConnectionDraftWasOpened} from "@actions/app";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     return{
         authUser: auth.get('authUser'),
+        isDraftOpenedOnce: app.get('isDraftOpenedOnce'),
     };
 }
 
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setConnectionDraftWasOpened})
 class Draft extends Component{
     constructor(props) {
         super(props);
@@ -43,6 +46,15 @@ class Draft extends Component{
         };
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        let connection = getLS(`${this.props.connection.fromConnector.invoker.name}&${this.props.connection.toConnector.invoker.name}`, `connection_${this.props.authUser.userId}`);
+        if(this.state.draftConnection === null && connection){
+            this.setState({
+                draftConnection: connection ? CConnection.createConnection(JSON.parse(connection)) : null,
+            });
+        }
+    }
+
     updateEntity(){
         this.setState({
             draftConnection: this.state.draftConnection,
@@ -50,6 +62,9 @@ class Draft extends Component{
     }
 
     toggleDraft(){
+        if(this.state.isVisibleDraft){
+            this.props.setConnectionDraftWasOpened()
+        }
         this.setState({
             isVisibleDraft: !this.state.isVisibleDraft,
         });
@@ -81,12 +96,12 @@ class Draft extends Component{
 
     render(){
         const {isVisibleDraft, draftConnection} = this.state;
-        const {authUser, connection} = this.props;
+        const {connection, isDraftOpenedOnce} = this.props;
         const data = {
             visible: true,
             readOnly: true,
         };
-        if(draftConnection === null
+        if(isDraftOpenedOnce || draftConnection === null
             || !(connection.fromConnector.methods.length === 0 && connection.fromConnector.operators.length === 0 && connection.toConnector.methods.length === 0 && connection.toConnector.operators.length === 0)
             || (draftConnection.fromConnector.methods.length === 0 && draftConnection.fromConnector.operators.length === 0 && draftConnection.toConnector.methods.length === 0 && draftConnection.toConnector.operators.length === 0)){
             return null;

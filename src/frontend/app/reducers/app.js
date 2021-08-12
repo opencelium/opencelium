@@ -33,7 +33,8 @@ const initialState = fromJS({
     currentMenu: {},
     error: null,
     message: {},
-    reducerName: '',
+    isFullScreen: false,
+    isDraftOpenedOnce: false,
 });
 
 /**
@@ -62,7 +63,11 @@ const reducer = (state = initialState, action) => {
         case AppAction.FETCH_APPVERSION_REJECTED:
             return state.set('fetchingAppVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case AppAction.SET_CURRENT_PAGE_ITEMS:
-            return state.set('currentPageItems', List(action.payload.items)).set('reducerName', action.payload.reducerName);
+            return state.set('currentPageItems', List(action.payload));
+        case AppAction.SET_FORM_SECTION_FULL_SCREEN:
+            return state.set('isFullScreen', action.payload);
+        case AppAction.SET_CONNECTION_DRAFT_TO_OPEN_ONCE:
+            return state.set('isDraftOpenedOnce', true);
         default:
             return state;
     }

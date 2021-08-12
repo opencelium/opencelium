@@ -21,10 +21,12 @@
 }
 .form{
   @extend .card_style;
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
   padding: 50px 20px 10px 0;
   margin: 20px 0 0;
   position: relative;
   .form_section_header{
+    z-index: 100;
     transition: top 0.3s cubic-bezier(.25,.8,.25,1);
     cursor: pointer;
     top: -20px;
@@ -41,6 +43,24 @@
       text-transform: uppercase;
     }
   }
+}
+
+.full_screen{
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: calc(100% + 5px);
+  z-index: 1000;
+  margin: 0;
+  .form_section_header{
+    top: 4px !important;
+  }
+}
+.full_screen_icon{
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  z-index: 100;
 }
 
 .minimized_form{

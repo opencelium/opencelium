@@ -89,6 +89,7 @@ class ConnectionsList extends Component{
             entityIdsName: 'connectionIds',
             deleteSelected: () => {},
             map: (connection) => {
+                console.log(connection);
                 return [{name: 'id', value: connection.connectionId}, {name: 'title', label: t('LIST.TITLE'), value: connection.title, width: '15%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: connection.description}, {name: 'from_connector', label: t('LIST.FROM_CONNECTOR'), value: connection.fromConnector.title, width: '15%'}, {name: 'to_connector', label: t('LIST.TO_CONNECTOR'), value: connection.toConnector.title, width: '15%'}]
             },
         }
@@ -105,7 +106,6 @@ class ConnectionsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnection;
         return <List
-            reducerName={'connections'}
             listViewData={listViewData}
             entities={connections}
             translations={translations}

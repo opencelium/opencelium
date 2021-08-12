@@ -30,6 +30,7 @@ import {withTranslation} from "react-i18next";
 import Svg from "@change_component/form_elements/form_connection/form_svg/layouts/Svg";
 import CreateElementPanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
+import Draft from "@change_component/form_elements/form_connection/form_methods/Draft";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -358,7 +359,7 @@ class FormConnectionSvg extends Component{
     }
 
     render(){
-        const {renderNavigationComponent, renderValidationMessage, data, connection, updateConnection, currentTechnicalItem, currentBusinessItem} = this.props;
+        const {entity, renderNavigationComponent, renderValidationMessage, data, connection, updateConnection, currentTechnicalItem, currentBusinessItem} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized,
             isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened, createElementPanelConnectorType,
             createElementPanelPosition,
@@ -366,6 +367,7 @@ class FormConnectionSvg extends Component{
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
+                <Draft connection={entity} updateEntity={::this.updateEntity}/>
                 <Details
                     readOnly={data.readOnly}
                     moveDetailsRight={::this.moveDetailsRight}
@@ -418,6 +420,11 @@ class FormConnectionSvg extends Component{
             </div>
         );
     }
+}
+
+FormConnectionSvg.defaultProps = {
+    renderValidationMessage: () => {},
+    renderNavigationComponent: () => {},
 }
 
 export default FormConnectionSvg;

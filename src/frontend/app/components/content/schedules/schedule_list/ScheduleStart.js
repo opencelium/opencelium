@@ -48,7 +48,6 @@ class ScheduleStart extends Component{
 
     constructor(props){
         super(props);
-
         this.enableTriggerSchedule = true;
     }
 

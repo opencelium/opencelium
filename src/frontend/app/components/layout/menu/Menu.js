@@ -31,6 +31,7 @@ import {MenuIcon, MenuLinkLogo} from "@components/layout/menu/MenuLink";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     return {
         isAuth: auth.get('isAuth'),
         fromLogin: auth.get('fromLogin'),
@@ -38,6 +39,7 @@ function mapStateToProps(state){
         role: auth.get('authUser') ? auth.get('authUser').role : Roles.GUEST,
         logining: auth.get('logining'),
         logouting: auth.get('logouting'),
+        isOneFormSectionFullScreen: app.get('isFullScreen'),
     };
 }
 
@@ -73,6 +75,14 @@ class Menu extends Component{
             this.setState({
                 currentPath: pathName,
             });
+        }
+        let bodyElement = document.querySelector('body');
+        if(bodyElement){
+            if(this.props.isOneFormSectionFullScreen){
+                bodyElement.classList.add(styles.body_without_menu);
+            } else {
+                bodyElement.classList.remove(styles.body_without_menu);
+            }
         }
     }
 
@@ -118,6 +128,7 @@ class Menu extends Component{
 
     render(){
         const {visible, isMouseOver} = this.state;
+        const {isOneFormSectionFullScreen} = this.props;
         let isExpanded = isMouseOver ? true : this.state.isExpanded;
         if(!visible){
             return null;
@@ -125,6 +136,9 @@ class Menu extends Component{
         let navbarClassName = styles.navbar;
         if(isExpanded){
             navbarClassName += ` ${styles.expander}`;
+        }
+        if(isOneFormSectionFullScreen){
+            navbarClassName += ` ${styles.hidden}`;
         }
         return(
             <div className={navbarClassName} id="navbar" onMouseOver={::this.setMouseOver} onMouseLeave={::this.setMouseLeave} onFocus={::this.setMouseOver} onBlur={::this.setMouseLeave}>

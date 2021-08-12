@@ -28,7 +28,7 @@ import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {INPUTS} from "@utils/constants/inputs";
 import OCTour from "@basic_components/OCTour";
-import {automaticallyShowTour, CONNECTION_ADD_TOURS, CONNECTION_UPDATE_TOURS} from "@utils/constants/tours";
+import {automaticallyShowTour, CONNECTION_TOURS} from "@utils/constants/tours";
 import {SingleComponent} from "@decorators/SingleComponent";
 import CConnection from "@classes/components/content/connection/CConnection";
 import {setFocusById} from "@utils/app";
@@ -198,7 +198,7 @@ class ConnectionUpdate extends Component{
             inputs: [
                 {
                     ...INPUTS.CONNECTION_TITLE,
-                    tourStep: CONNECTION_UPDATE_TOURS.page_1[0].selector,
+                    tourStep: CONNECTION_TOURS.page_1[0].selector,
                     label: t('UPDATE.FORM.TITLE'),
                     maxLength: 256,
                     required: true,
@@ -223,7 +223,7 @@ class ConnectionUpdate extends Component{
             inputs: [
                 {
                     ...INPUTS.CONNECTION_SVG,
-                    tourSteps: CONNECTION_ADD_TOURS.page_3,
+                    tourSteps: CONNECTION_TOURS.page_3,
                     label: t('ADD.FORM.METHODS'),
                     templateLabels: {addTemplate: t('ADD.FORM.ADD_TEMPLATE'), addTemplateTitle: t('ADD.FORM.ADD_TEMPLATE_TITLE')},
                     actions: {addTemplate: ::this.addTemplate},
@@ -254,7 +254,7 @@ class ConnectionUpdate extends Component{
                     onPageSwitch={::this.setCurrentTour}
                 />
                 <OCTour
-                    steps={CONNECTION_UPDATE_TOURS[this.state.currentTour]}
+                    steps={CONNECTION_TOURS[this.state.currentTour]}
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />

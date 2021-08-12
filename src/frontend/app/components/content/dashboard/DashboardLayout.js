@@ -14,15 +14,45 @@
  */
 
 import React, {Component, Suspense} from 'react';
-import {Container, Row} from 'react-grid-system';
+import {connect} from "react-redux";
 
 import Loading from '@loading';
 import ComponentError from "../../general/app/ComponentError";
-import {API_REQUEST_STATE, ERROR_TYPE} from "@utils/constants/app";
+import {ERROR_TYPE} from "@utils/constants/app";
 import DashboardView from "./view/DashboardView";
 import {OC_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 import styles from '@themes/default/content/dashboard/dashboard.scss'
+import {setCurrentPageItems} from "@actions/app";
+
+/**
+ * Layout for Connectors
+ */
+@connect(null, {setCurrentPageItems})
+@tour(OC_TOURS, filterOCSteps)
+class DashboardLayout extends Component{
+
+    constructor(props){
+        super(props);
+    }
+
+    componentWillUnmount() {
+        this.props.setCurrentPageItems([]);
+    }
+
+    render(){
+        const {authUser} = this.props;
+        return (
+            <div className={styles.dashboard_layout}>
+                <Suspense fallback={(<Loading authUser={authUser}/>)}>
+                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
+                        <DashboardView/>
+                    </ComponentError>
+                </Suspense>
+            </div>
+        );
+    }
+}
 
 function filterOCSteps(tourSteps){
     const {authUser} = this.props;
@@ -49,30 +79,6 @@ function filterOCSteps(tourSteps){
     }
 
     return steps;
-}
-
-/**
- * Layout for Connectors
- */
-@tour(OC_TOURS, filterOCSteps)
-class DashboardLayout extends Component{
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        const {authUser} = this.props;
-        return (
-            <div className={styles.dashboard_layout}>
-                <Suspense fallback={(<Loading authUser={authUser}/>)}>
-                    <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        <DashboardView/>
-                    </ComponentError>
-                </Suspense>
-            </div>
-        );
-    }
 }
 
 export default DashboardLayout;

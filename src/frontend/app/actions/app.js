@@ -147,7 +147,29 @@ const fetchAppVersionRejected = (error) => {
 const setCurrentPageItems = (data) => {
     return {
         type: AppAction.SET_CURRENT_PAGE_ITEMS,
-        payload: {reducerName: '', items: [], ...data},
+        payload: data,
+    };
+};
+
+/**
+ * set form section in full screen or not
+ * @returns {{type: string, payload: {}}}
+ */
+const setFullScreenFormSection = (isFullScreen) => {
+    return {
+        type: AppAction.SET_FORM_SECTION_FULL_SCREEN,
+        payload: isFullScreen,
+    };
+};
+
+/**
+ * set connection draft to open only once
+ * @returns {{type: string, payload: {}}}
+ */
+const setConnectionDraftWasOpened = (isOpenedOnce) => {
+    return {
+        type: AppAction.SET_CONNECTION_DRAFT_TO_OPEN_ONCE,
+        payload: isOpenedOnce,
     };
 };
 
@@ -164,4 +186,6 @@ export {
     fetchAppVersionFulfilled,
     fetchAppVersionRejected,
     setCurrentPageItems,
+    setFullScreenFormSection,
+    setConnectionDraftWasOpened,
 };

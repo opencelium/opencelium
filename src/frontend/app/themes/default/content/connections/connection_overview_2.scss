@@ -54,15 +54,15 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 }
 
 .connection_editor{
-  height: calc(100vh - 121px);
+  border-radius: 5px;
+  padding: 70px 10px 50px;
+  height: calc(100vh - 21px);
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  //height: 100%;
-  background: #fafafa;
+  background: #fff;
   z-index: 1;
-  padding-bottom: 50px;
 }
 .create_element_panel_line{
   position: absolute;
@@ -133,16 +133,20 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   position: relative;
   width: 100%;
   height: 100%;
+  background: #fafafa;
+  border: 1px solid #eee;
 }
 .technical_layout{
   width: 100%;
   height: 100%;
   position: relative;
+  background: #fafafa;
+  border: 1px solid #eee;
 }
 .layout_svg {
   cursor: move;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 22px);
   padding: 2px;
 }
 .operator_polygon{
@@ -276,22 +280,24 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   background: white;
   width: 300px;
   position: absolute;
+  border-right: 1px solid #eee;
+  border-left: 2px solid #eee;
 }
 .details_left{
   @extend .details;
   left: 0;
-  border-right: 1px solid #eee;
+  margin-left: 10px;
 }
 .details_right{
   @extend .details;
   right: 0;
-  border-left: 2px solid #eee;
+  margin-right: 10px;
 }
 .details_minimized{
   height: 20px;
 }
 .details_maximized{
-  height: calc(100vh - 171px)
+  height: calc(100vh - 142px)
 }
 .details_data{
   padding: 0 10px 10px;
@@ -309,7 +315,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 .settings_panel{
   position: relative;
   background: #e5e8f3;
-  height: 23px;
+  height: 24px;
   border: 1px solid #eee;
   top: 0;
   width: 100%;
@@ -319,6 +325,10 @@ $HIGHLIGHT_COLOR: #8a9dd7;
     background: white;
     border: 1px solid #eee;
     z-index: 1;
+    height: 22px;
+    >span{
+      vertical-align: top;
+    }
   }
   .replace_icon {
     @extend .icon;

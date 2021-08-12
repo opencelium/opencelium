@@ -318,8 +318,8 @@ export function sleepApp(milliseconds) {
  * a callback to sort by name
  */
 function sortByNameFunction(a, b){
-    let propertyA = a && a.hasOwnProperty('name') ? a.name.toUpperCase() : a.hasOwnProperty('title') ? a.title.toUpperCase() : '';
-    let propertyB = b && b.hasOwnProperty('name') ? b.name.toUpperCase() : b.hasOwnProperty('title') ? b.title.toUpperCase() : '';
+    let propertyA = a && isString(a.name) ? a.name.toUpperCase() : isString(a.title) ? a.title.toUpperCase() : '';
+    let propertyB = b && isString(b.name) ? b.name.toUpperCase() : isString(b.title) ? b.title.toUpperCase() : '';
     if(propertyA === '' && propertyB === ''){
         if(a.hasOwnProperty('userDetail') && a.userDetail && a.userDetail.hasOwnProperty('name')){
             propertyA = a.userDetail.name.toUpperCase();

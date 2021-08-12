@@ -15,7 +15,7 @@
     "FORM":{
       "PAGE_1": "Direction",
       "TITLE": "Title",
-      "TITLE_EXIST": "Connection with such title already exist",
+      "DESCRIPTION": "Description",
       "CONNECTORS": "Connectors",
       "CONNECTORS_PLACEHOLDER_1": "Choose from connector",
       "CONNECTORS_PLACEHOLDER_2": "Choose to connector",
@@ -38,6 +38,7 @@
     "HEADER": "Add Connection",
     "VALIDATION_MESSAGES": {
       "TITLE_REQUIRED": "Title is a required field",
+      "TITLE_EXIST": "Connection with such title already exist",
       "FROM_CONNECTOR_REQUIRED": "From Connector is a required field",
       "TO_CONNECTOR_REQUIRED": "To Connector is a required field",
       "TEMPLATE_REQUIRED": "Template is a required field",
@@ -53,6 +54,7 @@
     "FORM":{
       "PAGE_1": "Direction",
       "TITLE": "Title",
+      "DESCRIPTION": "Description",
       "CONNECTORS": "Connectors",
       "CONNECTORS_PLACEHOLDER_1": "Choose from connector",
       "CONNECTORS_PLACEHOLDER_2": "Choose to connector",
@@ -75,7 +77,7 @@
     "FORM":{
       "PAGE_1": "Direction",
       "TITLE": "Title",
-      "TITLE_EXIST": "Connection with such title already exist",
+      "DESCRIPTION": "Description",
       "CONNECTORS": "Connectors",
       "CONNECTORS_PLACEHOLDER_1": "Choose from connector",
       "CONNECTORS_PLACEHOLDER_2": "Choose to connector",
@@ -98,6 +100,7 @@
     "HEADER": "Update Connection",
     "VALIDATION_MESSAGES": {
       "TITLE_REQUIRED": "Title is a required field",
+      "TITLE_EXIST": "Connection with such title already exist",
       "FROM_CONNECTOR_REQUIRED": "From Connector is a required field",
       "TO_CONNECTOR_REQUIRED": "To Connector is a required field",
       "TEMPLATE_REQUIRED": "Template is a required field",

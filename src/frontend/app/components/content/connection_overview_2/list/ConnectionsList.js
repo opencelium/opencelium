@@ -97,7 +97,6 @@ class ConnectionsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnection;
         return <List
-            reducerName={'connections'}
             entities={connections}
             translations={translations}
             mapEntity={mapEntity}

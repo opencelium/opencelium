@@ -19,9 +19,10 @@ import ProgressBarElement from "./ProgressBarElement";
 import SubHeader from "../../../general/view_component/SubHeader";
 import {fetchCurrentSchedules, cancelFetchCurrentSchedules, fetchSchedulesByIds} from '@actions/schedules/fetch';
 import styles from '@themes/default/content/schedules/schedules.scss';
-import {getThemeClass} from "@utils/app";
+import {componentAppear, getThemeClass} from "@utils/app";
 import {cancelCurrentSchedule} from "@epics/schedules";
 import {withTranslation} from "react-i18next";
+import List from "@components/general/list_of_components/List";
 
 
 /**
@@ -38,7 +39,7 @@ function mapStateToProps(state) {
 }
 
 /**
- * (not used) Component for Current Schedules
+ * Component for Current Schedules
  */
 @connect(mapStateToProps, { fetchCurrentSchedules, cancelFetchCurrentSchedules, fetchSchedulesByIds })
 @withTranslation(['schedules', 'app'])
@@ -50,6 +51,7 @@ class CurrentSchedules extends Component{
 
     componentDidMount(){
         this.props.fetchCurrentSchedules();
+        componentAppear('current_schedules');
     }
 
     componentWillUnmount(){
@@ -93,9 +95,11 @@ class CurrentSchedules extends Component{
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         return (
-            <div className={styles.current_schedules}>
-                <SubHeader title={'Current Jobs'} authUser={authUser} className={styles.current_schedule_header}/>
-                {this.renderProgressBars()}
+            <div id={'current_schedules'} className={styles.card_style}>
+                <div className={styles.current_schedules}>
+                    <SubHeader title={'Current Jobs'} authUser={authUser} className={styles.current_schedule_header}/>
+                    {this.renderProgressBars()}
+                </div>
             </div>
         );
     }

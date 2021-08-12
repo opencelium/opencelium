@@ -156,7 +156,7 @@ class ListViewItem extends React.Component{
                                 </div>
                             </div>
                         :
-                            <div className={actionsShouldBeMinimized ? styles.minimized_actions : styles.actions} onMouseLeave={::this.hideActions}>
+                            <div className={actionsShouldBeMinimized ? `${styles.maximized_actions}` : `${styles.actions}`} onMouseLeave={::this.hideActions}>
                                 <div>
                                     {hasView &&
                                     <TooltipFontIcon tooltip={'View'} value={'visibility'} onClick={::this.view}

@@ -73,7 +73,7 @@ class StatusCell extends Component{
                 const index = updatedCurrentPageItems.findIndex(item => item.id === updatedSchedule.schedulerId);
                 if(index !== -1) {
                     updatedCurrentPageItems[index].status = !updatedCurrentPageItems[index].status;
-                    this.props.setCurrentPageItems({items: updatedCurrentPageItems});
+                    this.props.setCurrentPageItems(updatedCurrentPageItems);
                 }
             }
         }

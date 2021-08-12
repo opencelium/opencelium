@@ -106,7 +106,6 @@ class UsersList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteUser;
         return <List
-            reducerName={'users'}
             listViewData={listViewData}
             entities={users}
             exceptionEntities={{label: t('LIST.CURRENT_USER'), exceptions: exceptionUsers}}

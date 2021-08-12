@@ -245,14 +245,14 @@ class FormConnectors extends Component{
     }
 
     render(){
-        let {tourStep, readOnly} = this.props.data;
+        let {tourStep, readOnly, style} = this.props.data;
         if(!tourStep){
             tourStep = '';
         }
         return (
             <ToolboxThemeInput
                 label={'Connectors'}
-                style={readOnly ? {margin: '0 65px'} : {}}
+                style={style}
                 icon={'share'}
                 tourStep={tourStep}
                 required={true}

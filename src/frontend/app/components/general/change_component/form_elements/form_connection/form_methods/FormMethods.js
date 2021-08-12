@@ -78,7 +78,7 @@ class FormMethods extends Component{
             <div style={{margin: '0 65px', padding: '20px 0'}}>
                 {!readOnly &&
                     <React.Fragment>
-                        {!isDraft && <Draft connection={entity} updateEntity={::this.updateEntity}/>}
+                        <Draft connection={entity} updateEntity={::this.updateEntity}/>
                         <div style={{float: 'right'}}>
                             <AddTemplate data={data} entity={entity} authUser={authUser}/>
                             {/*<AddParam data={data} entity={entity} authUser={authUser}/>*/}
@@ -130,12 +130,12 @@ class FormMethods extends Component{
                             </Col>
                         </Row>
                     </div>
-                    <Mapping
+                    {/*<Mapping
                         readOnly={readOnly}
                         connection={entity}
                         updateEntity={::this.updateEntity}
                         tourClassNames={tourClassNames}
-                    />
+                    />*/}
                 </div>
             </div>
         );

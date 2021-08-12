@@ -10,6 +10,7 @@ import CConnection from "@classes/components/content/connection/CConnection";
 import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
 import {removeLS} from "@utils/LocalStorage";
 import styles from '@themes/default/content/connections/change.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 /**
  * common component to add and update Connector
@@ -34,16 +35,23 @@ export function ConnectionChange(type) {
                     },
                     connection: CConnection.createConnection(null),
                     entity: null,
+                    isNewConnectionView: true,
                 };
             }
 
             componentDidMount(){
-                setFocusById('input_connection_title');
+                setFocusById('input_title');
             }
 
             componentDidUpdate(prevProps, prevState, snapshot) {
                 const {checkingConnectionTitle, checkTitleResult, t, checkValidationRequest} = this.props;
                 checkValidationRequest(this, 'title', checkingConnectionTitle, checkTitleResult, t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`));
+            }
+
+            toggleIsNewConnectionView(){
+                this.setState({
+                    isNewConnectionView: !this.state.isNewConnectionView,
+                }, () => document.getElementById('form_section_header_methods').scrollIntoView())
             }
 
             /**
@@ -111,6 +119,21 @@ export function ConnectionChange(type) {
                     source: connectorMenuItems,
                     callback: ::this.setMethods,
                     connectors,
+                };
+            }
+
+            getMethodsFormSection(){
+                const {isNewConnectionView} = this.state;
+                const {t, connectors} = this.props;
+                const inputs = isNewConnectionView ? {...INPUTS.CONNECTION_SVG} : {...INPUTS.METHODS};
+                return {
+                    ...inputs,
+                    tourSteps: CONNECTION_TOURS.page_3,
+                    label: t(`${this.translationKey}.FORM.METHODS`),
+                    templateLabels: {addTemplate: t(`${this.translationKey}.FORM.ADD_TEMPLATE`), addTemplateTitle: t(`${this.translationKey}.FORM.ADD_TEMPLATE_TITLE`)},
+                    actions: {addTemplate: ::this.addTemplate},
+                    source: Object.freeze(connectors),
+                    readOnly: false,
                 };
             }
 
@@ -191,7 +214,7 @@ export function ConnectionChange(type) {
             }
 
             render(){
-                const {validationMessages, hasModeInputsSection, hasMethodsInputsSection} = this.state;
+                const {validationMessages, hasModeInputsSection, hasMethodsInputsSection, isNewConnectionView} = this.state;
                 const {t, connectors, checkingConnectionTitle, openTour, closeTour, isTourOpen} = this.props;
                 const connection = this.getConnection();
                 let connectorMenuItems = this.getConnectorMenuItems();
@@ -209,6 +232,9 @@ export function ConnectionChange(type) {
                             maxLength: 256,
                             required: true,
                         },
+                        {...INPUTS.DESCRIPTION,
+                            label: t(`${this.translationKey}.FORM.DESCRIPTION`)
+                        },
                         this.getFirstConnectorFormSection(),
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
@@ -222,6 +248,7 @@ export function ConnectionChange(type) {
                             source: connectorMenuItems,
                             connectors,
                             readOnly: true,
+                            style: {margin: '0 65px'},
                         },{
                             ...INPUTS.MODE,
                             error: validationMessages.mode,
@@ -246,21 +273,16 @@ export function ConnectionChange(type) {
                             source: connectorMenuItems,
                             readOnly: true,
                             hasAddMethod: true,
+                            style: {margin: '0 65px'},
                         },
-                        {
-                            ...INPUTS.METHODS,
-                            tourSteps: CONNECTION_TOURS.page_3,
-                            label: t(`${this.translationKey}.FORM.METHODS`),
-                            templateLabels: {addTemplate: t(`${this.translationKey}.FORM.ADD_TEMPLATE`), addTemplateTitle: t(`${this.translationKey}.FORM.ADD_TEMPLATE_TITLE`)},
-                            actions: {addTemplate: ::this.addTemplate},
-                            source: Object.freeze(connectors),
-                            readOnly: false,
-                        },
+                        this.getMethodsFormSection(),
                     ],
                     formClassName: styles.methods_form,
                     hint: {text: t(`${this.translationKey}.FORM.HINT_3`), openTour},
                     header: t(`${this.translationKey}.FORM.PAGE_3`),
                     visible: hasMethodsInputsSection,
+                    hasFullScreenFunction: true,
+                    AdditionalIcon: <TooltipFontIcon isButton className={styles.switch_view_icon} value={isNewConnectionView ? 'align_vertical_top' : 'account_tree'} tooltip={isNewConnectionView ? 'Column View' : 'Diagram View'} onClick={::this.toggleIsNewConnectionView}/>
                     /*
                     * TODO: uncomment when backend will be ready
                     */
