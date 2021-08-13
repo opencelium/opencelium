@@ -26,6 +26,7 @@ import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {ConnectionChange} from "@components/content/connections/ConnectionChange";
+import {fetchTemplates} from "@actions/templates/fetch";
 
 
 
@@ -50,13 +51,13 @@ function mapStateToProps(state){
 }
 
 function mapConnection(connection){
-    return connection;
+    return typeof connection.getObject === 'function' ? connection.getObject() : connection;
 }
 
 /**
  * Component to Update Connection
  */
-@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle})
+@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'updating', ['connectors'], mapConnection)

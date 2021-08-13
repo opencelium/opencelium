@@ -11,6 +11,7 @@ import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
 import {removeLS} from "@utils/LocalStorage";
 import styles from '@themes/default/content/connections/change.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 
 /**
  * common component to add and update Connector
@@ -31,7 +32,8 @@ export function ConnectionChange(type) {
                     validationMessages: {
                         title: '',
                         fromConnector: '',
-                        mode: '',
+                        toConnector: '',
+                        template: '',
                     },
                     connection: CConnection.createConnection(null),
                     entity: null,
@@ -111,7 +113,7 @@ export function ConnectionChange(type) {
                 }
                 return {
                     ...INPUTS.CONNECTOR,
-                    error: validationMessages.fromConnector,
+                    error: {fromConnector: validationMessages.fromConnector, toConnector: validationMessages.toConnector},
                     tourStep: CONNECTION_TOURS.page_1[1].selector,
                     label: t(`${this.translationKey}.FORM.CONNECTORS`),
                     placeholders: [t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_1`), t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_2`)],
@@ -142,9 +144,26 @@ export function ConnectionChange(type) {
              */
             setMethods(value, connectorType){
                 if(value !== '' && connectorType) {
+                    const {connection} = this.state;
+                    let connectorValidationMessage = {};
+                    if(connectorType === CONNECTOR_FROM){
+                        connectorValidationMessage.fromConnector = '';
+                    } else{
+                        connectorValidationMessage.toConnector = '';
+                    }
+                    let fromConnectorId = connection.fromConnector.id;
+                    let toConnectorId = connection.toConnector.id;
+                    if(connection.template.mode === TEMPLATE_MODE){
+                        this.props.fetchTemplates({from: fromConnectorId, to: toConnectorId});
+                    }
                     this.setState({
-                        hasModeInputsSection: this.state.connection.fromConnector.id !== 0 &&  this.state.connection.toConnector.id !== 0,
-                        hasMethodsInputsSection: this.state.connection.fromConnector.id !== 0 &&  this.state.connection.toConnector.id !== 0,
+                        hasModeInputsSection: fromConnectorId !== 0 && toConnectorId !== 0,
+                        hasMethodsInputsSection: fromConnectorId !== 0 && toConnectorId !== 0,
+                        validationMessages:{
+                            ...this.state.validationMessages,
+                            template: '',
+                            ...connectorValidationMessage,
+                        }
                     });
                 }
             }
@@ -168,13 +187,21 @@ export function ConnectionChange(type) {
             }
 
             /**
-             * to validate connector
+             * to validate from connector
              */
             validateFromConnector(entity){
                 const {t} = this.props;
                 if(entity.fromConnector.id === 0){
                     return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED`)};
                 }
+                return {value: true, message: ''};
+            }
+
+            /**
+             * to validate to connector
+             */
+            validateToConnector(entity){
+                const {t} = this.props;
                 if(entity.toConnector.id === 0){
                     return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED`)};
                 }
@@ -182,9 +209,9 @@ export function ConnectionChange(type) {
             }
 
             /**
-             * to validate mode
+             * to validate template
              */
-            validateMode(entity){
+            validateTemplate(entity){
                 const {t} = this.props;
                 if (entity.template && entity.template.mode === TEMPLATE_MODE && entity.template.templateId === -1) {
                     if(entity.allTemplates.length === 0){
@@ -210,7 +237,7 @@ export function ConnectionChange(type) {
             doAction(entity){
                 const {authUser, doAction} = this.props;
                 removeLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, `connection_${authUser.userId}`);
-                doAction(entity.getObject(), this);
+                doAction(entity, this);
             }
 
             render(){
@@ -247,11 +274,12 @@ export function ConnectionChange(type) {
                             placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
                             source: connectorMenuItems,
                             connectors,
+                            hasApiDocs: true,
                             readOnly: true,
                             style: {margin: '0 65px'},
                         },{
                             ...INPUTS.MODE,
-                            error: validationMessages.mode,
+                            error: validationMessages.template,
                             tourStep: CONNECTION_TOURS.page_2[0].selector,
                             label: t(`${this.translationKey}.FORM.MODE`),
                             confirmationLabels:{title: t(`${this.translationKey}.CONFIRMATION.TITLE`), message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)},

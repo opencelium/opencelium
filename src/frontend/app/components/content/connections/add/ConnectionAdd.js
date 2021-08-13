@@ -34,6 +34,7 @@ import {SingleComponent} from "@decorators/SingleComponent";
 import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
 import {removeLS} from "@utils/LocalStorage";
 import {ConnectionChange} from "@components/content/connections/ConnectionChange";
+import {fetchTemplates} from "@actions/templates/fetch";
 
 
 const connectionPrefixURL = '/connections';
@@ -57,13 +58,13 @@ function mapStateToProps(state){
 }
 
 function mapConnection(connection){
-    return connection;
+    return typeof connection.getObject === 'function' ? connection.getObject() : connection;
 }
 
 /**
  * Component to Add Connection
  */
-@connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle})
+@connect(mapStateToProps, {addConnection, addTemplate, fetchConnectors, checkConnectionTitle, fetchTemplates})
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'adding', ['connectors'], mapConnection)

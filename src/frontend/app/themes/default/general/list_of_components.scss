@@ -288,11 +288,38 @@
 }
 @media only screen and (max-width: 1024px)  {
   .add_button,.delete_selected_button{
+    margin-left: 2px;
     button{
       span:nth-child(2){
         display: none;
       }
+      >span{
+        span{
+          font-size: 16px !important;
+        }
+      }
+      padding: .175rem .55rem;
+      margin-right: 2px !important;
     }
+  }
+  .additional_button{
+    margin-left: 2px !important;
+    button{
+      padding: .175rem .55rem;
+      >span{
+        span{
+          font-size: 16px !important;
+        }
+      }
+    }
+  }
+  .search_field{
+    width: 104px !important;
+    input{
+      font-size: 14px !important;
+      height: 32px;
+    }
+    margin-left: 2px !important;
   }
 }
 

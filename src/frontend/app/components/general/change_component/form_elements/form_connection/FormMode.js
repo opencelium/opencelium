@@ -73,7 +73,6 @@ class FormMode extends Component{
             mode: '',
             onDeleteButtonOver: false,
             showConfirmDelete: false,
-            startFetchingTemplates: false,
             template,
             currentWidth: window.innerWidth,
         };
@@ -84,7 +83,6 @@ class FormMode extends Component{
         if(entity.template.mode === TEMPLATE_MODE && entity.allTemplates.length === 0){
             this.fetchTemplates();
         }
-
         let connector = data.connectors.find(c => c.id === entity.fromConnector.id);
         if(connector) entity.fromConnector.invoker = connector.invoker;
         connector = data.connectors.find(c => c.id === entity.toConnector.id);
@@ -94,34 +92,8 @@ class FormMode extends Component{
         window.addEventListener('resize', this.resize, false);
     }
 
-    componentDidUpdate(prevProps){
-        const {entity, error} = this.props;
-        const {startFetchingTemplates} = this.state;
-        let curFrom = entity.fromConnector.id;
-        let curTo = entity.toConnector.id;
-        if(entity.allTemplates.length > 0 && error === null){
-            let prevFrom = entity.allTemplates[0].connection.fromConnector.connectorId;
-            let prevTo = entity.allTemplates[0].connection.toConnector.connectorId;
-            if(!startFetchingTemplates) {
-                if (curFrom !== prevFrom || curTo !== prevTo) {
-                    this.fetchTemplates();
-                }
-            }
-        }
-    }
-
     componentWillUnmount() {
         window.removeEventListener('resize', this.resize, false);
-    }
-
-    static getDerivedStateFromProps(props){
-
-        if (props.fetchingTemplates !== API_REQUEST_STATE.START) {
-            return{
-                startFetchingTemplates: false
-            };
-        }
-        return null;
     }
 
     resize = (e) => {
@@ -136,7 +108,7 @@ class FormMode extends Component{
         let from = entity.fromConnector.id;
         let to = entity.toConnector.id;
         fetchTemplates({from, to});
-        this.setState({startFetchingTemplates: true, template: null});
+        this.setState({template: null});
         entity.template.templateId = -1;
         entity.template.label = '';
         updateEntity(entity);
@@ -239,7 +211,7 @@ class FormMode extends Component{
         entity.fieldBinding = templateContent.fieldBinding;
         entity.template.templateId = template.value;
         entity.template.label = template.label;
-        updateEntity(entity);
+        updateEntity(entity, 'template');
         this.setState({template});
     };
 
@@ -295,9 +267,9 @@ class FormMode extends Component{
     }
 
     renderTemplateSelect(){
-        const {onDeleteButtonOver, showConfirmDelete, startFetchingTemplates, template, currentWidth} = this.state;
-        const {entity, data, authUser} = this.props;
-        let {readOnly} = data;
+        const {onDeleteButtonOver, showConfirmDelete, template, currentWidth} = this.state;
+        const {entity, data, authUser, fetchingTemplates} = this.props;
+        let {readOnly, error} = data;
         let {mode} = entity.template;
         let isDeleteEnabled = template;
         let deleteButtonStyle = {};
@@ -309,19 +281,23 @@ class FormMode extends Component{
             deleteButtonStyle.cursor = 'default';
         }
         if(mode === TEMPLATE_MODE) {
-            if(startFetchingTemplates){
+            if(fetchingTemplates === API_REQUEST_STATE.START){
                 return <Loading authUser={authUser} className={styles.connection_mode_loading}/>;
             }
             let options = this.getTemplatesOptions();
             if(options.length === 0){
                 return(
-                    <div className={styles.no_templates}>There is no templates</div>
+                    <div className={styles.no_templates}>
+                        <span>There is no templates</span>
+                        {error && <div className={styles.no_templates_error}>{error}</div>}
+                    </div>
                 );
             }
             return (
                 <div className={`second-tour-step ${styles.template_select}`}>
                     <Select
                         id={'templates'}
+                        error={error}
                         className={styles.form_mode_template}
                         name={'connection_mode'}
                         value={template}

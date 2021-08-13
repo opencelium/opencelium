@@ -69,7 +69,7 @@ const reducer = (state = initialState, action) => {
         case ConnectionOverview2Action.SET_ISASSIGNMODE:
             return state.set('isAssignMode', action.payload);
         case ConnectionOverview2Action.SET_CONNECTIONDATA:
-            return state.set('connection', action.payload.connection).set('updateConnection', action.payload.updateConnection);
+            return state.set('connection', action.payload.connection).set('updateConnection', action.payload.updateConnection ? action.payload.updateConnection : state.get('updateConnection'));
         case ConnectionOverview2Action.SET_COLORMODE:
             return state.set('colorMode', action.payload);
         case ConnectionOverview2Action.SET_ARROWS:

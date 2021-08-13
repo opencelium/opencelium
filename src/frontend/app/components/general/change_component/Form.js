@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
 
 import styles from '@themes/default/general/form_component.scss';
 import FormSection from "@change_component/FormSection";
@@ -8,7 +9,10 @@ import {Col, Row} from "react-grid-system";
 import ListHeader from "@components/general/list_of_components/Header";
 import ListButton from "@components/general/view_component/ListButton";
 import {ActionButton, SubFormSections} from "@change_component/FormComponents";
+import {setConnectionData} from "@actions/connection_overview_2/set";
 
+
+@connect(null, {setConnectionData})
 class Form extends React.Component{
     constructor(props) {
         super(props);
@@ -62,6 +66,7 @@ class Form extends React.Component{
         this.setState({
             entity,
         });
+        this.props.setConnectionData(entity);
         this.props.clearValidationMessage(name);
     }
 

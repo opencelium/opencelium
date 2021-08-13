@@ -359,7 +359,7 @@ class FormConnectionSvg extends Component{
     }
 
     render(){
-        const {entity, renderNavigationComponent, renderValidationMessage, data, connection, updateConnection, currentTechnicalItem, currentBusinessItem} = this.props;
+        const {entity, data, connection, updateConnection, currentTechnicalItem, currentBusinessItem} = this.props;
         const {businessLayoutPosition, technicalLayoutPosition, detailsPosition, isTechnicalLayoutMinimized,
             isBusinessLayoutMinimized, isDetailsMinimized, isCreateElementPanelOpened, createElementPanelConnectorType,
             createElementPanelPosition,
@@ -367,7 +367,6 @@ class FormConnectionSvg extends Component{
         const verticalPanelParams = ::this.getPanelGroupParams();
         return (
             <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`}>
-                <Draft connection={entity} updateEntity={::this.updateEntity}/>
                 <Details
                     readOnly={data.readOnly}
                     moveDetailsRight={::this.moveDetailsRight}
@@ -415,16 +414,9 @@ class FormConnectionSvg extends Component{
                         setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
                     />
                 }
-                {!data.readOnly && renderValidationMessage({isExternal: true})}
-                {renderNavigationComponent({isExternal: true})}
             </div>
         );
     }
-}
-
-FormConnectionSvg.defaultProps = {
-    renderValidationMessage: () => {},
-    renderNavigationComponent: () => {},
 }
 
 export default FormConnectionSvg;

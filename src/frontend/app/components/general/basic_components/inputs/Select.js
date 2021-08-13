@@ -118,7 +118,7 @@ class Select extends Component{
                         },
                         menu: (provided) => ({
                             ...provided,
-                            zIndex: 100,
+                            zIndex: 1000,
                             color: 'black',
                             minWidth: '250px',
                             ...selectMenuStyles,

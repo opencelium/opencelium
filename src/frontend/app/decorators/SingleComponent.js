@@ -263,7 +263,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                     } else{
                         thisComponentScope.setState({
                             validationMessages: {...validationMessages, ...validations},
-                            entity: Object.assign({}, entity),
+                            entity: Object.assign({}, typeof entity.getObject === 'function' ? entity.getObject() : entity),
                         });
                         if(firstValidationName !== ''){
                             if(validations[firstValidationName] !== '') {

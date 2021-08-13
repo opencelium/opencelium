@@ -167,7 +167,8 @@ class FormConnectors extends Component{
 
     renderReadonlyConnectors(){
         const {isFromInvokerOpened, isToInvokerOpened} = this.state;
-        const {entity} = this.props;
+        const {entity, data} = this.props;
+        const hasApiDocs = data.hasOwnProperty('hasApiDocs') ? data.hasApiDocs && data.visible : false;
         let fromConnectorValue = entity.fromConnector.title;
         let toConnectorValue = entity.toConnector.title;
         return(
@@ -180,7 +181,7 @@ class FormConnectors extends Component{
                         tabIndex={-1}
                         theme={{input: styles.form_connector_input}}
                     />
-                    <InvokerButton onClick={::this.toggleFromInvoker} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>
+                    {hasApiDocs && <InvokerButton onClick={::this.toggleFromInvoker} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>}
                     {::this.renderFromInvoker()}
                 </Col>
                 <Col md={2} style={{textAlign: 'center'}}>
@@ -194,7 +195,7 @@ class FormConnectors extends Component{
                         tabIndex={-1}
                         theme={{input: styles.form_connector_input}}
                     />
-                    <InvokerButton onClick={::this.toggleToInvoker} tooltip={toConnectorValue} position={'right'} isOpened={isToInvokerOpened}/>
+                    {hasApiDocs && <InvokerButton onClick={::this.toggleToInvoker} tooltip={toConnectorValue} position={'right'} isOpened={isToInvokerOpened}/>}
                     {::this.renderToInvoker()}
                 </Col>
             </Row>
@@ -214,7 +215,7 @@ class FormConnectors extends Component{
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <Select
                         id={'input_fromConnector'}
-                        error={error}
+                        error={error.fromConnector}
                         value={fromConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'fromConnector')}
                         options={source}
@@ -230,7 +231,7 @@ class FormConnectors extends Component{
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <Select
                         id={'input_toConnector'}
-                        error={error}
+                        error={error.toConnector}
                         value={toConnectorValue}
                         onChange={(e, connector) => ::this.handleChange(e, 'toConnector')}
                         options={source}

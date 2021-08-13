@@ -186,8 +186,6 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
-                    renderNavigationComponent={renderNavigationComponent}
-                    renderValidationMessage={renderValidationMessage}
                 />;
             case 'invoker_name':
                 return <FormInvokerName
@@ -289,6 +287,9 @@ class FormSection extends Component{
                 data['setFocusInput'] = setFocusInput;
                 data['focused'] = focusedInput !== '' && focusedInput === data.name;
                 data['visible'] = data.hasOwnProperty('visible') ? data.visible : true;
+                if(content.hasOwnProperty('visible')){
+                    data['visible'] = content.visible;
+                }
                 if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){
                     data['visible'] = false;
                 }

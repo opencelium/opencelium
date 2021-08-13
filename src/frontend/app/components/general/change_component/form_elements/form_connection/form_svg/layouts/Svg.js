@@ -75,7 +75,7 @@ class Svg extends React.Component {
             this.setState({
                 ratio,
             });
-            window.addEventListener('resize', ::this.setRatio);
+            //window.addEventListener('resize', ::this.setRatio);
         }
         this.svgRef.current.addEventListener('wheel', ::this.onWheel, {passive: false});
     }
