@@ -27,7 +27,7 @@ import FormPermissionTable from "./form_elements/FormPermissionTable";
 import FormSecretInput from "./form_elements/FormSecretInput";
 import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
 import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
-import {findTopLeft, getThemeClass, isString} from "@utils/app";
+import {findTopLeft, isString} from "@utils/app";
 import FormMode from "./form_elements/form_connection/FormMode";
 import FormConnectionTitle from "./form_elements/form_connection/FormTitle";
 import FormUserTitle from "./form_elements/FormUserTitle";
@@ -68,7 +68,20 @@ class FormSection extends Component{
         this.state = {
             isFormSectionMinimized: false,
             isFullScreen: false,
+            areIconsVisible: false,
         }
+    }
+
+    showIcons(){
+        this.setState({
+            areIconsVisible: true,
+        });
+    }
+
+    hideIcons(){
+        this.setState({
+            areIconsVisible: false,
+        });
     }
 
     toggle(){
@@ -280,7 +293,7 @@ class FormSection extends Component{
      */
     generateInputs(){
         let result;
-        const {content, focusedInput, setFocusInput, isOneFormSectionFullScreen} = this.props;
+        const {content, focusedInput, setFocusInput} = this.props;
         if(Array.isArray(content.inputs)) {
             result = content.inputs.map((data, key) => {
                 data['tourStep'] = data['tourStep'] && isString(data['tourStep']) ? data['tourStep'].substr(1) : data['tourStep'];
@@ -290,9 +303,6 @@ class FormSection extends Component{
                 if(content.hasOwnProperty('visible')){
                     data['visible'] = content.visible;
                 }
-                if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){
-                    data['visible'] = false;
-                }
                 return this.mapInputs(Object.assign({}, data), key);
             });
         }
@@ -300,8 +310,8 @@ class FormSection extends Component{
     }
 
     render(){
-        const {isFormSectionMinimized, isFullScreen} = this.state;
-        const {isSubFormSection} = this.props;
+        const {isFormSectionMinimized, isFullScreen, areIconsVisible} = this.state;
+        const {isSubFormSection, isOneFormSectionFullScreen, } = this.props;
         let style = {};
         const content = {
             visible: true,
@@ -316,20 +326,26 @@ class FormSection extends Component{
             style.overflow = 'hidden';
             style.padding = 0;
         }
+        const hasHeader = content.header !== '' && !(isFullScreen && content.hasFullScreenFunction);
+        if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){
+            return null;
+        }
         return (
-            <div className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
-                {content.header !== '' &&
+            <div onMouseOver={::this.showIcons} onMouseLeave={::this.hideIcons} className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
+                {hasHeader &&
                     <div id={`form_section_header_${content.header.toLowerCase()}`} className={styles.form_section_header} onClick={::this.toggle}>
                         <span>{content.header}</span>
                     </div>
                 }
-                {
-                    content.hasFullScreenFunction &&
-                    <TooltipFontIcon isButton className={styles.full_screen_icon} value={isFullScreen ? 'close_fullscreen' : 'open_in_full'} tooltip={isFullScreen ? 'Minimize' : 'Maximize'} onClick={::this.toggleFullScreen}/>
-                }
-                {
-                    content.AdditionalIcon
-                }
+                <span style={{display: areIconsVisible ? 'inline' : 'inline'}} className={styles.form_section_icons}>
+                    {
+                        content.AdditionalIcon
+                    }
+                    {
+                        content.hasFullScreenFunction &&
+                        <TooltipFontIcon size={16} tooltipPosition={'left'} isButton className={styles.full_screen_icon} value={isFullScreen ? 'close_fullscreen' : 'open_in_full'} tooltip={isFullScreen ? 'Minimize' : 'Maximize'} onClick={::this.toggleFullScreen}/>
+                    }
+                </span>
                 {this.generateInputs()}
             </div>
         );

@@ -23,7 +23,7 @@ import {fetchUserGroups} from '@actions/usergroups/fetch';
 import {permission} from "@decorators/permission";
 import {UserPermissions} from "@utils/constants/permissions";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {UserChange} from "@components/content/users/UserChange";
+import {UserForm} from "@components/content/users/UserForm";
 
 
 function mapStateToProps(state){
@@ -41,6 +41,9 @@ function mapStateToProps(state){
     };
 }
 
+/**
+ * to map data before adding
+ */
 function mapUser(user){
     let updatedUser = {};
     updatedUser.email = user.email;
@@ -66,7 +69,6 @@ function mapUser(user){
 @permission(UserPermissions.CREATE, true)
 @withTranslation(['users', 'app'])
 @SingleComponent('user', 'adding', ['userGroups'], mapUser)
-@UserChange('add')
+@UserForm('add')
 class UserAdd extends Component{}
-
 export default UserAdd;

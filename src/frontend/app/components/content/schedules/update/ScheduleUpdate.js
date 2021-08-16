@@ -23,7 +23,7 @@ import {fetchConnections} from "@actions/connections/fetch";
 import {permission} from "@decorators/permission";
 import {SchedulePermissions} from "@utils/constants/permissions";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {ScheduleChange} from "@components/content/schedules/ScheduleChange";
+import {ScheduleForm} from "@components/content/schedules/ScheduleForm";
 
 
 function mapStateToProps(state){
@@ -59,7 +59,7 @@ function mapSchedule(schedule){
 @permission(SchedulePermissions.UPDATE, true)
 @withTranslation(['schedules', 'app'])
 @SingleComponent('schedule', 'updating', [], mapSchedule)
-@ScheduleChange('update')
+@ScheduleForm('update')
 class ScheduleUpdate extends Component{}
 
 export default ScheduleUpdate;

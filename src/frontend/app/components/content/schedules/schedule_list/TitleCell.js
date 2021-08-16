@@ -27,31 +27,14 @@ class TitleCell extends Component{
 
     constructor(props){
         super(props);
-
-        this.state = {
-            appearClassName: '',
-        };
-    }
-
-    componentDidUpdate(prevProps){
-        const {appearClassName} = this.state;
-        let newTitle = this.props.schedule.title;
-        let newId = this.props.schedule.id;
-        let oldTitle = prevProps.schedule.title;
-        let oldId = prevProps.schedule.id;
-        if(newId === oldId && newTitle !== oldTitle && appearClassName !== styles.emphasize_cell) {
-            this.setState({appearClassName: styles.emphasize_cell});
-            setTimeout(() => {this.setState({appearClassName: ''});}, 2000);
-        }
     }
 
     render(){
-        const {appearClassName} = this.state;
         const {schedule, index} = this.props;
         return (
             <td style={{position: 'relative'}}>
                 <WebHook index={index} schedule={CSchedule.createSchedule(schedule)}/>
-                <div className={`${styles.title_cell} ${styles.schedule_list_title} ${appearClassName}`} style={{animationDelay: '0.5s'}} title={schedule.title}>
+                <div className={`${styles.title_cell} ${styles.schedule_list_title}`} title={schedule.title}>
                     <span>{schedule.title}</span>
                 </div>
             </td>

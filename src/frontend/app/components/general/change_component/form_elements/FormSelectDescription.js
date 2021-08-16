@@ -20,6 +20,7 @@ import Input from '@basic_components/inputs/Input';
 import styles from '@themes/default/general/change_component.scss';
 import {FormElement} from "@decorators/FormElement";
 import FormSelect from "./FormSelect";
+import FormInput from "@change_component/form_elements/FormInput";
 
 
 /**
@@ -33,17 +34,17 @@ class FormSelectDescription extends Component{
     }
 
     render(){
-        const {name, error} = this.props.data;
+        const {name, error, readonly} = this.props.data;
         const {entity} = this.props;
         const description = this.props.data.description;
         let value = entity[name];
         if(value && value.hasOwnProperty('value')){
             value = value.value;
         }
-        let descriptionValue = description.values[value];
+        let descriptionValue = readonly ? entity.description : description.values[value];
         return (
             <div>
-                <FormSelect {...this.props} id={`input_${name}`}/>
+                {readonly ? <FormInput {...this.props} id={`input_${name}`}/> : <FormSelect {...this.props} id={`input_${name}`}/>}
                 <Input
                     tabIndex={'-1'}
                     name={description.name}

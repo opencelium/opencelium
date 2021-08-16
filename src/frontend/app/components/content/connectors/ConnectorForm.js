@@ -12,7 +12,7 @@ import React from "react";
 /**
  * common component to add and update Connector
  */
-export function ConnectorChange(type) {
+export function ConnectorForm(type) {
     return function (Component) {
         return class extends Component {
             constructor(props) {

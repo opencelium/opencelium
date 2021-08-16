@@ -249,7 +249,7 @@ class ListCard extends Component{
     }
 
     renderActions(){
-        const {t, isException, exceptionLabel, isSelectedCard, permissions, authUser, hasView, hasUpdate, hasGraph, hasDelete, hasTour, index} = this.props;
+        const {t, isException, exceptionLabel, isSelectedCard, permissions, authUser, hasView, hasUpdate, hasGraph, hasDelete, hasTour, index, isButton} = this.props;
         let classNames = [
             'button',
             'button_delete',
@@ -299,7 +299,7 @@ class ListCard extends Component{
         if(!isException){
             return (
                 <div className={styles[classNames.card_actions]} style={!hasView && !hasUpdate && !hasGraph ? {textAlign: 'right'} : null}>
-                    {hasView && <CardButton type={'view'} className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
+                    {hasView && !isButton && <CardButton type={'view'} className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
                     {hasUpdate && <CardButton type={'update'} className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/>}
                     {hasGraph && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-graph-${index + 1}` : ''}`} index={index} onClick={::this.viewGraph} text={graphButtonText} permission={permissions.READ}/>}
                     {hasDelete && <CardButton type={'delete'} className={`${deleteButtonStyle} ${hasTour ? `tour-step-delete-${index + 1}` : ''}`} index={index} onClick={::this.wantDelete} text={deleteButtonText} permission={permissions.DELETE}/>}

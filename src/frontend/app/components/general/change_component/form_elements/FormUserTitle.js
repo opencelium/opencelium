@@ -48,7 +48,7 @@ class FormUserTitle extends Component{
     }
 
     render(){
-        const {name, label, icon, required} = this.props.data;
+        const {name, label, icon, required, readonly} = this.props.data;
         const {t, entity} = this.props;
         let {tourStep} = this.props.data;
         let value = entity[name];
@@ -58,6 +58,8 @@ class FormUserTitle extends Component{
         ];
         return (
             <RadioButtons
+                required={required}
+                readOnly={readonly}
                 label={label}
                 value={value}
                 handleChange={::this.handleChangeTitle}

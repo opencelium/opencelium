@@ -55,8 +55,8 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 
 .connection_editor{
   border-radius: 5px;
-  padding: 70px 10px 50px;
-  height: calc(100vh - 21px);
+  padding: 0;
+  height: 100vh;
   position: absolute;
   top: 0;
   left: 0;
@@ -286,18 +286,16 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 .details_left{
   @extend .details;
   left: 0;
-  margin-left: 10px;
 }
 .details_right{
   @extend .details;
   right: 0;
-  margin-right: 10px;
 }
 .details_minimized{
   height: 20px;
 }
 .details_maximized{
-  height: calc(100vh - 142px)
+  height: calc(100vh - 1px)
 }
 .details_data{
   padding: 0 10px 10px;
@@ -324,8 +322,8 @@ $HIGHLIGHT_COLOR: #8a9dd7;
     cursor: pointer;
     background: white;
     border: 1px solid #eee;
-    z-index: 1;
     height: 22px;
+    z-index: 1;
     >span{
       vertical-align: top;
     }

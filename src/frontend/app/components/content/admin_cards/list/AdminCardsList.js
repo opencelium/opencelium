@@ -95,7 +95,7 @@ class AdminCardsList extends Component{
             entityIdName: 'id',
             entityIdsName: 'adminCardIds',
             map: (adminCard) => {
-                return [{name: 'id', value: adminCard.id}, {name: 'name', label: t('LIST.NAME'), value: adminCard.name, width: '80%'}, {name: 'link', label: t('LIST.NAME'), value: adminCard.link, visible: false}]
+                return [{name: 'id', value: adminCard.id}, {name: 'name', label: t('LIST.NAME'), value: adminCard.name, width: '80%', style: {textAlign: 'left'}}, {name: 'link', label: t('LIST.NAME'), value: adminCard.link, visible: false}]
             },
         }
         let mapEntity = {};

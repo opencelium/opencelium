@@ -10,7 +10,7 @@ import React from "react";
 /**
  * common component to add and update User Group
  */
-export function UserGroupChange(type) {
+export function UserGroupForm(type) {
     return function (Component) {
         return class extends Component {
             constructor(props) {
@@ -18,7 +18,11 @@ export function UserGroupChange(type) {
                 this.userGroupPrefixUrl = '/usergroups';
                 this.translationKey = type.toUpperCase();
                 this.isUpdate = type === 'update';
-                this.actionName = this.isUpdate ? `updatingUserGroup` : `addingUserGroup`
+                this.isView = type === 'view';
+                this.isAdd = type === 'add';
+                this.actionName = '';
+                if(this.isUpdate) this.actionName = `updatingUserGroup`;
+                if(this.isAdd) this.actionName = `addingUserGroup`;
                 this.state = {
                     hasPermissionsFormSection: this.isUpdate ? props.components && props.components.length > 0 : false,
                     validationMessages: {
@@ -64,6 +68,9 @@ export function UserGroupChange(type) {
              */
             matComponents(){
                 const {t, components} = this.props;
+                if(!components){
+                    return [];
+                }
                 return components.map(component => {
                     return {label: t(`app:COMPONENTS.${component.name}`), value: component.id};
                 });
@@ -82,7 +89,7 @@ export function UserGroupChange(type) {
              * to parse userGroup after fetch
              */
             parseEntity(){
-                if(this.isUpdate) {
+                if(this.isUpdate || this.isView) {
                     const {t, userGroup} = this.props;
                     let result = {};
                     result.id = userGroup.id;
@@ -163,7 +170,7 @@ export function UserGroupChange(type) {
                 let contentTranslations = {};
                 contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
                 contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.userGroupPrefixUrl};
-                contentTranslations.action_button = {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.userGroupPrefixUrl};
+                contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.userGroupPrefixUrl};
                 let contents = [{
                     inputs: [
                         {...INPUTS.ROLE,
@@ -173,9 +180,10 @@ export function UserGroupChange(type) {
                             required: true,
                             isLoading: checkingUserGroupName === API_REQUEST_STATE.START,
                             defaultValue: '',
+                            readonly: this.isView,
                         },
-                        {...INPUTS.DESCRIPTION, label: t(`${this.translationKey}.FORM.DESCRIPTION`), defaultValue: ''},
-                        {...INPUTS.ICON, label: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE`), browseTitle: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE_PLACEHOLDER`)},
+                        {...INPUTS.DESCRIPTION, label: t(`${this.translationKey}.FORM.DESCRIPTION`), defaultValue: '', readonly: this.isView,},
+                        {...INPUTS.ICON, label: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE`), browseTitle: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE_PLACEHOLDER`), readonly: this.isView,},
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
                     header: t(`${this.translationKey}.FORM.PAGE_1`),
@@ -190,6 +198,7 @@ export function UserGroupChange(type) {
                             required: true,
                             callback: ::this.togglePermissionsFormSection,
                             defaultValue: [],
+                            readonly: this.isView,
                         },
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_2`), openTour},
@@ -203,6 +212,7 @@ export function UserGroupChange(type) {
                             dataSource: 'components',
                             required: true,
                             defaultValue: {},
+                            readonly: this.isView,
                         },
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_3`), openTour},

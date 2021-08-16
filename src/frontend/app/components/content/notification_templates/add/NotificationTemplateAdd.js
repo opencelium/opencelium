@@ -21,7 +21,7 @@ import {addNotificationTemplate} from '@actions/notification_templates/add';
 import {NotificationTemplatePermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {NotificationTemplateChange} from "@components/content/notification_templates/NotificationTemplateChange";
+import {NotificationTemplateForm} from "@components/content/notification_templates/NotificationTemplateForm";
 
 
 function mapStateToProps(state){
@@ -45,7 +45,7 @@ function mapNotificationTemplate(notificationTemplate){
 @permission(NotificationTemplatePermissions.CREATE, true)
 @withTranslation(['notification_templates', 'app', 'schedules'])
 @SingleComponent('notificationTemplate', 'adding', [], mapNotificationTemplate)
-@NotificationTemplateChange('add')
+@NotificationTemplateForm('add')
 class NotificationTemplateAdd extends Component{}
 
 export default NotificationTemplateAdd;

@@ -57,7 +57,22 @@
   "VIEW": {
     "HEADER": "View Group",
     "TABLE_HEAD": "Permission/Component",
-    "LIST_BUTTON": "Group List"
+    "LIST_BUTTON": "Group List",
+    "FORM": {
+      "PAGE_1": "General Data",
+      "ROLE": "Name",
+      "DESCRIPTION": "Description",
+      "USER_GROUP_PICTURE": "Icon",
+      "USER_GROUP_PICTURE_PLACEHOLDER": "Please select an icon...",
+      "HINT_1": "Provide general information",
+      "PAGE_2": "Components",
+      "COMPONENTS": "Components",
+      "COMPONENTS_PLACEHOLDER": "Please choose some components",
+      "HINT_2": "Assign components",
+      "PAGE_3": "Permissions",
+      "PERMISSIONS": "Permissions",
+      "HINT_3": "Set permissions"
+    }
   },
   "LIST": {
     "HEADER": "Groups",

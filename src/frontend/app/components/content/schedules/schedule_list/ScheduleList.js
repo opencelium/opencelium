@@ -76,7 +76,6 @@ class ScheduleList extends Component{
     constructor(props){
         super(props);
 
-        this.notEmphasize = false;
         let allCurrentSchedules = this.filterAllCurrentSchedules({filterTitle: ''});
         this.state = {
             currentSchedules: this.filterCurrentSchedules({pageNumber: 1, filterTitle: '', allCurrentSchedules}),
@@ -102,28 +101,23 @@ class ScheduleList extends Component{
         }
         if(prevSchedules.length !== curSchedules.length){
             notEqualedSchedules = true;
-            this.notEmphasize = true;
         } else{
             for(let i = 0; i < prevSchedules.length; i++){
                 if(prevSchedules[i].title !== curSchedules[i].title){
                     notEqualedSchedules = true;
-                    this.notEmphasize = false;
                 }
                 if(!prevSchedules[i].lastExecution && curSchedules[i].lastExecution){
                     notEqualedSchedules = true;
-                    this.notEmphasize = false;
                 }
                 if(prevSchedules[i].lastExecution && curSchedules[i].lastExecution){
                     if(prevSchedules[i].lastExecution.success && curSchedules[i].lastExecution.success){
                         if(prevSchedules[i].lastExecution.success.endTime !== curSchedules[i].lastExecution.success.endTime){
                             notEqualedSchedules = true;
-                            this.notEmphasize = false;
                         }
                     }
                     if(prevSchedules[i].lastExecution.fail && curSchedules[i].lastExecution.fail){
                         if(prevSchedules[i].lastExecution.fail.endTime !== curSchedules[i].lastExecution.fail.endTime){
                             notEqualedSchedules = true;
-                            this.notEmphasize = false;
                         }
                     }
                 }
@@ -377,7 +371,7 @@ class ScheduleList extends Component{
                                             inputClassName={styles[classNames.checkbox_field]}
                                         />
                                     </td>}
-                                    <TitleCell index={key} schedule={schedule} notEmphasize={this.notEmphasize}/>
+                                    <TitleCell index={key} schedule={schedule}/>
                                     <td className={styles[classNames.schedule_list_title]}>
                                         <ReactRouterLink
                                             onlyActiveOnIndex={true}

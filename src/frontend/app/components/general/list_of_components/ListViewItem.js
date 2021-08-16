@@ -140,8 +140,9 @@ class ListViewItem extends React.Component{
                     if(React.isValidElement(shortText)){
                         return shortText;
                     }
+                    let style = element.hasOwnProperty('style') ? element.style : null;
                     return (
-                        <td key={element.name} title={fullText}>
+                        <td key={element.name} title={fullText} style={style}>
                             {shortText}
                         </td>
                     );

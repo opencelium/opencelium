@@ -33,7 +33,7 @@ class FormBody extends Component{
     handleInput(body){
         let {contentItem, updateEntity} = this.props;
         contentItem.body = body;
-        updateEntity(contentItem);
+        updateEntity(contentItem, 'body');
     }
 
     render(){

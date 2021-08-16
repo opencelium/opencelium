@@ -16,7 +16,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import Content from "../../../general/content/Content";
 
 import {checkConnectionTitle} from '@actions/connections/fetch';
 import {addConnection} from '@actions/connections/add';
@@ -24,20 +23,10 @@ import {addTemplate} from "@actions/templates/add";
 import {fetchConnectors} from '@actions/connectors/fetch';
 import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
-import {setFocusById} from "@utils/app";
-import {INPUTS} from "@utils/constants/inputs";
-import OCTour from "@basic_components/OCTour";
-import {automaticallyShowTour, CONNECTION_ADD_TOURS} from "@utils/constants/tours";
-import CConnection, {ALL_COLORS} from "@classes/components/content/connection/CConnection";
-import ChangeContent from "@change_component/ChangeContent";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
-import {removeLS} from "@utils/LocalStorage";
-import {ConnectionChange} from "@components/content/connections/ConnectionChange";
+import {ConnectionForm} from "@components/content/connections/ConnectionForm";
 import {fetchTemplates} from "@actions/templates/fetch";
 
-
-const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -68,7 +57,7 @@ function mapConnection(connection){
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'adding', ['connectors'], mapConnection)
-@ConnectionChange('add')
+@ConnectionForm('add')
 class ConnectionAdd extends Component{}
 
 export default ConnectionAdd;

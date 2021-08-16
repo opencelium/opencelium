@@ -16,7 +16,7 @@ import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorI
 /**
  * common component to add and update Connector
  */
-export function ConnectionChange(type) {
+export function ConnectionForm(type) {
     return function (Component) {
         return class extends Component {
             constructor(props) {
@@ -53,7 +53,7 @@ export function ConnectionChange(type) {
             toggleIsNewConnectionView(){
                 this.setState({
                     isNewConnectionView: !this.state.isNewConnectionView,
-                }, () => document.getElementById('form_section_header_methods').scrollIntoView())
+                }, () => {const elem = document.getElementById('form_section_header_methods'); if(elem) elem.scrollIntoView();})
             }
 
             /**
@@ -310,7 +310,7 @@ export function ConnectionChange(type) {
                     header: t(`${this.translationKey}.FORM.PAGE_3`),
                     visible: hasMethodsInputsSection,
                     hasFullScreenFunction: true,
-                    AdditionalIcon: <TooltipFontIcon isButton className={styles.switch_view_icon} value={isNewConnectionView ? 'align_vertical_top' : 'account_tree'} tooltip={isNewConnectionView ? 'Column View' : 'Diagram View'} onClick={::this.toggleIsNewConnectionView}/>
+                    AdditionalIcon: <TooltipFontIcon size={16} tooltipPosition={'left'} isButton className={styles.switch_view_icon} value={isNewConnectionView ? 'align_vertical_top' : 'account_tree'} tooltip={isNewConnectionView ? 'Column View' : 'Diagram View'} onClick={::this.toggleIsNewConnectionView}/>
                     /*
                     * TODO: uncomment when backend will be ready
                     */

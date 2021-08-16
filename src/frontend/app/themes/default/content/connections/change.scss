@@ -6,12 +6,8 @@
   /* autoprefixer: off */
   grid-row-end: 3;
   height: auto;
-  min-height: 735px;
+  box-shadow: none !important;
 }
 
 .switch_view_icon{
-  position: absolute;
-  right: 50px;
-  top: 15px;
-  z-index: 100;
 }

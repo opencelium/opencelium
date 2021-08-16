@@ -409,7 +409,7 @@ class List extends Component{
             listViewEntities = currentPageItems.map(item => listViewData.map(item, this));
         }
         const isListViewIconDisabled = !(listViewData);
-        const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width, visible: element.visible};}) : [];
+        const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width, visible: element.visible, style: element.style};}) : [];
         const entityIdName = listViewData ? listViewData.entityIdName : '';
         const actionsShouldBeMinimized = listViewData && listViewData.hasOwnProperty('actionsShouldBeMinimized') ? listViewData.actionsShouldBeMinimized : false;
         const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? listViewData.renderItemActions : null;

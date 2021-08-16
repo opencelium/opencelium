@@ -10,7 +10,7 @@ import OCTour from "@basic_components/OCTour";
 /**
  * common component to add and update Schedule
  */
-export function ScheduleChange(type) {
+export function ScheduleForm(type) {
     return function (Component) {
         return class extends Component {
             constructor(props) {

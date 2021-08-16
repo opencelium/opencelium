@@ -100,12 +100,28 @@
     "USER_GROUP": "User group",
     "LAST_LOGIN": "Last time login",
     "TABLE_HEAD": "Component/Permission",
-    "FIELDS": {
+    "FORM": {
+      "PAGE_1": "Credentials",
+      "EMAIL": "Email",
+      "PASSWORD": "Password",
+      "REPEAT_PASSWORD": "Repeat password",
+      "HINT_1": "Provide credential information",
+      "PAGE_2": "User Details",
       "NAME": "Name",
-      "PHONE": "Phone number",
+      "SURNAME": "Surname",
+      "PHONE_NUMBER": "Phone Number",
+      "ORGANISATION": "Organisation",
       "DEPARTMENT": "Department",
-      "ORGANIZATION": "Organization",
-      "USER_TITLE": "Title"
+      "USER_TITLE": "Title",
+      "PROFILE_PICTURE": "Avatar",
+      "PROFILE_PICTURE_PLACEHOLDER": "Please select an image...",
+      "HINT_2": "Provide user details",
+      "PAGE_3": "User Group",
+      "USER_GROUP": "User Group",
+      "USER_GROUP_PLACEHOLDER": "Choose user group...",
+      "DESCRIPTION": "Description",
+      "DESCRIPTION_DEFAULT": "Here you will see the description of the role",
+      "HINT_3": "Assign user group"
     }
   },
   "TITLE": {

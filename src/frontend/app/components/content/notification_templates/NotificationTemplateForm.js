@@ -11,7 +11,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 /**
  * common component to add and update User
  */
-export function NotificationTemplateChange(type) {
+export function NotificationTemplateForm(type) {
     return function (Component) {
         return class extends Component {
             constructor(props) {
@@ -20,6 +20,7 @@ export function NotificationTemplateChange(type) {
                 this.notificationTemplatePrefixUrl = '/notification_templates';
                 this.translationKey = type.toUpperCase();
                 this.isUpdate = type === 'update';
+                this.isView = type === 'view';
                 this.actionName = this.isUpdate ? `updatingNotificationTemplate` : `addingNotificationTemplate`;
 
                 this.state = {
@@ -118,7 +119,7 @@ export function NotificationTemplateChange(type) {
                 let contentTranslations = {};
                 contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
                 contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.notificationTemplatePrefixUrl};
-                contentTranslations.action_button = {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.notificationTemplatePrefixUrl};
+                contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.notificationTemplatePrefixUrl};
                 let contents = [{
                     inputs: [
                         {
@@ -128,7 +129,8 @@ export function NotificationTemplateChange(type) {
                             label: t(`${this.translationKey}.FORM.NAME`),
                             required: true,
                             maxLength: 255,
-                            defaultValue: ''
+                            defaultValue: '',
+                            readOnly: this.isView,
                         },
                         {
                             ...INPUTS.NOTIFICATION_TEMPLATE_TYPE,
@@ -138,6 +140,7 @@ export function NotificationTemplateChange(type) {
                             required: true,
                             defaultValue: 0,
                             t,
+                            readOnly: this.isView,
                         },
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
@@ -150,6 +153,7 @@ export function NotificationTemplateChange(type) {
                             tourStep: NOTIFICATION_TEMPLATE_TOURS,
                             label: t(`${this.translationKey}.FORM.CONTENT`),
                             required: true,
+                            readOnly: this.isView,
                         },
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_2`), openTour},

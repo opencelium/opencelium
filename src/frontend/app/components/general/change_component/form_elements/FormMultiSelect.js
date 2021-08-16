@@ -78,7 +78,7 @@ class FormMultiSelect extends Component{
     }
     
     render(){
-        const {icon, source, name, placeholder, tourStep, error} = this.props.data;
+        const {icon, source, name, placeholder, tourStep, error, readonly} = this.props.data;
         const {entity} = this.props;
         let value = entity[name];
         let iconClassName = '';
@@ -96,6 +96,7 @@ class FormMultiSelect extends Component{
             >
                 <Select
                     id={`input_${name}`}
+                    isDisabled={readonly}
                     error={error}
                     name={name}
                     value={value}

@@ -31,6 +31,8 @@ import ToolboxThemeInput from "../../../../../../hocs/ToolboxThemeInput";
 import Select from "@basic_components/inputs/Select";
 
 
+const HAS_API_DOCS = false;
+
 /**
  * Component for Form Connectors
  */
@@ -135,6 +137,9 @@ class FormConnectors extends Component{
         }
     }
 
+    /**
+     * to render api doc of from invoker
+     */
     renderFromInvoker(){
         const {hasAddMethod, connectors} = this.props.data;
         const {isFromInvokerOpened, fromWillDisappear} = this.state;
@@ -150,6 +155,9 @@ class FormConnectors extends Component{
         );
     }
 
+    /**
+     * to render api doc of to invoker
+     */
     renderToInvoker(){
         const {hasAddMethod, connectors} = this.props.data;
         const {isToInvokerOpened, toWillDisappear} = this.state;
@@ -181,7 +189,7 @@ class FormConnectors extends Component{
                         tabIndex={-1}
                         theme={{input: styles.form_connector_input}}
                     />
-                    {hasApiDocs && <InvokerButton onClick={::this.toggleFromInvoker} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>}
+                    {hasApiDocs && HAS_API_DOCS && <InvokerButton onClick={::this.toggleFromInvoker} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>}
                     {::this.renderFromInvoker()}
                 </Col>
                 <Col md={2} style={{textAlign: 'center'}}>
@@ -195,7 +203,7 @@ class FormConnectors extends Component{
                         tabIndex={-1}
                         theme={{input: styles.form_connector_input}}
                     />
-                    {hasApiDocs && <InvokerButton onClick={::this.toggleToInvoker} tooltip={toConnectorValue} position={'right'} isOpened={isToInvokerOpened}/>}
+                    {hasApiDocs && HAS_API_DOCS && <InvokerButton onClick={::this.toggleToInvoker} tooltip={toConnectorValue} position={'right'} isOpened={isToInvokerOpened}/>}
                     {::this.renderToInvoker()}
                 </Col>
             </Row>

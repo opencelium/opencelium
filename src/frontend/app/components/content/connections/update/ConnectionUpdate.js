@@ -25,7 +25,7 @@ import {fetchConnectors} from '@actions/connectors/fetch';
 import {ConnectionPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {ConnectionChange} from "@components/content/connections/ConnectionChange";
+import {ConnectionForm} from "@components/content/connections/ConnectionForm";
 import {fetchTemplates} from "@actions/templates/fetch";
 
 
@@ -61,7 +61,7 @@ function mapConnection(connection){
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'updating', ['connectors'], mapConnection)
-@ConnectionChange('update')
+@ConnectionForm('update')
 class ConnectionUpdate extends Component{}
 
 export default ConnectionUpdate;

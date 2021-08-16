@@ -27,6 +27,7 @@ import {permission} from "@decorators/permission";
 import {getThemeClass} from "@utils/app";
 import Table from "@basic_components/table/Table";
 import ViewComponent from "@components/general/view_component/ViewComponent";
+import {UserGroupForm} from "@components/content/user_groups/UserGroupForm";
 
 
 const prefixUrl = '/usergroups';
@@ -49,89 +50,7 @@ function mapStateToProps(state){
 @permission(UserGroupPermissions.READ, true)
 @withTranslation(['userGroups', 'app'])
 @SingleComponent('userGroup')
-class UserGroupView extends Component{
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        const {t, userGroup, authUser} = this.props;
-        let classNames = ['user_group',
-            'user_group_title_xs',
-            'user_group_title',
-            'user_group_icon',
-            'user_group_icon_size',
-            'user_group_description',
-            'user_group_row_table',
-            'user_group_col_table',
-            'header_cell',
-            'row_cell'];
-        classNames = getThemeClass({classNames, authUser, styles});
-        let components = userGroup.components;
-        const header = t('VIEW.HEADER');
-        const listButton = {title: t('VIEW.LIST_BUTTON'), link: `${prefixUrl}`, permission: UserGroupPermissions.READ};
-        return (
-            <ViewComponent header={header} listButton={listButton} permission={UserGroupPermissions.READ}>
-                <Row className={styles[classNames.user_group]}>
-                    <Col md={12}>
-                        <Row>
-                            <Visible xs sm>
-                                <Col offset={{md: 2}} md={10} className={styles[classNames.user_group_title_xs]}>
-                                    {userGroup.role}
-                                </Col>
-                            </Visible>
-                            <Hidden xs sm>
-                                <Col offset={{md: 2}} md={10} className={styles[classNames.user_group_title]}>
-                                    {userGroup.role}
-                                </Col>
-                            </Hidden>
-                        </Row>
-                        <Row>
-                            <Col md={2} className={styles[classNames.user_group_icon]}>
-                                <UserGroupIcon icon={userGroup.icon} className={styles[classNames.user_group_icon_size]}/>
-                            </Col>
-                            <Col md={10} className={styles[classNames.user_group_description]}>
-                                {userGroup.description}
-                            </Col>
-                        </Row>
-                        <Row className={styles[classNames.user_group_row_table]}>
-                            <Col md={12} className={styles[classNames.user_group_col_table]}>
-                                <Table hover>
-                                    <thead>
-                                        <tr>
-                                            <th>{t('VIEW.TABLE_HEAD')}</th>
-                                            {Permissions.map((permission, key) => (
-                                                <th key={key}>{t(`app:PERMISSIONS.${permission}`)}</th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {components.map((component, key) => (
-                                            <tr key={key}>
-                                                <td>{t(`app:COMPONENTS.${component.name}`)}</td>
-                                                {
-                                                    Permissions.map((permission, key2) => {
-                                                        let value = '-';
-                                                        if(component.permissions.indexOf(permission) !== -1){
-                                                            value = '+';
-                                                        }
-                                                        return (
-                                                            <td key={key2}>{value}</td>
-                                                        );
-                                                    })
-                                                }
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
-            </ViewComponent>
-        );
-    }
-}
+@UserGroupForm('view')
+class UserGroupView extends Component{}
 
 export default UserGroupView;

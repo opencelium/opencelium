@@ -17,16 +17,12 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchUser} from '@actions/users/fetch';
-import UserDetails from "./UserDetails";
-import UserGroup from "./UserGroup";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {permission} from "@decorators/permission";
 import {UserPermissions} from "@utils/constants/permissions";
-import ViewComponent from "@components/general/view_component/ViewComponent";
+import {UserForm} from "@components/content/users/UserForm";
 
 
-
-const prefixUrl = '/users';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -46,24 +42,7 @@ function mapStateToProps(state){
 @permission(UserPermissions.READ, true)
 @withTranslation('users')
 @SingleComponent('user')
-class UserView extends Component{
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        const {t, user} = this.props;
-        const usergroup = user.userGroups;
-        const listButton = {title: t('VIEW.LIST_BUTTON'), link: `${prefixUrl}`, permission: UserPermissions.READ};
-        const header = t('VIEW.HEADER');
-        return (
-            <ViewComponent header={header} listButton={listButton} permission={UserPermissions.READ}>
-                <UserDetails user={user}/>
-                <UserGroup usergroup={usergroup}/>
-            </ViewComponent>
-        );
-    }
-}
+@UserForm('view')
+class UserView extends Component{}
 
 export default UserView;

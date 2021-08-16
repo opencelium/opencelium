@@ -23,7 +23,7 @@ import {fetchComponents} from '@actions/components/fetch';
 import {permission} from "@decorators/permission";
 import {UserGroupPermissions} from "@utils/constants/permissions";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {UserGroupChange} from "@components/content/user_groups/UserGroupChange";
+import {UserGroupForm} from "@components/content/user_groups/UserGroupForm";
 
 
 /**
@@ -62,7 +62,7 @@ function mapStateToProps(state){
 @permission(UserGroupPermissions.CREATE, true)
 @withTranslation(['userGroups', 'app'])
 @SingleComponent('userGroup', 'adding', ['components'], mapUserGroup)
-@UserGroupChange('add')
+@UserGroupForm('add')
 class UserGroupAdd extends Component{}
 
 export default UserGroupAdd;

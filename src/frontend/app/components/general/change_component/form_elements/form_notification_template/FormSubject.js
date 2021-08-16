@@ -42,7 +42,7 @@ class FormSubject extends Component{
         const {subject} = this.state;
         let {contentItem, updateEntity} = this.props;
         contentItem.subject = subject;
-        updateEntity(contentItem);
+        updateEntity(contentItem, 'subject');
     }
 
     changeSubject(subject){

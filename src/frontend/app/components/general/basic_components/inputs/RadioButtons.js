@@ -25,7 +25,10 @@ class RadioButtons extends React.Component{
     }
 
     onChange(e){
-        this.props.handleChange(e.target.value);
+        const {readOnly, handleChange} = this.props;
+        if(!readOnly){
+            handleChange(e.target.value);
+        }
     }
 
     renderRadios(){

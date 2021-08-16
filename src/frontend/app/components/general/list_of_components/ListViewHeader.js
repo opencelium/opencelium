@@ -35,8 +35,15 @@ class ListViewHeader extends React.Component{
                     }
                     {header.map(item => {
                         const hasNoColumn = item.value === 'id' || item.visible === false;
+                        let style = item.hasOwnProperty('style') ? item.style : null;
+                        if(item.width){
+                            if(!style){
+                                style = {};
+                            }
+                            style.width = item.width;
+                        }
                         return hasNoColumn ? null :
-                            <th key={item.value} style={item.width ? {width: item.width} : null}
+                            <th key={item.value} style={style}
                                 title={item.label}>
                                 {item.label}
                                 {(item.value === 'name' || item.value === 'title') && <TooltipFontIcon isButton={true} blueTheme tooltip={sortTooltip} value={sortValue} onClick={toggleSortType}/>}

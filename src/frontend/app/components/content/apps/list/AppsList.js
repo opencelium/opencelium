@@ -67,7 +67,7 @@ class AppsList extends Component{
             entityIdsName: 'appIds',
             deleteSelected: () => {},
             map: (app) => {
-                return [{name: 'id', value: app.id}, {name: 'name', label: t('LIST.NAME'), value: app.name, width: '30%'}, {name: 'status', label: t('LIST.STATUS'), value: app.status, width: '25%'}]
+                return [{name: 'id', value: app.id}, {name: 'name', label: t('LIST.NAME'), value: app.name, width: '30%'}, {name: 'status', label: t('LIST.STATUS'), value: app.status, width: '25%'}, {name: 'link', label: t('LIST.LINK'), value: app.link, visible: false}]
             },
         }
         let mapEntity = {};
@@ -93,8 +93,10 @@ class AppsList extends Component{
             result.openEntityEvent = () => checkApp(app);
             return result;
         };
+        mapEntity.getViewLink = (app) => {return `${app.link}`;};
         mapEntity.getOnCardClickLink = (app) => {return `${app.link}`;};
         return <List
+            noSearchField={true}
             listViewData={listViewData}
             entities={apps}
             translations={translations}

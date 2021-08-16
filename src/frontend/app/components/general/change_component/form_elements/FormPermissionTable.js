@@ -100,8 +100,11 @@ class FormPermissionTable extends Component{
             type = '-';
         }
         let componentName = component.label;
-        const {name} = this.props.data;
+        const {name, readonly} = this.props.data;
         const {entity, updateEntity} = this.props;
+        if(readonly){
+            return;
+        }
         let permissions = entity[name];
         let index = -1;
         if(permissions.hasOwnProperty(componentName)){
@@ -136,7 +139,7 @@ class FormPermissionTable extends Component{
 
     render(){
         const {focused} = this.state;
-        const {label, name, dataSource, icon, tourStep, error} = this.props.data;
+        const {label, name, dataSource, icon, tourStep, error, readonly} = this.props.data;
         const {t, entity} = this.props;
         let components = entity[dataSource];
         let values = entity[name];

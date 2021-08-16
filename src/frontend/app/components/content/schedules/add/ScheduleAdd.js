@@ -22,7 +22,7 @@ import {fetchConnections} from "@actions/connections/fetch";
 import {permission} from "@decorators/permission";
 import {SchedulePermissions} from "@utils/constants/permissions";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {ScheduleChange} from "@components/content/schedules/ScheduleChange";
+import {ScheduleForm} from "@components/content/schedules/ScheduleForm";
 
 
 function mapStateToProps(state){
@@ -55,7 +55,7 @@ function mapSchedule(schedule){
 @permission(SchedulePermissions.CREATE, true)
 @withTranslation(['schedules', 'app'])
 @SingleComponent('schedule', 'adding', ['connections'], mapSchedule)
-@ScheduleChange('add')
+@ScheduleForm('add')
 class ScheduleAdd extends Component{}
 
 export default ScheduleAdd;

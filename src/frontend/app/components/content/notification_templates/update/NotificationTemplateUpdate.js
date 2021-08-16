@@ -22,7 +22,7 @@ import {updateNotificationTemplate} from '@actions/notification_templates/update
 import {NotificationTemplatePermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {NotificationTemplateChange} from "@components/content/notification_templates/NotificationTemplateChange";
+import {NotificationTemplateForm} from "@components/content/notification_templates/NotificationTemplateForm";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -47,7 +47,7 @@ function mapNotificationTemplate(notificationTemplate){
 @permission(NotificationTemplatePermissions.UPDATE, true)
 @withTranslation(['notification_templates', 'app', 'schedules'])
 @SingleComponent('notificationTemplate', 'updating', [], mapNotificationTemplate)
-@NotificationTemplateChange('update')
+@NotificationTemplateForm('update')
 class NotificationTemplateUpdate extends Component{}
 
 export default NotificationTemplateUpdate;

@@ -80,7 +80,7 @@ class FormType extends Component{
                 onBlur={::this.blurSelect}
                 options={options}
                 placeholder={placeholder}
-                isDisable={isReadonly}
+                isDisabled={isReadonly}
             />
         );
     }

@@ -47,10 +47,10 @@ class FormContent extends Component{
         };
     }
 
-    updateEntity(contentItem){
+    updateEntity(contentItem, name){
         let {entity, updateEntity} = this.props;
         entity.changeContentByLanguage(contentItem);
-        updateEntity(entity);
+        updateEntity(entity, name);
     }
 
     updateNewContent(contentItem){

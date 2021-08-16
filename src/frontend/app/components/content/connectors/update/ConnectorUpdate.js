@@ -23,7 +23,7 @@ import {testConnector} from '@actions/connectors/test';
 import {fetchInvokers} from '@actions/invokers/fetch';
 import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
-import {ConnectorChange} from "@components/content/connectors/ConnectorChange";
+import {ConnectorForm} from "@components/content/connectors/ConnectorForm";
 import {ConnectorPermissions} from "@utils/constants/permissions";
 
 function mapStateToProps(state){
@@ -71,7 +71,7 @@ function mapConnector(connector){
 @permission(ConnectorPermissions.UPDATE, true)
 @withTranslation(['connectors', 'app'])
 @SingleComponent('connector', 'updating', ['invokers'], mapConnector)
-@ConnectorChange('update')
+@ConnectorForm('update')
 class ConnectorUpdate extends Component{}
 
 export default ConnectorUpdate;
