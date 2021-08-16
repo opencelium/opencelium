@@ -7,6 +7,7 @@
     "EMPTY_LIST": "The list of Admin Cards is empty",
     "HEADER": "Admin Cards",
     "NO_UPDATES": "No updates available",
-    "UPDATES": "New version is available"
+    "UPDATES": "New version is available",
+    "NAME": "Name"
   }
 }

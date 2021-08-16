@@ -87,7 +87,7 @@ class NotificationTemplatesList extends Component{
             entityIdsName: 'notificationTemplateIds',
             deleteSelected: () => {},
             map: (notificationTemplate) => {
-                return [{name: 'id', value: notificationTemplate.id}, {name: 'name', label: t('LIST.NAME'), value: notificationTemplate.name, width: '30%'}, {name: 'type', label: t('LIST.TYPE'), value: notificationTemplate.type, width: '35%'}]
+                return [{name: 'id', value: notificationTemplate.templateId}, {name: 'name', label: t('LIST.NAME'), value: notificationTemplate.name, width: '30%'}, {name: 'type', label: t('LIST.TYPE'), value: notificationTemplate.type, width: '35%'}]
             },
         }
         let mapEntity = {};
@@ -98,8 +98,8 @@ class NotificationTemplatesList extends Component{
             result.avatar = notificationTemplate.icon;
             return result;
         };
-        mapEntity.getViewLink = (notificationTemplate) => {return `${prefixUrl}/${notificationTemplate.templateId}/view`;};
-        mapEntity.getUpdateLink = (notificationTemplate) => {return `${prefixUrl}/${notificationTemplate.templateId}/update`;};
+        mapEntity.getViewLink = (notificationTemplate) => {const id = notificationTemplate.hasOwnProperty('id') ? notificationTemplate.id : notificationTemplate.templateId; return `${prefixUrl}/${id}/view`;};
+        mapEntity.getUpdateLink = (notificationTemplate) => {const id = notificationTemplate.hasOwnProperty('id') ? notificationTemplate.id : notificationTemplate.templateId; return `${prefixUrl}/${id}/update`;};
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteNotificationTemplate;
         return <List

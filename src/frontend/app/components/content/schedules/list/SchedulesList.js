@@ -239,7 +239,7 @@ class SchedulesList extends Component{
                             <td key={`connection_title_${schedule.schedulerId}`} className={styles.schedule_list_title}>
                                 <ReactRouterLink
                                     onlyActiveOnIndex={true}
-                                    to={`/connections/${schedule.connection.connectionId}/view`}
+                                    to={`/connections/${schedule.connection.connectionId}/update`}
                                 >
                                     <span title={schedule.connection.title}>
                                         {schedule.connection.title}

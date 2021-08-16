@@ -34,7 +34,8 @@ class ListViewHeader extends React.Component{
                         </th>
                     }
                     {header.map(item => {
-                        return item.value === 'id' ? null :
+                        const hasNoColumn = item.value === 'id' || item.visible === false;
+                        return hasNoColumn ? null :
                             <th key={item.value} style={item.width ? {width: item.width} : null}
                                 title={item.label}>
                                 {item.label}

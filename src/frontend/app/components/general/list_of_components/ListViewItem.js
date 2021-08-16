@@ -134,7 +134,7 @@ class ListViewItem extends React.Component{
                     </td>
                 }
                 {item.map((element) => {
-                    if(element.name === 'id') return null;
+                    if(element.name === 'id' || element.visible === false) return null;
                     let shortText = isString(element.value) && element.value.length > 128 ? `${element.value.substr(0, 128)}...` : element.value;
                     let fullText = isString(element.value) ? element.value : '';
                     if(React.isValidElement(shortText)){

@@ -91,6 +91,13 @@ class AdminCardsList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        let listViewData = {
+            entityIdName: 'id',
+            entityIdsName: 'adminCardIds',
+            map: (adminCard) => {
+                return [{name: 'id', value: adminCard.id}, {name: 'name', label: t('LIST.NAME'), value: adminCard.name, width: '80%'}, {name: 'link', label: t('LIST.NAME'), value: adminCard.link, visible: false}]
+            },
+        }
         let mapEntity = {};
         mapEntity.map = (adminCard) => {
             let result = {};
@@ -108,6 +115,7 @@ class AdminCardsList extends Component{
             return result;
         };
         mapEntity.getOnCardClickLink = (adminCard) => {return `${adminCard.link}`;};
+        mapEntity.getViewLink = (adminCard) => {return `${adminCard.link}`;};
         return <List
             entities={adminCards}
             translations={translations}
@@ -116,10 +124,12 @@ class AdminCardsList extends Component{
             setTotalPages={setTotalPages}
             permissions={AppPermissions}
             authUser={authUser}
+            listViewData={listViewData}
             load={{loadLink: loadAdminCardsLink, loadingLink: loadingAdminCardsLink, callback: ::this.redirect}}
             containerStyles={{marginBottom: '70px'}}
             noSearchField={true}
             mapDependencies={{fetchingUpdateAppVersion, fetchingAppVersion}}
+            hasDeleteSelectedButtons={false}
         />;
     }
 }
