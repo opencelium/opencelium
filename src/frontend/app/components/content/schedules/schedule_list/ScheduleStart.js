@@ -34,6 +34,7 @@ function mapStateToProps(state){
     return {
         authUser: auth.get('authUser'),
         triggeringSchedule: schedules.get('triggeringSchedule'),
+        fetchingSchedulesByIds: schedules.get('fetchingSchedulesByIds'),
         stateSchedule: schedules.get('schedule'),
     };
 }

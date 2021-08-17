@@ -62,7 +62,7 @@ import {API_METHOD} from "@utils/constants/app";
  * main url for schedulers
  */
 const urlPrefix = 'scheduler';
-const INTERVAL_OF_GETTING_CURRENT_SCHEDULES = 2000;
+const INTERVAL_OF_GETTING_CURRENT_SCHEDULES = 20;
 
 
 /**
