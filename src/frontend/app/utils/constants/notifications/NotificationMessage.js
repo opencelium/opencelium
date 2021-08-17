@@ -99,7 +99,7 @@ class NotificationMessage extends Component{
         } else{
             let comingMessage = params && params.hasOwnProperty('response') && params.response && params.response.hasOwnProperty('message') ? params.response.message : '';
             if(comingMessage === ''){
-                comingMessage = params &&  params.hasOwnProperty('message') && params.message !== 'No message available' ? params.message : '';
+                comingMessage = params &&  params.hasOwnProperty('message') && params.message !== 'No message available' && params.message !== 'ajax error 0' ? params.message : '';
             }
             if(comingMessage){
                 if(i18n.exists(`notifications:${status}.${message}.${comingMessage}`)) {

@@ -18,7 +18,7 @@ import {fromJS} from 'immutable';
 import {AuthAction} from '../utils/actions';
 import {updateDashboardSettingsSubscriber} from "../utils/socket/users";
 import {API_REQUEST_STATE} from "../utils/constants/app";
-import {getLS, removeLS} from "@utils/LocalStorage";
+import {getLS, removeLS, setLS} from "@utils/LocalStorage";
 
 
 const initialState = fromJS({
@@ -28,7 +28,7 @@ const initialState = fromJS({
     logining: false,
     logouting: false,
     updatingDashboardSettings: false,
-    togglingAppTour: false,
+    togglingAppTour: API_REQUEST_STATE.INITIAL,
     updatingTheme: false,
     updatingAuthUserLanguage: false,
     error: null,
@@ -92,13 +92,14 @@ const reducer = (state = initialState, action) => {
         case AuthAction.UPDATE_THEME_REJECTED:
             return state.set('updatingTheme', false).set('error', fromJS(action.payload));
         case AuthAction.TOGGLE_APPTOUR:
-            return state.set('togglingAppTour', true).set('error', null);
+            return state.set('togglingAppTour', API_REQUEST_STATE.START).set('error', null);
         case AuthAction.TOGGLE_APPTOUR_FULFILLED:
             authUser = state.get('authUser');
-            authUser.userDetail = action.payload;
-            return state.set('togglingAppTour', false).set('authUser', authUser);
+            authUser.userDetail.appTour = !authUser.userDetail.appTour;
+            setLS("userDetail", authUser.userDetail);
+            return state.set('togglingAppTour', API_REQUEST_STATE.FINISH).set('authUser', authUser);
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
-            return state.set('togglingAppTour', false).set('error', fromJS(action.payload));
+            return state.set('togglingAppTour', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload));
         default:
             return state;
     }

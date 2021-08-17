@@ -293,7 +293,7 @@ export function sortByIndexFunction(a, b){
  * a callback to search by name
  */
 export function searchByNameFunction(element, searchValue){
-    let elementValue = element && element.hasOwnProperty('name') ? element.name.toUpperCase() : element && element.hasOwnProperty('title') ? element.title.toUpperCase() : '';
+    let elementValue = element && isString(element.name) ? element.name.toUpperCase() : element && isString(element.title) ? element.title.toUpperCase() : '';
     if(elementValue === ''){
         if(element.hasOwnProperty('userDetail') && element.userDetail && element.userDetail.hasOwnProperty('name')){
             elementValue = element.userDetail.name.toUpperCase();

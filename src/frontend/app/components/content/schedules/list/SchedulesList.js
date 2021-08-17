@@ -125,7 +125,7 @@ class SchedulesList extends Component{
             }
             this.props.setCurrentPageItems(updatedCurrentPageItems);
         }
-        if(shouldUpdateSchedules){
+        if(shouldUpdateSchedules && typeof this.state.updateSchedules === 'function'){
             this.state.updateSchedules();
         }
     }
@@ -216,12 +216,12 @@ class SchedulesList extends Component{
         mapEntity.map = (schedule) => {
             return schedule.getObject();
         };
-        const renderListViewItemActions = (schedule) => {
+        const renderListViewItemActions = (schedule, setCurrentPageItems) => {
             return (
                 <React.Fragment>
                     <WebHookTools schedule={schedule} t={t}/>
                     <ScheduleNotification schedule={schedule}/>
-                    <ScheduleStart schedule={schedule}/>
+                    <ScheduleStart schedule={schedule} setCurrentPageItems={setCurrentPageItems}/>
                 </React.Fragment>
             );
         }

@@ -18,15 +18,15 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import {Roles} from '@utils/constants/app';
 
-import {componentAppear} from "@utils/app";
+import {componentAppear, getThemeClass} from "@utils/app";
 import styles from '@themes/default/layout/menu.scss';
 import ConnectorsMenuItem from "@components/layout/menu/ConnectorsMenuItem";
 import AdminMenuItem from "@components/layout/menu/AdminMenuItem";
 import ConnectionsMenuItem from "@components/layout/menu/ConnectionsMenuItem";
 import SchedulesMenuItem from "@components/layout/menu/SchedulesMenuItem";
 import LogoutMenuItem from "@components/layout/menu/LogoutMenuItem";
-import LogoOcWhiteImagePath from "@images/logo_oc_white.png";
 import {MenuIcon, MenuLinkLogo} from "@components/layout/menu/MenuLink";
+import {getStyles} from "@utils/themes";
 
 
 function mapStateToProps(state){
@@ -128,12 +128,14 @@ class Menu extends Component{
 
     render(){
         const {visible, isMouseOver} = this.state;
-        const {isOneFormSectionFullScreen} = this.props;
+        const {isOneFormSectionFullScreen, authUser} = this.props;
+        let classNames = ['navbar'];
+        classNames = getThemeClass({classNames, authUser, styles});
         let isExpanded = isMouseOver ? true : this.state.isExpanded;
         if(!visible){
             return null;
         }
-        let navbarClassName = styles.navbar;
+        let navbarClassName = '';
         if(isExpanded){
             navbarClassName += ` ${styles.expander}`;
         }
@@ -141,7 +143,7 @@ class Menu extends Component{
             navbarClassName += ` ${styles.hidden}`;
         }
         return(
-            <div className={navbarClassName} id="navbar" onMouseOver={::this.setMouseOver} onMouseLeave={::this.setMouseLeave} onFocus={::this.setMouseOver} onBlur={::this.setMouseLeave}>
+            <div style={getStyles('menu')} className={navbarClassName} id="navbar" onMouseOver={::this.setMouseOver} onMouseLeave={::this.setMouseLeave} onFocus={::this.setMouseOver} onBlur={::this.setMouseLeave}>
                 <nav className={styles.main_menu_nav}>
                     <div>
                         <div className={styles.nav_brand}>

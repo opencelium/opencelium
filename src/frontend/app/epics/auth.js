@@ -142,8 +142,9 @@ const toggleAppTourEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let {payload} = action;
+            let appTour = !payload.userDetail.appTour;
             let url = `userDetail/${payload.userId}`;
-            return doRequest({url, method: API_METHOD.PUT, data: payload.userDetail}, {
+            return doRequest({url, method: API_METHOD.PUT, data: {...payload.userDetail, appTour}}, {
                 success: toggleAppTourFulfilled,
                 reject: toggleAppTourRejected,},
                 res => {return payload.userDetail;}

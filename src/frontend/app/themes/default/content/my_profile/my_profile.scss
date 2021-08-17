@@ -186,6 +186,7 @@
 
 .user_group{
   margin-top: 15px;
+  margin-left: 20px;
 }
 
 .user_group_title_xs{
@@ -196,6 +197,7 @@
 }
 
 .user_group_title{
+  align-self: center;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_MEDIUM;
   text-transform: capitalize;
@@ -207,16 +209,11 @@
 }
 
 .user_group_icon{
-  text-align: center;
-  img{
-    width: 70px;
-    height: 70px;
-  }
+  @extend .form_image;
 }
 
 
 .user_group_row_table{
-  padding: 0 15px;
 }
 
 .user_group_col_table{
@@ -226,6 +223,7 @@
 
 
 .user_group_description{
+  margin-top: 10px;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_TINY;
 }

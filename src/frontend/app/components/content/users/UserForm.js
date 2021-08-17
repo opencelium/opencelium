@@ -257,6 +257,15 @@ export function UserForm(type){
                     }
                 }
 
+                getPhotoField(){
+                    const {t} = this.props;
+                    if(this.isView) {
+                        return {...INPUTS.USER_PHOTO, label: t(`FORM.PROFILE_PICTURE`)};
+                    } else{
+                        return {...INPUTS.PROFILE_PICTURE, label: t(`${this.translationKey}.FORM.PROFILE_PICTURE`), browseTitle: t(`${this.translationKey}.FORM.PROFILE_PICTURE_PLACEHOLDER`)};
+                    }
+                }
+
                 /**
                  * to add/update User
                  */
@@ -303,7 +312,7 @@ export function UserForm(type){
                                 {...INPUTS.PHONE_NUMBER, label: t(`${this.translationKey}.FORM.PHONE_NUMBER`), defaultValue: '',readonly: this.isView,},
                                 {...INPUTS.DEPARTMENT, label: t(`${this.translationKey}.FORM.DEPARTMENT`), defaultValue: '',readonly: this.isView,},
                                 {...INPUTS.ORGANIZATION, label: t(`${this.translationKey}.FORM.ORGANISATION`), defaultValue: '',readonly: this.isView,},
-                                {...INPUTS.PROFILE_PICTURE, label: t(`${this.translationKey}.FORM.PROFILE_PICTURE`), browseTitle: t(`${this.translationKey}.FORM.PROFILE_PICTURE_PLACEHOLDER`),readonly: this.isView,},
+                                {...this.getPhotoField()}
                             ],
                             hint: {text: t(`${this.translationKey}.FORM.HINT_2`), openTour},
                             header: t(`${this.translationKey}.FORM.PAGE_2`),

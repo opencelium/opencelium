@@ -16,38 +16,32 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '@themes/default/general/view_component.scss';
-import {getThemeClass} from "@utils/app";
-
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
+import UserPhotoIcon from "@components/icons/UserPhotoIcon";
 
 /**
- * SubHeader for ViewComponent
+ * Component for Form User Photo
  */
-class SubHeader extends Component{
+@FormElement()
+class FormUserPhoto extends Component{
 
     constructor(props){
         super(props);
     }
 
     render(){
-        const {title, authUser, className} = this.props;
-        let classNames = ['title'];
-        classNames = getThemeClass({classNames, authUser, styles});
+        const {profilePicture} = this.props.entity;
         return (
-            <div className={`${className} ${styles[classNames.title]}`}>
-                {title}
-            </div>
+            <UserPhotoIcon photo={profilePicture} className={styles.user_photo}/>
         );
     }
 }
 
-SubHeader.propTypes = {
-    title: PropTypes.string.isRequired,
-    className: PropTypes.string,
+FormUserPhoto.propTypes = {
+    entity: PropTypes.object.isRequired,
+    data: PropTypes.object.isRequired,
 };
 
-SubHeader.defaultProps = {
-    className: '',
-};
 
-export default SubHeader;
+export default FormUserPhoto;

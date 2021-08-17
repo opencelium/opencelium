@@ -57,7 +57,9 @@
     "UPDATE_TEMPLATESFORASSISTANT": "Templates were successfully updated",
     "UPDATE_INVOKERSFORASSISTANT": "Invokers were successfully updated",
     "UPDATE_CONNECTIONSFORASSISTANT": "Connections were successfully updated",
-    "UPDATE_SYSTEM": "Opencelium was successfully updated"
+    "UPDATE_SYSTEM": "Opencelium was successfully updated",
+    "TOGGLE_APPTOUR": "The application tour was successfully switched",
+    "UPDATE_THEME": "The application theme was successfully changed"
   },
   "ERROR": {
     "ADD_USER": {
@@ -196,6 +198,12 @@
     },
     "FETCH_OFFLINEUPDATES": {
       "__DEFAULT__": "The Offline Updates were not fetched"
+    },
+    "TOGGLE_APPTOUR": {
+      "__DEFAULT__": "The application tour was not switched"
+    },
+    "UPDATE_THEME": {
+      "__DEFAULT__": "The application theme was not changed"
     }
   },
   "WARNING": {

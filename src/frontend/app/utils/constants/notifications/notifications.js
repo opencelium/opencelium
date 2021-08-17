@@ -45,6 +45,8 @@ export const EntitiesWithNotification = [
     {name: AuthAction.LOG_IN, types: ['REJECTED']},
     {name: AuthAction.SESSION_EXPIRED, types: ['WARNED']},
     {name: AuthAction.UPDATE_AUTH_USER_LANGUAGE, types: ['FULFILLED', 'REJECTED']},
+    {name: AuthAction.TOGGLE_APPTOUR, types: ['FULFILLED', 'REJECTED']},
+    {name: AuthAction.UPDATE_THEME, types: ['FULFILLED', 'REJECTED']},
     {name: AppAction.DO_REQUEST, types: ['REJECTED']},
     {name: ConnectorsAction.TEST_CONNECTOR, types: ['FULFILLED', 'REJECTED']},
     {name: ConnectorsAction.ADD_CONNECTOR, types: ['FULFILLED', 'REJECTED', 'STORE']},

@@ -220,7 +220,6 @@ class List extends Component{
     setCurrentPageItems(){
         const {mapEntity, setCurrentPageItems} = this.props;
         let filteredEntities = this.filterEntities().map((entity, key) => {let data = entity.getObject ? entity.getObject() : entity; return {...data, mappedEntity: mapEntity.map(entity, key)};});
-        console.log('set', filteredEntities);
         setCurrentPageItems(filteredEntities);
     }
 
@@ -412,7 +411,7 @@ class List extends Component{
         const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width, visible: element.visible, style: element.style};}) : [];
         const entityIdName = listViewData ? listViewData.entityIdName : '';
         const actionsShouldBeMinimized = listViewData && listViewData.hasOwnProperty('actionsShouldBeMinimized') ? listViewData.actionsShouldBeMinimized : false;
-        const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? listViewData.renderItemActions : null;
+        const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? (schedule) => listViewData.renderItemActions(schedule, ::this.setCurrentPageItems) : null;
         const isDeleteSelectedButtonDisabled = !::this.isOneChecked();
         const hasAddButton = mapEntity.hasOwnProperty('getAddLink') || mapEntity.hasOwnProperty('AddButton');
         if(hasDeleteSelectedButtons){

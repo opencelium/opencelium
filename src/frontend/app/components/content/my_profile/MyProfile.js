@@ -18,14 +18,11 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
 import {fetchUser} from '@actions/users/fetch';
-import UserDetails from "./UserDetails";
-import UserGroup from "./UserGroup";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {permission} from "@decorators/permission";
 import {MyProfilePermissions} from "@utils/constants/permissions";
-import Themes from "./Themes";
-import AppTour from "./AppTour";
-import ViewComponent from "@components/general/view_component/ViewComponent";
+import {INPUTS} from "@utils/constants/inputs";
+import Form from "@change_component/Form";
 
 
 function mapStateToProps(state){
@@ -52,17 +49,119 @@ class MyProfile extends Component{
         super(props);
     }
 
+    /**
+     * to map userGroups for select
+     */
+    mapUserGroups(){
+        const {userGroups, t} = this.props;
+        let result = {userGroups: [], descriptions: []};
+        if(userGroups && userGroups.length > 0) {
+            result.userGroups.push({label: t(`FORM.USER_GROUP_PLACEHOLDER`), value: 0});
+            result.descriptions.push(t(`FORM.DESCRIPTION_DEFAULT`));
+            userGroups.map(userGroup => {
+                result.userGroups.push({label: userGroup.role, value: userGroup.id});
+                result.descriptions[userGroup.id] = userGroup.description;
+            });
+        }
+        return result;
+    }
+
+    /**
+     * to parse user after fetch
+     */
+    parseEntity(){
+        const {user} = this.props;
+        let result = {};
+        result.id = user.id;
+        result.email = user.email;
+        result.password = '';
+        result.repeatPassword = '';
+        result.name = user.userDetail.name;
+        result.surname = user.userDetail.surname;
+        result.phoneNumber = user.userDetail.phoneNumber;
+        result.organisation = user.userDetail.organisation;
+        result.department = user.userDetail.department;
+        result.userTitle = user.userDetail.userTitle;
+        result.profilePicture = user.userDetail.profilePicture;
+        result.userGroup = user.userGroups;
+        return result;
+    }
+
     render(){
-        const {t, user} = this.props;
-        const userGroup = user.userGroups;
-        const header = t('HEADER');
+        const {t} = this.props;
+        let contentTranslations = {};
+        contentTranslations.header = {title: t(`HEADER`)};
+        const parsedEntity = this.parseEntity();
+        const contents = [
+            {
+                inputs:[
+                    {...INPUTS.USER_TITLE,
+                        label: t(`FORM.USER_TITLE`),
+                        defaultValue: '',
+                        readonly: true,
+                    },
+                    {...INPUTS.NAME,
+                        label: t(`FORM.NAME`),
+                        maxLength: 128,
+                        required: true,
+                        defaultValue: '',
+                        readonly: true,
+                    },
+                    {...INPUTS.SURNAME,
+                        label: t(`FORM.SURNAME`),
+                        maxLength: 128,
+                        required: true,
+                        defaultValue: '',
+                        readonly: true,
+                    },
+                    {...INPUTS.PHONE_NUMBER, label: t(`FORM.PHONE_NUMBER`), defaultValue: '',readonly: true,},
+                    {...INPUTS.DEPARTMENT, label: t(`FORM.DEPARTMENT`), defaultValue: '',readonly: true,},
+                    {...INPUTS.ORGANIZATION, label: t(`FORM.ORGANISATION`), defaultValue: '',readonly: true,},
+
+                    {...INPUTS.EMAIL,
+                        label: t(`FORM.EMAIL`),
+                        maxLength: 255,
+                        required: true,
+                        defaultValue: '',
+                        readonly: true,
+                    },
+                    {...INPUTS.USER_PHOTO, label: t(`FORM.PROFILE_PICTURE`),},
+                ],
+                hint: {text: t(`FORM.HINT_2`)},
+                header: t(`FORM.PAGE_2`),
+            },[
+                {
+                    inputs:[
+                        {...INPUTS.USER_GROUP_VIEW,
+                            label: t(`FORM.USER_GROUP`),
+                        }
+                    ],
+                    hint: {text: t(`FORM.HINT_3`)},
+                    header: t(`FORM.PAGE_3`),
+                },
+                {
+                    inputs:[
+                        {...INPUTS.THEMES,
+                            label: t(`FORM.THEMES`),
+                        },{...INPUTS.APP_TOUR,
+                            label: t(`FORM.APP_TOUR`),
+                        },
+                    ],
+                    hint: {text: t(`FORM.HINT_2`)},
+                    header: t(`FORM.PAGE_3`),
+                },
+            ]
+        ];
         return (
-            <ViewComponent header={header} permission={MyProfilePermissions.READ}>
-                <UserDetails user={user}/>
-                <UserGroup usergroup={userGroup}/>
-                <Themes/>
-                <AppTour/>
-            </ViewComponent>
+            <React.Fragment>
+                <Form
+                    contents={contents}
+                    translations={contentTranslations}
+                    permissions={MyProfilePermissions}
+                    entity={parsedEntity}
+                    type={'view'}
+                />
+            </React.Fragment>
         );
     }
 }

@@ -54,11 +54,13 @@ const ROLE = {name: 'role', type: 'text', maxLength: 256, icon: 'perm_identity'}
 const ICON = {name: 'icon', type: 'file', icon: 'photo'};
 const COMPONENTS = {name: 'components', type: 'multiselect', icon: 'view_carousel'};
 const PERMISSIONS = {name: 'permissions',type: 'permission_table', icon: 'lock_open'};
+const USER_GROUP_ICON = {name: 'profilePicture', type: 'user_group_icon_view', icon: 'photo'};
 const IUSER_GROUP = {
     ROLE,
     ICON,
     COMPONENTS,
     PERMISSIONS,
+    USER_GROUP_ICON,
 };
 
 //USER
@@ -87,6 +89,18 @@ const IUSER = {
     PROFILE_PICTURE,
     USER_GROUP,
 };
+
+//MY PROFILE
+const USER_PHOTO = {name: 'profilePicture', type: 'user_photo_view', icon: 'photo'};
+const THEMES = {name: 'themes', type: 'themes', icon: 'preview'};
+const APP_TOUR = {name: 'app_tour', type: 'app_tour', icon: 'help_center'};
+const USER_GROUP_VIEW = {name: 'userGroup', type: 'user_group_view', icon: 'supervised_user_circle'};
+const IMYPROFILE = {
+    USER_GROUP_VIEW,
+    USER_PHOTO,
+    THEMES,
+    APP_TOUR,
+}
 
 //INVOKER
 const INVOKER_NAME = {name: 'name', type: 'invoker_name', maxLength: 256, icon: 'title'};
@@ -140,6 +154,7 @@ export const INPUTS = {
     ...IINVOKER,
     ...INOTIFICATION_TEMPLATE,
     ...ISCHEDULE,
+    ...IMYPROFILE,
 };
 
 export const BACKSPACE_KEY_CODE = 8;

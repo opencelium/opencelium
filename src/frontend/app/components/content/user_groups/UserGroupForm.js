@@ -1,3 +1,4 @@
+import React from "react";
 import {setFocusById} from "@utils/app";
 import {INPUTS} from "@utils/constants/inputs";
 import {USERGROUP_TOURS} from "@utils/constants/tours";
@@ -5,7 +6,8 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 import Form from "@change_component/Form";
 import {UserGroupPermissions} from "@utils/constants/permissions";
 import OCTour from "@basic_components/OCTour";
-import React from "react";
+
+import styles from "@themes/default/content/user_groups/view.scss"
 
 /**
  * common component to add and update User Group
@@ -154,6 +156,17 @@ export function UserGroupForm(type) {
                 return {value: hasNotEmptyFields, message};
             }
 
+            getIconField(){
+                const {t} = this.props;
+                if(this.isView){
+                    return {...INPUTS.USER_GROUP_ICON, label: t(`FORM.PROFILE_PICTURE`)};
+                } else{
+                    return {
+                        ...INPUTS.ICON, label: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE`), browseTitle: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE_PLACEHOLDER`),
+                    };
+                }
+            }
+
             /**
              * to add/update UserGroup
              */
@@ -181,9 +194,10 @@ export function UserGroupForm(type) {
                             isLoading: checkingUserGroupName === API_REQUEST_STATE.START,
                             defaultValue: '',
                             readonly: this.isView,
+                            className: this.isView ? styles.role_input : '',
                         },
                         {...INPUTS.DESCRIPTION, label: t(`${this.translationKey}.FORM.DESCRIPTION`), defaultValue: '', readonly: this.isView,},
-                        {...INPUTS.ICON, label: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE`), browseTitle: t(`${this.translationKey}.FORM.USER_GROUP_PICTURE_PLACEHOLDER`), readonly: this.isView,},
+                        {...this.getIconField()}
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
                     header: t(`${this.translationKey}.FORM.PAGE_1`),

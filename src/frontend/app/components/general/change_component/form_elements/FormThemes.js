@@ -15,12 +15,8 @@
 
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import { Row, Col } from "react-grid-system";
 
 import {updateTheme} from '@actions/auth';
-import styles from '@themes/default/content/my_profile/my_profile.scss';
-import SubHeader from "../../general/view_component/SubHeader";
-import {getThemeClass} from "@utils/app";
 import {withTranslation} from "react-i18next";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
@@ -39,7 +35,7 @@ function mapStateToProps(state){
  */
 @connect(mapStateToProps, {updateTheme})
 @withTranslation('my_profile')
-class Themes extends Component{
+class FormThemes extends Component{
 
     constructor(props){
         super(props);
@@ -63,42 +59,33 @@ class Themes extends Component{
     }
 
     render(){
-        const {authUser, t} = this.props;
-        let classNames = ['user_details_themes_title', 'user_details_themes'];
-        classNames = getThemeClass({classNames, authUser, styles});
+        const {authUser, t, data} = this.props;
+        const {label, icon} = data;
         let theme = 'default';
         if(authUser.userDetail.hasOwnProperty('theme') && authUser.userDetail.theme){
             theme = authUser.userDetail.theme;
         }
         return (
-            <Row>
-                <Col md={12}>
-                    <SubHeader title={'Theme'} authUser={authUser} className={styles[classNames.user_details_themes_title]}/>
-                    <Row className={styles[classNames.user_details_themes]}>
-                        <Col md={12}>
-                            <RadioButtons
-                                label={''}
-                                value={theme}
-                                handleChange={::this.handleChangeTheme}
-                                radios={[
-                                    {
-                                        id: `theme_default`,
-                                        label: `${t('THEME.DEFAULT')}`,
-                                        value: 'default',
-                                    },{
-                                        id: `theme_other`,
-                                        label: `${t('THEME.OTHER')}`,
-                                        value: 'other',
-                                    }
-                                ]}
-                            />
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
+            <RadioButtons
+                value={theme}
+                label={label}
+                icon={icon}
+                handleChange={::this.handleChangeTheme}
+                radios={[
+                    {
+                        id: `theme_default`,
+                        label: `${t('THEME.DEFAULT')}`,
+                        value: 'default',
+                    },{
+                        id: `theme_other`,
+                        label: `${t('THEME.OTHER')}`,
+                        value: 'other',
+                    }
+                ]}
+            />
         );
     }
 }
 
 
-export default Themes;
+export default FormThemes;

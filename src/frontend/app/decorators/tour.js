@@ -68,7 +68,7 @@ export function tour(tourSteps, filter = null, once = false){
                     appTour = authUser.userDetail.appTour;
                 }
                 if(appTour !== isOpenTour) {
-                    authUser.userDetail.appTour = !appTour;
+                    //authUser.userDetail.appTour = !appTour;
                     store.dispatch(toggleAppTour(authUser));
                 }
                 this.setState({isOpenTour: true});

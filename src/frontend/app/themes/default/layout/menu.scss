@@ -18,6 +18,7 @@
 $NAVIGATION_WIDTH: 95px;
 $HIGHLIGHT_MENU_COLOR: $TURQUOISE_COLOR;
 $BACKGROUND_MENU_COLOR: #012E55;
+$BACKGROUND_GREEN_MENU_COLOR: #01553d;
 $MENU_COLOR: #eee;
 
 .html_body{
@@ -122,12 +123,12 @@ $MENU_COLOR: #eee;
 }
 
 .expander{
-  width: calc(#{$NAVIGATION_WIDTH} + 9.25rem);
+  width: calc(#{$NAVIGATION_WIDTH} + 9.25rem) !important;
 }
 
 .hidden{
-  width: 0;
-  padding: 0;
+  width: 0 !important;
+  padding: 0 !important;
 }
 
 .active{

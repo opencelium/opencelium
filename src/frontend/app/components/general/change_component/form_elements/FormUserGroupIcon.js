@@ -16,38 +16,33 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import styles from '@themes/default/general/view_component.scss';
-import {getThemeClass} from "@utils/app";
-
+import styles from '@themes/default/general/change_component.scss';
+import {FormElement} from "@decorators/FormElement";
+import UserPhotoIcon from "@components/icons/UserPhotoIcon";
+import UserGroupIcon from "@components/icons/UserGroupIcon";
 
 /**
- * SubHeader for ViewComponent
+ * Component for Form User Photo
  */
-class SubHeader extends Component{
+@FormElement()
+class FormUserGroupIcon extends Component{
 
     constructor(props){
         super(props);
     }
 
     render(){
-        const {title, authUser, className} = this.props;
-        let classNames = ['title'];
-        classNames = getThemeClass({classNames, authUser, styles});
+        const {icon} = this.props.entity;
         return (
-            <div className={`${className} ${styles[classNames.title]}`}>
-                {title}
-            </div>
+            <UserGroupIcon icon={icon} className={styles.user_group_icon}/>
         );
     }
 }
 
-SubHeader.propTypes = {
-    title: PropTypes.string.isRequired,
-    className: PropTypes.string,
+FormUserGroupIcon.propTypes = {
+    entity: PropTypes.object.isRequired,
+    data: PropTypes.object.isRequired,
 };
 
-SubHeader.defaultProps = {
-    className: '',
-};
 
-export default SubHeader;
+export default FormUserGroupIcon;

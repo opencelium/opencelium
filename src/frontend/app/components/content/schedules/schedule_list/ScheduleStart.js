@@ -60,6 +60,10 @@ class ScheduleStart extends Component{
             CVoiceControl.removeCommands({component: this, props: prevProps, state: prevState}, CScheduleControl);
             CVoiceControl.initCommands({component: this}, CScheduleControl);
         }
+        const shouldUpdateSchedules = prevProps.fetchingSchedulesByIds === API_REQUEST_STATE.START && this.props.fetchingSchedulesByIds === API_REQUEST_STATE.FINISH;
+        if(shouldUpdateSchedules){
+            this.props.setCurrentPageItems();
+        }
     }
 
     componentWillUnmount(){

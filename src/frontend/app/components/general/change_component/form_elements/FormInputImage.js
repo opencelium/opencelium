@@ -117,7 +117,7 @@ class FormInputImage extends Component{
                         name: label,
                     }}
                 />
-                <ReactCrop src={src} setCroppedImage={::this.setCroppedImage}/>
+                <ReactCrop src={src} setCroppedImage={::this.setCroppedImage} className={styles.image_crop}/>
             </div>
         );
     }

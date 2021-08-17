@@ -11,8 +11,14 @@ import ListButton from "@components/general/view_component/ListButton";
 import {ActionButton, SubFormSections} from "@change_component/FormComponents";
 import {setConnectionData} from "@actions/connection_overview_2/set";
 
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return {
+        authUser: auth.get('authUser'),
+    }
+}
 
-@connect(null, {setConnectionData})
+@connect(mapStateToProps, {setConnectionData})
 class Form extends React.Component{
     constructor(props) {
         super(props);

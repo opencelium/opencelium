@@ -42,7 +42,7 @@ class FormInput extends Component{
     }
 
     render(){
-        const {name, label, icon, maxLength, readonly, required, error, isLoading, value} = this.props.data;
+        const {name, label, icon, maxLength, readonly, required, error, isLoading, value, className} = this.props.data;
         const {entity} = this.props;
         let {type, tourStep} = this.props.data;
         let multiline = false;
@@ -50,6 +50,9 @@ class FormInput extends Component{
         let inputStyle = styles.form_input;
         if(tourStep){
             inputStyle += ' ' + tourStep;
+        }
+        if(className){
+            inputStyle += ` ${className}`;
         }
         if(type === 'textarea'){
             type = 'text';

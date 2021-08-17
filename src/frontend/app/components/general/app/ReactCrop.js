@@ -118,12 +118,13 @@ class ReactCrop extends React.Component{
     }
 
     render(){
-        const {src} = this.props;
+        const {src, className} = this.props;
         const { crop, croppedImageUrl} = this.state;
         return(
             <React.Fragment>
                 {src && (
                     <ReactImageCrop
+                        className={className}
                         src={src}
                         crop={crop}
                         ruleOfThirds
@@ -144,6 +145,10 @@ ReactCrop.propTypes = {
     src: PropTypes.any,
     setCroppedImage: PropTypes.func.isRequired,
 };
+
+ReactCrop.defaultProps = {
+    className: '',
+}
 
 
 export default ReactCrop;

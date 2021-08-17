@@ -47,6 +47,12 @@ import FormConnectionSvg from "@change_component/form_elements/form_connection/f
 import styles from '@themes/default/general/form_component.scss';
 import TestButton from "@change_component/form_elements/TestButton";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FormUserGroupView from "@change_component/form_elements/FormUserGroupView";
+import FormUserPhoto from "@change_component/form_elements/FormUserPhoto";
+import FormUserGroupIcon from "@change_component/form_elements/FormUserGroupIcon";
+import FormThemes from "@change_component/form_elements/FormThemes";
+import FormAppTour from "@change_component/form_elements/FormAppTour";
+import {getStyles} from "@utils/themes";
 
 
 function mapStateToProps(state){
@@ -277,6 +283,36 @@ class FormSection extends Component{
                     updateEntity={updateEntity}
                     data={data}
                 />;
+            case 'user_group_view':
+                return <FormUserGroupView
+                    key={key}
+                    entity={entity}
+                    data={data}
+                />;
+            case 'user_photo_view':
+                return <FormUserPhoto
+                    key={key}
+                    entity={entity}
+                    data={data}
+                />;
+            case 'user_group_icon_view':
+                return <FormUserGroupIcon
+                    key={key}
+                    entity={entity}
+                    data={data}
+                />;
+            case 'themes':
+                return <FormThemes
+                    key={key}
+                    entity={entity}
+                    data={data}
+                />;
+            case 'app_tour':
+                return <FormAppTour
+                    key={key}
+                    entity={entity}
+                    data={data}
+                />;
             case 'test_button':
                 return <TestButton
                     key={key}
@@ -300,9 +336,6 @@ class FormSection extends Component{
                 data['setFocusInput'] = setFocusInput;
                 data['focused'] = focusedInput !== '' && focusedInput === data.name;
                 data['visible'] = data.hasOwnProperty('visible') ? data.visible : true;
-                if(content.hasOwnProperty('visible')){
-                    data['visible'] = content.visible;
-                }
                 return this.mapInputs(Object.assign({}, data), key);
             });
         }
@@ -333,11 +366,11 @@ class FormSection extends Component{
         return (
             <div onMouseOver={::this.showIcons} onMouseLeave={::this.hideIcons} className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
                 {hasHeader &&
-                    <div id={`form_section_header_${content.header.toLowerCase()}`} className={styles.form_section_header} onClick={::this.toggle}>
+                    <div id={`form_section_header_${content.header.toLowerCase()}`} className={styles.form_section_header} onClick={::this.toggle} style={getStyles('form_section_header')}>
                         <span>{content.header}</span>
                     </div>
                 }
-                <span style={{display: areIconsVisible ? 'inline' : 'inline'}} className={styles.form_section_icons}>
+                <span style={{display: areIconsVisible ? 'inline' : 'none'}} className={styles.form_section_icons}>
                     {
                         content.AdditionalIcon
                     }

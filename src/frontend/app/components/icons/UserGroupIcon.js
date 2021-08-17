@@ -38,17 +38,18 @@ class UserGroupIcon extends Component{
 
     renderIcon(){
         const {isCorrectIcon} = this.state;
-        const {icon, className} = this.props;
+        const {icon} = this.props;
         if(isCorrectIcon){
             return <img src={icon} alt={'icon'}/>;
         } else{
-            return <FontIcon value={'monochrome_photos'} className={className}/>;
+            return <FontIcon value={'monochrome_photos'}/>;
         }
     }
 
     render(){
+        const {className} = this.props;
         return (
-            <div>
+            <div className={className}>
                 {this.renderIcon()}
             </div>
         );

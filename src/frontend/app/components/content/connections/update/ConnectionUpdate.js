@@ -58,7 +58,7 @@ function mapConnection(connection){
  * Component to Update Connection
  */
 @connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates})
-@permission(ConnectionPermissions.CREATE, true)
+@permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'updating', ['connectors'], mapConnection)
 @ConnectionForm('update')

@@ -25,6 +25,8 @@ export function ConnectionForm(type) {
                 this.connectionPrefixUrl = '/connections';
                 this.translationKey = type.toUpperCase();
                 this.isUpdate = type === 'update';
+                this.isAdd = type === 'add';
+                this.isView = type === 'view';
                 this.actionName = this.isUpdate ? `updatingConnection` : `addingConnection`;
                 this.state = {
                     hasModeInputsSection: this.isUpdate,

@@ -24,6 +24,7 @@ function mapStateToProps(state){
     const auth = state.get('auth');
     return{
         authUser: auth.get('authUser'),
+        appTour: auth.get('authUser').userDetail.appTour,
     };
 }
 
@@ -48,23 +49,18 @@ class SwitchOffTour extends Component{
     handleCheck(){
         const {toggleAppTour} = this.props;
         let {authUser} = this.props;
-        let checked = true;
-        if(authUser.userDetail.hasOwnProperty('appTour')){
-            checked = authUser.userDetail.appTour;
-        }
-        authUser.userDetail.appTour = !checked;
         toggleAppTour(authUser);
-        this.setState({checked: authUser.userDetail.appTour});
     }
 
     render(){
+        const {appTour} = this.props;
         return (
             <div>
                 <div className={styles.switch_off_tour_text}>{this.props.children}</div>
                 <div className={styles.switch_off_tour_check}>
                     <Checkbox
                         label={'Do not show again'}
-                        checked={!this.state.checked}
+                        checked={appTour}
                         onChange={::this.handleCheck}
                     />
                 </div>
