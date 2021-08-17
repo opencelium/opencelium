@@ -77,9 +77,6 @@ class CurrentSchedules extends Component{
 
     renderProgressBars(){
         const {authUser, t, currentSchedules} = this.props;
-        return (
-            <ProgressBarElement authUser={authUser} schedule={{fromConnector: 'idoit', title: 'create servers', toConnector: 'otrs'}} key={1} iterator={2 + 1}/>
-        );
         if(currentSchedules && currentSchedules.length > 0) {
             return currentSchedules.map((schedule, key) => {
                 return (
