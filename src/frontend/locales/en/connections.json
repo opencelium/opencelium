@@ -115,10 +115,26 @@
   "VIEW": {
     "HEADER": "View Connection",
     "LIST_BUTTON": "Connections",
-    "FORM": {
+    "FORM":{
+      "PAGE_1": "Direction",
       "TITLE": "Title",
+      "DESCRIPTION": "Description",
+      "CONNECTORS": "Connectors",
+      "CONNECTORS_PLACEHOLDER_1": "Choose from connector",
+      "CONNECTORS_PLACEHOLDER_2": "Choose to connector",
       "CHOSEN_CONNECTOR_FROM": "From connector",
-      "CHOSEN_CONNECTOR_TO": "To connector"
+      "CHOSEN_CONNECTOR_TO": "To connector",
+      "DIRECTION": "Direction",
+      "HINT_1": "Choose connectors and direction",
+      "PAGE_2": "Mode",
+      "MODE": "Mode",
+      "EXPERT_MODE": "Expert",
+      "TEMPLATE_MODE": "Template",
+      "HINT_2": "Choose mode",
+      "PAGE_3": "Methods",
+      "ADD_TEMPLATE": "Add Template",
+      "ADD_TEMPLATE_TITLE": "Add Template",
+      "HINT_3": "Add methods"
     }
   },
   "GRAPH": {

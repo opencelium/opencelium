@@ -62,19 +62,43 @@
 }
 .form_section_icons{
   position: absolute;
-  top: 23px;
+  top: 0;
   z-index: 100;
-  right: 1px;
-  background: white;
-  >:nth-child(n){
-    border: 1px solid #eee;
-    height: 22px;
-    button{
-      width: 20px;
-      >span{
-        vertical-align: middle;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: -webkit-center;
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 16% 100%);
+  width: 100px;
+  background: rgb(1, 46, 85);
+  color: white;
+  height: 5px;
+  transition: all 0.3s;
+  .dots{
+    text-align: center;
+    margin-top: -14px;
+    position: absolute;
+    left: 44px;
+  }
+  .icons{
+    position: relative;
+    width: 90px;
+    >span{
+      height: 22px;
+      button{
+        width: 20px;
+        >span{
+          vertical-align: middle;
+        }
       }
     }
+  }
+}
+.form_section_icons:hover{
+  height: 30px;
+  .dots{
+    display: none;
   }
 }
 .full_screen_icon{

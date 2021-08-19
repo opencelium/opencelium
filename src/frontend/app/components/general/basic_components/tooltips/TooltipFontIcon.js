@@ -77,12 +77,13 @@ class TooltipFontIcon extends Component{
     }
 
     render(){
-        const {showTooltip, left, top} = this.state;
+        let {showTooltip, left, top} = this.state;
         let {tooltip, tooltipPosition, wrapClassName, wrapStyles, ...props} = this.props;
         let fontSize = this.props.size ? isNumber(this.props.size) ? `${this.props.size}px` : this.props.size : '24px';
         let position = '';
         switch (tooltipPosition) {
             case 'top':
+                top -= 5;
                 position = theme.tooltipTop;
                 break;
             case 'left':
@@ -90,6 +91,9 @@ class TooltipFontIcon extends Component{
                 break;
             case 'right':
                 position = theme.tooltipRight;
+                break;
+            case 'bottom':
+                top += 10;
                 break;
         }
         return (
@@ -103,7 +107,7 @@ class TooltipFontIcon extends Component{
 
 TooltipFontIcon.propTypes = {
     tooltip: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.any.isRequired,
     isButton: PropTypes.bool,
     blueTheme: PropTypes.bool,
     darkBlueTheme: PropTypes.bool,

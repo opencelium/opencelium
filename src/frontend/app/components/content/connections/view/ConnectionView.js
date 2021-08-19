@@ -25,6 +25,7 @@ import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {INPUTS} from "@utils/constants/inputs";
 import CConnection from "@classes/components/content/connection/CConnection";
+import {ConnectionForm} from "@components/content/connections/ConnectionForm";
 
 
 const connectionPrefixURL = '/connections';
@@ -48,75 +49,7 @@ function mapStateToProps(state){
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @SingleComponent('connection')
-class ConnectionView extends Component{
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        const {t, authUser, checkingConnectionTitle, checkTitleResult} = this.props;
-        let connectors = [];
-        let {connection} = this.props;
-        let connectorMenuItems = [];
-        let contentTranslations = {};
-        contentTranslations.header = t('VIEW.HEADER');
-        contentTranslations.list_button = {title: t('VIEW.LIST_BUTTON'), index: 2};
-        let changeContentTranslations = {};
-        changeContentTranslations.addButton = t('VIEW.VIEW_BUTTON');
-        changeContentTranslations.testButton = t('VIEW.TEST_BUTTON');
-        let getListLink = `${connectionPrefixURL}`;
-        let breadcrumbsItems = [];
-        let contents = [{
-            inputs: [
-                {
-                    ...INPUTS.CONNECTION_TITLE,
-                    label: t('VIEW.FORM.TITLE'),
-                    maxLength: 256,
-                    required: true,
-                    readOnly: true,
-                    check: (e, entity) => ::this.validateTitle(e, entity),
-                    request: {
-                        inProcess: checkingConnectionTitle,
-                        status: this.startCheckingTitle && !checkingConnectionTitle,
-                        result: checkTitleResult,
-                        notSuccessMessage: t('VIEW.FORM.TITLE_EXIST'),
-                    }},
-                {
-                    ...INPUTS.CONNECTOR_READONLY,
-                    label: t('VIEW.FORM.CONNECTORS'),
-                    placeholders: [t('VIEW.FORM.CHOSEN_CONNECTOR_FROM'), t('VIEW.FORM.CHOSEN_CONNECTOR_TO')],
-                    source: connectorMenuItems,
-                    readOnly: true,
-                },
-                {
-                    ...INPUTS.METHODS,
-                    label: t('VIEW.FORM.METHODS'),
-                    templateLabels: {addTemplate: t('VIEW.FORM.VIEW_TEMPLATE'), addTemplateTitle: t('VIEW.FORM.VIEW_TEMPLATE_TITLE')},
-                    source: Object.freeze(connectors),
-                    readOnly: true,
-                },
-            ],
-            hint: {text: t('VIEW.FORM.HINT_1')},
-        }
-        ];
-        return (
-            <Content translations={contentTranslations} getListLink={getListLink} permissions={ConnectionPermissions} authUser={authUser}>
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
-                    contents={contents}
-                    translations={changeContentTranslations}
-                    authUser={authUser}
-                    action={null}
-                    isActionInProcess={0}
-                    noBreadcrumbs={true}
-                    noHint={true}
-                    noNavigation={true}
-                    entity={CConnection.createConnection(connection)}
-                />
-            </Content>
-        );
-    }
-}
+@ConnectionForm('view')
+class ConnectionView extends Component{}
 
 export default ConnectionView;

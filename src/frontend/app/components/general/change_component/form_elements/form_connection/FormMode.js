@@ -83,12 +83,13 @@ class FormMode extends Component{
         if(entity.template.mode === TEMPLATE_MODE && entity.allTemplates.length === 0){
             this.fetchTemplates();
         }
-        let connector = data.connectors.find(c => c.id === entity.fromConnector.id);
-        if(connector) entity.fromConnector.invoker = connector.invoker;
-        connector = data.connectors.find(c => c.id === entity.toConnector.id);
-        if(connector) entity.toConnector.invoker = connector.invoker;
-        updateEntity(entity);
-
+        if(data.connectors){
+            let connector = data.connectors.find(c => c.id === entity.fromConnector.id);
+            if(connector) entity.fromConnector.invoker = connector.invoker;
+            connector = data.connectors.find(c => c.id === entity.toConnector.id);
+            if(connector) entity.toConnector.invoker = connector.invoker;
+            updateEntity(entity);
+        }
         window.addEventListener('resize', this.resize, false);
     }
 
