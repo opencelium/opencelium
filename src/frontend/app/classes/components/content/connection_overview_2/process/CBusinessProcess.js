@@ -29,6 +29,10 @@ export class CBusinessProcess extends CProcess{
         return new CBusinessProcess(process);
     }
 
+    getHtmlIdName() {
+        return `business_process_${super.getHtmlIdName()}`;
+    }
+
     convertItem(item){
         if(item instanceof CTechnicalProcess || item instanceof CTechnicalOperator){
             return item;

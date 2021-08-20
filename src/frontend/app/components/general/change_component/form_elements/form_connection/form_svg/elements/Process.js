@@ -60,6 +60,17 @@ class Process extends React.Component{
         }
     }
 
+    onMouseDown(){
+        const {isAssignMode, setCurrentItem, process, isDisabled} = this.props;
+        if(!isDisabled) {
+            if (!isAssignMode) {
+                process.isDragged = true;
+                setCurrentItem(process);
+            }
+        }
+
+    }
+
     onMouseLeave(){
         const {isAssignMode, process} = this.props;
         if(isAssignMode && process instanceof CTechnicalProcess) {
@@ -82,6 +93,7 @@ class Process extends React.Component{
             if (isAssignMode) {
                 assign();
             } else {
+                process.isDragged = false;
                 setCurrentItem(process);
             }
         } else{
@@ -107,7 +119,7 @@ class Process extends React.Component{
         const {
             process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess,
             isDisabled, colorMode, readOnly, isAssignMode, businessLabelMode, connection,
-            isVisibleBusinessLabelKeyPressed,
+            isVisibleBusinessLabelKeyPressed, currentBusinessItem,
         } = this.props;
         const method = process.entity;
         const borderRadius = 10;
@@ -149,24 +161,31 @@ class Process extends React.Component{
         const assignedStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
         const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
+        if(currentBusinessItem)
+         console.log(currentBusinessItem.isDragged)
         return(
-            <svg x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
-                <rect fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onClick={::this.onClick} onMouseOver={::this.onMouseOver} onMouseLeave={::this.onMouseLeave} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
-                      className={`${technicalRectClassName} ${styles.process_rect} ${assignedStyle} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
-                />
-                <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
-                    {shortLabel}
-                </text>
-                <title>{label}</title>
-                {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
-                {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
-                {isCurrent && !readOnly &&
-                    <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
+            <React.Fragment>
+                <svg id={process.getHtmlIdName()} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
+                    <rect fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color} onDoubleClick={::this.onDoubleClick} onClick={::this.onClick} onMouseOver={::this.onMouseOver} onMouseDown={::this.onMouseDown} onMouseLeave={::this.onMouseLeave} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
+                          className={`${technicalRectClassName} ${styles.process_rect} ${assignedStyle} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
+                    />
+                    <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
+                        {shortLabel}
+                    </text>
+                    <title>{label}</title>
+                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
+                    {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
+                    {isCurrent && !readOnly &&
+                        <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={::this.deleteProcess}/>
+                    }
+                    {hasAssignIcon &&
+                        <AssignIcon svgX={85} svgY={2} x={assignX} y={assignY} onClick={::this.setAssignMode}/>
+                    }
+                </svg>
+                {currentBusinessItem && currentBusinessItem.isDragged &&
+                    <rect id={'draggable_process'} className={styles.draggable_process} rx={borderRadius} ry={borderRadius} x={process.x} y={process.y} width={process.width} height={process.height}/>
                 }
-                {hasAssignIcon &&
-                    <AssignIcon svgX={85} svgY={2} x={assignX} y={assignY} onClick={::this.setAssignMode}/>
-                }
-            </svg>
+            </React.Fragment>
         );
     }
 }

@@ -122,7 +122,7 @@ class Svg extends React.Component {
     }
 
     setItemCoordinates(coordinates){
-        const {currentItem, updateItems, items} = this.props;
+        const {currentItem, updateItems, items, setCurrentItem} = this.props;
         if(currentItem) {
             if(updateItems) {
                 updateItems(items.map(item => {
@@ -131,6 +131,8 @@ class Svg extends React.Component {
                     }
                     return item;
                 }));
+                currentItem.isDragged = false;
+                setCurrentItem(currentItem);
             }
         }
     }
@@ -182,7 +184,7 @@ class Svg extends React.Component {
     }
 
     drag(e){
-        const {isItemDraggable, dragAndDropStep, svgId, isDraggable} = this.props;
+        const {isItemDraggable, dragAndDropStep, svgId, isDraggable, currentItem} = this.props;
         if (this.selectedElement) {
             if(isItemDraggable) {
                 e.preventDefault();
@@ -203,7 +205,11 @@ class Svg extends React.Component {
                         this.dragCoordinates.y = Math.round((coordinates.y - this.offset.y) / dragAndDropStep) * dragAndDropStep;
                     }
                     if(this.dragCoordinates !== null) {
-                        ::this.setItemCoordinates(this.dragCoordinates)
+                        const htmlElem = document.getElementById('draggable_process');
+                        if(htmlElem){
+                            if(this.dragCoordinates.x) htmlElem.setAttribute('x', this.dragCoordinates.x);
+                            if(this.dragCoordinates.y) htmlElem.setAttribute('y', this.dragCoordinates.y);
+                        }
                     }
                 }
             }
@@ -230,6 +236,9 @@ class Svg extends React.Component {
         if(this.selectedElement){
             this.selectedElement = null;
             this.setCoordinatesForCreateElementPanel(e);
+            if(this.dragCoordinates !== null) {
+                ::this.setItemCoordinates(this.dragCoordinates)
+            }
         }
         if(this.isPointerDown) this.isPointerDown = false;
     }
