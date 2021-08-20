@@ -161,8 +161,6 @@ class Process extends React.Component{
         const assignedStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
         const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
-        if(currentBusinessItem)
-         console.log(currentBusinessItem.isDragged)
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
@@ -182,7 +180,7 @@ class Process extends React.Component{
                         <AssignIcon svgX={85} svgY={2} x={assignX} y={assignY} onClick={::this.setAssignMode}/>
                     }
                 </svg>
-                {currentBusinessItem && currentBusinessItem.isDragged &&
+                {isCurrent && currentBusinessItem && currentBusinessItem.isDragged &&
                     <rect id={'draggable_process'} className={styles.draggable_process} rx={borderRadius} ry={borderRadius} x={process.x} y={process.y} width={process.width} height={process.height}/>
                 }
             </React.Fragment>

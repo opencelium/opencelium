@@ -56,14 +56,6 @@ export default class CSvg{
         }
     }
 
-    static consoleBaseVal(prefix, suffix = ''){
-        if(document.getElementById('technical_layout_svg'))
-            if(document.getElementById('technical_layout_svg').viewBox.baseVal){
-                console.log(prefix, document.getElementById('technical_layout_svg').viewBox.baseVal);
-                if(suffix !== '') console.log(suffix);
-            }
-    }
-
     static isTechnicalItemAssigned(technicalItem, businessProcess){
         let isAssigned = false;
         if((technicalItem instanceof CTechnicalProcess || technicalItem instanceof CTechnicalOperator) && businessProcess instanceof CBusinessProcess){

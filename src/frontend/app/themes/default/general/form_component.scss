@@ -68,7 +68,7 @@
   margin-right: auto;
   left: 0;
   right: 0;
-  text-align: -webkit-center;
+  text-align: center;
   clip-path: polygon(0 0, 100% 0, 84% 100%, 16% 100%);
   width: 100px;
   background: rgb(1, 46, 85);
@@ -83,7 +83,7 @@
   }
   .icons{
     position: relative;
-    width: 90px;
+    width: 100px;
     >span{
       height: 22px;
       button{

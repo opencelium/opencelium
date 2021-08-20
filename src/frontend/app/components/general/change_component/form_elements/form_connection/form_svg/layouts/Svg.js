@@ -151,6 +151,7 @@ class Svg extends React.Component {
 
     startDrag(e){
         const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, setIsAssignMode, connection, updateConnection} = this.props;
+        this.dragCoordinates = null;
         if(e.target.classList.contains('draggable')) {
             if(isItemDraggable) {
                 this.selectedElement = e.target.parentNode;
