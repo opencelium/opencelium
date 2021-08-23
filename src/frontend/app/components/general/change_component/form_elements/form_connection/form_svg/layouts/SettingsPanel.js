@@ -36,7 +36,7 @@ class SettingsPanel extends React.Component{
         let minMaxTooltip = 'Minimize';
         let minMaxValue = 'minimize';
         let minMaxClick = minimizeLayout;
-        let minMaxTooltipPosition = 'top';
+        const tooltipPosition = 'bottom';
         if(isLayoutMinimized){
             minMaxTooltip = 'Maximize';
             minMaxValue = 'maximize';
@@ -45,12 +45,10 @@ class SettingsPanel extends React.Component{
         let titleClassName = '';
         if(detailsPosition === DETAILS_POSITION.RIGHT){
             settingsPanelClassName = styles.layout_settings_panel_left;
-            minMaxTooltipPosition = 'right';
             titleClassName = styles.technical_settings_panel_title_left;
         }
         if(detailsPosition === DETAILS_POSITION.LEFT){
             settingsPanelClassName = styles.layout_settings_panel_right;
-            minMaxTooltipPosition = 'left';
             titleClassName = styles.technical_settings_panel_title_right;
         }
         if(isDetailsMinimized){
@@ -64,7 +62,7 @@ class SettingsPanel extends React.Component{
                     onClick={replaceLayouts}
                     tooltip={isReplaceIconDisabled ? '' : 'Replace'}
                     value={'import_export'}
-                    tooltipPosition={minMaxTooltipPosition}
+                    tooltipPosition={tooltipPosition}
                     disabled={isDisabled || isReplaceIconDisabled}
                     isButton={true}
                 />
@@ -75,7 +73,7 @@ class SettingsPanel extends React.Component{
                     onClick={minMaxClick}
                     tooltip={isMinMaxIconDisabled ? '' : minMaxTooltip}
                     value={minMaxValue}
-                    tooltipPosition={minMaxTooltipPosition}
+                    tooltipPosition={tooltipPosition}
                     disabled={isDisabled || isMinMaxIconDisabled}
                     isButton={true}
                 />
@@ -85,7 +83,7 @@ class SettingsPanel extends React.Component{
                     onClick={openInNewWindow}
                     tooltip={isNewWindowIconDisabled ? '' : 'Open in new Window'}
                     value={'open_in_new'}
-                    tooltipPosition={'top'}
+                    tooltipPosition={tooltipPosition}
                     disabled={isDisabled || isNewWindowIconDisabled}
                     isButton={true}
                 />

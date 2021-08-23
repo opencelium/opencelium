@@ -38,7 +38,7 @@ class SettingsPanel extends React.Component{
         let positionTooltip = '';
         let positionValue = '';
         let positionClick = null;
-        let minMaxTooltipPosition;
+        const tooltipPosition = 'bottom';
         let settingsPanelStyles = {};
         let detailsTitleClassName = '';
         if(position === DETAILS_POSITION.LEFT){
@@ -48,7 +48,6 @@ class SettingsPanel extends React.Component{
             positionTooltip = 'Move to the Right';
             positionValue = 'keyboard_arrow_right';
             positionClick = moveDetailsRight;
-            minMaxTooltipPosition = 'top';
             settingsPanelStyles.borderRight = 'none';
             detailsTitleClassName = styles.details_title_left;
         }
@@ -59,7 +58,6 @@ class SettingsPanel extends React.Component{
             positionTooltip = 'Move to the Left';
             positionValue = 'keyboard_arrow_left';
             positionClick = moveDetailsLeft;
-            minMaxTooltipPosition = 'top';
             settingsPanelStyles.borderLeft = 'none';
             detailsTitleClassName = styles.details_title_right;
         }
@@ -91,7 +89,7 @@ class SettingsPanel extends React.Component{
                     onClick={minMaxClick}
                     tooltip={minMaxTooltip}
                     value={minMaxValue}
-                    tooltipPosition={minMaxTooltipPosition}
+                    tooltipPosition={tooltipPosition}
                 />
                 <TooltipFontIcon
                     size={20}
@@ -99,7 +97,7 @@ class SettingsPanel extends React.Component{
                     onClick={::this.openInNewWindow}
                     tooltip={'Open in new Window'}
                     value={'open_in_new'}
-                    tooltipPosition={'top'}
+                    tooltipPosition={tooltipPosition}
                 />
             </div>
         );

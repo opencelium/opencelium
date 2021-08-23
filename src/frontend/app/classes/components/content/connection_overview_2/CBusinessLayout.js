@@ -8,7 +8,7 @@ export default class CBusinessLayout{
 
     constructor(connection = null, svgItems = [], arrows = [], currentSvgItemId = '') {
         this._connection = connection;
-        this._svgItems = this.convertItems(svgItems);
+        this._svgItems = this.convertItems([...svgItems]);
         this._arrows = arrows;
         this._currentSvgItem = this.getCurrentSvgItemById(currentSvgItemId);
     }
@@ -31,12 +31,13 @@ export default class CBusinessLayout{
     }
 
     convertItem(item){
-        if(!(item instanceof CBusinessProcess)){
+        let newItem = {...item};
+        if(!(newItem instanceof CBusinessProcess)){
             let technicalItems = [];
-            if(item && item.hasOwnProperty('items')) {
-                for (let i = 0; i < item.items.length; i++) {
-                    if(!(item.items[i] instanceof CTechnicalProcess) && !(item.items[i] instanceof CTechnicalOperator)) {
-                        const id = item.items[i].id;
+            if(newItem && newItem.hasOwnProperty('items')) {
+                for (let i = 0; i < newItem.items.length; i++) {
+                    if(!(newItem.items[i] instanceof CTechnicalProcess) && !(newItem.items[i] instanceof CTechnicalOperator)) {
+                        const id = newItem.items[i].id;
                         let technicalItem = null;
                         if (id.indexOf(CONNECTOR_FROM) === 0) {
                             technicalItem = this._connection.fromConnector.svgItems.find(svgItem => svgItem.id === id);
@@ -46,12 +47,12 @@ export default class CBusinessLayout{
                         }
                         technicalItems.push(technicalItem);
                     } else{
-                        technicalItems.push(item.items[i]);
+                        technicalItems.push(newItem.items[i]);
                     }
                 }
-                item.items = technicalItems;
+                newItem.items = technicalItems;
             }
-            return CBusinessProcess.createBusinessProcess(item);
+            return CBusinessProcess.createBusinessProcess(newItem);
         }
         return item;
     }

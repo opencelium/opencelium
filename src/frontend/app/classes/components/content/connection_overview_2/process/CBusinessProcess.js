@@ -21,7 +21,7 @@ export class CBusinessProcess extends CProcess{
 
     constructor(businessProcess) {
         super(businessProcess);
-        this._items = businessProcess && businessProcess.hasOwnProperty('items') ? this.convertItems(businessProcess.items) : [];
+        this._items = businessProcess && businessProcess.hasOwnProperty('items') ? this.convertItems([...businessProcess.items]) : [];
         this._arrows = businessProcess && businessProcess.hasOwnProperty('arrows') ? businessProcess.arrows : [];
     }
 
@@ -46,7 +46,7 @@ export class CBusinessProcess extends CProcess{
     }
 
     convertItems(items){
-        return items.map(item => this.convertItem(item));
+        return [...items.map(item => this.convertItem(item))];
     }
 
     get items(){
@@ -98,7 +98,7 @@ export class CBusinessProcess extends CProcess{
         if(this._items.length > 0){
             if(this._items[0] instanceof CTechnicalProcess || this._items[0] instanceof CTechnicalOperator){
                 for(let i = 0; i < this._items.length; i++){
-                    objectItems.push(this._items[i].getObject());
+                    objectItems.push({...this._items[i].getObject()});
                 }
             }
         }

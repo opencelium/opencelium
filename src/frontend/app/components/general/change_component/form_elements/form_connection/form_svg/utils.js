@@ -22,8 +22,7 @@ import CConnection from "@classes/components/content/connection/CConnection";
 export function mapItemsToClasses(state){
     const connectionOverview = state.get('connection_overview');
     let currentBusinessItem = connectionOverview.get('currentBusinessItem');
-    let connection = connectionOverview.get('connection');
-    connection = CConnection.createConnection(connection);
+    let connection = CConnection.createConnection(Object.assign({}, connectionOverview.get('connection')));
     const updateConnection = connectionOverview.get('updateConnection');
     if(currentBusinessItem !== null && (!(currentBusinessItem instanceof CBusinessProcess) || !(currentBusinessItem instanceof CBusinessOperator))){
         if(currentBusinessItem.hasOwnProperty('type')){

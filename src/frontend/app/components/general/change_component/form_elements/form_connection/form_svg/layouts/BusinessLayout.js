@@ -33,6 +33,8 @@ import {
 } from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
+import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
+import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 
 
 function mapStateToProps(state){
@@ -74,7 +76,8 @@ class BusinessLayout extends React.Component{
     }
 
     openInNewWindow(){
-        setLS('connection_overview', this.props.connectionOverviewState.toJS(), 'connection_overview');
+        console.log(this.props.connectionOverviewState.toJS());
+        setLS('connection_overview', {...this.props.connectionOverviewState.toJS()}, 'connection_overview');
         this.props.openInNewWindow();
     }
 

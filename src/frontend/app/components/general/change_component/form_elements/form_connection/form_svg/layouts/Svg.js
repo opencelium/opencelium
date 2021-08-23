@@ -139,14 +139,16 @@ class Svg extends React.Component {
 
     setCoordinatesForCreateElementPanel(e){
         const {setCreateElementPanelPosition, layoutPosition} = this.props;
-        const clientRect = e.target.getBoundingClientRect();
-        let x = clientRect.x;
-        let y = clientRect.y;
-        x += clientRect.width + 8;
-        if(layoutPosition === LAYOUT_POSITION.BOTTOM) {
-            y -= 106;
+        if(typeof setCreateElementPanelPosition === 'function'){
+            const clientRect = e.target.getBoundingClientRect();
+            let x = clientRect.x;
+            let y = clientRect.y;
+            x += clientRect.width + 8;
+            if(layoutPosition === LAYOUT_POSITION.BOTTOM) {
+                y -= 106;
+            }
+            setCreateElementPanelPosition({x, y});
         }
-        setCreateElementPanelPosition({x, y});
     }
 
     startDrag(e){
@@ -352,8 +354,9 @@ class Svg extends React.Component {
     }
 
     hideCreateElementPanel(){
-        this.props.setCreateElementPanelPosition({x: 0, y: 0});
-        this.props.setIsCreateElementPanelOpened(false);
+        const {setCreateElementPanelPosition, setIsCreateElementPanelOpened} = this.props;
+        if(typeof setCreateElementPanelPosition === 'function') setCreateElementPanelPosition({x: 0, y: 0});
+        if(typeof setIsCreateElementPanelOpened === 'function') setIsCreateElementPanelOpened(false);
     }
 
     onEmptyTextClick(){

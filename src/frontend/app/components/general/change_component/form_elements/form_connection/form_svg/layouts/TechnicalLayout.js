@@ -39,8 +39,7 @@ import {
 } from "@utils/key_navigation";
 
 function mapStateToProps(state){
-    const connectionOverview = state.get('connection_overview');
-    const {currentTechnicalItem, currentBusinessItem, connection, updateConnection} = mapItemsToClasses(state);
+    const {connectionOverview, currentTechnicalItem, currentBusinessItem, connection, updateConnection} = mapItemsToClasses(state);
     return{
         connectionOverviewState: connectionOverview,
         currentTechnicalItem,
@@ -91,8 +90,8 @@ class TechnicalLayout extends React.Component{
     }
 
     openInNewWindow(){
-        const {entity} = this.props;
-        const items = [...entity.fromConnector.svgItems, ...entity.toConnector.svgItems];
+        const {connection} = this.props;
+        const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
         let convertedItems = [];
         if(items.length > 0 && (items[0] instanceof CProcess || items[0] instanceof COperator)){
             for(let i = 0; i < items.length; i++){
@@ -167,7 +166,7 @@ class TechnicalLayout extends React.Component{
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
-        const items = [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems];
+        const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
         const isSelectedBusinessItem = currentBusinessItem !== null;
         const isSelectedBusinessItemNotEmpty = isSelectedBusinessItem && currentBusinessItem.items.length !== 0;
@@ -203,25 +202,25 @@ class TechnicalLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
-                    style={svgStyle}
+                    layoutId={this.layoutId}
+                    svgId={`${this.layoutId}_svg`}
+                    isDraggable={!(isSelectedBusinessItemEmpty && !isAssignMode)}
+                    isScalable={HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode)}
+                    setCurrentItem={::this.setCurrentItem}
+                    deleteProcess={::this.deleteProcess}
                     currentItem={currentTechnicalItem}
+                    style={svgStyle}
                     isBusinessLayoutMinimized={isBusinessLayoutMinimized}
                     detailsPosition={detailsPosition}
-                    setCurrentItem={::this.setCurrentItem}
                     connection={connection}
                     items={items}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
-                    layoutId={this.layoutId}
-                    svgId={`${this.layoutId}_svg`}
                     isItemDraggable={false}
-                    isScalable={HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode)}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     startingSvgY={startingSvgY}
-                    deleteProcess={::this.deleteProcess}
                     hasAssignCentralText={isSelectedBusinessItemEmpty && !isAssignMode}
-                    isDraggable={!(isSelectedBusinessItemEmpty && !isAssignMode)}
                 />
             </div>
         );
