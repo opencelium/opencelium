@@ -9,5 +9,13 @@
   box-shadow: none !important;
 }
 
+.direction_form{
+  grid-column-start: 1;
+  /* autoprefixer: off */
+  grid-column-end: 3;
+  grid-row-start: 1;
+  /* autoprefixer: off */
+  grid-row-end: 2;
+}
 .switch_view_icon{
 }

@@ -21,13 +21,17 @@ import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
 import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
+import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {currentBusinessItem} = mapItemsToClasses(state);
+    const {connection, currentBusinessItem, updateConnection} = mapItemsToClasses(state);
     return{
         currentBusinessItem,
-        arrows: connectionOverview.get('arrows').toJS(),
+        connection,
+        updateConnection,
+        items: connection.businessLayout.getItems(),
+        arrows: connection.businessLayout.getArrows(),
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
         businessLayoutLocation: connectionOverview.get('businessLayoutLocation'),
     };
@@ -50,7 +54,17 @@ class ExtendedBusinessLayout extends React.Component{
         });
     }
 
+    setCurrentItem(currentItem){
+        const {setCurrentBusinessItem, connection, updateConnection} = this.props;
+        setCurrentBusinessItem(currentItem);
+        if(connection) {
+            connection.businessLayout.setCurrentSvgItem(currentItem);
+            updateConnection(connection);
+        }
+    }
+
     render(){
+        const {items} = this.props;
         const {createElementPanelPosition} = this.state;
         return(
             <div id={this.layoutId} className={`${styles.business_layout}`}>
@@ -58,10 +72,11 @@ class ExtendedBusinessLayout extends React.Component{
                     {...this.props}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
-                    dragAndDropStep={5}
-                    isDraggable={true}
-                    isScalable={false}
+                    isItemDraggable={true}
+                    isDraggable={items.length > 0}
+                    isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    setCurrentItem={::this.setCurrentItem}
                 />
                 <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y}/>
             </div>

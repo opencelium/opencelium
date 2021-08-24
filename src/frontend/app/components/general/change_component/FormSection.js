@@ -363,6 +363,7 @@ class FormSection extends Component{
         if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){
             return null;
         }
+        const hasIcons = content.hasFullScreenFunction || !!content.AdditionalIcon;
         return (
             <div onMouseOver={::this.showIcons} onMouseLeave={::this.hideIcons} className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
                 {hasHeader &&
@@ -370,15 +371,24 @@ class FormSection extends Component{
                         <span>{content.header}</span>
                     </div>
                 }
-                <span style={{display: areIconsVisible ? 'inline' : 'none'}} className={styles.form_section_icons}>
-                    {
-                        content.AdditionalIcon
-                    }
-                    {
-                        content.hasFullScreenFunction &&
-                        <TooltipFontIcon size={16} tooltipPosition={'left'} isButton className={styles.full_screen_icon} value={isFullScreen ? 'close_fullscreen' : 'open_in_full'} tooltip={isFullScreen ? 'Minimize' : 'Maximize'} onClick={::this.toggleFullScreen}/>
-                    }
-                </span>
+                {hasIcons &&
+                <div style={{display: areIconsVisible ? 'inline' : 'none'}} className={styles.form_section_icons}>
+                    <div className={styles.dots}>...</div>
+                    <div className={styles.icons}>
+                        {
+                            content.AdditionalIcon
+                        }
+                        {
+                            content.hasFullScreenFunction &&
+                            <TooltipFontIcon whiteTheme size={20} tooltipPosition={'bottom'} isButton
+                                             className={styles.full_screen_icon}
+                                             value={isFullScreen ? 'close_fullscreen' : 'open_in_full'}
+                                             tooltip={isFullScreen ? 'Minimize' : 'Maximize'}
+                                             onClick={::this.toggleFullScreen}/>
+                        }
+                    </div>
+                </div>
+                }
                 {this.generateInputs()}
             </div>
         );

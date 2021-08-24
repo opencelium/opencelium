@@ -162,7 +162,7 @@ export default class CConnectorItem{
         return this._svgItems.find(svgItem => svgItem.entity.index === index);
     }
 
-    getSvgElement(element){
+    static getSvgElement(element){
         if(element instanceof CTechnicalOperator || element instanceof CTechnicalProcess){
             return element
         }
@@ -199,7 +199,7 @@ export default class CConnectorItem{
                 svgElement.y += 10;
             }
             svgElement.id = `${this.getConnectorType()}_${items[i].index}`;
-            this._svgItems.push(this.getSvgElement(svgElement));
+            this._svgItems.push(CConnectorItem.getSvgElement(svgElement));
             if(items[i].index !== '0') {
                 this.arrows.push({from: `${this.getConnectorType()}_${this.getPrevIndex(items[i].index)}`, to: `${this.getConnectorType()}_${items[i].index}`});
             }

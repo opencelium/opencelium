@@ -30,6 +30,7 @@ export default class CProcess{
         this._y = process && process.hasOwnProperty('y') ? process.y : 0;
         this._width = PROCESS_WIDTH;
         this._height = PROCESS_HEIGHT;
+        this._isDragged = process && process.hasOwnProperty('isDragged') ? process.isDragged : false;
     }
 
     get id(){
@@ -38,6 +39,10 @@ export default class CProcess{
 
     set id(id){
         this._id = id;
+    }
+
+    getHtmlIdName(){
+        return `${this._id}_${this._name}`
     }
 
     get name(){
@@ -91,6 +96,14 @@ export default class CProcess{
         this._height = height;
     }
 
+    get isDragged(){
+        return this._isDragged;
+    }
+
+    set isDragged(isDragged){
+        this._isDragged = isDragged;
+    }
+
     get items(){
         return this._items;
     }
@@ -131,6 +144,7 @@ export default class CProcess{
             y: this._y,
             width: this._width,
             height: this._height,
+            isDragged: this._isDragged,
         };
     }
 }

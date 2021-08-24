@@ -76,7 +76,7 @@ export function ConnectionForm(type) {
             getConnection(){
                 const {error} = this.props;
                 let connection;
-                if(this.isUpdate){
+                if(this.isUpdate || this.isView){
                     connection = this.props.connection;
                     connection.error = error;
                     connection = CConnection.createConnection(connection);
@@ -93,9 +93,11 @@ export function ConnectionForm(type) {
             getConnectorMenuItems(){
                 const {connectors} = this.props;
                 let result = [];
-                connectors.map(connector => {
-                    result.push({label: connector.name, value: connector.id});
-                });
+                if(connectors) {
+                    connectors.map(connector => {
+                        result.push({label: connector.name, value: connector.id});
+                    });
+                }
                 return result;
             }
 
@@ -103,7 +105,7 @@ export function ConnectionForm(type) {
                 const {validationMessages} = this.state;
                 const {t, connectors} = this.props;
                 let connectorMenuItems = this.getConnectorMenuItems();
-                if(this.isUpdate){
+                if(this.isUpdate || this.isView){
                     return {
                         ...INPUTS.CONNECTOR_READONLY,
                         label: t('UPDATE.FORM.CONNECTORS'),
@@ -137,7 +139,7 @@ export function ConnectionForm(type) {
                     templateLabels: {addTemplate: t(`${this.translationKey}.FORM.ADD_TEMPLATE`), addTemplateTitle: t(`${this.translationKey}.FORM.ADD_TEMPLATE_TITLE`)},
                     actions: {addTemplate: ::this.addTemplate},
                     source: Object.freeze(connectors),
-                    readOnly: false,
+                    readOnly: this.isView,
                 };
             }
 
@@ -233,42 +235,12 @@ export function ConnectionForm(type) {
                 addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObject()});
             }
 
-            /**
-             * to add/update Connection
-             */
-            doAction(entity){
-                const {authUser, doAction} = this.props;
-                removeLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, `connection_${authUser.userId}`);
-                doAction(entity, this);
-            }
-
-            render(){
-                const {validationMessages, hasModeInputsSection, hasMethodsInputsSection, isNewConnectionView} = this.state;
-                const {t, connectors, checkingConnectionTitle, openTour, closeTour, isTourOpen} = this.props;
-                const connection = this.getConnection();
+            getSecondThirdFormsSections(){
+                const {hasModeInputsSection, validationMessages, hasMethodsInputsSection, isNewConnectionView} = this.state;
+                const {t, connectors, openTour} = this.props;
                 let connectorMenuItems = this.getConnectorMenuItems();
-                let contentTranslations = {};
-                contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.connectionPrefixUrl};
-                contentTranslations.action_button = {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.connectionPrefixUrl};
-                let contents = [{
-                    inputs: [
-                        {
-                            ...INPUTS.CONNECTION_TITLE,
-                            error: validationMessages.title,
-                            tourStep: CONNECTION_TOURS.page_1[0].selector,
-                            label: t(`${this.translationKey}.FORM.TITLE`),
-                            maxLength: 256,
-                            required: true,
-                        },
-                        {...INPUTS.DESCRIPTION,
-                            label: t(`${this.translationKey}.FORM.DESCRIPTION`)
-                        },
-                        this.getFirstConnectorFormSection(),
-                    ],
-                    hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
-                    header: t(`${this.translationKey}.FORM.PAGE_1`),
-                },{
+                let result = [];
+                const secondFormSection = {
                     inputs: [
                         {
                             ...INPUTS.CONNECTOR_READONLY,
@@ -293,31 +265,75 @@ export function ConnectionForm(type) {
                     ],
                     hint: {text: t(`${this.translationKey}.FORM.HINT_2`), openTour},
                     header: t(`${this.translationKey}.FORM.PAGE_2`),
-                    visible: hasModeInputsSection,
-                },{
+                    visible: hasModeInputsSection || this.isView,
+                };
+                if(!this.isView){
+                    result.push(secondFormSection);
+                }
+                const thirdFormSection = {
                     inputs: [
                         {
                             ...INPUTS.CONNECTOR_READONLY,
                             label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                            placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
-                            source: connectorMenuItems,
-                            readOnly: true,
-                            hasAddMethod: true,
-                            style: {margin: '0 65px'},
+                        placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
+                        source: connectorMenuItems,
+                        readOnly: true,
+                        hasAddMethod: true,
+                        style: {margin: '0 65px'},
                         },
                         this.getMethodsFormSection(),
                     ],
                     formClassName: styles.methods_form,
                     hint: {text: t(`${this.translationKey}.FORM.HINT_3`), openTour},
                     header: t(`${this.translationKey}.FORM.PAGE_3`),
-                    visible: hasMethodsInputsSection,
+                    visible: hasMethodsInputsSection || this.isView,
                     hasFullScreenFunction: true,
-                    AdditionalIcon: <TooltipFontIcon size={16} tooltipPosition={'left'} isButton className={styles.switch_view_icon} value={isNewConnectionView ? 'align_vertical_top' : 'account_tree'} tooltip={isNewConnectionView ? 'Column View' : 'Diagram View'} onClick={::this.toggleIsNewConnectionView}/>
-                    /*
-                    * TODO: uncomment when backend will be ready
-                    */
-                    // extraAction: 'CHECK_CONNECTION',
-                },
+                    AdditionalIcon: <TooltipFontIcon whiteTheme size={20} tooltipPosition={'bottom'} isButton className={styles.switch_view_icon} value={isNewConnectionView ? 'align_vertical_top' : 'account_tree'} tooltip={isNewConnectionView ? 'Column View' : 'Diagram View'} onClick={::this.toggleIsNewConnectionView}/>
+                }
+                result.push(thirdFormSection);
+                return result;
+            }
+
+            /**
+             * to add/update Connection
+             */
+            doAction(entity){
+                const {authUser, doAction} = this.props;
+                removeLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, `connection_${authUser.userId}`);
+                doAction(entity, this);
+            }
+
+            render(){
+                const {validationMessages} = this.state;
+                const {t, checkingConnectionTitle, openTour, closeTour, isTourOpen} = this.props;
+                const connection = this.getConnection();
+                let contentTranslations = {};
+                contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
+                contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.connectionPrefixUrl};
+                contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.connectionPrefixUrl};
+                let contents = [
+                    {
+                        inputs: [
+                            {
+                                ...INPUTS.CONNECTION_TITLE,
+                                error: validationMessages.title,
+                                tourStep: CONNECTION_TOURS.page_1[0].selector,
+                                label: t(`${this.translationKey}.FORM.TITLE`),
+                                maxLength: 256,
+                                required: true,
+                                readOnly: this.isView,
+                            },
+                            {...INPUTS.DESCRIPTION,
+                                label: t(`${this.translationKey}.FORM.DESCRIPTION`),
+                                readOnly: this.isView,
+                            },
+                            this.getFirstConnectorFormSection(),
+                        ],
+                        formClassName: this.isView ? styles.direction_form : '',
+                        hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
+                        header: t(`${this.translationKey}.FORM.PAGE_1`),
+                    },
+                    ...this.getSecondThirdFormsSections(),
                 ];
                 return (
                     <div>
