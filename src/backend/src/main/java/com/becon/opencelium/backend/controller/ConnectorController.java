@@ -195,7 +195,7 @@ public class ConnectorController {
     }
 
     @GetMapping("/exists/{title}")
-    public ResponseEntity<?> roleExists(@PathVariable("title") String title) throws IOException{
+    public ResponseEntity<?> titleExists(@PathVariable("title") String title) throws IOException{
         if (connectorService.existByTitle(title)){
             throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
         } else {

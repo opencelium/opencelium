@@ -42,8 +42,10 @@ public class RoleHasPermissionServiceImp implements RoleHasPermissionService {
 
     @Override
     @Transactional
-    public void deleteByUserRole(UserRole roleId) {
-        repository.deleteByUserRole(roleId);
+    public void deleteByUserRoleId(int roleId) {
+//        String query = "delete from role_has_permission where role_id = " + roleId + ";";
+//        em.createNativeQuery(query).executeUpdate();
+        repository.deleteByUserRoleId(roleId);
     }
 
     public boolean existsById(RoleHasPermission.RoleHasPermissionId id) {
