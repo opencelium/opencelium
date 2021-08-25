@@ -108,8 +108,8 @@ public class RoleController {
     public ResponseEntity<UserRoleResource> changeComponent(@PathVariable("id") int id,
                                                              @RequestBody UserRoleResource userRoleResource) throws IOException {
 
-        UserRole userRole = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
-        boolean isIdenticalName = userRole.getName().equals(userRoleResource.getName());
+        UserRole uRoleBackUp = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
+        boolean isIdenticalName = uRoleBackUp.getName().equals(userRoleResource.getName());
         if (!isIdenticalName && userRoleService.existsByRole(userRoleResource.getName())){
             throw new RoleExistsException(userRoleResource.getName());
         }
@@ -118,13 +118,22 @@ public class RoleController {
         // First of all we need to delete old relations between user_group and component
 //        for (RoleHasPermission roleHasPermission : userRole.getComponents()) {
 //            roleHasPermissionServiceImp.delete(roleHasPermission.getId());
-            roleHasPermissionServiceImp.deleteByUserRole(userRole);
+        roleHasPermissionServiceImp.deleteByUserRoleId(uRoleBackUp.getId());
 //        }
         // Creating new UserGroup object from groupJson
-        UserRole role = userRoleService.toEntity(userRoleResource);
-        role.setIcon(userRoleService.findById(id).get().getIcon());
-        UserRole userRole0 = userRoleService.findById(id).orElse(null);
-        userRoleService.save(role);
+//        UserRole role = new UserRole(userRoleResource);
+        UserRole uRole;
+        try {
+//            userRoleService.save(role);
+//            userRoleResource.setGroupId(role.getId());
+            uRole = userRoleService.toEntity(userRoleResource);
+            userRoleService.save(uRole);
+        }
+        catch (Exception e){
+            userRoleService.save(uRoleBackUp);
+            throw new RuntimeException(e);
+        }
+//        userRoleService.save(role);
 
 //        UserRole role1 = userRoleService.findById(id).get();
 //        UserRoleResource resource = userRoleService.toResource(role1);
@@ -133,7 +142,7 @@ public class RoleController {
 //                .path("/{id}")
 //                .buildAndExpand(role.getId()).toUri();
 
-        UserRole userRole1 = userRoleService.findById(id).orElse(null);
+//        UserRole userRole1 = userRoleService.findById(id).orElse(null);
         return userRoleService.findById(id)
                 .map(p -> ResponseEntity.ok(new UserRoleResource(p)))
                 .orElseThrow(() -> new RoleNotFoundException(id));

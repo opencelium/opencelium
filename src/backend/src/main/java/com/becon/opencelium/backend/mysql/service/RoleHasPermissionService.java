@@ -22,5 +22,5 @@ import com.becon.opencelium.backend.mysql.entity.UserRole;
 public interface RoleHasPermissionService {
 
     void delete(RoleHasPermission.RoleHasPermissionId roleId);
-    void deleteByUserRole(UserRole roleId);
+    void deleteByUserRoleId(int roleId);
 }

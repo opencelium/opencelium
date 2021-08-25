@@ -79,6 +79,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
         messageData.setIndex(methodNode.getIndex());
         messageData.setLocation("body");
 
+
         FieldNode currentField;
         String color = fieldResource.getColor();
         String type = fieldResource.getType();
@@ -125,6 +126,10 @@ public class FieldNodeServiceImp implements FieldNodeService {
                 path.push("__oc__value");
             }
             currentField = fieldNodeRepository.findNextField(nextField, currentField.getId());
+        }
+
+        if (currentField == null) {
+            throw new RuntimeException("Field \"" + color + "." + type + "." + field + "\" not found");
         }
 
         return currentField;
