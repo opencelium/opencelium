@@ -72,10 +72,13 @@ export function ConnectorForm(type) {
                                 validationMessages: {...this.state.validationMessages, ...fields}
                             })
                         } else {
+                            const data = {...this.state.entity, authenticationFields: {...this.state.authenticationFields}};
+                            if(this.isUpdate){
+                                data.id = parseInt(this.props.params.id);
+                            }
                             this.setState({
                                 validationMessages: {title: '', invoker: ''},
-                            }, () => ::this.props.doAction({...this.state.entity, ...this.state.authenticationFields}, this))
-
+                            }, () => ::this.props.doAction(data, this))
                         }
                         this.startTesting = false;
                     }
