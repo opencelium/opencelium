@@ -375,7 +375,7 @@ class Svg extends React.Component {
             isCreateElementPanelOpened, connection, hasCreateCentralText, createElementPanelConnectorType,
             hasAssignCentralText, isAssignMode,
         } = this.props;
-        let svgStyle = this.props.style;
+        let svgStyle = this.props.style ? {...this.props.style} : {};
         if(hasCreateCentralText || hasAssignCentralText && !isAssignMode){
             if(svgStyle === null){
                 svgStyle = {};

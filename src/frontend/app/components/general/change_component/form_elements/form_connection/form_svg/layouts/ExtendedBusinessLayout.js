@@ -22,6 +22,7 @@ import styles from "@themes/default/content/connections/connection_overview_2";
 import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
 import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import {ConnectionOverviewExtendedChannel} from "@utils/store";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -46,6 +47,10 @@ class ExtendedBusinessLayout extends React.Component{
         this.state = {
             createElementPanelPosition: {x: 0, y: 0},
         }
+    }
+
+    componentDidMount() {
+        ConnectionOverviewExtendedChannel.onmessage = (e) => ::this.props.setConnectionData(e.data);
     }
 
     updateConnection(connection){

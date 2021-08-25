@@ -21,13 +21,12 @@ import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import CConnection from "@classes/components/content/connection/CConnection";
 import {
     HAS_LAYOUTS_SCALING,
-    LAYOUT_POSITION
 } from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import CreateElementPanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
+import {ConnectionOverviewExtendedChannel} from "@utils/store";
 
 function mapStateToProps(state){
     const {connectionOverview, currentBusinessItem, currentTechnicalItem, connection} = mapItemsToClasses(state);
@@ -55,6 +54,10 @@ class ExtendedTechnicalLayout extends React.Component{
             createElementPanelConnectorType: '',
             createElementPanelPosition: {x: 0, y: 0},
         }
+    }
+
+    componentDidMount() {
+        ConnectionOverviewExtendedChannel.onmessage = (e) => ::this.props.setConnectionData(e.data);
     }
 
     setCreateElementPanelPosition(position){
