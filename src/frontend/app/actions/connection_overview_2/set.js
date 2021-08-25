@@ -63,7 +63,7 @@ const setColorMode = (color) => {
 const setConnectionData = (connection = null, updateConnection = null) => {
     return {
         type: ConnectionOverview2Action.SET_CONNECTIONDATA,
-        payload: {connection: connection instanceof CConnection ? connection.getObjectForConnectionOverview() : connection, updateConnection},
+        payload: {connection: typeof connection.getObjectForConnectionOverview === 'function' ? connection.getObjectForConnectionOverview() : connection, updateConnection},
     };
 };
 /**

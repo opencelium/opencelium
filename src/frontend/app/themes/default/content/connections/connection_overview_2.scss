@@ -65,6 +65,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   z-index: 1;
 }
 .create_element_panel_line{
+  z-index: 1000;
   position: absolute;
   width: 20px;
   height: 3px;
@@ -72,10 +73,12 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   box-shadow: 0 4px 2px rgba(0,0,0,0.12), 0 3px 10px rgba(0,0,0,0.24);
 }
 .add_icon{
+  z-index: 1000;
   position: absolute;
   cursor: pointer;
 }
 .create_element_panel{
+  z-index: 1000;
   background: white;
   position: absolute;
   width: 100px;
@@ -128,6 +131,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 .create_element_panel_for_item{
   @extend .create_element_panel;
   width: 200px;
+  z-index: 1000;
 }
 .business_layout {
   position: relative;

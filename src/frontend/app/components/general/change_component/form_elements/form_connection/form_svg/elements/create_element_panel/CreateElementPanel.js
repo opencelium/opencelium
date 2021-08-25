@@ -23,6 +23,7 @@ import ItemTypePanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/ItemTypePanel";
 import ItemPositionPanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/ItemPositionPanel";
+import ReactDOM from "react-dom";
 
 
 
@@ -42,6 +43,8 @@ class CreateElementPanel extends React.Component{
             type: CREATE_PROCESS,
             itemPosition: OUTSIDE_ITEM,
         }
+        this.createElementPanel = document.createElement('div');
+        document.body.appendChild(this.createElementPanel);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -53,6 +56,12 @@ class CreateElementPanel extends React.Component{
                     itemPosition: OUTSIDE_ITEM,
                 });
             }
+        }
+    }
+
+    componentWillUnmount(){
+        if(this.createElementPanel) {
+            document.body.removeChild(this.createElementPanel);
         }
     }
 
@@ -111,50 +120,53 @@ class CreateElementPanel extends React.Component{
         const hasLineBeforeItemTypePanel = hasItemPositionPanel;
         const hasLineBeforeCreateProcess = hasItemTypePanel || hasItemPositionPanel;
         return(
-            <div>
-                {hasCreateBusinessItem &&
-                    <CreateBusinessItem
-                        {...this.props}
-                        itemPosition={itemPosition}
-                        selectedItem={selectedItem}
-                        isTypeCreateOperator={isTypeCreateOperator}
-                    />
-                }
-                {hasItemPositionPanel &&
-                    <ItemPositionPanel
-                        {...this.props}
-                        itemPosition={itemPosition}
-                        onChangeItemPosition={::this.onChangeItemPosition}
-                    />
-                }
-                {hasItemTypePanel &&
-                    <ItemTypePanel
-                        {...this.props}
-                        type={type}
-                        changeType={::this.changeType}
-                        selectedItem={selectedItem}
-                        noOperatorType={noOperatorType}
-                        hasBeforeLine={hasLineBeforeItemTypePanel}
-                    />
-                }
-                {hasCreateProcess &&
-                    <CreateProcess
-                        {...this.props}
-                        hasBeforeLine={hasLineBeforeCreateProcess}
-                        itemPosition={itemPosition}
-                        selectedItem={selectedItem}
-                        isTypeCreateOperator={isTypeCreateOperator}
-                    />
-                }
-                {hasCreateOperator &&
-                    <CreateOperator
-                        {...this.props}
-                        itemPosition={itemPosition}
-                        selectedItem={selectedItem}
-                        isTypeCreateOperator={isTypeCreateOperator}
-                    />
-                }
-            </div>
+            ReactDOM.createPortal(
+                <div>
+                    {hasCreateBusinessItem &&
+                        <CreateBusinessItem
+                            {...this.props}
+                            itemPosition={itemPosition}
+                            selectedItem={selectedItem}
+                            isTypeCreateOperator={isTypeCreateOperator}
+                        />
+                    }
+                    {hasItemPositionPanel &&
+                        <ItemPositionPanel
+                            {...this.props}
+                            itemPosition={itemPosition}
+                            onChangeItemPosition={::this.onChangeItemPosition}
+                        />
+                    }
+                    {hasItemTypePanel &&
+                        <ItemTypePanel
+                            {...this.props}
+                            type={type}
+                            changeType={::this.changeType}
+                            selectedItem={selectedItem}
+                            noOperatorType={noOperatorType}
+                            hasBeforeLine={hasLineBeforeItemTypePanel}
+                        />
+                    }
+                    {hasCreateProcess &&
+                        <CreateProcess
+                            {...this.props}
+                            hasBeforeLine={hasLineBeforeCreateProcess}
+                            itemPosition={itemPosition}
+                            selectedItem={selectedItem}
+                            isTypeCreateOperator={isTypeCreateOperator}
+                        />
+                    }
+                    {hasCreateOperator &&
+                        <CreateOperator
+                            {...this.props}
+                            itemPosition={itemPosition}
+                            selectedItem={selectedItem}
+                            isTypeCreateOperator={isTypeCreateOperator}
+                        />
+                    }
+                </div>,
+                this.createElementPanel
+            )
         );
     }
 }

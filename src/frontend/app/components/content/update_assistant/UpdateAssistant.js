@@ -16,7 +16,7 @@
 import React, {Component, Suspense} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
-import {UpdateAssistantPermissions} from "@utils/constants/permissions";
+import {ConnectorPermissions, UpdateAssistantPermissions} from "@utils/constants/permissions";
 import ChangeContent from "@change_component/ChangeContent";
 import OCTour from "@basic_components/OCTour";
 import {automaticallyShowTour, UPDATE_ASSISTANT_TOURS} from "@utils/constants/tours";
@@ -36,6 +36,7 @@ import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import {logoutUserFulfilled} from "@actions/auth";
 import {APP_STATUS_UP} from "@utils/constants/url";
 import {checkResetFiles} from "@actions/update_assistant/check";
+import Form from "@change_component/Form";
 
 
 function mapStateToProps(state){
@@ -83,6 +84,11 @@ class UpdateAssistant extends Component{
                     updatedConnections: [],
                 },
             },
+            hasAvailableUpdates: false,
+            hasTemplateFileUpdate: false,
+            hasInvokerFileUpdate: false,
+            hasConnectionMigration: false,
+            hasFinishUpdate: false,
         };
         this.isUpdateStarted = false;
     }
@@ -95,6 +101,21 @@ class UpdateAssistant extends Component{
             this.props.router.push(`/login`);
             CVoiceControl.removeAll();
         }
+    }
+
+    setValidationMessage(param, validationMessage){
+        this.setState({
+            validationMessages:{
+                ...this.state.validationMessages,
+                [param]: validationMessage,
+            }
+        })
+    }
+
+    showNextFormSection(formSection){
+        this.setState({
+            [formSection]: true,
+        })
     }
 
     /**
@@ -143,95 +164,74 @@ class UpdateAssistant extends Component{
     }
 
     /**
-     * to validate system requirements
-     */
-    validateSystemRequirements(entity){
-        const {t, checkResetFiles} = this.props;
-        const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('details') && entity.systemRequirements.details && entity.systemRequirements.details.hasOwnProperty('neo4j') && entity.systemRequirements.details.neo4j.status === APP_STATUS_UP;
-        const isOCVersionUnknown = !entity.systemRequirements.hasOwnProperty('details') || !entity.systemRequirements.details.hasOwnProperty(OC_NAME.toLowerCase()) || entity.systemRequirements.details[OC_NAME.toLowerCase()].details.version === '';
-        if (!isNeo4jUp) {
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.NEO4j_DOWN')};
-        }
-        if (isOCVersionUnknown) {
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.UNKNOWN_OC_VERSION')};
-        }
-        this.startCheckingResetFiles = true;
-        checkResetFiles();
-        return {value: false, message: ''};
-    }
-
-    /**
      * to validate available updates
      */
-    validateAvailableUpdates(entity){
-        const {t} = this.props;
-        if (entity.availableUpdates && entity.availableUpdates.mode === '') {
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.NO_UPDATE_MODE')};
+    validateAvailableUpdates(){
+        const {updateData} = this.state;
+        if (updateData.availableUpdates && updateData.availableUpdates.mode === '') {
+            return false;
         }
-        if(entity.availableUpdates && entity.availableUpdates.selectedVersion === null){
-            return {value: false, message: t('FORM.VALIDATION_MESSAGES.NO_SELECTED_VERSION')};
+        if(updateData.availableUpdates && updateData.availableUpdates.selectedVersion === null){
+            return false;
         }
-        return {value: true, message: ''};
+        return true;
     }
 
     /**
      * to validate file update for templates
      */
-    validateTemplateFileUpdate(entity){
-        const {t} = this.props;
-        if(!entity.templateFileUpdate.isFinishUpdate){
-            if (entity.templateFileUpdate && entity.templateFileUpdate.updatedTemplates.length === 0) {
-                return {value: false, message: t('FORM.VALIDATION_MESSAGES.TEMPLATE_UPDATE_ABSENT')};
+    validateTemplateFileUpdate(){
+        const {updateData} = this.state;
+        if(!updateData.templateFileUpdate.isFinishUpdate){
+            if (updateData.templateFileUpdate && updateData.templateFileUpdate.updatedTemplates.length === 0) {
+                return false;
             }
-            if (entity.templateFileUpdate && !entity.templateFileUpdate.isFinishUpdate) {
-                return {value: false, message: t('FORM.VALIDATION_MESSAGES.TEMPLATES_HAVE_ERROR')};
+            if (updateData.templateFileUpdate && !updateData.templateFileUpdate.isFinishUpdate) {
+                return false;
             }
         }
-        return {value: true, message: ''};
+        return true;
     }
 
     /**
      * to validate file update for invokers
      */
-    validateInvokerFileUpdate(entity){
-        const {t} = this.props;
-        if(!entity.invokerFileUpdate.isFinishUpdate) {
-            if (entity.invokerFileUpdate && entity.invokerFileUpdate.updatedInvokers.length === 0) {
-                return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKER_UPDATE_ABSENT')};
+    validateInvokerFileUpdate(){
+        const {updateData} = this.state;
+        if(!updateData.invokerFileUpdate.isFinishUpdate) {
+            if (updateData.invokerFileUpdate && updateData.invokerFileUpdate.updatedInvokers.length === 0) {
+                return false;
             }
-            if (entity.invokerFileUpdate && !entity.invokerFileUpdate.isFinishUpdate) {
-                return {value: false, message: t('FORM.VALIDATION_MESSAGES.INVOKERS_HAVE_ERROR')};
+            if (updateData.invokerFileUpdate && !updateData.invokerFileUpdate.isFinishUpdate) {
+                return false;
             }
         }
-        return {value: true, message: ''};
+        return true;
     }
 
     /**
      * to validate connection migration
      */
-    validateConnectionMigration(entity){
-        const {t} = this.props;
-        if(!entity.connectionMigration.isFinishUpdate) {
-            if (entity.connectionMigration && entity.connectionMigration.updatedConnections.length === 0) {
-                return {value: false, message: t('FORM.VALIDATION_MESSAGES.CONNECTION_UPDATE_ABSENT')};
+    validateConnectionMigration(){
+        const {updateData} = this.state;
+        if(!updateData.connectionMigration.isFinishUpdate) {
+            if (updateData.connectionMigration && updateData.connectionMigration.updatedConnections.length === 0) {
+                return false;
             }
-            if (entity.connectionMigration && entity.connectionMigration.updatedConnections.length !== 0) {
-                return {value: false, message: t('FORM.VALIDATION_MESSAGES.CONNECTIONS_HAVE_ERROR')};
+            if (updateData.connectionMigration && updateData.connectionMigration.updatedConnections.length !== 0) {
+                return false;
             }
         }
-        return {value: true, message: ''};
+        return true;
     }
 
     render(){
-        const {updateData} = this.state;
-        const {t, authUser, updatingSystem, checkingResetFiles, checkResetFilesResult} = this.props;
+        const {updateData, hasAvailableUpdates, hasTemplateFileUpdate, hasInvokerFileUpdate, hasConnectionMigration, hasFinishUpdate} = this.state;
+        const {t, updatingSystem} = this.props;
         let contentTranslations = {};
-        contentTranslations.header = {title: t('FORM.HEADER'), breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
-        contentTranslations.list_button = '';
-        let changeContentTranslations = {};
-        changeContentTranslations.onlyTextButton = `${t('FORM.UPDATE_OC')}`;
-        let getListLink = ``;
-        let breadcrumbsItems = [t('FORM.PAGE_1'), t('FORM.PAGE_2'), t('FORM.PAGE_3'), t('FORM.PAGE_4'), t('FORM.PAGE_5'), t('FORM.PAGE_6')];
+        contentTranslations.header = {title: t('FORM.HEADER'), onHelpClick: ::this.openTour};
+        const isActionDisabled = !this.validateAvailableUpdates() || !this.validateTemplateFileUpdate() || !this.validateInvokerFileUpdate() || !this.validateConnectionMigration();
+        contentTranslations.action_button = {title: `${t('FORM.UPDATE_OC')}`, isDisabled: isActionDisabled};
         let contents = [{
             inputs: [
                 {
@@ -241,17 +241,11 @@ class UpdateAssistant extends Component{
                     name: 'systemRequirements',
                     label: t('FORM.SYSTEM_CHECK'),
                     Component: SystemOverview,
-                    check: (e, entity) => ::this.validateSystemRequirements(e, entity),
-                    request: {
-                        inProcess: checkingResetFiles,
-                        status: this.startCheckingResetFiles && !checkingResetFiles,
-                        result: checkResetFilesResult,
-                        failCondition: (result) => {return result.message !== 'EXISTS';},
-                        notSuccessMessage: t('FORM.VALIDATION_MESSAGES.RESET_FILES_NOT_EXIST'),
-                    },
+                    componentProps: {openNextForm: () => ::this.showNextFormSection('hasAvailableUpdates')},
                 },
             ],
             hint: {text: t('FORM.HINT_1'), openTour: ::this.openTour},
+            header: t(`FORM.PAGE_1`),
         },{
             inputs:[
                 {
@@ -261,10 +255,12 @@ class UpdateAssistant extends Component{
                     name: 'availableUpdates',
                     label: t('FORM.AVAILABLE_UPDATES'),
                     Component: AvailableUpdates,
-                    check: (e, entity) => ::this.validateAvailableUpdates(e, entity),
+                    componentProps: {openNextForm: () => ::this.showNextFormSection('hasTemplateFileUpdate')},
                 },
             ],
             hint: {text: t('FORM.HINT_2'), openTour: ::this.openTour},
+            header: t(`FORM.PAGE_2`),
+            visible: hasAvailableUpdates,
         },{
             inputs:[
                 {
@@ -274,10 +270,12 @@ class UpdateAssistant extends Component{
                     name: 'templateFileUpdate',
                     label: t('FORM.TEMPLATE_FILE_UPDATE'),
                     Component: TemplateFileUpdate,
-                    check: (e, entity) => ::this.validateTemplateFileUpdate(e, entity),
+                    componentProps: {openNextForm: () => ::this.showNextFormSection('hasInvokerFileUpdate')},
                 },
             ],
             hint: {text: t('FORM.HINT_3'), openTour: ::this.openTour},
+            header: t(`FORM.PAGE_3`),
+            visible: hasTemplateFileUpdate,
         },{
             inputs:[
                 {
@@ -287,10 +285,12 @@ class UpdateAssistant extends Component{
                     name: 'invokerFileUpdate',
                     label: t('FORM.INVOKER_FILE_UPDATE'),
                     Component: InvokerFileUpdate,
-                    check: (e, entity) => ::this.validateInvokerFileUpdate(e, entity),
+                    componentProps: {openNextForm: () => ::this.showNextFormSection('hasConnectionMigration')},
                 },
             ],
             hint: {text: t('FORM.HINT_4'), openTour: ::this.openTour},
+            header: t(`FORM.PAGE_4`),
+            visible: hasInvokerFileUpdate,
         },{
             inputs:[
                 {
@@ -300,10 +300,12 @@ class UpdateAssistant extends Component{
                     name: 'connectionMigration',
                     label: t('FORM.CONNECTION_MIGRATION'),
                     Component: ConnectionFileUpdate,
-                    check: (e, entity) => ::this.validateConnectionMigration(e, entity),
+                    componentProps: {openNextForm: () => ::this.showNextFormSection('hasFinishUpdate')},
                 },
             ],
             hint: {text: t('FORM.HINT_5'), openTour: ::this.openTour},
+            header: t(`FORM.PAGE_5`),
+            visible: hasConnectionMigration,
         },{
             inputs:[
                 {
@@ -313,19 +315,18 @@ class UpdateAssistant extends Component{
                     Component: FinishUpdate,
                 },
             ],
+            header: t(`FORM.PAGE_6`),
+            visible: hasFinishUpdate,
         },
         ];
         return (
-            <Content translations={contentTranslations} getListLink={getListLink} permissions={UpdateAssistantPermissions} authUser={authUser}>
-                <ChangeContent
-                    breadcrumbsItems={breadcrumbsItems}
+            <div>
+                <Form
                     contents={contents}
-                    translations={changeContentTranslations}
-                    action={::this.updateSystem}
-                    authUser={authUser}
-                    onPageSwitch={::this.setCurrentTour}
-                    entity={updateData}
+                    translations={contentTranslations}
                     isActionInProcess={updatingSystem}
+                    action={::this.updateSystem}
+                    entity={updateData}
                     type={'onlyText'}
                 />
                 <OCTour
@@ -333,7 +334,7 @@ class UpdateAssistant extends Component{
                     isOpen={this.state.isTourOpen}
                     onRequestClose={::this.closeTour}
                 />
-            </Content>
+            </div>
         );
     }
 }

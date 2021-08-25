@@ -75,6 +75,7 @@ export class CTechnicalProcess extends CProcess{
             itemTypeLineYIntend = -99;
             y -= 3;
         }
+        x -= 30;
         result.itemTypeLine = {top: `${y + 2 + itemTypeLineYIntend}px`, left: `${x - 7}px`};
         result.panelItemTypeStyles = {top: `${y + 2 + panelItemTypeYIntend}px`, left: `${x + 11}px`};
         result.beforeItemLineStyles = {top: `${y + 34}px`, left: `${x + 111}px`};

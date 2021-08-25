@@ -72,7 +72,7 @@ class ConnectionFileUpdate extends React.Component{
     }
 
     convert(index){
-        const {connections, updateConnections, addConvertConnectionsLogs} = this.props;
+        const {connections, updateConnections, addConvertConnectionsLogs, openNextForm} = this.props;
         if(connections.length > index){
             this.setState({
                 currentConnectionIndex: index,
@@ -89,6 +89,7 @@ class ConnectionFileUpdate extends React.Component{
             });
             if(isFinishUpdate) {
                 updateConnections(convertedConnections);
+                openNextForm();
             } else{
                 addConvertConnectionsLogs(connectionsWithErrors.map(connection => {return {connectionId: connection.data.connectionId, connectionName: connection.data.name, message: connection.status.error.message, data: connection.status.error.data};}));
             }
@@ -133,7 +134,7 @@ class ConnectionFileUpdate extends React.Component{
                     <thead>
                         <tr>
                             <th>{`${appVersion}`}</th>
-                            <th style={{paddingRight: connections.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion.name}`}</th>
+                            <th style={{paddingRight: connections.length > 6 ? '35px' : ''}}>{entity.availableUpdates.selectedVersion ? `${entity.availableUpdates.selectedVersion.name}` : ''}</th>
                         </tr>
                     </thead>
                 </Table>

@@ -76,7 +76,6 @@ class BusinessLayout extends React.Component{
     }
 
     openInNewWindow(){
-        console.log(this.props.connectionOverviewState.toJS());
         setLS('connection_overview', {...this.props.connectionOverviewState.toJS()}, 'connection_overview');
         this.props.openInNewWindow();
     }

@@ -72,7 +72,7 @@ class TemplateFileUpdate extends React.Component{
     }
 
     convert(index){
-        const {templates, updateTemplates, addConvertTemplatesLogs} = this.props;
+        const {templates, updateTemplates, addConvertTemplatesLogs, openNextForm} = this.props;
         if(templates.length > index){
             this.setState({
                 currentTemplateIndex: index,
@@ -89,6 +89,7 @@ class TemplateFileUpdate extends React.Component{
             });
             if(isFinishUpdate) {
                 updateTemplates(convertedTemplates);
+                openNextForm();
             } else{
                 addConvertTemplatesLogs(templatesWithErrors.map(template => {return {templateId: template.data.templateId, templateName: template.data.name, message: template.status.error.message, data: template.status.error.data};}));
             }
@@ -133,7 +134,7 @@ class TemplateFileUpdate extends React.Component{
                     <thead>
                         <tr>
                             <th>{`${appVersion}`}</th>
-                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion.name}`}</th>
+                            <th style={{paddingRight: templates.length > 6 ? '35px' : ''}}>{entity.availableUpdates.selectedVersion ? `${entity.availableUpdates.selectedVersion.name}` : ''}</th>
                         </tr>
                     </thead>
                 </Table>

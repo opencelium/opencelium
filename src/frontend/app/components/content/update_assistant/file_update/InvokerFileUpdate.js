@@ -75,7 +75,7 @@ class InvokerFileUpdate extends React.Component{
     }
 
     convert(index){
-        const {invokers, addConvertInvokersLogs, updateInvokers} = this.props;
+        const {invokers, addConvertInvokersLogs, updateInvokers, openNextForm} = this.props;
         if(invokers.length > index){
             this.setState({
                 currentInvokerIndex: index,
@@ -94,6 +94,7 @@ class InvokerFileUpdate extends React.Component{
                 if(convertedInvokers.length > 0) {
                     updateInvokers(convertedInvokers.map(invoker => {return {xml: invoker.data};}));
                 }
+                openNextForm();
             } else{
                 addConvertInvokersLogs(invokersWithErrors.map(invoker => {return {invokerName: invoker.data.name, message: invoker.status.error.message, data: invoker.status.error.data};}));
             }
@@ -138,7 +139,7 @@ class InvokerFileUpdate extends React.Component{
                     <thead>
                     <tr>
                         <th>{`${appVersion}`}</th>
-                        <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{`${entity.availableUpdates.selectedVersion.name}`}</th>
+                        <th style={{paddingRight: invokers.length > 6 ? '35px' : ''}}>{entity.availableUpdates.selectedVersion ? `${entity.availableUpdates.selectedVersion.name}` : ''}</th>
                     </tr>
                     </thead>
                 </Table>
