@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
+import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.ResourceSupport;
@@ -32,6 +33,7 @@ public class ConnectorNodeResource extends ResourceSupport {
     private String title;
     private String icon;
     private InvokerResource invoker; // due to front end asked sending object, normally should be name of invoker
+    private BusinessLayout businessLayout;
     private List<MethodResource> methods;
     private List<OperatorResource> operators;
 
@@ -73,6 +75,14 @@ public class ConnectorNodeResource extends ResourceSupport {
 
     public void setInvoker(InvokerResource invoker) {
         this.invoker = invoker;
+    }
+
+    public BusinessLayout getBusinessLayout() {
+        return businessLayout;
+    }
+
+    public void setBusinessLayout(BusinessLayout businessLayout) {
+        this.businessLayout = businessLayout;
     }
 
     public List<MethodResource> getMethods() {

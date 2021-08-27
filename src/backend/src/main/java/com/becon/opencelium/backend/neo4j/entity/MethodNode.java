@@ -30,6 +30,7 @@ public class MethodNode {
     private String index;
     private String color;
     private String name;
+    private String label;
 
     @Relationship(type = "has_request", direction = Relationship.OUTGOING)
     private RequestNode requestNode;
@@ -105,5 +106,13 @@ public class MethodNode {
 
     public void setNextOperator(StatementNode nextOperator) {
         this.nextOperator = nextOperator;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

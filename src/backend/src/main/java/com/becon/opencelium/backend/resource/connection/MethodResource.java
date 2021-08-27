@@ -29,6 +29,7 @@ public class MethodResource extends ResourceSupport {
     private String index;
     private String name;
     private String color;
+    private String label;
     private RequestResource request;
     private ResponseResource response;
 
@@ -62,6 +63,14 @@ public class MethodResource extends ResourceSupport {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public RequestResource getRequest() {

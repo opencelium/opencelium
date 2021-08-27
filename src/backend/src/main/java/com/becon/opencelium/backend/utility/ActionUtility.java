@@ -348,16 +348,15 @@ public class ActionUtility {
 
     private MethodNode toNodeEntity(MethodResource methodResource){
         MethodNode methodNode = new MethodNode();
-//        methodNode.setId(methodResource.getNodeId());
         methodNode.setIndex(methodResource.getIndex());
         methodNode.setName(methodResource.getName());
         methodNode.setColor(methodResource.getColor());
+        methodNode.setLabel(methodResource.getLabel());
         return methodNode;
     }
 
     private StatementNode toOperatorNode(OperatorResource operatorResource){
         StatementNode statementNode = new StatementNode();
-//        statementNode.setId(operatorResource.getNodeId());
         statementNode.setIndex(operatorResource.getIndex());
         statementNode.setType(operatorResource.getType());
         statementNode.setOperand(operatorResource.getCondition().getRelationalOperator());
