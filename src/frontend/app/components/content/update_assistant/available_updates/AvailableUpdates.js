@@ -107,13 +107,14 @@ class AvailableUpdates extends React.Component{
     }
 
     selectVersion(selectedVersionName){
-        const {entity, updateEntity} = this.props;
+        const {entity, updateEntity, openNextForm} = this.props;
         const updates = ::this.getUpdates();
         const selectedVersion = updates.available.find(version => version.name === selectedVersionName);
         if(selectedVersion) {
             entity.availableUpdates = {...entity.availableUpdates, selectedVersion};
             updateEntity(entity)
             this.setState({selectedVersionName});
+            openNextForm();
         }
     }
 
@@ -161,7 +162,7 @@ class AvailableUpdates extends React.Component{
                 if(fetchingOnlineUpdates !== API_REQUEST_STATE.FINISH){
                     return updates;
                 }
-                selectedUpdates = onlineUpdates;
+                selectedUpdates = [...onlineUpdates, {name: "v5.0.0", status: VERSION_STATUS.AVAILABLE}];
                 break;
             case OFFLINE_UPDATE:
                 if(fetchingOfflineUpdates !== API_REQUEST_STATE.FINISH){

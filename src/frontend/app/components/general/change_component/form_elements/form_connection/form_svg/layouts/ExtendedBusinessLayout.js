@@ -22,14 +22,15 @@ import styles from "@themes/default/content/connections/connection_overview_2";
 import {setBusinessLayoutLocation} from "@actions/connection_overview_2/set";
 import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import {ConnectionOverviewExtendedChannel} from "@utils/store";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
-    const {connection, currentBusinessItem, updateConnection} = mapItemsToClasses(state);
+    const {connection, currentBusinessItem} = mapItemsToClasses(state);
     return{
         currentBusinessItem,
         connection,
-        updateConnection,
+        updateConnectionInOpener: window.opener.updateConnection,
         items: connection.businessLayout.getItems(),
         arrows: connection.businessLayout.getArrows(),
         technicalLayoutLocation: connectionOverview.get('technicalLayoutLocation'),
@@ -48,35 +49,66 @@ class ExtendedBusinessLayout extends React.Component{
         }
     }
 
+    componentDidMount() {
+        ConnectionOverviewExtendedChannel.onmessage = (e) => ::this.props.setConnectionData(e.data);
+    }
+
+    updateConnection(connection){
+        const {updateConnectionInOpener, setConnectionData} = this.props;
+        updateConnectionInOpener(connection);
+        setConnectionData(connection);
+    }
+
     setCreateElementPanelPosition(position){
         this.setState({
             createElementPanelPosition: position,
         });
     }
 
+    deleteProcess(process){
+        const {connection, setCurrentBusinessItem} = this.props;
+        connection.businessLayout.deleteItem(process);
+        this.updateConnection(connection);
+        const currentSvgElement = connection.businessLayout.getCurrentSvgItem()
+        setCurrentBusinessItem(currentSvgElement);
+    }
+
+    updateItems(items){
+        const {connection} = this.props;
+        connection.businessLayout.setItems(items);
+        this.updateConnection(connection);
+    }
+
     setCurrentItem(currentItem){
-        const {setCurrentBusinessItem, connection, updateConnection} = this.props;
+        const {setCurrentBusinessItem, connection} = this.props;
         setCurrentBusinessItem(currentItem);
         if(connection) {
             connection.businessLayout.setCurrentSvgItem(currentItem);
-            updateConnection(connection);
+            this.updateConnection(connection);
         }
     }
 
     render(){
-        const {items} = this.props;
+        const {items, currentBusinessItem} = this.props;
         const {createElementPanelPosition} = this.state;
         return(
-            <div id={this.layoutId} className={`${styles.business_layout}`}>
+            <div id={this.layoutId} className={`${styles.business_layout_extended}`}>
                 <Svg
                     {...this.props}
+                    updateConnection={::this.updateConnection}
+                    currentItem={currentBusinessItem}
+                    updateItems={::this.updateItems}
+                    hasCreateCentralText={items.length === 0}
+                    setCurrentItem={::this.setCurrentItem}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
+                    dragAndDropStep={5}
                     isItemDraggable={true}
                     isDraggable={items.length > 0}
                     isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
-                    setCurrentItem={::this.setCurrentItem}
+                    deleteProcess={::this.deleteProcess}
+                    shouldUnselectOnDraggingPanel={true}
                 />
                 <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y}/>
             </div>

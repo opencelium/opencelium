@@ -9,10 +9,10 @@ export default class CCreateElementPanel{
         let element = null;
         switch (type) {
             case CONNECTOR_FROM:
-                element = document.getElementById(`${CONNECTOR_FROM}_panel`);
+                element = document.getElementById(`${CONNECTOR_FROM}_panel_text`);
                 break;
             case CONNECTOR_TO:
-                element = document.getElementById(`${CONNECTOR_TO}_panel`);
+                element = document.getElementById(`${CONNECTOR_TO}_panel_text`);
                 break;
             case 'business_layout':
                 element = document.getElementById(`business_layout_empty_text`);
@@ -21,16 +21,15 @@ export default class CCreateElementPanel{
         if (element) {
             const clientSvg = element.getBoundingClientRect();
             result.x = clientSvg.x;
-            result.y = clientSvg.y + clientSvg.height / 2 - 115;
-            if (isOnTheTop) {
-                result.y += 5;
-            }
+            result.y = clientSvg.y;
         } else {
-            result.y -= -30;
+            result.x += 20;
+            result.y += 100;
             if (isOnTheTop) {
                 result.y -= 100;
             }
         }
+        result.y += window.scrollY;
         return result;
     }
 

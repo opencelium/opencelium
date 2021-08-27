@@ -32,6 +32,7 @@ export function NewWindowFeature(params = {url: '', windowName: '', setLocation:
 
             openInNewWindow(){
                 const that = this;
+                window.updateConnection = this.props.updateConnection;
                 this.newWindow = window.open(params.url, params.windowName, 'menubar:0,status:0,toolbar:0');
                 this.newWindow.onload = () => {setTimeout(() => {that.isOpenedNewWindow = true;}, 200); params.setLocation(that.props, {location: PANEL_LOCATION.NEW_WINDOW})};
                 if(typeof params.moveTo !== 'function'){

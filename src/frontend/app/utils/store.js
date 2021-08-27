@@ -29,7 +29,8 @@ import {responsiveStoreEnhancer} from 'redux-responsive';
 import {AppSettings} from "./constants/app";
 import {ConnectionOverview2Action} from "@utils/actions";
 
-export const BChannel = new BroadcastChannel('connection_overview');
+export const ConnectionOverviewChannel = new BroadcastChannel('connection_overview');
+export const ConnectionOverviewExtendedChannel = new BroadcastChannel('connection_overview_extended');
 
 const initialEnhancers  = [responsiveStoreEnhancer];
 

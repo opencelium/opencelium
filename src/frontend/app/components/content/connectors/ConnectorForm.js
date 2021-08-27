@@ -61,22 +61,27 @@ export function ConnectorForm(type) {
                 checkValidationRequest(this, 'title', checkingConnectorTitle, checkTitleResult, t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`));
                 if(this.startTesting && testResult){
                     const fields = {};
-                    if(testResult.status > 299 || testResult.status < 200){
-                        for(let param in this.state.authenticationFields){
-                            if(this.state.authenticationFields[param]){
-                                fields[param] = t(`${this.translationKey}.VALIDATION_MESSAGES.WRONG_CREDENTIAL_DATA`);
+                    if(testResult && testResult.hasOwnProperty('status')) {
+                        if (testResult.status > 299 || testResult.status < 200) {
+                            for (let param in this.state.authenticationFields) {
+                                if (this.state.authenticationFields[param]) {
+                                    fields[param] = t(`${this.translationKey}.VALIDATION_MESSAGES.WRONG_CREDENTIAL_DATA`);
+                                }
                             }
+                            this.setState({
+                                validationMessages: {...this.state.validationMessages, ...fields}
+                            })
+                        } else {
+                            const data = {...this.state.entity, authenticationFields: {...this.state.authenticationFields}};
+                            if(this.isUpdate){
+                                data.id = parseInt(this.props.params.id);
+                            }
+                            this.setState({
+                                validationMessages: {title: '', invoker: ''},
+                            }, () => ::this.props.doAction(data, this))
                         }
-                        this.setState({
-                            validationMessages: {...this.state.validationMessages, ...fields}
-                        })
-                    } else{
-                        this.setState({
-                            validationMessages: {title: '', invoker: ''},
-                        }, () => ::this.props.doAction({...this.state.entity, ...this.state.authenticationFields}, this))
-
+                        this.startTesting = false;
                     }
-                    this.startTesting = false;
                 }
             }
 

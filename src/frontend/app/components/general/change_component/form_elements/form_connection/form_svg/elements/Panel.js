@@ -15,6 +15,7 @@ class Panel extends React.Component{
     render(){
         const {panelPosition, rectPosition, invokerName, namePosition, isEmpty, connectorType, createElementPanelConnectorType} = this.props;
         const textX = namePosition === 'right' ? panelPosition.width : 2;
+        const hasPanelText = isEmpty && createElementPanelConnectorType !== connectorType;
         return(
             <React.Fragment>
                 <svg id={`${connectorType}_panel`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
@@ -22,11 +23,9 @@ class Panel extends React.Component{
                     <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
                         {invokerName}
                     </text>
-                    {isEmpty && createElementPanelConnectorType !== connectorType &&
-                        <text onClick={::this.onClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'50%'} y={'50%'} className={styles.connector_empty_text}>
-                            {'Click here to create...'}
-                        </text>
-                    }
+                    <text id={`${connectorType}_panel_text`} style={{opacity: hasPanelText ? 1 : 0}} onClick={::this.onClick} dominantBaseline={"middle"} textAnchor={"middle"} x={'50%'} y={'50%'} className={styles.connector_empty_text}>
+                        {'Click here to create...'}
+                    </text>
                     {/*<rect x={1} y={1} width={'100%'} height={'100%'} fill={'none'} stroke={'red'}/>*/}
                 </svg>
             </React.Fragment>

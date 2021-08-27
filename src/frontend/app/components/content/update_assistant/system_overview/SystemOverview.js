@@ -18,11 +18,14 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import { Row, Col, Container } from "react-grid-system";
 import {fetchSystemRequirements} from "@actions/update_assistant/fetch";
+import {checkResetFiles} from "@actions/update_assistant/check";
 import {ListComponent} from "@decorators/ListComponent";
 import styles from "@themes/default/content/update_assistant/main";
 import Translate from "@components/general/app/Translate";
-import {OC_NAME} from "@utils/constants/app";
-import {APP_STATUS_DOWN} from "@utils/constants/url";
+import {API_REQUEST_STATE, OC_NAME} from "@utils/constants/app";
+import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
+import theme from "react-toolbox/lib/input/theme.css";
+import basicComponentsStyles from "@themes/default/general/basic_components";
 
 
 function mapStateToProps(state){
@@ -32,24 +35,68 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingSystemRequirements: updateAssistant.get('fetchingSystemRequirements'),
         systemRequirements: updateAssistant.get('systemRequirements'),
+        checkingResetFiles: updateAssistant.get('checkingResetFiles'),
+        checkResetFilesResult: updateAssistant.get('checkResetFiles'),
     }
 }
 
 @withTranslation('update_assistant')
-@connect(mapStateToProps, {fetchSystemRequirements})
+@connect(mapStateToProps, {fetchSystemRequirements, checkResetFiles})
 @ListComponent('systemRequirements')
 class SystemOverview extends React.Component{
     constructor(props) {
         super(props);
+
+        this.state = {
+            validationMessage: '',
+        }
+    }
+
+    setValidationMessage(validationMessage){
+        this.setState({
+            validationMessage,
+        });
     }
 
     componentDidMount() {
         const {entity, updateEntity, systemRequirements} = this.props;
         entity.systemRequirements = systemRequirements;
         updateEntity(entity);
+        this.validateSystemRequirements(entity);
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {t, checkingResetFiles, checkResetFilesResult, openNextForm} = this.props;
+        if(prevProps.checkingResetFiles === API_REQUEST_STATE.START && checkingResetFiles !== API_REQUEST_STATE.START){
+            if(checkResetFilesResult.message !== 'EXISTS'){
+                this.setValidationMessage(t('FORM.VALIDATION_MESSAGES.RESET_FILES_NOT_EXIST'));
+            } else{
+                if(this.state.validationMessage !== ''){
+                    openNextForm();
+                }
+            }
+        }
+    }
+
+    /**
+     * to validate system requirements
+     */
+    validateSystemRequirements(entity){
+        const {t, checkResetFiles} = this.props;
+        const isNeo4jUp = entity.systemRequirements && entity.systemRequirements.hasOwnProperty('details') && entity.systemRequirements.details && entity.systemRequirements.details.hasOwnProperty('neo4j') && entity.systemRequirements.details.neo4j.status === APP_STATUS_UP;
+        const isOCVersionUnknown = !entity.systemRequirements.hasOwnProperty('details') || !entity.systemRequirements.details.hasOwnProperty(OC_NAME.toLowerCase()) || entity.systemRequirements.details[OC_NAME.toLowerCase()].details.version === '';
+        if(!isNeo4jUp) {
+            this.setValidationMessage(t('FORM.VALIDATION_MESSAGES.NEO4j_DOWN'));
+        }
+        if(isOCVersionUnknown) {
+            this.setValidationMessage(t('FORM.VALIDATION_MESSAGES.UNKNOWN_OC_VERSION'));
+        }
+        this.startCheckingResetFiles = true;
+        checkResetFiles();
     }
 
     render(){
+        const {validationMessage} = this.state;
         const {t, systemRequirements} = this.props;
         const VISIBLE_SERVICES = ['db', 'elasticsearch', 'neo4j', OC_NAME.toLowerCase(), 'os'];
         const backupLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
@@ -82,6 +129,7 @@ class SystemOverview extends React.Component{
                                    <a href={backupLogLink} target={'_blank'} children={backupLinkText}/>
                                ]}/>
                 </div>
+                {validationMessage && <span className={`${theme.error} ${basicComponentsStyles.input_error}`} style={{textAlign: 'center', width: '100%',paddingRight: '30px'}}>{validationMessage}</span>}
             </Container>
         );
     }

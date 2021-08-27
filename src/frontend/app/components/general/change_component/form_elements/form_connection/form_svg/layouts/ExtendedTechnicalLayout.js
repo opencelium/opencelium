@@ -15,17 +15,21 @@
 
 import React from 'react';
 import {connect} from "react-redux";
-import {setCurrentBusinessItem, setCurrentTechnicalItem} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
 import {setTechnicalLayoutLocation} from "@actions/connection_overview_2/set";
 import CConnectorItem, {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import CConnection from "@classes/components/content/connection/CConnection";
-import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import {
+    HAS_LAYOUTS_SCALING,
+} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
+import CreateElementPanel
+    from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
+import {ConnectionOverviewExtendedChannel} from "@utils/store";
 
 function mapStateToProps(state){
-    const {currentBusinessItem, currentTechnicalItem, connection, updateConnection} = mapItemsToClasses(state);
+    const {connectionOverview, currentBusinessItem, currentTechnicalItem, connection} = mapItemsToClasses(state);
     let arrows = connection ? [...connection.fromConnector.arrows, ...connection.toConnector.arrows] : [];
     const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
     return{
@@ -34,30 +38,59 @@ function mapStateToProps(state){
         items,
         arrows,
         connection,
-        updateConnection,
+        updateConnectionInOpener: window.opener.updateConnection,
+        isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
-@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation, setConnectionData})
 class ExtendedTechnicalLayout extends React.Component{
 
     constructor(props) {
         super(props);
         this.layoutId = 'technical_layout';
+        this.state = {
+            isCreateElementPanelOpened: false,
+            createElementPanelConnectorType: '',
+            createElementPanelPosition: {x: 0, y: 0},
+        }
+    }
+
+    componentDidMount() {
+        ConnectionOverviewExtendedChannel.onmessage = (e) => ::this.props.setConnectionData(e.data);
+    }
+
+    setCreateElementPanelPosition(position){
+        this.setState({
+            createElementPanelPosition: position,
+        });
+    }
+
+    setIsCreateElementPanelOpened(isCreateElementPanelOpened, createElementPanelConnectorType = ''){
+        this.setState({
+            isCreateElementPanelOpened,
+            createElementPanelConnectorType,
+        });
+    }
+
+    updateConnection(connection){
+        const {updateConnectionInOpener, setConnectionData} = this.props;
+        updateConnectionInOpener(connection);
+        setConnectionData(connection);
     }
 
     setCurrentItem(currentItem){
-        const {setCurrentTechnicalItem, connection, updateConnection} = this.props;
+        const {setCurrentTechnicalItem, connection} = this.props;
         setCurrentTechnicalItem(currentItem);
         if(connection) {
             const connector = connection.getConnectorByType(currentItem.connectorType);
             connector.setCurrentItem(currentItem.entity);
-            updateConnection(connection);
+            this.updateConnection(connection);
         }
     }
 
     deleteProcess(process){
-        const {connection, updateConnection, setCurrentTechnicalItem} = this.props;
+        const {connection, setCurrentTechnicalItem} = this.props;
         const method = process.entity;
         const connector = connection.getConnectorByType(process.connectorType);
         if(connector){
@@ -66,12 +99,12 @@ class ExtendedTechnicalLayout extends React.Component{
             } else{
                 connection.removeToConnectorMethod(method);
             }
-            updateConnection(connection);
             const currentItem = connector.getCurrentItem();
             if(currentItem){
                 const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
                 setCurrentTechnicalItem(currentSvgElement);
             }
+            this.updateConnection(connection);
         }
     }
 
@@ -100,31 +133,51 @@ class ExtendedTechnicalLayout extends React.Component{
     }
 
     render(){
-        const {currentTechnicalItem, currentBusinessItem} = this.props;
+        const {createElementPanelPosition, createElementPanelConnectorType, isCreateElementPanelOpened} = this.state;
+        const {currentTechnicalItem, currentBusinessItem, connection, isAssignMode} = this.props;
         const isSelectedBusinessItem = currentBusinessItem !== null;
         const isSelectedBusinessItemEmpty = isSelectedBusinessItem && currentBusinessItem.items.length === 0;
-        let isAssignMode = false;
         let svgStyle = {};
         if(isAssignMode){
             svgStyle.background = '#d7dcf2';
         }
         const isScalable = HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode);
         const isDraggable = !(isSelectedBusinessItemEmpty && !isAssignMode);
+        const hasAssignCentralText = isSelectedBusinessItemEmpty && !isAssignMode;
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams();
         return(
             <div id={this.layoutId} className={`${styles.technical_layout_extended}`}>
                 <Svg
                     {...this.props}
+                    updateConnection={::this.updateConnection}
                     layoutId={this.layoutId}
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={isDraggable}
                     isScalable={isScalable}
+                    isItemDraggable={false}
                     setCurrentItem={::this.setCurrentItem}
                     deleteProcess={::this.deleteProcess}
                     currentItem={currentTechnicalItem}
                     style={svgStyle}
+                    isBusinessLayoutMinimized={false}
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
+                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
+                    startingSvgY={-80}
+                    hasAssignCentralText={hasAssignCentralText}
+                />
+                <CreateElementPanel
+                    isOnTheTopLayout={true}
+                    createElementPanelConnectorType={createElementPanelConnectorType}
+                    x={createElementPanelPosition.x}
+                    y={createElementPanelPosition.y}
+                    connectorType={currentTechnicalItem ? currentTechnicalItem.connectorType : ''}
+                    connection={connection}
+                    updateConnection={::this.updateConnection}
+                    isCreateElementPanelOpened={isCreateElementPanelOpened}
+                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
                 />
             </div>
         );

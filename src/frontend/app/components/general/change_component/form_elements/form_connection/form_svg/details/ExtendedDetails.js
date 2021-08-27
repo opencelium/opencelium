@@ -22,7 +22,7 @@ import PageNotFound from "@components/general/app/PageNotFound";
 import {SEPARATE_WINDOW} from "@utils/constants/app";
 import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
-import {BChannel} from "@utils/store";
+import {ConnectionOverviewChannel} from "@utils/store";
 import {withTranslation} from "react-i18next";
 
 function mapStateToProps(state){
@@ -54,7 +54,7 @@ class ExtendedDetails extends React.Component{
 
     updateConnection(){
         const {connection} = this.props;
-        BChannel.postMessage(connection.getObjectForConnectionOverview());
+        ConnectionOverviewChannel.postMessage(connection.getObjectForConnectionOverview());
     }
 
     render(){

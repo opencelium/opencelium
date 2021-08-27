@@ -25,12 +25,10 @@ import {PANEL_LOCATION} from "@utils/constants/app";
 import {setLS} from "@utils/LocalStorage";
 import {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
-import {BChannel} from "@utils/store";
+import {ConnectionOverviewChannel, ConnectionOverviewExtendedChannel} from "@utils/store";
 import {withTranslation} from "react-i18next";
-import Svg from "@change_component/form_elements/form_connection/form_svg/layouts/Svg";
 import CreateElementPanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
-import Draft from "@change_component/form_elements/form_connection/form_methods/Draft";
 
 
 export const HAS_LAYOUTS_SCALING = true;
@@ -101,7 +99,7 @@ class FormConnectionSvg extends Component{
     componentDidMount() {
         const {entity} = this.props;
         this.props.setConnectionData(entity, ::this.updateEntity);
-        BChannel.onmessage = (e) => ::this.updateEntity(e.data);
+        ConnectionOverviewChannel.onmessage = (e) => ::this.updateEntity(e.data);
     }
 
     componentWillUnmount() {
@@ -331,6 +329,7 @@ class FormConnectionSvg extends Component{
                 setConnectionData(e, ::this.updateEntity);
             }
         }
+        ConnectionOverviewExtendedChannel.postMessage(connection.getObjectForConnectionOverview());
     }
 
     renderBusinessLayout(){

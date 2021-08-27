@@ -10,6 +10,7 @@ import {connect} from "react-redux";
 import {setCurrentBusinessItem} from "@actions/connection_overview_2/set";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
 import CCreateElementPanel from "@classes/components/content/connection_overview_2/CCreateElementPanel";
+import ReactDOM from "react-dom";
 
 
 @connect(null, {setCurrentBusinessItem})

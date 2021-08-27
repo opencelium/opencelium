@@ -31,8 +31,8 @@ export default class CBusinessLayout{
     }
 
     convertItem(item){
-        let newItem = {...item};
-        if(!(newItem instanceof CBusinessProcess)){
+        if(!(item instanceof CBusinessProcess)){
+            let newItem = {...item};
             let technicalItems = [];
             if(newItem && newItem.hasOwnProperty('items')) {
                 for (let i = 0; i < newItem.items.length; i++) {

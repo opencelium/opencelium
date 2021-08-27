@@ -14,6 +14,8 @@ export const ActionButton = (props) => {
         case 'update':
             icon = 'autorenew';
             break;
+        case 'onlyText':
+            break;
     }
     if(isActionInProcess){
         icon = 'loading';
@@ -21,9 +23,9 @@ export const ActionButton = (props) => {
     }
     return <Button
         iconClassName={iconClassName}
-        title={<span>{translations.action_button.title}</span>}
+        title={translations.action_button.title}
         icon={icon}
-        disabled={isActionInProcess}
+        disabled={isActionInProcess || translations.action_button.isDisabled}
         onClick={doAction}
     />;
 }
