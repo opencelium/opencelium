@@ -38,10 +38,11 @@ class SettingsPanel extends React.Component{
         let positionTooltip = '';
         let positionValue = '';
         let positionClick = null;
-        const tooltipPosition = 'bottom';
+        let tooltipPosition = 'bottom';
         let settingsPanelStyles = {};
         let detailsTitleClassName = '';
         if(position === DETAILS_POSITION.LEFT){
+            tooltipPosition = 'right_bottom';
             positionIconClassName = styles.position_icon_left;
             minMaxIconClassName = styles.min_max_icon_left;
             newWindowIconClassName = styles.new_window_icon_left;
@@ -52,6 +53,7 @@ class SettingsPanel extends React.Component{
             detailsTitleClassName = styles.details_title_left;
         }
         if(position === DETAILS_POSITION.RIGHT){
+            tooltipPosition = 'left_bottom';
             positionIconClassName = styles.position_icon_right;
             minMaxIconClassName = styles.min_max_icon_right;
             newWindowIconClassName = styles.new_window_icon_right;
@@ -81,6 +83,7 @@ class SettingsPanel extends React.Component{
                     onClick={positionClick}
                     tooltip={positionTooltip}
                     value={positionValue}
+                    tooltipPosition={tooltipPosition}
                 />
                 {isMinimized && <div className={detailsTitleClassName}>Details</div>}
                 <TooltipFontIcon

@@ -74,6 +74,7 @@ class CreateProcess extends React.Component{
             } else {
                 connection.addToConnectorMethod(method, itemPosition);
             }
+            console.log('CreateProcess', connection)
             updateConnection(connection);
             if (setCreateElementPanelPosition) setCreateElementPanelPosition({x: 0, y: 0});
             if (setIsCreateElementPanelOpened) setIsCreateElementPanelOpened(false);

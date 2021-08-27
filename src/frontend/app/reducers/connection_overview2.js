@@ -49,7 +49,6 @@ if(initialState === null){
         businessLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         technicalLayoutLocation: PANEL_LOCATION.SAME_WINDOW,
         colorMode: COLOR_MODE.RECTANGLE_TOP,
-        isAssignMode: false,
         businessLabelMode: BUSINESS_LABEL_MODE.NOT_VISIBLE,
         isVisibleBusinessLabelKeyPressed: false,
     });
@@ -66,8 +65,6 @@ const reducer = (state = initialState, action) => {
             return state.set('businessLabelMode', action.payload.businessLabelMode).set('colorMode', action.payload.colorMode);
         case ConnectionOverview2Action.SET_BUSINESSLABELMODE:
             return state.set('businessLabelMode', action.payload);
-        case ConnectionOverview2Action.SET_ISASSIGNMODE:
-            return state.set('isAssignMode', action.payload);
         case ConnectionOverview2Action.SET_CONNECTIONDATA:
             return state.set('connection', action.payload.connection).set('updateConnection', action.payload.updateConnection ? action.payload.updateConnection : state.get('updateConnection'));
         case ConnectionOverview2Action.SET_COLORMODE:

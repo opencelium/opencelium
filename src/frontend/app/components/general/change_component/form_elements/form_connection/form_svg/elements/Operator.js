@@ -27,14 +27,8 @@ import {SvgItem} from "@decorators/SvgItem";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
 
 
-function mapStateToProps(store){
-    const connectionOverview = store.get('connection_overview');
-    return{
-        isAssignMode: connectionOverview.get('isAssignMode'),
-    }
-}
 
-@connect(mapStateToProps, {setCurrentBusinessItem})
+@connect(null, {setCurrentBusinessItem})
 @SvgItem(COperator)
 class Operator extends React.Component{
     constructor(props) {
@@ -46,8 +40,8 @@ class Operator extends React.Component{
     }
 
     onMouseOver(){
-        const {isAssignMode} = this.props;
-        if(isAssignMode) {
+        const {connection} = this.props;
+        if(connection && connection.businessLayout.isInAssignMode) {
             this.setState({
                 polygonStyle: {stroke: '#79c883'}
             });
@@ -55,8 +49,8 @@ class Operator extends React.Component{
     }
 
     onMouseLeave(){
-        const {isAssignMode} = this.props;
-        if(isAssignMode) {
+        const {connection} = this.props;
+        if(connection && connection.businessLayout.isInAssignMode) {
             this.setState({
                 polygonStyle: {},
             });
@@ -68,7 +62,8 @@ class Operator extends React.Component{
     }
 
     onClick(){
-        const {isAssignMode, setCurrentItem, operator, isDisabled, assign, toggleReassignConfirmation} = this.props;
+        const {connection, setCurrentItem, operator, isDisabled, assign, toggleReassignConfirmation} = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         if(!isDisabled) {
             if (isAssignMode) {
                 assign();
@@ -103,7 +98,8 @@ class Operator extends React.Component{
 
     renderLoopOperator(){
         const {polygonStyle} = this.state;
-        const {operator, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isAssignMode, isDisabled} = this.props;
+        const {connection, operator, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess, isDisabled} = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const points = `${operator.width / 2},1 ${operator.height - 1},${operator.width / 2} ${operator.width / 2},${operator.height - 1} 1,${operator.width / 2}`;
         const closeX = 40;
         const closeY = 0;
@@ -131,7 +127,8 @@ class Operator extends React.Component{
 
     renderIfOperator(){
         const {polygonStyle} = this.state;
-        const {operator, isNotDraggable, isCurrent, isHighlighted, readOnly, isAssignedToBusinessProcess, isAssignMode, isDisabled} = this.props;
+        const {connection, operator, isNotDraggable, isCurrent, isHighlighted, readOnly, isAssignedToBusinessProcess, isDisabled} = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const textX = '50%';
         const textY = '50%';
         const closeX = 40;

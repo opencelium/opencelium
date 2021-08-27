@@ -21,7 +21,7 @@ import {CBusinessProcess} from "@classes/components/content/connection_overview_
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {isString} from "@utils/app";
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
-import {setCurrentBusinessItem, setIsAssignMode} from "@actions/connection_overview_2/set";
+import {setCurrentBusinessItem} from "@actions/connection_overview_2/set";
 import {AssignIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 import {SvgItem} from "@decorators/SvgItem";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
@@ -33,14 +33,13 @@ function mapStateToProps(state){
     const {currentBusinessItem} = mapItemsToClasses(state);
     return{
         colorMode: connectionOverview.get('colorMode'),
-        isAssignMode: connectionOverview.get('isAssignMode'),
         businessLabelMode: connectionOverview.get('businessLabelMode'),
         isVisibleBusinessLabelKeyPressed: connectionOverview.get('isVisibleBusinessLabelKeyPressed'),
         currentBusinessItem,
     }
 }
 
-@connect(mapStateToProps, {setCurrentBusinessItem, setIsAssignMode})
+@connect(mapStateToProps, {setCurrentBusinessItem})
 @SvgItem(CProcess)
 class Process extends React.Component{
     constructor(props) {
@@ -52,8 +51,8 @@ class Process extends React.Component{
     }
 
     onMouseOver(){
-        const {isAssignMode, process} = this.props;
-        if(isAssignMode && process instanceof CTechnicalProcess) {
+        const {connection, process} = this.props;
+        if(connection && connection.businessLayout.isInAssignMode && process instanceof CTechnicalProcess) {
             this.setState({
                 technicalRectClassName: styles.process_assign,
             });
@@ -61,9 +60,9 @@ class Process extends React.Component{
     }
 
     onMouseDown(){
-        const {isAssignMode, setCurrentItem, process, isDisabled} = this.props;
+        const {connection, setCurrentItem, process, isDisabled} = this.props;
         if(!isDisabled) {
-            if (!isAssignMode) {
+            if (connection && !connection.businessLayout.isInAssignMode) {
                 process.isDragged = true;
                 setCurrentItem(process);
             }
@@ -72,8 +71,8 @@ class Process extends React.Component{
     }
 
     onMouseLeave(){
-        const {isAssignMode, process} = this.props;
-        if(isAssignMode && process instanceof CTechnicalProcess) {
+        const {connection, process} = this.props;
+        if(connection && connection.businessLayout.isInAssignMode && process instanceof CTechnicalProcess) {
             this.setState({
                 technicalRectClassName: '',
             });
@@ -81,14 +80,15 @@ class Process extends React.Component{
     }
 
     onDoubleClick(){
-        const {isDisabled, isAssignMode} = this.props;
-        if(!isDisabled && !isAssignMode) {
+        const {isDisabled, connection} = this.props;
+        if(!isDisabled && connection && !connection.businessLayout.isInAssignMode) {
             this.props.setIsCreateElementPanelOpened(true);
         }
     }
 
     onClick(){
-        const {isAssignMode, setCurrentItem, process, assign, isDisabled, toggleReassignConfirmation} = this.props;
+        const {connection, setCurrentItem, process, assign, isDisabled, toggleReassignConfirmation} = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         if(!isDisabled) {
             if (isAssignMode) {
                 assign();
@@ -97,7 +97,8 @@ class Process extends React.Component{
                 setCurrentItem(process);
             }
         } else{
-            if (isAssignMode) {
+            const isBusinessProcess = process instanceof CBusinessProcess;
+            if (isAssignMode && !isBusinessProcess) {
                 toggleReassignConfirmation();
             }
         }
@@ -110,17 +111,21 @@ class Process extends React.Component{
     }
 
     setAssignMode(){
-        const {setIsAssignMode} = this.props;
-        setIsAssignMode(true);
+        const {connection, updateConnection} = this.props;
+        if(connection){
+            connection.businessLayout.isInAssignMode = true;
+            updateConnection(connection);
+        }
     }
 
     render(){
         const {technicalRectClassName} = this.state;
         const {
             process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess,
-            isDisabled, colorMode, readOnly, isAssignMode, businessLabelMode, connection,
+            isDisabled, colorMode, readOnly, businessLabelMode, connection,
             isVisibleBusinessLabelKeyPressed, currentBusinessItem,
         } = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const method = process.entity;
         const borderRadius = 10;
         const labelX = '50%';

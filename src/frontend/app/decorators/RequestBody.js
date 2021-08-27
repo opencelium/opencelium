@@ -278,6 +278,7 @@ export function RequestBody(CRequestType){
                             {this.renderEnhancement()}
                             <Component
                                 {...this.props}
+                                openEnhancement={::this.openEnhancement}
                                 updateBody={::this.updateBody}
                                 ReferenceComponent={hasReferenceComponent ? {
                                     getComponent: (params) => {

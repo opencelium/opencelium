@@ -44,7 +44,7 @@ export const DETAILS_POSITION = {
 };
 
 export const  LAYOUT_SETTINGS = {
-    MIN_WIDTH: 200,
+    MIN_WIDTH: 300,
 };
 
 const INITIAL_BUSINESS_LAYOUT_POSITION = LAYOUT_POSITION.TOP;
@@ -244,7 +244,7 @@ class FormConnectionSvg extends Component{
                     panelWidths[1].minSize = 20;
                     panelWidths[1].size = 20;
                 } else{
-                    panelWidths[0].size = height;
+                    panelWidths[0].size = 300;
                 }
             }
             if(layoutPosition === LAYOUT_POSITION.BOTTOM){
@@ -253,7 +253,7 @@ class FormConnectionSvg extends Component{
                     panelWidths[0].minSize = 20;
                     panelWidths[0].size = 20;
                 } else{
-                    panelWidths[1].size = height;
+                    panelWidths[1].size = 300;
                 }
             }
         }
@@ -318,18 +318,23 @@ class FormConnectionSvg extends Component{
         };
     }
 
-    updateEntity(e = null){
+    updateEntity(entity = null, settings = {hasPostMessage: true}){
         const {authUser, connection, updateEntity, setConnectionData} = this.props;
         if(connection) {
             setLS(`${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`, JSON.stringify(connection.getObject()), `connection_${authUser.userId}`);
-            if (e === null) {
+            if (entity === null) {
                 updateEntity(connection);
+                if(!settings || settings.hasOwnProperty('hasPostMessage') && settings.hasPostMessage !== false){
+                    ConnectionOverviewExtendedChannel.postMessage(connection.getObjectForConnectionOverview());
+                }
             } else {
-                updateEntity(e);
-                setConnectionData(e, ::this.updateEntity);
+                updateEntity(entity);
+                setConnectionData(entity, ::this.updateEntity);
+                if(!settings || settings.hasOwnProperty('hasPostMessage') && settings.hasPostMessage !== false){
+                    ConnectionOverviewExtendedChannel.postMessage(entity.getObjectForConnectionOverview());
+                }
             }
         }
-        ConnectionOverviewExtendedChannel.postMessage(connection.getObjectForConnectionOverview());
     }
 
     renderBusinessLayout(){

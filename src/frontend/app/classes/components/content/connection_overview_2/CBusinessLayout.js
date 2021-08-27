@@ -6,11 +6,12 @@ import {CTechnicalOperator} from "@classes/components/content/connection_overvie
 
 export default class CBusinessLayout{
 
-    constructor(connection = null, svgItems = [], arrows = [], currentSvgItemId = '') {
+    constructor(connection = null, svgItems = [], arrows = [], currentSvgItemId = '', isInAssignMode = false) {
         this._connection = connection;
         this._svgItems = this.convertItems([...svgItems]);
         this._arrows = arrows;
         this._currentSvgItem = this.getCurrentSvgItemById(currentSvgItemId);
+        this._isInAssignMode = isInAssignMode;
     }
 
     static createBusinessLayout(businessLayout){
@@ -18,7 +19,8 @@ export default class CBusinessLayout{
         const svgItems = businessLayout && businessLayout.hasOwnProperty('svgItems') ? businessLayout.svgItems : [];
         const arrows = businessLayout && businessLayout.hasOwnProperty('arrows') ? businessLayout.arrows : [];
         const currentSvgItemId = businessLayout && businessLayout.hasOwnProperty('currentSvgItemId') ? businessLayout.currentSvgItemId : '';
-        return new CBusinessLayout(connection, svgItems, arrows, currentSvgItemId);
+        const isInAssignMode = businessLayout && businessLayout.hasOwnProperty('isInAssignMode') ? businessLayout.isInAssignMode : false;
+        return new CBusinessLayout(connection, svgItems, arrows, currentSvgItemId, isInAssignMode);
     }
 
     changeItemName(item, newName){
@@ -170,6 +172,14 @@ export default class CBusinessLayout{
         return this._currentSvgItem;
     }
 
+    get isInAssignMode(){
+        return this._isInAssignMode;
+    }
+
+    set isInAssignMode(isInAssignMode){
+        this._isInAssignMode = isInAssignMode;
+    }
+
     getObject(){
         let svgItems = [];
         for(let i = 0; i < this._svgItems.length; i++){
@@ -181,6 +191,7 @@ export default class CBusinessLayout{
             svgItems,
             arrows: this._arrows,
             currentSvgItemId: this._currentSvgItem ? this._currentSvgItem.id : '',
+            isInAssignMode: this._isInAssignMode ? this._isInAssignMode : false,
         }
     }
 }

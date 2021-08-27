@@ -32,6 +32,7 @@ function mapStateToProps(state){
     const {connectionOverview, currentBusinessItem, currentTechnicalItem, connection} = mapItemsToClasses(state);
     let arrows = connection ? [...connection.fromConnector.arrows, ...connection.toConnector.arrows] : [];
     const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
+    console.log('mapStateToProps', items);
     return{
         currentBusinessItem,
         currentTechnicalItem,
@@ -39,7 +40,6 @@ function mapStateToProps(state){
         arrows,
         connection,
         updateConnectionInOpener: window.opener.updateConnection,
-        isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
@@ -57,7 +57,14 @@ class ExtendedTechnicalLayout extends React.Component{
     }
 
     componentDidMount() {
-        ConnectionOverviewExtendedChannel.onmessage = (e) => ::this.props.setConnectionData(e.data);
+        ConnectionOverviewExtendedChannel.onmessage = (e) => {console.log('ExtendedChannel.onMessage', e.data); ::this.props.setConnectionData(e.data)};
+    }
+
+    updateConnection(connection){
+        const {updateConnectionInOpener, setConnectionData} = this.props;
+        console.log('updateConnection', connection)
+        updateConnectionInOpener(connection, {hasPostMessage: false});
+        setConnectionData(connection);
     }
 
     setCreateElementPanelPosition(position){
@@ -71,12 +78,6 @@ class ExtendedTechnicalLayout extends React.Component{
             isCreateElementPanelOpened,
             createElementPanelConnectorType,
         });
-    }
-
-    updateConnection(connection){
-        const {updateConnectionInOpener, setConnectionData} = this.props;
-        updateConnectionInOpener(connection);
-        setConnectionData(connection);
     }
 
     setCurrentItem(currentItem){
@@ -110,7 +111,7 @@ class ExtendedTechnicalLayout extends React.Component{
 
     getPanelParams(){
         const {items, connection, currentBusinessItem} = this.props;
-        let isAssignMode = false;
+        let isAssignMode = connection && connection.businessLayout.isInAssignMode;
         let fromConnectorItems = [];
         let toConnectorItems = [];
         for(let i = 0; i < items.length; i++){
@@ -134,17 +135,19 @@ class ExtendedTechnicalLayout extends React.Component{
 
     render(){
         const {createElementPanelPosition, createElementPanelConnectorType, isCreateElementPanelOpened} = this.state;
-        const {currentTechnicalItem, currentBusinessItem, connection, isAssignMode} = this.props;
+        const {currentTechnicalItem, currentBusinessItem, connection} = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const isSelectedBusinessItem = currentBusinessItem !== null;
         const isSelectedBusinessItemEmpty = isSelectedBusinessItem && currentBusinessItem.items.length === 0;
         let svgStyle = {};
         if(isAssignMode){
-            svgStyle.background = '#d7dcf2';
+            svgStyle.background = '#00acc2';
         }
         const isScalable = HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode);
         const isDraggable = !(isSelectedBusinessItemEmpty && !isAssignMode);
         const hasAssignCentralText = isSelectedBusinessItemEmpty && !isAssignMode;
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams();
+        console.log('render', connection)
         return(
             <div id={this.layoutId} className={`${styles.technical_layout_extended}`}>
                 <Svg
@@ -164,6 +167,7 @@ class ExtendedTechnicalLayout extends React.Component{
                     toConnectorPanelParams={toConnectorPanelParams}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
                     setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
+                    startingSvgX={-200}
                     startingSvgY={-80}
                     hasAssignCentralText={hasAssignCentralText}
                 />

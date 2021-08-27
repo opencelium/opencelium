@@ -92,6 +92,14 @@ class TooltipFontIcon extends Component{
             case 'right':
                 position = theme.tooltipRight;
                 break;
+            case 'left_bottom':
+                position = theme.tooltipLeft;
+                top += 30;
+                break;
+            case 'right_bottom':
+                position = theme.tooltipRight;
+                top += 30;
+                break;
             case 'bottom':
                 top += 10;
                 break;
