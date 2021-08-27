@@ -28,7 +28,6 @@ import CSvg from "@classes/components/content/connection_overview_2/CSvg";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
-import {setIsAssignMode} from "@actions/connection_overview_2/set";
 
 function mapStateToProps(state){
     const connectionOverview = state.get('connection_overview');
@@ -36,11 +35,10 @@ function mapStateToProps(state){
     return{
         currentBusinessItem,
         currentTechnicalItem,
-        isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
-@connect(mapStateToProps, {setIsAssignMode})
+@connect(mapStateToProps, {})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -64,13 +62,14 @@ class Svg extends React.Component {
 
 
     componentDidMount() {
-        const {layoutId, svgId, startingSvgY, detailsPosition} = this.props;
+        const {layoutId, svgId, startingSvgX, startingSvgY, detailsPosition} = this.props;
         const layout = document.getElementById(layoutId);
         const layoutSVG = document.getElementById(svgId);
+        console.log(svgId, document.getElementById('technical_layout_svg') ? document.getElementById('technical_layout_svg').viewBox.baseVal : null);
         if(layout && layoutSVG) {
             let width = layout.offsetWidth;
             let ratio = width / layoutSVG.getBoundingClientRect().width;
-            const viewBox = {x: CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
+            const viewBox = {x: startingSvgX ? startingSvgX : CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
             CSvg.setViewBox(svgId, viewBox);
             this.setState({
                 ratio,
@@ -81,13 +80,18 @@ class Svg extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {svgId, detailsPosition, items, startingSvgY, isDraggable} = this.props;
-        if (detailsPosition !== prevProps.detailsPosition) {
-            const x = CSvg.getStartingViewBoxX(detailsPosition);
+        const {svgId, detailsPosition, items, startingSvgX, startingSvgY, isDraggable} = this.props;
+        console.log(svgId, document.getElementById('technical_layout_svg') ? document.getElementById('technical_layout_svg').viewBox.baseVal : null);
+        if (detailsPosition !== prevProps.detailsPosition || prevProps.startingSvgX !== startingSvgX) {
+            const x = startingSvgX ? startingSvgX : CSvg.getStartingViewBoxX(detailsPosition);
             CSvg.setViewBox(svgId, {x});
         }
+        if (prevProps.startingSvgY !== startingSvgY) {
+            const y = startingSvgY;
+            CSvg.setViewBox(svgId, {y});
+        }
         if(items.length === 0 && !isDraggable){
-            const viewBox = {x: CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
+            const viewBox = {x: startingSvgX ? startingSvgX : CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
             CSvg.setViewBox(svgId, viewBox);
         }
     }
@@ -152,7 +156,7 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, setIsAssignMode, connection, updateConnection} = this.props;
+        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, connection, updateConnection} = this.props;
         this.dragCoordinates = null;
         if(e.target.classList.contains('draggable')) {
             if(isItemDraggable) {
@@ -176,8 +180,8 @@ class Svg extends React.Component {
                 }
                 if(shouldUnselectOnDraggingPanel && e.target.id === svgId){
                     setCurrentItem(null);
-                    setIsAssignMode(false);
                     if(connection) {
+                        connection.businessLayout.isInAssignMode = false;
                         connection.businessLayout.setCurrentSvgItem(null);
                         updateConnection(connection);
                     }
@@ -285,12 +289,12 @@ class Svg extends React.Component {
 
     renderItems(){
         const {
-            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, isAssignMode,
-            setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
+            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection,         setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
         } = this.props;
         if(hasAssignCentralText){
             return null;
         }
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         return items.map((item,key) => {
             let currentItem = null;
             if(item instanceof CBusinessProcess && !currentTechnicalItem) {
@@ -302,7 +306,7 @@ class Svg extends React.Component {
             let isHighlighted = item.isHighlighted(currentItem);
             let isCurrent = item.isCurrent(currentItem);
             let isAssignedToBusinessProcess = CSvg.isTechnicalItemAssigned(item, currentBusinessItem);
-            let isDisabled = connection ? CSvg.isTechnicalItemDisabled(item, connection.businessLayout, isAssignMode) : false;
+            let isDisabled = connection ? CSvg.isTechnicalItemDisabled(item, connection.businessLayout) : false;
             if(!isDisabled){
                 isDisabled = CSvg.isBusinessItemDisabled(item, currentBusinessItem, isAssignMode);
             }
@@ -324,19 +328,20 @@ class Svg extends React.Component {
     }
 
     renderArrows(){
-        const {currentItem, currentTechnicalItem, currentBusinessItem, arrows, items, hasAssignCentralText, connection, isAssignMode} = this.props;
+        const {currentItem, currentTechnicalItem, currentBusinessItem, arrows, items, hasAssignCentralText, connection} = this.props;
         if(hasAssignCentralText){
             return null;
         }
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         return arrows.map((arrow,key) => {
             const from = items.find(item => item.id === arrow.from);
             const to = items.find(item => item.id === arrow.to);
 
-            let isDisabledFrom = connection ? CSvg.isTechnicalItemDisabled(from, connection.businessLayout, isAssignMode) : false;
+            let isDisabledFrom = connection ? CSvg.isTechnicalItemDisabled(from, connection.businessLayout) : false;
             if(!isDisabledFrom){
                 isDisabledFrom = CSvg.isBusinessItemDisabled(from, currentBusinessItem, isAssignMode);
             }
-            let isDisabledTo = connection ? CSvg.isTechnicalItemDisabled(to, connection.businessLayout, isAssignMode) : false;
+            let isDisabledTo = connection ? CSvg.isTechnicalItemDisabled(to, connection.businessLayout) : false;
             if(!isDisabledTo){
                 isDisabledTo = CSvg.isBusinessItemDisabled(to, currentBusinessItem, isAssignMode);
             }
@@ -365,16 +370,20 @@ class Svg extends React.Component {
     }
 
     onAssignTextClick(){
-        const {setIsAssignMode} = this.props;
-        setIsAssignMode(true);
+        const {connection, updateConnection} = this.props;
+        if(connection){
+            connection.businessLayout.isInAssignMode = true;
+            updateConnection(connection);
+        }
     }
 
     render(){
         const {
             svgId, fromConnectorPanelParams, toConnectorPanelParams, setIsCreateElementPanelOpened,
             isCreateElementPanelOpened, connection, hasCreateCentralText, createElementPanelConnectorType,
-            hasAssignCentralText, isAssignMode,
+            hasAssignCentralText,
         } = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         let svgStyle = this.props.style ? {...this.props.style} : {};
         if(hasCreateCentralText || hasAssignCentralText && !isAssignMode){
             if(svgStyle === null){

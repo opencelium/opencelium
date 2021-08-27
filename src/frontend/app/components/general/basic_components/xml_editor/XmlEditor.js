@@ -22,7 +22,7 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ChangeTag from "@basic_components/xml_editor/ChangeTag";
 import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
 
-
+export const OnReferenceClickContext = React.createContext(null);
 /**
  * XmlEditor with References
  */
@@ -101,30 +101,32 @@ class XmlEditor extends Component{
         const {xml, hasAddTagPopup, addTag} = this.state;
         const {translate, className, readOnly, ReferenceComponent, onReferenceClick} = this.props;
         return(
-            <div className={`${styles.xml_editor} ${className}`}>
-                {xml && xml.declaration ?
-                    <Tag translate={translate} tag={xml.declaration} xml={xml} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration}
-                         readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
-                :
-                    <React.Fragment>
-                        <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.ADD_DECLARATION')} value={<span>{'<?xml?>'}</span>} className={styles.add_declaration_icon} onClick={::this.addDeclaration}/>
-                        <br/>
-                    </React.Fragment>
-                }
-                {xml && xml.tag ?
-                    <Tag translate={translate} tag={xml.tag} xml={xml} update={::this.updateXml} deleteTag={::this.deleteCoreTag}
-                         readOnly={readOnly} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
-                :
-                    <React.Fragment>
-                        <TooltipFontIcon id={`xml_add_tag`} size={14} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
-                        {
-                            hasAddTagPopup && !readOnly &&
-                                <ChangeTag xml={xml} translate={translate} correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}
-                                    mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>
-                        }
-                    </React.Fragment>
-                }
-            </div>
+            <OnReferenceClickContext.Provider value={onReferenceClick}>
+                <div className={`${styles.xml_editor} ${className}`}>
+                    {xml && xml.declaration ?
+                        <Tag translate={translate} tag={xml.declaration} xml={xml} isDeclaration update={::this.updateXml} deleteTag={::this.deleteDeclaration}
+                             readOnly={readOnly} ReferenceComponent={ReferenceComponent}/>
+                    :
+                        <React.Fragment>
+                            <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.ADD_DECLARATION')} value={<span>{'<?xml?>'}</span>} className={styles.add_declaration_icon} onClick={::this.addDeclaration}/>
+                            <br/>
+                        </React.Fragment>
+                    }
+                    {xml && xml.tag ?
+                        <Tag translate={translate} tag={xml.tag} xml={xml} update={::this.updateXml} deleteTag={::this.deleteCoreTag}
+                             readOnly={readOnly} ReferenceComponent={ReferenceComponent}/>
+                    :
+                        <React.Fragment>
+                            <TooltipFontIcon id={`xml_add_tag`} size={14} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={<span>{'<tag/>'}</span>} className={styles.add_first_tag_icon} onClick={::this.showAddTagPopup}/>
+                            {
+                                hasAddTagPopup && !readOnly &&
+                                    <ChangeTag xml={xml} translate={translate} correspondedId={`xml_add_tag`} parent={xml} tag={addTag} change={::this.updateXml} close={::this.hideAddTagPopup}
+                                        mode={'add'} ReferenceComponent={ReferenceComponent}/>
+                            }
+                        </React.Fragment>
+                    }
+                </div>
+            </OnReferenceClickContext.Provider>
         );
     }
 }

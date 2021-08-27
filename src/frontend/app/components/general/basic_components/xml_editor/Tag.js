@@ -25,6 +25,7 @@ import ChangeProperty from "@basic_components/xml_editor/ChangeProperty";
 import ChangeTag from "@basic_components/xml_editor/ChangeTag";
 import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
 import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
+import {OnReferenceClickContext} from "@basic_components/xml_editor/XmlEditor";
 
 const XML_TAG_INDENT = 15;
 
@@ -200,7 +201,7 @@ class Tag extends Component{
     }
 
     renderProperties(){
-        const {translate, tag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
+        const {translate, tag, update, readOnly, ReferenceComponent} = this.props;
         return tag.properties.map(property => {
             return(
                 <Property
@@ -211,7 +212,6 @@ class Tag extends Component{
                     update={update}
                     readOnly={readOnly}
                     ReferenceComponent={ReferenceComponent}
-                    onReferenceClick={onReferenceClick}
                 />
             );
         })
@@ -222,19 +222,27 @@ class Tag extends Component{
         let isReference = checkReferenceFormat(tag.tags);
         if(isReference){
             return (
-                <ReferenceValues
-                    translate={translate}
-                    references={tag.tags}
-                    styles={{
-                        padding: '0 12px',
-                        margin: '0 0 0 6px',
-                        width: 0,
-                        height: 0,
-                        fontSize: '12px'
-                    }}
-                    maxVisible={4}
-                    hasDelete={false}
-                />
+                <OnReferenceClickContext.Consumer>
+                    {value =>
+                        <span className={styles.tag_reference_values}>
+                            <ReferenceValues
+                                onReferenceClick={value}
+                                tag={tag}
+                                translate={translate}
+                                references={tag.tags}
+                                styles={{
+                                    padding: '0 12px',
+                                    margin: '0 0 0 6px',
+                                    width: 0,
+                                    height: 0,
+                                    fontSize: '12px'
+                                }}
+                                maxVisible={4}
+                                hasDelete={false}
+                            />
+                        </span>
+                    }
+                </OnReferenceClickContext.Consumer>
             );
         }
         return(
@@ -243,7 +251,7 @@ class Tag extends Component{
     }
 
     renderSubTags(){
-        const {translate, tag, update, readOnly, ReferenceComponent, onReferenceClick, xml} = this.props;
+        const {translate, tag, update, readOnly, ReferenceComponent, xml} = this.props;
         if(tag.minimized){
             return <TooltipFontIcon
                 size={14}
@@ -280,14 +288,13 @@ class Tag extends Component{
                 deleteTag={(e) => ::this.deleteTag(e, index)}
                 readOnly={readOnly}
                 ReferenceComponent={ReferenceComponent}
-                onReferenceClick={onReferenceClick}
             />;
         }) : null;
     }
 
     render() {
         const {hasAddPropertyIcon, hasDeleteTagIcon, hasMinimizerIcon, hasAddPropertyPopup, property, hasUpdateTagPopup, hasAddTagPopup, addTag, hasAddTagIcon, hasCopyToClipboardIcon} = this.state;
-        const {xml, translate, tag, isDeclaration, deleteTag, update, readOnly, ReferenceComponent, onReferenceClick} = this.props;
+        const {xml, translate, tag, isDeclaration, deleteTag, update, readOnly, ReferenceComponent} = this.props;
         const hasMinimizer = !isString(tag.tags) && tag.tags !== null && hasMinimizerIcon;
         const isMinimized = tag.minimized;
         return(
@@ -297,11 +304,11 @@ class Tag extends Component{
                     <span onMouseOver={::this.showTagIcons} onMouseLeave={::this.hideTagIcons} className={styles.tag_open}>
                         <span className={styles.bracket}>{`<${isDeclaration ? '?' : ''}`}</span>
                         <span className={`${styles.name_open} ${!readOnly ? styles.name_open_hovered : ''}`} onClick={!readOnly ? ::this.showUpdateTagPopup : null} id={`${tag.uniqueIndex}_tag_name`}>{tag.name}</span>
-                        {hasUpdateTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
-                        {hasAddTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
+                        {hasUpdateTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={::this.hideUpdateTagPopup} mode={'update'} ReferenceComponent={ReferenceComponent}/>}
+                        {hasAddTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {this.renderProperties()}
                         {hasAddPropertyIcon && !readOnly && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
-                        {hasAddPropertyPopup && !readOnly && <ChangeProperty translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'} ReferenceComponent={ReferenceComponent} onReferenceClick={onReferenceClick}/>}
+                        {hasAddPropertyPopup && !readOnly && <ChangeProperty tag={tag} translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
                         {hasDeleteTagIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_TAG')} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}
@@ -338,6 +345,5 @@ Tag.defaultProps = {
     isDeclaration: false,
     readOnly: false,
 };
-
 
 export default Tag;

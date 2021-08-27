@@ -50,7 +50,6 @@ function mapStateToProps(state){
         isVisibleBusinessLabelKeyPressed: connectionOverview.get('isVisibleBusinessLabelKeyPressed'),
         connection,
         updateConnection,
-        isAssignMode: connectionOverview.get('isAssignMode'),
     };
 }
 
@@ -134,7 +133,8 @@ class TechnicalLayout extends React.Component{
     }
 
     getPanelParams(allItems){
-        const {connection, isAssignMode, currentBusinessItem} = this.props;
+        const {connection, currentBusinessItem} = this.props;
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         let fromConnectorItems = [];
         let toConnectorItems = [];
         for(let i = 0; i < allItems.length; i++){
@@ -157,7 +157,7 @@ class TechnicalLayout extends React.Component{
     }
 
     render(){
-        const {isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setCreateElementPanelPosition, isAssignMode} = this.props;
+        const {isBusinessLayoutEmpty, updateConnection, isCreateElementPanelOpened, setCreateElementPanelPosition} = this.props;
         const {
             isLayoutMinimized, maximizeLayout, minimizeLayout, replaceLayouts, businessLayoutLocation,
             detailsPosition, technicalLayoutLocation, isBusinessLayoutMinimized, connection, setCurrentTechnicalItem,
@@ -166,6 +166,7 @@ class TechnicalLayout extends React.Component{
         if(technicalLayoutLocation === PANEL_LOCATION.NEW_WINDOW || connection === null){
             return null;
         }
+        const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
         const isSelectedBusinessItem = currentBusinessItem !== null;
@@ -174,11 +175,12 @@ class TechnicalLayout extends React.Component{
         const isReplaceIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW;
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
-        const startingSvgY = isBusinessLayoutEmpty ? -80 : -220;
+        let startingSvgX = isBusinessLayoutMinimized ? -250 : -40;
+        let startingSvgY = isBusinessLayoutMinimized ? -180 : -250;
         let svgStyle = {};
         let settingsPanelTitle = 'Technical Layout';
         if(isAssignMode){
-            svgStyle.background = '#d7dcf2';
+            svgStyle.background = '#00acc2';
             settingsPanelTitle += ' (assign mode)';
         }
         return(
@@ -219,6 +221,7 @@ class TechnicalLayout extends React.Component{
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
+                    startingSvgX={startingSvgX}
                     startingSvgY={startingSvgY}
                     hasAssignCentralText={isSelectedBusinessItemEmpty && !isAssignMode}
                 />

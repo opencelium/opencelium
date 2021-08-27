@@ -60,7 +60,7 @@ class ConfigurationsIcon extends React.Component{
 
     render(){
         const {isVisibleSettingsWindow, colorMode, businessLabelMode} = this.state;
-        const {disabled} = this.props;
+        const {disabled, tooltipPosition} = this.props;
         return(
             <React.Fragment>
                 <TooltipFontIcon
@@ -69,7 +69,7 @@ class ConfigurationsIcon extends React.Component{
                     onClick={::this.toggleIsVisibleSettingsWindow}
                     tooltip={disabled ? '' : 'Settings'}
                     value={'settings'}
-                    tooltipPosition={'bottom'}
+                    tooltipPosition={tooltipPosition}
                     disabled={disabled}
                     isButton={true}
                 />

@@ -133,21 +133,22 @@ class BusinessLayout extends React.Component{
                 />
                 <Svg
                     {...svgProps}
+                    connection={connection}
+                    items={items}
+                    arrows={arrows}
+                    layoutId={this.layoutId}
+                    svgId={`${this.layoutId}_svg`}
+                    isDraggable={items.length > 0}
+                    isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
+                    setCurrentItem={::this.setCurrentItem}
+                    deleteProcess={::this.deleteProcess}
                     currentItem={currentBusinessItem}
                     updateItems={::this.updateItems}
                     hasCreateCentralText={items.length === 0}
-                    items={items}
-                    arrows={arrows}
                     detailsPosition={detailsPosition}
-                    setCurrentItem={::this.setCurrentItem}
-                    layoutId={this.layoutId}
-                    svgId={`${this.layoutId}_svg`}
                     dragAndDropStep={5}
                     isItemDraggable={true}
-                    isDraggable={items.length > 0}
-                    isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
-                    deleteProcess={::this.deleteProcess}
                     shouldUnselectOnDraggingPanel={true}
                 />
             </div>

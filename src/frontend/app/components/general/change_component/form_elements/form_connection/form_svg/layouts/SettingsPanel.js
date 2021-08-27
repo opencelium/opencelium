@@ -36,7 +36,7 @@ class SettingsPanel extends React.Component{
         let minMaxTooltip = 'Minimize';
         let minMaxValue = 'minimize';
         let minMaxClick = minimizeLayout;
-        const tooltipPosition = 'bottom';
+        let tooltipPosition = 'bottom';
         if(isLayoutMinimized){
             minMaxTooltip = 'Maximize';
             minMaxValue = 'maximize';
@@ -46,10 +46,12 @@ class SettingsPanel extends React.Component{
         if(detailsPosition === DETAILS_POSITION.RIGHT){
             settingsPanelClassName = styles.layout_settings_panel_left;
             titleClassName = styles.technical_settings_panel_title_left;
+            tooltipPosition = 'right_bottom';
         }
         if(detailsPosition === DETAILS_POSITION.LEFT){
             settingsPanelClassName = styles.layout_settings_panel_right;
             titleClassName = styles.technical_settings_panel_title_right;
+            tooltipPosition = 'left_bottom';
         }
         if(isDetailsMinimized){
             titleClassName = styles.technical_settings_panel_title_center;
@@ -87,7 +89,7 @@ class SettingsPanel extends React.Component{
                     disabled={isDisabled || isNewWindowIconDisabled}
                     isButton={true}
                 />
-                {hasConfigurationsIcon && <ConfigurationsIcon disabled={isDisabled}/>}
+                {hasConfigurationsIcon && <ConfigurationsIcon disabled={isDisabled} tooltipPosition={tooltipPosition}/>}
             </div>
         );
     }

@@ -16,16 +16,7 @@
 import {ConnectionOverview2Action} from "@utils/actions";
 import CProcess from "@classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@classes/components/content/connection_overview_2/operator/COperator";
-import {isObject} from "@utils/app";
-import CConnection from "@classes/components/content/connection/CConnection";
 
-
-const setIsAssignMode = (isAssignMode) => {
-    return{
-        type: ConnectionOverview2Action.SET_ISASSIGNMODE,
-        payload: isAssignMode,
-    };
-}
 
 const setIsVisibleBusinessLabelKeyPressed = (isVisibleBusinessLabelKeyPressed) => {
     return{
@@ -169,7 +160,6 @@ export{
     setTechnicalLayoutLocation,
     setColorMode,
     setConnectionData,
-    setIsAssignMode,
     setBusinessLabelMode,
     setPanelConfigurations,
     setIsVisibleBusinessLabelKeyPressed,

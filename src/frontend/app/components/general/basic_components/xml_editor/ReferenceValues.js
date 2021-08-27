@@ -17,6 +17,9 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import appStyles from '@themes/default/general/basic_components.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
+import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
+import {ATTRIBUTES_MARK} from "@classes/components/content/invoker/CBody";
 
 
 /**
@@ -37,6 +40,22 @@ class ReferenceValues extends Component{
         }
     }
 
+    onReferenceClick(e){
+        const {tag, property, onReferenceClick} = this.props;
+        if(typeof onReferenceClick === 'function'){
+            if(tag){
+                let namespace = tag.getNamespaces();
+                let name = tag.name;
+                if(property){
+                    namespace.push(name);
+                    name = `${ATTRIBUTES_MARK}${property.name}`;
+                    e.preventDefault();
+                }
+                onReferenceClick(null, {namespace, variable: {name}})
+            }
+        }
+    }
+
     render() {
         const {translate, references, maxVisible, hasDelete} = this.props;
         let {styles} = this.props;
@@ -54,6 +73,7 @@ class ReferenceValues extends Component{
                             return (
                                 <React.Fragment key={key}>
                                     <TooltipFontIcon
+                                        onClick={::this.onReferenceClick}
                                         className={appStyles.reference_value}
                                         tooltip={pointer.slice(2, pointer.length).join('.').replace('[]', '')}
                                         value={<span/>}
@@ -81,6 +101,9 @@ class ReferenceValues extends Component{
 
 ReferenceValues.propTypes = {
     styles: PropTypes.object,
+    tag: PropTypes.instanceOf(CTag),
+    property: PropTypes.instanceOf(CProperty),
+    onReferenceClick: PropTypes.func,
 };
 
 ReferenceValues.defaultProps = {
@@ -88,6 +111,7 @@ ReferenceValues.defaultProps = {
     maxVisible: 1000,
     hasDelete: true,
     styles: {},
+    onReferenceClick: null,
 };
 
 export default ReferenceValues;

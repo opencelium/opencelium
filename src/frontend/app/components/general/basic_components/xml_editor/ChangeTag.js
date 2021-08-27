@@ -198,7 +198,7 @@ class ChangeTag extends Component{
                 <TagType translate={translate} valueType={valueType} changeValueType={::this.changeValueType}/>
                 {valueType === TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_clipboard_text`} rows={2} multiline={true} value={clipboardText} onChange={::this.changeClipboardText} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')} theme={{input: styles.change_tag_name}}/>}
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={::this.changeName} onKeyDown={::this.pressKey} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}
-                {valueType === TAG_VALUE_TYPES.TEXT && <Value translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}
+                {valueType === TAG_VALUE_TYPES.TEXT && <Value tag={tag} translate={translate} ReferenceComponent={ReferenceComponent} changeValue={::this.changeText} uniqueIndex={tag.uniqueIndex} value={text} pressKey={::this.pressKey} label={translate('XML_EDITOR.TAG.TEXT')}/>}
                 <Button onClick={::this.change} title={mode === 'add' ? translate('XML_EDITOR.TAG.ADD') : translate('XML_EDITOR.TAG.UPDATE')}/>
             </div>,
             document.getElementById('oc_xml_modal')

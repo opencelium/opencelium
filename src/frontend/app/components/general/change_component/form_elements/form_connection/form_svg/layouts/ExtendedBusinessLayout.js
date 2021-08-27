@@ -15,7 +15,11 @@
 
 import React from 'react';
 import {connect} from "react-redux";
-import {setCurrentBusinessItem} from "@actions/connection_overview_2/set";
+import {
+    setConnectionData,
+    setCurrentBusinessItem,
+    setTechnicalLayoutLocation
+} from "@actions/connection_overview_2/set";
 import {mapItemsToClasses} from "../utils";
 import Svg from "../layouts/Svg";
 import styles from "@themes/default/content/connections/connection_overview_2";
@@ -38,13 +42,15 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {setCurrentBusinessItem, setBusinessLayoutLocation})
+@connect(mapStateToProps, {setCurrentBusinessItem, setBusinessLayoutLocation, setConnectionData})
 class ExtendedBusinessLayout extends React.Component{
 
     constructor(props) {
         super(props);
         this.layoutId = 'business_layout';
         this.state = {
+            isCreateElementPanelOpened: false,
+            createElementPanelConnectorType: '',
             createElementPanelPosition: {x: 0, y: 0},
         }
     }
@@ -65,6 +71,22 @@ class ExtendedBusinessLayout extends React.Component{
         });
     }
 
+    setIsCreateElementPanelOpened(isCreateElementPanelOpened, createElementPanelConnectorType = ''){
+        this.setState({
+            isCreateElementPanelOpened,
+            createElementPanelConnectorType,
+        });
+    }
+
+    setCurrentItem(currentItem){
+        const {setCurrentBusinessItem, connection} = this.props;
+        setCurrentBusinessItem(currentItem);
+        if(connection) {
+            connection.businessLayout.setCurrentSvgItem(currentItem);
+            this.updateConnection(connection);
+        }
+    }
+
     deleteProcess(process){
         const {connection, setCurrentBusinessItem} = this.props;
         connection.businessLayout.deleteItem(process);
@@ -79,38 +101,42 @@ class ExtendedBusinessLayout extends React.Component{
         this.updateConnection(connection);
     }
 
-    setCurrentItem(currentItem){
-        const {setCurrentBusinessItem, connection} = this.props;
-        setCurrentBusinessItem(currentItem);
-        if(connection) {
-            connection.businessLayout.setCurrentSvgItem(currentItem);
-            this.updateConnection(connection);
-        }
-    }
-
     render(){
-        const {items, currentBusinessItem} = this.props;
-        const {createElementPanelPosition} = this.state;
+        const {items, currentBusinessItem, currentTechnicalItem, connection} = this.props;
+        const {createElementPanelPosition, createElementPanelConnectorType, isCreateElementPanelOpened} = this.state;
         return(
             <div id={this.layoutId} className={`${styles.business_layout_extended}`}>
                 <Svg
                     {...this.props}
                     updateConnection={::this.updateConnection}
+                    layoutId={this.layoutId}
+                    svgId={`${this.layoutId}_svg`}
+                    isDraggable={items.length > 0}
+                    isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
+                    setCurrentItem={::this.setCurrentItem}
+                    deleteProcess={::this.deleteProcess}
                     currentItem={currentBusinessItem}
                     updateItems={::this.updateItems}
                     hasCreateCentralText={items.length === 0}
-                    setCurrentItem={::this.setCurrentItem}
-                    layoutId={this.layoutId}
-                    svgId={`${this.layoutId}_svg`}
                     dragAndDropStep={5}
                     isItemDraggable={true}
-                    isDraggable={items.length > 0}
-                    isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
                     setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
-                    deleteProcess={::this.deleteProcess}
+                    setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
                     shouldUnselectOnDraggingPanel={true}
+                    startingSvgX={-100}
                 />
-                <CreateElementPanel x={createElementPanelPosition.x} y={createElementPanelPosition.y}/>
+                <CreateElementPanel
+                    isOnTheTopLayout={true}
+                    createElementPanelConnectorType={createElementPanelConnectorType}
+                    x={createElementPanelPosition.x}
+                    y={createElementPanelPosition.y}
+                    connectorType={currentTechnicalItem ? currentTechnicalItem.connectorType : ''}
+                    connection={connection}
+                    updateConnection={::this.updateConnection}
+                    isCreateElementPanelOpened={isCreateElementPanelOpened}
+                    setCreateElementPanelPosition={::this.setCreateElementPanelPosition}
+                    setIsCreateElementPanelOpened={::this.setIsCreateElementPanelOpened}
+                />
             </div>
         );
     }

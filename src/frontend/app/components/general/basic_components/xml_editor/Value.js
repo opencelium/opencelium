@@ -22,6 +22,9 @@ import ReferenceValues from "@basic_components/xml_editor/ReferenceValues";
 import ValueType from "@basic_components/xml_editor/ValueType";
 import styles from "@themes/default/general/form_methods";
 import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
+import CTag from "@classes/components/general/basic_components/xml_editor/CTag";
+import CProperty from "@classes/components/general/basic_components/xml_editor/CProperty";
+import {OnReferenceClickContext} from "@basic_components/xml_editor/XmlEditor";
 
 
 /**
@@ -85,7 +88,7 @@ class Value extends Component{
 
     renderValue(){
         const {valueType, references, notReferenceValue} = this.state;
-        const {translate, uniqueIndex, ReferenceComponent, pressKey, label} = this.props;
+        const {translate, uniqueIndex, ReferenceComponent, pressKey, label, tag, property} = this.props;
         if(valueType === 'reference'){
             if(ReferenceComponent) {
                 return (
@@ -94,14 +97,20 @@ class Value extends Component{
                             references !== '' &&
                                 <ToolboxThemeInput style={{paddingBottom: 0}} inputElementClassName={styles.multiselect_label} label={translate('XML_EDITOR.LIST_OF_REFERENCES')}>
                                     <div style={{position: 'relative', display: 'flex', width: '100%', flexWrap: 'wrap', padding: '0 1px'}}>
-                                        <ReferenceValues
-                                            styles={{
-                                                display: 'inline-block'
-                                            }}
-                                            translate={translate}
-                                            references={references}
-                                            updateReferences={::this.updateReferences}
-                                        />
+                                        <OnReferenceClickContext.Consumer>
+                                            {value =>
+                                                <ReferenceValues
+                                                    onReferenceClick={value}
+                                                    styles={{
+                                                        display: 'inline-block'
+                                                    }}
+                                                    property={property}
+                                                    tag={tag}
+                                                    translate={translate}
+                                                    references={references}
+                                                    updateReferences={::this.updateReferences}
+                                                />}
+                                        </OnReferenceClickContext.Consumer>
                                     </div>
                                 </ToolboxThemeInput>
                         }
@@ -128,6 +137,8 @@ class Value extends Component{
 }
 
 Value.propTypes = {
+    tag: PropTypes.instanceOf(CTag),
+    property: PropTypes.instanceOf(CProperty),
     value: PropTypes.string.isRequired,
     changeValue: PropTypes.func.isRequired,
     uniqueIndex: PropTypes.string.isRequired,

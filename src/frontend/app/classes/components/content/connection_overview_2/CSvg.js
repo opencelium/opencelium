@@ -67,26 +67,29 @@ export default class CSvg{
         return isAssigned;
     }
 
-    static isTechnicalItemDisabled(svgItem, businessLayout, isAssignMode){
-        if(businessLayout instanceof CBusinessLayout) {
-            const currentBusinessSvgItem = businessLayout.getCurrentSvgItem();
-            if (isAssignMode) {
-                if (svgItem instanceof CTechnicalProcess || svgItem instanceof CTechnicalOperator) {
-                    let businessProcesses = businessLayout.getItems();
-                    for (let i = 0; i < businessProcesses.length; i++) {
-                        if (currentBusinessSvgItem && businessProcesses[i].id !== currentBusinessSvgItem.id) {
-                            for (let j = 0; j < businessProcesses[i].items.length; j++) {
-                                if (businessProcesses[i].items[j].id === svgItem.id) {
-                                    return true;
+    static isTechnicalItemDisabled(svgItem, businessLayout){
+        if(svgItem instanceof CTechnicalProcess || svgItem instanceof CTechnicalOperator) {
+            if (businessLayout instanceof CBusinessLayout) {
+                const currentBusinessSvgItem = businessLayout.getCurrentSvgItem();
+                const isAssignMode = businessLayout.isInAssignMode;
+                if (isAssignMode) {
+                    if (svgItem instanceof CTechnicalProcess || svgItem instanceof CTechnicalOperator) {
+                        let businessProcesses = businessLayout.getItems();
+                        for (let i = 0; i < businessProcesses.length; i++) {
+                            if (currentBusinessSvgItem && businessProcesses[i].id !== currentBusinessSvgItem.id) {
+                                for (let j = 0; j < businessProcesses[i].items.length; j++) {
+                                    if (businessProcesses[i].items[j].id === svgItem.id) {
+                                        return true;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            } else {
-                if(currentBusinessSvgItem) {
-                    const currentBusinessSvgItemItems = currentBusinessSvgItem.items;
-                    return currentBusinessSvgItemItems.findIndex(item => item.id === svgItem.id) === -1;
+                } else {
+                    if (currentBusinessSvgItem) {
+                        const currentBusinessSvgItemItems = currentBusinessSvgItem.items;
+                        return currentBusinessSvgItemItems.findIndex(item => item.id === svgItem.id) === -1;
+                    }
                 }
             }
         }
@@ -94,8 +97,9 @@ export default class CSvg{
     }
 
     static isBusinessItemDisabled(item, currentBusinessItem, isAssignMode){
-        if(isAssignMode && item instanceof CBusinessProcess && item.id !== currentBusinessItem.id){
+        if(item instanceof CBusinessProcess && currentBusinessItem && isAssignMode && item.id !== currentBusinessItem.id){
             return true;
         }
+        return false;
     }
 }
