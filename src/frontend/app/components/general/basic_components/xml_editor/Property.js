@@ -104,7 +104,7 @@ class Property extends Component{
 
     render() {
         const {hasRemoveIcon, hasUpdatePopup} = this.state;
-        const {translate, property, update, readOnly, ReferenceComponent} = this.props;
+        const {translate, property, update, readOnly, ReferenceComponent, tag} = this.props;
         return(
             <span style={{position: 'relative', display: 'inline-block'}}>
                 <span id={`${property.uniqueIndex}_property`} className={`${styles.property} ${!readOnly ? styles.property_hovered : ''}`}>
@@ -114,7 +114,7 @@ class Property extends Component{
                 </span>
                 {
                     hasUpdatePopup && !readOnly &&
-                        <ChangeProperty translate={translate} correspondedId={`${property.uniqueIndex}_property`} property={property} change={update} close={::this.hideUpdatePopup}
+                        <ChangeProperty tag={tag} translate={translate} correspondedId={`${property.uniqueIndex}_property`} property={property} change={update} close={::this.hideUpdatePopup}
                                         mode={'update'} ReferenceComponent={ReferenceComponent}/>
                 }
             </span>

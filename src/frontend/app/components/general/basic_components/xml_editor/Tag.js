@@ -223,21 +223,25 @@ class Tag extends Component{
         if(isReference){
             return (
                 <OnReferenceClickContext.Consumer>
-                    {value => <ReferenceValues
-                        onReferenceClick={value}
-                        tag={tag}
-                        translate={translate}
-                        references={tag.tags}
-                        styles={{
-                            padding: '0 12px',
-                            margin: '0 0 0 6px',
-                            width: 0,
-                            height: 0,
-                            fontSize: '12px'
-                        }}
-                        maxVisible={4}
-                        hasDelete={false}
-                    />}
+                    {value =>
+                        <span className={styles.tag_reference_values}>
+                            <ReferenceValues
+                                onReferenceClick={value}
+                                tag={tag}
+                                translate={translate}
+                                references={tag.tags}
+                                styles={{
+                                    padding: '0 12px',
+                                    margin: '0 0 0 6px',
+                                    width: 0,
+                                    height: 0,
+                                    fontSize: '12px'
+                                }}
+                                maxVisible={4}
+                                hasDelete={false}
+                            />
+                        </span>
+                    }
                 </OnReferenceClickContext.Consumer>
             );
         }
@@ -304,7 +308,7 @@ class Tag extends Component{
                         {hasAddTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={::this.hideAddTagPopup} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {this.renderProperties()}
                         {hasAddPropertyIcon && !readOnly && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={::this.showAddPropertyPopup}/>}
-                        {hasAddPropertyPopup && !readOnly && <ChangeProperty translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
+                        {hasAddPropertyPopup && !readOnly && <ChangeProperty tag={tag} translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={::this.addProperty} close={::this.hideAddPropertyPopup} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
                         {hasDeleteTagIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_TAG')} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}

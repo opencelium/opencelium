@@ -870,3 +870,11 @@
   z-index: 1000;
   cursor: pointer;
 }
+.tag_reference_values{
+  padding: 3px;
+}
+.tag_reference_values:hover{
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  border-radius: 2px;
+  cursor: pointer;
+}
