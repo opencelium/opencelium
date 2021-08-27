@@ -243,6 +243,26 @@ export default class CTag{
         consoleError('Such tag value type does not exist');
     }
 
+    getNamespaces(){
+        let namespaces = [];
+        let parent = this._parent;
+        let prevIndex = this._uniqueIndex;
+        while(true){
+            let name = parent.name;
+            if(parent.isArray){
+                let index = parent.tags.findIndex(tag => tag._uniqueIndex === prevIndex);
+                name += `[${index}]`;
+            }
+            namespaces.unshift(name);
+            if(parent instanceof CXmlEditor) {
+                break;
+            }
+            prevIndex = parent._uniqueIndex;
+            parent = parent.parent;
+        }
+        return namespaces;
+    }
+
     get parent(){
         return this._parent;
     }
