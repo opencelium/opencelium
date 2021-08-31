@@ -174,6 +174,17 @@ const setConnectionDraftWasOpened = (isOpenedOnce) => {
 };
 
 
+/**
+ * toggle notification panel
+ * @returns {{type: string, payload: {}}}
+ */
+const toggleNotificationPanel = () => {
+    return {
+        type: AppAction.TOGGLE_NOTIFICATION_PANEL,
+    };
+};
+
+
 export {
     changeLanguage,
     setComponentInChangeContent,
@@ -188,4 +199,5 @@ export {
     setCurrentPageItems,
     setFullScreenFormSection,
     setConnectionDraftWasOpened,
+    toggleNotificationPanel,
 };

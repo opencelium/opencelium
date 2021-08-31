@@ -35,6 +35,7 @@ const initialState = fromJS({
     message: {},
     isFullScreen: false,
     isDraftOpenedOnce: false,
+    isNotificationPanelOpened: false,
 });
 
 /**
@@ -45,6 +46,8 @@ const reducer = (state = initialState, action) => {
         case AppAction.CHANGE_LANGUAGE:
             i18n.changeLanguage(action.payload.code);
             return state.set('currentLanguage', action.payload.code);
+        case AppAction.TOGGLE_NOTIFICATION_PANEL:
+            return state.set('isNotificationPanelOpened', !state.get('isNotificationPanelOpened'));
         case AppAction.SET_COMPONENTINCHANGECONTENT:
             return state.set('isComponentExternalInChangeContent', action.payload);
         case AppAction.UPDATE_MENU:

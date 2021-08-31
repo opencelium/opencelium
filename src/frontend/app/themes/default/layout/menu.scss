@@ -17,7 +17,6 @@
 
 $NAVIGATION_WIDTH: 95px;
 $HIGHLIGHT_MENU_COLOR: $TURQUOISE_COLOR;
-$BACKGROUND_MENU_COLOR: #012E55;
 $BACKGROUND_GREEN_MENU_COLOR: #01553d;
 $MENU_COLOR: #eee;
 
@@ -27,6 +26,7 @@ $MENU_COLOR: #eee;
   margin: 0;
   padding: 2rem 2rem 0 7.75rem;
   transition: .5s;
+  overflow-x: hidden;
 }
 .body_pd{
   padding: 2rem 2rem 0 17rem;
