@@ -702,6 +702,7 @@ export default class CConnection{
             fromConnector: fromConnector,
             toConnector: toConnector,
             fieldBinding: fieldBinding,
+            businessLayout: this._businessLayout.getObject(),
         };
         if(this.hasOwnProperty('_id')){
             obj.id = this._id;

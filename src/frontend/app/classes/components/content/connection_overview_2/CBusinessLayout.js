@@ -39,7 +39,7 @@ export default class CBusinessLayout{
             if(newItem && newItem.hasOwnProperty('items')) {
                 for (let i = 0; i < newItem.items.length; i++) {
                     if(!(newItem.items[i] instanceof CTechnicalProcess) && !(newItem.items[i] instanceof CTechnicalOperator)) {
-                        const id = newItem.items[i].id;
+                        const id = isString(newItem.items[i]) ? newItem.items[i] : newItem.items[i].id;
                         let technicalItem = null;
                         if (id.indexOf(CONNECTOR_FROM) === 0) {
                             technicalItem = this._connection.fromConnector.svgItems.find(svgItem => svgItem.id === id);
