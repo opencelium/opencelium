@@ -176,10 +176,14 @@ export function RequestBody(CRequestType){
                 }
 
                 getEnhancementComponent(){
+                    const data = this.getEnhancementData();
+                    if(!data){
+                        return null;
+                    }
                     return (
                         <div>
                             <Enhancement
-                                {...this.getEnhancementData()}
+                                {...data}
                             />
                         </div>
                     );

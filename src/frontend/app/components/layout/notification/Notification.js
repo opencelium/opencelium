@@ -4,7 +4,7 @@ import styles from '@themes/default/layout/notification.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
-const MAX_NOTIFICATION_MESSAGE_LENGTH = 250;
+const MAX_NOTIFICATION_MESSAGE_LENGTH = 200;
 
 class Notification extends React.Component{
     constructor(props) {
@@ -44,7 +44,7 @@ class Notification extends React.Component{
         const {notification} = this.props;
         let message = notification.message;
         if(message.length > MAX_NOTIFICATION_MESSAGE_LENGTH){
-            message = `${message.substr(0, MAX_NOTIFICATION_MESSAGE_LENGTH)}...`;
+            message = <span><span>{`${message.substr(0, MAX_NOTIFICATION_MESSAGE_LENGTH)}... `}</span><span>read more</span></span>;
         }
         let tooltip = '';
         let value = '';
