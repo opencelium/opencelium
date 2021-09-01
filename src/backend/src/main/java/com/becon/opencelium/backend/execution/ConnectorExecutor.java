@@ -269,9 +269,9 @@ public class ConnectorExecutor {
 //            restTemplate = getRestTemplate();
 //        }i
 
-        if (invoker.getName().equalsIgnoreCase("IGEL")){
+        if (invoker.getName().equalsIgnoreCase("IGEL") || invoker.getName().equalsIgnoreCase("SAPB1")){
             ClientHttpRequestFactory requestFactory =
-                    new HttpComponentsClientHttpRequestFactory(getHttpClient());
+                    new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
             restTemplate.setRequestFactory(requestFactory);
         }
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
@@ -305,7 +305,7 @@ public class ConnectorExecutor {
         return response;
     }
 
-    private CloseableHttpClient getHttpClient() {
+    private CloseableHttpClient getDisabledHttpsClient() {
 
         try {
             TrustManager[] trustAllCerts = new TrustManager[] {

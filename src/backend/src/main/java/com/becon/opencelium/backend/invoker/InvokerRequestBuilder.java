@@ -109,7 +109,7 @@ public class InvokerRequestBuilder{
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        if (invokerName.equalsIgnoreCase("IGEL")){
+        if (invokerName.equalsIgnoreCase("IGEL") || invokerName.equalsIgnoreCase("SAPB1")){
             ClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory(getHttpClient());
             restTemplate.setRequestFactory(requestFactory);
