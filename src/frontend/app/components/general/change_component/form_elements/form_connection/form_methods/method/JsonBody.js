@@ -60,6 +60,7 @@ JsonBody.defaultProps = {
     bodyStyles: {},
     isDraft: false,
     source: null,
+    noPlaceholder: false,
 };
 
 export default JsonBody;
