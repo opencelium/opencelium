@@ -71,9 +71,6 @@ public class Connection   {
     @OneToMany(mappedBy = "connection", fetch = FetchType.LAZY)
     private List<Scheduler> schedulers;
 
-    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "connection")
-    private BusinessLayout businessLayout;
-
     public Connection() {
     }
 
@@ -163,13 +160,5 @@ public class Connection   {
 
     public void setSchedulers(List<Scheduler> schedulers) {
         this.schedulers = schedulers;
-    }
-
-    public BusinessLayout getBusinessLayout() {
-        return businessLayout;
-    }
-
-    public void setBusinessLayout(BusinessLayout businessLayout) {
-        this.businessLayout = businessLayout;
     }
 }
