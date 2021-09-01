@@ -213,55 +213,7 @@ INSERT INTO `widget` VALUES (1,'CONNECTION_OVERVIEW','cable','Connection Overvie
 /*!40000 ALTER TABLE `event_notification_has_event_recipient` ENABLE KEYS */;
 UNLOCK TABLES;
 
---changeset 1.3:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
--- -----------------------------------------------------
--- Table `buisness_layout`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `business_layout` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NULL,
-  `x_axis` INT NULL,
-  `y_axis` INT NULL,
-  `connection_id` INT(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  INDEX `fk_buisness_layout_connection_idx` (`connection_id` ASC),
-  CONSTRAINT `fk_buisness_layout_connection`
-    FOREIGN KEY (`connection_id`)
-    REFERENCES `opencelium`.`connection` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
--- -----------------------------------------------------
--- Table `bl_items`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `bl_items` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NULL,
-  `business_layout_id` INT NOT NULL,
-  PRIMARY KEY (`id`, `business_layout_id`),
-  INDEX `fk_bl_items_business_layout1_idx` (`business_layout_id` ASC),
-  CONSTRAINT `fk_bl_items_business_layout1`
-    FOREIGN KEY (`business_layout_id`)
-    REFERENCES `opencelium`.`business_layout` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
--- -----------------------------------------------------
--- Table `bl_arrows`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `bl_arrows` (
-  `id` INT NOT NULL,
-  `from` INT NULL,
-  `to` INT NULL,
-  `business_layout_id` INT NOT NULL,
-  PRIMARY KEY (`id`, `business_layout_id`),
-  INDEX `fk_bl_arrows_business_layout1_idx` (`business_layout_id` ASC),
-  CONSTRAINT `fk_bl_arrows_business_layout1`
-    FOREIGN KEY (`business_layout_id`)
-    REFERENCES `opencelium`.`business_layout` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+
+
 
 
