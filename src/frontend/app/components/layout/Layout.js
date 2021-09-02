@@ -36,6 +36,7 @@ import {API_REQUEST_STATE, TEST} from "@utils/constants/app";
 import {hasHeader} from "@utils/app";
 import Menu from "@components/layout/menu/Menu";
 import TopBar from "@components/layout/header/TopBar";
+import NotificationPanel from "@components/layout/notification/NotificationPanel";
 
 let checkTokenInterval;
 
@@ -155,14 +156,12 @@ class Layout extends Component{
     }
 
     renderLayout(){
-        const {isComponentExternalInChangeContent} = this.props;
         return (
             <div>
                 {this.renderHeader()}
                 {this.renderLoginAgain()}
-                <div style={isComponentExternalInChangeContent ? {position: 'relative'} : {}}>
-                    {this.props.children}
-                </div>
+                {this.props.children}
+                {this.props.isAuth && <NotificationPanel/>}
                 {this.renderFooter()}
             </div>
         );
