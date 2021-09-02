@@ -46,7 +46,7 @@ public class OperatorNodeServiceImp implements OperatorNodeService {
     public static OperatorResource toResource(StatementNode entity){
         OperatorResource operatorResource = new OperatorResource();
         operatorResource.setIndex(entity.getIndex());
-        operatorResource.setNodeId(entity.getId());
+//        operatorResource.setNodeId(entity.getId());
         operatorResource.setType(entity.getType());
         operatorResource.setIterator(entity.getIterator());
         operatorResource.setCondition(new ConditionResource(entity));

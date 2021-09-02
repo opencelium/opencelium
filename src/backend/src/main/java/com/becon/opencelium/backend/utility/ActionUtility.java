@@ -184,7 +184,7 @@ public class ActionUtility {
                 return;
             }
 
-            if (v instanceof LinkedHashMap || v instanceof ArrayList){
+            if (v instanceof Map || v instanceof List){
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, Object> child = new LinkedHashMap<>();
                 if ((v instanceof ArrayList)) {
