@@ -18,13 +18,13 @@ package com.becon.opencelium.backend.constant;
 
 public interface ExceptionConstant {
 
-    public static final String USER_NOT_EXIST = "USER_NOT_EXIST";
-    public static final String EMAIL_ALREADY_EXIST = "EMAIL_ALREADY_EXIST";
-    public static final String EMAIL_NOT_FOUND = "EMAIL_NOT_FOUND";
-    public static final String PASSWORD_IS_NULL = "PASSWORD_IS_NULL";
-    public static final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
-    public static final String ROLE_ALREADY_EXIST = "ROLE_ALREADY_EXIST";
-    public static final String UNSUPPORTED_HEADER_AUTH_TYPE = "UNSUPPORTED_HEADER_AUTH_TYPE";
+    String USER_NOT_EXIST = "USER_NOT_EXIST";
+    String EMAIL_ALREADY_EXIST = "EMAIL_ALREADY_EXIST";
+    String EMAIL_NOT_FOUND = "EMAIL_NOT_FOUND";
+    String PASSWORD_IS_NULL = "PASSWORD_IS_NULL";
+    String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
+    String ROLE_ALREADY_EXIST = "ROLE_ALREADY_EXIST";
+    String UNSUPPORTED_HEADER_AUTH_TYPE = "UNSUPPORTED_HEADER_AUTH_TYPE";
 
     // ----------------------------------------- Storage Controller --------------------------------------- //
 

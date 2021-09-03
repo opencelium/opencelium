@@ -48,7 +48,7 @@ public class MethodNodeServiceImp implements MethodNodeService {
         methodResource.setIndex(methodNode.getIndex());
         methodResource.setColor(methodNode.getColor());
         methodResource.setName(methodNode.getName());
-        methodResource.setNodeId(methodNode.getId());
+//        methodResource.setNodeId(methodNode.getId());
         methodResource.setLabel(methodNode.getLabel());
 
         methodResource.setRequest(RequestNodeServiceImp.toResource(methodNode.getRequestNode()));

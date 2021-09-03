@@ -28,7 +28,7 @@ public class RequestNodeServiceImp implements RequestNodeService{
             return null;
         }
         RequestResource requestResource = new RequestResource();
-        requestResource.setNodeId(requestNode.getId());
+//        requestResource.setNodeId(requestNode.getId());
         requestResource.setEndpoint(requestNode.getEndpoint());
         requestResource.setMethod(requestNode.getMethod());
         if (requestNode.getBodyNode() != null){
