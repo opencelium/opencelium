@@ -111,6 +111,7 @@ class NotificationTemplatesList extends Component{
             permissions={NotificationTemplatePermissions}
             authUser={authUser}
             listViewData={listViewData}
+            componentName={'notificationTemplates'}
         />;
     }
 }

@@ -7,8 +7,8 @@ export class CSearch{
     sources = {};
 
     constructor(searchData) {
-        this.searchValue = searchData?.searchValue.toLowerCase() || '';
-        this.componentName = searchData?.componentName.toLowerCase() || '';
+        this.searchValue = searchData?.searchValue.toLowerCase().trim() || '';
+        this.componentName = searchData?.componentName || '';
         this.sources = searchData?.sources || {};
     }
 
@@ -26,96 +26,115 @@ export class CSearch{
         return result;
     }
 
-    searchInConnectors(){
-        const source = this.sources['connectors'];
+    search(componentName, searchFunction){
+        const source = this.sources[componentName];
         let result = [];
-        const searchFunction = (element, searchValue)=>{
-            let checkName = element.name ? element.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
-            let checkDescription = element.description ? element.description.indexOf(searchValue.toLowerCase()) !== -1 : false;
-            let checkInvokerName = element.invoker.name ? element.invoker.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
-            return checkName || checkDescription || checkInvokerName;
-        }
         if(source){
             result = source.filter((value) => searchFunction(value, this.searchValue));
         }
-        return {connectors: result};
+        return {[componentName]: result};
     }
 
+    /**
+     * search in connectors by name, description, invoker.name
+     * @returns {{}}
+     */
+    searchInConnectors(){
+        const searchFunction = (element, searchValue)=>{
+            let checkName = element.name ? element.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkDescription = element.description ? element.description.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkInvokerName = element.invoker.name ? element.invoker.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            return checkName || checkDescription || checkInvokerName;
+        }
+        return this.search('connectors', searchFunction);
+    }
+
+    /**
+     * search in connections by title, description, connector.title
+     * @returns {{}}
+     */
     searchInConnections(){
-        const source = this.sources['connections'];
-        let result = [];
-        if(source){
-            for(let i = 0; i < source.length; i++){
-
-            }
+        const searchFunction = (element, searchValue)=>{
+            let checkTitle = element.title ? element.title.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkDescription = element.description ? element.description.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkFromConnectorTitle = element.fromConnector.title ? element.fromConnector.title.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkToConnectorTitle = element.toConnector.title ? element.toConnector.title.toLowerCase().indexOf(searchValue) !== -1 : false;
+            return checkTitle || checkDescription || checkFromConnectorTitle || checkToConnectorTitle;
         }
-        return {connections: result};
+        return this.search('connections', searchFunction);
     }
 
+    /**
+     * search in schedules by title, connection.title
+     * @returns {{}}
+     */
     searchInSchedules(){
-        const source = this.sources['schedules'];
-        let result = [];
-        if(source){
-            for(let i = 0; i < source.length; i++){
-
-            }
+        const searchFunction = (element, searchValue)=>{
+            let checkTitle = element.title ? element.title.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkConnectionTitle = element.connection.title ? element.connection.title.toLowerCase().indexOf(searchValue) !== -1 : false;
+            return checkTitle || checkConnectionTitle;
         }
-        return {schedules: result};
+        return this.search('schedules', searchFunction);
     }
 
+    /**
+     * search in users by email, userGroup.name
+     * @returns {{}}
+     */
     searchInUsers(){
-        const source = this.sources['users'];
-        let result = [];
-        if(source){
-            for(let i = 0; i < source.length; i++){
-
-            }
+        const searchFunction = (element, searchValue)=>{
+            let checkEmail = element.email ? element.email.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkGroupName = element.userGroups.name ? element.userGroups.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            return checkEmail || checkGroupName;
         }
-        return {users: result};
+        return this.search('users', searchFunction);
     }
 
+    /**
+     * search in userGroups by name, description, component.name
+     * @returns {{}}
+     */
     searchInUserGroups(){
-        const source = this.sources['userGroups'];
-        let result = [];
-        if(source){
-            for(let i = 0; i < source.length; i++){
-
-            }
+        const searchFunction = (element, searchValue)=>{
+            const components = element.components ? element.components.map(e => e.name).join(', ') : '';
+            let checkName = element.name ? element.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkDescription = element.description ? element.description.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkComponents = components ? components.toLowerCase().indexOf(searchValue) !== -1 : false;
+            return checkName || checkDescription || checkComponents;
         }
-        return {userGroups: result};
+        return this.search('userGroups', searchFunction);
     }
 
     searchInInvokers(){
-        const source = this.sources['invokers'];
-        let result = [];
-        if(source){
-            for(let i = 0; i < source.length; i++){
-
-            }
+        const searchFunction = (element, searchValue)=>{
+            let checkName = element.name ? element.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkDescription = element.description ? element.description.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkAuthType = element.authType ? element.authType.toLowerCase().indexOf(searchValue) !== -1 : false;
+            const operations = element.operations ? element.operations.map(e => e.name).join(', ') : '';
+            let checkOperations = operations ? operations.toLowerCase().indexOf(searchValue) !== -1 : false;
+            return checkName || checkDescription || checkAuthType || checkOperations;
         }
-        return {invokers: result};
+        return this.search('invokers', searchFunction);
     }
 
     searchInTemplates(){
-        const source = this.sources['templates'];
-        let result = [];
-        if(source){
-            for(let i = 0; i < source.length; i++){
-
-            }
+        const searchFunction = (element, searchValue)=>{
+            let checkName = element.name ? element.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
+            let checkDescription = element.description ? element.description.indexOf(searchValue.toLowerCase()) !== -1 : false;
+            let checkFromInvokerName = element.connection.fromConnector.invoker.name ? element.connection.fromConnector.invoker.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
+            let checkToInvokerName = element.connection.toConnector.invoker.name ? element.connection.toConnector.invoker.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
+            return checkName || checkDescription || checkFromInvokerName || checkToInvokerName;
         }
-        return {templates: result};
+        return this.search('templates', searchFunction);
     }
 
     searchInNotificationTemplates(){
-        const source = this.sources['notificationTemplates'];
-        let result = [];
-        if(source){
-            for(let i = 0; i < source.length; i++){
-
-            }
+        const searchFunction = (element, searchValue)=>{
+            let checkName = element.name ? element.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkType = element.type ? element.type.toLowerCase().indexOf(searchValue) !== -1 : false;
+            return checkName || checkType;
         }
-        return {notificationTemplates: result};
+        return this.search('notificationTemplates', searchFunction);
     }
 
 }

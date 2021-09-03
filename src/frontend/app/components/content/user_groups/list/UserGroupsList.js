@@ -113,6 +113,7 @@ class UserGroupsList extends Component{
             setTotalPages={setTotalPages}
             permissions={UserGroupPermissions}
             authUser={authUser}
+            componentName={'userGroups'}
         />;
     }
 }

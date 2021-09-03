@@ -93,7 +93,7 @@ class List extends Component{
             isPressedAddEntity: false,
             searchValue: '',
             gridViewType: '4',
-            entitiesProPage: 4 * AMOUNT_OF_ROWS,
+            entitiesProPage: props.viewType === VIEW_TYPE.LIST ? 10 : 4 * AMOUNT_OF_ROWS,
             checks: [],
             sortType: 'asc',
         };
@@ -572,6 +572,7 @@ List.propTypes = {
     hasDeleteSelectedButtons: PropTypes.bool,
     readOnly: PropTypes.bool,
     viewType: PropTypes.oneOf(['GRID', 'LIST']),
+    componentName: PropTypes.string,
 };
 
 List.defaultProps = {
@@ -583,7 +584,8 @@ List.defaultProps = {
     hasDeleteSelectedButtons: true,
     listViewData: null,
     readOnly: false,
-    viewType: 'LIST'
+    viewType: 'LIST',
+    componentName: '',
 };
 
 export default withRouter(List);

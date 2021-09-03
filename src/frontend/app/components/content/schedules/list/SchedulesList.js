@@ -296,6 +296,7 @@ class SchedulesList extends Component{
                     permissions={SchedulePermissions}
                     authUser={authUser}
                     hasDeleteSelectedButtons={false}
+                    componentName={'schedules'}
                 />
                 <CurrentSchedules/>
                 <Confirmation
