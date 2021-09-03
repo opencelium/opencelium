@@ -3,11 +3,18 @@ import {connect} from 'react-redux';
 import {withRouter} from "react-router";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import Input from "@basic_components/inputs/Input";
-import {toggleNotificationPanel} from "@actions/app";
+import {toggleNotificationPanel} from "@actions/auth";
 import styles from "@themes/default/layout/header.scss";
 
 
-@connect(null, {toggleNotificationPanel})
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return{
+        notifications: auth.get('notifications').toJS(),
+    }
+}
+
+@connect(mapStateToProps, {toggleNotificationPanel})
 class TopBar extends React.Component{
     constructor(props) {
         super(props);
@@ -26,14 +33,15 @@ class TopBar extends React.Component{
     }
 
     render(){
-        const notificationNumber = 6;
+        const {notifications} = this.props;
+        const notificationAmount = notifications.length;
         return(
             <div className={styles.top_bar}>
                 <Input className={styles.search_input} placeholder={'Search'}/>
                 <TooltipFontIcon darkTheme tooltip={'Search'} value={'search'} tooltipPosition={'bottom'} iconClassName={styles.search_icon} isButton onClick={::this.onClickSearchIcon}/>
                 <div className={styles.notifications}>
-                    {notificationNumber && <div className={styles.notification_number} onClick={::this.onClickNotifications}>{`+${notificationNumber}`}</div>}
-                    <TooltipFontIcon disabled={!notificationNumber} darkTheme tooltip={'Notifications'} value={'notifications'} tooltipPosition={'bottom'} isButton onClick={::this.onClickNotifications}/>
+                    {notificationAmount !== 0 && <div className={styles.notification_number} onClick={::this.onClickNotifications}>{`+${notificationAmount}`}</div>}
+                    <TooltipFontIcon disabled={notificationAmount === 0} darkTheme tooltip={'Notifications'} value={'notifications'} tooltipPosition={'bottom'} isButton onClick={::this.onClickNotifications}/>
                 </div>
                 <TooltipFontIcon darkTheme tooltip={'My Profile'} value={'face'} tooltipPosition={'bottom'} isButton onClick={::this.onClickMyProfile}/>
             </div>

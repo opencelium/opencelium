@@ -119,6 +119,7 @@ class ConnectorsList extends Component{
             authUser={authUser}
             listViewData={listViewData}
             rerenderDependency={addingConnectorIcon}
+            componentName={'connectors'}
         />;
     }
 }

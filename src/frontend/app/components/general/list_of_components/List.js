@@ -59,6 +59,7 @@ import GridViewMenu from "@components/general/list_of_components/GridViewMenu";
 import ListView from "@components/general/list_of_components/ListView";
 import Button from "@basic_components/buttons/Button";
 import {NO_NEED_PERMISSION} from "@utils/constants/permissions";
+import {CSearch} from "@classes/components/general/CSearch";
 
 
 const AMOUNT_OF_ROWS = 3;
@@ -329,8 +330,14 @@ class List extends Component{
      */
     searchEntities(){
         const {searchValue} = this.state;
-        const {entities} = this.props;
-        let result = entities.filter((value) => searchByNameFunction(value, searchValue));
+        const {entities, componentName} = this.props;
+        let result;
+        if(componentName){
+            const Search = new CSearch({searchValue, sources: {[componentName]: entities}, componentName: componentName});
+            result = Search.getResults()[componentName];
+        } else{
+            result = entities.filter((value) => searchByNameFunction(value, searchValue));
+        }
         return result;
     }
 

@@ -13,11 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {fromJS} from 'immutable';
+import {fromJS, List} from 'immutable';
 
-import {AuthAction} from '../utils/actions';
-import {updateDashboardSettingsSubscriber} from "../utils/socket/users";
-import {API_REQUEST_STATE} from "../utils/constants/app";
+import {AuthAction} from '@utils/actions';
+import {updateDashboardSettingsSubscriber} from "@utils/socket/users";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 import {getLS, removeLS, setLS} from "@utils/LocalStorage";
 
 
@@ -35,6 +35,8 @@ const initialState = fromJS({
     message: {},
     fromLogin: false,
     isSessionExpired: true,
+    isNotificationPanelOpened: false,
+    notifications: List(getLS('notifications') ? getLS('notifications') :[]),
 });
 
 let authUser = null;
@@ -43,6 +45,8 @@ let authUser = null;
  * redux reducer for auth user
  */
 const reducer = (state = initialState, action) => {
+    let notifications = state.get('notifications');
+    let index = -1;
     switch (action.type) {
         case AuthAction.INITIAL_STATE:
             return state;
@@ -57,7 +61,8 @@ const reducer = (state = initialState, action) => {
         case AuthAction.LOG_OUT:
             return state.set('logouting', true).set('error', null);
         case AuthAction.LOG_OUT_FULFILLED:
-            return state.set('logouting', false).set('authUser', action.payload).set('isAuth', false);
+            removeLS('notifications');
+            return state.set('logouting', false).set('authUser', action.payload).set('isAuth', false).set('notifications', List([]));
         case AuthAction.LOG_OUT_REJECTED:
             return state.set('logouting', false).set('error', action.payload).set('isAuth', true);
         case AuthAction.LOG_OUT_CANCELED:
@@ -67,7 +72,8 @@ const reducer = (state = initialState, action) => {
                 return state.set('isSessionExpired', true).set('logouting', false).set('authUser', action.payload).set('isAuth', false);
             }
             removeLS('token');
-            return state.set('isSessionExpired', true);
+            removeLS('notifications');
+            return state.set('isSessionExpired', true).set('notifications', List([]));
         case AuthAction.SESSION_NOTEXPIRED_FULFILLED:
             return state.set('isSessionExpired', false);
         case AuthAction.UPDATE_AUTH_USER_LANGUAGE:
@@ -100,6 +106,22 @@ const reducer = (state = initialState, action) => {
             return state.set('togglingAppTour', API_REQUEST_STATE.FINISH).set('authUser', authUser);
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
             return state.set('togglingAppTour', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload));
+        case AuthAction.ADD_NOTIFICATION:
+            notifications = notifications.set(notifications.size, action.payload);
+            setLS('notifications', notifications.toJS());
+            return state.set('notifications', notifications);
+        case AuthAction.CLEAR_NOTIFICATION:
+            index = notifications.findIndex(function (notification) {
+                return notification.id === action.payload.id;
+            });
+            notifications = notifications.delete(index);
+            setLS('notifications', notifications.toJS());
+            return state.set('notifications', List(notifications));
+        case AuthAction.CLEAR_ALL_NOTIFICATIONS:
+            setLS('notifications', [])
+            return state.set('notifications', List([]));
+        case AuthAction.TOGGLE_NOTIFICATION_PANEL:
+            return state.set('isNotificationPanelOpened', !state.get('isNotificationPanelOpened'));
         default:
             return state;
     }
