@@ -1,5 +1,4 @@
-import {capitalize, isString, searchByNameFunction} from "@utils/app";
-import CUserGroup from "@classes/components/content/user_group/CUserGroup";
+import {capitalize} from "@utils/app";
 
 export class CSearch{
     searchValue = '';

@@ -34,7 +34,7 @@ class TopBar extends React.Component{
 
     render(){
         const {notifications} = this.props;
-        const notificationAmount = notifications.length;
+        const notificationAmount = notifications.length > 99 ? 99 : notifications.length;
         return(
             <div className={styles.top_bar}>
                 <Input className={styles.search_input} placeholder={'Search'}/>
