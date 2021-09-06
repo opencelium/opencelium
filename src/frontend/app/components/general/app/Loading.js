@@ -79,8 +79,8 @@ Loading.defaultProps = {
     className: '',
     error: null,
     cancelCallback: null,
-    style: {},
-    spinnerStyle: {},
+    style: null,
+    spinnerStyle: null,
 };
 
 export default Loading;
