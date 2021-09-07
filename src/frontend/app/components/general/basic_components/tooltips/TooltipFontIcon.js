@@ -106,7 +106,7 @@ class TooltipFontIcon extends Component{
         }
         return (
             <span onMouseOver={::this.show} onMouseLeave={::this.hide} className={wrapClassName} style={{fontSize, ...wrapStyles}}>
-                {showTooltip && this.tooltip && tooltip !== '' && ReactDOM.createPortal(<span className={`${theme.tooltip} ${position} ${theme.tooltipActive}`} style={{left, top, zIndex: 1000000}}><span className={theme.tooltipInner}>{tooltip}</span></span>, this.tooltip)}
+                {showTooltip && this.tooltip && tooltip !== '' && !this.props.disabled && ReactDOM.createPortal(<span className={`${theme.tooltip} ${position} ${theme.tooltipActive}`} style={{left, top, zIndex: 1000000}}><span className={theme.tooltipInner}>{tooltip}</span></span>, this.tooltip)}
                 <FontIcon myRef={this.icon} onButtonFocus={::this.show} onButtonBlur={::this.hide} {...props}/>
             </span>
         );

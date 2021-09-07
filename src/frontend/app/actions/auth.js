@@ -15,10 +15,51 @@
 
 import Rx from 'rxjs/Rx';
 
-import { AuthAction } from '@utils/actions';
+import {AuthAction} from '@utils/actions';
 import {removeAllLS, setLS} from '@utils/LocalStorage';
 
 
+/**
+ * toggle notification panel
+ * @returns {{type: string, payload: {}}}
+ */
+const toggleNotificationPanel = () => {
+    return {
+        type: AuthAction.TOGGLE_NOTIFICATION_PANEL,
+    };
+};
+
+/**
+ * add a new notification
+ * @param data
+ * @returns {{type: string, payload: {}}}
+ */
+const addNotification = (data) => {
+    return {
+        type: AuthAction.ADD_NOTIFICATION,
+        payload: data,
+    };
+};
+/**
+ * clear a new notification
+ * @param data
+ * @returns {{type: string, payload: {}}}
+ */
+const clearNotification = (data) => {
+    return {
+        type: AuthAction.CLEAR_NOTIFICATION,
+        payload: data,
+    };
+};
+/**
+ * clear all notifications
+ * @returns {{type: string, payload: {}}}
+ */
+const clearAllNotifications = () => {
+    return {
+        type: AuthAction.CLEAR_ALL_NOTIFICATIONS,
+    };
+};
 /**
  * toggle application tour
  * @param user
@@ -291,4 +332,8 @@ export {
     toggleAppTour,
     toggleAppTourFulfilled,
     toggleAppTourRejected,
+    clearAllNotifications,
+    clearNotification,
+    addNotification,
+    toggleNotificationPanel,
 };

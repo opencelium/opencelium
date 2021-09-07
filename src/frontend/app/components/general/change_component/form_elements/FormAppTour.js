@@ -70,6 +70,7 @@ class FormAppTour extends Component{
             <ToolboxThemeInput label={label} icon={icon}>
                 <TooltipSwitch
                     id={'app_tour'}
+                    loadingIconStyles={{textAlign: 'left'}}
                     isLoading={togglingAppTour === API_REQUEST_STATE.START}
                     authUser={authUser}
                     tooltip={appTour ? t('APP_TOUR.DISABLE') : t('APP_TOUR.ENABLE')}

@@ -111,6 +111,7 @@ class InvokersList extends Component{
             setTotalPages={setTotalPages}
             permissions={InvokerPermissions}
             authUser={authUser}
+            componentName={'invokers'}
         />;
     }
 }

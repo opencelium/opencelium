@@ -70,7 +70,8 @@ class NotificationMessage extends Component{
     }
 
     renderServerMessage(comingMessage){
-        const {t, shortMessage} = this.props;
+        const {t, notification} = this.props;
+        const {shortMessage} = notification;
         let result = '';
         let colorRegExp = /^(.*)#[0-9a-f]{6}(.*)/gi;
         let checkColorRegExp = colorRegExp.exec(comingMessage);
@@ -92,40 +93,41 @@ class NotificationMessage extends Component{
     }
 
     render() {
-        const {t, status, message, params} = this.props;
-        let notificationMessage = status + '.' + message;
-        if(NotificationMessageHandlers[status] && NotificationMessageHandlers[status][message]){
-            notificationMessage = NotificationMessageHandlers[status][message](params);
+        const {t, notification} = this.props;
+        const {type, message, params} = notification;
+        let notificationMessage = type + '.' + message;
+        if(NotificationMessageHandlers[type] && NotificationMessageHandlers[type][message]){
+            notificationMessage = NotificationMessageHandlers[type][message](params);
         } else{
             let comingMessage = params && params.hasOwnProperty('response') && params.response && params.response.hasOwnProperty('message') ? params.response.message : '';
             if(comingMessage === ''){
                 comingMessage = params &&  params.hasOwnProperty('message') && params.message !== 'No message available' && params.message !== 'ajax error 0' ? params.message : '';
             }
             if(comingMessage){
-                if(i18n.exists(`notifications:${status}.${message}.${comingMessage}`)) {
+                if(i18n.exists(`notifications:${type}.${message}.${comingMessage}`)) {
                     if(params.hasOwnProperty('response') && params.response.hasOwnProperty('data') && params.response.data.hasOwnProperty('connectionPointer')){
                         let connectionPointer = parseConnectionPointer(params.response.data.connectionPointer);
                         if(connectionPointer.field !== '' && connectionPointer.color !== '') {
-                            notificationMessage = t(status + '.' + message + '.' + comingMessage, {methodPath: connectionPointer.field});
+                            notificationMessage = t(type + '.' + message + '.' + comingMessage, {methodPath: connectionPointer.field});
                             notificationMessage = this.renderServerMessage(`${notificationMessage} ${connectionPointer.color}`);
                         } else{
-                            notificationMessage = t(status + '.' + message + '.' + comingMessage);
+                            notificationMessage = t(type + '.' + message + '.' + comingMessage);
                         }
                     } else {
-                        notificationMessage = t(status + '.' + message + '.' + comingMessage);
-                        if (notificationMessage === `${status}.${message}.${comingMessage}`) {
-                            notificationMessage = t(`${status}.${message}.__DEFAULT__`);
+                        notificationMessage = t(type + '.' + message + '.' + comingMessage);
+                        if (notificationMessage === `${type}.${message}.${comingMessage}`) {
+                            notificationMessage = t(`${type}.${message}.__DEFAULT__`);
                         }
                     }
                 } else{
                     notificationMessage = this.renderServerMessage(comingMessage);
                 }
             } else {
-                if (i18n.exists(`notifications:${status}.${message}.__DEFAULT__`)) {
-                    notificationMessage = t(`${status}.${message}.__DEFAULT__`);
+                if (i18n.exists(`notifications:${type}.${message}.__DEFAULT__`)) {
+                    notificationMessage = t(`${type}.${message}.__DEFAULT__`);
                 } else{
-                    if(i18n.exists(`notifications:${status}.${message}`)){
-                        notificationMessage = t(`${status}.${message}`);
+                    if(i18n.exists(`notifications:${type}.${message}`)){
+                        notificationMessage = t(`${type}.${message}`);
                     } else{
                         notificationMessage = message;
                     }

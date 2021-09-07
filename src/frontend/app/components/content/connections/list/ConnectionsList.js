@@ -113,6 +113,7 @@ class ConnectionsList extends Component{
             setTotalPages={setTotalPages}
             permissions={ConnectionPermissions}
             authUser={authUser}
+            componentName={'connections'}
         />;
     }
 }

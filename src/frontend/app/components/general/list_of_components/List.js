@@ -59,6 +59,7 @@ import GridViewMenu from "@components/general/list_of_components/GridViewMenu";
 import ListView from "@components/general/list_of_components/ListView";
 import Button from "@basic_components/buttons/Button";
 import {NO_NEED_PERMISSION} from "@utils/constants/permissions";
+import {CSearch} from "@classes/components/general/CSearch";
 
 
 const AMOUNT_OF_ROWS = 3;
@@ -92,7 +93,7 @@ class List extends Component{
             isPressedAddEntity: false,
             searchValue: '',
             gridViewType: '4',
-            entitiesProPage: 4 * AMOUNT_OF_ROWS,
+            entitiesProPage: props.viewType === VIEW_TYPE.LIST ? 10 : 4 * AMOUNT_OF_ROWS,
             checks: [],
             sortType: 'asc',
         };
@@ -329,8 +330,14 @@ class List extends Component{
      */
     searchEntities(){
         const {searchValue} = this.state;
-        const {entities} = this.props;
-        let result = entities.filter((value) => searchByNameFunction(value, searchValue));
+        const {entities, componentName} = this.props;
+        let result;
+        if(componentName){
+            const Search = new CSearch({searchValue, sources: {[componentName]: entities}, componentName: componentName});
+            result = Search.getResults()[componentName];
+        } else{
+            result = entities.filter((value) => searchByNameFunction(value, searchValue));
+        }
         return result;
     }
 
@@ -565,6 +572,7 @@ List.propTypes = {
     hasDeleteSelectedButtons: PropTypes.bool,
     readOnly: PropTypes.bool,
     viewType: PropTypes.oneOf(['GRID', 'LIST']),
+    componentName: PropTypes.string,
 };
 
 List.defaultProps = {
@@ -576,7 +584,8 @@ List.defaultProps = {
     hasDeleteSelectedButtons: true,
     listViewData: null,
     readOnly: false,
-    viewType: 'LIST'
+    viewType: 'LIST',
+    componentName: '',
 };
 
 export default withRouter(List);

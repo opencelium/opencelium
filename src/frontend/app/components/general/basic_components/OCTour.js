@@ -41,6 +41,10 @@ class OCTour extends Component{
 
     render(){
         const {authUser, startAt, rounded, disableInteraction, disableKeyboardNavigation, className, ...props} = this.props;
+        /*
+        * TODO: remove stub as soon as all tour data will be fixed
+        */
+        return null;
         let classNames = [
             'tour',
         ];

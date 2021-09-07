@@ -14,18 +14,15 @@
  */
 
 import React, {Suspense} from 'react';
-import ReactDOM from 'react-dom';
 
-import Notification from '@components/general/app/Notification';
-import {EntitiesWithNotification, NotificationType} from '../utils/constants/notifications/notifications';
+import {EntitiesWithNotification, NotificationType} from '@utils/constants/notifications/notifications';
 import i18n from "../utils/i18n";
 import {sessionExpired} from "@actions/auth";
-import {AuthAction} from "../utils/actions";
 
 import {history} from '@components/App';
-import Loading from "@loading";
 import styles from "@themes/default/general/app";
 import {checkExpiredMessages} from "@utils/app";
+import {addNotification} from "@actions/auth";
 
 
 /**
@@ -88,24 +85,18 @@ export default function (store){
                     data.type = NotificationType.NOTE;
                     break;
             }
-            let idName = 'note_';
-            if(notification.children.length === 0 || typeof notification.children[notification.children.length - 1].children[0] === 'undefined') {
-                idName += 1;
-            }else{
-                let nextIndex = notification.children[notification.children.length - 1].children[0].id;
-                nextIndex = nextIndex.split('_');
-                idName += parseInt(nextIndex[1]) + 1;
-            }
-            const newDiv = document.createElement("div");
-            notification.appendChild(newDiv);
-            let domElem = notification.children[notification.children.length - 1];
-            if(notificationType !== ''){
-                data.type = notificationType;
-            }
-            ReactDOM.render(
-                <Suspense fallback={(<Loading/>)}>
-                    <Notification data={data} id={idName} params={action.payload} hasCloseButton={hasCloseButton}/>
-                </Suspense>, domElem);
+            let date = new Date();
+            const notification = {
+                id: date.getTime(),
+                type: data.type,
+                title: systemTitle,
+                message: data.message,
+                createdTime: date.getTime(),
+                params: action.payload,
+                shortMessage,
+                hasCloseButton,
+            };
+            store.dispatch(addNotification(notification));
         }
         next(action);
     };

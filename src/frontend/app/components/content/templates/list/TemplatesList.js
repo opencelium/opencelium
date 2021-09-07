@@ -172,6 +172,7 @@ class TemplatesList extends Component{
             setTotalPages={setTotalPages}
             permissions={TemplatePermissions}
             authUser={authUser}
+            componentName={'templates'}
         />;
     }
 }

@@ -115,6 +115,7 @@ class UsersList extends Component{
             setTotalPages={setTotalPages}
             permissions={UserPermissions}
             authUser={authUser}
+            componentName={'users'}
         />;
     }
 }

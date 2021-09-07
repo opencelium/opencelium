@@ -39,6 +39,10 @@ class HelpIcon extends Component{
 
     render(){
         const {onClick, id} = this.props;
+        /*
+        * TODO: remove stub as soon as all tour data will be fixed
+        */
+        return null;
         return (
             <sup>
                 <TooltipFontIcon

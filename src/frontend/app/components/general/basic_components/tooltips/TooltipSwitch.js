@@ -76,7 +76,7 @@ class TooltipSwitch extends Component{
 
     render(){
         const {showTooltip, left, top} = this.state;
-        const {authUser, tooltip, middle, tooltipPosition, wrapClassName, isLoading, ...props} = this.props;
+        const {authUser, tooltip, middle, tooltipPosition, wrapClassName, isLoading, loadingIconStyles, ...props} = this.props;
         let position = '';
         let classNames = [
             'tooltip_switch_loading',
@@ -88,7 +88,7 @@ class TooltipSwitch extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         if(isLoading){
             return (
-                <Loading className={styles[classNames.tooltip_switch_loading]} authUser={authUser}/>
+                <Loading style={loadingIconStyles} className={styles[classNames.tooltip_switch_loading]} authUser={authUser}/>
             );
         }
         switch (tooltipPosition) {
@@ -123,6 +123,7 @@ TooltipSwitch.defaultProps = {
     middle: false,
     isLoading: false,
     tooltipPosition: 'top',
+    loadingIconStyles: null,
 };
 
 export default TooltipSwitch;

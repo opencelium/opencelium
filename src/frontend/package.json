@@ -73,6 +73,7 @@
     "storm-react-diagrams": "^5.2.1",
     "styled-components": "^5.3.0",
     "three": "^0.125.2",
+    "timeago-react": "^3.0.3",
     "uglifyjs-webpack-plugin": "2.1.1",
     "vikas-vis": "^1.0.2",
     "vis": "^4.21.0",
