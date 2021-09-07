@@ -397,7 +397,7 @@ class List extends Component{
     render(){
         const {
             mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles,
-            noSearchField, currentPageItems, listViewData, readOnly,
+            noSearchField, currentPageItems, listViewData, readOnly, deletingEntity,
         } = this.props;
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType} = this.state;
         let {page, translations, hasDeleteSelectedButtons} = this.props;
@@ -487,6 +487,7 @@ class List extends Component{
                                 <React.Fragment>
                                     {viewType === VIEW_TYPE.LIST &&
                                         <ListView
+                                            deletingEntity={deletingEntity}
                                             readOnly={readOnly}
                                             translations={translations}
                                             sortType={sortType}
@@ -521,6 +522,7 @@ class List extends Component{
                                                 return (
                                                     <Card
                                                         key={key}
+                                                        deletingEntity={deletingEntity}
                                                         permission={entity.permission ? entity.permission : NO_NEED_PERMISSION}
                                                         gridViewType={gridViewType}
                                                         hasTour={translations.header && translations.header.hasOwnProperty('onHelpClick') && (key === 0 || key === 1)}
@@ -586,6 +588,7 @@ List.defaultProps = {
     readOnly: false,
     viewType: 'LIST',
     componentName: '',
+    deletingEntity: null,
 };
 
 export default withRouter(List);

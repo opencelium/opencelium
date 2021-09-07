@@ -115,18 +115,18 @@ const reducer = (state = initialState, action) => {
         case UserGroupsAction.UPDATE_GROUPICON_REJECTED:
             return state.set('updatingUserGroup', API_REQUEST_STATE.ERROR).set('updatingGroupIcon', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case UserGroupsAction.DELETE_USERGROUP:
-            return state.set('deletingUserGroup', API_REQUEST_STATE.START).set('error', null);
+            return state.set('deletingUserGroup', API_REQUEST_STATE.START).set('error', null).set('userGroup', action.payload);
         case UserGroupsAction.DELETE_USERGROUP_FULFILLED:
             deleteUserGroupSubscriber(action.payload);
             index = userGroups.findIndex(function (userGroup) {
                 return userGroup.id === action.payload.id;
             });
             if (index >= 0) {
-                return state.set('deletingUserGroup', API_REQUEST_STATE.FINISH).set('userGroups', userGroups.delete(index));
+                return state.set('deletingUserGroup', API_REQUEST_STATE.FINISH).set('userGroups', userGroups.delete(index)).set('userGroup', null);
             }
-            return state.set('deletingUserGroup', API_REQUEST_STATE.FINISH);
+            return state.set('deletingUserGroup', API_REQUEST_STATE.FINISH).set('userGroup', null);
         case UserGroupsAction.DELETE_USERGROUP_REJECTED:
-            return state.set('deletingUserGroup', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('deletingUserGroup', API_REQUEST_STATE.ERROR).set('error', action.payload).set('userGroup', null);
         case UserGroupsAction.DELETE_USERGROUPICON:
             return state.set('deletingUserGroupIcon', API_REQUEST_STATE.START).set('error', null);
         case UserGroupsAction.DELETE_USERGROUPICON_FULFILLED:

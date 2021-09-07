@@ -78,17 +78,17 @@ const reducer = (state = initialState, action) => {
         case NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE_REJECTED:
             return state.set('updatingNotificationTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE:
-            return state.set('deletingNotificationTemplate', API_REQUEST_STATE.START).set('error', null);
+            return state.set('deletingNotificationTemplate', API_REQUEST_STATE.START).set('error', null).set('notificationTemplate', action.payload);
         case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE_FULFILLED:
             index = notificationTemplates.findIndex(function (notificationTemplate) {
                 return notificationTemplate.templateId === action.payload.id;
             });
             if(index >= 0) {
-                return state.set('deletingNotificationTemplate', API_REQUEST_STATE.FINISH).set('notificationTemplates', notificationTemplates.delete(index));
+                return state.set('deletingNotificationTemplate', API_REQUEST_STATE.FINISH).set('notificationTemplates', notificationTemplates.delete(index)).set('notificationTemplate', null);
             }
-            return state.set('deletingNotificationTemplate', API_REQUEST_STATE.FINISH);
+            return state.set('deletingNotificationTemplate', API_REQUEST_STATE.FINISH).set('notificationTemplate', null);
         case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE_REJECTED:
-            return state.set('deletingNotificationTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('deletingNotificationTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload).set('notificationTemplate', null);
         default:
             return state;
     }

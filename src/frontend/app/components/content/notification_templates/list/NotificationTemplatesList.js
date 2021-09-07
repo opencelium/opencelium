@@ -25,6 +25,7 @@ import {NotificationTemplatePermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {tour} from "@decorators/tour";
 import {LIST_TOURS} from "@utils/constants/tours";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 const prefixUrl = '/notification_templates';
 
@@ -35,6 +36,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingNotificationTemplates: notificationTemplates.get('fetchingNotificationTemplates'),
         deletingNotificationTemplate: notificationTemplates.get('deletingNotificationTemplate'),
+        currentNotificationTemplate: notificationTemplates.get('notificationTemplate'),
         notificationTemplates: notificationTemplates.get('notificationTemplates').toJS(),
         isCanceled: notificationTemplates.get('isCanceled'),
         isRejected: notificationTemplates.get('isRejected'),
@@ -77,7 +79,7 @@ class NotificationTemplatesList extends Component{
     }
 
     render(){
-        const {authUser, t, notificationTemplates, deleteNotificationTemplate, params, setTotalPages, openTour} = this.props;
+        const {authUser, t, notificationTemplates, deleteNotificationTemplate, params, setTotalPages, openTour, deletingNotificationTemplate, currentNotificationTemplate} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -103,6 +105,7 @@ class NotificationTemplatesList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteNotificationTemplate;
         return <List
+            deletingEntity={(notificationTemplate) => deletingNotificationTemplate === API_REQUEST_STATE.START && notificationTemplate.id === currentNotificationTemplate.id}
             entities={notificationTemplates}
             translations={translations}
             mapEntity={mapEntity}

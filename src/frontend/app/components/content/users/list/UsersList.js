@@ -25,6 +25,7 @@ import {permission} from "@decorators/permission";
 import {UserPermissions} from "@utils/constants/permissions";
 import {tour} from "@decorators/tour";
 import {LIST_TOURS} from "@utils/constants/tours";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const prefixUrl = '/users';
@@ -36,6 +37,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingUsers: users.get('fetchingUsers'),
         deletingUser: users.get('deletingUser'),
+        currentUser: users.get('user'),
         users: users.get('users').toJS(),
         isCanceled: users.get('isCanceled'),
         isRejected: users.get('isRejected'),
@@ -78,7 +80,7 @@ class UsersList extends Component{
     }
 
     render(){
-        const {t, users, deleteUser, params, setTotalPages, authUser, openTour} = this.props;
+        const {t, users, deleteUser, params, setTotalPages, authUser, openTour, deletingUser, currentUser} = this.props;
         let exceptionUsers = [authUser.userId];
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
@@ -106,6 +108,7 @@ class UsersList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteUser;
         return <List
+            deletingEntity={(user) => deletingUser === API_REQUEST_STATE.START && user.id === currentUser.id}
             listViewData={listViewData}
             entities={users}
             exceptionEntities={{label: t('LIST.CURRENT_USER'), exceptions: exceptionUsers}}

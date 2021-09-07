@@ -25,6 +25,7 @@ import {permission} from "@decorators/permission";
 import {UserGroupPermissions} from "@utils/constants/permissions";
 import {LIST_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const prefixUrl = '/usergroups';
@@ -36,6 +37,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingUserGroups: userGroups.get('fetchingUserGroups'),
         deletingUserGroup: userGroups.get('deletingUserGroup'),
+        currentUserGroup: userGroups.get('userGroup'),
         userGroups: userGroups.get('userGroups').toJS(),
         isCanceled: userGroups.get('isCanceled'),
         isRejected: userGroups.get('isRejected'),
@@ -78,7 +80,7 @@ class UserGroupsList extends Component{
     }
 
     render(){
-        const {authUser, t, userGroups, deleteUserGroup, deleteUserGroups, params, setTotalPages, openTour} = this.props;
+        const {authUser, t, userGroups, deleteUserGroup, deleteUserGroups, params, setTotalPages, openTour, deletingUserGroup, currentUserGroup} = this.props;
         let exceptionUserGroups = authUser && authUser.hasOwnProperty('userGroup') && authUser.userGroup && authUser.userGroup.hasOwnProperty('groupId') ? [authUser.userGroup.groupId] : [];
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
@@ -104,6 +106,7 @@ class UserGroupsList extends Component{
         mapUserGroup.getAddLink = `${prefixUrl}/add`;
         mapUserGroup.onDelete = deleteUserGroup;
         return <List
+            deletingEntity={(userGroup) => deletingUserGroup === API_REQUEST_STATE.START && userGroup.id === currentUserGroup.id}
             entities={userGroups}
             listViewData={listViewData}
             exceptionEntities={{label: t('LIST.CURRENT_USER_GROUP'), exceptions: exceptionUserGroups}}

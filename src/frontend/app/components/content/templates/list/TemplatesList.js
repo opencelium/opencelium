@@ -49,6 +49,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingTemplates: templates.get('fetchingTemplates'),
         deletingTemplate: templates.get('deletingTemplate'),
+        currentTemplate: templates.get('template'),
         exportedTemplate: templates.get('exportedTemplate'),
         exportingTemplate: templates.get('exportingTemplate'),
         convertingTemplates: templates.get('convertingTemplates').toJS(),
@@ -119,7 +120,7 @@ class TemplatesList extends Component{
     }
 
     render(){
-        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates} = this.props;
+        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates, deletingTemplate, currentTemplate} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}]};
         translations.add_button = t('LIST.IMPORT_BUTTON');
@@ -163,6 +164,7 @@ class TemplatesList extends Component{
         mapEntity.AdditionalButton = <Button authUser={authUser} title={'Convert All'} onClick={::this.convertAll}/>;
         mapEntity.onDelete = deleteTemplate;
         return <List
+            deletingEntity={(template) => deletingTemplate === API_REQUEST_STATE.START && template.id === currentTemplate.id}
             listViewData={listViewData}
             rerenderDependency={convertingTemplates.length}
             entities={templates}

@@ -20,6 +20,7 @@ import {permission} from "@decorators/permission";
 import {formatHtmlId} from "@utils/app";
 import styles from "@themes/default/general/list_of_components.scss";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import Loading from "@components/general/app/Loading";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -63,9 +64,14 @@ class CardButton extends Component{
             return (
                 <React.Fragment>
                     {value && <TooltipFontIcon wrapClassName={`${className} ${styles.card_button_icon}`} size={'3vw'} tooltip={tooltip} value={value} onClick={onClick} id={id} isButton={true} turquoiseTheme/>}
-                    <button className={`${styles.card_button} ${className}`} onClick={onClick} id={id}>
-                        <div>{text}</div>
-                    </button>
+                    {type !== 'loading' &&
+                        <button className={`${styles.card_button} ${className}`} onClick={onClick} id={id}>
+                            <div>{text}</div>
+                        </button>
+                    }
+                    {type === 'loading' &&
+                        <Loading className={className}/>
+                    }
                 </React.Fragment>
             );
         } else{

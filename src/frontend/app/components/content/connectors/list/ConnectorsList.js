@@ -29,6 +29,7 @@ import {LIST_TOURS} from "@utils/constants/tours";
 import ImageCropView from "@components/general/app/ImageCropView";
 import {isString} from "@utils/app";
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const prefixUrl = '/connectors';
@@ -42,6 +43,7 @@ function mapStateToProps(state){
         deletingConnector: connectors.get('deletingConnector'),
         addingConnectorIcon: connectors.get('addingConnectorIcon'),
         connectors: connectors.get('connectors').toJS(),
+        currentConnector: connectors.get('connector'),
         isCanceled: connectors.get('isCanceled'),
         isRejected: connectors.get('isRejected'),
     };
@@ -83,7 +85,7 @@ class ConnectorsList extends Component{
     }
 
     render(){
-        const {authUser, t, connectors, deleteConnector, params, setTotalPages, openTour, addConnectorIcon, addingConnectorIcon} = this.props;
+        const {authUser, t, connectors, deleteConnector, params, setTotalPages, openTour, addConnectorIcon, addingConnectorIcon, deletingConnector, currentConnector} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -110,6 +112,7 @@ class ConnectorsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnector;
         return <List
+            deletingEntity={(connector) => deletingConnector === API_REQUEST_STATE.START && connector.id === currentConnector.id}
             entities={connectors}
             translations={translations}
             mapEntity={mapEntity}

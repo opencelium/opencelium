@@ -249,10 +249,12 @@ class ListCard extends Component{
     }
 
     renderActions(){
-        const {t, isException, exceptionLabel, isSelectedCard, permissions, authUser, hasView, hasUpdate, hasGraph, hasDelete, hasTour, index, isButton} = this.props;
+        const {t, entity, deletingEntity, isException, exceptionLabel, isSelectedCard, permissions, authUser, hasView, hasUpdate, hasGraph, hasDelete, hasTour, index, isButton} = this.props;
         let classNames = [
             'button',
             'button_delete',
+            'button_delete_loading',
+            'only_button_delete_loading',
             'only_button_delete',
             'key_navigation_title',
             'key_navigation_letter',
@@ -272,10 +274,23 @@ class ListCard extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         let buttonStyle = styles[classNames.button];
         let deleteButtonStyle = buttonStyle;
-        if(!hasView && !hasUpdate && !hasGraph){
-            deleteButtonStyle += ` ${styles[classNames.only_button_delete]}`;
+        const isDeletingEntity = deletingEntity(entity);
+        if(isDeletingEntity){
+            deleteButtonStyle = `${styles[classNames.button_delete_loading]}`
         } else{
-            deleteButtonStyle += ` ${styles[classNames.button_delete]}`;
+            if(!hasView && !hasUpdate && !hasGraph){
+                if(isDeletingEntity){
+                    deleteButtonStyle = `${styles[classNames.only_button_delete_loading]}`
+                } else{
+                    deleteButtonStyle += ` ${styles[classNames.only_button_delete]}`;
+                }
+            } else{
+                if(isDeletingEntity) {
+                    deleteButtonStyle = `${styles[classNames.button_delete_loading]}`
+                } else{
+                    deleteButtonStyle += ` ${styles[classNames.button_delete]}`;
+                }
+            }
         }
         let currentCardStyle = `${styles[classNames.current_card]}`;
         let viewButtonText = t('LIST.CARD.BUTTON_VIEW');
@@ -302,7 +317,7 @@ class ListCard extends Component{
                     {hasView && !isButton && <CardButton type={'view'} className={`${buttonStyle} ${hasTour ? `tour-step-view-${index + 1}` : ''}`} index={index} onClick={::this.view} text={viewButtonText} permission={permissions.READ}/>}
                     {hasUpdate && <CardButton type={'update'} className={`${buttonStyle} ${hasTour ? `tour-step-update-${index + 1}` : ''}`} index={index} onClick={::this.update} text={updateButtonText} permission={permissions.UPDATE}/>}
                     {hasGraph && <CardButton className={`${buttonStyle} ${hasTour ? `tour-step-graph-${index + 1}` : ''}`} index={index} onClick={::this.viewGraph} text={graphButtonText} permission={permissions.READ}/>}
-                    {hasDelete && <CardButton type={'delete'} className={`${deleteButtonStyle} ${hasTour ? `tour-step-delete-${index + 1}` : ''}`} index={index} onClick={::this.wantDelete} text={deleteButtonText} permission={permissions.DELETE}/>}
+                    {hasDelete && <CardButton type={isDeletingEntity ? 'loading' : 'delete'} className={`${deleteButtonStyle} ${hasTour ? `tour-step-delete-${index + 1}` : ''}`} index={index} onClick={::this.wantDelete} text={deleteButtonText} permission={permissions.DELETE}/>}
                 </div>
             );
         } else{
@@ -421,6 +436,7 @@ ListCard.defaultProps = {
     onCardClickLink: '',
     load: null,
     isButton: false,
+    deletingEntity: false,
 };
 
 export default withRouter(ListCard);
