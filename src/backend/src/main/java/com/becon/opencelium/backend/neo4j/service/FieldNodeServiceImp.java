@@ -144,8 +144,13 @@ public class FieldNodeServiceImp implements FieldNodeService {
         String color = methodNode.getColor();
         String exchangeType = fieldHasRequest(node.getId()) ? "request" : "response";
         String field = getPath(methodNode, node).replace(color + ".", "")
-                .replace("(" + exchangeType + ").", "");
-
+                .replace("(" + exchangeType + ").", "").replace(".__oc__value","");
+        if(field.contains("__oc__attributes")) {
+            field = field.replace(".__oc__attributes","");
+            StringBuilder sb = new StringBuilder(field);
+            sb.insert(field.lastIndexOf('.')  + 1,'@');
+            field = sb.toString();
+        }
         fieldResource.setColor(color);
         fieldResource.setType(exchangeType);
         fieldResource.setField(field);
