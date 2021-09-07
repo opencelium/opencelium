@@ -10,6 +10,7 @@ import {NotificationMessageHandlers, NotificationType} from "@utils/constants/no
 import i18n from "@utils/i18n";
 import {isString, parseConnectionPointer} from "@utils/app";
 import Dialog from "@basic_components/Dialog";
+import {CNotification} from "@classes/components/general/CNotification";
 
 
 const MAX_NOTIFICATION_MESSAGE_LENGTH = 250;
@@ -43,7 +44,8 @@ class Notification extends React.Component{
     }
 
     hasExtension(){
-        const messageData = this.getMessage();
+        const {t, notification} = this.props;
+        const messageData = CNotification.getMessage(t, notification, ::this.renderServerMessage);
         return messageData.length > 88;
     }
 
@@ -67,57 +69,6 @@ class Notification extends React.Component{
 
     clearNotification(){
         this.props.clearNotification(this.props.notification);
-    }
-
-    getMessage(){
-        const {t, notification} = this.props;
-        let {type, message, params} = notification;
-        let serverMessageLength = 0;
-        let notificationMessage = type + '.' + message;
-        if(NotificationMessageHandlers[type] && NotificationMessageHandlers[type][message]){
-            notificationMessage = NotificationMessageHandlers[type][message](params);
-        } else{
-            let comingMessage = params && params.hasOwnProperty('response') && params.response && params.response.hasOwnProperty('message') ? params.response.message : '';
-            if(comingMessage === ''){
-                comingMessage = params && params.hasOwnProperty('message') && params.message !== 'No message available' && params.message !== 'ajax error 0' ? params.message : '';
-            }
-            if(comingMessage){
-                if(i18n.exists(`notifications:${type}.${message}.${comingMessage}`)) {
-                    if(params.hasOwnProperty('response') && params.response.hasOwnProperty('data') && params.response.data.hasOwnProperty('connectionPointer')){
-                        let connectionPointer = parseConnectionPointer(params.response.data.connectionPointer);
-                        if(connectionPointer.field !== '' && connectionPointer.color !== '') {
-                            notificationMessage = t(type + '.' + message + '.' + comingMessage, {methodPath: connectionPointer.field});
-                            const serverMessage = this.renderServerMessage(`${notificationMessage} ${connectionPointer.color}`);
-                            notificationMessage = serverMessage.message;
-                            serverMessageLength = serverMessage.length;
-                        } else{
-                            notificationMessage = t(type + '.' + message + '.' + comingMessage);
-                        }
-                    } else {
-                        notificationMessage = t(type + '.' + message + '.' + comingMessage);
-                        if (notificationMessage === `${type}.${message}.${comingMessage}`) {
-                            notificationMessage = t(`${type}.${message}.__DEFAULT__`);
-                        }
-                    }
-                } else{
-                    const serverMessage = this.renderServerMessage(comingMessage);
-                    notificationMessage = serverMessage.message;
-                    serverMessageLength = serverMessage.length;
-                }
-            } else {
-                if (i18n.exists(`notifications:${type}.${message}.__DEFAULT__`)) {
-                    notificationMessage = t(`${type}.${message}.__DEFAULT__`);
-                } else{
-                    if(i18n.exists(`notifications:${type}.${message}`)){
-                        notificationMessage = t(`${type}.${message}`);
-                    } else{
-                        notificationMessage = message;
-                    }
-                }
-            }
-        }
-        let length = isString(notificationMessage) ? notificationMessage.length : serverMessageLength;
-        return {message: notificationMessage, length};
     }
 
     renderDialogInDetails(){
@@ -174,7 +125,7 @@ class Notification extends React.Component{
         const {isExtended, isMouseOver} = this.state;
         const {t, notification} = this.props;
         let title = t(`SYSTEMS.${notification.title.toUpperCase()}`);
-        let messageData = this.getMessage();
+        let messageData = CNotification.getMessage(t, notification, ::this.renderServerMessage);
         if(isString(messageData.message) && messageData.message.length > MAX_NOTIFICATION_MESSAGE_LENGTH){
             messageData.message = <Details t={t} shortMessage={messageData.message.substr(0, MAX_NOTIFICATION_MESSAGE_LENGTH)} comingMessage={messageData.message} onClick={::this.openDialog}/>;
         }
@@ -182,24 +133,6 @@ class Notification extends React.Component{
             datetime={notification.createdTime}
             locale='de_DE'
         />;
-        let tooltip = '';
-        let value = '';
-        let iconClassName = '';
-        switch (notification.type){
-            case NotificationType.SUCCESS:
-                tooltip = 'Info';
-                value = 'info';
-                iconClassName = styles.info_icon;
-                break;
-            case NotificationType.WARNING:
-                iconClassName = styles.warning_icon;
-                break;
-            case NotificationType.ERROR:
-                tooltip = 'Error';
-                value = 'cancel';
-                iconClassName = styles.error_icon;
-                break;
-        }
         let messageStyles = {
             height: '50px',
             minHeight: '50px',
@@ -225,12 +158,7 @@ class Notification extends React.Component{
                 {isMouseOver && <TooltipFontIcon isButton className={styles.delete_icon} size={16} value={'delete'} tooltip={'Clear'} onClick={::this.clearNotification}/>}
                 {isMouseOver && this.hasExtension() && <TooltipFontIcon isButton className={styles.unfold_icon} size={16} value={unFoldIcon.value} tooltip={unFoldIcon.tooltip} onClick={::this.toggleExtension}/>}
                 <div className={styles.title}>
-                    {notification.type !== 'warning' ?
-                        <TooltipFontIcon wrapClassName={styles.type_icon} className={iconClassName} size={20}
-                                         value={value} tooltip={tooltip}/>
-                        :
-                        <div className={iconClassName}><div>!</div></div>
-                    }
+                    {CNotification.getTypeIcon(notification.type)}
                     <span className={styles.title_text}>
                         {title}
                     </span>

@@ -98,7 +98,7 @@ class Notification extends Component{
         }
         result.systemTitle = t(`SYSTEMS.${systemTitle.toUpperCase()}`);
         result.header = t("HEADERS" + '.' + type);
-        result.message = <NotificationMessage status={type} message={message} params={params} shortMessage={shortMessage ? shortMessage : ''} setHasCloseButton={::this.setHasCloseButton}/>;
+        result.message = <NotificationMessage notification={{type, message, params, shortMessage: shortMessage ? shortMessage : ''}}/>;
         return result;
     }
 

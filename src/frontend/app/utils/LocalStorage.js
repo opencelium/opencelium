@@ -26,7 +26,7 @@ let localStorage = window.localStorage;
  * set local storage variable
  */
 function setLS(key, value){
-    localStorage.setItem(key, value);
+    localStorage.setItem(key, JSON.stringify(value));
 }
 /**
  * set crypt local storage variable
@@ -55,7 +55,7 @@ function getCryptLS(key, namespace = 'd'){
  * get local storage variable
  */
 function getLS(key){
-    return localStorage.getItem(key);
+    return JSON.parse(localStorage.getItem(key));
 }
 
 /**

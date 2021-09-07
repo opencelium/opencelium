@@ -191,3 +191,85 @@
   width: 20px;
   height: 20px;
 }
+
+
+
+@keyframes slideTopRight {
+  0% {
+  }
+
+  100% {
+    top: 0;
+    opacity: 0;
+  }
+}
+.callout {
+  animation-delay: 2.5s;
+  animation-name: slideTopRight;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+  .message{
+    @extend .overflow_text;
+    display: inline-block;
+    width: 86%;
+    margin-left: 2%;
+    font-size: 12px;
+  }
+  position: absolute;
+  top: 12px;
+  left: -170px;
+  height: 50px;
+  width: 200px;
+  color: black;
+  background-color: $BACKGROUND_CALLOUT;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 25px;
+  min-height: 50px;
+  border: 1px solid $BACKGROUND_CALLOUT;
+}
+
+.callout::before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  border: 0.8em solid transparent;
+  position: absolute;
+}
+
+.callout.top::before {
+  left: 45%;
+  bottom: -20px;
+  border-top: 10px solid $BACKGROUND_CALLOUT;
+}
+
+.callout.bottom::before {
+  left: 72.5%;
+  top: -20px;
+  border-bottom: 10px solid $BACKGROUND_CALLOUT;
+}
+
+.callout.left::before {
+  right: -20px;
+  top: 40%;
+  border-left: 10px solid $BACKGROUND_CALLOUT;
+}
+
+.callout.right::before {
+  left: -20px;
+  top: 40%;
+  border-right: 10px solid $BACKGROUND_CALLOUT;
+}
+
+.callout.top-left::before {
+  left: 7px;
+  bottom: -20px;
+  border-top: 10px solid $BACKGROUND_CALLOUT;
+}
+
+.callout.top-right::before {
+  right: 7px;
+  bottom: -20px;
+  border-top: 10px solid $BACKGROUND_CALLOUT;
+}
