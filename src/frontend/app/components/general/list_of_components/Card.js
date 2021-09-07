@@ -275,21 +275,17 @@ class ListCard extends Component{
         let buttonStyle = styles[classNames.button];
         let deleteButtonStyle = buttonStyle;
         const isDeletingEntity = deletingEntity(entity);
-        if(isDeletingEntity){
-            deleteButtonStyle = `${styles[classNames.button_delete_loading]}`
-        } else{
-            if(!hasView && !hasUpdate && !hasGraph){
-                if(isDeletingEntity){
-                    deleteButtonStyle = `${styles[classNames.only_button_delete_loading]}`
-                } else{
-                    deleteButtonStyle += ` ${styles[classNames.only_button_delete]}`;
-                }
+        if(!hasView && !hasUpdate && !hasGraph){
+            if(isDeletingEntity){
+                deleteButtonStyle += ` ${styles[classNames.only_button_delete_loading]}`
             } else{
-                if(isDeletingEntity) {
-                    deleteButtonStyle = `${styles[classNames.button_delete_loading]}`
-                } else{
-                    deleteButtonStyle += ` ${styles[classNames.button_delete]}`;
-                }
+                deleteButtonStyle += ` ${styles[classNames.only_button_delete]}`;
+            }
+        } else{
+            if(isDeletingEntity) {
+                deleteButtonStyle = `${styles[classNames.button_delete_loading]}`
+            } else{
+                deleteButtonStyle += ` ${styles[classNames.button_delete]}`;
             }
         }
         let currentCardStyle = `${styles[classNames.current_card]}`;

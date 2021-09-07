@@ -31,7 +31,7 @@ import {NotificationType} from "@utils/constants/notifications/notifications";
 import {logoutUserFulfilled, sessionNotExpired} from "@actions/auth";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CAppVoiceControl from "@classes/voice_control/CAppVoiceControl";
-import {getLS} from "@utils/LocalStorage";
+import {getCryptLS, getLS} from "@utils/LocalStorage";
 import {API_REQUEST_STATE, TEST} from "@utils/constants/app";
 import {hasHeader} from "@utils/app";
 import Menu from "@components/layout/menu/Menu";
@@ -112,7 +112,7 @@ class Layout extends Component{
         if(location.pathname !== '/login' && isSessionExpired) {
             const {t} = this.props;
             checkTokenInterval = setInterval(() => {
-                if(getLS('token')){
+                if(getCryptLS('token')){
                     sessionNotExpired();
                 }
             }, 2000);

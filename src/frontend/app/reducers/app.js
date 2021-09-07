@@ -19,9 +19,12 @@ import {AppAction} from '@utils/actions';
 import i18n from '../utils/i18n';
 import {defaultLanguage} from "@utils/constants/languages";
 
-import {setLS} from '@utils/LocalStorage';
+import {getLS, setLS} from '@utils/LocalStorage';
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import {VIEW_TYPE} from "@components/general/list_of_components/List";
 
+const viewType = getLS('viewType');
+const gridViewType = getLS('gridViewType');
 
 const initialState = fromJS({
     currentLanguage: defaultLanguage.code,
@@ -35,6 +38,8 @@ const initialState = fromJS({
     message: {},
     isFullScreen: false,
     isDraftOpenedOnce: false,
+    viewType: viewType ? viewType : VIEW_TYPE.LIST,
+    gridViewType: gridViewType ? gridViewType : '4',
 });
 
 /**
@@ -42,6 +47,12 @@ const initialState = fromJS({
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case AppAction.SET_VIEW_TYPE:
+            setLS('viewType', action.payload);
+            return state.set('viewType', action.payload);
+        case AppAction.SET_GRID_VIEW_TYPE:
+            setLS('gridViewType', action.payload);
+            return state.set('gridViewType', action.payload);
         case AppAction.CHANGE_LANGUAGE:
             i18n.changeLanguage(action.payload.code);
             return state.set('currentLanguage', action.payload.code);

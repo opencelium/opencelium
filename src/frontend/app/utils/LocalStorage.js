@@ -19,25 +19,32 @@ import SecureLS from 'secure-ls';
 /**
  * define Secure Local Storage variable for crypting data in local storage of the web browser
  */
-let ls = new SecureLS({encodingType: 'des', isCompression: false, encryptionSecret: 'SmhaRzFwYmpKVoy'});
+let cryptLocalStorage = new SecureLS({encodingType: 'des', isCompression: false});
+let localStorage = window.localStorage;
 
 /**
  * set local storage variable
  */
-function setLS(key, value, namespace = 'd'){
-    let data = ls.get(namespace);
+function setLS(key, value){
+    localStorage.setItem(key, value);
+}
+/**
+ * set crypt local storage variable
+ */
+function setCryptLS(key, value, namespace = 'd'){
+    let data = cryptLocalStorage.get(namespace);
     if(data === ''){
         data = {};
     }
     data[key] = value;
-    ls.set(namespace, data);
+    cryptLocalStorage.set(namespace, data);
 }
 
 /**
- * get local storage variable
+ * get crypt local storage variable
  */
-function getLS(key, namespace = 'd'){
-    let data = ls.get(namespace);
+function getCryptLS(key, namespace = 'd'){
+    let data = cryptLocalStorage.get(namespace);
     if(data === ''){
         return null;
     }
@@ -45,29 +52,54 @@ function getLS(key, namespace = 'd'){
 }
 
 /**
- * remove local storage variable
+ * get local storage variable
  */
-function removeLS(key, namespace = 'd'){
-    let data = ls.get(namespace);
+function getLS(key){
+    return localStorage.getItem(key);
+}
+
+/**
+ * remove crypt local storage variable
+ */
+function removeCryptLS(key, namespace = 'd'){
+    let data = cryptLocalStorage.get(namespace);
     if(data !== ''){
         delete data[key];
-        ls.set(namespace, data);
+        cryptLocalStorage.set(namespace, data);
+    }
+}
+
+/**
+ * remove local storage variable
+ */
+function removeLS(key){
+    localStorage.removeItem(key);
+}
+
+/**
+ * remove all crypt local storage variable
+ */
+function removeAllCryptLS(namespace = 'd'){
+    let data = cryptLocalStorage.get(namespace);
+    if(data !== '') {
+        cryptLocalStorage.remove(namespace);
     }
 }
 
 /**
  * remove all local storage variable
  */
-function removeAllLS(namespace = 'd'){
-    let data = ls.get(namespace);
-    if(data !== '') {
-        ls.remove(namespace);
-    }
+function removeAllLS(){
+    localStorage.clear();
 }
 
 export {
     setLS,
+    setCryptLS,
     getLS,
+    getCryptLS,
     removeLS,
+    removeCryptLS,
     removeAllLS,
+    removeAllCryptLS,
 };

@@ -16,7 +16,7 @@
 import Rx from 'rxjs/Rx';
 
 import {AuthAction} from '@utils/actions';
-import {removeAllLS, setLS} from '@utils/LocalStorage';
+import {removeAllCryptLS, setCryptLS} from '@utils/LocalStorage';
 
 
 /**
@@ -77,7 +77,7 @@ const toggleAppTour = (user) => {
  * @returns {{type: string, payload: {}, data: {}}}
  */
 const toggleAppTourFulfilled = (userDetail) => {
-    setLS("userDetail", userDetail);
+    setCryptLS("userDetail", userDetail);
     return {
         type: AuthAction.TOGGLE_APPTOUR_FULFILLED,
         payload: userDetail,
@@ -186,7 +186,7 @@ const logoutUser = (user) => {
  * @returns {{type: string, payload: {}}}
  */
 const logoutUserFulfilled = (user) => {
-    removeAllLS();
+    removeAllCryptLS();
     return {
         type: AuthAction.LOG_OUT_FULFILLED,
         payload: user,
@@ -294,7 +294,7 @@ const updateTheme = (data) => {
  * @returns {{type: string, payload: {}}}
  */
 const updateThemeFulfilled = (user) => {
-    setLS("userDetail", user.userDetail);
+    setCryptLS("userDetail", user.userDetail);
     return {
         type: AuthAction.UPDATE_THEME_FULFILLED,
         payload: user,

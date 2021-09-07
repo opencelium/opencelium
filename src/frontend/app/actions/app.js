@@ -20,6 +20,28 @@ import {AppAction} from '@utils/actions';
 
 
 /**
+ * set grid view type
+ * @returns {{type: string, payload: {}}}
+ */
+const setGridViewType = (gridViewType) => {
+    return {
+        type: AppAction.SET_GRID_VIEW_TYPE,
+        payload: gridViewType,
+    };
+};
+
+/**
+ * set view type
+ * @returns {{type: string, payload: {}}}
+ */
+const setViewType = (viewType) => {
+    return {
+        type: AppAction.SET_VIEW_TYPE,
+        payload: viewType,
+    };
+};
+
+/**
  * change application language
  * @param language
  * @returns {{type: string, payload: {}}}
@@ -176,6 +198,8 @@ const setConnectionDraftWasOpened = (isOpenedOnce) => {
 
 
 export {
+    setViewType,
+    setGridViewType,
     changeLanguage,
     setComponentInChangeContent,
     updateMenu,

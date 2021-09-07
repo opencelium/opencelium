@@ -18,9 +18,10 @@ import {fromJS, List} from 'immutable';
 import {AuthAction} from '@utils/actions';
 import {updateDashboardSettingsSubscriber} from "@utils/socket/users";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import {getLS, removeLS, setLS} from "@utils/LocalStorage";
+import {getCryptLS, getLS, removeCryptLS, removeLS, setCryptLS, setLS} from "@utils/LocalStorage";
+import {VIEW_TYPE} from "@components/general/list_of_components/List";
 
-
+const notifications = getLS('notifications');
 const initialState = fromJS({
     authUser: {},
     isAuth: false,
@@ -36,7 +37,7 @@ const initialState = fromJS({
     fromLogin: false,
     isSessionExpired: true,
     isNotificationPanelOpened: false,
-    notifications: List(getLS('notifications') ? getLS('notifications') :[]),
+    notifications: List(notifications ? notifications :[]),
 });
 
 let authUser = null;
@@ -68,10 +69,10 @@ const reducer = (state = initialState, action) => {
         case AuthAction.LOG_OUT_CANCELED:
             return state.set('logouting', false).set('message', action.payload).set('isAuth', true);
         case AuthAction.SESSION_EXPIRED_WARNED:
-            if(!getLS('token')){
+            if(!getCryptLS('token')){
                 return state.set('isSessionExpired', true).set('logouting', false).set('authUser', action.payload).set('isAuth', false);
             }
-            removeLS('token');
+            removeCryptLS('token');
             removeLS('notifications');
             return state.set('isSessionExpired', true).set('notifications', List([]));
         case AuthAction.SESSION_NOTEXPIRED_FULFILLED:
@@ -102,7 +103,7 @@ const reducer = (state = initialState, action) => {
         case AuthAction.TOGGLE_APPTOUR_FULFILLED:
             authUser = state.get('authUser');
             authUser.userDetail.appTour = !authUser.userDetail.appTour;
-            setLS("userDetail", authUser.userDetail);
+            setCryptLS("userDetail", authUser.userDetail);
             return state.set('togglingAppTour', API_REQUEST_STATE.FINISH).set('authUser', authUser);
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
             return state.set('togglingAppTour', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload));

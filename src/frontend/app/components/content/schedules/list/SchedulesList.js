@@ -287,7 +287,7 @@ class SchedulesList extends Component{
             <React.Fragment>
                 <List
                     deletingEntity={(schedule) => deletingSchedule === API_REQUEST_STATE.START && schedule.id === currentSchedule.id}
-                    viewType={viewType}
+                    viewTypeMust={viewType}
                     readOnly={readOnly}
                     listViewData={listViewData}
                     entities={schedules}
