@@ -100,17 +100,17 @@ const reducer = (state = initialState, action) => {
         case TemplatesAction.FETCH_TEMPLATES_REJECTED:
             return state.set('fetchingTemplates', API_REQUEST_STATE.ERROR).set('error', action.payload).set('templates', List([]));
         case TemplatesAction.DELETE_TEMPLATE:
-            return state.set('deletingTemplate', API_REQUEST_STATE.START).set('error', null);
+            return state.set('deletingTemplate', API_REQUEST_STATE.START).set('error', null).set('template', action.payload);
         case TemplatesAction.DELETE_TEMPLATE_FULFILLED:
             index = templates.findIndex(function (template) {
                 return template.templateId === action.payload.templateId;
             });
             if(index >= 0) {
-                return state.set('deletingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.delete(index));
+                return state.set('deletingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.delete(index)).set('template', null);
             }
-            return state.set('deletingTemplate', API_REQUEST_STATE.FINISH);
+            return state.set('deletingTemplate', API_REQUEST_STATE.FINISH).set('template', null);
         case TemplatesAction.DELETE_TEMPLATE_REJECTED:
-            return state.set('deletingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('deletingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload).set('template', null);
         case TemplatesAction.IMPORT_TEMPLATE:
             return state.set('importingTemplate', API_REQUEST_STATE.START).set('error', null);
         case TemplatesAction.IMPORT_TEMPLATE_FULFILLED:

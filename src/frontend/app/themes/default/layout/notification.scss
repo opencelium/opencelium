@@ -20,9 +20,13 @@
     font-family: $FONT_FAMILY;
   }
   .close_icon{
-    position: absolute;
-    right: 9px;
-    top: 5px;
+    position: sticky;
+    right: 0;
+    top: 0;
+    float: right;
+    z-index: 1;
+    background: white;
+    border-radius: 50px;
   }
   .actions{
     position: relative;

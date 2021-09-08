@@ -264,6 +264,22 @@
   top:1px;
 }
 
+.button_delete_loading{
+  margin-top: 0;
+  text-align: right;
+  min-height: 20px;
+  margin-left: auto;
+  &>div{
+    width: 18px;
+    height: 18px;
+  }
+}
+.only_button_delete_loading{
+  @extend .button_delete_loading;
+  margin-left: 0;
+  height: 40.15px;
+}
+
 .button_delete{
   font-family: $FONT_FAMILY;
   color: $ERROR_COLOR;
@@ -364,6 +380,7 @@
 
 .empty_list{
   @extend .card_style;
+  padding: 1vw;
   font-family: $FONT_FAMILY;
   font-size: $FONT_SIZE_SMALL;
   display: block;

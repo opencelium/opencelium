@@ -21,7 +21,7 @@ import {loginUserFulfilled, logoutUserFulfilled, sessionExpired} from '@actions/
 import {doRequestRejected} from '@actions/app';
 import {updateMenu} from '@actions/app';
 
-import {setLS, getLS} from '@utils/LocalStorage';
+import {getCryptLS, getLS, setCryptLS} from '@utils/LocalStorage';
 import {history} from '@components/App';
 import {baseUrl, baseUrlApi} from '@utils/constants/url';
 import {API_METHOD} from "@utils/constants/app";
@@ -61,7 +61,7 @@ export function getRequestSettings(params){
         data = JSON.stringify(data);
     }
     if(isApi || hasAuthHeader){
-        settings.headers['Authorization'] = getLS('token');
+        settings.headers['Authorization'] = getCryptLS('token');
     }
     switch(method){
         case API_METHOD.POST:
@@ -126,9 +126,9 @@ export function doRequest(requestParams, callbacks, mapping = null){
  * check if the expired time gone or not
  */
 function checkExpTime(){
-    const lastLogin = getLS("last_login");
-    const expTime = getLS("exp_time") + 500;
-    const sessionTime = getLS("session_time") + 500;
+    const lastLogin = getCryptLS("last_login");
+    const expTime = getCryptLS("exp_time") + 500;
+    const sessionTime = getCryptLS("session_time") + 500;
     if (lastLogin !== null) {
         const currentLogin = Date.now();
         if(currentLogin - lastLogin >= sessionTime || currentLogin >= expTime) {
@@ -136,7 +136,7 @@ function checkExpTime(){
             history.push('/login');
             return Rx.Observable.of(logoutUserFulfilled({}));
         } else{
-            setLS("last_login", Date.now());
+            setCryptLS("last_login", Date.now());
             if(sessionTimeout){
                 clearTimeout(sessionTimeout);
             }
@@ -152,10 +152,10 @@ function checkExpTime(){
  */
 export function setAuthSettings(){
     checkExpTime();
-    if(getLS('token')) {
-        const token = getLS('token');
-        const userGroup = getLS('userGroup');
-        const userDetail = getLS('userDetail');
+    if(getCryptLS('token')) {
+        const token = getCryptLS('token');
+        const userGroup = getCryptLS('userGroup');
+        const userDetail = getCryptLS('userDetail');
         const decodedData = jwt.decode(token.slice(7));
         decodedData['userGroup'] = userGroup;
         decodedData['userDetail'] = userDetail;

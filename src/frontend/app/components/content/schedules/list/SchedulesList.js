@@ -56,6 +56,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingSchedules: schedules.get('fetchingSchedules'),
         fetchingSchedulesByIds: schedules.get('fetchingSchedulesByIds'),
+        currentSchedule: schedules.get('schedule'),
         deletingSchedule: schedules.get('deletingSchedule'),
         deletingSchedules: schedules.get('deletingSchedules'),
         startingSchedules: schedules.get('startingSchedules'),
@@ -206,7 +207,7 @@ class SchedulesList extends Component{
 
     render(){
         const {showConfirm} = this.state;
-        const {t, viewType, noHeader, readOnly, params, setTotalPages, authUser, openTour, startingSchedules, enablingSchedules, disablingSchedules, deletingSchedules} = this.props;
+        const {t, viewType, noHeader, readOnly, params, setTotalPages, authUser, openTour, startingSchedules, enablingSchedules, disablingSchedules, deletingSchedules, deletingSchedule, currentSchedule} = this.props;
         const schedules = this.convertSchedules();
         let translations = {};
         translations.header = noHeader ? null : {title: t('LIST.HEADER'), onHelpClick: openTour};
@@ -285,7 +286,8 @@ class SchedulesList extends Component{
         return (
             <React.Fragment>
                 <List
-                    viewType={viewType}
+                    deletingEntity={(schedule) => deletingSchedule === API_REQUEST_STATE.START && schedule.id === currentSchedule.id}
+                    viewTypeMust={viewType}
                     readOnly={readOnly}
                     listViewData={listViewData}
                     entities={schedules}

@@ -108,7 +108,7 @@ class ListViewItem extends React.Component{
 
     render(){
         const {showConfirm, showActions} = this.state;
-        const {t, item, mapEntity, checks, index, renderAdditionalActions, allEntities, readOnly, actionsShouldBeMinimized} = this.props;
+        const {t, item, mapEntity, checks, index, renderAdditionalActions, allEntities, readOnly, actionsShouldBeMinimized, deletingEntity} = this.props;
         const {viewLink, updateLink} = this.getLinks();
         let data = this.getObjectDataFromItem();
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
@@ -168,7 +168,7 @@ class ListViewItem extends React.Component{
                                                      isButton={true}
                                                      turquoiseTheme/>}
                                     {hasDelete &&
-                                    <TooltipFontIcon tooltip={'Delete'} value={'delete'} onClick={::this.wantDelete}
+                                    <TooltipFontIcon tooltip={'Delete'} value={typeof deletingEntity === 'function' && deletingEntity(data) ? 'loading' : 'delete'} onClick={::this.wantDelete}
                                                      isButton={true} turquoiseTheme/>}
                                     {typeof renderAdditionalActions === 'function' && renderAdditionalActions(entity)}
                                 </div>

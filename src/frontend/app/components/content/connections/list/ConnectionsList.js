@@ -26,6 +26,7 @@ import {permission} from "@decorators/permission";
 import {LIST_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 import ConnectionCardTitle from "@components/content/connections/list/ConnectionCardTitle";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const prefixUrl = '/connections';
@@ -37,6 +38,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingConnections: connections.get('fetchingConnections'),
         deletingConnection: connections.get('deletingConnection'),
+        currentConnection: connections.get('connection'),
         connections: connections.get('connections').toJS(),
         isCanceled: connections.get('isCanceled'),
         isRejected: connections.get('isRejected'),
@@ -79,7 +81,7 @@ class ConnectionsList extends Component{
     }
 
     render(){
-        const {authUser, t, connections, deleteConnection, params, setTotalPages, openTour} = this.props;
+        const {authUser, t, connections, deleteConnection, params, setTotalPages, openTour, deletingConnection, currentConnection} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -105,6 +107,7 @@ class ConnectionsList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnection;
         return <List
+            deletingEntity={(connection) => deletingConnection === API_REQUEST_STATE.START && connection.id === currentConnection.id}
             listViewData={listViewData}
             entities={connections}
             translations={translations}

@@ -64,6 +64,7 @@ ListView.propTypes = {
 
 ListView.defaultProps = {
     readOnly: false,
+    deletingEntity: null,
     actionsShouldBeMinimized: false,
 }
 

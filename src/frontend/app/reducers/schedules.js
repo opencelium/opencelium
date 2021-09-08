@@ -40,7 +40,7 @@ const initialState = fromJS({
     fetchingScheduleNotifications: API_REQUEST_STATE.INITIAL,
     fetchingSchedulesByIds: API_REQUEST_STATE.INITIAL,
     fetchingCurrentSchedules: API_REQUEST_STATE.INITIAL,
-    deletingSchedule: false,
+    deletingSchedule: API_REQUEST_STATE.INITIAL,
     deletingScheduleNotification: API_REQUEST_STATE.INITIAL,
     deletingSchedules: API_REQUEST_STATE.INITIAL,
     startingSchedules: API_REQUEST_STATE.INITIAL,
@@ -276,18 +276,18 @@ const reducer = (state = initialState, action) => {
         case SchedulesAction.UPDATE_SCHEDULESTATUS_REJECTED:
             return state.set('updatingScheduleStatus', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         case SchedulesAction.DELETE_SCHEDULE:
-            return state.set('deletingSchedule', true).set('isRejected', false).set('isCanceled', false).set('error', null).set('schedule', action.payload);
+            return state.set('deletingSchedule', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('schedule', action.payload);
         case SchedulesAction.DELETE_SCHEDULE_FULFILLED:
             deleteScheduleSubscriber(action.payload);
             index = schedules.findIndex(function (schedule) {
                 return schedule.schedulerId === action.payload.id;
             });
             if(index >= 0) {
-                return state.set('deletingSchedule', false).set('schedules', schedules.delete(index));
+                return state.set('deletingSchedule', API_REQUEST_STATE.FINISH).set('schedules', schedules.delete(index)).set('schedule', null);
             }
-            return state.set('deletingSchedule', false);
+            return state.set('deletingSchedule', API_REQUEST_STATE.FINISH).set('schedule', null);
         case SchedulesAction.DELETE_SCHEDULE_REJECTED:
-            return state.set('deletingSchedule', false).set('isRejected', true).set('error', action.payload);
+            return state.set('deletingSchedule', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('schedule', null);
         case SchedulesAction.DELETE_SCHEDULENOTIFICATION:
             return state.set('deletingScheduleNotification', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('notification', action.payload);
         case SchedulesAction.DELETE_SCHEDULENOTIFICATION_FULFILLED:

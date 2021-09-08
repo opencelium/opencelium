@@ -24,7 +24,7 @@ import Card from './Card';
 import Pagination from "@basic_components/pagination/Pagination";
 import CardError from "./CardError";
 import AddButton from "./AddButton";
-import {setCurrentPageItems} from "@actions/app";
+import {setCurrentPageItems, setViewType, setGridViewType} from "@actions/app";
 import {
     addAddEntityKeyNavigation,
     addDeleteCardKeyNavigation,
@@ -74,26 +74,29 @@ export const VIEW_TYPE = {
 function mapStateToProps(state){
     const app = state.get('app');
     return {
+        viewType: app.get('viewType'),
+        gridViewType: app.get('gridViewType'),
         currentPageItems: app.get('currentPageItems').toJS(),
     };
 }
 /**
  * List Component
  */
-@connect(mapStateToProps, {setCurrentPageItems})
+@connect(mapStateToProps, {setCurrentPageItems, setViewType, setGridViewType})
 class List extends Component{
 
     constructor(props){
         super(props);
-
+        const viewType = props.viewTypeMust ? props.viewTypeMust : props.viewType;
+        const gridViewType = props.gridViewType;
         this.state = {
-            viewType: props.viewType,
+            viewType,
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
             searchValue: '',
-            gridViewType: '4',
-            entitiesProPage: props.viewType === VIEW_TYPE.LIST ? 10 : 4 * AMOUNT_OF_ROWS,
+            gridViewType,
+            entitiesProPage: viewType === VIEW_TYPE.LIST ? 10 : 4 * AMOUNT_OF_ROWS,
             checks: [],
             sortType: 'asc',
         };
@@ -153,10 +156,16 @@ class List extends Component{
         switchUserListKeyNavigation(false);
     }
 
-    componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps,prevState){
         if(this.props.page.pageNumber !== prevProps.page.pageNumber || this.props.entities.length !== prevProps.entities.length
             || this.props.rerenderDependency !== prevProps.rerenderDependency){
             this.setCurrentPageItems();
+        }
+        if(prevState.viewType !== this.state.viewType){
+            this.props.setViewType(this.state.viewType);
+        }
+        if(prevState.gridViewType !== this.state.gridViewType){
+            this.props.setGridViewType(this.state.gridViewType);
         }
         for(let dependency in prevProps.mapDependencies){
             if(prevProps.mapDependencies[dependency] !== this.props.mapDependencies[dependency]){
@@ -196,6 +205,7 @@ class List extends Component{
             selectedCard: -1,
             keyNavigateType: '',
         }, this.setCurrentPageItems);
+        //this.props.setViewType(VIEW_TYPE.GRID);
     }
 
     setListView(){
@@ -208,6 +218,7 @@ class List extends Component{
                 selectedCard: -1,
                 keyNavigateType: '',
             }, this.setCurrentPageItems);
+            //this.props.setViewType(VIEW_TYPE.LIST);
         }
     }
 
@@ -397,7 +408,7 @@ class List extends Component{
     render(){
         const {
             mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles,
-            noSearchField, currentPageItems, listViewData, readOnly,
+            noSearchField, currentPageItems, listViewData, readOnly, deletingEntity,
         } = this.props;
         const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType} = this.state;
         let {page, translations, hasDeleteSelectedButtons} = this.props;
@@ -487,6 +498,7 @@ class List extends Component{
                                 <React.Fragment>
                                     {viewType === VIEW_TYPE.LIST &&
                                         <ListView
+                                            deletingEntity={deletingEntity}
                                             readOnly={readOnly}
                                             translations={translations}
                                             sortType={sortType}
@@ -521,6 +533,7 @@ class List extends Component{
                                                 return (
                                                     <Card
                                                         key={key}
+                                                        deletingEntity={deletingEntity}
                                                         permission={entity.permission ? entity.permission : NO_NEED_PERMISSION}
                                                         gridViewType={gridViewType}
                                                         hasTour={translations.header && translations.header.hasOwnProperty('onHelpClick') && (key === 0 || key === 1)}
@@ -571,7 +584,7 @@ List.propTypes = {
     mapDependencies: PropTypes.object,
     hasDeleteSelectedButtons: PropTypes.bool,
     readOnly: PropTypes.bool,
-    viewType: PropTypes.oneOf(['GRID', 'LIST']),
+    viewTypeMust: PropTypes.oneOf(['GRID', 'LIST']),
     componentName: PropTypes.string,
 };
 
@@ -584,8 +597,8 @@ List.defaultProps = {
     hasDeleteSelectedButtons: true,
     listViewData: null,
     readOnly: false,
-    viewType: 'LIST',
     componentName: '',
+    deletingEntity: null,
 };
 
 export default withRouter(List);

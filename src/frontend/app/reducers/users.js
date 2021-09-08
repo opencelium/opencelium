@@ -134,18 +134,18 @@ const reducer = (state = initialState, action) => {
         case UsersAction.UPDATE_USERDETAIL_REJECTED:
             return state.set('updatingUserDetail', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload));
         case UsersAction.DELETE_USER:
-            return state.set('deletingUser', API_REQUEST_STATE.START).set('error', null);
+            return state.set('deletingUser', API_REQUEST_STATE.START).set('error', null).set('user', action.payload);
         case UsersAction.DELETE_USER_FULFILLED:
             deleteUserSubscriber(action.payload);
             index = users.findIndex(function (user) {
                 return user.id === action.payload.id;
             });
             if(index >= 0) {
-                return state.set('deletingUser', API_REQUEST_STATE.FINISH).set('users', users.delete(index));
+                return state.set('deletingUser', API_REQUEST_STATE.FINISH).set('users', users.delete(index)).set('user', null);
             }
-            return state.set('deletingUser', API_REQUEST_STATE.FINISH);
+            return state.set('deletingUser', API_REQUEST_STATE.FINISH).set('user', null);
         case UsersAction.DELETE_USER_REJECTED:
-            return state.set('deletingUser', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload));
+            return state.set('deletingUser', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload)).set('user', null);
         default:
             return state;
     }

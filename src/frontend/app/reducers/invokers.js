@@ -94,17 +94,17 @@ const reducer = (state = initialState, action) => {
         case InvokersAction.UPDATE_INVOKER_REJECTED:
             return state.set('updatingInvoker', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case InvokersAction.DELETE_INVOKER:
-            return state.set('deletingInvoker', API_REQUEST_STATE.START).set('error', null);
+            return state.set('deletingInvoker', API_REQUEST_STATE.START).set('error', null).set('invoker', action.payload);
         case InvokersAction.DELETE_INVOKER_FULFILLED:
             index = invokers.findIndex(function (invoker) {
                 return invoker.name === action.payload.id;
             });
             if(index >= 0) {
-                return state.set('deletingInvoker', API_REQUEST_STATE.FINISH).set('invokers', invokers.delete(index));
+                return state.set('deletingInvoker', API_REQUEST_STATE.FINISH).set('invokers', invokers.delete(index)).set('invoker', null);
             }
-            return state.set('deletingInvoker', API_REQUEST_STATE.FINISH);
+            return state.set('deletingInvoker', API_REQUEST_STATE.FINISH).set('invoker', null);
         case InvokersAction.DELETE_INVOKER_REJECTED:
-            return state.set('deletingInvoker', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('deletingInvoker', API_REQUEST_STATE.ERROR).set('error', action.payload).set('invoker', null);
         default:
             return state;
     }

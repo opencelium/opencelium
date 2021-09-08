@@ -112,18 +112,18 @@ const reducer = (state = initialState, action) => {
         case ConnectionsAction.UPDATE_CONNECTION_REJECTED:
             return state.set('updatingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case ConnectionsAction.DELETE_CONNECTION:
-            return state.set('deletingConnection', API_REQUEST_STATE.START).set('error', null);
+            return state.set('deletingConnection', API_REQUEST_STATE.START).set('error', null).set('connection', action.payload);
         case ConnectionsAction.DELETE_CONNECTION_FULFILLED:
             deleteConnectionSubscriber(action.payload);
             index = connections.findIndex(function (connection) {
                 return connection.connectionId === action.payload.connectionId;
             });
             if(index >= 0) {
-                return state.set('deletingConnection', API_REQUEST_STATE.FINISH).set('connections', connections.delete(index));
+                return state.set('deletingConnection', API_REQUEST_STATE.FINISH).set('connections', connections.delete(index)).set('connection', null);
             }
-            return state.set('deletingConnection', API_REQUEST_STATE.FINISH);
+            return state.set('deletingConnection', API_REQUEST_STATE.FINISH).set('connection', null);
         case ConnectionsAction.DELETE_CONNECTION_REJECTED:
-            return state.set('deletingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload);
+            return state.set('deletingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload).set('connection', null);
         case ConnectionsAction.SEND_OPERATIONREQUEST:
             return state.set('sendingOperationRequest', API_REQUEST_STATE.START).set('error', null);
         case ConnectionsAction.SEND_OPERATIONREQUEST_FULFILLED:

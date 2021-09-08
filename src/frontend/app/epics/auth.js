@@ -24,7 +24,7 @@ import {
 } from '@actions/auth';
 
 import {doRequest} from '@utils/auth';
-import {setLS} from "@utils/LocalStorage";
+import {setCryptLS} from "@utils/LocalStorage";
 import {API_METHOD} from "@utils/constants/app";
 
 
@@ -67,12 +67,12 @@ const updateAuthUserLanguageEpic = (action$, store) => {
                     }
                     if(token !== null) {
                         const decodedData = jwt.decode(token.slice(7));
-                        setLS("token", token);
-                        setLS("exp_time", decodedData.exp * 1000);
-                        setLS("session_time", decodedData.sessionTime);
-                        setLS("last_login", decodedData.iat * 1000);
-                        setLS("userGroup", response.userGroup);
-                        setLS("userDetail", response.userDetail);
+                        setCryptLS("token", token);
+                        setCryptLS("exp_time", decodedData.exp * 1000);
+                        setCryptLS("session_time", decodedData.sessionTime);
+                        setCryptLS("last_login", decodedData.iat * 1000);
+                        setCryptLS("userGroup", response.userGroup);
+                        setCryptLS("userDetail", response.userDetail);
                         decodedData['userGroup'] = response.userGroup;
                         decodedData['userDetail'] = response.userDetail;
                         return loginUserFulfilled(decodedData);

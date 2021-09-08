@@ -25,6 +25,7 @@ import {InvokerPermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
 import {tour} from "@decorators/tour";
 import {LIST_TOURS} from "@utils/constants/tours";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 const prefixUrl = '/invokers';
 
@@ -35,6 +36,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingInvokers: invokers.get('fetchingInvokers'),
         deletingInvoker: invokers.get('deletingInvoker'),
+        currentInvoker: invokers.get('invoker'),
         invokers: invokers.get('invokers').toJS(),
         isCanceled: invokers.get('isCanceled'),
         isRejected: invokers.get('isRejected'),
@@ -77,7 +79,7 @@ class InvokersList extends Component{
     }
 
     render(){
-        const {authUser, t, invokers, deleteInvoker, params, setTotalPages, openTour} = this.props;
+        const {authUser, t, invokers, deleteInvoker, params, setTotalPages, openTour, deletingInvoker, currentInvoker} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -103,6 +105,7 @@ class InvokersList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteInvoker;
         return <List
+            deletingEntity={(invoker) => deletingInvoker === API_REQUEST_STATE.START && invoker.id === currentInvoker.id}
             listViewData={listViewData}
             entities={invokers}
             translations={translations}
