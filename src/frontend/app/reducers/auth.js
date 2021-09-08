@@ -108,7 +108,7 @@ const reducer = (state = initialState, action) => {
         case AuthAction.TOGGLE_APPTOUR_REJECTED:
             return state.set('togglingAppTour', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload));
         case AuthAction.ADD_NOTIFICATION:
-            notifications = notifications.set(notifications.size, action.payload);
+            notifications = notifications.unshift(action.payload);
             setLS('notifications', notifications.toJS());
             return state.set('notifications', notifications);
         case AuthAction.CLEAR_NOTIFICATION:

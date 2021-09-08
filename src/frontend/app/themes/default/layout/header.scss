@@ -151,7 +151,7 @@
   z-index: 1000;
   position: absolute;
   right: 30px;
-  top: 0;
+  top: 20px;
   display: flex;
   align-items: center;
   >:nth-child(n){
@@ -161,11 +161,9 @@
     margin-right: 0;
   }
   .search_input{
+    width: 200px;
     float: left;
     margin-right: 5px;
-    >div{
-      padding: 0;
-    }
   }
   .search_icon{
     font-size: 20px;

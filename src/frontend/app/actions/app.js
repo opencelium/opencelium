@@ -18,6 +18,39 @@ import Rx from 'rxjs/Rx';
 import {AppAction} from '@utils/actions';
 
 
+/**
+ * fetch data for search in top bar
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchDataForSearch = () => {
+    return {
+        type: AppAction.FETCH_DATAFORSEARCH,
+    };
+};
+
+/**
+ * fetch data for search in top bar fulfilled
+ * @param data = application
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchDataForSearchFulfilled = (data) => {
+    return {
+        type: AppAction.FETCH_DATAFORSEARCH_FULFILLED,
+        payload: data,
+    };
+};
+
+/**
+ * fetch data for search in top bar rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchDataForSearchRejected = (error) => {
+    return Rx.Observable.of({
+        type: AppAction.FETCH_DATAFORSEARCH_REJECTED,
+        payload: error
+    });
+};
 
 /**
  * set grid view type
@@ -198,6 +231,9 @@ const setConnectionDraftWasOpened = (isOpenedOnce) => {
 
 
 export {
+    fetchDataForSearch,
+    fetchDataForSearchFulfilled,
+    fetchDataForSearchRejected,
     setViewType,
     setGridViewType,
     changeLanguage,
