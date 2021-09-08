@@ -54,9 +54,48 @@ const deleteTemplateRejected = (error) => {
     });
 };
 
+/**
+ * delete templates
+ * @param templates
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteTemplates = (templates) => {
+    return {
+        type: TemplatesAction.DELETE_TEMPLATES,
+        payload: templates,
+    };
+};
+
+/**
+ * delete templates fulfilled
+ * @param status
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteTemplatesFulfilled = (status) => {
+    return {
+        type: TemplatesAction.DELETE_TEMPLATES_FULFILLED,
+        payload: status,
+    };
+};
+
+/**
+ * delete templates rejected
+ * @param error
+ * @returns {promise}
+ */
+const deleteTemplatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: TemplatesAction.DELETE_TEMPLATES_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteTemplate,
     deleteTemplateFulfilled,
-    deleteTemplateRejected
+    deleteTemplateRejected,
+    deleteTemplates,
+    deleteTemplatesFulfilled,
+    deleteTemplatesRejected,
 };

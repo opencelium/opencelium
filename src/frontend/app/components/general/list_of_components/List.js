@@ -22,7 +22,6 @@ import { Row, Col } from "react-grid-system";
 import ListHeader from './Header';
 import Card from './Card';
 import Pagination from "@basic_components/pagination/Pagination";
-import CardError from "./CardError";
 import AddButton from "./AddButton";
 import {setCurrentPageItems, setViewType, setGridViewType} from "@actions/app";
 import {

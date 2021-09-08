@@ -20,11 +20,13 @@ import {AppAction} from '@utils/actions';
 
 /**
  * fetch data for search in top bar
+ * @param searchValue - value of the search input
  * @returns {{type: string, payload: {}}}
  */
-const fetchDataForSearch = () => {
+const fetchDataForSearch = (searchValue) => {
     return {
         type: AppAction.FETCH_DATAFORSEARCH,
+        payload: searchValue,
     };
 };
 

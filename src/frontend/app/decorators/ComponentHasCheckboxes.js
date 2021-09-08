@@ -61,7 +61,7 @@ export function ComponentHasCheckboxes(){
             /**
              * to delete data from checks state
              */
-            deleteCheck(e, data){
+            deleteCheck(data){
                 let {checks} = this.state;
                 let allChecked = true;
                 let index = checks.findIndex(c => c.id === data.key);

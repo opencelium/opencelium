@@ -54,9 +54,48 @@ const deleteConnectorRejected = (error) => {
     });
 };
 
+/**
+ * delete connectors
+ * @param connectors
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteConnectors = (connectors) => {
+    return {
+        type: ConnectorsAction.DELETE_CONNECTORS,
+        payload: connectors,
+    };
+};
+
+/**
+ * delete connectors fulfilled
+ * @param status
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteConnectorsFulfilled = (status) => {
+    return {
+        type: ConnectorsAction.DELETE_CONNECTORS_FULFILLED,
+        payload: status,
+    };
+};
+
+/**
+ * delete connectors rejected
+ * @param error
+ * @returns {*}
+ */
+const deleteConnectorsRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectorsAction.DELETE_CONNECTORS_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteConnector,
     deleteConnectorFulfilled,
-    deleteConnectorRejected
+    deleteConnectorRejected,
+    deleteConnectors,
+    deleteConnectorsFulfilled,
+    deleteConnectorsRejected,
 };

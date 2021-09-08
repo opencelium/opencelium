@@ -25,11 +25,8 @@ class Search extends React.Component{
         }
     }
 
-    componentDidMount() {
-        this.props.fetchDataForSearch()
-    }
-
     handleInputChange(searchValue){
+        this.props.fetchDataForSearch(searchValue)
         this.setState({
             searchValue,
         });
@@ -42,7 +39,7 @@ class Search extends React.Component{
         });
         let categoryName = '';
         for(let param in dataForSearch){
-            if(dataForSearch[param].findIndex(entry => entry.id === value.value && entry.title === value.label) !== -1){
+            if(dataForSearch[param].findIndex(entry => `${param}_${entry.id}` === value.id) !== -1){
                 categoryName = param;
                 break;
             }
@@ -52,16 +49,13 @@ class Search extends React.Component{
     }
 
     getData(){
-        const {searchValue} = this.state;
         const {dataForSearch} = this.props;
         let data = [];
         if(dataForSearch){
-            const Search = new CSearch({searchValue, sources: dataForSearch});
-            const searchResult = Search.getResults();
-            for(let param in searchResult){
+            for(let param in dataForSearch){
                 let options = [];
-                for(let i = 0; i < searchResult[param].length; i++){
-                    options.push({label: searchResult[param][i].title, value: searchResult[param][i].id});
+                for(let i = 0; i < dataForSearch[param].length; i++){
+                    options.push({label: dataForSearch[param][i].title, value: dataForSearch[param][i].id, id: `${param}_${dataForSearch[param][i].id}`});
                 }
                 data.push({label: param, options});
             }
@@ -72,14 +66,15 @@ class Search extends React.Component{
     render(){
         const {searchValue} = this.state;
         const {fetchingDataForSearch} = this.props;
+        let isLoading = fetchingDataForSearch === API_REQUEST_STATE.START;
         return (
             <Select
                 placeholder={'Search...'}
                 className={styles.search_input}
                 inputValue={searchValue}
                 value={null}
-                menuIsOpen={searchValue.length > 0}
-                isLoading={fetchingDataForSearch === API_REQUEST_STATE.START}
+                menuIsOpen={searchValue.length > 0 && !isLoading}
+                isLoading={isLoading}
                 onInputChange={::this.handleInputChange}
                 onChange={::this.openComponent}
                 options={::this.getData()}

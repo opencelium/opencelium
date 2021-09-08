@@ -54,9 +54,48 @@ const deleteNotificationTemplateRejected = (error) => {
     });
 };
 
+/**
+ * delete Notification Templates
+ * @param notificationTemplates
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteNotificationTemplates = (notificationTemplates) => {
+    return {
+        type: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES,
+        payload: notificationTemplates,
+    };
+};
+
+/**
+ * delete Notification Templates fulfilled
+ * @param status
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteNotificationTemplatesFulfilled = (status) => {
+    return {
+        type: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES_FULFILLED,
+        payload: status,
+    };
+};
+
+/**
+ * delete Notification Templates rejected
+ * @param error
+ * @returns {*}
+ */
+const deleteNotificationTemplatesRejected = (error) => {
+    return Rx.Observable.of({
+        type: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteNotificationTemplate,
     deleteNotificationTemplateFulfilled,
-    deleteNotificationTemplateRejected
+    deleteNotificationTemplateRejected,
+    deleteNotificationTemplates,
+    deleteNotificationTemplatesFulfilled,
+    deleteNotificationTemplatesRejected,
 };

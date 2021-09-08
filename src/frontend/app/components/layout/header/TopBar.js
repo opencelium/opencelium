@@ -68,7 +68,6 @@ class TopBar extends React.Component{
             <div className={styles.top_bar}>
                 {/*<Search/>*/}
                 <Input className={styles.search_input} placeholder={'Search'}/>
-                {/*<TooltipFontIcon darkTheme tooltip={'Search'} value={'search'} tooltipPosition={'bottom'} iconClassName={styles.search_icon} isButton onClick={::this.onClickSearchIcon}/>*/}
                 <div className={styles.notifications}>
                     {isCalloutVisible && calloutMessage && <Callout message={calloutMessage} type={calloutType}/>}
                     {notificationsAmount !== 0 && <div className={styles.notification_number} onClick={::this.onClickNotifications}>{`${notificationsAmount > 99 ? '+' : ''}${notificationsAmount}`}</div>}

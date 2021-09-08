@@ -54,9 +54,48 @@ const deleteUserRejected = (error) => {
     });
 };
 
+/**
+ * delete users
+ * @param users
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteUsers = (users) => {
+    return {
+        type: UsersAction.DELETE_USERS,
+        payload: users,
+    };
+};
+
+/**
+ * delete users fulfilled
+ * @param data
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteUsersFulfilled = (data) => {
+    return {
+        type: UsersAction.DELETE_USERS_FULFILLED,
+        payload: data,
+    };
+};
+
+/**
+ * delete users rejected
+ * @param error
+ * @returns {promise}
+ */
+const deleteUsersRejected = (error) => {
+    return Rx.Observable.of({
+        type: UsersAction.DELETE_USERS_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteUser,
     deleteUserFulfilled,
-    deleteUserRejected
+    deleteUserRejected,
+    deleteUsers,
+    deleteUsersFulfilled,
+    deleteUsersRejected,
 };
