@@ -318,4 +318,13 @@ public class InvokerServiceImp implements InvokerService{
             throw new RuntimeException(e);
         }
     }
+
+    public InvokerResource toMetaResource(Invoker invoker) {
+        InvokerResource invokerResource = new InvokerResource();
+        invokerResource.setName(invoker.getName());
+        invokerResource.setDescription(invoker.getDescription());
+        invokerResource.setIcon(invoker.getIcon());
+
+        return invokerResource;
+    }
 }

@@ -235,27 +235,6 @@ public class ConnectionController {
         }
     }
 
-//    @PutMapping("/test")
-//    public ResponseEntity<?> test(@RequestBody ConnectionResource connectionResource) throws Exception {
-//        final ConnectionNode connectionNode = tConnectionServiceImp
-//                .fillTemporaryIds(connectionNodeService.toEntity(connectionResource));
-//
-//        List<EnhancementNode> enhancementNodes = connectionResource.getFieldBinding()
-//                .stream()
-//                .map(fb -> enhancementNodeService.toNode(fb, connectionNode))
-//                .collect(Collectors.toList());
-//
-//        List<Enhancement> enhancements = connectionResource.getFieldBinding()
-//                .stream()
-//                .map(fb -> enhancementService.toEntity(fb.getEnhancement()))
-//                .collect(Collectors.toList());
-//
-////        TConnectionServiceImp tConnectionServiceImp = new TConnectionServiceImp();
-//        TConnection tConnection = tConnectionServiceImp.run(connectionNode, enhancementNodes, enhancements);
-//        final Resource<TestConnectionResource> resource = new Resource<>(tConnectionServiceImp.toResource(tConnection));
-//        return ResponseEntity.ok().body(resource);
-//    }
-
 
     @PostMapping("/remoteapi/test")
     public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) throws Exception {
