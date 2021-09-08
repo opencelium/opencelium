@@ -188,6 +188,14 @@ public class ConnectionServiceImp implements ConnectionService{
         connectionResource.setConnectionId(connection.getId());
         connectionResource.setTitle(connection.getName());
         connectionResource.setDescription(connection.getDescription());
+        Connector from = connectorService.findById(connection.getFromConnector())
+                .orElseThrow(() -> new RuntimeException("Connector - " + connection.getFromConnector() + " not found"));
+        Connector to = connectorService.findById(connection.getToConnector())
+                .orElseThrow(() -> new RuntimeException("Connector - " + connection.getToConnector() + " not found"));
+
+        connectionResource.setFromConnector(connectorService.toMetaResource(from));
+        connectionResource.setToConnector(connectorService.toMetaResource(to));
+
         return connectionResource;
     }
 }
