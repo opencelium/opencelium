@@ -73,7 +73,7 @@ import {
     fetchAdminCardsEpic, loadAdminCardsLinkEpic,
 } from "@epics/admin_cards";
 import {
-    addErrorTicketEpic, fetchAppVersionEpic,
+    addErrorTicketEpic, fetchAppVersionEpic, fetchDataForSearchEpic,
 } from "@epics/app";
 import {
     fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
@@ -183,6 +183,7 @@ export default combineEpics(
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,
     fetchAppVersionEpic,
+    fetchDataForSearchEpic,
     fetchNotificationTemplatesEpic,
     fetchNotificationTemplateEpic,
     addNotificationTemplateEpic,

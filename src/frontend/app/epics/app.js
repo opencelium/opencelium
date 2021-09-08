@@ -15,11 +15,13 @@
 
 import {AppAction} from '@utils/actions';
 import {
-    addErrorTicketFulfilled, addErrorTicketRejected, fetchAppVersionFulfilled, fetchAppVersionRejected
+    addErrorTicketFulfilled, addErrorTicketRejected, fetchAppVersionFulfilled, fetchAppVersionRejected,
+    fetchDataForSearchFulfilled, fetchDataForSearchRejected,
 } from '@actions/app';
 import {doRequest} from "@utils/auth";
 import {API_METHOD} from "@utils/constants/app";
-import {fetchTemplatesFulfilled} from "@actions/templates/fetch";
+import Rx from "rxjs";
+import {addConvertInvokersLogsFulfilled} from "@actions/update_assistant/add";
 
 
 /**
@@ -62,8 +64,26 @@ const fetchAppVersionEpic = (action$, store) => {
         });
 };
 
+/**
+ * fetch data for search
+ */
+const fetchDataForSearchEpic = (action$, store) => {
+    return action$.ofType(AppAction.FETCH_DATAFORSEARCH)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = ``;
+            const data = {connections: [{id: 1, title: 'getServers'},{id: 2, title: 'saveTickets'},], connectors: [{id: 1, title: 'i-doit'},{id: 2, title: 'ticket'},], schedules: [{id: 1, title: 'do save'},{id: 2, title: 'trigger job'},]};
+            return Rx.Observable.of(fetchDataForSearchFulfilled(data));
+            /*return doRequest({url},{
+                success: (data) => fetchDataForSearchFulfilled(data, {...action.settings}),
+                reject: fetchDataForSearchRejected(),
+            });*/
+        });
+};
+
 
 export {
     addErrorTicketEpic,
     fetchAppVersionEpic,
+    fetchDataForSearchEpic,
 };

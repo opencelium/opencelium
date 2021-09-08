@@ -8,6 +8,7 @@ import styles from "@themes/default/layout/header.scss";
 import Callout from "@components/layout/header/Callout";
 import {CNotification} from "@classes/components/general/CNotification";
 import {withTranslation} from "react-i18next";
+import Search from "@components/layout/header/Search";
 
 
 function mapStateToProps(state){
@@ -65,6 +66,7 @@ class TopBar extends React.Component{
         const calloutType = notifications.length > 0 ? notifications[notifications.length - 1].type : '';
         return(
             <div className={styles.top_bar}>
+                {/*<Search/>*/}
                 <Input className={styles.search_input} placeholder={'Search'}/>
                 {/*<TooltipFontIcon darkTheme tooltip={'Search'} value={'search'} tooltipPosition={'bottom'} iconClassName={styles.search_icon} isButton onClick={::this.onClickSearchIcon}/>*/}
                 <div className={styles.notifications}>
