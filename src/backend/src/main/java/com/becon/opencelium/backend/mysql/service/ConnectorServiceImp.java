@@ -195,8 +195,8 @@ public class ConnectorServiceImp implements ConnectorService{
         String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
         ConnectorNodeResource connectorNodeResource = new ConnectorNodeResource();
         connectorNodeResource.setConnectorId(entity.getId());
-//        InvokerResource invokerResource = invokerServiceImp.toResource(invokerServiceImp.findByName(entity.getInvoker()));
-//        connectorNodeResource.setInvoker(invokerResource);
+        InvokerResource invokerResource = invokerServiceImp.toMetaResource(invokerServiceImp.findByName(entity.getInvoker()));
+        connectorNodeResource.setInvoker(invokerResource);
         connectorNodeResource.setTitle(entity.getTitle());
         connectorNodeResource.setIcon(imagePath + entity.getIcon());
         return connectorNodeResource;
