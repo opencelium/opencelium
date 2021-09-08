@@ -72,7 +72,7 @@ const fetchDataForSearchEpic = (action$, store) => {
         .debounceTime(500)
         .mergeMap((action) => {
             let url = ``;
-            const data = {connections: [{id: 1, title: 'getServers'},{id: 2, title: 'saveTickets'},], connectors: [{id: 1, title: 'i-doit'},{id: 2, title: 'ticket'},], schedules: [{id: 1, title: 'do save'},{id: 2, title: 'trigger job'},]};
+            const data = {connections: [{id: 23, title: 'test'},{id: 24, title: 'test2'},], connectors: [{id: 10, title: 'i-doit'},{id: 11, title: 'xml'},{id: 12, title: 'w'},], schedules: [{id: 8, title: 'qwe'},]};
             return Rx.Observable.of(fetchDataForSearchFulfilled(data));
             /*return doRequest({url},{
                 success: (data) => fetchDataForSearchFulfilled(data, {...action.settings}),
