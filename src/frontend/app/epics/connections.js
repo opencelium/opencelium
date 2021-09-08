@@ -145,7 +145,7 @@ const fetchConnectionsEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.FETCH_CONNECTIONS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/all`;
+            let url = `${urlPrefix}/all/meta`;
             let neo4j = action.settings ? action.settings.neo4j : null;
             if(!neo4j){
                 return checkNeo4j({callback: fetchConnections, settings: action.settings});
