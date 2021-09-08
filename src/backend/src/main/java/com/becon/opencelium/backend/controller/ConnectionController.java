@@ -82,6 +82,16 @@ public class ConnectionController {
         return ResponseEntity.ok().body(connectionResources);
     }
 
+    @GetMapping("/all/meta")
+    public ResponseEntity<?> getAllMeta(){
+        List<Connection> connections = connectionService.findAll();
+//        List<ConnectionResource> connectionResources = connections.stream()
+//                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
+        List<ConnectionResource> connectionResources = connections.stream()
+                .map(c -> connectionService.toResource(c)).collect(Collectors.toList());
+        return ResponseEntity.ok().body(connectionResources);
+    }
+
     @GetMapping("/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId){
         Connection connection = connectionService.findById(connectionId).orElse(null);
