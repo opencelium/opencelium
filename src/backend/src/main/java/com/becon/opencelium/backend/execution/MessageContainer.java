@@ -204,7 +204,7 @@ public class MessageContainer {
             XPath xpath = xpathfactory.newXPath();
             List<String> cpart =  Arrays.asList(xpathQuery.split("/"));
             String lastElem = cpart.get(cpart.size() - 1);
-            if (!lastElem.contains("@") && !(lastElem.contains("[") && lastElem.contains("]"))){
+            if (!lastElem.contains("@") && !(lastElem.contains("[*]") || lastElem.contains("[]"))){
                 xpathQuery = xpathQuery + "/text()";
             }
             XPathExpression expr = xpath.compile(xpathQuery); // //book[@year>2001]/title/text()
