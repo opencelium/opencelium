@@ -59,7 +59,7 @@ export function ComponentHasCheckboxes(){
             }
 
             /**
-             * to delete data from checks state
+             * to delete data from checks state via ids
              */
             deleteCheck(data){
                 let {checks} = this.state;
