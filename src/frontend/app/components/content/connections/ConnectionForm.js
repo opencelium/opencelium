@@ -12,6 +12,7 @@ import {removeLS} from "@utils/LocalStorage";
 import styles from '@themes/default/content/connections/change.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
+import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
 
 /**
  * common component to add and update Connector
@@ -335,6 +336,14 @@ export function ConnectionForm(type) {
                     },
                     ...this.getSecondThirdFormsSections(),
                 ];
+                const additionalButtons = (entity) => {
+                    if(this.isView || contents.length < 2){
+                        return null;
+                    }
+                    return(
+                        <AddTemplate data={contents[2].inputs[1]} entity={entity} disabled={entity.isEmpty()}/>
+                    );
+                }
                 return (
                     <div>
                         <Form
@@ -346,6 +355,7 @@ export function ConnectionForm(type) {
                             action={::this.doAction}
                             entity={connection}
                             type={type}
+                            additionalButtons={additionalButtons}
                         />
                         <OCTour
                             steps={ConnectionPermissions.page_1}

@@ -83,14 +83,14 @@ class AddTemplate extends Component{
 
     render(){
         const {visibleAddTemplateDialog, addTemplateName, addTemplateDescription} = this.state;
-        const {data, authUser} = this.props;
+        const {data, disabled} = this.props;
         const {templateLabels} = data;
         if(!templateLabels){
             return null;
         }
         return (
             <div style={{float: 'left', marginRight: '20px'}}>
-                <Button authUser={authUser} title={templateLabels.addTemplate} onClick={::this.toggleAddTemplateDialog}/>
+                <Button title={templateLabels.addTemplate} onClick={::this.toggleAddTemplateDialog} disabled={disabled}/>
                 <Dialog
                     actions={[{label: 'Ok', onClick: ::this.addTemplate, id: 'add_template_ok'}, {label: 'Cancel', onClick: ::this.toggleAddTemplateDialog, id: 'add_template_cancel'}]}
                     active={visibleAddTemplateDialog}
@@ -124,9 +124,13 @@ class AddTemplate extends Component{
 }
 
 AddTemplate.propTypes = {
-    authUser: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
     entity: PropTypes.object.isRequired,
+    disabled: PropTypes.bool,
 };
+
+AddTemplate.defaultProps = {
+    disabled: false,
+}
 
 export default AddTemplate;

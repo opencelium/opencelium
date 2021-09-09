@@ -86,7 +86,7 @@ class Form extends React.Component{
 
     render(){
         const {entity} = this.state;
-        const {contents, translations, permissions, isActionInProcess} = this.props;
+        const {contents, translations, permissions, isActionInProcess, additionalButtons} = this.props;
         const hasActionButton = translations && translations.action_button;
         const hasListButton = translations && translations.list_button;
         return(
@@ -108,6 +108,9 @@ class Form extends React.Component{
                                     link={translations.list_button.link}
                                     permission={permissions.READ}
                                 />
+                            }
+                            {
+                                additionalButtons(entity)
                             }
                         </div>
                         <div className={styles.form_component}>
@@ -174,6 +177,7 @@ Form.defaultProps = {
     isActionInProcess: false,
     clearValidationMessage: () => {},
     action: () => {},
+    additionalButtons: null,
 };
 
 export default Form;

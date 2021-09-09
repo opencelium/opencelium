@@ -80,7 +80,7 @@ class FormMethods extends Component{
                     <React.Fragment>
                         <Draft connection={entity} updateEntity={::this.updateEntity}/>
                         <div style={{float: 'right'}}>
-                            <AddTemplate data={data} entity={entity} authUser={authUser}/>
+                            {/*<AddTemplate data={data} entity={entity} authUser={authUser}/>*/}
                             {/*<AddParam data={data} entity={entity} authUser={authUser}/>*/}
                         </div>
                     </React.Fragment>
