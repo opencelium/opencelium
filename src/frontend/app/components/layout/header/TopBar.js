@@ -66,8 +66,8 @@ class TopBar extends React.Component{
         const calloutType = notifications.length > 0 ? notifications[notifications.length - 1].type : '';
         return(
             <div className={styles.top_bar}>
-                <Search/>
-                {/*<Input className={styles.search_input} placeholder={'Search'}/>*/}
+                {/*<Search/>*/}
+                <Input className={styles.search_input} placeholder={'Search'}/>
                 <div className={styles.notifications}>
                     {isCalloutVisible && calloutMessage && <Callout message={calloutMessage} type={calloutType}/>}
                     {notificationsAmount !== 0 && <div className={styles.notification_number} onClick={::this.onClickNotifications}>{`${notificationsAmount > 99 ? '+' : ''}${notificationsAmount}`}</div>}
