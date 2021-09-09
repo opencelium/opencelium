@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -105,13 +106,18 @@ public class EnhancementServiceImp implements EnhancementService{
     public FieldBindingResource toFieldBindingResource(Enhancement enhancement) {
         FieldBindingResource fieldBindingResource = new FieldBindingResource();
         EnhancementResource enhancementResource = new EnhancementResource(enhancement);
-        EnhancementNode enhancementNode = enhancementNodeService.findByEnhanceId(enhancement.getId())
-                .orElseThrow(()-> new RuntimeException("Enhancement: " + enhancement.getId() +" not found"));
-        List<LinkedFieldResource> toField = enhancementNode.getOutgoingField().stream()
-                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
-        List<LinkedFieldResource> fromField = enhancementNode.getIncomeField().stream()
-                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
-
+//        EnhancementNode enhancementNode = enhancementNodeService.findByEnhanceId(enhancement.getId())
+//                .orElseThrow(()-> new RuntimeException("Enhancement: " + enhancement.getId() +" not found"));
+//        List<LinkedFieldResource> toField = enhancementNode.getOutgoingField().stream()
+//                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
+//        List<LinkedFieldResource> fromField = enhancementNode.getIncomeField().stream()
+//                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
+        List<LinkedFieldResource> toField = Arrays.stream(enhancement.getExpertVar().split(","))
+                .filter(f -> f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
+                .map(f -> fieldNodeService.toLinkedFieldResource(f)).collect(Collectors.toList());
+        List<LinkedFieldResource> fromField = Arrays.stream(enhancement.getExpertVar().split(","))
+                .filter(f -> !f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
+                .map(f -> fieldNodeService.toLinkedFieldResource(f)).collect(Collectors.toList());
         fieldBindingResource.setEnhancement(enhancementResource);
         fieldBindingResource.setFrom(fromField);
         fieldBindingResource.setTo(toField);
