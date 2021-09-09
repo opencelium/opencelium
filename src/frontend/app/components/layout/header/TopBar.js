@@ -62,8 +62,8 @@ class TopBar extends React.Component{
     render(){
         const {isCalloutVisible, notificationsAmount} = this.state;
         const {t, notifications} = this.props;
-        const calloutMessage = notifications.length > 0 ? CNotification.getMessage(t, notifications[notifications.length - 1]).message : '';
-        const calloutType = notifications.length > 0 ? notifications[notifications.length - 1].type : '';
+        const calloutMessage = notifications.length > 0 ? CNotification.getMessage(t, notifications[0]).message : '';
+        const calloutType = notifications.length > 0 ? notifications[0].type : '';
         return(
             <div className={styles.top_bar}>
                 {/*<Search/>*/}
