@@ -177,7 +177,7 @@ Form.defaultProps = {
     isActionInProcess: false,
     clearValidationMessage: () => {},
     action: () => {},
-    additionalButtons: null,
+    additionalButtons: () => {},
 };
 
 export default Form;
