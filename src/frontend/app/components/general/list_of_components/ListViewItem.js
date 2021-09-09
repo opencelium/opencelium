@@ -108,7 +108,7 @@ class ListViewItem extends React.Component{
 
     render(){
         const {showConfirm, showActions} = this.state;
-        const {t, item, mapEntity, checks, index, renderAdditionalActions, allEntities, readOnly, actionsShouldBeMinimized, deletingEntity} = this.props;
+        const {t, item, mapEntity, checks, index, renderAdditionalActions, allEntities, entityIdName, readOnly, actionsShouldBeMinimized, deletingEntity} = this.props;
         const {viewLink, updateLink} = this.getLinks();
         let data = this.getObjectDataFromItem();
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
@@ -116,7 +116,7 @@ class ListViewItem extends React.Component{
         let hasUpdate = isString(updateLink) && updateLink !== '';
         let hasDelete = onDelete !== null;
         let checked = checks.findIndex(c => c.id === data.id && c.value) !== -1;
-        const entity = allEntities.find(entity => entity.id === item[0].value);
+        const entity = allEntities.find(entity => entity[entityIdName] === item[0].value);
         const isCheckboxesVisible = !readOnly;
         const isActionsVisible = !readOnly;
         let areActionsMinimized = showActions || !actionsShouldBeMinimized;

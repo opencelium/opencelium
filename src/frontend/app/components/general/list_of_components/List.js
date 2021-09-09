@@ -22,7 +22,6 @@ import { Row, Col } from "react-grid-system";
 import ListHeader from './Header';
 import Card from './Card';
 import Pagination from "@basic_components/pagination/Pagination";
-import CardError from "./CardError";
 import AddButton from "./AddButton";
 import {setCurrentPageItems, setViewType, setGridViewType} from "@actions/app";
 import {
@@ -75,6 +74,7 @@ function mapStateToProps(state){
     const app = state.get('app');
     return {
         viewType: app.get('viewType'),
+        searchValue: app.get('searchValue'),
         gridViewType: app.get('gridViewType'),
         currentPageItems: app.get('currentPageItems').toJS(),
     };
@@ -94,7 +94,7 @@ class List extends Component{
             selectedCard: -1,
             keyNavigateType: '',
             isPressedAddEntity: false,
-            searchValue: '',
+            searchValue: props.searchValue,
             gridViewType,
             entitiesProPage: viewType === VIEW_TYPE.LIST ? 10 : 4 * AMOUNT_OF_ROWS,
             checks: [],
@@ -423,7 +423,7 @@ class List extends Component{
         const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width, visible: element.visible, style: element.style};}) : [];
         const entityIdName = listViewData ? listViewData.entityIdName : '';
         const actionsShouldBeMinimized = listViewData && listViewData.hasOwnProperty('actionsShouldBeMinimized') ? listViewData.actionsShouldBeMinimized : false;
-        const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? (schedule) => listViewData.renderItemActions(schedule, ::this.setCurrentPageItems) : null;
+        const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? (entity) => listViewData.renderItemActions(entity, ::this.setCurrentPageItems) : null;
         const isDeleteSelectedButtonDisabled = !::this.isOneChecked();
         const hasAddButton = mapEntity.hasOwnProperty('getAddLink') || mapEntity.hasOwnProperty('AddButton');
         if(hasDeleteSelectedButtons){

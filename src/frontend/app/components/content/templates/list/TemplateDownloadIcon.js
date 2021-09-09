@@ -45,6 +45,7 @@ class TemplateDownloadIcon extends React.Component{
             <TooltipFontIcon
                 id={`template_download_${index}`}
                 isButton={true}
+                turquoiseTheme
                 size={'1.6vw'}
                 style={{cursor: 'pointer'}}
                 value={'get_app'}

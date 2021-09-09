@@ -125,9 +125,15 @@ class TemplatesList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}]};
         translations.add_button = t('LIST.IMPORT_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        const renderListViewItemActions = (template) => {
+            if(template)
+                return <TemplateDownloadIcon index={template.id} template={template}/>;
+            return null;
+        };
         let listViewData = {
             entityIdName: 'templateId',
             entityIdsName: 'templateIds',
+            renderItemActions: renderListViewItemActions,
             deleteSelected: () => {},
             map: (template) => {
                 return [{name: 'id', value: template.templateId}, {name: 'name', label: t('LIST.NAME'), value: template.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: template.description}, {name: 'from_invoker', label: t('LIST.FROM_INVOKER'), value: template.connection.fromConnector.invoker.name, width: '20%'}, {name: 'to_invoker', label: t('LIST.TO_INVOKER'), value: template.connection.toConnector.invoker.name, width: '20%'}]

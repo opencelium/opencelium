@@ -687,6 +687,10 @@ export default class CConnection{
         }
     }
 
+    isEmpty(){
+        return this.fromConnector.isEmpty() && this.toConnector.isEmpty();
+    }
+
     getObject(){
         let fromConnector = this._fromConnector.getObject();
         let toConnector = this._toConnector.getObject();

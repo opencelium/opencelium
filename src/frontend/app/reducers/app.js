@@ -42,6 +42,7 @@ const initialState = fromJS({
     isDraftOpenedOnce: false,
     viewType: viewType ? viewType : VIEW_TYPE.LIST,
     gridViewType: gridViewType ? gridViewType : '4',
+    searchValue: '',
 });
 
 /**
@@ -49,6 +50,8 @@ const initialState = fromJS({
  */
 const reducer = (state = initialState, action) => {
     switch (action.type) {
+        case AppAction.SET_SEARCHVALUE:
+            return state.set('searchValue', action.payload);
         case AppAction.FETCH_DATAFORSEARCH:
             return state.set('fetchingDataForSearch', API_REQUEST_STATE.START).set('error', null);
         case AppAction.FETCH_DATAFORSEARCH_FULFILLED:

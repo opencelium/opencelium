@@ -1082,6 +1082,10 @@ export default class CConnectorItem{
         return methods.reverse();
     }
 
+    isEmpty(){
+        return this._methods.length === 0 && this._operators.length === 0;
+    }
+
     getObject(){
         let methods = [];
         for (let i = 0; i < this._methods.length; i++){

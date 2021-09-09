@@ -54,9 +54,48 @@ const deleteInvokerRejected = (error) => {
     });
 };
 
+/**
+ * delete invokers
+ * @param invokers
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteInvokers = (invokers) => {
+    return {
+        type: InvokersAction.DELETE_INVOKERS,
+        payload: invokers,
+    };
+};
+
+/**
+ * delete invokers fulfilled
+ * @param status
+ * @returns {{type: string, payload: {}}}
+ */
+const deleteInvokersFulfilled = (status) => {
+    return {
+        type: InvokersAction.DELETE_INVOKERS_FULFILLED,
+        payload: status,
+    };
+};
+
+/**
+ * delete invokers rejected
+ * @param error
+ * @returns {*}
+ */
+const deleteInvokersRejected = (error) => {
+    return Rx.Observable.of({
+        type: InvokersAction.DELETE_INVOKERS_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
     deleteInvoker,
     deleteInvokerFulfilled,
     deleteInvokerRejected,
+    deleteInvokers,
+    deleteInvokersFulfilled,
+    deleteInvokersRejected,
 };

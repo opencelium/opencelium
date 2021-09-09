@@ -19,12 +19,26 @@ import {AppAction} from '@utils/actions';
 
 
 /**
- * fetch data for search in top bar
+ * set search value
+ * @param searchValue - value of the search input
  * @returns {{type: string, payload: {}}}
  */
-const fetchDataForSearch = () => {
+const setSearchValue = (searchValue) => {
+    return {
+        type: AppAction.SET_SEARCHVALUE,
+        payload: searchValue,
+    };
+};
+
+/**
+ * fetch data for search in top bar
+ * @param searchValue - value of the search input
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchDataForSearch = (searchValue) => {
     return {
         type: AppAction.FETCH_DATAFORSEARCH,
+        payload: searchValue,
     };
 };
 
@@ -231,6 +245,7 @@ const setConnectionDraftWasOpened = (isOpenedOnce) => {
 
 
 export {
+    setSearchValue,
     fetchDataForSearch,
     fetchDataForSearchFulfilled,
     fetchDataForSearchRejected,

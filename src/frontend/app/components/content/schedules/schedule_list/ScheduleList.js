@@ -394,7 +394,7 @@ class ScheduleList extends Component{
                                                     <WebHookTools index={key} schedule={schedule} t={t}/>
                                                     <ScheduleNotification schedule={schedule} index={key}/>
                                                     <ScheduleDelete index={key} schedule={schedule}
-                                                                    deleteCheck={(e) => deleteCheck(e, {
+                                                                    deleteCheck={() => deleteCheck({
                                                                         key,
                                                                         id: schedule.id
                                                                     })}/>
