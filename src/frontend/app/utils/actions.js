@@ -18,6 +18,7 @@
  * app's actions for redux state
  */
 export const AppAction = {
+    SET_SEARCHVALUE:                    'SET_SEARCHVALUE',
     FETCH_DATAFORSEARCH:                'FETCH_DATAFORSEARCH',
     FETCH_DATAFORSEARCH_FULFILLED:      'FETCH_DATAFORSEARCH_FULFILLED',
     FETCH_DATAFORSEARCH_REJECTED:       'FETCH_DATAFORSEARCH_REJECTED',

@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import styles from "@themes/default/layout/header";
 import {CSearch} from "@classes/components/general/CSearch";
 import {API_REQUEST_STATE} from "@utils/constants/app";
-import {fetchDataForSearch} from "@actions/app";
+import {fetchDataForSearch, setSearchValue} from "@actions/app";
 import Select from "@basic_components/inputs/Select";
 import {withRouter} from "react-router";
 
@@ -15,7 +15,7 @@ function mapStateToProps(state){
     }
 }
 
-@connect(mapStateToProps, {fetchDataForSearch})
+@connect(mapStateToProps, {fetchDataForSearch, setSearchValue})
 class Search extends React.Component{
     constructor(props) {
         super(props);
@@ -33,7 +33,7 @@ class Search extends React.Component{
     }
 
     openComponent(value, e){
-        const {router, dataForSearch} = this.props;
+        const {router, dataForSearch, setSearchValue} = this.props;
         this.setState({
             searchValue: '',
         });
@@ -44,8 +44,9 @@ class Search extends React.Component{
                 break;
             }
         }
+        setSearchValue(value.label);
         router.push('/');
-        setTimeout(() => router.push(`/${categoryName}/${value.value}/update`), 10);
+        setTimeout(() => router.push(`/${categoryName}`), 10);
     }
 
     getData(){
