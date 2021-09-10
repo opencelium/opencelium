@@ -162,7 +162,7 @@ class NotificationListItem extends Component{
         const validateResult = validateChangeNotification(pureNotification);
         if(validateResult.success) {
             this.setState({startUpdatingNotification: true});
-            updateScheduleNotification({...pureNotification, schedulerId: schedule.id});
+            updateScheduleNotification({...pureNotification, schedulerId: schedule.id, scheduleTitle: schedule.title});
             this.toggleUpdateNotificationDialog();
         } else{
             setFocusById(validateResult.id);
@@ -178,7 +178,7 @@ class NotificationListItem extends Component{
     deleteNotification(){
         const {schedule, notification, deleteScheduleNotification} = this.props;
         this.setState({startDeletingNotification: true});
-        deleteScheduleNotification({...notification.getObject(), schedulerId: schedule.id});
+        deleteScheduleNotification({...notification.getObject(), schedulerId: schedule.id, scheduleTitle: schedule.title});
         this.toggleDeleteNotificationConfirmation();
     }
 

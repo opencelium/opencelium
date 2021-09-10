@@ -18,12 +18,28 @@ function mapStateToProps(state){
 class NotificationPanel extends React.Component{
     constructor(props) {
         super(props);
+
+        this.notificationPanel = React.createRef();
+    }
+
+    componentDidMount() {
+        document.addEventListener("mousedown", ::this.checkIfClickedOutside)
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {notifications, isNotificationPanelOpened, toggleNotificationPanel} = this.props;
         if(notifications.length === 0 && isNotificationPanelOpened){
             toggleNotificationPanel();
+        }
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", ::this.checkIfClickedOutside)
+    }
+
+    checkIfClickedOutside(e){
+        if (this.props.isNotificationPanelOpened && this.notificationPanel.current && !this.notificationPanel.current.contains(e.target)) {
+            this.props.toggleNotificationPanel()
         }
     }
 
@@ -40,7 +56,7 @@ class NotificationPanel extends React.Component{
             className += ` ${styles.opened}`;
         }
         return(
-            <div className={className}>
+            <div className={className} ref={this.notificationPanel}>
                 <TooltipFontIcon size={20} className={styles.close_icon} isButton={true} tooltipPosition={'left_bottom'} value={'close'} tooltip={'Close'} onClick={toggleNotificationPanel}/>
                 <div className={styles.panel_title}>Notifications</div>
                 <div className={styles.actions}>

@@ -14,8 +14,8 @@
  */
 
 import React from 'react';
-import { Trans } from 'react-i18next';
-
+import {Trans} from 'react-i18next';
+import i18n from "@utils/i18n";
 
 class Translate extends React.Component{
     constructor(props) {

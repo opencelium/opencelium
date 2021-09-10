@@ -19,6 +19,7 @@ import CUserGroup from "@classes/components/content/user_group/CUserGroup";
 import CComponent from "@classes/components/content/user_group/CComponent";
 import _ from 'lodash';
 import {SEPARATE_WINDOW} from "@utils/constants/app";
+import {history} from "@components/App";
 
 
 /**
@@ -43,6 +44,11 @@ export function isExternalWindow(){
         }
     }
     return false;
+}
+
+export function navigateTo(url){
+    history.push('/');
+    setTimeout(() => history.push(`/${url}`), 10);
 }
 
 export function checkCronExpression(cronExp){

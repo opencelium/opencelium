@@ -134,6 +134,7 @@ class TemplatesList extends Component{
             entityIdName: 'templateId',
             entityIdsName: 'templateIds',
             renderItemActions: renderListViewItemActions,
+            isItemActionsBefore: true,
             deleteSelected: () => {},
             map: (template) => {
                 return [{name: 'id', value: template.templateId}, {name: 'name', label: t('LIST.NAME'), value: template.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: template.description}, {name: 'from_invoker', label: t('LIST.FROM_INVOKER'), value: template.connection.fromConnector.invoker.name, width: '20%'}, {name: 'to_invoker', label: t('LIST.TO_INVOKER'), value: template.connection.toConnector.invoker.name, width: '20%'}]

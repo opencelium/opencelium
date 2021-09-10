@@ -27,7 +27,11 @@ import {
 } from '@actions/connections/add';
 import {updateConnectionFulfilled, updateConnectionRejected,
 } from '@actions/connections/update';
-import {deleteConnectionFulfilled, deleteConnectionRejected} from '@actions/connections/delete';
+import {
+    deleteConnectionFulfilled,
+    deleteConnectionRejected,
+    deleteConnectionsFulfilled, deleteConnectionsRejected
+} from '@actions/connections/delete';
 import {doRequest} from "@utils/auth";
 import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
 import {checkConnectionFulfilled, checkConnectionRejected} from "@actions/connections/check";
@@ -211,6 +215,23 @@ const deleteConnectionEpic = (action$, store) => {
 };
 
 /**
+ * delete connections by ids
+ */
+const deleteConnectionsEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.DELETE_CONNECTIONS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            const data = action.payload;
+            return doRequest({url, method: API_METHOD.DELETE, data},{
+                    success: deleteConnectionsFulfilled,
+                    reject: deleteConnectionsRejected,},
+                res => {return {connectionIds: action.payload.connectionIds};}
+            );
+        });
+};
+
+/**
  * send operation request
  */
 const sendOperationRequestEpic = (action$, store) => {
@@ -250,6 +271,7 @@ export {
     addConnectionEpic,
     updateConnectionEpic,
     deleteConnectionEpic,
+    deleteConnectionsEpic,
     checkConnectionTitleEpic,
     validateConnectionFormMethodsEpic,
     checkNeo4jEpic,
