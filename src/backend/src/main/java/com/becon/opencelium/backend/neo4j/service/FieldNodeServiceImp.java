@@ -158,6 +158,25 @@ public class FieldNodeServiceImp implements FieldNodeService {
         return fieldResource;
     }
 
+    public LinkedFieldResource toLinkedFieldResource(String fieldPath) {
+        LinkedFieldResource fieldResource = new LinkedFieldResource();
+        String color = fieldPath.substring(0, fieldPath.indexOf('.'));
+        String exchangeType = fieldPath.contains("request") ? "request" : "response";
+        String field = fieldPath.replace(color + ".", "")
+                .replace("(" + exchangeType + ").", "").replace(".__oc__value","");
+        if(field.contains("__oc__attributes")) {
+            field = field.replace(".__oc__attributes","");
+            StringBuilder sb = new StringBuilder(field);
+            sb.insert(field.lastIndexOf('.')  + 1,'@');
+            field = sb.toString();
+        }
+        fieldResource.setColor(color);
+        fieldResource.setType(exchangeType);
+        fieldResource.setField(field);
+
+        return fieldResource;
+    }
+
     public static Map<String, Object> toResource(List<FieldNode> fieldNodes){
         Map<String, Object> fields = new HashMap<>();
         fieldNodes.forEach(f -> {
