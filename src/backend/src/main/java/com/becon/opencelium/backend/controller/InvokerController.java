@@ -175,6 +175,14 @@ public class InvokerController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteInvokerByNameIn(@RequestBody List<String> invokerNames){
+        invokerNames.forEach(name -> {
+            invokerService.delete(name);
+        });
+        return ResponseEntity.ok().build();
+    }
+
     private static Document convertStringToXMLDocument(String xmlString)
     {
         //Parser that produces DOM object trees from XML content

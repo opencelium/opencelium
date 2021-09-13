@@ -197,6 +197,20 @@ public class RoleController {
                 .orElseThrow(() -> new RoleNotFoundException(id));
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteRoleByIdIn(@RequestBody List<Integer> ids) {
+
+        ids.forEach(id -> {
+            UserRole p = userRoleService.findById(id).get();
+            if (p.getIcon() != null){
+                storageService.delete(p.getIcon());
+            }
+
+            userRoleService.deleteById(id);
+        });
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}/icon")
     public ResponseEntity<?> deleteIcon(@PathVariable("id") int id) {
         return userRoleService

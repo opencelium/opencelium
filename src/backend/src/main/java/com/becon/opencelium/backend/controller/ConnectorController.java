@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.authentication.AuthenticationType;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
@@ -131,6 +132,19 @@ public class ConnectorController {
             connectionNodeService.deleteById(c.getId());
         });
         connectorService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteCtorByIdIn(@RequestBody List<Integer> ids){
+        ids.forEach(id -> {
+            List<Connection> connections = connectionService.findAllByConnectorId(id);
+            connections.forEach(c -> {
+                connectionService.deleteById(c.getId());
+                connectionNodeService.deleteById(c.getId());
+            });
+            connectorService.deleteById(id);
+        });
         return ResponseEntity.noContent().build();
     }
 
