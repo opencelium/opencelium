@@ -42,7 +42,7 @@ export function validateUpdateWebHook(webhook){
  */
 export function validateDeleteWebHook(webhook){
     let result = {success: true, message: ''};
-    if(!webhook.hasOwnProperty('id') || !webhook.hasOwnProperty('schedulerId')){
+    if(!webhook.hasOwnProperty('id') && !webhook.hasOwnProperty('schedulerId')){
         result.success = false;
         result.message = 'NOT_ENOUGH_DATA';
     }

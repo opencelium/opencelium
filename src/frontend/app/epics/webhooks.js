@@ -50,12 +50,12 @@ const addWebHookEpic = (action$, store) => {
             let validation = validateAddWebHook(action.payload);
             if(validation.success) {
                 const {userId, schedule} = action.payload;
-                const {id} = schedule;
+                const {id, title} = schedule;
                 let url = `${urlPrefix}/url/${userId}/${id}`;
                 return doRequest({url}, {
                         success: addWebHookFulfilled,
                         reject: addWebHookRejected,},
-                    res => {return {webhook: res.response, id};}
+                    res => {return {webhook: res.response, id, schedule: {title}};}
                 );
             } else{
                 return addWebHookRejected({'message': validation.message});
@@ -94,12 +94,12 @@ const deleteWebHookEpic = (action$, store) => {
         .mergeMap((action) => {
             let validation = validateDeleteWebHook(action.payload);
             if(validation.success) {
-                let {id, schedulerId} = action.payload;
+                let {id, schedule} = action.payload;
                 let url = `${urlPrefix}/${id}`;
                 return doRequest({url, method: API_METHOD.DELETE}, {
                         success: deleteWebHookFulfilled,
                         reject: deleteWebHookRejected,},
-                    res => {return {schedulerId};}
+                    res => {return {schedulerId: schedule.id, schedule};}
                 );
             } else{
                 return deleteWebHookRejected({'message': validation.message});

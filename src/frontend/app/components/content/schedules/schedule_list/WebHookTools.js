@@ -109,7 +109,7 @@ class WebHookTools extends Component{
         const {deleteWebHook, schedule} = this.props;
         deleteWebHook({
             id: schedule.getWebhookId(),
-            schedulerId: schedule.id,
+            schedule: schedule,
         });
     }
     

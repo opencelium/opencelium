@@ -23,7 +23,7 @@ import ListHeader from './Header';
 import Card from './Card';
 import Pagination from "@basic_components/pagination/Pagination";
 import AddButton from "./AddButton";
-import {setCurrentPageItems, setViewType, setGridViewType} from "@actions/app";
+import {setCurrentPageItems, setViewType, setGridViewType, setSearchValue} from "@actions/app";
 import {
     addAddEntityKeyNavigation,
     addDeleteCardKeyNavigation,
@@ -82,7 +82,7 @@ function mapStateToProps(state){
 /**
  * List Component
  */
-@connect(mapStateToProps, {setCurrentPageItems, setViewType, setGridViewType})
+@connect(mapStateToProps, {setCurrentPageItems, setViewType, setGridViewType, setSearchValue})
 class List extends Component{
 
     constructor(props){
@@ -128,6 +128,7 @@ class List extends Component{
         document.addEventListener('mousedown', ::this.onMouseDownOnDocument)
         setFocusById('search_field');
         componentAppear('app_list');
+        this.props.setSearchValue('');
     }
 
     componentWillUnmount(){
@@ -424,6 +425,7 @@ class List extends Component{
         const entityIdName = listViewData ? listViewData.entityIdName : '';
         const actionsShouldBeMinimized = listViewData && listViewData.hasOwnProperty('actionsShouldBeMinimized') ? listViewData.actionsShouldBeMinimized : false;
         const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? (entity) => listViewData.renderItemActions(entity, ::this.setCurrentPageItems) : null;
+        const isItemActionsBefore = listViewData && listViewData.hasOwnProperty('isItemActionsBefore') ? listViewData.isItemActionsBefore : false;
         const isDeleteSelectedButtonDisabled = !::this.isOneChecked();
         const hasAddButton = mapEntity.hasOwnProperty('getAddLink') || mapEntity.hasOwnProperty('AddButton');
         if(hasDeleteSelectedButtons){
@@ -512,6 +514,7 @@ class List extends Component{
                                             mapEntity={mapEntity}
                                             renderItemActions={renderListViewItemActions}
                                             actionsShouldBeMinimized={actionsShouldBeMinimized}
+                                            isItemActionsBefore={isItemActionsBefore}
                                         />}
                                     {viewType === VIEW_TYPE.GRID &&
                                     <div className={styles.grid_view}>

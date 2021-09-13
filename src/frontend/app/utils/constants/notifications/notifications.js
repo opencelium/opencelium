@@ -14,6 +14,7 @@
  */
 
 import React from 'react';
+import i18n from "@utils/i18n";
 
 import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
@@ -21,8 +22,24 @@ import {
     AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
     UpdateAssistantAction,
 } from '@utils/actions';
-import Translate from "@components/general/app/Translate";
 import AvailableUpdateMessage from "@basic_components/translations/AvailableUpdateMessage";
+import {ADD_USER, DELETE_USER, UPDATE_USER} from "@utils/constants/notifications/interpolations/user";
+import INTERPOLATIONS from "@utils/constants/notifications/interpolations"
+import {
+    ADD_USERGROUP,
+    DELETE_USERGROUP,
+    UPDATE_USERGROUP
+} from "@utils/constants/notifications/interpolations/usergroup";
+import {
+    ADD_CONNECTOR,
+    DELETE_CONNECTOR,
+    UPDATE_CONNECTOR
+} from "@utils/constants/notifications/interpolations/connector";
+import {
+    ADD_CONNECTION,
+    DELETE_CONNECTION,
+    UPDATE_CONNECTION
+} from "@utils/constants/notifications/interpolations/connection";
 
 
 /**
@@ -64,6 +81,9 @@ export const EntitiesWithNotification = [
     {name: SchedulesAction.TRIGGER_SCHEDULE, types: ['FULFILLED', 'REJECTED']},
     {name: SchedulesAction.TRIGGER_SCHEDULESUCCESS, types: ['FULFILLED']},
     {name: SchedulesAction.ADD_SCHEDULE, types: ['FULFILLED', 'REJECTED',]},
+    {name: SchedulesAction.ADD_SCHEDULENOTIFICATION, types: ['FULFILLED', 'REJECTED',]},
+    {name: SchedulesAction.UPDATE_SCHEDULENOTIFICATION, types: ['FULFILLED', 'REJECTED',]},
+    {name: SchedulesAction.DELETE_SCHEDULENOTIFICATION, types: ['FULFILLED', 'REJECTED',]},
     {name: SchedulesAction.FETCH_SCHEDULES, types: ['REJECTED']},
     {name: SchedulesAction.DELETE_SCHEDULE, types: ['FULFILLED', 'REJECTED',]},
     {name: SchedulesAction.UPDATE_SCHEDULE, types: ['FULFILLED', 'REJECTED',]},
@@ -122,15 +142,12 @@ function boldMessage(message){
  * handlers for notification messages
  */
 export const NotificationMessageHandlers = {};
+let ALL_INTERPOLATIONS = {};
+for(let param in INTERPOLATIONS){
+    ALL_INTERPOLATIONS = {...ALL_INTERPOLATIONS, ...INTERPOLATIONS[param]};
+}
 const SuccessInterpolates = {
-    ADD_USER: (params) => {
-        const {name} = params.userDetail;
-        return (
-            <Translate i18nKey="notifications:SUCCESS.ADD_USER" name={name}>
-                The user <strong>{name}</strong> was successfully added.
-            </Translate>
-        );
-    },
+    ...ALL_INTERPOLATIONS,
     FETCH_UPDATEAPPVERSION: (params) => {
         return <AvailableUpdateMessage {...params}/>
     },

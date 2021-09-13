@@ -274,7 +274,7 @@ class ListCard extends Component{
         classNames = getThemeClass({classNames, authUser, styles});
         let buttonStyle = styles[classNames.button];
         let deleteButtonStyle = buttonStyle;
-        const isDeletingEntity = deletingEntity(entity);
+        const isDeletingEntity = typeof deletingEntity === 'function' ? deletingEntity(entity) : false;
         if(!hasView && !hasUpdate && !hasGraph){
             if(isDeletingEntity){
                 deleteButtonStyle += ` ${styles[classNames.only_button_delete_loading]}`

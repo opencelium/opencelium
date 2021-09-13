@@ -6,6 +6,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 import {fetchDataForSearch, setSearchValue} from "@actions/app";
 import Select from "@basic_components/inputs/Select";
 import {withRouter} from "react-router";
+import {navigateTo} from "@utils/app";
 
 function mapStateToProps(state){
     const app = state.get('app');
@@ -45,8 +46,7 @@ class Search extends React.Component{
             }
         }
         setSearchValue(value.label);
-        router.push('/');
-        setTimeout(() => router.push(`/${categoryName}`), 10);
+        navigateTo(categoryName);
     }
 
     getData(){

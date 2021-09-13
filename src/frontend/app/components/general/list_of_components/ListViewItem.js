@@ -108,7 +108,7 @@ class ListViewItem extends React.Component{
 
     render(){
         const {showConfirm, showActions} = this.state;
-        const {t, item, mapEntity, checks, index, renderAdditionalActions, allEntities, entityIdName, readOnly, actionsShouldBeMinimized, deletingEntity} = this.props;
+        const {t, item, isItemActionsBefore, mapEntity, checks, index, renderAdditionalActions, allEntities, entityIdName, readOnly, actionsShouldBeMinimized, deletingEntity} = this.props;
         const {viewLink, updateLink} = this.getLinks();
         let data = this.getObjectDataFromItem();
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
@@ -159,6 +159,7 @@ class ListViewItem extends React.Component{
                         :
                             <div className={actionsShouldBeMinimized ? `${styles.maximized_actions}` : `${styles.actions}`} onMouseLeave={::this.hideActions}>
                                 <div>
+                                    {isItemActionsBefore && typeof renderAdditionalActions === 'function' && renderAdditionalActions(entity)}
                                     {hasView &&
                                     <TooltipFontIcon tooltip={'View'} value={'visibility'} onClick={::this.view}
                                                      isButton={true}
@@ -170,7 +171,7 @@ class ListViewItem extends React.Component{
                                     {hasDelete &&
                                     <TooltipFontIcon tooltip={'Delete'} value={typeof deletingEntity === 'function' && deletingEntity(data) ? 'loading' : 'delete'} onClick={::this.wantDelete}
                                                      isButton={true} turquoiseTheme/>}
-                                    {typeof renderAdditionalActions === 'function' && renderAdditionalActions(entity)}
+                                    {!isItemActionsBefore && typeof renderAdditionalActions === 'function' && renderAdditionalActions(entity)}
                                 </div>
                             </div>
                         }

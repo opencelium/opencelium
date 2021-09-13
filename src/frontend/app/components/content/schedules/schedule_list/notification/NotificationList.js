@@ -119,7 +119,7 @@ class NotificationList extends Component{
                 newNotification: CNotification.createNotification(),
                 showAddDialog: !showAddDialog,
             });
-            addScheduleNotification({...notification, schedulerId: schedule.id});
+            addScheduleNotification({...notification, schedulerId: schedule.id, scheduleTitle: schedule.title});
         } else{
             setFocusById(validateResult.id);
             this.setState({

@@ -129,7 +129,7 @@ const deleteTemplateEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteTemplateFulfilled,
                     reject: deleteTemplateRejected,},
-                res => {return {...res.response, templateId: id};}
+                res => {return {...res.response, templateId: id, name: action.payload.name};}
             );
         });
 };
@@ -162,7 +162,7 @@ const exportTemplateEpic = (action$, store) => {
             return doRequest({url, fullUrl: true},{
                 success: exportTemplateFulfilled,
                 reject: exportTemplateRejected,},
-                res => {return {...action.payload, templateContent: res.response};}
+                res => {return {...action.payload, templateContent: res.response, name: action.payload.name};}
             );
         });
 };

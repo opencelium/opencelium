@@ -28,7 +28,12 @@ import {
     updateConnectorFulfilled, updateConnectorRejected,
     updateConnectorIcon, updateConnectorIconFulfilled, updateConnectorIconRejected,
 } from '@actions/connectors/update';
-import {deleteConnectorFulfilled, deleteConnectorRejected} from '@actions/connectors/delete';
+import {
+    deleteConnectorFulfilled,
+    deleteConnectorRejected,
+    deleteConnectorsFulfilled,
+    deleteConnectorsRejected
+} from '@actions/connectors/delete';
 import {doRequest} from "@utils/auth";
 import {API_METHOD} from "@utils/constants/app";
 import {isString} from "@utils/app";
@@ -200,6 +205,23 @@ const deleteConnectorEpic = (action$, store) => {
 };
 
 /**
+ * delete connectors by ids
+ */
+const deleteConnectorsEpic = (action$, store) => {
+    return action$.ofType(ConnectorsAction.DELETE_CONNECTORS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.DELETE, data},{
+                    success: deleteConnectorsFulfilled,
+                    reject: deleteConnectorsRejected,},
+                res => {return {connectorIds: data.connectorIds};}
+            );
+        });
+};
+
+/**
  * check connector's title on existing
  */
 const checkConnectorTitleEpic = (action$, store) => {
@@ -223,6 +245,7 @@ export {
     updateConnectorEpic,
     updateConnectorIconEpic,
     deleteConnectorEpic,
+    deleteConnectorsEpic,
     testConnectorEpic,
     checkConnectorTitleEpic,
 };

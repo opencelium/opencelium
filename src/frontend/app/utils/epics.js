@@ -36,7 +36,7 @@ import {
 import {
     fetchConnectorEpic, fetchConnectorsEpic, addConnectorEpic, addConnectorIconEpic,
     updateConnectorEpic, updateConnectorIconEpic, deleteConnectorEpic, testConnectorEpic,
-    checkConnectorTitleEpic,
+    checkConnectorTitleEpic, deleteConnectorsEpic,
 } from '@epics/connectors';
 import {
     fetchInvokersEpic, fetchInvokerEpic, addInvokerEpic,
@@ -44,7 +44,7 @@ import {
 } from '@epics/invokers';
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
-    updateConnectionEpic, deleteConnectionEpic, checkConnectionTitleEpic,
+    updateConnectionEpic, deleteConnectionEpic, deleteConnectionsEpic, checkConnectionTitleEpic,
     validateConnectionFormMethodsEpic, checkNeo4jEpic, checkNeo4jFulfilledEpic,
     sendOperationRequestEpic, checkConnectionEpic,
 } from '@epics/connections';
@@ -125,6 +125,7 @@ export default combineEpics(
     updateConnectorEpic,
     updateConnectorIconEpic,
     deleteConnectorEpic,
+    deleteConnectorsEpic,
     fetchInvokersEpic,
     fetchInvokerEpic,
     addInvokerEpic,
@@ -143,6 +144,7 @@ export default combineEpics(
     addConnectionEpic,
     updateConnectionEpic,
     deleteConnectionEpic,
+    deleteConnectionsEpic,
     fetchScheduleEpic,
     fetchSchedulesEpic,
     fetchCurrentSchedulesEpic,

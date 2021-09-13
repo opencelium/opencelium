@@ -139,3 +139,15 @@
     border-radius: 50px;
   }
 }
+
+.emphasize{
+  font-weight: 600;
+}
+.link{
+  @extend .emphasize;
+  color: $TURQUOISE_COLOR;
+  cursor: pointer;
+  &:hover{
+    text-decoration: underline;
+  }
+}

@@ -97,7 +97,7 @@ export class CSearch{
     searchInUserGroups(){
         const searchFunction = (element, searchValue)=>{
             const components = element.components ? element.components.map(e => e.name).join(', ') : '';
-            let checkName = element.name ? element.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkName = element.role ? element.role.toLowerCase().indexOf(searchValue) !== -1 : false;
             let checkDescription = element.description ? element.description.toLowerCase().indexOf(searchValue) !== -1 : false;
             let checkComponents = components ? components.toLowerCase().indexOf(searchValue) !== -1 : false;
             return checkName || checkDescription || checkComponents;
@@ -119,10 +119,10 @@ export class CSearch{
 
     searchInTemplates(){
         const searchFunction = (element, searchValue)=>{
-            let checkName = element.name ? element.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
-            let checkDescription = element.description ? element.description.indexOf(searchValue.toLowerCase()) !== -1 : false;
-            let checkFromInvokerName = element?.connection?.fromConnector?.invoker?.name ? element.connection.fromConnector.invoker.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
-            let checkToInvokerName = element?.connection?.toConnector?.invoker?.name ? element.connection.toConnector.invoker.name.indexOf(searchValue.toLowerCase()) !== -1 : false;
+            let checkName = element.name ? element.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkDescription = element.description ? element.description.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkFromInvokerName = element?.connection?.fromConnector?.invoker?.name ? element.connection.fromConnector.invoker.name.toLowerCase().indexOf(searchValue) !== -1 : false;
+            let checkToInvokerName = element?.connection?.toConnector?.invoker?.name ? element.connection.toConnector.invoker.name.toLowerCase().indexOf(searchValue) !== -1 : false;
             return checkName || checkDescription || checkFromInvokerName || checkToInvokerName;
         }
         return this.search('templates', searchFunction);

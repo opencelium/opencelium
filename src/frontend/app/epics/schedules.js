@@ -75,8 +75,9 @@ const triggerScheduleEpic = (action$, store) => {
             let url = `${urlPrefix}/execute/${action.payload.id}`;
             return doRequest({url},{
                 success: triggerScheduleFulfilled,
-                reject: triggerScheduleRejected,
-            });
+                reject: triggerScheduleRejected,},
+                res => {return {title: action.payload.title};},
+            );
         });
 };
 
@@ -291,8 +292,8 @@ const addScheduleNotificationEpic = (action$, store) => {
             let data = action.payload;
             return doRequest({url, method: API_METHOD.POST, data}, {
                     success: addScheduleNotificationFulfilled,
-                    reject: addScheduleNotificationRejected,
-                },
+                    reject: addScheduleNotificationRejected,},
+                res => {return {...res.response, scheduleTitle: action.payload.scheduleTitle};},
             );
         });
 };
@@ -324,6 +325,7 @@ const updateScheduleNotificationEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.PUT, data: action.payload},{
                 success: updateScheduleNotificationFulfilled,
                 reject: updateScheduleNotificationRejected,},
+                res => {return {...res.response, scheduleTitle: action.payload.scheduleTitle};},
             );
         });
 };
@@ -335,12 +337,12 @@ const updateScheduleStatusEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.UPDATE_SCHEDULESTATUS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let {id, status} = action.payload;
+            let {id, status, title} = action.payload;
             let url = `${urlPrefix}/${id}/status`;
             return doRequest({url, method: API_METHOD.PUT, data: {status}},{
                 success: updateScheduleStatusFulfilled,
                 reject: updateScheduleStatusRejected,},
-                res => {return {id, status};},
+                res => {return {id, status, title};},
             );
         });
 };
@@ -373,7 +375,7 @@ const deleteScheduleNotificationEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.DELETE, data},{
                     success: deleteScheduleNotificationFulfilled,
                     reject: deleteScheduleNotificationRejected,},
-                res => {return {...res.response, id: action.payload.notificationId};}
+                res => {return {...res.response, name: data.name, id: data.notificationId, scheduleTitle: data.scheduleTitle};}
             );
         });
 };
