@@ -254,32 +254,37 @@
   padding: 2px 12px !important;
   font-size: $FONT_SIZE_SMALL;
   line-height: 1.5;
-  border-radius: .25rem;
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  border-radius: .25rem !important;
   font-family: $FONT_FAMILY;
   height: 34px;
   width: 31%;
   color: #fff !important;
-  background-color: #007bff !important;
-  border-color: #007bff;
+  background: #007bff !important;
+  border: 1px solid #007bff !important;
+  transition: background 0.8s !important;
   input{
     display: none;
+  }
+  span{
+    margin-top: -6px;
   }
 }
 .input_file_browse:active{
   color: #fff !important;
-  background-color: #0062cc !important;
-  border-color: #005cbf !important;
+  background: #0062cc !important;
+  border-color: #0062cc !important;
 }
 .input_file_browse:hover{
   color: #fff !important;
-  background-color: #0069d9 !important;
-  border-color: #0062cc !important;
+  transition: background 0.8s !important;
+  background: #47a7f5 radial-gradient(circle, transparent 1%, #47a7f5 1%) center/15000% !important;
+  border: 1px solid #0062cc !important;
 }
 .input_file_browse:focus{
   box-shadow: $FOCUS_BOX_SHADOW !important;
 }
 .input_file_label{
+  padding-top: 11px !important;
   min-height: 24px;
   font-family: $FONT_FAMILY;
   width: 69% !important;
