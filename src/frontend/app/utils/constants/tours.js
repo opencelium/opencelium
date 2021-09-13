@@ -243,7 +243,7 @@ export const APP_TOURS = [
     },
 ];
 
-export const INVOKER_ADD_TOURS = {
+export const INVOKER_TOURS = {
     page_1: [
         {
             selector: '.tour-page-1-step-1',

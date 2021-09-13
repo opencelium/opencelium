@@ -66,6 +66,7 @@ class BrowseButton extends Component{
                     onFocus={::this.onFocus}
                     onBlur={::this.onBlur}
                     disabled={hideInput}
+                    ripple={false}
                 />
             </ToolboxThemeInput>
         );
