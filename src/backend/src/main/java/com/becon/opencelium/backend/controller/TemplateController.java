@@ -185,4 +185,13 @@ public class TemplateController {
         templateService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteTemplateByIdIn(@RequestBody List<String> ids){
+
+        ids.forEach(id -> {
+            templateService.deleteById(id);
+        });
+        return ResponseEntity.noContent().build();
+    }
 }

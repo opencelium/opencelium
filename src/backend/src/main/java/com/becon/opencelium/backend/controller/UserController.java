@@ -154,6 +154,19 @@ public class UserController {
                         })
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUserByIdIn(@RequestBody List<Integer> ids) {
+        ids.forEach(id -> {
+            User p = userService.findById(id).get();
+            if (p.getUserDetail().getProfilePicture() != null){
+                storageService.delete(p.getUserDetail().getProfilePicture());
+            }
+            userService.deleteById(id);
+        });
+
+        return ResponseEntity.noContent().build();
+    }
 //
     @GetMapping("/{id}/logout")
     public ResponseEntity<?> logout(@PathVariable("id") int id) {

@@ -252,6 +252,16 @@ public class ConnectionController {
         return ResponseEntity.ok().body(response);
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteCtionByIdIn(@RequestBody List<Long> ids) throws Exception {
+
+        ids.forEach(id -> {
+            connectionService.deleteById(id);
+            connectionNodeService.deleteById(id);
+        });
+        return ResponseEntity.noContent().build();
+    }
+
     private HttpMethod getMethod(String method){
         HttpMethod httpMethodType;
         switch (method){
