@@ -1,7 +1,8 @@
+import ReactDOMServer from "react-dom/server";
 import React from "react";
 import {NotificationMessageHandlers, NotificationType} from "@utils/constants/notifications/notifications";
 import i18n from "@utils/i18n";
-import {isString, parseConnectionPointer} from "@utils/app";
+import {isString, parseConnectionPointer, stringToHTML} from "@utils/app";
 import styles from "@themes/default/layout/notification";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
@@ -12,6 +13,7 @@ export class CNotification{
         let notificationMessage = type + '.' + message;
         if(NotificationMessageHandlers[type] && NotificationMessageHandlers[type][message]){
             notificationMessage = NotificationMessageHandlers[type][message](params);
+            serverMessageLength = stringToHTML(ReactDOMServer.renderToString(notificationMessage)).innerText.length;
         } else{
             let comingMessage = params && params.hasOwnProperty('response') && params.response && params.response.hasOwnProperty('message') ? params.response.message : '';
             if(comingMessage === ''){
