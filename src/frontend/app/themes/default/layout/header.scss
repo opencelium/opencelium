@@ -204,7 +204,7 @@
 }
 .callout {
   animation-delay: 2.5s;
-  animation-name: slideTopRight;
+  //animation-name: slideTopRight;
   animation-duration: 0.5s;
   animation-timing-function: ease-in-out;
   animation-fill-mode: forwards;
@@ -213,6 +213,8 @@
     display: inline-block;
     width: 86%;
     margin-left: 2%;
+    vertical-align: middle;
+    margin-top: -4px;
     font-size: 12px;
   }
   position: absolute;

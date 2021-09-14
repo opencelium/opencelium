@@ -11,7 +11,7 @@ class Callout extends React.Component{
         const {message, type} = this.props;
         return(
             <div className={`${styles.callout} ${styles.bottom}`}>
-                {CNotification.getTypeIcon(type)}
+                {CNotification.getTypeIcon(type, 16)}
                 <div className={styles.message}>{message}</div>
             </div>
         );

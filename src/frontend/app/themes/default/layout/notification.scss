@@ -110,32 +110,32 @@
     right: 0;
     font-size: 10px;
   }
-  .type_icon{
-    vertical-align: middle;
-  }
-  .info_icon{
-    color: black;
-  }
-  .warning_icon{
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 18px solid yellow;
-    float: left;
-    color: black;
-    font-size: 12px;
-    text-align: center;
-    >div{
-      display: inline-block;
-      margin-left: -1px;
-      margin-top: 1px;
-    }
-  }
-  .error_icon{
-    color: white;
-    background: red;
-    border-radius: 50px;
+}
+.error_icon{
+  color: white;
+  background: red;
+  border-radius: 50px;
+}
+.type_icon{
+  vertical-align: middle;
+}
+.info_icon{
+  color: black;
+}
+.warning_icon{
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 18px solid yellow;
+  float: left;
+  color: black;
+  font-size: 12px;
+  text-align: center;
+  >div{
+    display: inline-block;
+    margin-left: -1px;
+    margin-top: 1px;
   }
 }
 
