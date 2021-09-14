@@ -54,7 +54,7 @@ class OperationItem extends Component{
 
     render(){
         const {isVisible, operation, className, data, hasTour, forConnection} = this.props;
-        const {tourSteps} = data;
+        const {tourSteps, error} = data;
         const showTabs = operation.request.method !== '';
         const isNotGetMethod = operation.request.method !== METHOD_TYPES[1].value;
         let tourClassNames = [];
@@ -67,9 +67,9 @@ class OperationItem extends Component{
         tabsClassname += ` ${styles.operation_item_tabs}`;
         return (
             <div className={className}>
-                <Name {...this.props} tourStep={tourClassNames[0] ? tourClassNames[0] : ''}/>
+                <Name {...this.props} error={error ? error.name : ''} tourStep={tourClassNames[0] ? tourClassNames[0] : ''}/>
                 <Endpoint {...this.props} tourStep={tourClassNames[1] ? tourClassNames[1] : ''}/>
-                {forConnection ? null : <Method {...this.props} tourStep={tourClassNames[2] ? tourClassNames[2] : ''}/>}
+                {forConnection ? null : <Method {...this.props} error={error ? error.method : ''} tourStep={tourClassNames[2] ? tourClassNames[2] : ''}/>}
                 {
                     isVisible && showTabs
                     ?

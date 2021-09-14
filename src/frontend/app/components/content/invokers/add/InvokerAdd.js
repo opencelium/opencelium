@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2020>  <becon GmbH>
+ * Copyright (C) <2021>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,38 @@
  */
 
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
+import {withTranslation} from 'react-i18next';
+import {InvokerPermissions} from "@utils/constants/permissions";
+import {permission} from "@decorators/permission";
+import {SingleComponent} from "@decorators/SingleComponent";
+import {InvokerForm} from "@components/content/invokers/InvokerForm";
+import {addInvoker} from "@actions/invokers/add";
+import {checkName} from "@actions/invokers/fetch";
+
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    const invokers = state.get('invokers');
+    return{
+        authUser: auth.get('authUser'),
+        addingInvoker: invokers.get('addingInvoker'),
+        error: invokers.get('error'),
+    };
+}
+
+function mapConnector(invoker){
+    return {xml: invoker.getXml()};
+}
 
 /**
  * Component to Add Invoker
  */
-class InvokerAdd extends Component{
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        return <div style={{fontSize: '30px', textAlign: 'center', marginTop: '150px'}}>Sorry, you do not have a subscription to use this function</div>;
-    }
-}
+@connect(mapStateToProps, {addInvoker, checkName})
+@permission(InvokerPermissions.CREATE, true)
+@withTranslation(['invokers', 'app'])
+@SingleComponent('invoker', 'adding', [], mapConnector)
+@InvokerForm('add')
+class InvokerAdd extends Component{}
 
 export default InvokerAdd;

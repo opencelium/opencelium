@@ -46,7 +46,7 @@ class FormName extends Component{
 
     render(){
         const {nameValue} = this.state;
-        const {name, label, icon, maxLength, readOnly, required} = this.props.data;
+        const {name, label, icon, maxLength, readOnly, required, error} = this.props.data;
         let {tourStep} = this.props.data;
         let isReadonly = false;
         let inputStyle = styles.form_input;
@@ -59,6 +59,7 @@ class FormName extends Component{
         return (
             <Input
                 id={`input_${name}`}
+                error={error}
                 onChange={::this.handleInput}
                 onBlur={::this.onBlur}
                 name={'form_connector_name'}

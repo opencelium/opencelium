@@ -17,7 +17,7 @@ import {InvokersAction} from '@utils/actions';
 import {
     fetchInvokersFulfilled,fetchInvokersRejected,
     fetchInvokerFulfilled, fetchInvokerRejected,
-    fetchDefaultInvokersFulfilled, fetchDefaultInvokersRejected,
+    fetchDefaultInvokersFulfilled,
 } from '@actions/invokers/fetch';
 import {
     addInvokerFulfilled, addInvokerRejected,
@@ -27,6 +27,7 @@ import {
 } from '@actions/invokers/update';
 import {
     deleteInvokerFulfilled, deleteInvokerRejected,
+    deleteInvokersFulfilled, deleteInvokersRejected,
 } from '@actions/invokers/delete';
 
 import {doRequest} from "@utils/auth";
@@ -141,6 +142,22 @@ const deleteInvokerEpic = (action$, store) => {
         });
 };
 
+/**
+ * delete invokers by ids
+ */
+const deleteInvokersEpic = (action$, store) => {
+    return action$.ofType(InvokersAction.DELETE_INVOKERS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.DELETE, data},{
+                    success: deleteInvokersFulfilled,
+                    reject: deleteInvokersRejected,},
+                res => {return {ids: action.payload};}
+            );
+        });
+};
 
 
 
@@ -150,5 +167,6 @@ export {
     addInvokerEpic,
     updateInvokerEpic,
     deleteInvokerEpic,
+    deleteInvokersEpic,
     fetchDefaultInvokersEpic
 };

@@ -156,11 +156,9 @@ class AccordionItem extends Component{
         const hasAddMethod = typeof addMethod === 'function';
         let accordionToggleStyle = {};
         let accordionToggleDivStyle = null;
-        if(connectorType){
+        if(connectorType) {
             accordionToggleStyle = {textAlign: connectorType === CONNECTOR_FROM ? 'left' : 'right'};
             accordionToggleDivStyle = {float: connectorType === CONNECTOR_FROM ? 'left' : 'right'};
-        } else{
-            accordionToggleStyle.marginLeft = '20px';
         }
         return(
             <div onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
