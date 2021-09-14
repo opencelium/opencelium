@@ -46,7 +46,7 @@ class Notification extends React.Component{
     hasExtension(){
         const {t, notification} = this.props;
         const messageData = CNotification.getMessage(t, notification, ::this.renderServerMessage);
-        return messageData.length > 88;
+        return messageData.length > 65;
     }
 
     toggleExtension(){
