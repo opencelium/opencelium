@@ -65,7 +65,7 @@ public class MessageController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteMessageByIdIn(@PathVariable List<Integer> ids) throws Exception{
+    public ResponseEntity<?> deleteMessageByIdIn(@RequestBody List<Integer> ids) throws Exception{
         ids.forEach(id -> messageService.deleteById(id));
         return ResponseEntity.ok().build();
     }
