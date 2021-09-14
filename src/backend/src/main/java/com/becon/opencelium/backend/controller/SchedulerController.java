@@ -201,7 +201,7 @@ public class SchedulerController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/all")
+    @DeleteMapping
     public ResponseEntity<?> deleteSchedularByIdIn(@RequestBody List<Integer> ids) throws Exception {
         schedulerService.deleteAllById(ids);
         return ResponseEntity.noContent().build();
