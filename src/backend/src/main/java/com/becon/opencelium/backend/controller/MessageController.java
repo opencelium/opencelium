@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.resource.notification.MessageResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.hateoas.Resources;
@@ -60,6 +61,12 @@ public class MessageController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMessage(@PathVariable int id) throws Exception{
         messageService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteMessage(@PathVariable List<Integer> ids) throws Exception{
+        ids.forEach(id -> messageService.deleteById(id));
         return ResponseEntity.ok().build();
     }
 
