@@ -202,9 +202,8 @@ public class SchedulerController {
     }
 
     @DeleteMapping("/all")
-    public ResponseEntity<?> deleteAll(@RequestBody Map<String, Object> response) throws Exception {
-        ArrayList<Integer> schedulerIds = (ArrayList<Integer>) response.get("schedulerIds");
-        schedulerService.deleteAllById(schedulerIds);
+    public ResponseEntity<?> deleteSchedularByIdIn(@RequestBody List<Integer> ids) throws Exception {
+        schedulerService.deleteAllById(ids);
         return ResponseEntity.noContent().build();
     }
 
