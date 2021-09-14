@@ -99,6 +99,7 @@ const fetchInvokerRejected = (error) => {
         payload: error
     });
 };
+
 /**
  * fetch default invokers
  * @returns {{type: string}}
@@ -133,8 +134,46 @@ const fetchDefaultInvokersRejected = (error) => {
     });
 };
 
+/**
+ * check name
+ * @param name
+ * @returns {{type: string, payload: {}}}
+ */
+const checkName = (name) => {
+    return {
+        type: InvokersAction.CHECK_NAME,
+        payload: name,
+    };
+};
+
+/**
+ * check name fulfilled
+ * @param result
+ * @returns {{type: string, payload: {}}}
+ */
+const checkNameFulfilled = (result) => {
+    return {
+        type: InvokersAction.CHECK_NAME_FULFILLED,
+        payload: result,
+    };
+};
+
+/**
+ * check name rejected
+ * @param error
+ * @returns {promise}
+ */
+const checkNameRejected = (error) => {
+    return Rx.Observable.of({
+        type: InvokersAction.CHECK_NAME_REJECTED,
+        payload: error
+    });
+};
 
 export {
+    checkName,
+    checkNameFulfilled,
+    checkNameRejected,
     fetchInvokers,
     fetchInvokersFulfilled,
     fetchInvokersRejected,

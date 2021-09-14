@@ -17,7 +17,7 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchUsers, fetchUsersCanceled} from '@actions/users/fetch';
-import {deleteUser} from '@actions/users/delete';
+import {deleteUser, deleteUsers} from '@actions/users/delete';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -37,6 +37,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingUsers: users.get('fetchingUsers'),
         deletingUser: users.get('deletingUser'),
+        deletingUsers: users.get('deletingUsers'),
         currentUser: users.get('user'),
         users: users.get('users').toJS(),
         isCanceled: users.get('isCanceled'),
@@ -68,7 +69,7 @@ function filterUserSteps(tourSteps){
 /**
  * List of Users
  */
-@connect(mapStateToProps, {fetchUsers, fetchUsersCanceled, deleteUser})
+@connect(mapStateToProps, {fetchUsers, fetchUsersCanceled, deleteUser, deleteUsers})
 @permission(UserPermissions.READ, true)
 @withTranslation('users')
 @ListComponent('users')
@@ -80,7 +81,7 @@ class UsersList extends Component{
     }
 
     render(){
-        const {t, users, deleteUser, params, setTotalPages, authUser, openTour, deletingUser, currentUser} = this.props;
+        const {t, users, deleteUser, params, setTotalPages, authUser, openTour, deletingUser, currentUser, deleteUsers, deletingUsers} = this.props;
         let exceptionUsers = [authUser.userId];
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
@@ -98,7 +99,8 @@ class UsersList extends Component{
         let listViewData = {
             entityIdName: 'id',
             entityIdsName: 'userIds',
-            deleteSelected: () => {},
+            deleteSelected: deleteUsers,
+            isDeletingSelected: deletingUsers === API_REQUEST_STATE.START,
             map: (user) => {
                 return [{name: 'id', value: user.id}, {name: 'email', label: t('LIST.EMAIL'), value: user.email, width: '30%'}, {name: 'groups', label: t('LIST.ASSIGNED_GROUPS'), value: user.userGroups.name}]
             },

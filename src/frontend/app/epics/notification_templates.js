@@ -27,6 +27,7 @@ import {
 } from '@actions/notification_templates/update';
 import {
     deleteNotificationTemplateFulfilled, deleteNotificationTemplateRejected,
+    deleteNotificationTemplatesFulfilled, deleteNotificationTemplatesRejected,
 } from '@actions/notification_templates/delete';
 
 import {doRequest} from "@utils/auth";
@@ -118,6 +119,22 @@ const deleteNotificationTemplateEpic = (action$, store) => {
         });
 };
 
+/**
+ * delete notification templates by ids
+ */
+const deleteNotificationTemplatesEpic = (action$, store) => {
+    return action$.ofType(NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.DELETE, data},{
+                    success: deleteNotificationTemplatesFulfilled,
+                    reject: deleteNotificationTemplatesRejected,},
+                res => {return {ids: action.payload};}
+            );
+        });
+};
 
 
 
@@ -127,4 +144,5 @@ export {
     addNotificationTemplateEpic,
     updateNotificationTemplateEpic,
     deleteNotificationTemplateEpic,
+    deleteNotificationTemplatesEpic,
 };

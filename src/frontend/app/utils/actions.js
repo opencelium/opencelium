@@ -204,6 +204,9 @@ export const ConnectorsAction = {
  * invokers' actions for redux state
  */
 export const InvokersAction = {
+    CHECK_NAME:                       'CHECK_NAME',
+    CHECK_NAME_FULFILLED:             'CHECK_NAME_FULFILLED',
+    CHECK_NAME_REJECTED:              'CHECK_NAME_REJECTED',
     FETCH_INVOKERS:                      'FETCH_INVOKERS',
     FETCH_INVOKERS_FULFILLED:            'FETCH_INVOKERS_FULFILLED',
     FETCH_INVOKERS_REJECTED:             'FETCH_INVOKERS_REJECTED',

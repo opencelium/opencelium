@@ -28,7 +28,12 @@ import {
 import {updateUserFulfilled, updateUserRejected,updateUserDetailFulfilled, updateUserDetailRejected,
     updateProfilePicture, updateProfilePictureFulfilled, updateProfilePictureRejected,
 } from '@actions/users/update';
-import {deleteUserFulfilled, deleteUserRejected} from '@actions/users/delete';
+import {
+    deleteUserFulfilled,
+    deleteUserRejected,
+    deleteUsersFulfilled,
+    deleteUsersRejected
+} from '@actions/users/delete';
 import {doRequest} from "@utils/auth";
 import {isString} from "@utils/app";
 import {API_METHOD} from "@utils/constants/app";
@@ -214,9 +219,26 @@ const deleteUserEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
-                success: deleteUserFulfilled,
-                reject: deleteUserRejected,},
+                    success: deleteUserFulfilled,
+                    reject: deleteUserRejected,},
                 res => {return {...action.payload};}
+            );
+        });
+};
+
+/**
+ * delete users by ids
+ */
+const deleteUsersEpic = (action$, store) => {
+    return action$.ofType(UsersAction.DELETE_USERS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.DELETE, data},{
+                    success: deleteUsersFulfilled,
+                    reject: deleteUsersRejected,},
+                res => {return {ids: action.payload};}
             );
         });
 };
@@ -232,4 +254,5 @@ export {
     addProfilePictureEpic,
     updateProfilePictureEpic,
     checkUserEmailEpic,
+    deleteUsersEpic,
 };

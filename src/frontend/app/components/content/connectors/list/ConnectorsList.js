@@ -18,7 +18,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchConnectors, fetchConnectorsCanceled} from '@actions/connectors/fetch';
 import {addConnectorIcon} from "@actions/connectors/add";
-import {deleteConnector} from '@actions/connectors/delete';
+import {deleteConnector, deleteConnectors} from '@actions/connectors/delete';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -41,6 +41,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingConnectors: connectors.get('fetchingConnectors'),
         deletingConnector: connectors.get('deletingConnector'),
+        deletingConnectors: connectors.get('deletingConnectors'),
         addingConnectorIcon: connectors.get('addingConnectorIcon'),
         connectors: connectors.get('connectors').toJS(),
         currentConnector: connectors.get('connector'),
@@ -73,7 +74,7 @@ function filterConnectorSteps(tourSteps){
 /**
  * List of the Connectors
  */
-@connect(mapStateToProps, {fetchConnectors, fetchConnectorsCanceled, deleteConnector, addConnectorIcon})
+@connect(mapStateToProps, {fetchConnectors, fetchConnectorsCanceled, deleteConnector, deleteConnectors, addConnectorIcon})
 @permission(ConnectorPermissions.READ, true)
 @withTranslation('connectors')
 @ListComponent('connectors')
@@ -85,7 +86,7 @@ class ConnectorsList extends Component{
     }
 
     render(){
-        const {authUser, t, connectors, deleteConnector, params, setTotalPages, openTour, addConnectorIcon, addingConnectorIcon, deletingConnector, currentConnector} = this.props;
+        const {authUser, t, connectors, deleteConnector, params, setTotalPages, openTour, addConnectorIcon, addingConnectorIcon, deletingConnector, deleteConnectors, currentConnector, deletingConnectors} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -93,7 +94,8 @@ class ConnectorsList extends Component{
         let listViewData = {
             entityIdName: 'id',
             entityIdsName: 'connectorIds',
-            deleteSelected: () => {},
+            deleteSelected: deleteConnectors,
+            isDeletingSelected: deletingConnectors === API_REQUEST_STATE.START,
             map: (connector) => {
                 return [{name: 'id', value: connector.id}, {name: 'name', label: t('LIST.NAME'), value: connector.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: connector.description, width: '25%'}, {name: 'invoker', label: t('LIST.INVOKER'), value: connector.invoker.name}]
             },

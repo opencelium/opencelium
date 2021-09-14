@@ -17,7 +17,7 @@ import {List, fromJS} from 'immutable';
 
 import {SchedulesAction, WebHooksAction} from '../utils/actions';
 import { addScheduleSubscriber, updateScheduleSubscriber, deleteScheduleSubscriber, deleteSchedulesSubscriber } from '../utils/socket/schedules';
-import {isArray, isEmptyObject} from '../utils/app';
+import {isArray} from '../utils/app';
 import {API_REQUEST_STATE} from "../utils/constants/app";
 
 
@@ -304,17 +304,13 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingSchedules', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
         case SchedulesAction.DELETE_SCHEDULES_FULFILLED:
             deleteSchedulesSubscriber(action.payload);
-            for(let i = 0; i < action.payload.schedulerIds.length; i++) {
+            for(let i = 0; i < action.payload.ids.length; i++) {
                 indexes.push(schedules.findIndex(function (schedule) {
-                    return schedule.schedulerId === action.payload.schedulerIds[i];
+                    return schedule.schedulerId === action.payload.ids[i];
                 }));
             }
             if(indexes.length >= 0) {
-                for(let i = indexes.length - 1; i >= 0; i--){
-                    if(indexes[i] >= 0) {
-                        schedules = schedules.delete(indexes[i]);
-                    }
-                }
+                schedules = schedules.filter((u, key) => indexes.indexOf(key) === -1);
                 return state.set('deletingSchedules', API_REQUEST_STATE.FINISH).set('schedules', schedules);
             }
             return state.set('deletingSchedules', API_REQUEST_STATE.FINISH);

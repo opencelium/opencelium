@@ -30,6 +30,7 @@ const initialState = fromJS({
     updatingConnectorIcon: API_REQUEST_STATE.INITIAL,
     fetchingConnectors: API_REQUEST_STATE.INITIAL,
     deletingConnector: API_REQUEST_STATE.INITIAL,
+    deletingConnectors: API_REQUEST_STATE.INITIAL,
     testingConnector: API_REQUEST_STATE.INITIAL,
     connector: {},
     testResult: null,
@@ -42,12 +43,14 @@ const initialState = fromJS({
 let connectors = [];
 let connector = {};
 let index = 0;
+let indexes = [];
 
 /**
  * redux reducer for connectors
  */
 const reducer = (state = initialState, action) => {
     connectors = state.get('connectors');
+    indexes = [];
     switch (action.type) {
         case ConnectorsAction.CHECK_CONNECTORTITLE:
             return state.set('checkingConnectorTitle', API_REQUEST_STATE.START).set('checkTitleResult', null).set('error', null);
@@ -141,6 +144,21 @@ const reducer = (state = initialState, action) => {
             return state.set('testingConnector', API_REQUEST_STATE.FINISH).set('testResult', action.payload);
         case ConnectorsAction.TEST_CONNECTOR_REJECTED:
             return state.set('testingConnector', API_REQUEST_STATE.ERROR).set('testResult', action.payload);
+        case ConnectorsAction.DELETE_CONNECTORS:
+            return state.set('deletingConnectors', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case ConnectorsAction.DELETE_CONNECTORS_FULFILLED:
+            for(let i = 0; i < action.payload.ids.length; i++) {
+                indexes.push(connectors.findIndex(function (connector) {
+                    return connector.id === action.payload.ids[i];
+                }));
+            }
+            if(indexes.length >= 0) {
+                connectors = connectors.filter((u, key) => indexes.indexOf(key) === -1);
+                return state.set('deletingConnectors', API_REQUEST_STATE.FINISH).set('connectors', connectors);
+            }
+            return state.set('deletingConnectors', API_REQUEST_STATE.FINISH);
+        case ConnectorsAction.DELETE_CONNECTORS_REJECTED:
+            return state.set('deletingConnectors', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

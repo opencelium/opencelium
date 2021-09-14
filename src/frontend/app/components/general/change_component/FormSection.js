@@ -110,7 +110,7 @@ class FormSection extends Component{
      * to map Field Inputs correspondingly
      */
     mapInputs(data, key){
-        const {entity, updateEntity, renderNavigationComponent, renderValidationMessage} = this.props;
+        const {entity, updateEntity, renderNavigationComponent, renderValidationMessage, clearValidationMessage} = this.props;
         switch(data.type){
             case 'select+description':
                 return <FormSelectDescription
@@ -240,6 +240,7 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
+                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'invoker_authentication':
                 return <FormAuthentication
@@ -254,6 +255,7 @@ class FormSection extends Component{
                     entity={entity}
                     updateEntity={updateEntity}
                     data={data}
+                    clearValidationMessage={clearValidationMessage}
                 />;
             case 'user_title':
                 return <FormUserTitle

@@ -33,7 +33,7 @@ const initialState = fromJS({
     fetchingUserGroups: API_REQUEST_STATE.INITIAL,
     deletingUserGroup: API_REQUEST_STATE.INITIAL,
     deletingUserGroupIcon: API_REQUEST_STATE.INITIAL,
-    deletingUserGroups: false,
+    deletingUserGroups: API_REQUEST_STATE.INITIAL,
     userGroup: {},
     userGroups: List([]),
     error: null,
@@ -136,17 +136,13 @@ const reducer = (state = initialState, action) => {
         case UserGroupsAction.DELETE_USERGROUPS:
             return state.set('deletingUserGroups', true).set('isRejected', false).set('isCanceled', false).set('error', null);
         case UserGroupsAction.DELETE_USERGROUPS_FULFILLED:
-            for(let i = 0; i < action.payload.userGroupIds.length; i++) {
+            for(let i = 0; i < action.payload.ids.length; i++) {
                 indexes.push(userGroups.findIndex(function (group) {
-                    return group.id === action.payload.userGroupIds[i];
+                    return group.id === action.payload.ids[i];
                 }));
             }
             if(indexes.length >= 0) {
-                for(let i = indexes.length - 1; i >= 0; i--){
-                    if(indexes[i] >= 0) {
-                        userGroups = userGroups.delete(indexes[i]);
-                    }
-                }
+                userGroups = userGroups.filter((u, key) => indexes.indexOf(key) === -1);
                 return state.set('deletingUserGroups', false).set('userGroups', userGroups);
             }
             return state.set('deletingUserGroups', false);

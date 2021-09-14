@@ -19,7 +19,7 @@ import {
 import {
     fetchUserEpic, fetchUsersEpic, addUserEpic, addProfilePictureEpic,
     updateUserEpic, updateProfilePictureEpic, updateUserDetailEpic, deleteUserEpic,
-    checkUserEmailEpic,
+    checkUserEmailEpic, deleteUsersEpic,
 } from '@epics/users';
 import {
     addUserGroupEpic, addGroupIconEpic, deleteUserGroupEpic, fetchUserGroupEpic,
@@ -40,7 +40,7 @@ import {
 } from '@epics/connectors';
 import {
     fetchInvokersEpic, fetchInvokerEpic, addInvokerEpic,
-    updateInvokerEpic, deleteInvokerEpic, fetchDefaultInvokersEpic,
+    updateInvokerEpic, deleteInvokerEpic, fetchDefaultInvokersEpic, deleteInvokersEpic,
 } from '@epics/invokers';
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
@@ -51,7 +51,7 @@ import {
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
     importTemplateEpic, exportTemplateEpic, convertTemplateEpic,
-    convertTemplatesEpic
+    convertTemplatesEpic, deleteTemplatesEpic
 } from '@epics/templates';
 import {
     fetchScheduleEpic, fetchSchedulesEpic, addScheduleEpic,
@@ -77,7 +77,7 @@ import {
 } from "@epics/app";
 import {
     fetchNotificationTemplatesEpic, fetchNotificationTemplateEpic, addNotificationTemplateEpic,
-    updateNotificationTemplateEpic, deleteNotificationTemplateEpic,
+    updateNotificationTemplateEpic, deleteNotificationTemplateEpic, deleteNotificationTemplatesEpic,
 } from '@epics/notification_templates';
 import {
     fetchUpdateAppVersionEpic, fetchOfflineUpdatesEpic, fetchOnlineUpdatesEpic, deleteVersionEpic,
@@ -105,6 +105,7 @@ export default combineEpics(
     addProfilePictureEpic,
     updateUserEpic,
     deleteUserEpic,
+    deleteUsersEpic,
     updateUserDetailEpic,
     addUserGroupEpic,
     addGroupIconEpic,
@@ -131,6 +132,7 @@ export default combineEpics(
     addInvokerEpic,
     updateInvokerEpic,
     deleteInvokerEpic,
+    deleteInvokersEpic,
     fetchDefaultInvokersEpic,
     testConnectorEpic,
     checkConnectorTitleEpic,
@@ -168,6 +170,7 @@ export default combineEpics(
     triggerScheduleEpic,
     triggerScheduleSuccessEpic,
     deleteTemplateEpic,
+    deleteTemplatesEpic,
     fetchTemplatesEpic,
     addTemplateEpic,
     convertTemplateEpic,
@@ -191,6 +194,7 @@ export default combineEpics(
     addNotificationTemplateEpic,
     updateNotificationTemplateEpic,
     deleteNotificationTemplateEpic,
+    deleteNotificationTemplatesEpic,
     checkConnectionEpic,
     fetchUpdateAppVersionEpic,
     fetchOfflineUpdatesEpic,

@@ -86,7 +86,7 @@ class Form extends React.Component{
 
     render(){
         const {entity} = this.state;
-        const {contents, translations, permissions, isActionInProcess, additionalButtons} = this.props;
+        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage} = this.props;
         const hasActionButton = translations && translations.action_button;
         const hasListButton = translations && translations.list_button;
         return(
@@ -124,6 +124,7 @@ class Form extends React.Component{
                                                 form={form}
                                                 contents={contents}
                                                 entity={entity}
+                                                clearValidationMessage={clearValidationMessage}
                                                 updateEntity={::this.updateEntity}
                                             />
                                         );
@@ -135,6 +136,7 @@ class Form extends React.Component{
                                                 content={form}
                                                 entity={entity}
                                                 updateEntity={::this.updateEntity}
+                                                clearValidationMessage={clearValidationMessage}
                                             />
                                         );
                                     }

@@ -18,7 +18,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchTemplates} from '@actions/templates/fetch';
 import {convertTemplates, convertTemplatesRejected} from "@actions/templates/update";
-import {deleteTemplate} from '@actions/templates/delete';
+import {deleteTemplate, deleteTemplates} from '@actions/templates/delete';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -49,6 +49,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingTemplates: templates.get('fetchingTemplates'),
         deletingTemplate: templates.get('deletingTemplate'),
+        deletingTemplates: templates.get('deletingTemplates'),
         currentTemplate: templates.get('template'),
         exportedTemplate: templates.get('exportedTemplate'),
         exportingTemplate: templates.get('exportingTemplate'),
@@ -83,7 +84,7 @@ function filterTemplateSteps(tourSteps){
 /**
  * List of the Templates
  */
-@connect(mapStateToProps, {fetchTemplates, deleteTemplate, convertTemplates, convertTemplatesRejected})
+@connect(mapStateToProps, {fetchTemplates, deleteTemplate, deleteTemplates, convertTemplates, convertTemplatesRejected})
 @permission(TemplatePermissions.READ, true)
 @withTranslation('templates')
 @ListComponent('templates')
@@ -120,7 +121,7 @@ class TemplatesList extends Component{
     }
 
     render(){
-        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates, deletingTemplate, currentTemplate} = this.props;
+        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates, deleteTemplates, deletingTemplate, deletingTemplates, currentTemplate} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}]};
         translations.add_button = t('LIST.IMPORT_BUTTON');
@@ -135,7 +136,8 @@ class TemplatesList extends Component{
             entityIdsName: 'templateIds',
             renderItemActions: renderListViewItemActions,
             isItemActionsBefore: true,
-            deleteSelected: () => {},
+            deleteSelected: deleteTemplates,
+            isDeletingSelected: deletingTemplates === API_REQUEST_STATE.START,
             map: (template) => {
                 return [{name: 'id', value: template.templateId}, {name: 'name', label: t('LIST.NAME'), value: template.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: template.description}, {name: 'from_invoker', label: t('LIST.FROM_INVOKER'), value: template.connection.fromConnector.invoker.name, width: '20%'}, {name: 'to_invoker', label: t('LIST.TO_INVOKER'), value: template.connection.toConnector.invoker.name, width: '20%'}]
             },

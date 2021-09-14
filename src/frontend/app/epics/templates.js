@@ -23,7 +23,10 @@ import {
     addTemplateFulfilled, addTemplateRejected,
     importTemplateFulfilled, importTemplateRejected,
 } from '@actions/templates/add';
-import {deleteTemplateFulfilled, deleteTemplateRejected} from '@actions/templates/delete';
+import {
+    deleteTemplateFulfilled, deleteTemplateRejected,
+    deleteTemplatesFulfilled, deleteTemplatesRejected,
+} from '@actions/templates/delete';
 import {doRequest} from "@utils/auth";
 import {API_METHOD} from "@utils/constants/app";
 import {
@@ -135,6 +138,23 @@ const deleteTemplateEpic = (action$, store) => {
 };
 
 /**
+ * delete templates by ids
+ */
+const deleteTemplatesEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.DELETE_TEMPLATES)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.DELETE, data},{
+                    success: deleteTemplatesFulfilled,
+                    reject: deleteTemplatesRejected,},
+                res => {return {ids: action.payload};}
+            );
+        });
+};
+
+/**
  * import template
  */
 const importTemplateEpic = (action$, store) => {
@@ -175,6 +195,7 @@ export {
     convertTemplateEpic,
     convertTemplatesEpic,
     deleteTemplateEpic,
+    deleteTemplatesEpic,
     importTemplateEpic,
     exportTemplateEpic,
 };

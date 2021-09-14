@@ -438,12 +438,12 @@ const deleteSchedulesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.DELETE_SCHEDULES)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/all`;
+            let url = `${urlPrefix}`;
             let data = action.payload;
             return doRequest({url, method: API_METHOD.DELETE, data},{
                 success: deleteSchedulesFulfilled,
                 reject: deleteSchedulesRejected,},
-                res => {return {schedulerIds: data.schedulerIds};}
+                res => {return {ids: action.payload};}
             );
         });
 };

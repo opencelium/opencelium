@@ -17,7 +17,7 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchConnections, fetchConnectionsCanceled} from '@actions/connections/fetch';
-import {deleteConnection} from '@actions/connections/delete';
+import {deleteConnection, deleteConnections} from '@actions/connections/delete';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -38,6 +38,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingConnections: connections.get('fetchingConnections'),
         deletingConnection: connections.get('deletingConnection'),
+        deletingConnections: connections.get('deletingConnections'),
         currentConnection: connections.get('connection'),
         connections: connections.get('connections').toJS(),
         isCanceled: connections.get('isCanceled'),
@@ -69,7 +70,7 @@ function filterConnectionSteps(tourSteps){
 /**
  * List of the Connections
  */
-@connect(mapStateToProps, {fetchConnections, fetchConnectionsCanceled, deleteConnection})
+@connect(mapStateToProps, {fetchConnections, fetchConnectionsCanceled, deleteConnection, deleteConnections})
 @permission(ConnectionPermissions.READ, true)
 @withTranslation('connections')
 @ListComponent('connections')
@@ -81,7 +82,7 @@ class ConnectionsList extends Component{
     }
 
     render(){
-        const {authUser, t, connections, deleteConnection, params, setTotalPages, openTour, deletingConnection, currentConnection} = this.props;
+        const {authUser, t, connections, deleteConnection, params, setTotalPages, openTour, deleteConnections, deletingConnection, deletingConnections, currentConnection} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -89,7 +90,8 @@ class ConnectionsList extends Component{
         let listViewData = {
             entityIdName: 'connectionId',
             entityIdsName: 'connectionIds',
-            deleteSelected: () => {},
+            deleteSelected: deleteConnections,
+            isDeletingSelected: deletingConnections === API_REQUEST_STATE.START,
             map: (connection) => {
                 return [{name: 'id', value: connection.connectionId}, {name: 'title', label: t('LIST.TITLE'), value: connection.title, width: '15%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: connection.description}, {name: 'from_connector', label: t('LIST.FROM_CONNECTOR'), value: connection.fromConnector.title, width: '15%'}, {name: 'to_connector', label: t('LIST.TO_CONNECTOR'), value: connection.toConnector.title, width: '15%'}]
             },

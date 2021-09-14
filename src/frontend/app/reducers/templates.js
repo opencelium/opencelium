@@ -14,9 +14,9 @@
  */
 import {List, fromJS} from 'immutable';
 
-import {TemplatesAction} from '../utils/actions';
-import {isArray} from "../utils/app";
-import {API_REQUEST_STATE} from "../utils/constants/app";
+import {TemplatesAction} from '@utils/actions';
+import {isArray} from "@utils/app";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const initialState = fromJS({
@@ -24,6 +24,7 @@ const initialState = fromJS({
     updatingTemplate: API_REQUEST_STATE.INITIAL,
     fetchingTemplates: API_REQUEST_STATE.INITIAL,
     deletingTemplate: API_REQUEST_STATE.INITIAL,
+    deletingTemplates: API_REQUEST_STATE.INITIAL,
     exportingTemplate: API_REQUEST_STATE.INITIAL,
     importingTemplate: API_REQUEST_STATE.INITIAL,
     template: {},
@@ -38,6 +39,7 @@ const initialState = fromJS({
 let templates = [];
 let convertingTemplates = [];
 let index = 0;
+let indexes = [];
 
 /**
  * redux reducer for templates
@@ -45,6 +47,7 @@ let index = 0;
 const reducer = (state = initialState, action) => {
     templates = state.get('templates');
     convertingTemplates = state.get('convertingTemplates');
+    indexes = [];
     switch (action.type) {
         case TemplatesAction.ADD_TEMPLATE:
             return state.set('addingTemplate', API_REQUEST_STATE.START).set('error', null);
@@ -133,6 +136,21 @@ const reducer = (state = initialState, action) => {
             return state.set('exportingTemplate', API_REQUEST_STATE.FINISH);
         case TemplatesAction.EXPORT_TEMPLATE_REJECTED:
             return state.set('exportingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case TemplatesAction.DELETE_TEMPLATES:
+            return state.set('deletingTemplates', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case TemplatesAction.DELETE_TEMPLATES_FULFILLED:
+            for(let i = 0; i < action.payload.ids.length; i++) {
+                indexes.push(templates.findIndex(function (template) {
+                    return template.templateId === action.payload.ids[i];
+                }));
+            }
+            if(indexes.length >= 0) {
+                templates = templates.filter((u, key) => indexes.indexOf(key) === -1);
+                return state.set('deletingTemplates', API_REQUEST_STATE.FINISH).set('templates', templates);
+            }
+            return state.set('deletingTemplates', API_REQUEST_STATE.FINISH);
+        case TemplatesAction.DELETE_TEMPLATES_REJECTED:
+            return state.set('deletingTemplates', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

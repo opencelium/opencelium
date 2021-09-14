@@ -179,7 +179,7 @@ class SchedulesList extends Component{
         const {deleteSchedules} = this.props;
         let schedulerIds = checks.filter(c => c.value);
         schedulerIds = schedulerIds.map(c => c.id);
-        deleteSchedules({schedulerIds});
+        deleteSchedules(schedulerIds);
         this.setState({
             showConfirm: false,
         });
