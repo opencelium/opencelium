@@ -29,9 +29,9 @@ class FormConnection extends Component{
         super(props);
     }
 
-    updateEntity(){
+    updateEntity(name){
         const {entity, updateEntity} = this.props;
-        updateEntity(entity);
+        updateEntity(entity, name);
     }
 
     render(){

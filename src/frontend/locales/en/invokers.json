@@ -29,7 +29,7 @@
       "HINT_4": "Provide request and response operations"
     },
     "VALIDATION_MESSAGES":{
-      "TITLE_REQUIRED": "Title is a required field",
+      "NAME_REQUIRED": "Name is a required field",
       "AUTH_REQUIRED": "Authorization is a required field",
       "CONNECTION_NAME_REQUIRED": "Name of the connection is a required field",
       "CONNECTION_METHOD_REQUIRED": "Method of the connection is a required field"

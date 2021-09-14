@@ -26,6 +26,7 @@ const initialState = fromJS({
     addingNotificationTemplate: API_REQUEST_STATE.INITIAL,
     updatingNotificationTemplate: API_REQUEST_STATE.INITIAL,
     deletingNotificationTemplate: API_REQUEST_STATE.INITIAL,
+    deletingNotificationTemplates: API_REQUEST_STATE.INITIAL,
     notificationTemplate: null,
     notificationTemplates: List([]),
     error: null,
@@ -35,11 +36,13 @@ const initialState = fromJS({
 let notificationTemplates = [];
 let notificationTemplate = {};
 let index = 0;
+let indexes = [];
 /**
  * redux reducer for Notification Templates
  */
 const reducer = (state = initialState, action) => {
     notificationTemplates = state.get('notificationTemplates');
+    indexes = [];
     switch (action.type) {
         case NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATES:
             return state.set('fetchingNotificationTemplates', API_REQUEST_STATE.START).set('error', null);
@@ -89,6 +92,21 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingNotificationTemplate', API_REQUEST_STATE.FINISH).set('notificationTemplate', null);
         case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE_REJECTED:
             return state.set('deletingNotificationTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload).set('notificationTemplate', null);
+        case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES:
+            return state.set('deletingNotificationTemplates', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES_FULFILLED:
+            for(let i = 0; i < action.payload.ids.length; i++) {
+                indexes.push(notificationTemplates.findIndex(function (notificationTemplate) {
+                    return notificationTemplate.id === action.payload.ids[i];
+                }));
+            }
+            if(indexes.length >= 0) {
+                notificationTemplates = notificationTemplates.filter((u, key) => indexes.indexOf(key) === -1);
+                return state.set('deletingNotificationTemplates', API_REQUEST_STATE.FINISH).set('notificationTemplates', notificationTemplates);
+            }
+            return state.set('deletingNotificationTemplates', API_REQUEST_STATE.FINISH);
+        case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES_REJECTED:
+            return state.set('deletingNotificationTemplates', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

@@ -211,12 +211,12 @@ const deleteConnectorsEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.DELETE_CONNECTORS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/all`;
+            let url = `${urlPrefix}`;
             let data = action.payload;
             return doRequest({url, method: API_METHOD.DELETE, data},{
                     success: deleteConnectorsFulfilled,
                     reject: deleteConnectorsRejected,},
-                res => {return {connectorIds: data.connectorIds};}
+                res => {return {ids: action.payload};}
             );
         });
 };

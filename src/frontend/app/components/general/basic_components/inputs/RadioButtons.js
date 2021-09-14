@@ -32,12 +32,12 @@ class RadioButtons extends React.Component{
     }
 
     renderRadios(){
-        const {radios, value} = this.props;
-        return radios.map(radio => {
+        const {radios, value, id} = this.props;
+        return radios.map((radio, index) => {
             const {label, inputStyle, labelStyle, inputClassName, labelClassName, ...props} = radio;
             return(
                 <React.Fragment key={label}>
-                    <Input type="radio" {...props} checked={value === radio.value} onChange={::this.onChange} style={inputStyle} className={inputClassName ? inputClassName : ''}/>
+                    <Input id={index === 0 ? id : `${id}_${index}`}type="radio" {...props} checked={value === radio.value} onChange={::this.onChange} style={inputStyle} className={inputClassName ? inputClassName : ''}/>
                     <span onClick={() => ::this.onChange({target: {value: radio.value}})} className={`${styles.radio_button_label} ${labelClassName ? labelClassName : ''}`} style={labelStyle}>{label}</span>
                 </React.Fragment>
             );

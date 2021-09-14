@@ -27,6 +27,7 @@ const initialState = fromJS({
     addingInvoker: API_REQUEST_STATE.INITIAL,
     updatingInvoker: API_REQUEST_STATE.INITIAL,
     deletingInvoker: API_REQUEST_STATE.INITIAL,
+    deletingInvokers: API_REQUEST_STATE.INITIAL,
     invoker: null,
     invokers: List([]),
     defaultInvokers: List([]),
@@ -39,12 +40,14 @@ let invokers = [];
 let defaultInvokers = [];
 let invoker = {};
 let index = 0;
+let indexes = [];
 /**
  * redux reducer for invokers
  */
 const reducer = (state = initialState, action) => {
     invokers = state.get('invokers');
     defaultInvokers = state.get('defaultInvokers');
+    indexes = [];
     switch (action.type) {
         case InvokersAction.FETCH_INVOKERS:
             return state.set('fetchingInvokers', API_REQUEST_STATE.START).set('error', null);
@@ -105,6 +108,21 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingInvoker', API_REQUEST_STATE.FINISH).set('invoker', null);
         case InvokersAction.DELETE_INVOKER_REJECTED:
             return state.set('deletingInvoker', API_REQUEST_STATE.ERROR).set('error', action.payload).set('invoker', null);
+        case InvokersAction.DELETE_INVOKERS:
+            return state.set('deletingInvokers', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case InvokersAction.DELETE_INVOKERS_FULFILLED:
+            for(let i = 0; i < action.payload.ids.length; i++) {
+                indexes.push(invokers.findIndex(function (invoker) {
+                    return invoker.name === action.payload.ids[i];
+                }));
+            }
+            if(indexes.length >= 0) {
+                invokers = invokers.filter((u, key) => indexes.indexOf(key) === -1);
+                return state.set('deletingInvokers', API_REQUEST_STATE.FINISH).set('invokers', invokers);
+            }
+            return state.set('deletingInvokers', API_REQUEST_STATE.FINISH);
+        case InvokersAction.DELETE_INVOKERS_REJECTED:
+            return state.set('deletingInvokers', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

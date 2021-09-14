@@ -37,6 +37,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingUserGroups: userGroups.get('fetchingUserGroups'),
         deletingUserGroup: userGroups.get('deletingUserGroup'),
+        deletingUserGroups: userGroups.get('deletingUserGroups'),
         currentUserGroup: userGroups.get('userGroup'),
         userGroups: userGroups.get('userGroups').toJS(),
         isCanceled: userGroups.get('isCanceled'),
@@ -80,7 +81,7 @@ class UserGroupsList extends Component{
     }
 
     render(){
-        const {authUser, t, userGroups, deleteUserGroup, deleteUserGroups, params, setTotalPages, openTour, deletingUserGroup, currentUserGroup} = this.props;
+        const {authUser, t, userGroups, deleteUserGroup, deleteUserGroups, params, setTotalPages, openTour, deletingUserGroup, currentUserGroup, deletingUserGroups} = this.props;
         let exceptionUserGroups = authUser && authUser.hasOwnProperty('userGroup') && authUser.userGroup && authUser.userGroup.hasOwnProperty('groupId') ? [authUser.userGroup.groupId] : [];
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
@@ -90,6 +91,7 @@ class UserGroupsList extends Component{
             entityIdName: 'id',
             entityIdsName: 'userGroupIds',
             deleteSelected: deleteUserGroups,
+            isDeletingSelected: deletingUserGroups === API_REQUEST_STATE.START,
             map: (userGroup) => {
                 return [{name: 'id', value: userGroup.id}, {name: 'name', label: t('LIST.NAME'), value: userGroup.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: userGroup.description, width: '25%'}, {name: 'components', label: t('LIST.COMPONENTS'), value: userGroup.components.map(component => t(`app:COMPONENTS.${component.name}`)).join(', ')}]
             },

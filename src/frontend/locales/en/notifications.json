@@ -7,6 +7,7 @@
     "UPDATE_PROFILEPICTURE": "The user was successfully updated.",
     "UPDATE_USERDETAIL": "The userdetail was successfully updated.",
     "DELETE_USER": "The user <1><0>{{email}}</0></1> was successfully removed.",
+    "DELETE_USERS": "The selected users were successfully removed.",
     "UPDATE_AUTH_USER_LANGUAGE": "The language was updated",
     "ADD_USERGROUP": "The user group <1><0>{{name}}</0></1> was successfully added.",
     "ADD_GROUPICON": "The user group {{name}} was successfully added.",
@@ -14,17 +15,20 @@
     "UPDATE_USERGROUP": "The user group <1><0>{{name}}</0></1> was successfully updated.",
     "UPDATE_GROUPICON": "The user group was successfully updated.",
     "DELETE_USERGROUP": "The user group <1><0>{{name}}</0></1> was successfully removed.",
+    "DELETE_USERGROUPS": "The selected user groups were successfully removed.",
     "TEST_CONNECTOR": "Successfully tested!",
     "ADD_CONNECTOR": "The connector <1><0>{{title}}</0></1> was successfully added",
     "ADD_CONNECTORICON": "The icon was successfully uploaded",
     "FETCH_CONNECTORS": "Connectors were successfully fetched",
     "UPDATE_CONNECTOR": "The connector <1><0>{{title}}</0></1> was successfully updated",
     "DELETE_CONNECTOR": "The connector <1><0>{{title}}</0></1> was successfully removed",
+    "DELETE_CONNECTORS": "The selected connectors were successfully removed",
     "CHECK_CONNECTION": "The connection was successfully checked",
     "ADD_CONNECTION": "The connection <1><0>{{title}}</0></1> was successfully added",
     "FETCH_CONNECTIONS": "Connections were successfully fetched",
     "UPDATE_CONNECTION": "The connection <1><0>{{title}}</0></1> was successfully updated",
     "DELETE_CONNECTION": "The connection <1><0>{{title}}</0></1> was successfully removed",
+    "DELETE_CONNECTIONS": "The selected connections were successfully removed",
     "TRIGGER_SCHEDULE": "The job <1><0>{{title}}</0></1> was successfully triggered",
     "TRIGGER_SCHEDULESUCCESS": "The job was successfully finished for 3.41 sec",
     "ADD_SCHEDULE": "The schedule <1><0>{{title}}</0></1> was successfully added",
@@ -43,12 +47,14 @@
     "IMPORT_TEMPLATE": "The Template <1><0>{{name}}</0></1> was successfully imported",
     "EXPORT_TEMPLATE": "The Template <1><0>{{name}}</0></1> was successfully downloaded",
     "DELETE_TEMPLATE": "The template <1><0>{{name}}</0></1> was successfully removed",
+    "DELETE_TEMPLATES": "The selected templates were successfully removed",
     "ADD_WEBHOOK": "The webhook of <1><0>{{name}}</0></1> was successfully created",
     "DELETE_WEBHOOK": "The webhook of <1><0>{{name}}</0></1> was successfully removed",
     "COPYTOCLIPBOARD_WEBHOOK": "The webhook was successfully copied",
-    "ADD_INVOKER": "The invoker <1><0>{{id}}</0></1> was successfully added",
-    "DELETE_INVOKER": "The invoker <1><0>{{id}}</0></1> was successfully removed",
-    "UPDATE_INVOKER": "The invoker <1><0>{{id}}</0></1> was successfully updated",
+    "ADD_INVOKER": "The invoker <1><0>{{name}}</0></1> was successfully added.",
+    "DELETE_INVOKER": "The invoker <1><0>{{name}}</0></1> was successfully removed",
+    "DELETE_INVOKERS": "The selected invokers were successfully removed",
+    "UPDATE_INVOKER": "The invoker <1><0>{{name}}</0></1> was successfully updated",
     "ADD_SCHEDULENOTIFICATION": "The notification <1><0>{{name}}</0></1> of schedule <3><0>{{scheduleTitle}}</0></3> was successfully added",
     "UPDATE_SCHEDULENOTIFICATION": "The notification <1><0>{{name}}</0></1> of schedule <3><0>{{scheduleTitle}}</0></3> was successfully updated",
     "DELETE_SCHEDULENOTIFICATION": "The notification <1><0>{{name}}</0></1> of schedule <3><0>{{scheduleTitle}}</0></3> was successfully removed",
@@ -56,6 +62,7 @@
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were successfully fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template <1><0>{{name}}</0></1> was successfully updated",
     "DELETE_NOTIFICATIONTEMPLATE": "The template <1><0>{{name}}</0></1> was successfully removed",
+    "DELETE_NOTIFICATIONTEMPLATES": "The selected templates were successfully removed",
     "FETCH_UPDATEAPPVERSION": "OC Update <0>{{version}}</0> available",
     "UPLOAD_VERSION": "New version was successfully uploaded",
     "UPDATE_TEMPLATESFORASSISTANT": "Templates were successfully updated",
@@ -75,6 +82,7 @@
     },
     "UPDATE_USERDETAIL": "There is an error updating userdetail.",
     "DELETE_USER": "There is an error deleting user.",
+    "DELETE_USERS": "The selected users were not removed.",
     "LOG_IN": {
       "UNAUTHORIZED": "Wrong email or password",
       "WRONG_CREDENTIALS": "Wrong email or password",
@@ -91,6 +99,7 @@
       "__DEFAULT__": "There is an error updating user group."
     },
     "DELETE_USERGROUP": "There is an error deleting user group.",
+    "DELETE_USERGROUPS": "The selected user groups were not removed.",
     "TEST_CONNECTOR": {
       "COMMUNICATION_FAILED": "Connection was failed",
       "__DEFAULT__": "Unsuccessfully tested"
@@ -112,6 +121,10 @@
       "EXIST_IN_CONNECTION": "This connector is used in connections",
       "__DEFAULT__": "The connector was not removed"
     },
+    "DELETE_CONNECTORS": {
+      "EXIST_IN_CONNECTION": "This connector is used in connections",
+      "__DEFAULT__": "The selected connectors were not removed"
+    },
     "CHECK_CONNECTION": {
       "__DEFAULT__": "The connection was not checked"
     },
@@ -125,6 +138,10 @@
     "DELETE_CONNECTION": {
       "SCHEDULER_NOT_DELETED": "The connection has Schedules. It cannot be removed.",
       "__DEFAULT__": "The connection was not removed"
+    },
+    "DELETE_CONNECTIONS": {
+      "SCHEDULER_NOT_DELETED": "The connection has Schedules. It cannot be removed.",
+      "__DEFAULT__": "The selected connections were not removed"
     },
     "CHECK_NEO4J": {
       "DOWN": "Neo4j is down"
@@ -173,6 +190,7 @@
     "IMPORT_TEMPLATE": "Template was not imported",
     "EXPORT_TEMPLATE": "Template was not downloaded",
     "DELETE_TEMPLATE": "The template was not removed",
+    "DELETE_TEMPLATES": "The selected templates were not removed",
     "ADD_WEBHOOK": {
       "__DEFAULT__": "The webhook was not created",
       "NOT_ENOUGH_DATA": "The webhook does not have enough data to be created"
@@ -185,10 +203,12 @@
     "LOAD_ADMINCARD": "The link to this card does not work, please check your permissions",
     "ADD_INVOKER": "The invoker was not added",
     "DELETE_INVOKER": "The invoker was not removed",
+    "DELETE_INVOKERS": "The selected invokers were not removed",
     "ADD_NOTIFICATIONTEMPLATE": "The template was not added",
     "FETCH_NOTIFICATIONTEMPLATES": "Templates were not fetched",
     "UPDATE_NOTIFICATIONTEMPLATE": "The template was not updated",
     "DELETE_NOTIFICATIONTEMPLATE": "The template was not removed",
+    "DELETE_NOTIFICATIONTEMPLATES": "The selected templates were not removed",
     "UPLOAD_VERSION": {
       "__DEFAULT__": "New version was not uploaded"
     },

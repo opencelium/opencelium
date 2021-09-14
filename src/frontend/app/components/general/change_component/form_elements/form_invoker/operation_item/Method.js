@@ -48,7 +48,7 @@ class Method extends Component{
     chooseMethod(e, method){
         const {operation, updateEntity} = this.props;
         operation.request.method = method;
-        updateEntity();
+        updateEntity('connectionMethod');
     }
 
     renderLabel(){
@@ -63,15 +63,16 @@ class Method extends Component{
 
     render(){
         const {focused} = this.state;
-        const {operation, tourStep, data} = this.props;
+        const {operation, tourStep, data, error} = this.props;
         let {readOnly, required} = data;
         let value = operation.request.method;
         return (
-            <ToolboxThemeInput icon={'public'} tourStep={tourStep} required={required} label={this.renderLabel()} iconClassName={focused ? styles.icon_focused : ''}>
+            <ToolboxThemeInput error={error} icon={'public'} tourStep={tourStep} required={required} label={this.renderLabel()} iconClassName={focused ? styles.icon_focused : ''}>
                 {
                     METHOD_TYPES.map((type, key) => {
                         return (
                             <button
+                                id={'input_connectionMethod'}
                                 key={key}
                                 className={styles.invoker_request_item_method_button}
                                 onClick={readOnly ? null : (e) => ::this.chooseMethod(e, type.value)}

@@ -6,34 +6,34 @@ import Translate from "@components/general/app/Translate";
 import styles from "@themes/default/layout/notification";
 
 const ADD_INVOKER = (params) => {
-    const {id} = params;
+    const {name} = params;
     const openPage = () => {
-        store.dispatch(setSearchValue(id));
+        store.dispatch(setSearchValue(name));
         navigateTo('invokers');
     }
     return (
         <Translate i18nKey="notifications:SUCCESS.ADD_INVOKER">
-            The invoker <span className={styles.link} onClick={openPage}>{id}</span> was successfully added.
+            The invoker <span className={styles.link} onClick={openPage}>{name}</span> was successfully added.
         </Translate>
     );
 }
 const UPDATE_INVOKER = (params) => {
-    const {id} = params;
+    const {name} = params;
     const openPage = () => {
-        store.dispatch(setSearchValue(id));
+        store.dispatch(setSearchValue(name));
         navigateTo('invokers');
     }
     return (
         <Translate i18nKey="notifications:SUCCESS.UPDATE_INVOKER">
-            The invoker <span className={styles.link} onClick={openPage}>{id}</span> was successfully updated.
+            The invoker <span className={styles.link} onClick={openPage}>{name}</span> was successfully updated.
         </Translate>
     );
 }
 const DELETE_INVOKER = (params) => {
-    const {id} = params;
+    const {name} = params;
     return (
         <Translate i18nKey="notifications:SUCCESS.DELETE_INVOKER">
-            The invoker <span className={styles.emphasize}>{id}</span> was successfully removed.
+            The invoker <span className={styles.emphasize}>{name}</span> was successfully removed.
         </Translate>
     );
 }

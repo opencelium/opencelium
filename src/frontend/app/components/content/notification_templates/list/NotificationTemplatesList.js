@@ -17,7 +17,7 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchNotificationTemplates} from '@actions/notification_templates/fetch';
-import {deleteNotificationTemplate} from '@actions/notification_templates/delete';
+import {deleteNotificationTemplate, deleteNotificationTemplates} from '@actions/notification_templates/delete';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -36,6 +36,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingNotificationTemplates: notificationTemplates.get('fetchingNotificationTemplates'),
         deletingNotificationTemplate: notificationTemplates.get('deletingNotificationTemplate'),
+        deletingNotificationTemplates: notificationTemplates.get('deletingNotificationTemplates'),
         currentNotificationTemplate: notificationTemplates.get('notificationTemplate'),
         notificationTemplates: notificationTemplates.get('notificationTemplates').toJS(),
         isCanceled: notificationTemplates.get('isCanceled'),
@@ -67,7 +68,7 @@ function filterNotificationTemplateSteps(tourSteps){
 /**
  * List of the NotificationTemplates
  */
-@connect(mapStateToProps, {fetchNotificationTemplates, deleteNotificationTemplate})
+@connect(mapStateToProps, {fetchNotificationTemplates, deleteNotificationTemplate, deleteNotificationTemplates})
 @permission(NotificationTemplatePermissions.READ, true)
 @withTranslation('notification_templates')
 @ListComponent('notificationTemplates')
@@ -79,7 +80,7 @@ class NotificationTemplatesList extends Component{
     }
 
     render(){
-        const {authUser, t, notificationTemplates, deleteNotificationTemplate, params, setTotalPages, openTour, deletingNotificationTemplate, currentNotificationTemplate} = this.props;
+        const {authUser, t, notificationTemplates, deleteNotificationTemplate, params, setTotalPages, openTour, deleteNotificationTemplates, deletingNotificationTemplate, deletingNotificationTemplates, currentNotificationTemplate} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -87,7 +88,8 @@ class NotificationTemplatesList extends Component{
         let listViewData = {
             entityIdName: 'id',
             entityIdsName: 'notificationTemplateIds',
-            deleteSelected: () => {},
+            deleteSelected: deleteNotificationTemplates,
+            isDeletingSelected: deletingNotificationTemplates === API_REQUEST_STATE.START,
             map: (notificationTemplate) => {
                 return [{name: 'id', value: notificationTemplate.templateId}, {name: 'name', label: t('LIST.NAME'), value: notificationTemplate.name, width: '30%'}, {name: 'type', label: t('LIST.TYPE'), value: notificationTemplate.type, width: '35%'}]
             },

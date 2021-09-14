@@ -22,6 +22,7 @@ import Card from 'react-bootstrap/Card';
 import styles from '@themes/default/general/change_component.scss';
 import COperation, {METHOD_TYPE_TEST} from "@classes/components/content/invoker/COperation";
 import AccordionItem from "./AccordionItem";
+import {setFocusById} from "@utils/app";
 
 
 class Operations extends Component{
@@ -31,8 +32,22 @@ class Operations extends Component{
 
         this.state = {
             addOperationState: COperation.createOperation(),
+            nameValidationMessage: '',
+            methodValidationMessage: '',
         };
         this.justAdded = false;
+    }
+
+    setNameValidationMessage(nameValidationMessage){
+        this.setState({
+            nameValidationMessage,
+        });
+    }
+
+    setMethodValidationMessage(methodValidationMessage){
+        this.setState({
+            methodValidationMessage,
+        });
     }
 
     updateEntity(){
@@ -45,6 +60,8 @@ class Operations extends Component{
     updateAddOperation(){
         this.setState({
             addOperationState: this.state.addOperationState,
+            nameValidationMessage: '',
+            methodValidationMessage: '',
         });
     }
 
@@ -58,14 +75,18 @@ class Operations extends Component{
     addOperation(){
         const {addOperationState} = this.state;
         const {entity} = this.props;
-        if(addOperationState.name === ''){
+        if(addOperationState.name.trim() === ''){
+            this.setState({
+                nameValidationMessage: 'Name is a required field',
+            })
             this.openAddOperation();
-            setTimeout(function(){
-                let addInvokerName = document.getElementById('add_invoker_name');
-                if(addInvokerName) {
-                    addInvokerName.focus();
-                }
-            }, 100);
+            setFocusById('add_invoker_name');
+        } else if(addOperationState.request.method === ''){
+            this.setState({
+                methodValidationMessage: 'Method is a required field',
+            })
+            this.openAddOperation();
+            setFocusById('method_post');
         } else {
             this.justAdded = true;
             entity.addOperation(addOperationState);
@@ -113,7 +134,7 @@ class Operations extends Component{
     }
 
     renderAddOperation(){
-        const {addOperationState} = this.state;
+        const {addOperationState, nameValidationMessage, methodValidationMessage} = this.state;
         let {entity, data, ...props} = this.props;
         let canAddMethods = this.props.data.hasOwnProperty('canAddMethods') ? this.props.data.canAddMethods : true;
         let operations = entity.getOperationsWithoutConnection();
@@ -126,7 +147,7 @@ class Operations extends Component{
                     <Card.Body className={styles.no_card_header_tabs}>
                         <OperationItem
                             {...props}
-                            data={{...data, readOnly: !canAddMethods}}
+                            data={{...data, readOnly: !canAddMethods, error: {name: nameValidationMessage, method: methodValidationMessage}}}
                             isVisible={true}
                             updateEntity={::this.updateAddOperation}
                             operation={addOperationState}
@@ -149,7 +170,7 @@ class Operations extends Component{
         let canAddMethods = data.hasOwnProperty('canAddMethods') ? data.canAddMethods : true;
         let operations = entity.getOperationsWithoutConnection();
         return (
-            <div>
+            <div style={{marginLeft: '20px'}}>
                 <Accordion defaultActiveKey={operations.length + 1}>
                     {this.renderOperations()}
                     {!canAddMethods ? null : this.renderAddOperation()}

@@ -59,6 +59,9 @@ import ListView from "@components/general/list_of_components/ListView";
 import Button from "@basic_components/buttons/Button";
 import {NO_NEED_PERMISSION} from "@utils/constants/permissions";
 import {CSearch} from "@classes/components/general/CSearch";
+import CurrentSchedules from "@components/content/schedules/current_schedules/CurrentSchedules";
+import Confirmation from "@components/general/app/Confirmation";
+import {withTranslation} from "react-i18next";
 
 
 const AMOUNT_OF_ROWS = 3;
@@ -83,6 +86,7 @@ function mapStateToProps(state){
  * List Component
  */
 @connect(mapStateToProps, {setCurrentPageItems, setViewType, setGridViewType, setSearchValue})
+@withTranslation(['app'])
 class List extends Component{
 
     constructor(props){
@@ -99,6 +103,7 @@ class List extends Component{
             entitiesProPage: viewType === VIEW_TYPE.LIST ? 10 : 4 * AMOUNT_OF_ROWS,
             checks: [],
             sortType: 'asc',
+            showConfirmDeleteSelected: false,
         };
     }
 
@@ -174,6 +179,12 @@ class List extends Component{
                 break;
             }
         }
+    }
+
+    toggleConfirmDeleteSelected(){
+        this.setState({
+            showConfirmDeleteSelected: !this.state.showConfirmDeleteSelected,
+        })
     }
 
     toggleSortType(){
@@ -392,7 +403,10 @@ class List extends Component{
         let entityIds = checks.filter(c => c.value);
         entityIds = entityIds.map(c => c.id);
         if(listViewData && listViewData.hasOwnProperty('deleteSelected')) {
-            listViewData.deleteSelected({[listViewData.entityIdsName]: entityIds});
+            listViewData.deleteSelected(entityIds);
+            this.setState({
+                showConfirmDeleteSelected: false,
+            });
         }
     }
 
@@ -409,9 +423,9 @@ class List extends Component{
     render(){
         const {
             mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles,
-            noSearchField, currentPageItems, listViewData, readOnly, deletingEntity,
+            noSearchField, currentPageItems, listViewData, readOnly, deletingEntity, t,
         } = this.props;
-        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType} = this.state;
+        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType, showConfirmDeleteSelected} = this.state;
         let {page, translations, hasDeleteSelectedButtons} = this.props;
         let classNames = ['empty_list', 'search_field'];
         classNames = getThemeClass({classNames, authUser, styles});
@@ -424,6 +438,7 @@ class List extends Component{
         const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width, visible: element.visible, style: element.style};}) : [];
         const entityIdName = listViewData ? listViewData.entityIdName : '';
         const actionsShouldBeMinimized = listViewData && listViewData.hasOwnProperty('actionsShouldBeMinimized') ? listViewData.actionsShouldBeMinimized : false;
+        const isDeletingSelected = listViewData && listViewData.hasOwnProperty('isDeletingSelected') ? listViewData.isDeletingSelected : false;
         const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? (entity) => listViewData.renderItemActions(entity, ::this.setCurrentPageItems) : null;
         const isItemActionsBefore = listViewData && listViewData.hasOwnProperty('isItemActionsBefore') ? listViewData.isItemActionsBefore : false;
         const isDeleteSelectedButtonDisabled = !::this.isOneChecked();
@@ -457,7 +472,7 @@ class List extends Component{
                             {
                                 hasDeleteSelectedButtons && !readOnly &&
                                 <div className={styles.delete_selected_button}>
-                                    <Button icon={'delete'} onClick={::this.deleteSelected} id={formatHtmlId(`button_delete_selected`)} disabled={isDeleteSelectedButtonDisabled}>
+                                    <Button icon={isDeletingSelected ? 'loading' : 'delete'} onClick={::this.toggleConfirmDeleteSelected} id={formatHtmlId(`button_delete_selected`)} disabled={isDeleteSelectedButtonDisabled || isDeletingSelected}>
                                         <span>{'Delete Selected'}</span>
                                     </Button>
                                 </div>
@@ -569,6 +584,13 @@ class List extends Component{
                                 </React.Fragment>
                         }
                         <Pagination page={page} setTotalPages={setTotalPages} entitiesProPage={entitiesProPage}/>
+                        <Confirmation
+                            okClick={::this.deleteSelected}
+                            cancelClick={::this.toggleConfirmDeleteSelected}
+                            active={showConfirmDeleteSelected}
+                            title={t('app:LIST.CARD.CONFIRMATION_TITLE')}
+                            message={t('app:LIST.CARD.CONFIRMATION_MESSAGE')}
+                        />
                     </div>
                 </Col>
             </Row>

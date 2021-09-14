@@ -45,6 +45,7 @@ class Name extends Component{
 
     onChange(nameValue){
         this.setState({nameValue});
+        this.props.clearValidationMessage('connectionName');
     }
 
     onBlur(){
@@ -58,7 +59,7 @@ class Name extends Component{
 
     render(){
         const {nameValue} = this.state;
-        const {ids, data, tourStep, index, forConnection} = this.props;
+        const {ids, data, tourStep, index, forConnection, error} = this.props;
         const {name, maxLength, readOnly, required} = data;
         let isReadonly = false;
         let inputStyle = '';
@@ -70,10 +71,11 @@ class Name extends Component{
         }
         return (
             <Input
+                error={error}
                 onChange={::this.onChange}
                 onBlur={::this.onBlur}
                 name={'Name'}
-                id={ids && ids.hasOwnProperty('name') ? ids.name : `input_${name ? name : ''}_${index}`}
+                id={ids && ids.hasOwnProperty('name') ? ids.name : `input_connectionName`}
                 label={'Name'}
                 type={'text'}
                 icon={forConnection ? '' : 'perm_identity'}

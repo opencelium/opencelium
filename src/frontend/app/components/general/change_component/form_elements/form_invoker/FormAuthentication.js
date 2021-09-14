@@ -82,7 +82,7 @@ class FormAuthentication extends Component{
     }
 
     render(){
-        const {name, icon, readOnly, label, required} = this.props.data;
+        const {name, icon, readOnly, label, required, error} = this.props.data;
         const {entity} = this.props;
         let {tourStep} = this.props.data;
         let value = entity[name];
@@ -94,6 +94,8 @@ class FormAuthentication extends Component{
         }
         return(
             <RadioButtons
+                id={'form_auth'}
+                error={error}
                 inline={false}
                 tourStep={tourStep}
                 required={required}

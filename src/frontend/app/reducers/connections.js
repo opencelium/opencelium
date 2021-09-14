@@ -15,10 +15,10 @@
 
 import {List, fromJS} from 'immutable';
 
-import {ConnectionsAction, WebHooksAction} from '../utils/actions';
-import { addConnectionSubscriber, updateConnectionSubscriber, deleteConnectionSubscriber } from '../utils/socket/connections';
-import {isEmptyObject} from "../utils/app";
-import {API_REQUEST_STATE} from "../utils/constants/app";
+import {ConnectionsAction} from '@utils/actions';
+import { addConnectionSubscriber, updateConnectionSubscriber, deleteConnectionSubscriber } from '@utils/socket/connections';
+import {isEmptyObject} from "@utils/app";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 const initialState = fromJS({
     fetchingConnection: API_REQUEST_STATE.INITIAL,
@@ -26,6 +26,7 @@ const initialState = fromJS({
     updatingConnection: API_REQUEST_STATE.INITIAL,
     fetchingConnections: API_REQUEST_STATE.INITIAL,
     deletingConnection: API_REQUEST_STATE.INITIAL,
+    deletingConnections: API_REQUEST_STATE.INITIAL,
     testingConnection: API_REQUEST_STATE.INITIAL,
     checkingConnection: API_REQUEST_STATE.INITIAL,
     sendingOperationRequest: API_REQUEST_STATE.INITIAL,
@@ -47,12 +48,14 @@ const initialState = fromJS({
 let connections = [];
 let connection = {};
 let index = 0;
+let indexes = [];
 
 /**
  * redux reducer for connections
  */
 const reducer = (state = initialState, action) => {
     connections = state.get('connections');
+    indexes = [];
     switch (action.type) {
         case ConnectionsAction.CHECK_NEO4J:
             return state.set('checkingNeo4j', true).set('error', null);
@@ -136,6 +139,21 @@ const reducer = (state = initialState, action) => {
             return state.set('checkingConnection', API_REQUEST_STATE.FINISH).set('checkConnectionResult', action.payload);
         case ConnectionsAction.CHECK_CONNECTION_REJECTED:
             return state.set('checkingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
+        case ConnectionsAction.DELETE_CONNECTIONS:
+            return state.set('deletingConnections', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case ConnectionsAction.DELETE_CONNECTIONS_FULFILLED:
+            for(let i = 0; i < action.payload.ids.length; i++) {
+                indexes.push(connections.findIndex(function (connection) {
+                    return connection.connectionId === action.payload.ids[i];
+                }));
+            }
+            if(indexes.length >= 0) {
+                connections = connections.filter((u, key) => indexes.indexOf(key) === -1);
+                return state.set('deletingConnections', API_REQUEST_STATE.FINISH).set('connections', connections);
+            }
+            return state.set('deletingConnections', API_REQUEST_STATE.FINISH);
+        case ConnectionsAction.DELETE_CONNECTIONS_REJECTED:
+            return state.set('deletingConnectors', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

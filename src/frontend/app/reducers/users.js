@@ -15,11 +15,11 @@
 
 import {List, fromJS} from 'immutable';
 
-import {UsersAction} from '../utils/actions';
-import { addUserSubscriber, updateUserSubscriber, deleteUserSubscriber, updateUserDetailSubscriber,} from '../utils/socket/users';
+import {UsersAction} from '@utils/actions';
+import { addUserSubscriber, updateUserSubscriber, deleteUserSubscriber, updateUserDetailSubscriber,} from '@utils/socket/users';
 
-import {updateObj} from '../utils/app';
-import {API_REQUEST_STATE} from "../utils/constants/app";
+import {updateObj} from '@utils/app';
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const initialState = fromJS({
@@ -34,6 +34,7 @@ const initialState = fromJS({
     updatingUserDetail: API_REQUEST_STATE.INITIAL,
     fetchingUsers: API_REQUEST_STATE.INITIAL,
     deletingUser: API_REQUEST_STATE.INITIAL,
+    deletingUsers: API_REQUEST_STATE.INITIAL,
     user: null,
     users: List([]),
     error: null,
@@ -44,12 +45,14 @@ const initialState = fromJS({
 let users = [];
 let user = {};
 let index = 0;
+let indexes = [];
 
 /**
  * redux reducer for users
  */
 const reducer = (state = initialState, action) => {
     users = state.get('users');
+    indexes = [];
     switch (action.type) {
         case UsersAction.CHECK_USEREMAIL:
             return state.set('checkingUserEmail', API_REQUEST_STATE.START).set('checkEmailResult', null).set('error', null);
@@ -146,6 +149,21 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingUser', API_REQUEST_STATE.FINISH).set('user', null);
         case UsersAction.DELETE_USER_REJECTED:
             return state.set('deletingUser', API_REQUEST_STATE.ERROR).set('error', fromJS(action.payload)).set('user', null);
+        case UsersAction.DELETE_USERS:
+            return state.set('deletingUsers', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null);
+        case UsersAction.DELETE_USERS_FULFILLED:
+            for(let i = 0; i < action.payload.ids.length; i++) {
+                indexes.push(users.findIndex(function (user) {
+                    return user.id === action.payload.ids[i];
+                }));
+            }
+            if(indexes.length >= 0) {
+                users = users.filter((u, key) => indexes.indexOf(key) === -1);
+                return state.set('deletingUsers', API_REQUEST_STATE.FINISH).set('users', users);
+            }
+            return state.set('deletingUsers', API_REQUEST_STATE.FINISH);
+        case UsersAction.DELETE_USERS_REJECTED:
+            return state.set('deletingUsers', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
         default:
             return state;
     }

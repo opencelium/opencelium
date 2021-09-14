@@ -17,7 +17,7 @@ import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 import {fetchInvokers} from '@actions/invokers/fetch';
-import {deleteInvoker} from '@actions/invokers/delete';
+import {deleteInvoker, deleteInvokers} from '@actions/invokers/delete';
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -36,6 +36,7 @@ function mapStateToProps(state){
         authUser: auth.get('authUser'),
         fetchingInvokers: invokers.get('fetchingInvokers'),
         deletingInvoker: invokers.get('deletingInvoker'),
+        deletingInvokers: invokers.get('deletingInvokers'),
         currentInvoker: invokers.get('invoker'),
         invokers: invokers.get('invokers').toJS(),
         isCanceled: invokers.get('isCanceled'),
@@ -67,7 +68,7 @@ function filterInvokerSteps(tourSteps){
 /**
  * List of the Invokers
  */
-@connect(mapStateToProps, {fetchInvokers, deleteInvoker})
+@connect(mapStateToProps, {fetchInvokers, deleteInvoker, deleteInvokers})
 @permission(InvokerPermissions.READ, true)
 @withTranslation('invokers')
 @ListComponent('invokers')
@@ -79,7 +80,7 @@ class InvokersList extends Component{
     }
 
     render(){
-        const {authUser, t, invokers, deleteInvoker, params, setTotalPages, openTour, deletingInvoker, currentInvoker} = this.props;
+        const {authUser, t, invokers, deleteInvoker, params, setTotalPages, openTour, deleteInvokers, deletingInvoker, deletingInvokers, currentInvoker} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -87,7 +88,8 @@ class InvokersList extends Component{
         let listViewData = {
             entityIdName: 'name',
             entityIdsName: 'invokerIds',
-            deleteSelected: () => {},
+            deleteSelected: deleteInvokers,
+            isDeletingSelected: deletingInvokers === API_REQUEST_STATE.START,
             map: (invoker) => {
                 return [{name: 'id', value: invoker.name}, {name: 'name', label: t('LIST.NAME'), value: invoker.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: invoker.description, width: '25%'}, {name: 'auth_type', label: t('LIST.AUTH_TYPE'), value: invoker.authType}, {name: 'operations', label: t('LIST.OPERATIONS'), value: invoker.operations.map(operation => operation.name).join(', ')}]
             },

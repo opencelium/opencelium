@@ -126,7 +126,7 @@ class Notification extends React.Component{
         const {t, notification} = this.props;
         let title = t(`SYSTEMS.${notification.title.toUpperCase()}`);
         let messageData = CNotification.getMessage(t, notification, ::this.renderServerMessage);
-        if(isString(messageData.message) && messageData.message.length > MAX_NOTIFICATION_MESSAGE_LENGTH){
+        if(isString(messageData.message) && messageData.length > MAX_NOTIFICATION_MESSAGE_LENGTH){
             messageData.message = <Details t={t} shortMessage={messageData.message.substr(0, MAX_NOTIFICATION_MESSAGE_LENGTH)} comingMessage={messageData.message} onClick={::this.openDialog}/>;
         }
         let timeAgo = <TimeAgo

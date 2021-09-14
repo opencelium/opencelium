@@ -35,7 +35,6 @@ import {
 import {doRequest} from "@utils/auth";
 import {isString} from "@utils/app";
 import {API_METHOD} from "@utils/constants/app";
-import {deleteSchedulesFulfilled, deleteSchedulesRejected} from "@actions/schedules/delete";
 
 
 /**
@@ -196,23 +195,6 @@ const deleteUserGroupEpic = (action$, store) => {
 };
 
 /**
- * delete all selected usergroups by id
- */
-const deleteUserGroupsEpic = (action$, store) => {
-    return action$.ofType(UserGroupsAction.DELETE_USERGROUPS)
-        .debounceTime(500)
-        .mergeMap((action) => {
-            let url = `${urlPrefix}/all`;
-            let data = action.payload;
-            return doRequest({url, method: API_METHOD.DELETE, data},{
-                    success: deleteUserGroupsFulfilled,
-                    reject: deleteUserGroupsRejected,},
-                res => {return {userGroupIds: data.userGroupIds};}
-            );
-        });
-};
-
-/**
  * delete one usergroup icon by usergroup id
  */
 const deleteUserGroupIconEpic = (action$, store) => {
@@ -224,6 +206,23 @@ const deleteUserGroupIconEpic = (action$, store) => {
                     success: deleteUserGroupIconFulfilled,
                     reject: deleteUserGroupIconRejected,},
                 res => {return {...action.payload};}
+            );
+        });
+};
+
+/**
+ * delete usergroups by ids
+ */
+const deleteUserGroupsEpic = (action$, store) => {
+    return action$.ofType(UserGroupsAction.DELETE_USERGROUPS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.DELETE, data},{
+                    success: deleteUserGroupsFulfilled,
+                    reject: deleteUserGroupsRejected,},
+                res => {return {ids: action.payload};}
             );
         });
 };
