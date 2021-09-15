@@ -40,7 +40,7 @@ export function ConnectionForm(type) {
                     },
                     connection: CConnection.createConnection(null),
                     entity: null,
-                    isNewConnectionView: true,
+                    isNewConnectionView: false,
                 };
             }
 
