@@ -136,23 +136,16 @@ class Layout extends Component{
     }
 
     renderHeader(){
-        if(this.props.isAuth && hasHeader(this.props)){
-            return (
-                <div id={'app_header'}>
-                    <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>
-                    <TopBar/>
-                </div>
-            );
-            //return <Header toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={this.props.router}/>;
+        const {isAuth, router} = this.props;
+        if(!isAuth){
+            return <TopBar/>;
         }
-        return null;
-    }
-
-    renderFooter(){
-        return null;
-        if(this.props.isAuth){
-            return <Footer/>;
-        }
+        return (
+            <div id={'app_header'}>
+                {hasHeader(this.props) && <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={router}/>}
+                <TopBar/>
+            </div>
+        );
     }
 
     renderLayout(){
@@ -162,7 +155,6 @@ class Layout extends Component{
                 {this.renderLoginAgain()}
                 {this.props.children}
                 {this.props.isAuth && <NotificationPanel/>}
-                {this.renderFooter()}
             </div>
         );
     }

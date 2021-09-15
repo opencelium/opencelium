@@ -204,7 +204,7 @@
 }
 .callout {
   animation-delay: 2.5s;
-  //animation-name: slideTopRight;
+  animation-name: slideTopRight;
   animation-duration: 0.5s;
   animation-timing-function: ease-in-out;
   animation-fill-mode: forwards;
@@ -273,4 +273,19 @@
   right: 7px;
   bottom: -20px;
   border-top: 10px solid $BACKGROUND_CALLOUT;
+}
+
+.single_callout{
+  position: absolute;
+  right: 100px;
+  top: 10px;
+  >div{
+    border: 1px solid #eee !important;
+    height: auto !important;
+    >div{
+      text-overflow: unset !important;
+      overflow: unset !important;
+      white-space: unset !important;
+    }
+  }
 }
