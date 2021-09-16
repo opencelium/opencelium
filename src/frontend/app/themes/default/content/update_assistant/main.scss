@@ -32,7 +32,11 @@
 }
 
 .system_overview{
-  margin-top: 20px;
+  text-align: left;
+  font-size: 16px;
+  padding-left: 0;
+  bottom: 20px;
+  position: absolute;
   @extend .finish_update;
 }
 

@@ -102,7 +102,7 @@ class SystemOverview extends React.Component{
         const backupLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
         const backupLinkText = t('FORM.BACKUP_LINK_TEXT');
         return(
-            <Container>
+            <Container style={{position: 'unset'}}>
                 {
                     Object.entries(systemRequirements.details).map(line => {
                         if(VISIBLE_SERVICES.indexOf(line[0]) !== -1) {
