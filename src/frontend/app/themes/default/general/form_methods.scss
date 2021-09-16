@@ -1028,6 +1028,7 @@
   position: absolute;
   max-height: 500px;
   overflow: hidden auto;
+  min-height: 100px;
 }
 .method_body_no_placeholder{
   @extend .method_body;
