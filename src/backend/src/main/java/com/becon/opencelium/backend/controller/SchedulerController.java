@@ -284,6 +284,12 @@ public class SchedulerController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{schedulerId}/notification")
+    public ResponseEntity<?> deleteNotification(@RequestBody List<Integer> schedulerIds,@RequestBody List<Integer> notificationIds){
+        notificationIds.forEach(nId -> schedulerService.deleteNotificationById(nId));
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{schedulerId}/notification/{notificationId}")
     public ResponseEntity<?> updateNotification(@PathVariable int schedulerId,@PathVariable int notificationId,
                                                 @RequestBody NotificationResource notificationResource) throws Exception{
