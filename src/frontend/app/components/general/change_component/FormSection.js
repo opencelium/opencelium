@@ -74,20 +74,7 @@ class FormSection extends Component{
         this.state = {
             isFormSectionMinimized: false,
             isFullScreen: false,
-            areIconsVisible: false,
         }
-    }
-
-    showIcons(){
-        this.setState({
-            areIconsVisible: true,
-        });
-    }
-
-    hideIcons(){
-        this.setState({
-            areIconsVisible: false,
-        });
     }
 
     toggle(){
@@ -345,7 +332,7 @@ class FormSection extends Component{
     }
 
     render(){
-        const {isFormSectionMinimized, isFullScreen, areIconsVisible} = this.state;
+        const {isFormSectionMinimized, isFullScreen} = this.state;
         const {isSubFormSection, isOneFormSectionFullScreen, } = this.props;
         let style = {};
         const content = {
@@ -367,29 +354,31 @@ class FormSection extends Component{
         }
         const hasIcons = content.hasFullScreenFunction || !!content.AdditionalIcon;
         return (
-            <div onMouseOver={::this.showIcons} onMouseLeave={::this.hideIcons} className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
+            <div className={`${!isSubFormSection ? styles.form : ''} ${content.visible ? content.formClassName : ''} ${isFormSectionMinimized ? styles.minimized_form : ''} ${isFullScreen ? styles.full_screen : ''}`} style={style}>
                 {hasHeader &&
                     <div id={`form_section_header_${content.header.toLowerCase()}`} className={styles.form_section_header} onClick={::this.toggle} style={getStyles('form_section_header')}>
                         <span>{content.header}</span>
                     </div>
                 }
                 {hasIcons &&
-                <div style={{display: areIconsVisible ? 'inline' : 'none'}} className={styles.form_section_icons}>
-                    <div className={styles.dots}>...</div>
-                    <div className={styles.icons}>
-                        {
-                            content.AdditionalIcon
-                        }
-                        {
-                            content.hasFullScreenFunction &&
-                            <TooltipFontIcon whiteTheme size={20} tooltipPosition={'bottom'} isButton
-                                             className={styles.full_screen_icon}
-                                             value={isFullScreen ? 'close_fullscreen' : 'open_in_full'}
-                                             tooltip={isFullScreen ? 'Minimize' : 'Maximize'}
-                                             onClick={::this.toggleFullScreen}/>
-                        }
+                    <div className={styles.form_methods_icons}>
+                        <div className={styles.form_section_icons}>
+                            <div className={styles.dots}>...</div>
+                            <div className={styles.icons}>
+                                {
+                                    content.AdditionalIcon
+                                }
+                                {
+                                    content.hasFullScreenFunction &&
+                                    <TooltipFontIcon whiteTheme size={20} tooltipPosition={'bottom'} isButton
+                                                     className={styles.full_screen_icon}
+                                                     value={isFullScreen ? 'close_fullscreen' : 'open_in_full'}
+                                                     tooltip={isFullScreen ? 'Minimize' : 'Maximize'}
+                                                     onClick={::this.toggleFullScreen}/>
+                                }
+                            </div>
+                        </div>
                     </div>
-                </div>
                 }
                 {this.generateInputs()}
             </div>

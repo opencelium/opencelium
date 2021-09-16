@@ -9,12 +9,15 @@ import Callout from "@components/layout/header/Callout";
 import {CNotification} from "@classes/components/general/CNotification";
 import {withTranslation} from "react-i18next";
 import Search from "@components/layout/header/Search";
+import {hasHeader} from "@utils/app";
+import Menu from "@components/layout/menu/Menu";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
     return{
         notifications: auth.get('notifications').toJS(),
+        isAuth: auth.get('isAuth'),
     }
 }
 
@@ -64,6 +67,17 @@ class TopBar extends React.Component{
         const {t, notifications} = this.props;
         const calloutMessage = notifications.length > 0 ? CNotification.getMessage(t, notifications[0]).message : '';
         const calloutType = notifications.length > 0 ? notifications[0].type : '';
+        if(!this.props.isAuth){
+            if(isCalloutVisible && calloutMessage){
+                return (
+                    <div className={styles.single_callout}>
+                        <Callout message={calloutMessage} type={calloutType} isBottom={false}/>
+                    </div>
+                );
+            } else{
+                return null;
+            }
+        }
         return(
             <div className={styles.top_bar}>
                 {/*<Search/>*/}

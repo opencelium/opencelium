@@ -213,6 +213,8 @@
     display: inline-block;
     width: 86%;
     margin-left: 2%;
+    vertical-align: middle;
+    margin-top: -4px;
     font-size: 12px;
   }
   position: absolute;
@@ -271,4 +273,19 @@
   right: 7px;
   bottom: -20px;
   border-top: 10px solid $BACKGROUND_CALLOUT;
+}
+
+.single_callout{
+  position: absolute;
+  right: 100px;
+  top: 10px;
+  >div{
+    border: 1px solid #eee !important;
+    height: auto !important;
+    >div{
+      text-overflow: unset !important;
+      overflow: unset !important;
+      white-space: unset !important;
+    }
+  }
 }

@@ -8,14 +8,18 @@ class Callout extends React.Component{
     }
 
     render(){
-        const {message, type} = this.props;
+        const {message, type, isBottom} = this.props;
         return(
-            <div className={`${styles.callout} ${styles.bottom}`}>
-                {CNotification.getTypeIcon(type)}
+            <div className={`${styles.callout} ${isBottom ? styles.bottom : ''}`}>
+                {CNotification.getTypeIcon(type, 16)}
                 <div className={styles.message}>{message}</div>
             </div>
         );
     }
 }
+
+Callout.defaultProps = {
+    isBottom: true,
+};
 
 export default Callout;

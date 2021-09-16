@@ -39,8 +39,8 @@ export class CNotification{
                     }
                 } else{
                     const serverMessage = renderServerMessage ? renderServerMessage(comingMessage) : comingMessage;
-                    notificationMessage = serverMessage.message;
-                    serverMessageLength = serverMessage.length;
+                    notificationMessage = isString(serverMessage) ? serverMessage : serverMessage.message;
+                    serverMessageLength = isString(serverMessage) ? serverMessage.length : serverMessage.length;
                 }
             } else {
                 if (i18n.exists(`notifications:${type}.${message}.__DEFAULT__`)) {
@@ -84,11 +84,11 @@ export class CNotification{
         }
     }
 
-    static getTypeIcon(type){
+    static getTypeIcon(type, size = 20){
         const {tooltip, value, iconClassName} = CNotification.getTypeData(type);
         if(type !== 'warning'){
             return(
-                <TooltipFontIcon wrapClassName={styles.type_icon} className={iconClassName} size={20}
+                <TooltipFontIcon wrapClassName={styles.type_icon} className={iconClassName} size={size}
                                  value={value} tooltip={tooltip}/>
             );
         } else{
