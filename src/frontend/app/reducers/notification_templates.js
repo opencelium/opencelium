@@ -97,7 +97,7 @@ const reducer = (state = initialState, action) => {
         case NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES_FULFILLED:
             for(let i = 0; i < action.payload.ids.length; i++) {
                 indexes.push(notificationTemplates.findIndex(function (notificationTemplate) {
-                    return notificationTemplate.id === action.payload.ids[i];
+                    return notificationTemplate.templateId === action.payload.ids[i];
                 }));
             }
             if(indexes.length >= 0) {
