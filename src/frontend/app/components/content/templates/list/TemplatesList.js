@@ -128,7 +128,10 @@ class TemplatesList extends Component{
         translations.empty_list = t('LIST.EMPTY_LIST');
         const renderListViewItemActions = (template) => {
             if(template)
-                return <TemplateDownloadIcon index={template.id} template={template}/>;
+                return <React.Fragment>
+                    <TemplateConversionIcon data={{template}}/>
+                    <TemplateDownloadIcon index={template.id} template={template}/>
+                </React.Fragment>;
             return null;
         };
         let listViewData = {

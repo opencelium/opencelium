@@ -71,12 +71,8 @@ class TemplateConversionIcon extends Component{
         return(
             <React.Fragment>
                 {
-                    invalidVersion && !isLoading &&
-                    <TooltipFontIcon turquoiseTheme isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={::this.convert} size={'1.6vw'}/>
-                }
-                {
-                    isLoading &&
-                    <Spinner type="grow" color="primary" className={classNameIcon}/>
+                    invalidVersion &&
+                    <TooltipFontIcon turquoiseTheme isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={isLoading ? 'loading' : 'replay'} onClick={::this.convert} size={'1.6vw'}/>
                 }
             </React.Fragment>
         );
