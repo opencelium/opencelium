@@ -140,7 +140,7 @@ export default class ConnectionCardTitle extends React.Component{
                         {isCorrectToIcon ?
                             <img alt={toConnector.title} src={toIcon} style={imgStyles}/>
                             :
-                            <DefaultIcon name={toConnector.title} isMouseOver={isMouseOver}/>
+                            <DefaultIcon title={toConnector.title} isMouseOver={isMouseOver}/>
                         }
                     </Col>
                 </Row>

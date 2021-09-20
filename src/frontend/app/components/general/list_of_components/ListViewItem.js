@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from "prop-types";
+import {connect} from 'react-redux';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {isString} from "@utils/app";
 import Confirmation from "@components/general/app/Confirmation";
@@ -7,6 +8,15 @@ import {withTranslation} from "react-i18next";
 import Checkbox from "@basic_components/inputs/Checkbox";
 import styles from "@themes/default/general/list_of_components.scss";
 
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return{
+        authUser: auth.get('authUser'),
+    }
+}
+
+@connect(mapStateToProps, {})
 @withTranslation('app')
 class ListViewItem extends React.Component{
     constructor(props) {
@@ -106,6 +116,24 @@ class ListViewItem extends React.Component{
         this.props.checkOneEntity(...args, this.props.setChecks);
     }
 
+    isEntityCannotBeDeleted(){
+        const {authUser, item} = this.props;
+        let findItem = item.find(elem => elem.name === 'email');
+        if(findItem){
+            if(authUser.sub === findItem.value){
+                return true;
+            }
+        } else{
+            findItem = item.find(elem => elem.name === 'name');
+            if(findItem){
+                if(authUser.role === findItem.value){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     render(){
         const {showConfirm, showActions} = this.state;
         const {t, item, isItemActionsBefore, mapEntity, checks, index, renderAdditionalActions, allEntities, entityIdName, readOnly, actionsShouldBeMinimized, deletingEntity} = this.props;
@@ -114,7 +142,7 @@ class ListViewItem extends React.Component{
         let onDelete = mapEntity.hasOwnProperty('onDelete') ? mapEntity.onDelete : null;
         let hasView = isString(viewLink) && viewLink !== '';
         let hasUpdate = isString(updateLink) && updateLink !== '';
-        let hasDelete = onDelete !== null;
+        let hasDelete = onDelete !== null && !this.isEntityCannotBeDeleted();
         let checked = checks.findIndex(c => c.id === data.id && c.value) !== -1;
         const entity = allEntities.find(entity => entity[entityIdName] === item[0].value);
         const isCheckboxesVisible = !readOnly;
