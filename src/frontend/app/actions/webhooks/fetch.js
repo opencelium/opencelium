@@ -54,11 +54,13 @@ const fetchWebHookRejected = (error) => {
 
 /**
  * copy to clipboard the webhook
+ * @param schedule
  * @returns {{type: string, payload: {}}}
  */
-const copyToClipboardWebHookFulfilled = () => {
+const copyToClipboardWebHookFulfilled = (schedule) => {
     return {
         type: WebHooksAction.COPYTOCLIPBOARD_WEBHOOK_FULFILLED,
+        payload: schedule,
     };
 };
 

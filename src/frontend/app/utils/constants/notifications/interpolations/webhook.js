@@ -30,7 +30,21 @@ const DELETE_WEBHOOK = (params) => {
     );
 }
 
+const COPYTOCLIPBOARD_WEBHOOK = (params) => {
+    const title = params && params.schedule ? params.schedule.title : '';
+    const openPage = () => {
+        store.dispatch(setSearchValue(title));
+        navigateTo('schedules');
+    }
+    return (
+        <Translate i18nKey="notifications:SUCCESS.COPYTOCLIPBOARD_WEBHOOK">
+            The webhook of schedule <span className={styles.link} onClick={openPage}>{title}</span> was successfully added.
+        </Translate>
+    );
+}
+
 export default {
     ADD_WEBHOOK,
     DELETE_WEBHOOK,
+    COPYTOCLIPBOARD_WEBHOOK,
 }

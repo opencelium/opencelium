@@ -17,6 +17,18 @@ const ADD_CONNECTOR = (params) => {
         </Translate>
     );
 }
+const ADD_CONNECTORICON = (params) => {
+    const {title} = params;
+    const openPage = () => {
+        store.dispatch(setSearchValue(title));
+        navigateTo('connectors');
+    }
+    return (
+        <Translate i18nKey="notifications:SUCCESS.ADD_CONNECTORICON">
+            The connector <span className={styles.link} onClick={openPage}>{title}</span> was successfully added.
+        </Translate>
+    );
+}
 const UPDATE_CONNECTOR = (params) => {
     const {title} = params;
     const openPage = () => {
@@ -40,6 +52,7 @@ const DELETE_CONNECTOR = (params) => {
 
 export default {
     ADD_CONNECTOR,
+    ADD_CONNECTORICON,
     UPDATE_CONNECTOR,
     DELETE_CONNECTOR,
 }

@@ -66,7 +66,7 @@ class WebHook extends Component{
     copyWebHookToClipboard(){
         const {copyToClipboardWebHookFulfilled, schedule} = this.props;
         copyStringToClipboard(schedule.getWebhookUrl());
-        copyToClipboardWebHookFulfilled();
+        copyToClipboardWebHookFulfilled({schedule});
     }
     
     render(){

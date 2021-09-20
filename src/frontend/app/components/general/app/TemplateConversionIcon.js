@@ -72,7 +72,7 @@ class TemplateConversionIcon extends Component{
             <React.Fragment>
                 {
                     invalidVersion && !isLoading &&
-                    <TooltipFontIcon isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={::this.convert} size={'1.6vw'}/>
+                    <TooltipFontIcon turquoiseTheme isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={::this.convert} size={'1.6vw'}/>
                 }
                 {
                     isLoading &&
