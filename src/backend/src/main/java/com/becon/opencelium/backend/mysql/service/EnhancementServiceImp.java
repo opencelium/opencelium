@@ -112,10 +112,10 @@ public class EnhancementServiceImp implements EnhancementService{
 //                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
 //        List<LinkedFieldResource> fromField = enhancementNode.getIncomeField().stream()
 //                .map(fieldNode -> fieldNodeService.toLinkedFieldResource(fieldNode)).collect(Collectors.toList());
-        List<LinkedFieldResource> toField = Arrays.stream(enhancement.getExpertVar().split(","))
+        List<LinkedFieldResource> toField = Arrays.stream(enhancement.getExpertVar().split(";"))
                 .filter(f -> f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
                 .map(f -> fieldNodeService.toLinkedFieldResource(f)).collect(Collectors.toList());
-        List<LinkedFieldResource> fromField = Arrays.stream(enhancement.getExpertVar().split(","))
+        List<LinkedFieldResource> fromField = Arrays.stream(enhancement.getExpertVar().split(";"))
                 .filter(f -> !f.contains("RESULT_VAR")).map(f -> (f.split("="))[1].trim())
                 .map(f -> fieldNodeService.toLinkedFieldResource(f)).collect(Collectors.toList());
         fieldBindingResource.setEnhancement(enhancementResource);

@@ -112,6 +112,11 @@ public class UserServiceImpl implements UserService{
             userRequestResource.getUserDetail().setProfilePicture(userDb.getUserDetail().getProfilePicture());
         }
 
+        if (userDb == null && (userRequestResource.getPassword() != null || userRequestResource.getPassword().isEmpty())) {
+            String encPass = userRequestResource.getPassword();
+            user.setPassword(encodePassword(encPass));
+        }
+
         UserDetail userDetail = detailService.toEntity(userRequestResource.getUserDetail());
         Activity activity  = activityService.findById(userRequestResource.getUserId()).orElse(null);
 
