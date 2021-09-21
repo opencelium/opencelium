@@ -79,7 +79,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper mapper = new ObjectMapper();
         UserPrincipals userPrincipals = (UserPrincipals) auth.getPrincipal();
         User user = userPrincipals.getUser();
-//        UserRoleResource userRoleResource = new UserRoleResource(user.getUserRole());
         UserResource userResource = new UserResource(user);
 
         String payload = mapper.writeValueAsString(userResource);

@@ -116,7 +116,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         httpSecurity
                 .cors()
                 .and()
-                .csrf().disable()/*
+                .csrf().disable()
                 .authorizeRequests()
                 .anyRequest()
                 .authenticated()
@@ -124,7 +124,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilter(authenticationFilter)
                 .addFilter(authorizationFilter)
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)*/;
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     }
 
