@@ -26,6 +26,7 @@ import {permission} from "@decorators/permission";
 import {tour} from "@decorators/tour";
 import {LIST_TOURS} from "@utils/constants/tours";
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import ImageCropView from "@components/general/app/ImageCropView";
 
 const prefixUrl = '/invokers';
 
@@ -99,7 +100,7 @@ class InvokersList extends Component{
             let result = {};
             result.id = invoker.name;
             result.title = invoker.name;
-            result.avatar = invoker.icon;
+            result.avatar = <ImageCropView entityId={invoker.name} title={invoker.name} icon={invoker.icon}/>;
             return result;
         };
         mapEntity.getViewLink = (invoker) => {return `${prefixUrl}/${invoker.name}/view`;};
