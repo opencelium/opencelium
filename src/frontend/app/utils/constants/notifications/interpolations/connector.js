@@ -25,7 +25,7 @@ const ADD_CONNECTORICON = (params) => {
     }
     return (
         <Translate i18nKey="notifications:SUCCESS.ADD_CONNECTORICON">
-            The connector <span className={styles.link} onClick={openPage}>{title}</span> was successfully added.
+            The icon of the connector <span className={styles.link} onClick={openPage}>{title}</span> was successfully uploaded.
         </Translate>
     );
 }

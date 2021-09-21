@@ -72,8 +72,8 @@ class ImageCropView extends React.Component{
 
     uploadIcon(){
         const {croppedImage} = this.state;
-        const {uploadIcon, mapping, entityId} = this.props;
-        uploadIcon(mapping({entityId, croppedImage}));
+        const {uploadIcon, mapping, entityId, title} = this.props;
+        uploadIcon(mapping({entityId, title, croppedImage}));
         this.toggleShowDialog();
     }
 
@@ -128,10 +128,10 @@ class ImageCropView extends React.Component{
             cardIconStyles.opacity = 0.5;
         }
         return(
-            <div>
+            <div style={{width: 'calc(30% - 0.5vw)'}}>
                 <div className={styles.image_crop} onMouseOver={::this.onMouseOverImage} onMouseLeave={::this.onMouseLeaveImage}>
                     <CardIcon authUser={authUser} title={title} icon={icon} onClick={::this.toggleShowDialog} style={cardIconStyles}/>
-                    {isMouseOverImage && <TooltipFontIcon onClick={::this.toggleShowDialog} className={styles.upload_icon} size={'2vw'} tooltip={'Upload'} value={'upload'}/>}
+                    {isMouseOverImage && <TooltipFontIcon onClick={::this.toggleShowDialog} wrapClassName={styles.upload_icon} size={'1.5vw'} tooltip={'Upload'} value={'upload'}/>}
                 </div>
                 {::this.renderDialog()}
             </div>

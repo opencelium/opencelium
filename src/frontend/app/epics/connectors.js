@@ -110,7 +110,7 @@ const addConnectorEpic = (action$, store) => {
             let data = {...action.payload};
             let successResponse = addConnectorFulfilled;
             if(data.icon !== null && data.icon !== ''){
-                successResponse = (connector) => addConnectorIcon(connector, {background: true});
+                successResponse = (connector) => addConnectorIcon(connector, {background: true, onlyIcon: false});
             }
             delete data.icon;
             return doRequest({url, method: API_METHOD.POST, data: {...data}},{
@@ -134,8 +134,12 @@ const addConnectorIconEpic = (action$, store) => {
             let data = new FormData();
             data.append('connectorId', action.payload.connectorId);
             data.append('file', action.payload.icon);
+            let successResponse = () => addConnectorFulfilled(action.payload);
+            if(action.settings && action.settings.onlyIcon){
+                successResponse = (data) => addConnectorIconFulfilled(data, action.settings);
+            }
             return doRequest({url, method: API_METHOD.POST, data, contentType: 'multipart/form-data'},{
-                    success: addConnectorIconFulfilled,
+                    success: successResponse,
                     reject: addConnectorIconRejected,},
                 res => {return {...action.payload, icon: res.response.icon};}
             );

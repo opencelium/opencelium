@@ -82,7 +82,7 @@ class FontIcon extends Component{
             );
         } else {
             return (
-                <span ref={myRef ? myRef : this.icon} >
+                <span ref={myRef ? myRef : this.icon} className={!darkTheme ? theme : ''} >
                     {isImageValue
                     ?
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}} onClick={onClick} id={id}/>

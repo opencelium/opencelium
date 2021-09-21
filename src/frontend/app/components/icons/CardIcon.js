@@ -55,7 +55,7 @@ class CardIcon extends Component{
         if(isCorrectIcon){
             return <img src={icon} className={styles[classNames.avatar]} alt={title ? title : 'icon'}/>;
         } else{
-            return <FontIcon value={'monochrome_photos'} className={styles[classNames.avatar_default]}/>;
+            return <FontIcon size={'100%'} value={'monochrome_photos'} className={styles[classNames.avatar_default]}/>;
         }
     }
 
