@@ -49,9 +49,13 @@ class LoginPage extends Component{
     }
 
     render(){
-        const {authUser} = this.props;
+        const {authUser, isAuth} = this.props;
+        let loginPageStyle = styles.login_page;
+        if(isAuth){
+            loginPageStyle += ` ${styles.move_login_page}`
+        }
         return (
-            <div className={styles.login_page}>
+            <div className={loginPageStyle}>
                 <Suspense fallback={(<Loading authUser={authUser}/>)}>
                     <Login/>
                 </Suspense>

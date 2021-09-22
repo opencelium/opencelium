@@ -144,3 +144,26 @@
   z-index: 300;
   position: relative;
 }
+
+.login_open_celium{
+  text-align: center;
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  img{
+    transition: width 0.5s;
+    width: 60px;
+    cursor: pointer;
+  }
+  div{
+    margin-top: 5px !important;
+    min-height: 1px !important;
+  }
+}
+.login_open_celium_in_menu{
+  @extend .login_open_celium;
+  margin-top: 24px;
+  img{
+    width: 2.5rem;
+  }
+}

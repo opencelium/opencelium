@@ -15,8 +15,22 @@
 
 import React from 'react';
 import styles from '../../themes/default/general/icons.scss';
+import LogoOcWhiteImagePath from "assets/logo_oc_white.png";
+import Loading from "@components/general/app/Loading";
 
-const LoginIcon = ({isUnlocked, ...props}) => {
+export const LoginOpenCelium = ({isAuth, onClick, isLoading}) => {
+    return(
+        <div className={isAuth ? styles.login_open_celium_in_menu : styles.login_open_celium}>
+            {isLoading ?
+                <Loading/>
+                :
+                <img src={LogoOcWhiteImagePath} alt={'OpenCelium'} onClick={onClick}/>
+            }
+        </div>
+    );
+}
+
+export const LoginIcon = ({isUnlocked, ...props}) => {
     return(
         <button {...props} className={styles.wrapper}>
             <div className={styles.base}>
@@ -36,5 +50,3 @@ const LoginIcon = ({isUnlocked, ...props}) => {
         </button>
     )
 };
-
-export default LoginIcon;

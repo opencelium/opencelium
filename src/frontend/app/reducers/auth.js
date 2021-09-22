@@ -26,7 +26,7 @@ const initialState = fromJS({
     authUser: {},
     isAuth: false,
     expTime: 0,
-    logining: false,
+    logining: API_REQUEST_STATE.INITIAL,
     logouting: false,
     updatingDashboardSettings: false,
     togglingAppTour: API_REQUEST_STATE.INITIAL,
@@ -52,13 +52,13 @@ const reducer = (state = initialState, action) => {
         case AuthAction.INITIAL_STATE:
             return state;
         case AuthAction.LOG_IN:
-            return state.set('logining', true).set('error', null).set('fromLogin', action.payload.fromLogin);
+            return state.set('logining', API_REQUEST_STATE.START).set('error', null).set('fromLogin', action.payload.fromLogin);
         case AuthAction.LOG_IN_FULFILLED:
-            return state.set('logining', false).set('authUser', action.payload).set('isAuth', true).set('isSessionExpired', false);
+            return state.set('logining', API_REQUEST_STATE.FINISH).set('authUser', action.payload).set('isAuth', true).set('isSessionExpired', false);
         case AuthAction.LOG_IN_REJECTED:
-            return state.set('logining', false).set('error', action.payload).set('isAuth', false);
+            return state.set('logining', API_REQUEST_STATE.ERROR).set('error', action.payload).set('isAuth', false);
         case AuthAction.LOG_IN_CANCELED:
-            return state.set('logining', false).set('message', action.payload).set('isAuth', false);
+            return state.set('logining', API_REQUEST_STATE.PAUSE).set('message', action.payload).set('isAuth', false);
         case AuthAction.LOG_OUT:
             return state.set('logouting', true).set('error', null);
         case AuthAction.LOG_OUT_FULFILLED:
