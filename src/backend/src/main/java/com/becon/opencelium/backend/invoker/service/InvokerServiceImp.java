@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.invoker.service;
 
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -43,6 +45,7 @@ import javax.xml.xpath.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -320,10 +323,12 @@ public class InvokerServiceImp implements InvokerService{
     }
 
     public InvokerResource toMetaResource(Invoker invoker) {
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
+        String imagePath = uri.getScheme() + "://" + uri.getAuthority() + PathConstant.IMAGES;
         InvokerResource invokerResource = new InvokerResource();
         invokerResource.setName(invoker.getName());
         invokerResource.setDescription(invoker.getDescription());
-        invokerResource.setIcon(invoker.getIcon());
+        invokerResource.setIcon(imagePath + invoker.getIcon());
 
         return invokerResource;
     }
