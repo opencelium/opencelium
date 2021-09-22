@@ -103,10 +103,10 @@ class ConnectorsList extends Component{
         let mapEntity = {};
         mapEntity.map = (connector) => {
             let result = {};
-            const mapping = (data) => {return {connectorId: data.entityId, icon: data.croppedImage};};
+            const mapping = (data) => {return {connectorId: data.entityId, icon: data.croppedImage, title: data.title};};
             result.id = connector.id;
             result.title = connector.name;
-            result.avatar = <ImageCropView entityId={connector.id} mapping={mapping} title={connector.name} icon={CConnectorItem.hasIcon(connector.icon) ? connector.icon : connector.invoker.icon} uploadIcon={addConnectorIcon} uploadingIcon={addingConnectorIcon}/>;
+            result.avatar = <ImageCropView entityId={connector.id} mapping={mapping} title={connector.name} icon={CConnectorItem.hasIcon(connector.icon) ? connector.icon : connector.invoker.icon} uploadIcon={(connector) => addConnectorIcon(connector, {onlyIcon: true})} uploadingIcon={addingConnectorIcon}/>;
             return result;
         };
         mapEntity.getViewLink = (connector) => {return `${prefixUrl}/${connector.id}/view`;};

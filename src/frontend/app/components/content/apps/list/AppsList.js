@@ -25,6 +25,7 @@ import {permission} from "@decorators/permission";
 import {APP_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 import {APP_STATUS_DOWN, APP_STATUS_UP} from "@utils/constants/url";
+import ImageCropView from "@components/general/app/ImageCropView";
 
 
 const prefixUrl = '/apps';
@@ -87,7 +88,7 @@ class AppsList extends Component{
             result.id = app.id;
             result.title = app.name;
             result.subtitle = subtitle;
-            result.avatar = app.icon;
+            result.avatar = <ImageCropView entityId={app.name} title={app.name} icon={app.icon}/>;
             result.value = app.value;
             result.link = app.link;
             result.openEntityEvent = () => checkApp(app);

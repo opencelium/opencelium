@@ -148,7 +148,7 @@ class Menu extends Component{
                     <div>
                         <div className={styles.nav_brand}>
                             <MenuLinkLogo/>
-                            <MenuIcon className={styles.nav_toggle} isButton whiteTheme value={this.state.isExpanded ? 'menu_open' : 'menu'} onClick={::this.onToggleMenu}/>
+                            <MenuIcon tooltip={this.state.isExpanded ? 'Constrict' : 'Expand'} className={styles.nav_toggle} isButton whiteTheme value={this.state.isExpanded ? 'menu_open' : 'menu'} onClick={::this.onToggleMenu}/>
                         </div>
                         <div>
                             <ConnectorsMenuItem/>

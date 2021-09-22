@@ -53,6 +53,7 @@ import FormUserGroupIcon from "@change_component/form_elements/FormUserGroupIcon
 import FormThemes from "@change_component/form_elements/FormThemes";
 import FormAppTour from "@change_component/form_elements/FormAppTour";
 import {getStyles} from "@utils/themes";
+import FormCronExp from "@change_component/form_elements/FormCronExp";
 
 
 function mapStateToProps(state){
@@ -153,6 +154,13 @@ class FormSection extends Component{
             case 'email':
             case 'textarea':
                 return <FormInput
+                    key={key}
+                    entity={entity}
+                    updateEntity={updateEntity}
+                    data={data}
+                />;
+            case 'cron_exp':
+                return <FormCronExp
                     key={key}
                     entity={entity}
                     updateEntity={updateEntity}

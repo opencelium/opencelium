@@ -263,7 +263,7 @@ class NotificationListItem extends Component{
                                             value={'edit'}
                                             tooltip={t('NOTIFICATION.UPDATE')}
                                             onClick={::this.fetchNotification}
-                                            blueTheme={true}
+                                            turquoiseTheme={true}
                                             isButton={true}
                                         />
                                 }
@@ -279,7 +279,7 @@ class NotificationListItem extends Component{
                                             value={'delete'}
                                             tooltip={t('NOTIFICATION.DELETE')}
                                             onClick={::this.toggleDeleteNotificationConfirmation}
-                                            blueTheme={true}
+                                            turquoiseTheme={true}
                                             isButton={true}
                                         />
                                 }

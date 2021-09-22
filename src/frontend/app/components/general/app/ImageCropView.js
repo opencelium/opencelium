@@ -46,6 +46,10 @@ class ImageCropView extends React.Component{
         }
     }
 
+    hasUpload(){
+        return typeof this.props.uploadIcon === 'function';
+    }
+
     setCroppedImage(croppedImage){
         this.setState({croppedImage});
     }
@@ -63,17 +67,19 @@ class ImageCropView extends React.Component{
     }
 
     toggleShowDialog(){
-        this.setState({
-            isDialogVisible: !this.state.isDialogVisible,
-            src: null,
-            browseTitle: 'Please, select an image...',
-        })
+        if(this.hasUpload()){
+            this.setState({
+                isDialogVisible: !this.state.isDialogVisible,
+                src: null,
+                browseTitle: 'Please, select an image...',
+            })
+        }
     }
 
     uploadIcon(){
         const {croppedImage} = this.state;
-        const {uploadIcon, mapping, entityId} = this.props;
-        uploadIcon(mapping({entityId, croppedImage}));
+        const {uploadIcon, mapping, entityId, title} = this.props;
+        uploadIcon(mapping({entityId, title, croppedImage}));
         this.toggleShowDialog();
     }
 
@@ -124,14 +130,15 @@ class ImageCropView extends React.Component{
         const {isMouseOverImage} = this.state;
         const {icon, title, authUser} = this.props;
         let cardIconStyles = {opacity: 1};
-        if(isMouseOverImage){
+        const showUploadIcon = isMouseOverImage && this.hasUpload();
+        if(showUploadIcon){
             cardIconStyles.opacity = 0.5;
         }
         return(
-            <div>
+            <div style={{width: 'calc(30% - 0.5vw)'}}>
                 <div className={styles.image_crop} onMouseOver={::this.onMouseOverImage} onMouseLeave={::this.onMouseLeaveImage}>
                     <CardIcon authUser={authUser} title={title} icon={icon} onClick={::this.toggleShowDialog} style={cardIconStyles}/>
-                    {isMouseOverImage && <TooltipFontIcon onClick={::this.toggleShowDialog} className={styles.upload_icon} size={'2vw'} tooltip={'Upload'} value={'upload'}/>}
+                    {showUploadIcon && <TooltipFontIcon onClick={::this.toggleShowDialog} wrapClassName={styles.upload_icon} size={'1.5vw'} tooltip={'Upload'} value={'upload'}/>}
                 </div>
                 {::this.renderDialog()}
             </div>
@@ -141,12 +148,12 @@ class ImageCropView extends React.Component{
 
 
 ImageCropView.propTypes = {
-    entityId: PropTypes.number.isRequired,
+    entityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     title: PropTypes.string.isRequired,
     icon: PropTypes.string.isRequired,
-    uploadIcon: PropTypes.func.isRequired,
-    uploadingIcon: PropTypes.number.isRequired,
-    mapping: PropTypes.func.isRequired,
+    uploadIcon: PropTypes.func,
+    uploadingIcon: PropTypes.number,
+    mapping: PropTypes.func,
 }
 
 ImageCropView.defaultProps = {

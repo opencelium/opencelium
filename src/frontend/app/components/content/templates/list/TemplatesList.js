@@ -173,7 +173,7 @@ class TemplatesList extends Component{
             return result;
         };
         mapEntity.AddButton = TemplateImport;
-        mapEntity.AdditionalButton = <Button authUser={authUser} title={t('LIST.CONVERT_SELECTED_BUTTON')} onClick={::this.convertAll}/>;
+        mapEntity.AdditionalButton = <Button authUser={authUser} title={t('LIST.CONVERT_ALL_BUTTON')} onClick={::this.convertAll}/>;
         mapEntity.onDelete = deleteTemplate;
         return <List
             deletingEntity={(template) => deletingTemplate === API_REQUEST_STATE.START && template.id === currentTemplate.id}

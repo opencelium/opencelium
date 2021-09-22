@@ -79,7 +79,7 @@ class TopBar extends React.Component{
             }
         }
         return(
-            <div className={styles.top_bar}>
+            <div className={styles.top_bar} id={'app_header'}>
                 {/*<Search/>*/}
                 <Input className={styles.search_input} placeholder={'Search'}/>
                 <div className={styles.notifications}>

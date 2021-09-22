@@ -28,13 +28,15 @@ import {
     removeLoginKeyNavigation
 } from "@utils/key_navigation";
 import ValidationMessage from "@change_component/ValidationMessage";
-import LoginIcon from "@components/icons/LoginIcon";
+import {LoginOpenCelium} from "@components/icons/LoginIcon";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
     return{
         isAuth: auth.get('isAuth'),
+        logining: auth.get('logining'),
     };
 }
 
@@ -174,15 +176,21 @@ class Login extends Component{
     }
 
     render(){
-        const {t, isAuth} = this.props;
+        const {t, isAuth, logining} = this.props;
+        let inputStyle = styles.input;
+        let captionStyle = styles.caption;
+        if(isAuth){
+            inputStyle += ` ${styles.hide}`;
+            captionStyle += ` ${styles.hide}`;
+        }
         return (
             <div className={styles.login}>
-                <div className={styles.caption}>{t("LOGIN.HEADER")}</div>
+                <div className={captionStyle}>{t("LOGIN.HEADER")}</div>
                 <Input
                     type={'email'}
                     placeholder={t('LOGIN.EMAIL_PLACEHOLDER')}
                     value={this.state.email}
-                    theme={styles}
+                    theme={{...styles, input: inputStyle}}
                     onChange={::this.changeEmail}
                     onKeyPress={(e) => onEnter(e, ::this.pressEnterEmail)}
                     id={'login_email'}
@@ -191,14 +199,15 @@ class Login extends Component{
                     type={'password'}
                     placeholder={t('LOGIN.PASSWORD_PLACEHOLDER')}
                     value={this.state.password}
-                    theme={styles}
+                    theme={{...styles, input: inputStyle}}
                     onChange={::this.changePassword}
                     onKeyPress={(e) => onEnter(e, () => {::this.login(); setFocusById('login_button');})}
                     id={'login_password'}
                 />
                 {this.renderValidation()}
-                <LoginIcon
-                    isUnlocked={isAuth}
+                <LoginOpenCelium
+                    isAuth={isAuth}
+                    isLoading={logining === API_REQUEST_STATE.START}
                     onClick={::this.login}
                     id={'login_button'}
                 />

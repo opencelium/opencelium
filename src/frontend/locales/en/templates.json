@@ -8,6 +8,6 @@
     "DESCRIPTION": "Description",
     "FROM_INVOKER": "From Invoker",
     "TO_INVOKER": "To Invoker",
-    "CONVERT_SELECTED_BUTTON": "Convert Selected"
+    "CONVERT_ALL_BUTTON": "Convert All"
   }
 }

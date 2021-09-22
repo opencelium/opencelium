@@ -5,6 +5,7 @@ import {Link as ReactRouterLink} from "react-router";
 import LogoOcWhiteImagePath from "assets/logo_oc_white.png";
 import {permission} from "@decorators/permission";
 import {connect} from "react-redux";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
@@ -41,9 +42,15 @@ const Link = React.forwardRef((props, ref) => (
 ))
 
 export const MenuIcon = (props) => {
-    return(
-        <FontIcon className={styles.nav_icon} size={30} {...props}/>
-    );
+    if(props.tooltip){
+        return(
+            <TooltipFontIcon whiteTheme className={styles.nav_icon} size={30} {...props}/>
+        );
+    } else{
+        return(
+            <FontIcon whiteTheme className={styles.nav_icon} size={30} {...props}/>
+        );
+    }
 }
 
 export const MenuLink = (props) => {
@@ -119,7 +126,7 @@ export class MenuLinkWithSubLinks extends React.Component{
             <div className={`${styles.nav_link} ${styles.main_menu_collapse}`}>
                 <MenuIcon value={value}/>
                 <ReactRouterLink key={label} onlyActiveOnIndex to={to} className={`${styles.main_menu_collapse_link}`}>{label}</ReactRouterLink>
-                <FontIcon className={collapseIconClassName} size={18} value={'expand_more'} onClick={::this.onToggleCollapse}/>
+                <FontIcon whiteTheme className={collapseIconClassName} size={18} value={'expand_more'} onClick={::this.onToggleCollapse}/>
                 <ul className={collapseMenuClassName}>
                     {subLinks.map(subLink => <PermissionLink key={subLink.label} permission={subLink.permission} onlyActiveOnIndex to={subLink.to} className={`${styles.main_menu_collapse_sublink}`}>{subLink.label}</PermissionLink>)}
                 </ul>

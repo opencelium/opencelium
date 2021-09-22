@@ -204,10 +204,11 @@
 .card_avatar{
   font-family: $FONT_FAMILY;
   float: right;
-  margin-top: 5px;
   transform-origin: 90% 25%;
   transition: all 0.1s;
-  width: 30%;
+  width: 100%;
+  display: flex;
+  justify-content: right;
 }
 
 .avatar{
@@ -217,19 +218,17 @@
   -moz-border-radius: 8px;
   border-radius: 8px;
   width: 70%;
-  padding: 3px 5px;
   text-align: right;
 }
 
 .card_avatar_default{
-  text-align: right;
-  cursor: pointer;
+  font-family: $FONT_FAMILY;
   float: right;
-  width: 30%;
-  img{
-    width: 70% !important;
-    height: 70% !important;
-  }
+  transform-origin: 90% 25%;
+  transition: all 0.1s;
+  width: 70%;
+  display: flex;
+  justify-content: center;
 }
 
 .avatar_default{

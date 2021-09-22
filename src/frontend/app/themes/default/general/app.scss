@@ -215,11 +215,18 @@
 }
 .image_crop{
   position: relative;
+  display: flex;
+  justify-content: right;
 }
 .upload_icon{
+  width: 70%;
+  font-size: 1.5vw;
+  float: right;
+  display: flex;
+  justify-content: center;
   position: absolute;
-  right: 1vw;
-  top: 1vw;
+  right: 0;
+  top: 15px;
   cursor: pointer;
 }
 .image_crop_preview{

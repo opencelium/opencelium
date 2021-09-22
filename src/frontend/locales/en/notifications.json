@@ -18,7 +18,7 @@
     "DELETE_USERGROUPS": "The selected user groups were successfully removed.",
     "TEST_CONNECTOR": "Successfully tested!",
     "ADD_CONNECTOR": "The connector <1><0>{{title}}</0></1> was successfully added",
-    "ADD_CONNECTORICON": "The connector <1><0>{{title}}</0></1> was successfully added",
+    "ADD_CONNECTORICON": "The icon of the connector <1><0>{{title}}</0></1> was successfully uploaded",
     "FETCH_CONNECTORS": "Connectors were successfully fetched",
     "UPDATE_CONNECTOR": "The connector <1><0>{{title}}</0></1> was successfully updated",
     "DELETE_CONNECTOR": "The connector <1><0>{{title}}</0></1> was successfully removed",

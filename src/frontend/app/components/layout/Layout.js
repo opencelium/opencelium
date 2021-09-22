@@ -141,7 +141,7 @@ class Layout extends Component{
             return <TopBar/>;
         }
         return (
-            <div id={'app_header'}>
+            <div>
                 {hasHeader(this.props) && <Menu toggleMenu={::this.toggleMenu} hideMenu={::this.hideMenu} router={router}/>}
                 <TopBar/>
             </div>

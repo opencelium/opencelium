@@ -22,13 +22,15 @@
 }
 
 .login_page{
+  background: $BACKGROUND_MENU_COLOR;
   font-family: $FONT_FAMILY;
   width: 300px;
-  height: 290px;
-  margin: 30px auto;
-  border: 1px solid #f7f7f7;
+  height: 305px;
+  top: 30px;
+  position: absolute;
+  left: calc(50% - 150px);
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  transition: all 0.5s ease-in;
   .login{
     position: relative;
   }
@@ -36,6 +38,7 @@
     font-family: $FONT_FAMILY;
     font-size: $FONT_SIZE_MEDIUM;
     padding: 10px;
+    color: #fff;
     text-align: center;
   }
   .button_connect{
@@ -51,10 +54,10 @@
 
 .input {
   font-family: $FONT_FAMILY;
-  background: #2e75b6;
+  background: #fff;
   input {
     border-bottom-color: #c2c2c2 !important;
-    color: white;
+    color: black;
     width: 96%;
     margin: 0 2% 0 2%;
   }
@@ -64,8 +67,9 @@
 }
 .bar::before,.bar::after{
   font-family: $FONT_FAMILY;
-  background-color: white !important;
+  background-color: #c2c2c2 !important;
   height: 1px !important;
+  width: 48% !important;
 }
 
 .login_page:hover {
@@ -74,10 +78,21 @@
 }
 
 .validation_message{
-  bottom: -24px !important;
   padding: 0 !important;
+  bottom: -30px;
   .message{
-    color: $ERROR_COLOR;
+    color: #eee;
     position: relative;
   }
+}
+.hide{
+  height: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+.move_login_page{
+  height: 100vh;
+  left: 0;
+  top: 0;
+  width: 95px;
 }

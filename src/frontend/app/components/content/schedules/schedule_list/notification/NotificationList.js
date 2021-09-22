@@ -234,7 +234,7 @@ class NotificationList extends Component{
                 <TooltipFontIcon
                     size={18}
                     id={`notification_list_add_${index}`}
-                    blueTheme={true}
+                    turquoiseTheme={true}
                     isButton={true}
                     tooltip={t('schedules:NOTIFICATION.ADD_ICON_TOOLTIP')}
                     value={startAddingNotification ? <Loading className={styles[classNames.loading_add]}/> : 'add'}
@@ -244,7 +244,7 @@ class NotificationList extends Component{
                 <TooltipFontIcon
                     size={18}
                     id={`notification_list_close_${index}`}
-                    blueTheme={true}
+                    turquoiseTheme={true}
                     isButton={true}
                     tooltip={t('schedules:NOTIFICATION.CLOSE_ICON_TOOLTIP')}
                     value={'close'}
