@@ -5,6 +5,7 @@ import {Link as ReactRouterLink} from "react-router";
 import LogoOcWhiteImagePath from "assets/logo_oc_white.png";
 import {permission} from "@decorators/permission";
 import {connect} from "react-redux";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
@@ -41,9 +42,15 @@ const Link = React.forwardRef((props, ref) => (
 ))
 
 export const MenuIcon = (props) => {
-    return(
-        <FontIcon whiteTheme className={styles.nav_icon} size={30} {...props}/>
-    );
+    if(props.tooltip){
+        return(
+            <TooltipFontIcon whiteTheme className={styles.nav_icon} size={30} {...props}/>
+        );
+    } else{
+        return(
+            <FontIcon whiteTheme className={styles.nav_icon} size={30} {...props}/>
+        );
+    }
 }
 
 export const MenuLink = (props) => {

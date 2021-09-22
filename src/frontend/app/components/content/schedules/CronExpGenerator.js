@@ -379,7 +379,7 @@ class CronExpGenerator extends Component{
                         </Col>
                     </Row>
                 </Dialog>
-                <TooltipFontIcon onClick={::this.toggleShowGenerator} tooltip={t('ADD.CRON_ICON_TOOLTIP')} value={'schedule'} isButton={true} wrapClassName={styles[classNames.cron_icon_tooltip]} blueTheme={true}/>
+                <TooltipFontIcon turquoiseTheme onClick={::this.toggleShowGenerator} tooltip={t('ADD.CRON_ICON_TOOLTIP')} value={'schedule'} isButton={true} wrapClassName={styles[classNames.cron_icon_tooltip]}/>
             </React.Fragment>
         );
     }

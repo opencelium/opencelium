@@ -124,7 +124,7 @@ const IINVOKER = {
 const SCHEDULE_TITLE = {name: 'title', type: 'text', maxLength: 256, icon: 'title'};
 const SCHEDULE_CONNECTION = {name: 'connection', type: 'select+description', icon: 'supervised_user_circle'};
 const SCHEDULE_CONNECTION_TEXT = {name: 'connection', type: 'text', icon: 'supervised_user_circle'};
-const SCHEDULE_CRON_EXPRESSION = {name: 'cronExp', type: 'text', maxLength: 256, icon: 'title'};
+const SCHEDULE_CRON_EXPRESSION = {name: 'cronExp', type: 'cron_exp', maxLength: 256, icon: 'title'};
 
 //SCHEDULE
 const ISCHEDULE = {
