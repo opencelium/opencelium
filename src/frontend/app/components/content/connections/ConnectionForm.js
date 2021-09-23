@@ -13,6 +13,7 @@ import styles from '@themes/default/content/connections/change.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
+import Button from "@basic_components/buttons/Button";
 
 /**
  * common component to add and update Connector
@@ -42,6 +43,7 @@ export function ConnectionForm(type) {
                     entity: null,
                     isNewConnectionView: false,
                 };
+                this.isNavigatingToScheduler = false;
             }
 
             componentDidMount(){
@@ -298,10 +300,15 @@ export function ConnectionForm(type) {
             /**
              * to add/update Connection
              */
-            doAction(entity){
+            doAction(entity, redirectUrl, isNavigatingToScheduler = false){
+                this.isNavigatingToScheduler = isNavigatingToScheduler;
                 const {authUser, doAction} = this.props;
                 removeLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, `connection_${authUser.userId}`);
-                doAction(entity, this);
+                doAction(entity, this, redirectUrl);
+            }
+
+            doActionAndGoToScheduler(entity){
+                this.doAction(entity, '/schedules', true);
             }
 
             render(){
@@ -310,7 +317,7 @@ export function ConnectionForm(type) {
                 const connection = this.getConnection();
                 let contentTranslations = {};
                 contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.connectionPrefixUrl};
+                contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.connectionPrefixUrl};
                 contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.connectionPrefixUrl};
                 let contents = [
                     {
@@ -340,8 +347,18 @@ export function ConnectionForm(type) {
                     if(this.isView || contents.length < 2){
                         return null;
                     }
+                    let button = null;
+                    if(this.isAdd){
+                        button = <Button icon={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START) ? 'loading' : 'add'} title={t('ADD.ADD_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => ::this.doActionAndGoToScheduler(entity)}/>;
+                    }
+                    if(this.isUpdate){
+                        button = <Button icon={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START) ? 'loading' : 'autorenew'} title={t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => ::this.doActionAndGoToScheduler(entity)}/>;
+                    }
                     return(
-                        <AddTemplate data={contents[2].inputs[1]} entity={entity} disabled={entity.isEmpty()}/>
+                        <React.Fragment>
+                            {button}
+                            <AddTemplate data={contents[2].inputs[1]} entity={entity} disabled={entity.isEmpty()}/>
+                        </React.Fragment>
                     );
                 }
                 return (
@@ -349,7 +366,7 @@ export function ConnectionForm(type) {
                         <Form
                             contents={contents}
                             translations={contentTranslations}
-                            isActionInProcess={this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START}
+                            isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}
                             permissions={ConnectionPermissions}
                             clearValidationMessage={::this.clearValidationMessage}
                             action={::this.doAction}

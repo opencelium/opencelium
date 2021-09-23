@@ -345,7 +345,7 @@ export function ConnectorForm(type) {
                         return null;
                     }
                     if(this.isAdd){
-                        return <Button icon={this.isNavigatingToConnection && (this.props[this.actionName] === API_REQUEST_STATE.START || this.props.checkingConnectorTitle === API_REQUEST_STATE.START) ? 'loading' : 'add'} title={t('ADD.ADD_BUTTON_AND_GO_TO_ADD_CONNECTION')} onClick={() => ::this.doActionAndGoToConnections(entity)}/>;
+                        return <Button icon={this.isNavigatingToConnection && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectorTitle === API_REQUEST_STATE.START) ? 'loading' : 'add'} title={t('ADD.ADD_BUTTON_AND_GO_TO_ADD_CONNECTION')} onClick={() => ::this.doActionAndGoToConnections(entity)}/>;
                     }
                 }
                 return (
