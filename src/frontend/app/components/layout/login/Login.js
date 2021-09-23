@@ -52,7 +52,10 @@ class Login extends Component{
         this.state = {
             email: '',
             password: '',
-            validationMessage: '',
+            validationMessages: {
+                password: '',
+                email: '',
+            },
         };
         let bodyElement = document.querySelector('body');
         if(bodyElement) bodyElement.classList.remove(menuStyles.body_pd);
@@ -78,7 +81,10 @@ class Login extends Component{
     changeEmail(value){
         this.setState({
             email: value,
-            validationMessage: '',
+            validationMessages: {
+                ...this.state.validationMessages,
+                email: '',
+            },
         });
     }
 
@@ -90,7 +96,10 @@ class Login extends Component{
     changePassword(value){
         this.setState({
             password: value,
-            validationMessage: '',
+            validationMessages: {
+                ...this.state.validationMessages,
+                password: '',
+            },
         });
     }
 
@@ -120,14 +129,14 @@ class Login extends Component{
         const {email} = this.state;
         const {t} = this.props;
         if(email === ''){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.EMAIL_REQUIRED')});
+            this.setState({validationMessages: {...this.state.validationMessages, email: t('users:ADD.VALIDATION_MESSAGES.EMAIL_REQUIRED')}});
             setFocusById('login_email');
             return false;
         }
         let isEmailRegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         let isEmail = isEmailRegExp.test(email);
         if(!isEmail){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.WRONG_EMAIL')});
+            this.setState({validationMessages: {...this.state.validationMessages, email: t('users:ADD.VALIDATION_MESSAGES.WRONG_EMAIL')}});
             setFocusById('login_email');
             return false;
         }
@@ -150,32 +159,20 @@ class Login extends Component{
         const {password} = this.state;
         const {t} = this.props;
         if(password === ''){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.PASSWORD_REQUIRED')});
+            this.setState({validationMessages: {...this.state.validationMessages, password: t('users:ADD.VALIDATION_MESSAGES.PASSWORD_REQUIRED')}});
             setFocusById('login_password');
             return false;
         }
         if(password.length < 3){
-            this.setState({validationMessage: t('users:ADD.VALIDATION_MESSAGES.WRONG_LENGTH_PASSWORD_SHORT')});
+            this.setState({validationMessages: {...this.state.validationMessages, password: t('users:ADD.VALIDATION_MESSAGES.WRONG_LENGTH_PASSWORD_SHORT')}});
             setFocusById('login_password');
             return false;
         }
         return true;
     }
 
-    renderValidation(){
-        const {validationMessage} = this.state;
-        if(validationMessage !== '') {
-            return (
-                <ValidationMessage
-                    message={validationMessage}
-                    classNames={{validationMessage: styles.validation_message, message: styles.message}}
-                />
-            );
-        }
-        return null;
-    }
-
     render(){
+        const {validationMessages} = this.state;
         const {t, isAuth, logining} = this.props;
         let inputStyle = styles.input;
         let captionStyle = styles.caption;
@@ -187,6 +184,8 @@ class Login extends Component{
             <div className={styles.login}>
                 <div className={captionStyle}>{t("LOGIN.HEADER")}</div>
                 <Input
+                    required
+                    error={validationMessages.email}
                     type={'email'}
                     placeholder={t('LOGIN.EMAIL_PLACEHOLDER')}
                     value={this.state.email}
@@ -196,6 +195,8 @@ class Login extends Component{
                     id={'login_email'}
                 />
                 <Input
+                    required
+                    error={validationMessages.password}
                     type={'password'}
                     placeholder={t('LOGIN.PASSWORD_PLACEHOLDER')}
                     value={this.state.password}
@@ -204,7 +205,6 @@ class Login extends Component{
                     onKeyPress={(e) => onEnter(e, () => {::this.login(); setFocusById('login_button');})}
                     id={'login_password'}
                 />
-                {this.renderValidation()}
                 <LoginOpenCelium
                     isAuth={isAuth}
                     isLoading={logining === API_REQUEST_STATE.START}

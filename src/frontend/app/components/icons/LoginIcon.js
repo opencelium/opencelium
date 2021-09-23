@@ -18,16 +18,38 @@ import styles from '../../themes/default/general/icons.scss';
 import LogoOcWhiteImagePath from "assets/logo_oc_white.png";
 import Loading from "@components/general/app/Loading";
 
-export const LoginOpenCelium = ({isAuth, onClick, isLoading}) => {
-    return(
-        <div className={isAuth ? styles.login_open_celium_in_menu : styles.login_open_celium}>
-            {isLoading ?
-                <Loading/>
-                :
-                <img src={LogoOcWhiteImagePath} alt={'OpenCelium'} onClick={onClick}/>
-            }
-        </div>
-    );
+export class LoginOpenCelium extends React.Component{
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            doRotate: false,
+        }
+    }
+
+    onClick(){
+        this.setState({
+            doRotate: true,
+        }, () => setTimeout(() => {this.setState({doRotate: false}); this.props.onClick()}, 300))
+    }
+
+    render(){
+        const {doRotate} = this.state;
+        const {isAuth, isLoading} = this.props;
+        let className = isAuth ? `${styles.login_open_celium_in_menu}` : styles.login_open_celium;
+        if(doRotate){
+            className += ` ${styles.rotate}`;
+        }
+        return(
+            <div className={className}>
+                {isLoading ?
+                    <Loading/>
+                    :
+                    <img src={LogoOcWhiteImagePath} alt={'OpenCelium'} onClick={::this.onClick}/>
+                }
+            </div>
+        );
+    }
 }
 
 export const LoginIcon = ({isUnlocked, ...props}) => {

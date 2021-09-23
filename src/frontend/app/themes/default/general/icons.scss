@@ -148,10 +148,11 @@
 .login_open_celium{
   text-align: center;
   width: 100%;
-  margin-top: 15px;
-  margin-bottom: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   img{
     transition: width 0.5s;
+    transition-delay: 0.3s;
     width: 60px;
     cursor: pointer;
   }
@@ -165,5 +166,12 @@
   margin-top: 24px;
   img{
     width: 2.5rem;
+  }
+}
+.rotate{
+  img{
+    transform-origin: 25px 25px;
+    transform: rotate(60deg);
+    transition: transform 0.3s;
   }
 }

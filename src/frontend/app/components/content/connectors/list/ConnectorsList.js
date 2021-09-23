@@ -30,6 +30,8 @@ import ImageCropView from "@components/general/app/ImageCropView";
 import {isString} from "@utils/app";
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import Button from "@basic_components/buttons/Button";
+import {withRouter} from "react-router";
 
 
 const prefixUrl = '/connectors';
@@ -130,4 +132,4 @@ class ConnectorsList extends Component{
 }
 
 
-export default ConnectorsList;
+export default withRouter(ConnectorsList);

@@ -24,8 +24,9 @@
 .login_page{
   background: $BACKGROUND_MENU_COLOR;
   font-family: $FONT_FAMILY;
+  border-radius: 6px;
   width: 300px;
-  height: 305px;
+  height: 285px;
   top: 30px;
   position: absolute;
   left: calc(50% - 150px);
@@ -55,6 +56,7 @@
 .input {
   font-family: $FONT_FAMILY;
   background: #fff;
+  padding-top: 15px;
   input {
     border-bottom-color: #c2c2c2 !important;
     color: black;
@@ -70,6 +72,14 @@
   background-color: #c2c2c2 !important;
   height: 1px !important;
   width: 48% !important;
+}
+
+.errored{
+  padding-bottom: 20px !important;
+}
+.error{
+  padding: 0 2%;
+  position: absolute;
 }
 
 .login_page:hover {
@@ -95,4 +105,5 @@
   left: 0;
   top: 0;
   width: 95px;
+  border-radius: 0 !important;
 }
