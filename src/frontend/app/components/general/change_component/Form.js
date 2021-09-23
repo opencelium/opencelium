@@ -10,6 +10,7 @@ import ListHeader from "@components/general/list_of_components/Header";
 import ListButton from "@components/general/view_component/ListButton";
 import {ActionButton, SubFormSections} from "@change_component/FormComponents";
 import {setConnectionData} from "@actions/connection_overview_2/set";
+import CancelButton from "@components/general/view_component/CancelButton";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -89,6 +90,7 @@ class Form extends React.Component{
         const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage} = this.props;
         const hasActionButton = translations && translations.action_button;
         const hasListButton = translations && translations.list_button;
+        const hasCancelButton = translations && translations.cancel_button;
         return(
             <Row id={'form_component'}>
                 <Col sm={12}>
@@ -111,6 +113,13 @@ class Form extends React.Component{
                             }
                             {
                                 additionalButtons(entity)
+                            }
+                            {hasCancelButton &&
+                                <CancelButton
+                                    title={translations.cancel_button.title}
+                                    link={translations.cancel_button.link}
+                                    permission={permissions.READ}
+                                />
                             }
                         </div>
                         <div className={styles.form_component}>
@@ -159,6 +168,10 @@ Form.propTypes = {
             onHelpClick: PropTypes.func,
         }),
         list_button: PropTypes.shape({
+            title: PropTypes.string.isRequired,
+            link: PropTypes.string.isRequired,
+        }),
+        cancel_button: PropTypes.shape({
             title: PropTypes.string.isRequired,
             link: PropTypes.string.isRequired,
         }),

@@ -18,7 +18,7 @@ import RejectedRequest from "@components/general/app/RejectedRequest";
 import Loading from "@loading";
 import PageNotFound from "@components/general/app/PageNotFound";
 
-import {capitalize, consoleLog, isEmptyObject, setFocusById} from '@utils/app';
+import {capitalize, consoleLog, isEmptyObject, isString, setFocusById} from '@utils/app';
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {automaticallyShowTour} from "@utils/constants/tours";
 
@@ -49,6 +49,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                     hasStartedFetchingResources: false,
                     hasWrongURL: false,
                     isTourOpen: automaticallyShowTour(props.authUser),
+                    redirectUrl: '',
                 };
             }
 
@@ -207,8 +208,8 @@ import {automaticallyShowTour} from "@utils/constants/tours";
              *      PageNotFound if the requested page does not exist
              */
             checkEntity(){
-                const {entity, isCommandTriggered, resources, hasWrongURL} = this.state;
-                const {error, t, authUser} = this.props;
+                const {entity, isCommandTriggered, resources, hasWrongURL, redirectUrl} = this.state;
+                const {error, t, authUser, router} = this.props;
                 const cancelFetching = this.props[`fetch${capitalize(singleEntityName)}Canceled`];
                 if(hasWrongURL){
                     return <PageNotFound/>;
@@ -228,14 +229,19 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                     }
                 }
                 if(command !== '' && isCommandTriggered){
-                    if(typeof this.redirect === 'function')
-                        this.redirect();
+                    if(redirectUrl !== ''){
+                        router.push(redirectUrl)
+                    } else{
+                        if(typeof ::this.redirect === 'function'){
+                            ::this.redirect();
+                        }
+                    }
                 }
 
                 return null;
             }
 
-            doAction(entity, thisComponentScope = null){
+            do(entity, thisComponentScope = null){
                 if(thisComponentScope !== null){
                     const {validationMessages} = thisComponentScope.state;
                     thisComponentScope.startDoingAction = true;
@@ -273,6 +279,16 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                     }
                 } else{
                     this.action(entity);
+                }
+            }
+
+            doAction(entity, thisComponentScope = null, redirectUrl = ''){
+                if(isString(redirectUrl) && redirectUrl){
+                    this.setState({
+                        redirectUrl,
+                    }, () => this.do(entity, thisComponentScope));
+                } else{
+                    this.do(entity, thisComponentScope);
                 }
             }
 

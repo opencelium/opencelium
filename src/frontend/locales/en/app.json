@@ -19,6 +19,9 @@
     "APP": "App",
     "INVOKER": "Invoker"
   },
+  "FORM": {
+    "CANCEL": "Cancel"
+  },
   "LIST": {
     "CARD": {
       "BUTTON_VIEW": "View",

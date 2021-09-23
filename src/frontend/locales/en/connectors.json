@@ -40,7 +40,8 @@
       "WRONG_CREDENTIAL_DATA": "Wrong credential data"
     },
     "LIST_BUTTON": "Connectors",
-    "ADD_BUTTON": "Add",
+    "ADD_BUTTON": "Add & Close",
+    "ADD_BUTTON_AND_GO_TO_ADD_CONNECTION": "Add & Go to Add Connection",
     "TEST_BUTTON": "Test",
     "HEADER": "Add Connector"
   },

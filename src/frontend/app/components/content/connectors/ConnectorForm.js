@@ -8,6 +8,7 @@ import Form from "@change_component/Form";
 import {ConnectorPermissions} from "@utils/constants/permissions";
 import OCTour from "@basic_components/OCTour";
 import React from "react";
+import Button from "@basic_components/buttons/Button";
 
 /**
  * common component to add and update Connector
@@ -21,6 +22,8 @@ export function ConnectorForm(type) {
                 this.connectorPrefixUrl = '/connectors';
                 this.translationKey = type.toUpperCase();
                 this.isUpdate = type === 'update';
+                this.isAdd = type === 'add';
+                this.isView = type === 'view';
                 this.actionName = this.isUpdate ? `updatingConnector` : `addingConnector`;
                 this.state = {
                     authenticationFields: {},
@@ -32,6 +35,7 @@ export function ConnectorForm(type) {
                     entity: null,
                 };
                 this.startTesting = false;
+                this.isNavigatingToConnection = false;
             }
 
             componentDidMount(){
@@ -274,24 +278,29 @@ export function ConnectorForm(type) {
             /**
              * to add/update connector
              */
-            doAction(connector){
+            doAction(connector, redirectUrl, isNavigatingToConnection = false){
+                this.isNavigatingToConnection = isNavigatingToConnection;
                 const {doAction, params} = this.props;
                 const {authenticationFields} = this.state;
                 const data = {...connector, authenticationFields};
                 if(this.isUpdate){
                     data.id = parseInt(params.id);
                 }
-                doAction(data, this);
+                doAction(data, this, redirectUrl);
+            }
+
+            doActionAndGoToConnections(connector){
+                this.doAction(connector, '/connections/add', true);
             }
 
             render(){
                 const {hasAuthenticationInputsSection, validationMessages} = this.state;
-                const {t, openTour, closeTour, isTourOpen, testingConnector, checkingConnectorTitle} = this.props;
+                const {t, openTour, closeTour, isTourOpen, testingConnector, checkingConnectorTitle, route} = this.props;
                 let {invokers, descriptions} = this.mapInvokers();
                 let parsedEntity = this.parseEntity();
                 let contentTranslations = {};
                 contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.connectorPrefixUrl};
+                contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.connectorPrefixUrl};
                 contentTranslations.action_button = {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.connectorPrefixUrl};
                 let authenticationInputs = this.generateAuthenticationInputs();
                 let contents = [{
@@ -331,17 +340,26 @@ export function ConnectorForm(type) {
                     visible: hasAuthenticationInputsSection,
                 },
                 ];
+                const additionalButtons = (entity) => {
+                    if(this.isView){
+                        return null;
+                    }
+                    if(this.isAdd){
+                        return <Button icon={this.isNavigatingToConnection && (this.props[this.actionName] === API_REQUEST_STATE.START || this.props.checkingConnectorTitle === API_REQUEST_STATE.START) ? 'loading' : 'add'} title={t('ADD.ADD_BUTTON_AND_GO_TO_ADD_CONNECTION')} onClick={() => ::this.doActionAndGoToConnections(entity)}/>;
+                    }
+                }
                 return (
                     <div>
                         <Form
                             contents={contents}
                             translations={contentTranslations}
-                            isActionInProcess={this.props[this.actionName] === API_REQUEST_STATE.START || this.startTesting && testingConnector === API_REQUEST_STATE.START || checkingConnectorTitle === API_REQUEST_STATE.START}
+                            isActionInProcess={this.props[this.actionName] === API_REQUEST_STATE.START && !this.isNavigatingToConnection || this.startTesting && testingConnector === API_REQUEST_STATE.START || checkingConnectorTitle === API_REQUEST_STATE.START && !this.isNavigatingToConnection}
                             permissions={ConnectorPermissions}
                             clearValidationMessage={::this.clearValidationMessage}
                             action={::this.doAction}
                             entity={parsedEntity}
                             type={type}
+                            additionalButtons={additionalButtons}
                         />
                         <OCTour
                             steps={CONNECTOR_TOURS.page_1}
