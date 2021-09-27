@@ -17,5 +17,5 @@ Login into the system! You will see the menu on the left: Connectors, Connection
 See next section, explaining the usage of this system.
 
 
-.. |image0| image:: ../img/admin/0.png
+.. |image0| image:: ../img/login/0.png
    :align: middle
