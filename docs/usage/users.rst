@@ -3,9 +3,10 @@ Users
 ##################
 
 Users represent directly clients of the application. List of users
-shows all user of the system including the authorized user, it has a
-label - *Current user.* Each element of the list display a first and a
-second name of the user and his email.
+shows all users of the system including the authorized user.
+Each element in the grid view displays a first and a second name of
+the user and his email. The list view has an email and an assigned group.
+The current user logically cannot be deleted.
 
 |image0|
 
@@ -31,20 +32,17 @@ application.
 The *password*\ ’s and *repeat password*\ ’s fields length must be
 between 8 and 16 symbols. The last one should have the same value as the
 *password* field.
-
-|image4|
-
 User Details step has next fields: *name, surname, phone number,
 organization, department, salutation, avatar.* *Name* and *surname* are
 required fields.
 
-|image5|
+|image4|
 
 User Group step has only one select field - *user group* and a textarea
 with a description to selected item. Meaning of the user group you can
 find in the chapter *Groups*.
 
-|image6|
+|image5|
 
 .. |image0| image:: ../img/user/image1.png
    :align: middle
@@ -57,6 +55,4 @@ find in the chapter *Groups*.
 .. |image4| image:: ../img/user/image5.png
    :align: middle
 .. |image5| image:: ../img/user/image6.png
-   :align: middle
-.. |image6| image:: ../img/user/image7.png
    :align: middle
