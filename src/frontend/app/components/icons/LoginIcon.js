@@ -30,7 +30,7 @@ export class LoginOpenCelium extends React.Component{
     onClick(){
         this.setState({
             doRotate: true,
-        }, () => setTimeout(() => {this.setState({doRotate: false}); this.props.onClick()}, 300))
+        }, () => setTimeout(() => {this.setState({doRotate: false}); this.props.onClick()}, 800))
     }
 
     render(){
