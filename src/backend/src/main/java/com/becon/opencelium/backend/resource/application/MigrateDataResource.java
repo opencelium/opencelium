@@ -27,7 +27,7 @@ public class MigrateDataResource {
         return isOnline;
     }
 
-    public void setOnline(boolean online) {
+    public void setIsOnline(boolean online) {
         isOnline = online;
     }
 
