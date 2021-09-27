@@ -60,17 +60,10 @@ a number of elements pro row:
 The user can navigate in the grid view using keyboard arrows. The selected icon underlines
 the first letter of the actions, that means pressing: *v* - opens view, *u* - opens update and
 *d* - performs delete. If the amount of data does not fit to the page, here comes
-a paginator for navigating:
-
-|paginator|
-
-The grid view displays an icon of the element that can be replaced, if you mouseover the
-icon and click on it.
-
-|upload_image_icon|
-
-Checking items in the list view you can apply an operation to all of them, for instance
-*Delete Selected*. There can be more operations depending of the entity.
+a paginator for navigating |paginator|. The grid view displays an icon of the element that can
+be replaced, if you mouseover the icon and click on it |upload_image_icon|. Checking items in
+the list view you can apply an operation to all of them, for instance *Delete Selected*.
+There can be more operations depending of the entity.
 
 |more_multiple_actions|
 
