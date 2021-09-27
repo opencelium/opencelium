@@ -161,7 +161,7 @@ public class FieldNodeServiceImp implements FieldNodeService {
     public LinkedFieldResource toLinkedFieldResource(String fieldPath) {
         LinkedFieldResource fieldResource = new LinkedFieldResource();
         String color = fieldPath.substring(0, fieldPath.indexOf('.'));
-        String exchangeType = fieldPath.contains("request") ? "request" : "response";
+        String exchangeType = fieldPath.contains(".(request).") ? "request" : "response";
         String field = fieldPath.replace(color + ".", "")
                 .replace("(" + exchangeType + ").", "").replace(".__oc__value","");
         if(field.contains("__oc__attributes")) {
