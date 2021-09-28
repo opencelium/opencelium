@@ -154,7 +154,7 @@ class UpdateAssistant extends Component{
         const data = {
             folder: updateData.availableUpdates.folder ? updateData.availableUpdates.folder : '',
             isOnline: updateData.availableUpdates.mode === ONLINE_UPDATE,
-            version: updateData.availableUpdates.name ? updateData.availableUpdates.name : '',
+            version: updateData.availableUpdates.selectedVersion.name ? updateData.availableUpdates.selectedVersion.name : '',
             templates: updateData.templateFileUpdate.updatedTemplates.map(template => template.data),
             invokers: updateData.invokerFileUpdate.updatedInvokers.map(invoker => invoker.data),
             connections: updateData.connectionMigration.updatedConnections.map(connection => connection.data),
@@ -241,6 +241,7 @@ class UpdateAssistant extends Component{
                     name: 'systemRequirements',
                     label: t('FORM.SYSTEM_CHECK'),
                     Component: SystemOverview,
+                    style: {minHeight: '300px'},
                     componentProps: {openNextForm: () => ::this.showNextFormSection('hasAvailableUpdates')},
                 },
             ],
