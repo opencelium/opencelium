@@ -177,7 +177,7 @@ Form.propTypes = {
         }),
         action_button: PropTypes.shape({
             title: PropTypes.string.isRequired,
-            link: PropTypes.string.isRequired,
+            link: PropTypes.string,
         })
     }),
     isActionInProcess: PropTypes.bool,

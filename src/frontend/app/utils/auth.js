@@ -47,6 +47,7 @@ export function getRequestSettings(params){
     settings.url = url;
     settings.method = method;
     settings.crossDomain = true;
+    settings.timeout = 10000;
     settings.headers = headers ? {...headers} : {};
     if(typeof contentType === 'string'){
         if(contentType !== 'multipart/form-data'){

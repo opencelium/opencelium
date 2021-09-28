@@ -126,6 +126,7 @@ export const EntitiesWithNotification = [
     {name: UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPDATE_SYSTEM, types: ['FULFILLED', 'REJECTED']},
+    {name: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS, types: ['REJECTED']},
 ];
 
 /**

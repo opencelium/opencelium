@@ -22,12 +22,16 @@
   }
   font-family: $FONT_FAMILY;
   text-align: center;
-  font-size: 24px;
+  font-size: 16px;
   .header{
     font-size: 30px;
   }
   .hint{
-    font-weight: bold;
+    span{
+      font-weight: bold;
+    }
+    margin-top: 50px;
+    margin-bottom: 20px;
   }
 }
 
@@ -38,6 +42,9 @@
   bottom: 20px;
   position: absolute;
   @extend .finish_update;
+  .hint{
+    font-weight: bold;
+  }
 }
 
 .table{

@@ -154,7 +154,7 @@ class InvokerFileUpdate extends React.Component{
                         <tbody>
                         {invokers.map((invoker, key) => (
                             <InvokerFileEntry
-                                key={invoker.name}
+                                key={`${invoker.name}${key}`}
                                 index={key}
                                 invoker={invoker}
                                 setInvoker={::this.setInvoker}

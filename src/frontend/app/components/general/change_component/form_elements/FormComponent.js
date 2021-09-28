@@ -37,7 +37,7 @@ class FormComponent extends Component{
         }
         let value = entity[name];
         if(!icon){
-            return <Component entity={entity} updateEntity={updateEntity}/>;
+            return <Component entity={entity} updateEntity={updateEntity} {...componentProps}/>;
         }
         return (
             <ToolboxThemeInput

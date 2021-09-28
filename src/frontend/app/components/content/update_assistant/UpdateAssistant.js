@@ -314,6 +314,7 @@ class UpdateAssistant extends Component{
                     name: 'finishUpdate',
                     label: t('FORM.FINISH_UPDATE'),
                     Component: FinishUpdate,
+                    componentProps: {updateSystem: () => ::this.updateSystem()}
                 },
             ],
             header: t(`FORM.PAGE_6`),
