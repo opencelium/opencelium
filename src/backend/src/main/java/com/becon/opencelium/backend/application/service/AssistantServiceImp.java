@@ -221,12 +221,12 @@ public class AssistantServiceImp implements ApplicationService {
 //                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
 //                .setBranch("refs/heads/specific-branch")
 //                .call();
-        String gitUrl = env.getProperty("opencelium.assistant.repo.url");
-        Process process = Runtime.getRuntime().exec("git pull " + gitUrl);
+//        String gitUrl = env.getProperty("opencelium.assistant.repo.url");
+        Process process = Runtime.getRuntime().exec("git fetch --tags");
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
 
-        process = Runtime.getRuntime().exec("git checkout " + version);
+        process = Runtime.getRuntime().exec("git checkout -f tag/" + version);
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
 
