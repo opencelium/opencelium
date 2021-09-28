@@ -22,8 +22,6 @@ This documentation is organized into a couple of sections:
 
    usage/login
    usage/application_management
-   usage/users
-   usage/groups
    usage/connectors
    usage/connections
    usage/schedules
