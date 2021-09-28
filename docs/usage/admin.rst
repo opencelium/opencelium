@@ -144,9 +144,6 @@ gets versions from the git and in *Offline* you can upload a *zip* file with Ope
 
 |image_update_assistant_1|
 
-|image_update_assistant_2|
-
-|image_update_assistant_3|
 
 Converter
 """""""""""""""""
