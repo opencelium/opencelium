@@ -276,7 +276,7 @@ class UpdateAssistant extends Component{
             ],
             hint: {text: t('FORM.HINT_3'), openTour: ::this.openTour},
             header: t(`FORM.PAGE_3`),
-            visible: hasTemplateFileUpdate,
+            visible: hasAvailableUpdates && hasTemplateFileUpdate,
         },{
             inputs:[
                 {
@@ -291,7 +291,7 @@ class UpdateAssistant extends Component{
             ],
             hint: {text: t('FORM.HINT_4'), openTour: ::this.openTour},
             header: t(`FORM.PAGE_4`),
-            visible: hasInvokerFileUpdate,
+            visible: hasTemplateFileUpdate && hasInvokerFileUpdate,
         },{
             inputs:[
                 {
@@ -306,7 +306,7 @@ class UpdateAssistant extends Component{
             ],
             hint: {text: t('FORM.HINT_5'), openTour: ::this.openTour},
             header: t(`FORM.PAGE_5`),
-            visible: hasConnectionMigration,
+            visible: hasInvokerFileUpdate && hasConnectionMigration,
         },{
             inputs:[
                 {
@@ -317,7 +317,7 @@ class UpdateAssistant extends Component{
                 },
             ],
             header: t(`FORM.PAGE_6`),
-            visible: hasFinishUpdate,
+            visible: hasConnectionMigration && hasFinishUpdate,
         },
         ];
         return (
