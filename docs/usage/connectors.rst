@@ -8,7 +8,8 @@ different protocols: HTTP, JSON-RPC, SOAP, and so on. Currently, HTTP
 and JSON-RPC are available. Connector uses invokers. Invoker is a
 special file filled in with instructions.
 
-Each item of the connector's list displays a title and an icon.
+Each item of the connector's list displays a title and an icon. The grid
+view provides also description and invoker name.
 
 |image0|
 
@@ -18,7 +19,7 @@ description, hint, and operations.
 
 |image1|
 
-Adding/Updating connector consists of two steps: general data, and
+Adding/Updating connector consists of two steps: general data and
 credentials. General data step has four input fields: *title*,
 *description*, *invoker* and *icon*. The *title* and *invoker* are required
 fields. The *icon* can be unset setting checkbox as uncheck.
@@ -36,6 +37,19 @@ it was completed successfully you can finish the process.
 
 |image3|
 
+After filling all data you can test your credential data pressing on the
+*Test* button. If it is failed, you will be notified.
+
+|image4|
+
+After adding a connector you will be redirected to the list. You can also
+press on *Add & Go to Add Connection*, if you want to be redirected to the
+create connection page. The adding can be easily canceled and drive you
+to the list pressing on the *cancel* button.
+
+|image5|
+
+
 .. |image0| image:: ../img/connector/0.png
    :align: middle
 .. |image1| image:: ../img/connector/1.png
@@ -43,4 +57,8 @@ it was completed successfully you can finish the process.
 .. |image2| image:: ../img/connector/2.png
    :align: middle
 .. |image3| image:: ../img/connector/3.png
+   :align: middle
+.. |image4| image:: ../img/connector/4.png
+   :align: middle
+.. |image5| image:: ../img/connector/5.png
    :align: middle

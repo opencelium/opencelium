@@ -2,89 +2,114 @@
 Application Management
 ##################
 
+
 The OC Application tries to keep consistency in all her parts. It means
 to save persistence in the User Interface, so user does not need to get
-used again and again. With each entity you can do CRUD operations:
-Create, Read, Update and Delete. After successful or rejected
-fulfillment, you will be alerted with a message:
+used again and again.
 
-|image0|
+Navigation
+=========
 
-Let us consider them. The following explanations will touch upon Users,
-Groups, Connectors, Invokers and Connections.
+On the left side you can see the menu for navigation. It display only icons
+until you mouseover it. After it expands and show the labels. The admin item
+has subitems, that can be (un)folded clicking on the arrow.
+
+|menu|
+
+To persist the expanding of the menu click on the menu icon |burger_icon|.
+
+
+Notification System
+=========
+
+With each entity you can do CRUD operations: Create, Read, Update and Delete.
+After a successful or rejected operation, you will be alerted with a message:
+
+|notification_alert|
+
+This message goes to the stack in the Notification Panel. You can see
+it clicking on the bell icon |bell|.
+
+|notification_panel|
+
+Each notification contains the type icon (info, error, warning), the timestamp
+and the message itself. In case, the content is too long, you can unfold it
+clicking on the arrows icon.
+
+|notification|
+
+Moreover, sometimes the message has a concrete name of the entity that was
+in process and clicking on it you will be redirected to its replacement.
+A notification or all notifications can be easily cleared using bin icon or
+*Clear all* responsively.
 
 List of Elements
 =========
 
-To open list of elements click on the header in the top menu or press on
-the corresponding key on the keyboard: Alt + **U** - Users, **G** - Groups,
-**C** - Connectors, **I** - Invokers, **N** - Connections. The list of elements
-representing with cards divided with pagination. There are 4 cards for
-each page.\ |image3|\ If you want to go forward, click on the page
-number, or arrow on the right, or you can press on the keyboard **→**.
-Going back, press the key ←, or click on the arrow on the left. Each
-card contains some actions: |image4|. Also you can seek in the list
-typing a name or a title of the entity in the search input field.
+The list of data represents as a table where columns display corresponding data,
+optional checkboxes for multiple actions and a column with single actions.
 
-Due to them you can correspondingly view the element, update it or
-delete. Clicking on the delete button, the application will ask you to
-confirm your action. If you want to cancel your deletion, press on the
-**Esc** button or click on the **CANCEL** or click on the background of
-the message. You can also navigate through the list pressing **1, 2, 3,
-4** on the keyboard. Each digit correspond to the card of the list.
-Pressing on it, you select the card. You will see the highlighted
-background of the card. After, the actions will have the underscored
-letter. The letter means the key on the keyboard that you can press
-to view, to update, to graph or to delete the item. For example, ***U***
-to update the element. To undo the selection, just press **Esc** or
-**5** on the keyboard.
+|list_view|
 
-If you want to get a hint, just click on the |image5| icon.
+There is a possibility also to sort data (asc/desc) by name or title |title_sort_icon|. User
+has a possibility to see data in a grid view clicking on the icon |grid_icon| and setting
+a number of elements pro row:
 
-View Element
-=========
+|grid_view|
 
-To view element, you need press on the *View* button. There are
-information about element in details. To go back to the list, you can
-click on the action on the bottom or press on the keyboard the key that
-is underlined in the action word.
+The user can navigate in the grid view using keyboard arrows. The selected icon underlines
+the first letter of the actions, that means pressing: *v* - opens view, *u* - opens update and
+*d* - performs delete. If the amount of data does not fit to the page, here comes
+a paginator for navigating |paginator|. The grid view displays an icon of the element that can
+be replaced, if you mouseover the icon and click on it |upload_image_icon|. Checking items in
+the list view you can apply an operation to all of them, for instance *Delete Selected*.
+There can be more operations depending of the entity.
+
+|more_multiple_actions|
+
+The action columns provides such manipulations like: *view*, *update*, and *delete*.
+Also, you can search by all possible parameters that has the corresponded entity typing
+in the search input.
 
 Add/Update Element
 =========
 
 You are on the page with list of elements. To add a new one, you need to
-click on the *Add* button or press **Alt + '+'**. To open update element
-form read the paragraph *List of Elements*. The application shows the
-same forms for adding and updating the concrete element. If you want to go
-back to the list of elements, just click on the header icon below or
-press the corresponding key (in details read List of Elements paragraph).
+click on the *Add <Element>* button or press **Alt + '+'**. The application
+shows the same forms for adding and updating of the concrete element.
 
-Add/Update process is a rectangle with dotted borders contains:
-breadcrumb navigation, form input fields, a short description about
-current filling and arrows to previous or next step. There is also a
-validation message displaying with a red text, if you provide wrong data
-into the fields and want to go forward. Specially for *Connections* you
-can see a number of hints in the beginning of each step. This is a
-tour through the process. It explains some parts of the fields in more
-details. To close it just click on the free area or on the **x** button.
-To open it again click on the |image5| icon. When you complete on the
-first page you can click on the arrow right to jump on the next page or
-press on the keyboard **→**. Pay attention, if you are focusing on the
-input form, you need to press **Esc** key to blur from the form to be
-able to use arrows keys. On the next page you can use an arrow on the
-left to go back also pressing on the key **→**. The last page does
-not have the arrow forward, but instead of it has Add/Update button.
+Add/Update element has several form sections. The validation process is fulfilled
+after pressing the action buttons.
 
-.. |image0| image:: ../img/management/image5.png
-   :width: 6.27083in
-   :height: 1.05749in
+|form_section|
+
+Sometimes, the section form appears only after selecting data in the section before it.
+The reason is a dependency of your selection.
+
+
+
+
+
+
+.. |bell| image:: ../img/management/bell.png
+.. |burger_icon| image:: ../img/management/burger_icon.png
+.. |form_section| image:: ../img/management/form_section.png
    :align: middle
-.. |image3| image:: ../img/management/image1.png
-   :width: 0.98900in
-   :height: 0.31011in
-.. |image4| image:: ../img/management/image4.png
-   :width: 2.71354in
-   :height: 0.36047in
-.. |image5| image:: ../img/management/image3.png
-   :width: 0.20992in
-   :height: 0.23512in
+.. |grid_icon| image:: ../img/management/grid_icon.png
+.. |grid_view| image:: ../img/management/grid_view.png
+   :align: middle
+.. |list_view| image:: ../img/management/list_view.png
+   :align: middle
+.. |menu| image:: ../img/management/menu.png
+   :align: middle
+.. |more_multiple_actions| image:: ../img/management/more_multiple_actions.png
+   :align: middle
+.. |notification| image:: ../img/management/notification.png
+   :align: middle
+.. |notification_alert| image:: ../img/management/notification_alert.png
+   :align: middle
+.. |notification_panel| image:: ../img/management/notification_panel.png
+   :align: middle
+.. |paginator| image:: ../img/management/paginator.png
+.. |title_sort_icon| image:: ../img/management/title_sort_icon.png
+.. |upload_image_icon| image:: ../img/management/upload_image_icon.png

@@ -2,8 +2,9 @@
 Groups
 ##################
 
-Group or User Group is a set of users with defined permissions. The list
-of groups displays a name of it.
+Group or User Group is a set of users with defined permissions. The grid
+view displays names of groups, whereas the list view has more information,
+like: description and components.
 
 |image0|
 
