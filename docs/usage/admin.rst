@@ -144,6 +144,10 @@ gets versions from the git and in *Offline* you can upload a *zip* file with Ope
 
 |image_update_assistant_1|
 
+|image_update_assistant_2|
+
+|image_update_assistant_3|
+
 Converter
 """""""""""""""""
 
@@ -159,6 +163,7 @@ the rule resides in the array, then this rule will be applied for each item (onl
 of loop). Due to saving of rules, you can apply them whenever you need using upload button.
 Clicking on the *Download Result* you will get the converted *json*-file.
 This tool is good to use for template, as they are have json type.
+|image_admin_1|
 
 
 .. |image_admin_0| image:: ../img/admin/0.png
