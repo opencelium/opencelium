@@ -51,6 +51,10 @@ class RelationalOperator extends React.Component{
                     openMenuOnClick={true}
                     maxMenuHeight={200}
                     minMenuHeight={50}
+                    selectMenuValueContainer={{
+                        placeItems: 'center',
+                        display: 'grid'
+                    }}
                     styles={{
                         container: (provided, {isFocused, isDisabled}) => ({
                             fontSize: '12px',

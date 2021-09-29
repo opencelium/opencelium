@@ -68,7 +68,7 @@ class TechnicalProcessDescription extends React.Component{
         return(
             <Row className={styles.row}>
                 <Name {...this.props}/>
-                <Label {...this.props} label={label} changeLabel={::this.changeLabel}/>
+                <Label {...this.props} label={label} changeLabel={::this.changeLabel} text={'Label'}/>
                 {generalDataEntries.map(entry => {
                     return(
                         <React.Fragment key={entry.name}>
@@ -80,7 +80,7 @@ class TechnicalProcessDescription extends React.Component{
                 <br/>
                 <br/>
                 <Col xs={12} className={styles.col}><b>{`Request`}</b></Col>
-                <Col xs={12} className={styles.col}>
+                <Col xs={12} className={styles.col} style={{marginBottom: '10px'}}>
                     <Row className={styles.row}>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Method:`}</Col>
                         <Col xs={8} className={`${styles.col}`}><span className={styles.value}>{request.method}</span></Col>
@@ -89,8 +89,6 @@ class TechnicalProcessDescription extends React.Component{
                         <Body readOnly={readOnly} nameOfCurrentInfo={'request_body'} isCurrentInfo={currentInfo === 'request_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={request.getBodyFields()} connection={connection} connector={connector} updateConnection={::this.updateBody} method={methodItem} bodyTitle={'Request data'}/>
                     </Row>
                 </Col>
-                <br/>
-                <br/>
                 <Col xs={12} className={styles.col}>
                     <b>{`Response`}</b>
                     <TooltipFontIcon className={styles.response_toggle_icon} onClick={::this.toggleResponseVisibleIcon} tooltip={isResponseVisible ? 'Hide' : 'Show'} value={isResponseVisible ? 'arrow_drop_up' : 'arrow_drop_down'}/>

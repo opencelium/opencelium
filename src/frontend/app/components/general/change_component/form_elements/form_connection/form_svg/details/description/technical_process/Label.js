@@ -86,10 +86,10 @@ class Label extends React.Component{
 
     render(){
         const {isMouseOver, isEditOn, labelValue} = this.state;
-        const {label, readOnly} = this.props;
+        const {label, readOnly, text} = this.props;
         return(
             <React.Fragment>
-                <Col xs={4} className={styles.col}>{`Label`}</Col>
+                <Col xs={4} className={styles.col}>{text}</Col>
                 <Col xs={8} className={styles.col} onMouseOver={::this.mouseOver} onMouseLeave={::this.mouseLeave}>
                     {isEditOn
                     ?

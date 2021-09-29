@@ -57,6 +57,12 @@ class ConnectionFileUpdate extends React.Component{
         }
     }
 
+    componentDidMount() {
+        if(this.props.connections.length === 0){
+            this.props.openNextForm();
+        }
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.connections.length === 0 && !this.props.entity.connectionMigration.isFinishUpdate && this.props.fetchingConnections === API_REQUEST_STATE.FINISH){
             const {entity, updateEntity} = this.props;

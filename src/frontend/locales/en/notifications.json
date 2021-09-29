@@ -144,13 +144,16 @@
       "__DEFAULT__": "The selected connections were not removed"
     },
     "CHECK_NEO4J": {
-      "DOWN": "Neo4j is down"
+      "DOWN": "Neo4j is down",
+      "__DEFAULT__": "Neo4j could not be checked"
     },
     "CHECK_ELASTICSEARCH": {
-      "DOWN": "Elasticsearch is down"
+      "DOWN": "Elasticsearch is down",
+      "__DEFAULT__": "Neo4j could not be checked"
     },
     "CHECK_APP": {
-      "DOWN": "is down"
+      "DOWN": "is down",
+      "__DEFAULT__": "App could not be checked"
     },
     "TRIGGER_SCHEDULE": {
       "__DEFAULT__": "The job was not triggered"
@@ -228,6 +231,9 @@
     },
     "UPDATE_THEME": {
       "__DEFAULT__": "The application theme was not changed"
+    },
+    "FETCH_SYSTEMREQUIREMENTS": {
+      "__DEFAULT__": "The system requirements could not be checked"
     }
   },
   "WARNING": {

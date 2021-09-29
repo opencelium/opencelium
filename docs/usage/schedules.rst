@@ -46,7 +46,9 @@ Choosing type you need to select template of that type and recipients who gets a
 
 After creating the notification you will see a list of notifications and search to look for them
 by name, event or notification type. Also, you can update or delete the corresponding notification,
-if you mouse over on one of them and click on the icon (|image8|).
+if you mouse over on one of them and click on the icon.
+
+|image8|
 
 *Update* schedule gives an opportunity to update the name of the schedule.
 
@@ -68,11 +70,13 @@ There are three additional multiple actions for the selected schedules: *start* 
 .. |image3| image:: ../img/schedule/3.png
 .. |image4| image:: ../img/schedule/4.png
 .. |image5| image:: ../img/schedule/5.png
+   :align: middle
 .. |image6| image:: ../img/schedule/6.png
    :align: middle
 .. |image7| image:: ../img/schedule/7.png
    :align: middle
 .. |image8| image:: ../img/schedule/8.png
+   :align: middle
 .. |image9| image:: ../img/schedule/9.png
    :align: middle
 .. |image10| image:: ../img/schedule/10.png

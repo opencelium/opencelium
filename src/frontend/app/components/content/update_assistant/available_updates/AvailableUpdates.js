@@ -162,7 +162,7 @@ class AvailableUpdates extends React.Component{
                 if(fetchingOnlineUpdates !== API_REQUEST_STATE.FINISH){
                     return updates;
                 }
-                selectedUpdates = [...onlineUpdates, {name: 'v2.1.0', status: 'available'}];
+                selectedUpdates = [...onlineUpdates];
                 break;
             case OFFLINE_UPDATE:
                 if(fetchingOfflineUpdates !== API_REQUEST_STATE.FINISH){

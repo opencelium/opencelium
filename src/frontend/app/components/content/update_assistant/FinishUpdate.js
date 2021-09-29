@@ -17,6 +17,7 @@ import React from 'react';
 import {withTranslation} from "react-i18next";
 import styles from "@themes/default/content/update_assistant/main";
 import Translate from "@components/general/app/Translate";
+import Button from "@basic_components/buttons/Button";
 
 
 @withTranslation('update_assistant')
@@ -26,7 +27,7 @@ class FinishUpdate extends React.Component{
     }
 
     render(){
-        const {t} = this.props;
+        const {t, updateSystem} = this.props;
         const updateLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
         const restoreLinkText = t('FORM.FINISH.RESTORE_LINK_TEXT');
         return(
@@ -38,7 +39,12 @@ class FinishUpdate extends React.Component{
                            components={[
                                <a href={updateLogLink} target={'_blank'} children={restoreLinkText}/>
                            ]}/>
-                <div><span className={styles.hint}>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
+                <div className={styles.hint}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
+                <Button
+                    style={{float: 'right'}}
+                    onClick={updateSystem}
+                    title={t('FORM.UPDATE_OC')}
+                />
             </div>
         );
     }

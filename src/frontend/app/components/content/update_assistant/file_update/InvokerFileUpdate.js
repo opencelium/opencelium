@@ -60,6 +60,12 @@ class InvokerFileUpdate extends React.Component{
         }
     }
 
+    componentDidMount() {
+        if(this.props.invokers.length === 0){
+            this.props.openNextForm();
+        }
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.invokers.length === 0 && !this.props.entity.invokerFileUpdate.isFinishUpdate && this.props.fetchingInvokers === API_REQUEST_STATE.FINISH){
             const {entity, updateEntity} = this.props;
@@ -148,7 +154,7 @@ class InvokerFileUpdate extends React.Component{
                         <tbody>
                         {invokers.map((invoker, key) => (
                             <InvokerFileEntry
-                                key={invoker.name}
+                                key={`${invoker.name}${key}`}
                                 index={key}
                                 invoker={invoker}
                                 setInvoker={::this.setInvoker}

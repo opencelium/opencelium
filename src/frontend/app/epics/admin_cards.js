@@ -37,7 +37,7 @@ const adminCards = [
     {id: 5, name: 'Templates', link: '/templates', permission: TemplatePermissions.READ},
     {id: 6, name: 'Converter', link: '/template_converter'},
     {id: 7, name: 'Notification Templates', link: '/notification_templates', permission: NotificationTemplatePermissions.READ},
-    {id: 8, name: 'Available Updates', link: '/update_assistant'},
+    {id: 8, name: 'Update Assistant', link: '/update_assistant'},
 ];
 
 /**

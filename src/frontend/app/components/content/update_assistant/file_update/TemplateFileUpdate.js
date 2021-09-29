@@ -57,6 +57,12 @@ class TemplateFileUpdate extends React.Component{
         }
     }
 
+    componentDidMount() {
+        if(this.props.templates.length === 0){
+            this.props.openNextForm();
+        }
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.templates.length === 0 && !this.props.entity.templateFileUpdate.isFinishUpdate && this.props.fetchingTemplates === API_REQUEST_STATE.FINISH){
             const {entity, updateEntity} = this.props;
