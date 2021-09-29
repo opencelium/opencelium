@@ -3,36 +3,43 @@ Connections
 ##################
 
 Connection defines between which connectors do we want to do requests,
-what kind of requests and specify mapping between them. This is a core
-element of the application. The list of connections displays only a
-title.
+what kind of requests and to specify mapping between them. This is a core
+element of the application. There is also a possibility to add the connection
+to the *templates*. Clicking on the |image3| button appears a window where should
+be provided a name.The list of connections displays a title, a description,
+and connectors' title.
 
 |image0|
 
-Adding/updating connection consist of three steps: direction, mode, and
-methods. There is an explanation tour for creating connection. The
-direction page has two fields: *title* and *connectors*.They are both
-required. The *title* must be unique, it is checking before going to the
-next page. The *connectors* are two: *from connector* and *to connector*.
+Adding/updating connection consists of three steps: *direction*, *mode*, and
+*methods*. The *direction* page has three fields: *title*, *description* and
+*connectors*. *Title* and *connectors* are required. The *title* must be unique,
+it is checking before performing an action (add/update). The *connectors* are two:
+*from connector* and *to connector*. The options are loaded from the *connectors*
+list.
 
 |image1|
 
-The mode step has one required field - *mode*. It can be *expert* or
-*template.* If *template* is chosen, their will be appeared a select
-field, where you can select a template that you need or you cat delete
-it.
+The *mode* step has one required field - *mode*. It can be an *expert* or
+a *template.* If the *template* is chosen, their will be appeared a select
+field, where you need to select a desired template. Here also you can delete
+it, clicking on the bin icon, or upgrade, if the template need to be upgraded
+to the current application version.
 
 |image2|
 
-if you come back to this step from the next step, choosing another mode
-will affect on the adding, that is why you need to confirm your choice.
+If you change the mode it will affect on the "methods", that is why you need
+to confirm your choice.
 
-The methods step has two areas: *methods* and *mapping fields*. There is
-also a possibility to add this connection to the *templates*. Clicking
-on the |image3| button appears a window where should be provided
-a name.
+The *method* step can be defined in two modes: *column* view (default) and
+*diagram* view. You can switch between them mouseovering the icon |form_methods_top_more|.
+There you also can open *method* form section on the whole window clicking
+on the maximize icon |form_methods_top_icons|.
 
-The *methods* area is divided into two parts: left and right. On the
+Column View
+=========
+
+The *column* view is divided into two parts: left and right. On the
 left side you see elements belongs to *from connector* and on the right
 to *to connector*.
 
@@ -41,7 +48,7 @@ There are two types of elements: method and operator. Clicking on
 the |image4| button you can create the element. The element will be located
 after the current element, that is pointed with an arrow |image5|.
 Each method has his own color that generates automatically. To remove the
-method just click on the recycle icon.
+method just click on the bin icon.
 
 The method consists of *Query* and *Body*.
 
@@ -126,27 +133,122 @@ itself.
 There are predefined variables to relate with the fields. *VAR_[i]* are coming parameters
 and *RESULT_VAR* is the final value for *to connector* field.
 
-Documentation about APIs of the connectors are available on this page. Clicking on the icon
-|image22| you will see the appropriate documentation.
 
-|image23|
+Diagram View
+=========
 
-There are method and title of the request. If you want to read the specific request in details
-just toggle it clicking on the title.
+The *diagram* view shows you three panels: *business layout*, *technical layout* and *details*.
 
-|image24|
+|process_view_example|
 
-Moreover, you can test the request clicking on |image25|. Then you see a popup window where
-you already have predefined method, request and body.
+Each layout can be: opened in the separate window |open_in_a_new_window_icon|, minimized |minimize_layout_icon| or
+maximized |maximize_layout_icon|. The *details* can be moved from right to left |move_left_details_icon| and vice versa
+|move_right_details_icon|.
 
-|image26|
+The layouts height is resizable. Use your mouse to resize the height grabbing the separate gray line between them.
+Also you can drag the layout to see hidden parts outside the screen. Using *shift*+*mouse scroll*
+zoom in and out to dive into details or to see the whole picture.
 
-You can change the method, add headers or update body. To add a header type his key and value.
-After click on the |image27| icon. If you have more than two headers just click on |image28|
-and |image29| arrows to navigate between them. After you prepared the request, press **Send**
-button and the response will appear in the *Response* tab.
+**Technical Layout**
 
-|image30|
+The goal of this layout is define your requests and operators. The *technical* layout displays two connector areas.
+They are white bordered boxes with connector labels and clickable text inside "Click here to create...". On the panel
+size you can see a settings icon |settings_icon|. Clicking on it the dialog popped up. Here you can define the position
+of the color in technical process and business label mode. Business label is a label of the business process to which
+the technical item was assigned. It can visible all the time, not visible, or visible only on pressing *b* (business) key.
+
+|settings_dialog|
+
+The *technical* layout has two creatable items: process and operator. The process is a
+defined in invoker file operation. The operators can be two: *if* and *loop*. *If* is
+a conditional operator and *loop* is an iterable operator. To create an initial technical
+item you need to click on the text in the appropriate connector area. You can create as
+very first item only a process in the from connector. The to connector has a possibility
+to create an operator as his very first item, only if the from connector is not empty.
+After the popup dialog appears where you need to select a required name and set a label.
+The label serves as an optional name defined by user to bring readability and simplify the
+view.
+
+|create_technical_item_1|
+
+Clicking on the add icon you will see a rounded bordered rectangle with the label, if it was
+set, otherwise with the name. Each technical process has a unique color to distinguish it
+among other processes with the same name. You can easily delete the process clicking on the
+bin icon and confirming your decision. To create furthers items in the same connector area
+just double click on the element. Now you can see the *operator* options: *if* and *loop*.
+
+|create_technical_item_2|
+
+Select one of the and click on the *add* icon. The *operator* item can have items in his scope.
+To define it, double click on the *operator* and choose *in* option.
+
+|create_technical_item_3|
+
+The items that are inside operator's scope placed one level below and arrowed down.
+
+|technical_operator|
+
+As you can see, when you select the operator, all his scoped elements are highlighted
+what makes it more readable.
+
+**Business Layout**
+
+The business layout serves to group technical items under the business process for simplicity.
+All items can be dragged and dropped where you wish in this layout. To create an item clicking
+on the text and define the name. The process appears in the business layout.
+
+|business_item|
+
+It display the name and has two icons: bin for deleting and assign icon to determine what
+technical items should be grouped. Clicking on that icon the background of the technical layout
+will be changed. That means that you are right now in the assign mode.
+
+|assign_mode|
+
+Click on the need item and it will be determined to the selected business process. Clicking
+on the business layout free space you will exit from assign mode. Press now the business process
+to see what technical items are assigned to it. The not assigned items are slightly transparent.
+
+|assign_example|
+
+**Details**
+
+The *details* of business process is pretty simple. You can change the name of the process.
+
+|details_business_item|
+
+The *details* of technical process has more configurations.
+
+|technical_process_details|
+
+First of all, the name and the label both configured. But be careful by updating the name,
+because it can influence on your predefined workflow.
+
+|details_label|
+
+You can see such information like the invoker that is used and format of the transfer data.
+The request has *method* name, *endpoint*, *header* and *body*. Pressing on *H* you can
+read the header in details. The *endpoint* and the *body* are editable. The *endpoint* is
+a URL of the request where you can add data as references from different responses that
+defined before it.
+
+|details_endpoint|
+
+Pressing on the *...* you can read and update the *body*. Typing *#* assign in the text area
+you will see a pop up dialog to add a reference.
+
+|details_request_reference|
+
+There is an *enhancement* on the right side as soon as you set the reference.
+*Enhancement* is piece of javascript code that will be applied before the definition.
+
+|details_request_enhancement|
+
+The *details* of the *operator* has two fields: *type* and *condition*. Be careful when
+you change *type* because it can influence on your predefined workflow. The *condition*
+has several input fields depending on the relational operator that you choose.
+
+|details_condition|
 
 
 
@@ -192,16 +294,46 @@ button and the response will appear in the *Response* tab.
    :align: middle
 .. |image21| image:: ../img/connection/21.png
    :align: middle
-.. |image22| image:: ../img/connection/22.png
-.. |image23| image:: ../img/connection/23.png
+.. |form_methods_top_more| image:: ../image/connections/form_methods_top_more.png
+.. |form_methods_top_icons| image:: ../image/connections/form_methods_top_icons.png
+.. |process_view_example| image:: ../image/connections/process_view_example.png
    :align: middle
-.. |image24| image:: ../img/connection/24.png
+.. |maximize_layout_icon| image:: ../image/connections/maximize_layout_icon.png
+.. |minimize_layout_icon| image:: ../image/connections/minimize_layout_icon.png
+.. |move_left_details_icon| image:: ../image/connections/move_left_details_icon.png
+.. |move_right_details_icon| image:: ../image/connections/move_right_details_icon.png
+.. |open_in_a_new_window_icon| image:: ../image/connections/open_in_a_new_window_icon.png
+.. |replace_layout_icon| image:: ../image/connections/replace_layout_icon.png
+.. |settings_icon| image:: ../image/connections/settings_icon.png
+.. |settings_dialog| image:: ../image/connections/settings_dialog.png
    :align: middle
-.. |image25| image:: ../img/connection/25.png
-.. |image26| image:: ../img/connection/26.png
+.. |create_technical_item_1| image:: ../image/connections/create_technical_item_1.png
    :align: middle
-.. |image27| image:: ../img/connection/27.png
-.. |image28| image:: ../img/connection/28.png
-.. |image29| image:: ../img/connection/29.png
-.. |image30| image:: ../img/connection/30.png
+.. |technical_process| image:: ../image/connections/technical_process.png
+   :align: middle
+.. |create_technical_item_2| image:: ../image/connections/create_technical_item_2.png
+   :align: middle
+.. |create_technical_item_3| image:: ../image/connections/create_technical_item_3.png
+   :align: middle
+.. |technical_operator| image:: ../image/connections/technical_operator.png
+   :align: middle
+.. |technical_process_details| image:: ../image/connections/technical_process_details.png
+   :align: middle
+.. |details_endpoint| image:: ../image/connections/details_endpoint.png
+   :align: middle
+.. |details_request_reference| image:: ../image/connections/details_request_reference.png
+   :align: middle
+.. |details_request_enhancement| image:: ../image/connections/details_request_enhancement.png
+   :align: middle
+.. |details_label| image:: ../image/connections/details_label.png
+   :align: middle
+.. |details_condition| image:: ../image/connections/details_condition.png
+   :align: middle
+.. |business_item| image:: ../image/connections/business_item.png
+   :align: middle
+.. |assign_mode| image:: ../image/connections/assign_mode.png
+   :align: middle
+.. |assign_example| image:: ../image/connections/assign_example.png
+   :align: middle
+.. |details_business_item| image:: ../image/connections/details_business_item.png
    :align: middle
