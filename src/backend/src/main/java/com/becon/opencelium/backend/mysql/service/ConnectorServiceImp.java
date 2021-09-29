@@ -116,6 +116,11 @@ public class ConnectorServiceImp implements ConnectorService{
     }
 
     @Override
+    public List<Connector> findAllByTitle(String title) {
+        return connectorRepository.findAllByTitle(title);
+    }
+
+    @Override
     public Connector toEntity(ConnectorResource resource) {
         Connector connector = new Connector();
         connector.setId(resource.getConnectorId());

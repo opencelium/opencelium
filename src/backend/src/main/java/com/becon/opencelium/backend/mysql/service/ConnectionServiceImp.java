@@ -98,6 +98,12 @@ public class ConnectionServiceImp implements ConnectionService{
         return connectionRepository.findAll();
     }
 
+
+    @Override
+    public List<Connection> findAllByName(String name) {
+        return connectionRepository.findAllByName(name);
+    }
+
     @Override
     public boolean existsByName(String name) {
         return connectionRepository.existsByName(name);

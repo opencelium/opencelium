@@ -20,7 +20,11 @@ import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     boolean existsByTitle(String title);
+
+    List<Scheduler> findAllByTitle(String title);
 }
