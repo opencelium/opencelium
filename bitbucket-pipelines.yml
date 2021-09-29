@@ -1,7 +1,16 @@
-clone:
-  depth: full
 pipelines:
-  default:
-    - step:
-        script:
-          - git push --mirror git@github.com:opencelium/opencelium.git
+    branches:
+      prod:
+        - step:
+           script:
+             - git remote add sync git@github.com:opencelium/opencelium.git
+             - git checkout prod
+             - git pull    
+             - git push sync prod
+      dev:
+        - step:
+           script:
+             - git remote add sync git@github.com:opencelium/opencelium.git
+             - git checkout dev
+             - git pull    
+             - git push sync dev
