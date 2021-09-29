@@ -4,4 +4,4 @@ pipelines:
   default:
     - step:
         script:
-          - git push --mirror -all git@github.com:YourOrg/mirror-repo.git
+          - git push --mirror --all git@github.com:YourOrg/mirror-repo.git
