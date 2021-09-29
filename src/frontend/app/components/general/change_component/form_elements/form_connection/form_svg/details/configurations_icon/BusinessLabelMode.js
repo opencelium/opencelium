@@ -29,7 +29,7 @@ class BusinessLabelMode extends React.Component{
                             value: BUSINESS_LABEL_MODE.VISIBLE,
                         },{
                             id: BUSINESS_LABEL_MODE.VISIBLE_ON_PRESS_KEY,
-                            label: `Visible on Press Key`,
+                            label: `Visible on Press Key (b)`,
                             value: BUSINESS_LABEL_MODE.VISIBLE_ON_PRESS_KEY,
                         }
                     ]}

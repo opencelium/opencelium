@@ -23,7 +23,7 @@ class BusinessProcessDescription extends React.Component{
         const label = this.props.details.name;
         return(
             <Row className={styles.row}>
-                <Label {...this.props} label={label} changeLabel={::this.changeLabel}/>
+                <Label {...this.props} label={label} changeLabel={::this.changeLabel} text={'Name'}/>
             </Row>
         );
     }
