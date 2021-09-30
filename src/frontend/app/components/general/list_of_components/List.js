@@ -66,7 +66,7 @@ import {withTranslation} from "react-i18next";
 
 const AMOUNT_OF_ROWS = 3;
 
-const AMOUNT_OF_ITEMS_FOR_LIST = 3;
+const AMOUNT_OF_ITEMS_FOR_LIST = 10;
 
 export const VIEW_TYPE = {
     LIST: 'LIST',

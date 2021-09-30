@@ -280,7 +280,7 @@ export function UserForm(type){
                     let {userGroups, descriptions} = this.mapUserGroups();
                     let contentTranslations = {};
                     contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                    contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.userPrefixUrl};
+                    contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.userPrefixUrl};
                     contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.userPrefixUrl};
                     const parsedEntity = this.parseEntity();
                     const contents = [

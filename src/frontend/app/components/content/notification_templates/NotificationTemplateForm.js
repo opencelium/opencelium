@@ -118,7 +118,7 @@ export function NotificationTemplateForm(type) {
                 const {t, openTour, closeTour, isTourOpen} = this.props;
                 let contentTranslations = {};
                 contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.notificationTemplatePrefixUrl};
+                contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.notificationTemplatePrefixUrl};
                 contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.notificationTemplatePrefixUrl};
                 let contents = [{
                     inputs: [

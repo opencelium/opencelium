@@ -154,7 +154,7 @@ export function ScheduleForm(type) {
                 let {connections, descriptions} = this.mapConnections();
                 let contentTranslations = {};
                 contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.schedulePrefixUrl};
+                contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.schedulePrefixUrl};
                 contentTranslations.action_button = {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.schedulePrefixUrl};
                 const parsedEntity = this.parseEntity();
                 const connectionInput = this.isUpdate ? {...INPUTS.SCHEDULE_CONNECTION_TEXT, value: schedule.connection.title} : INPUTS.SCHEDULE_CONNECTION;
