@@ -87,11 +87,30 @@ comes from the invoker. If it exists there, you will see it after typing the
 third symbol in the input field as a select popup block.
 
 *Body* has an icon |image10|. Clicking on it popup a block of request that you
-send using this method. It can be modified using |image11| icon or directly change
+send using this method. It can be modified using
+
+|image11|
+
+icon or directly change
 each parameter. There is also a possibility here to add a parameter from the response
 of the previous methods. Type **#** as the first character and you will see another
-popup |image12|. You can handle with that in the same principe as for the *Query*.
-When you finish with editing click on the apply icon |image13|.
+popup.
+
+|image12|
+
+You can handle with that in the same principe as for the *Query*.
+When you finish with editing click on the apply icon |image13|. Moreover, you can add
+an enhancement between fields. Clicking on the reference
+
+|image20|
+
+you will see a popup window where you set a description and an enhancement
+itself.
+
+|image21|
+
+There are predefined variables to relate with the fields. *VAR_[i]* are coming parameters
+and *RESULT_VAR* is the final value for *to connector* field.
 
 When you create an operator there are two options: *if* and *loop*. *if* operator
 does a condition before performance. You should define here also a reference, choose
@@ -109,7 +128,11 @@ well on the right. We have limited the overview and brought history here. Both
 *from connector* and *to connector* can have 5 elements. If you have more than five, appears
 a navigator on the left side with progress bar |image16|. Clicking up or down you can
 navigate throw the elements and see how deep you are, just looking on the progress bar.
-Moreover, there is a history on the top |image17|. This history displays you all operators
+Moreover, there is a history on the top.
+
+|image17|
+
+This history displays you all operators
 that are participating to fulfill the current item. Clicking on the search icon |image18|
 you see the whole structure of the connector.
 
@@ -119,19 +142,6 @@ Press arrows up and down to navigate there or left and right arrows to minimize 
 accordingly the operators. Clicking on the item here you go directly to that element and it
 will selected as the current one.
 
-*Mapping Fields* displays the relationship between the fields of the methods.
-
-|image20|
-
-They are created immediately after setting references in *Body*. The relationship can be one
-to one or many to one. Moreover, you can add an enhancement between fields. Clicking on the
-enhancement title you will see a popup window where you set a description and an enhancement
-itself.
-
-|image21|
-
-There are predefined variables to relate with the fields. *VAR_[i]* are coming parameters
-and *RESULT_VAR* is the final value for *to connector* field.
 
 
 Diagram View
@@ -279,7 +289,9 @@ has several input fields depending on the relational operator that you choose.
    :align: middle
 .. |image10| image:: ../img/connection/10.png
 .. |image11| image:: ../img/connection/11.png
+   :align: middle
 .. |image12| image:: ../img/connection/12.png
+   :align: middle
 .. |image13| image:: ../img/connection/13.png
 .. |image14| image:: ../img/connection/14.png
    :align: middle
@@ -287,6 +299,7 @@ has several input fields depending on the relational operator that you choose.
    :align: middle
 .. |image16| image:: ../img/connection/16.png
 .. |image17| image:: ../img/connection/17.png
+   :align: middle
 .. |image18| image:: ../img/connection/18.png
 .. |image19| image:: ../img/connection/19.png
    :align: middle
@@ -294,46 +307,46 @@ has several input fields depending on the relational operator that you choose.
    :align: middle
 .. |image21| image:: ../img/connection/21.png
    :align: middle
-.. |form_methods_top_more| image:: ../image/connections/form_methods_top_more.png
-.. |form_methods_top_icons| image:: ../image/connections/form_methods_top_icons.png
-.. |process_view_example| image:: ../image/connections/process_view_example.png
+.. |form_methods_top_more| image:: ../img/connection/form_methods_top_more.png
+.. |form_methods_top_icons| image:: ../img/connection/form_methods_top_icons.png
+.. |process_view_example| image:: ../img/connection/process_view_example.png
    :align: middle
-.. |maximize_layout_icon| image:: ../image/connections/maximize_layout_icon.png
-.. |minimize_layout_icon| image:: ../image/connections/minimize_layout_icon.png
-.. |move_left_details_icon| image:: ../image/connections/move_left_details_icon.png
-.. |move_right_details_icon| image:: ../image/connections/move_right_details_icon.png
-.. |open_in_a_new_window_icon| image:: ../image/connections/open_in_a_new_window_icon.png
-.. |replace_layout_icon| image:: ../image/connections/replace_layout_icon.png
-.. |settings_icon| image:: ../image/connections/settings_icon.png
-.. |settings_dialog| image:: ../image/connections/settings_dialog.png
+.. |maximize_layout_icon| image:: ../img/connection/maximize_layout_icon.png
+.. |minimize_layout_icon| image:: ../img/connection/minimize_layout_icon.png
+.. |move_left_details_icon| image:: ../img/connection/move_left_details_icon.png
+.. |move_right_details_icon| image:: ../img/connection/move_right_details_icon.png
+.. |open_in_a_new_window_icon| image:: ../img/connection/open_in_a_new_window_icon.png
+.. |replace_layout_icon| image:: ../img/connection/replace_layout_icon.png
+.. |settings_icon| image:: ../img/connection/settings_icon.png
+.. |settings_dialog| image:: ../img/connection/settings_dialog.png
    :align: middle
-.. |create_technical_item_1| image:: ../image/connections/create_technical_item_1.png
+.. |create_technical_item_1| image:: ../img/connection/create_technical_item_1.png
    :align: middle
-.. |technical_process| image:: ../image/connections/technical_process.png
+.. |technical_process| image:: ../img/connection/technical_process.png
    :align: middle
-.. |create_technical_item_2| image:: ../image/connections/create_technical_item_2.png
+.. |create_technical_item_2| image:: ../img/connection/create_technical_item_2.png
    :align: middle
-.. |create_technical_item_3| image:: ../image/connections/create_technical_item_3.png
+.. |create_technical_item_3| image:: ../img/connection/create_technical_item_3.png
    :align: middle
-.. |technical_operator| image:: ../image/connections/technical_operator.png
+.. |technical_operator| image:: ../img/connection/technical_operator.png
    :align: middle
-.. |technical_process_details| image:: ../image/connections/technical_process_details.png
+.. |technical_process_details| image:: ../img/connection/technical_process_details.png
    :align: middle
-.. |details_endpoint| image:: ../image/connections/details_endpoint.png
+.. |details_endpoint| image:: ../img/connection/details_endpoint.png
    :align: middle
-.. |details_request_reference| image:: ../image/connections/details_request_reference.png
+.. |details_request_reference| image:: ../img/connection/details_request_reference.png
    :align: middle
-.. |details_request_enhancement| image:: ../image/connections/details_request_enhancement.png
+.. |details_request_enhancement| image:: ../img/connection/details_request_enhancement.png
    :align: middle
-.. |details_label| image:: ../image/connections/details_label.png
+.. |details_label| image:: ../img/connection/details_label.png
    :align: middle
-.. |details_condition| image:: ../image/connections/details_condition.png
+.. |details_condition| image:: ../img/connection/details_condition.png
    :align: middle
-.. |business_item| image:: ../image/connections/business_item.png
+.. |business_item| image:: ../img/connection/business_item.png
    :align: middle
-.. |assign_mode| image:: ../image/connections/assign_mode.png
+.. |assign_mode| image:: ../img/connection/assign_mode.png
    :align: middle
-.. |assign_example| image:: ../image/connections/assign_example.png
+.. |assign_example| image:: ../img/connection/assign_example.png
    :align: middle
-.. |details_business_item| image:: ../image/connections/details_business_item.png
+.. |details_business_item| image:: ../img/connection/details_business_item.png
    :align: middle
