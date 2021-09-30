@@ -42,6 +42,8 @@ public interface ConnectorService {
 
     List<RequestData> getRequestData(Integer ctorId);
 
+    List<Connector> findAllByTitle(String title);
+
     List<Connector> findAll();
 
     Connector toEntity(ConnectorResource resource);

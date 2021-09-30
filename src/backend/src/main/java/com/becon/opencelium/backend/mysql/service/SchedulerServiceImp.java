@@ -94,9 +94,6 @@ public class SchedulerServiceImp implements SchedulerService {
         } catch (Exception e){
             throw new RuntimeException(e);
         }
-
-//        lastExecutionServiceImp.deleteAllBySchedulerId(scheduler.getId());
-//        executionServiceImp.deleteAllBySchedulerId(scheduler.getId());
         schedulerRepository.deleteById(id);
     }
 
@@ -110,8 +107,6 @@ public class SchedulerServiceImp implements SchedulerService {
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
-//            lastExecutionServiceImp.deleteAllBySchedulerId(scheduler.getId());
-//            executionServiceImp.deleteAllBySchedulerId(scheduler.getId());
             schedulerRepository.deleteById(scheduler.getId());
         });
     }
@@ -119,6 +114,11 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public List<Scheduler> findAll() {
         return schedulerRepository.findAll();
+    }
+
+    @Override
+    public List<Scheduler> findAllByTitle(String title) {
+        return schedulerRepository.findAllByTitle(title);
     }
 
     @Override

@@ -41,6 +41,8 @@ public interface ConnectionService {
 
     List<Connection> findAllByConnectorId(int connectorId);
 
+    List<Connection> findAllByName(String name);
+
     Connection toEntity(ConnectionResource resource);
 
     ConnectionResource toNodeResource(Connection connection);
