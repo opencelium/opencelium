@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.entity.EnhancementNode;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.EnhancementNodeServiceImp;
+import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,6 +162,8 @@ public class ConnectionServiceImp implements ConnectionService{
         connection.setDescription(resource.getDescription());
         connection.setFromConnector(resource.getFromConnector().getConnectorId());
         connection.setToConnector(resource.getToConnector().getConnectorId());
+        BusinessLayout businessLayout = new BusinessLayout(resource.getBusinessLayoutResource());
+        connection.setBusinessLayout(businessLayout);
         return connection;
     }
 
@@ -201,6 +204,7 @@ public class ConnectionServiceImp implements ConnectionService{
 
         connectionResource.setFromConnector(connectorService.toMetaResource(from));
         connectionResource.setToConnector(connectorService.toMetaResource(to));
+        connectionResource.setBusinessLayoutResource(new BusinessLayoutResource(connection.getBusinessLayout()));
 
         return connectionResource;
     }

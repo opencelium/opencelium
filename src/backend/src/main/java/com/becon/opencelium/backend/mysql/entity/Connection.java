@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.mysql.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -70,6 +71,10 @@ public class Connection   {
 
     @OneToMany(mappedBy = "connection", fetch = FetchType.LAZY)
     private List<Scheduler> schedulers;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private BusinessLayout businessLayout;
 
     public Connection() {
     }
@@ -160,5 +165,13 @@ public class Connection   {
 
     public void setSchedulers(List<Scheduler> schedulers) {
         this.schedulers = schedulers;
+    }
+
+    public BusinessLayout getBusinessLayout() {
+        return businessLayout;
+    }
+
+    public void setBusinessLayout(BusinessLayout businessLayout) {
+        this.businessLayout = businessLayout;
     }
 }

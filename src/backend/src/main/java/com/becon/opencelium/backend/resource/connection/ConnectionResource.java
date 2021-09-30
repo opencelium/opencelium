@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.resource.connection;
 
 import com.becon.opencelium.backend.mysql.entity.BusinessLayout;
+import com.becon.opencelium.backend.resource.blayout.BusinessLayoutResource;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingResource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.ResourceSupport;
@@ -32,10 +33,10 @@ public class ConnectionResource extends ResourceSupport {
     private Long connectionId;
     private String title;
     private String description;
-    private BusinessLayout businessLayout;
     private ConnectorNodeResource fromConnector;
     private ConnectorNodeResource toConnector;
     private List<FieldBindingResource> fieldBinding;
+    private BusinessLayoutResource businessLayoutResource;
 
     public Long getNodeId() {
         return nodeId;
@@ -69,14 +70,6 @@ public class ConnectionResource extends ResourceSupport {
         this.description = description;
     }
 
-    public BusinessLayout getBusinessLayout() {
-        return businessLayout;
-    }
-
-    public void setBusinessLayout(BusinessLayout businessLayout) {
-        this.businessLayout = businessLayout;
-    }
-
     public ConnectorNodeResource getFromConnector() {
         return fromConnector;
     }
@@ -99,5 +92,13 @@ public class ConnectionResource extends ResourceSupport {
 
     public void setFieldBinding(List<FieldBindingResource> fieldBinding) {
         this.fieldBinding = fieldBinding;
+    }
+
+    public BusinessLayoutResource getBusinessLayoutResource() {
+        return businessLayoutResource;
+    }
+
+    public void setBusinessLayoutResource(BusinessLayoutResource businessLayoutResource) {
+        this.businessLayoutResource = businessLayoutResource;
     }
 }
