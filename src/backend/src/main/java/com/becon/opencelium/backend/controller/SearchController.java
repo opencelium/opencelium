@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,6 +44,9 @@ public class SearchController {
                 schedulerServiceImp.findAllByTitleContains(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
         );
 
-        return ResponseEntity.ok().body(results);
+
+        Map<String, List> resp = new HashMap<>();
+        resp.put("result", results);
+        return ResponseEntity.ok().body(resp);
     }
 }
