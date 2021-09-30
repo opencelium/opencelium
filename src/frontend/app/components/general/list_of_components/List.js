@@ -66,7 +66,7 @@ import {withTranslation} from "react-i18next";
 
 const AMOUNT_OF_ROWS = 3;
 
-const AMOUNT_OF_ITEMS_FOR_LIST = 10;
+const AMOUNT_OF_ITEMS_FOR_LIST = 3;
 
 export const VIEW_TYPE = {
     LIST: 'LIST',
@@ -100,7 +100,7 @@ class List extends Component{
             isPressedAddEntity: false,
             searchValue: props.searchValue,
             gridViewType,
-            entitiesProPage: viewType === VIEW_TYPE.LIST ? 10 : 4 * AMOUNT_OF_ROWS,
+            entitiesProPage: viewType === VIEW_TYPE.LIST ? AMOUNT_OF_ITEMS_FOR_LIST : 4 * AMOUNT_OF_ROWS,
             checks: [],
             sortType: 'asc',
             showConfirmDeleteSelected: false,
