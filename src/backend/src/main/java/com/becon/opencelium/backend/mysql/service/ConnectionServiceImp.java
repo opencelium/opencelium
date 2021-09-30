@@ -100,8 +100,8 @@ public class ConnectionServiceImp implements ConnectionService{
 
 
     @Override
-    public List<Connection> findAllByName(String name) {
-        return connectionRepository.findAllByName(name);
+    public List<Connection> findAllByNameContains(String name) {
+        return connectionRepository.findAllByNameContains(name);
     }
 
     @Override

@@ -42,7 +42,7 @@ public interface ConnectorService {
 
     List<RequestData> getRequestData(Integer ctorId);
 
-    List<Connector> findAllByTitle(String title);
+    List<Connector> findAllByTitleContains(String title);
 
     List<Connector> findAll();
 

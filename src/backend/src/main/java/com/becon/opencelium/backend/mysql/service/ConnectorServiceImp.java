@@ -116,8 +116,8 @@ public class ConnectorServiceImp implements ConnectorService{
     }
 
     @Override
-    public List<Connector> findAllByTitle(String title) {
-        return connectorRepository.findAllByTitle(title);
+    public List<Connector> findAllByTitleContains(String title) {
+        return connectorRepository.findAllByTitleContains(title);
     }
 
     @Override

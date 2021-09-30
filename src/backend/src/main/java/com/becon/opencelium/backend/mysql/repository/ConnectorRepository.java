@@ -27,5 +27,5 @@ public interface ConnectorRepository extends JpaRepository<Connector, Integer> {
 
     boolean existsByTitle(String title);
 
-    List<Connector> findAllByTitle(String title);
+    List<Connector> findAllByTitleContains(String title);
 }

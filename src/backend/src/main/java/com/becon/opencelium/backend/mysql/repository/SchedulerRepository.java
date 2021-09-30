@@ -26,5 +26,5 @@ import java.util.List;
 public interface SchedulerRepository extends JpaRepository<Scheduler, Integer> {
     boolean existsByTitle(String title);
 
-    List<Scheduler> findAllByTitle(String title);
+    List<Scheduler> findAllByTitleContains(String title);
 }

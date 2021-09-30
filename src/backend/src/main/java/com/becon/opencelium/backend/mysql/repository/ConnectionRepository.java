@@ -31,5 +31,5 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     @Query(value = "select * from connection where from_connector = ?1 or to_connector = ?1", nativeQuery = true)
     LinkedList<Connection> findAllByConnectorId(int connectorId);
 
-    List<Connection> findAllByName(String name);
+    List<Connection> findAllByNameContains(String name);
 }

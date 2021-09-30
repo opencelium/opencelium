@@ -40,7 +40,7 @@ public interface SchedulerService {
     boolean existsByTitle(String title);
     boolean existsById(int id);
     List<Scheduler> findAllById(ArrayList<Integer> ids);
-    List<Scheduler> findAllByTitle(String title);
+    List<Scheduler> findAllByTitleContains(String title);
 
     Scheduler toEntity(SchedulerRequestResource resource);
     SchedulerResource toResource(Scheduler entity);

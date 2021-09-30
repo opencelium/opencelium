@@ -35,15 +35,15 @@ public class SearchController {
 
         List<SearchResource> results = new ArrayList<>();
         results.addAll(
-                connectionServiceImp.findAllByName(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
+                connectionServiceImp.findAllByNameContains(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
         );
 
         results.addAll(
-                connectorServiceImp.findAllByTitle(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
+                connectorServiceImp.findAllByTitleContains(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
         );
 
         results.addAll(
-                schedulerServiceImp.findAllByTitle(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
+                schedulerServiceImp.findAllByTitleContains(title).stream().filter(Objects::nonNull).map(SearchResource::new).collect(Collectors.toList())
         );
 
         return ResponseEntity.ok().body(results);

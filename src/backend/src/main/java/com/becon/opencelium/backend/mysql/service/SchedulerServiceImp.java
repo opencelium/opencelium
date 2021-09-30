@@ -117,8 +117,8 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public List<Scheduler> findAllByTitle(String title) {
-        return schedulerRepository.findAllByTitle(title);
+    public List<Scheduler> findAllByTitleContains(String title) {
+        return schedulerRepository.findAllByTitleContains(title);
     }
 
     @Override
