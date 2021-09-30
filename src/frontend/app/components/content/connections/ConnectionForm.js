@@ -14,6 +14,12 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
 import Button from "@basic_components/buttons/Button";
+import {setConnectionViewType} from "@actions/app";
+
+export const CONNECTION_VIEW_TYPE = {
+    COLUMN: 'COLUMN',
+    DIAGRAM: 'DIAGRAM',
+}
 
 /**
  * common component to add and update Connector
@@ -41,7 +47,7 @@ export function ConnectionForm(type) {
                     },
                     connection: CConnection.createConnection(null),
                     entity: null,
-                    isNewConnectionView: false,
+                    isNewConnectionView: props.connectionViewType === CONNECTION_VIEW_TYPE.DIAGRAM,
                 };
                 this.isNavigatingToScheduler = false;
             }
@@ -56,6 +62,7 @@ export function ConnectionForm(type) {
             }
 
             toggleIsNewConnectionView(){
+                this.props.setConnectionViewType(!this.state.isNewConnectionView ? CONNECTION_VIEW_TYPE.DIAGRAM : CONNECTION_VIEW_TYPE.COLUMN)
                 this.setState({
                     isNewConnectionView: !this.state.isNewConnectionView,
                 }, () => {const elem = document.getElementById('form_section_header_methods'); if(elem) elem.scrollIntoView();})

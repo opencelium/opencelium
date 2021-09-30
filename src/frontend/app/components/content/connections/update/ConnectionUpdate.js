@@ -27,15 +27,17 @@ import {permission} from "@decorators/permission";
 import {SingleComponent} from "@decorators/SingleComponent";
 import {ConnectionForm} from "@components/content/connections/ConnectionForm";
 import {fetchTemplates} from "@actions/templates/fetch";
-
+import {setConnectionViewType} from "@actions/app";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     const connections = state.get('connections');
     const connectors = state.get('connectors');
     return{
         authUser: auth.get('authUser'),
+        connectionViewType: app.get('connectionViewType'),
         connection: connections.get('connection'),
         fetchingConnection: connections.get('fetchingConnection'),
         updatingConnection: connections.get('updatingConnection'),
@@ -57,7 +59,7 @@ function mapConnection(connection){
 /**
  * Component to Update Connection
  */
-@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates})
+@connect(mapStateToProps, {updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle, fetchTemplates, setConnectionViewType})
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
 @SingleComponent('connection', 'updating', ['connectors'], mapConnection)

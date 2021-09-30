@@ -89,6 +89,17 @@ const setViewType = (viewType) => {
 };
 
 /**
+ * set connection view type
+ * @returns {{type: string, payload: {}}}
+ */
+const setConnectionViewType = (viewType) => {
+    return {
+        type: AppAction.SET_CONNECTION_VIEW_TYPE,
+        payload: viewType,
+    };
+};
+
+/**
  * change application language
  * @param language
  * @returns {{type: string, payload: {}}}
@@ -250,6 +261,7 @@ export {
     fetchDataForSearchFulfilled,
     fetchDataForSearchRejected,
     setViewType,
+    setConnectionViewType,
     setGridViewType,
     changeLanguage,
     setComponentInChangeContent,
