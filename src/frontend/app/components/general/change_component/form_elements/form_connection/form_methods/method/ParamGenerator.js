@@ -25,7 +25,7 @@ import {
 import Input from "@basic_components/inputs/Input";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CStatement, {STATEMENT_RESPONSE} from "@classes/components/content/connection/operator/CStatement";
-import {findTopLeft} from "@utils/app";
+import {findTopLeft, setFocusById} from "@utils/app";
 import ReactDOM from "react-dom";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
 import Select from "@basic_components/inputs/Select";
@@ -65,7 +65,13 @@ class ParamGenerator extends Component {
      * to change field value
      */
     toggleShowGenerator(){
-        this.setState({showGenerator: !this.state.showGenerator});
+        const {connector, method} = this.props;
+        this.setState({showGenerator: !this.state.showGenerator}, () => {
+            if(this.state.showGenerator){
+                setFocusById(`param_generator_add_${connector.getConnectorType()}_${method.index}`)
+                setFocusById(`param_generator_select_${connector.getConnectorType()}_${method.index}`, 300)
+            }
+        });
     }
 
     setIdValue(){
@@ -170,7 +176,7 @@ class ParamGenerator extends Component {
         return (
             <div style={selectThemeInputStyle} className={themeGeneratorFormMethod}>
                 <Select
-                    id={selectId}
+                    id={`param_generator_select_${this.props.connector.getConnectorType()}_${this.props.method.index}`}
                     name={'...'}
                     value={value}
                     onChange={::this.updateColor}
@@ -320,9 +326,9 @@ class ParamGenerator extends Component {
     }
 
     renderGenerator(){
-        const {showGenerator, color} = this.state;
-        const {isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
-        let hasMethod = color !== '';
+        const {showGenerator, color, field} = this.state;
+        const hasMethod = color !== '' && field !== '';
+        const {connector, method, isAlwaysVisible, theme, isVisible, isAbsolute, parent, submitEdit, actionButtonTooltip, actionButtonValue} = this.props;
         if(this.getOptionsForMethods().length === 0){
             return null;
         }
@@ -342,12 +348,18 @@ class ParamGenerator extends Component {
                             {this.renderMethodSelect()}
                             {this.renderParamInput()}
                             <TooltipFontIcon
+                                id={`param_generator_add_${connector.getConnectorType()}_${method.index}`}
                                 isButton={true}
                                 tooltip={actionButtonTooltip}
                                 value={actionButtonValue}
-                                disabled={!hasMethod}
                                 className={styles.param_generator_form_add}
-                                onClick={submitEdit ? submitEdit : ::this.addParam}
+                                onClick={(e) => {if(hasMethod){
+                                    if(submitEdit){
+                                         submitEdit(e);
+                                    } else{
+                                        ::this.addParam(e)
+                                    }
+                                } }}
                             />
                         </div>
                         :
