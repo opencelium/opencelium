@@ -31,7 +31,7 @@ const initialState = fromJS({
     addingErrorTicket: API_REQUEST_STATE.INITIAL,
     fetchingAppVersion: API_REQUEST_STATE.INITIAL,
     fetchingDataForSearch: API_REQUEST_STATE.INITIAL,
-    dataForSearch: null,
+    dataForSearch: List([]),
     currentPageItems: [],
     isComponentExternalInChangeContent: false,
     appVersion: '',
@@ -55,7 +55,7 @@ const reducer = (state = initialState, action) => {
         case AppAction.FETCH_DATAFORSEARCH:
             return state.set('fetchingDataForSearch', API_REQUEST_STATE.START).set('error', null);
         case AppAction.FETCH_DATAFORSEARCH_FULFILLED:
-            return state.set('fetchingDataForSearch', API_REQUEST_STATE.FINISH).set('dataForSearch', action.payload);
+            return state.set('fetchingDataForSearch', API_REQUEST_STATE.FINISH).set('dataForSearch', List(action.payload));
         case AppAction.FETCH_DATAFORSEARCH_REJECTED:
             return state.set('fetchingDataForSearch', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case AppAction.SET_VIEW_TYPE:
