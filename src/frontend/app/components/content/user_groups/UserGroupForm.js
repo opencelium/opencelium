@@ -182,7 +182,7 @@ export function UserGroupForm(type) {
                 let parsedEntity = this.parseEntity();
                 let contentTranslations = {};
                 contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                contentTranslations.list_button = {title: t(`${this.translationKey}.LIST_BUTTON`), link: this.userGroupPrefixUrl};
+                contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.userGroupPrefixUrl};
                 contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.userGroupPrefixUrl};
                 let contents = [{
                     inputs: [

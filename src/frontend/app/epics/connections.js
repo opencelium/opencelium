@@ -209,7 +209,7 @@ const deleteConnectionEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.DELETE},{
                     success: deleteConnectionFulfilled,
                     reject: deleteConnectionRejected,},
-                res => {return {connectionId: action.payload.id};}
+                res => {return {connectionId: action.payload.id, title: action.payload.title};}
             );
         });
 };

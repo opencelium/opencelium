@@ -81,27 +81,50 @@ export function ComponentHasCheckboxes(){
             /**
              * to set checks state with item id
              */
-            checkAllEntities(callback = null){
+            checkAllEntities(callback = null, value = null){
+                const {items} = this.props;
                 let entities = this.props[this.props.entitiesName];
-                let checks = [];
-                for(let i = 0; i < entities.length; i++){
-                    checks.push({value: !this.state.allChecked, id: entities[i][this.props.entityIdName]});
+                let checks = this.state.checks;
+                for (let i = 0; i < entities.length; i++) {
+                    let item = items.find(item => item[0].name === this.props.entityIdName && item[0].value === entities[i][this.props.entityIdName]);
+                    if (item) {
+                        let index = checks.findIndex(check => check.id === entities[i][this.props.entityIdName]);
+                        if(index !== -1){
+                            checks[index] = {
+                                value: value === null ? !this.state.allChecked : value,
+                                id: entities[i][this.props.entityIdName]
+                            };
+                        } else{
+                            checks.push({
+                                value: value === null ? !this.state.allChecked : value,
+                                id: entities[i][this.props.entityIdName]
+                            });
+                        }
+                    }
                 }
-                this.setState({checks, allChecked: !this.state.allChecked}, typeof callback === 'function' ? callback : () => {});
+                this.setState({checks, allChecked: value === null ? !this.state.allChecked : value}, typeof callback === 'function' ? callback : () => {});
             }
 
             /**
              * to check if all checks are checked
              */
-            isAllChecked(checks){
-                let entities = this.props[this.props.entitiesName];
-                if(entities.length !== checks.length){
-                    return false;
+            isAllChecked(checks = null){
+                const {items} = this.props;
+                if(checks === null){
+                    checks = this.state.checks;
                 }
+                let iterator = 0;
                 for(let i = 0; i < checks.length; i++){
-                    if(!checks[i].value){
-                        return false;
+                    let item = items.find(item => item[0].name === this.props.entityIdName && item[0].value === checks[i].id);
+                    if(item){
+                        if(!checks[i].value){
+                            return false;
+                        }
+                        iterator++;
                     }
+                }
+                if(iterator !== items.length){
+                    return false;
                 }
                 return true;
             }
@@ -117,7 +140,7 @@ export function ComponentHasCheckboxes(){
             }
 
             render(){
-                const {checks, allChecked} = this.state;
+                const {checks} = this.state;
                 return <Component
                     {...this.props}
                     checkAllEntities={::this.checkAllEntities}
@@ -126,7 +149,7 @@ export function ComponentHasCheckboxes(){
                     setAllChecked={::this.setAllChecked}
                     isOneChecked={::this.isOneChecked}
                     checks={checks}
-                    allChecked={allChecked}
+                    allChecked={::this.isAllChecked()}
                 />;
             }
         };

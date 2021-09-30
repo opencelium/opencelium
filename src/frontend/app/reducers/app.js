@@ -22,16 +22,18 @@ import {defaultLanguage} from "@utils/constants/languages";
 import {getLS, setLS} from '@utils/LocalStorage';
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {VIEW_TYPE} from "@components/general/list_of_components/List";
+import {CONNECTION_VIEW_TYPE} from "@components/content/connections/ConnectionForm";
 
 const viewType = getLS('viewType');
 const gridViewType = getLS('gridViewType');
+const connectionViewType = getLS('connectionViewType');
 
 const initialState = fromJS({
     currentLanguage: defaultLanguage.code,
     addingErrorTicket: API_REQUEST_STATE.INITIAL,
     fetchingAppVersion: API_REQUEST_STATE.INITIAL,
     fetchingDataForSearch: API_REQUEST_STATE.INITIAL,
-    dataForSearch: null,
+    dataForSearch: List([]),
     currentPageItems: [],
     isComponentExternalInChangeContent: false,
     appVersion: '',
@@ -40,6 +42,7 @@ const initialState = fromJS({
     message: {},
     isFullScreen: false,
     isDraftOpenedOnce: false,
+    connectionViewType: connectionViewType ? connectionViewType : CONNECTION_VIEW_TYPE.DIAGRAM,
     viewType: viewType ? viewType : VIEW_TYPE.LIST,
     gridViewType: gridViewType ? gridViewType : '4',
     searchValue: '',
@@ -55,9 +58,12 @@ const reducer = (state = initialState, action) => {
         case AppAction.FETCH_DATAFORSEARCH:
             return state.set('fetchingDataForSearch', API_REQUEST_STATE.START).set('error', null);
         case AppAction.FETCH_DATAFORSEARCH_FULFILLED:
-            return state.set('fetchingDataForSearch', API_REQUEST_STATE.FINISH).set('dataForSearch', action.payload);
+            return state.set('fetchingDataForSearch', API_REQUEST_STATE.FINISH).set('dataForSearch', List(action.payload));
         case AppAction.FETCH_DATAFORSEARCH_REJECTED:
             return state.set('fetchingDataForSearch', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case AppAction.SET_CONNECTION_VIEW_TYPE:
+            setLS('connectionViewType', action.payload);
+            return state.set('connectionViewType', action.payload);
         case AppAction.SET_VIEW_TYPE:
             setLS('viewType', action.payload);
             return state.set('viewType', action.payload);

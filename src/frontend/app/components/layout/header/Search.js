@@ -11,9 +11,15 @@ import {navigateTo} from "@utils/app";
 function mapStateToProps(state){
     const app = state.get('app');
     return{
-        dataForSearch: app.get('dataForSearch'),
+        dataForSearch: app.get('dataForSearch').toJS(),
         fetchingDataForSearch: app.get('fetchingDataForSearch'),
     }
+}
+
+const NAVIGATION_MAPPING = {
+    connector: 'connectors',
+    connection: 'connections',
+    scheduler: 'schedules'
 }
 
 @connect(mapStateToProps, {fetchDataForSearch, setSearchValue})
@@ -27,7 +33,9 @@ class Search extends React.Component{
     }
 
     handleInputChange(searchValue){
-        this.props.fetchDataForSearch(searchValue)
+        if(searchValue !== ''){
+            this.props.fetchDataForSearch(searchValue)
+        }
         this.setState({
             searchValue,
         });
@@ -39,12 +47,16 @@ class Search extends React.Component{
             searchValue: '',
         });
         let categoryName = '';
-        for(let param in dataForSearch){
+        let index = dataForSearch.findIndex(entry => `${entry.components}_${entry.id}` === value.id)
+        if(index !== -1){
+            categoryName = NAVIGATION_MAPPING[dataForSearch[index].components];
+        }
+        /*for(let param in dataForSearch){
             if(dataForSearch[param].findIndex(entry => `${param}_${entry.id}` === value.id) !== -1){
                 categoryName = param;
                 break;
             }
-        }
+        }*/
         setSearchValue(value.label);
         navigateTo(categoryName);
     }
@@ -53,13 +65,22 @@ class Search extends React.Component{
         const {dataForSearch} = this.props;
         let data = [];
         if(dataForSearch){
-            for(let param in dataForSearch){
+            for(let i = 0; i < dataForSearch.length; i++){
+                let option = {label: dataForSearch[i].title, value: dataForSearch[i].id, id: `${dataForSearch[i].components}_${dataForSearch[i].id}`};
+                let index = data.findIndex(elem => elem.label === dataForSearch[i].components);
+                if(index !== -1){
+                    data[index].options.push(option);
+                } else{
+                    data.push({label: dataForSearch[i].components, options: [option]});
+                }
+            }
+/*            for(let param in dataForSearch){
                 let options = [];
                 for(let i = 0; i < dataForSearch[param].length; i++){
                     options.push({label: dataForSearch[param][i].title, value: dataForSearch[param][i].id, id: `${param}_${dataForSearch[param][i].id}`});
                 }
                 data.push({label: param, options});
-            }
+            }*/
         }
         return data;
     }

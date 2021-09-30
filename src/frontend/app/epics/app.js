@@ -71,13 +71,13 @@ const fetchDataForSearchEpic = (action$, store) => {
     return action$.ofType(AppAction.FETCH_DATAFORSEARCH)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = ``;
-            const data = {connections: [{id: 23, title: 'test'},{id: 24, title: 'test2'},], connectors: [{id: 10, title: 'i-doit'},{id: 11, title: 'xml'},{id: 12, title: 'w'},], schedules: [{id: 8, title: 'qwe'},]};
-            return Rx.Observable.of(fetchDataForSearchFulfilled(data));
-            /*return doRequest({url},{
-                success: (data) => fetchDataForSearchFulfilled(data, {...action.settings}),
-                reject: fetchDataForSearchRejected(),
-            });*/
+            let url = `search/${action.payload}`;
+            /*const data = {connections: [{id: 23, title: 'test'},{id: 24, title: 'test2'},], connectors: [{id: 10, title: 'i-doit'},{id: 11, title: 'xml'},{id: 12, title: 'w'},], schedules: [{id: 8, title: 'qwe'},]};
+            return Rx.Observable.of(fetchDataForSearchFulfilled(data));*/
+            return doRequest({url},{
+                success: (data) => fetchDataForSearchFulfilled(data.result),
+                reject: fetchDataForSearchRejected,
+            });
         });
 };
 
