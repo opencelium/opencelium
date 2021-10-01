@@ -7,16 +7,16 @@ Invoker can be managed both from UI and from server directly. Let us consider th
 
 **You, as an admin, want to add an invoker in the OpenCelium.**
 
-To add an invoker directly to server, go to the root folder of the application and find there
+To add an invoker directly to the server, go to the root folder of the application and find there
 *src/main/resources/invoker* folder. Paste the invoker file (*xml* format) and restart the project.
 
 There is also an option to add an invoker from UI. Go to *Admin/Invokers* page. There is a button *+ Add Invoker*.
-|image0| Press on it. Provide *Name*, *Description*, and *Hint*. *Hint* will be displayed and helpful, when you create
+|image0| Press on it. Provide a *Name*, *Description*, and a *Hint*. The *Hint* will be displayed and helpful, when you create
 a *Connector*.
 
 |image1|
 
-Choose an Authentication Type. Right now 4 types are available: *API key*, *Token*, *Basic* and *Endpoint* Authentication.
+Choose an *Authentication Type*. Right now 4 types are available: *API key*, *Token*, *Basic* and *Endpoint* Authentication.
 
 |image2|
 
@@ -24,8 +24,8 @@ After, you need to provide information about the method that will be used as a t
 
 |image3|
 
-*Name* is a required and unique field. *Path* of each request can be different. The main url is *{url}*. Type it and
-provide endpoint if it is necessary. Choose *Method* and enter the *Request* and the *Response* (*Success*/*Error*)
+A *Name* is a required and unique field. A *Path* of each request can be different. The main url is *{url}*. Type it and
+provide endpoint if it is necessary. Choose a *Method* and enter a *Request* and a *Response* (*Success*/*Error*)
 data in the appeared tabs.
 
 |image4|
