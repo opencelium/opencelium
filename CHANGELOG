@@ -16,7 +16,7 @@ OC Changelog
 [Connector]							Jira Service Desk
 [Connector]							Jira Asset
 [Bug][OC-341]						Connection crashed after making some changes
-[Bug][OC-364]                       Json tool couldn’t add new property in old connection layout
+[Bug][OC-364]                       Json tool could not add new property in old connection layout
 [Bug][OC-384]                       Wrong position of the title from dashboard widget
 [Bug][OC-362]                       Creates two enhancements on the same property
 
