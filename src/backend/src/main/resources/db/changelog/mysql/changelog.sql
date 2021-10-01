@@ -264,7 +264,7 @@ CREATE TABLE IF NOT EXISTS `bl_arrows` (
   `arr_from` INT NOT NULL,
   `arr_to` INT NOT NULL,
   PRIMARY KEY (`business_layout_id`, arr_from, arr_to),
-  UNIQUE KEY (`arr_from`,`arr_to`),
+  UNIQUE KEY (`business_layout_id`,`arr_from`,`arr_to`),
   INDEX `fk_arrows_business_layout1_idx` (`business_layout_id`),
   CONSTRAINT `fk_arrows_business_layout1`
     FOREIGN KEY (`business_layout_id`)
