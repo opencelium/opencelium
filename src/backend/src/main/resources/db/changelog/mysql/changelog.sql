@@ -240,7 +240,7 @@ ENGINE = InnoDB;
 -- Table `opencelium`.`bl_svg_items`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `bl_svg_items` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL,
   `name` VARCHAR(45) NULL,
   `x_axis` INT NULL,
   `y_axis` INT NULL,
