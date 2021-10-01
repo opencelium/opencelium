@@ -205,8 +205,9 @@ public class ConnectionServiceImp implements ConnectionService{
 
         connectionResource.setFromConnector(connectorService.toMetaResource(from));
         connectionResource.setToConnector(connectorService.toMetaResource(to));
-        connectionResource.setBusinessLayout(new BusinessLayoutResource(connection.getBusinessLayout()));
-
+//        if (connection.getBusinessLayout() != null) {
+//            connectionResource.setBusinessLayout(new BusinessLayoutResource(connection.getBusinessLayout()));
+//        }
         return connectionResource;
     }
 }
