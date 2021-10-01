@@ -267,9 +267,10 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                         this.action(entity);
                         thisComponentScope.startDoingAction = false;
                     } else{
+                        const convertedObject = typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : typeof entity.getObject === 'function' ? entity.getObject() : entity;
                         thisComponentScope.setState({
                             validationMessages: {...validationMessages, ...validations},
-                            entity: Object.assign({}, typeof entity.getObject === 'function' ? entity.getObject() : entity),
+                            entity: Object.assign({}, convertedObject),
                         });
                         if(firstValidationName !== ''){
                             if(validations[firstValidationName] !== '') {

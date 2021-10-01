@@ -194,4 +194,17 @@ export default class CBusinessLayout{
             isInAssignMode: this._isInAssignMode ? this._isInAssignMode : false,
         }
     }
+
+    getObjectForBackend(){
+        let svgItems = [];
+        for(let i = 0; i < this._svgItems.length; i++){
+            if(this._svgItems[i] instanceof CBusinessProcess) {
+                svgItems.push(this._svgItems[i].getObjectForBackend());
+            }
+        }
+        return{
+            svgItems,
+            arrows: this._arrows,
+        }
+    }
 }

@@ -2,7 +2,7 @@
 Manage Business Templates
 ##################
 
-Business Templates can be managed both from UI and from server directly. Let us consider the next use case.
+Business Templates can be managed both from UI and from server directly. Let us consider the next use cases.
 
 **You, as a user, want to have a template in the OpenCelium.**
 
@@ -32,12 +32,12 @@ Each template has its correspondence *Download* icon. Click on it to get the tem
 **You, as a user, want to use the template in OpenCelium.**
 
 The template itself we need during the adding of connection. Go to *Connection* page and press on *+ Add* button.
-Provide required information and go further clicking on the arrow. Now you should see two choises of mode:
-"Expert" and "Template".
+Provide required information and go further clicking on the arrow. Now you should see two choices of mode:
+*Expert* and *Template*.
 
 |choose_mode_form|
 
-Clicking on the "Template" the system loads all existing templates to the corresponded connectors.
+Clicking on the *Template* the system loads all existing templates to the corresponded connectors.
 
 |choose_template|
 
@@ -52,13 +52,11 @@ Click on the arrow again to use the template.
 Starting from OpenCelium 1.3 version, there is a changed structure inside on the template. It means,
 to use the older templates in a new version, you need to upgrade them. There are two ways to perform that.
 First, you can go to the *Templates* page using *Admin*, as it is described above. There you can upgrade one
-specific template clicking on the icon |list_upgrade_icon| or pressing on the Convert All button to convert all
+specific template clicking on the icon |list_upgrade_icon| or pressing on the *Convert All* button to convert all
 templates to the latest version.
 
 Second option is to convert the template directly when you use it in *Connections*. If the template has older
-version it will be disabled and with conversion icon |list_upgrade_icon|.
-
-Clicking on it, you will convert the template.
+version it will be disabled and with conversion icon |list_upgrade_icon| clicking on it, you will convert the template.
 
 **You, as a user, want to change the template in OpenCelium.**
 
@@ -71,7 +69,7 @@ to the error on the *Add Connection* page. We recommend you to create a new temp
 
 The template can be for sure deleted. You can find the deletion in two places: *Admin/Templates*
 or *Connections/Add*. The first place shows you a list of all templates and a corresponded *Delete*
-functionality for each template. The second deletion is on the second step of adding connection,
+functionality for each template. The second deletion is on the second form section of adding connection,
 when you choose the *Template Mode*.
 
 
