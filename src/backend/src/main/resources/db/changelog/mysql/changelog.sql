@@ -260,7 +260,7 @@ ENGINE = InnoDB;
 -- Table `opencelium`.`bl_arrows`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `bl_arrows` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL,
   `arr_from` INT NULL,
   `arr_to` INT NULL,
   `business_layout_id` INT NOT NULL,
