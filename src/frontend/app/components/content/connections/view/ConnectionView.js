@@ -33,9 +33,11 @@ const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     const connections = state.get('connections');
     return{
         authUser: auth.get('authUser'),
+        connectionViewType: app.get('connectionViewType'),
         error: connections.get('error'),
         connection: connections.get('connection'),
         fetchingConnection: connections.get('fetchingConnection'),
