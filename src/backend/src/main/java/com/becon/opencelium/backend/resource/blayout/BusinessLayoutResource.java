@@ -11,6 +11,9 @@ public class BusinessLayoutResource {
     private List<BLayoutArrowResource> arrows;
     private List<BLayoutSvgItemResource> svgItems;
 
+    public BusinessLayoutResource() {
+    }
+
     public BusinessLayoutResource(BusinessLayout businessLayout) {
         this.id = businessLayout.getId();
         this.arrows = businessLayout.getArrows().stream().map(BLayoutArrowResource::new).collect(Collectors.toList());

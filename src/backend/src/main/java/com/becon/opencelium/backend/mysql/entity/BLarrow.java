@@ -13,20 +13,30 @@ public class BLarrow {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @Column(name = "from")
+    @Column(name = "arr_from")
     private int from;
 
-    @Column(name = "to")
+    @Column(name = "arr_to")
     private int to;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "business_layout_id")
     private BusinessLayout bLayout;
 
+    public BLarrow() {
+    }
+
     public BLarrow(BLayoutArrowResource arrowResource) {
         this.id = arrowResource.getId();
         this.from = arrowResource.getFrom();
         this.to = arrowResource.getTo();
+    }
+
+    public BLarrow(BLayoutArrowResource arrowResource, BusinessLayout businessLayout) {
+        this.id = arrowResource.getId();
+        this.from = arrowResource.getFrom();
+        this.to = arrowResource.getTo();
+        this.bLayout = businessLayout;
     }
 
     public int getId() {

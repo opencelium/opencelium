@@ -9,6 +9,9 @@ public class BLayoutArrowResource {
     private int from;
     private int to;
 
+    public BLayoutArrowResource() {
+    }
+
     public BLayoutArrowResource(BLarrow bLarrow) {
         this.id = bLarrow.getId();
         this.from = bLarrow.getFrom();

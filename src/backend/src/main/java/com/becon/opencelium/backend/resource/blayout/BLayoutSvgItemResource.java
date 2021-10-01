@@ -12,6 +12,9 @@ public class BLayoutSvgItemResource {
     private int y;
     private List<String> items;
 
+    public BLayoutSvgItemResource() {
+    }
+
     public BLayoutSvgItemResource(BLsvgItem bLsvgItem) {
         this.id = bLsvgItem.getId();
         this.name = bLsvgItem.getName();
