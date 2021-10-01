@@ -147,4 +147,13 @@ export default class CProcess{
             isDragged: this._isDragged,
         };
     }
+
+    getObjectForBackend(){
+        return {
+            id: this._id,
+            name: this._name,
+            x: this._x,
+            y: this._y,
+        };
+    }
 }

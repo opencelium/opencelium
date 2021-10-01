@@ -108,4 +108,20 @@ export class CBusinessProcess extends CProcess{
             arrows: this._arrows,
         }
     }
+
+    getObjectForBackend(){
+        let data = super.getObjectForBackend();
+        let objectItems = [];
+        if(this._items.length > 0){
+            if(this._items[0] instanceof CTechnicalProcess || this._items[0] instanceof CTechnicalOperator){
+                for(let i = 0; i < this._items.length; i++){
+                    objectItems.push(this._items[i].id);
+                }
+            }
+        }
+        return{
+            ...data,
+            items: objectItems,
+        }
+    }
 }

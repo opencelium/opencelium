@@ -988,6 +988,9 @@ function mapConnection(connection){
         if(connection.hasOwnProperty('fieldBinding')) {
             result.fieldBinding = connection.fieldBinding;
         }
+        if(connection.hasOwnProperty('businessLayout')) {
+            result.businessLayout = connection.businessLayout;
+        }
         if(connection.hasOwnProperty('webhook')) {
             result.webhook = connection.webhook;
         }

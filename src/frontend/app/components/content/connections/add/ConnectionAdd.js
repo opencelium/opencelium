@@ -50,7 +50,7 @@ function mapStateToProps(state){
 }
 
 function mapConnection(connection){
-    return typeof connection.getObject === 'function' ? connection.getObject() : connection;
+    return typeof connection.getObjectForBackend === 'function' ? connection.getObjectForBackend() : connection;
 }
 
 /**
