@@ -73,7 +73,7 @@ public class Connection   {
     private List<Scheduler> schedulers;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "connection", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private BusinessLayout businessLayout;
 
     public Connection() {

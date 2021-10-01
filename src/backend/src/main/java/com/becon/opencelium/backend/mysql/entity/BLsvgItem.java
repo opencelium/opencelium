@@ -27,6 +27,9 @@ public class BLsvgItem {
     @JoinColumn(name = "business_layout_id")
     private BusinessLayout bLayout;
 
+    public BLsvgItem() {
+    }
+
     public BLsvgItem(BLayoutSvgItemResource svgItemResource) {
         this.id = svgItemResource.getId();
         this.name = svgItemResource.getName();
@@ -36,6 +39,18 @@ public class BLsvgItem {
         svgItemResource.getItems().forEach(s -> b.append(s).append(","));
         b.deleteCharAt(b.length() - 1);
         this.items = b.toString();
+    }
+
+    public BLsvgItem(BLayoutSvgItemResource svgItemResource, BusinessLayout businessLayout) {
+        this.id = svgItemResource.getId();
+        this.name = svgItemResource.getName();
+        this.axisX = svgItemResource.getX();
+        this.axisY = svgItemResource.getY();
+        StringBuilder b = new StringBuilder();
+        svgItemResource.getItems().forEach(s -> b.append(s).append(","));
+        b.deleteCharAt(b.length() - 1);
+        this.items = b.toString();
+        this.bLayout = businessLayout;
     }
 
     public int getId() {

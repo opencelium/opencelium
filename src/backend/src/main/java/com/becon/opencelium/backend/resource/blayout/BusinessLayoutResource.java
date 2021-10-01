@@ -11,7 +11,13 @@ public class BusinessLayoutResource {
     private List<BLayoutArrowResource> arrows;
     private List<BLayoutSvgItemResource> svgItems;
 
+    public BusinessLayoutResource() {
+    }
+
     public BusinessLayoutResource(BusinessLayout businessLayout) {
+        if (businessLayout == null) {
+            return;
+        }
         this.id = businessLayout.getId();
         this.arrows = businessLayout.getArrows().stream().map(BLayoutArrowResource::new).collect(Collectors.toList());
         this.svgItems = businessLayout.getSvgItems().stream().map(BLayoutSvgItemResource::new).collect(Collectors.toList());

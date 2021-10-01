@@ -36,7 +36,7 @@ public class ConnectionResource extends ResourceSupport {
     private ConnectorNodeResource fromConnector;
     private ConnectorNodeResource toConnector;
     private List<FieldBindingResource> fieldBinding;
-    private BusinessLayoutResource businessLayoutResource;
+    private BusinessLayoutResource businessLayout;
 
     public Long getNodeId() {
         return nodeId;
@@ -94,11 +94,11 @@ public class ConnectionResource extends ResourceSupport {
         this.fieldBinding = fieldBinding;
     }
 
-    public BusinessLayoutResource getBusinessLayoutResource() {
-        return businessLayoutResource;
+    public BusinessLayoutResource getBusinessLayout() {
+        return businessLayout;
     }
 
-    public void setBusinessLayoutResource(BusinessLayoutResource businessLayoutResource) {
-        this.businessLayoutResource = businessLayoutResource;
+    public void setBusinessLayout(BusinessLayoutResource businessLayout) {
+        this.businessLayout = businessLayout;
     }
 }

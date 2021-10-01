@@ -22,16 +22,26 @@ public class BusinessLayout {
     @JoinColumn(name = "connection_id")
     private Connection connection;
 
-    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<BLsvgItem> svgItems;
 
-    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<BLarrow> arrows;
+
+    public BusinessLayout() {
+    }
 
     public BusinessLayout(BusinessLayoutResource businessLayoutResource) {
         this.id = businessLayoutResource.getId();
-        this.arrows = businessLayoutResource.getArrows().stream().map(BLarrow::new).collect(Collectors.toList());
-        this.svgItems = businessLayoutResource.getSvgItems().stream().map(BLsvgItem::new).collect(Collectors.toList());
+        this.arrows = businessLayoutResource.getArrows().stream().map(ar -> new BLarrow(ar, this)).collect(Collectors.toList());
+        this.svgItems = businessLayoutResource.getSvgItems().stream().map(svg -> new BLsvgItem(svg, this)).collect(Collectors.toList());
+    }
+
+    public BusinessLayout(BusinessLayoutResource businessLayoutResource, Connection connection) {
+        this.id = businessLayoutResource.getId();
+        this.arrows = businessLayoutResource.getArrows().stream().map(ar -> new BLarrow(ar, this)).collect(Collectors.toList());
+        this.svgItems = businessLayoutResource.getSvgItems().stream().map(svg -> new BLsvgItem(svg, this)).collect(Collectors.toList());
+        this.connection = connection;
     }
 
     public int getId() {
