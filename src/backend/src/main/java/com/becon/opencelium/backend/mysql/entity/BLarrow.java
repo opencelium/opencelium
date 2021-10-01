@@ -10,7 +10,6 @@ import javax.persistence.*;
 public class BLarrow {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @Column(name = "arr_from")
