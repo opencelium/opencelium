@@ -108,6 +108,11 @@ class Search extends React.Component{
                         width: '200px',
                     })
                 }}
+                selectMenuControlStyles={{
+                    borderRadius: '2px',
+                    top: '-2px',
+                    left: '-6px'
+                }}
                 components={{DropdownIndicator: null}}
             />
         );
