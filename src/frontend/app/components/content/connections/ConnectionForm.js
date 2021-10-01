@@ -14,7 +14,6 @@ import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
 import Button from "@basic_components/buttons/Button";
-import {setConnectionViewType} from "@actions/app";
 
 export const CONNECTION_VIEW_TYPE = {
     COLUMN: 'COLUMN',

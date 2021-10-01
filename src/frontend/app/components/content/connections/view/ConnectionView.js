@@ -26,6 +26,7 @@ import {SingleComponent} from "@decorators/SingleComponent";
 import {INPUTS} from "@utils/constants/inputs";
 import CConnection from "@classes/components/content/connection/CConnection";
 import {ConnectionForm} from "@components/content/connections/ConnectionForm";
+import {setConnectionViewType} from "@actions/app";
 
 
 const connectionPrefixURL = '/connections';
@@ -45,7 +46,7 @@ function mapStateToProps(state){
 /**
  * Component to View Connection
  */
-@connect(mapStateToProps, {fetchConnection})
+@connect(mapStateToProps, {fetchConnection, setConnectionViewType})
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @SingleComponent('connection')
