@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "bl_arrows")
-@IdClass(SvgItemId.class)
+@IdClass(BLArrowId.class)
 public class BLarrow implements Serializable {
 
     @Id

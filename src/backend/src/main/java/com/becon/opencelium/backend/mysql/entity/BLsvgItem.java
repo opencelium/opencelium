@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Table(name = "bl_svg_items")
 public class BLsvgItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @Column(name = "name")
