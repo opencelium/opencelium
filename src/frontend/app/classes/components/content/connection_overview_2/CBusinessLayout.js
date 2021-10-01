@@ -190,6 +190,7 @@ export default class CBusinessLayout{
             }
         }
         return{
+            id: this._id,
             svgItems,
             arrows: this._arrows,
             currentSvgItemId: this._currentSvgItem ? this._currentSvgItem.id : '',
