@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.mysql.entity.BLarrow;
 import java.util.List;
 
 public class BLayoutArrowResource {
-    private int id;
     private int from;
     private int to;
 
@@ -13,17 +12,8 @@ public class BLayoutArrowResource {
     }
 
     public BLayoutArrowResource(BLarrow bLarrow) {
-        this.id = bLarrow.getId();
         this.from = bLarrow.getFrom();
         this.to = bLarrow.getTo();
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public int getFrom() {

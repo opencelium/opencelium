@@ -260,12 +260,12 @@ ENGINE = InnoDB;
 -- Table `opencelium`.`bl_arrows`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `bl_arrows` (
-  `id` INT NOT NULL,
-  `arr_from` INT NULL,
-  `arr_to` INT NULL,
   `business_layout_id` INT NOT NULL,
-  PRIMARY KEY (`id`, `business_layout_id`),
-  INDEX `fk_arrows_business_layout1_idx` (`business_layout_id` ASC),
+  `arr_from` INT NOT NULL,
+  `arr_to` INT NOT NULL,
+  PRIMARY KEY (`business_layout_id`, arr_from, arr_to),
+  UNIQUE KEY (`arr_from`,`arr_to`),
+  INDEX `fk_arrows_business_layout1_idx` (`business_layout_id`),
   CONSTRAINT `fk_arrows_business_layout1`
     FOREIGN KEY (`business_layout_id`)
     REFERENCES `business_layout` (`id`)

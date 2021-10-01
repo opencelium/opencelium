@@ -1,20 +1,22 @@
 package com.becon.opencelium.backend.mysql.entity;
 
 import com.becon.opencelium.backend.resource.blayout.BLayoutArrowResource;
-import com.becon.opencelium.backend.resource.blayout.BLayoutSvgItemResource;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "bl_arrows")
-public class BLarrow {
+@IdClass(SvgItemId.class)
+public class BLarrow implements Serializable {
 
     @Id
-    private int id;
-
+//    @GeneratedValue(strategy=GenerationType.SEQUENCE)
     @Column(name = "arr_from")
     private int from;
 
+    @Id
+//    @GeneratedValue(strategy=GenerationType.SEQUENCE)
     @Column(name = "arr_to")
     private int to;
 
@@ -26,24 +28,14 @@ public class BLarrow {
     }
 
     public BLarrow(BLayoutArrowResource arrowResource) {
-        this.id = arrowResource.getId();
         this.from = arrowResource.getFrom();
         this.to = arrowResource.getTo();
     }
 
     public BLarrow(BLayoutArrowResource arrowResource, BusinessLayout businessLayout) {
-        this.id = arrowResource.getId();
         this.from = arrowResource.getFrom();
         this.to = arrowResource.getTo();
         this.bLayout = businessLayout;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public int getFrom() {
