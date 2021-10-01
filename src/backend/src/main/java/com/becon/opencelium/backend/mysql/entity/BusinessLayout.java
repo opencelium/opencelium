@@ -22,10 +22,10 @@ public class BusinessLayout {
     @JoinColumn(name = "connection_id")
     private Connection connection;
 
-    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<BLsvgItem> svgItems;
 
-    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "bLayout", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<BLarrow> arrows;
 
     public BusinessLayout() {
