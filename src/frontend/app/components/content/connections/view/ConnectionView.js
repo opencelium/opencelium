@@ -26,15 +26,18 @@ import {SingleComponent} from "@decorators/SingleComponent";
 import {INPUTS} from "@utils/constants/inputs";
 import CConnection from "@classes/components/content/connection/CConnection";
 import {ConnectionForm} from "@components/content/connections/ConnectionForm";
+import {setConnectionViewType} from "@actions/app";
 
 
 const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
     const auth = state.get('auth');
+    const app = state.get('app');
     const connections = state.get('connections');
     return{
         authUser: auth.get('authUser'),
+        connectionViewType: app.get('connectionViewType'),
         error: connections.get('error'),
         connection: connections.get('connection'),
         fetchingConnection: connections.get('fetchingConnection'),
@@ -45,7 +48,7 @@ function mapStateToProps(state){
 /**
  * Component to View Connection
  */
-@connect(mapStateToProps, {fetchConnection})
+@connect(mapStateToProps, {fetchConnection, setConnectionViewType})
 @permission(ConnectionPermissions.READ, true)
 @withTranslation(['connections', 'app'])
 @SingleComponent('connection')

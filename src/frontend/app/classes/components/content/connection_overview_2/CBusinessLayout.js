@@ -1,12 +1,13 @@
 import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
-import {isString} from "@utils/app";
+import {isArray, isString} from "@utils/app";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 import {CTechnicalProcess} from "@classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 
 export default class CBusinessLayout{
 
-    constructor(connection = null, svgItems = [], arrows = [], currentSvgItemId = '', isInAssignMode = false) {
+    constructor(id = 0, connection = null, svgItems = [], arrows = [], currentSvgItemId = '', isInAssignMode = false) {
+        this._id = id;
         this._connection = connection;
         this._svgItems = this.convertItems([...svgItems]);
         this._arrows = arrows;
@@ -15,12 +16,13 @@ export default class CBusinessLayout{
     }
 
     static createBusinessLayout(businessLayout){
+        const id = businessLayout && businessLayout.hasOwnProperty('id') ? businessLayout.id : 0;
         const connection = businessLayout && businessLayout.hasOwnProperty('connection') ? businessLayout.connection : null;
-        const svgItems = businessLayout && businessLayout.hasOwnProperty('svgItems') ? businessLayout.svgItems : [];
-        const arrows = businessLayout && businessLayout.hasOwnProperty('arrows') ? businessLayout.arrows : [];
+        const svgItems = businessLayout && businessLayout.hasOwnProperty('svgItems') && isArray(businessLayout.svgItems) ? businessLayout.svgItems : [];
+        const arrows = businessLayout && businessLayout.hasOwnProperty('arrows') && isArray(businessLayout.arrows) ? businessLayout.arrows : [];
         const currentSvgItemId = businessLayout && businessLayout.hasOwnProperty('currentSvgItemId') ? businessLayout.currentSvgItemId : '';
         const isInAssignMode = businessLayout && businessLayout.hasOwnProperty('isInAssignMode') ? businessLayout.isInAssignMode : false;
-        return new CBusinessLayout(connection, svgItems, arrows, currentSvgItemId, isInAssignMode);
+        return new CBusinessLayout(id, connection, svgItems, arrows, currentSvgItemId, isInAssignMode);
     }
 
     changeItemName(item, newName){
@@ -188,6 +190,7 @@ export default class CBusinessLayout{
             }
         }
         return{
+            id: this._id,
             svgItems,
             arrows: this._arrows,
             currentSvgItemId: this._currentSvgItem ? this._currentSvgItem.id : '',
@@ -197,14 +200,19 @@ export default class CBusinessLayout{
 
     getObjectForBackend(){
         let svgItems = [];
+        let data;
         for(let i = 0; i < this._svgItems.length; i++){
             if(this._svgItems[i] instanceof CBusinessProcess) {
                 svgItems.push(this._svgItems[i].getObjectForBackend());
             }
         }
-        return{
+        data = {
             svgItems,
             arrows: this._arrows,
         }
+        if(this._id !== 0){
+            data.id = this._id;
+        }
+        return data;
     }
 }
