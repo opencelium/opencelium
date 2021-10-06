@@ -150,9 +150,9 @@ const plugins = () => {
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
             'process.env.NODE_BUILD': NodeParams.IS_BUILD,
-            'process.env.i18nextSettings': JSON.stringify(NodeParams.IS_BUILD ? {
+            'process.env.i18nextSettings': JSON.stringify(false ? {
                 backend: {
-                    loadPath: __dirname + "/dist/locales/{{lng}}/{{ns}}.json"
+                    loadPath: "frontend/dist/locales/{{lng}}/{{ns}}.json"
                 }
             } : {}),
         })
@@ -172,7 +172,6 @@ const plugins = () => {
 };
 const output = () => {
     return {
-        publicPath: NodeParams.IS_BUILD ? `${__dirname}/dist/` : '/',
         filename: "[name].js"
     };
 };

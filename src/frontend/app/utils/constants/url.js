@@ -16,7 +16,7 @@
 import SETTINGS from '@root/settings.json';
 import {isBuild} from "@utils/constants/app";
 
-let {protocol, hostname, port} = window.location;
+let {protocol, hostname, port, pathname} = window.location;
 if(isBuild){
     protocol = 'http:';
     hostname = 'localhost'
@@ -48,3 +48,4 @@ export const invokerUrl = `${protocol}//${hostname}:${port}/invokers`;
 export const connectionOverviewDetailsUrl = `${protocol}//${hostname}:${port}/connection_overview_details`;
 export const connectionOverviewTechnicalLayoutUrl = `${protocol}//${hostname}:${port}/connection_overview_technical_layout`;
 export const connectionOverviewBusinessLayoutUrl = `${protocol}//${hostname}:${port}/connection_overview_business_layout`;
+export const i18nextLoadPath = isBuild ? `${pathname.substring(0, pathname.lastIndexOf('/'))}/locales/{{lng}}/{{ns}}.json` : `${window.location.protocol}//${window.location.host}/locales/{{lng}}/{{ns}}.json`;

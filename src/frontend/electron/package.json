@@ -6,6 +6,6 @@
   "author": "becon",
   "license": "becon ",
   "dependencies": {
-    "tree-kill": "^1.2.2"
+    "electron-packager": "^15.4.0"
   }
 }
