@@ -162,8 +162,10 @@ public class ConnectionServiceImp implements ConnectionService{
         connection.setDescription(resource.getDescription());
         connection.setFromConnector(resource.getFromConnector().getConnectorId());
         connection.setToConnector(resource.getToConnector().getConnectorId());
-        BusinessLayout businessLayout = new BusinessLayout(resource.getBusinessLayout(), connection);
-        connection.setBusinessLayout(businessLayout);
+        if (resource.getBusinessLayout() != null) {
+            BusinessLayout businessLayout = new BusinessLayout(resource.getBusinessLayout(), connection);
+            connection.setBusinessLayout(businessLayout);
+        }
         return connection;
     }
 
@@ -180,7 +182,9 @@ public class ConnectionServiceImp implements ConnectionService{
         connectionResource.setTitle(connection.getName());
         connectionResource.setDescription(connection.getDescription());
         connectionResource.setFieldBinding(fieldBindingResources);
-        connectionResource.setBusinessLayout(new BusinessLayoutResource(connection.getBusinessLayout()));
+        if(connection.getBusinessLayout() != null) {
+            connectionResource.setBusinessLayout(new BusinessLayoutResource(connection.getBusinessLayout()));
+        }
 
         Connector from = connectorService.findById(connection.getFromConnector())
                 .orElseThrow(() -> new RuntimeException("Connector - " + connection.getFromConnector() + " not found"));
