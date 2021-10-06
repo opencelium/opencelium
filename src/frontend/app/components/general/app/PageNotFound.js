@@ -19,6 +19,7 @@ import {Col, Container, Row} from "react-grid-system";
 import styles from '@themes/default/general/app.scss';
 import {connect} from "react-redux";
 import {getThemeClass} from "@utils/app";
+import PageNotFoundImagePath from "assets/page_not_found.png";
 
 function mapStateToProps(state){
     const auth = state.get('auth');
@@ -50,7 +51,7 @@ class PageNotFound extends Component{
                             This Page not Found
                         </div>
                         <div className={styles[classNames.page_not_found_smile]}>
-                            <img src="../../../../img/page_not_found.png" width={72} height={72} />
+                            <img src={PageNotFoundImagePath} width={72} height={72} alt={'Page not found'} />
                         </div>
                     </Col>
                 </Row>

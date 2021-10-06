@@ -32,7 +32,6 @@ function mapStateToProps(state){
     const {connectionOverview, currentBusinessItem, currentTechnicalItem, connection} = mapItemsToClasses(state);
     let arrows = connection ? [...connection.fromConnector.arrows, ...connection.toConnector.arrows] : [];
     const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
-    console.log('mapStateToProps', items);
     return{
         currentBusinessItem,
         currentTechnicalItem,
@@ -57,12 +56,11 @@ class ExtendedTechnicalLayout extends React.Component{
     }
 
     componentDidMount() {
-        ConnectionOverviewExtendedChannel.onmessage = (e) => {console.log('ExtendedChannel.onMessage', e.data); ::this.props.setConnectionData(e.data)};
+        ConnectionOverviewExtendedChannel.onmessage = (e) => {::this.props.setConnectionData(e.data)};
     }
 
     updateConnection(connection){
         const {updateConnectionInOpener, setConnectionData} = this.props;
-        console.log('updateConnection', connection)
         updateConnectionInOpener(connection, {hasPostMessage: false});
         setConnectionData(connection);
     }
@@ -147,7 +145,6 @@ class ExtendedTechnicalLayout extends React.Component{
         const isDraggable = !(isSelectedBusinessItemEmpty && !isAssignMode);
         const hasAssignCentralText = isSelectedBusinessItemEmpty && !isAssignMode;
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams();
-        console.log('render', connection)
         return(
             <div id={this.layoutId} className={`${styles.technical_layout_extended}`}>
                 <Svg

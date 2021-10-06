@@ -101,4 +101,7 @@ webpack-stream
 webpack-hot-middleware
 resolve-url-loader
 
+commands:
+java -jar -Dserver.port=9090 C:/becon/opencelium/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar
 
+electron-packager . --overwrite

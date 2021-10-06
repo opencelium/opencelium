@@ -37,6 +37,7 @@ import {hasHeader} from "@utils/app";
 import Menu from "@components/layout/menu/Menu";
 import TopBar from "@components/layout/header/TopBar";
 import NotificationPanel from "@components/layout/notification/NotificationPanel";
+import Callout from "@components/layout/header/Callout";
 
 let checkTokenInterval;
 
@@ -151,8 +152,8 @@ class Layout extends Component{
     renderLayout(){
         return (
             <div>
-                {this.renderHeader()}
-                {this.renderLoginAgain()}
+                {this.renderHeader()}{/*
+                {this.renderLoginAgain()}*/}
                 {this.props.children}
                 {this.props.isAuth && <NotificationPanel/>}
             </div>

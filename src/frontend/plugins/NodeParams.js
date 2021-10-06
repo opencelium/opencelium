@@ -17,6 +17,7 @@ const hasSocket = process.env.NODE_SOCKET === 'true';
 const hasBrowserSync = process.env.NODE_BSYNC === 'true';
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = process.env.NODE_ENV === 'production';
+const isBuild = process.env.NODE_BUILD === '1';
 
 /**
  * params from package.json scripts
@@ -26,4 +27,5 @@ module.exports = {
     HAS_BROWSER_SYNC: hasBrowserSync,
     IS_PROD: isProd,
     IS_DEV: isDev,
+    IS_BUILD: isBuild,
 };

@@ -65,7 +65,7 @@ class Svg extends React.Component {
         const {layoutId, svgId, startingSvgX, startingSvgY, detailsPosition} = this.props;
         const layout = document.getElementById(layoutId);
         const layoutSVG = document.getElementById(svgId);
-        console.log(svgId, document.getElementById('technical_layout_svg') ? document.getElementById('technical_layout_svg').viewBox.baseVal : null);
+
         if(layout && layoutSVG) {
             let width = layout.offsetWidth;
             let ratio = width / layoutSVG.getBoundingClientRect().width;
@@ -81,7 +81,7 @@ class Svg extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {svgId, detailsPosition, items, startingSvgX, startingSvgY, isDraggable} = this.props;
-        console.log(svgId, document.getElementById('technical_layout_svg') ? document.getElementById('technical_layout_svg').viewBox.baseVal : null);
+
         if (detailsPosition !== prevProps.detailsPosition || prevProps.startingSvgX !== startingSvgX) {
             const x = startingSvgX ? startingSvgX : CSvg.getStartingViewBoxX(detailsPosition);
             CSvg.setViewBox(svgId, {x});

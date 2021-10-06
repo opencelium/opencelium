@@ -32,7 +32,8 @@ const i18nSettings = {
     defaultNS: 'common',
     interpolation: {
         escapeValue: false,
-    }
+    },
+    ...AppSettings.i18nAdditionalSettings,
 };
 
 /**

@@ -21,6 +21,8 @@ export const OC_NAME = 'OpenCelium';
 export const OC_DESCRIPTION = 'OpenCelium is super duper hub';
 export const isProd = process.env.NODE_ENV === 'production';
 export const isDev = process.env.NODE_ENV === 'development';
+export const isBuild = process.env.NODE_BUILD;
+const i18nextSettings = process.env.i18nextSettings;
 export const Roles = {
     USER: 'ROLE_USER',
     ADMIN: 'ROLE_ADMIN'
@@ -34,6 +36,7 @@ export const Permissions = ['CREATE', 'READ', 'UPDATE', 'DELETE'];
 export const AppSettings = {
     i18nDebug: isDev,
     reduxHasLogs: isDev,
+    i18nAdditionalSettings: {...i18nextSettings},
 };
 
 export const ERROR_TYPE = {

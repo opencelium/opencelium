@@ -13,6 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 const path = require('path');
 const webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
@@ -109,7 +110,10 @@ const plugins = () => {
             template: './index.html',
             minify: {
                 collapseWhitespace: NodeParams.IS_PROD
-            }
+            },
+            templateParameters: {
+                'host': NodeParams.IS_BUILD ? '' : '/'
+            },
         }),
         new CleanWebpackPlugin(),
         new CopyWebpackPlugin({
@@ -129,6 +133,14 @@ const plugins = () => {
                 {
                     from: path.resolve(__dirname, 'img'),
                     to: path.resolve(__dirname, 'dist/img')
+                },
+                {
+                    from: path.resolve(__dirname, 'fonts'),
+                    to: path.resolve(__dirname, 'dist/fonts')
+                },
+                {
+                    from: path.resolve(__dirname, 'electron'),
+                    to: path.resolve(__dirname, 'dist')
                 }
             ]
         }),
@@ -136,7 +148,13 @@ const plugins = () => {
             filename: filename('css')
         }),
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+            'process.env.NODE_BUILD': NodeParams.IS_BUILD,
+            'process.env.i18nextSettings': JSON.stringify(NodeParams.IS_BUILD ? {
+                backend: {
+                    loadPath: __dirname + "/dist/locales/{{lng}}/{{ns}}.json"
+                }
+            } : {}),
         })
     ];
     if(NodeParams.IS_DEV){
@@ -154,7 +172,7 @@ const plugins = () => {
 };
 const output = () => {
     return {
-        publicPath: '/',
+        publicPath: NodeParams.IS_BUILD ? `${__dirname}/dist/` : '/',
         filename: "[name].js"
     };
 };

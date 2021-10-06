@@ -16,7 +16,7 @@
 import React, {Suspense} from 'react';
 import {Provider} from 'react-redux';
 
-import {Router, browserHistory} from 'react-router';
+import {Router, hashHistory, browserHistory} from 'react-router';
 import {syncHistoryWithStore } from 'react-router-redux';
 
 import {setAuthSettings} from '@utils/auth';
@@ -25,6 +25,7 @@ import i18n from '@utils/i18n';
 import {createRoutes} from '@utils/routes';
 import Loading from "@loading";
 import {componentAppear} from "@utils/app";
+import {isBuild} from "@utils/constants/app";
 
 
 /**
@@ -41,7 +42,7 @@ const createSelectLocationState = () => {
         return prevRoutingStateJS;
     };
 };
-export const history = syncHistoryWithStore(browserHistory, store, {
+export const history = syncHistoryWithStore(isBuild ? hashHistory : browserHistory, store, {
     selectLocationState: createSelectLocationState()
 });
 

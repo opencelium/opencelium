@@ -718,7 +718,7 @@ export default class CConnection{
         let data = this.getObject();
         return{
             ...data,
-            businessLayout: this._businessLayout.getObjectForBackend(),
+            businessLayout: this._businessLayout.getItems().length === 0 ? null : this._businessLayout.getObjectForBackend(),
         }
     }
 

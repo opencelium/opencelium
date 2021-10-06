@@ -14,8 +14,13 @@
  */
 
 import SETTINGS from '@root/settings.json';
+import {isBuild} from "@utils/constants/app";
 
 let {protocol, hostname, port} = window.location;
+if(isBuild){
+    protocol = 'http:';
+    hostname = 'localhost'
+}
 const apiPort = SETTINGS.PORT.API;
 const socketPort = SETTINGS.PORT.SOCKET;
 const kibanaPort = SETTINGS.PORT.KIBANA;
