@@ -27,6 +27,7 @@ const initialState = fromJS({
     deletingTemplates: API_REQUEST_STATE.INITIAL,
     exportingTemplate: API_REQUEST_STATE.INITIAL,
     importingTemplate: API_REQUEST_STATE.INITIAL,
+    convertingTemplatesState: API_REQUEST_STATE.INITIAL,
     template: {},
     exportedTemplate: {},
     templates: List([]),
@@ -74,7 +75,7 @@ const reducer = (state = initialState, action) => {
         case TemplatesAction.CONVERT_TEMPLATE_REJECTED:
             return state.set('isRejected', true).set('error', action.payload).set('convertingTemplates', List([]));
         case TemplatesAction.CONVERT_TEMPLATES:
-            return state.set('isRejected', false).set('isCanceled', false).set('error', null).set('convertingTemplates', List(action.payload));
+            return state.set('convertingTemplatesState', API_REQUEST_STATE.START).set('isRejected', false).set('isCanceled', false).set('error', null).set('convertingTemplates', List(action.payload));
         case TemplatesAction.CONVERT_TEMPLATES_FULFILLED:
             for(let i = 0; i < action.payload.oldTemplates.length; i++){
                 index = templates.findIndex(function (template) {
@@ -90,9 +91,9 @@ const reducer = (state = initialState, action) => {
                     convertingTemplates = convertingTemplates.delete(index);
                 }
             }
-            return state.set('templates', templates).set('convertingTemplates', convertingTemplates);
+            return state.set('convertingTemplatesState', API_REQUEST_STATE.FINISH).set('templates', templates).set('convertingTemplates', convertingTemplates);
         case TemplatesAction.CONVERT_TEMPLATES_REJECTED:
-            return state.set('isRejected', true).set('error', action.payload).set('convertingTemplates', List([]));
+            return state.set('convertingTemplatesState', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload).set('convertingTemplates', List([]));
         case TemplatesAction.FETCH_TEMPLATES:
             return state.set('fetchingTemplates', API_REQUEST_STATE.START).set('error', null);
         case TemplatesAction.FETCH_TEMPLATES_FULFILLED:

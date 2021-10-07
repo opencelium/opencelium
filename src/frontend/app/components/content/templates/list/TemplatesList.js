@@ -20,7 +20,7 @@ import {fetchTemplates} from '@actions/templates/fetch';
 import {convertTemplates, convertTemplatesRejected} from "@actions/templates/update";
 import {deleteTemplate, deleteTemplates} from '@actions/templates/delete';
 
-import List from '../../../general/list_of_components/List';
+import List, {VIEW_TYPE} from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
 import {TemplatePermissions} from "@utils/constants/permissions";
 import {permission} from "@decorators/permission";
@@ -54,6 +54,7 @@ function mapStateToProps(state){
         exportedTemplate: templates.get('exportedTemplate'),
         exportingTemplate: templates.get('exportingTemplate'),
         convertingTemplates: templates.get('convertingTemplates').toJS(),
+        convertingTemplatesState: templates.get('convertingTemplatesState'),
         templates: templates.get('templates').toJS(),
         isCanceled: templates.get('isCanceled'),
         isRejected: templates.get('isRejected'),
@@ -103,7 +104,7 @@ class TemplatesList extends Component{
         CVoiceControl.removeCommands({component:this}, CTemplateVoiceControl);
     }
 
-    convertAll(){
+    convertAll(checks){
         const {appVersion, templates, convertTemplates, convertTemplatesRejected} = this.props;
         let convertingTemplates = [];
         for(let i = 0; i < templates.length; i++){
@@ -117,11 +118,12 @@ class TemplatesList extends Component{
                 }
             }
         }
-        convertTemplates(convertingTemplates);
+        convertingTemplates = convertingTemplates.filter(t => checks.findIndex(c => c.value && c.id === t.templateId) !== -1);
+            convertTemplates(convertingTemplates);
     }
 
     render(){
-        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates, deleteTemplates, deletingTemplate, deletingTemplates, currentTemplate} = this.props;
+        const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates, convertingTemplatesState, deleteTemplates, deletingTemplate, deletingTemplates, currentTemplate} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}]};
         translations.add_button = t('LIST.IMPORT_BUTTON');
@@ -173,7 +175,20 @@ class TemplatesList extends Component{
             return result;
         };
         mapEntity.AddButton = TemplateImport;
-        mapEntity.AdditionalButton = <Button authUser={authUser} title={t('LIST.CONVERT_ALL_BUTTON')} onClick={::this.convertAll}/>;
+        mapEntity.AdditionalButton = (thisListScope) => {
+            if(thisListScope.state.viewType === VIEW_TYPE.GRID){
+                return null;
+            }
+            const disabled = !::thisListScope.isOneChecked();
+            return (
+                <Button
+                    icon={convertingTemplatesState === API_REQUEST_STATE.START ? 'loading' : 'play_arrow'}
+                    title={t('LIST.CONVERT_ALL_BUTTON')}
+                    disabled={disabled || convertingTemplatesState === API_REQUEST_STATE.START }
+                    onClick={() => ::this.convertAll(thisListScope.state.checks)}
+                />
+            );
+        };
         mapEntity.onDelete = deleteTemplate;
         return <List
             deletingEntity={(template) => deletingTemplate === API_REQUEST_STATE.START && template.id === currentTemplate.id}
