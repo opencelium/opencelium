@@ -150,11 +150,6 @@ const plugins = () => {
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
             'process.env.NODE_BUILD': NodeParams.IS_BUILD,
-            'process.env.i18nextSettings': JSON.stringify(false ? {
-                backend: {
-                    loadPath: "frontend/dist/locales/{{lng}}/{{ns}}.json"
-                }
-            } : {}),
         })
     ];
     if(NodeParams.IS_DEV){
@@ -171,8 +166,14 @@ const plugins = () => {
     return plugins;
 };
 const output = () => {
+    if(NodeParams.IS_BUILD){
+        return {
+            filename: "[name].js"
+        };
+    }
     return {
-        filename: "[name].js"
+        filename: "[name].js",
+        publicPath: '/',
     };
 };
 
