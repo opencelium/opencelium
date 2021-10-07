@@ -6,6 +6,8 @@
   "author": "becon",
   "license": "becon ",
   "dependencies": {
-    "electron-packager": "^15.4.0"
+    "electron-packager": "^15.4.0",
+    "find-pid-from-port": "^0.1.0",
+    "tree-kill": "^1.2.2"
   }
 }

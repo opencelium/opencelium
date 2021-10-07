@@ -18,8 +18,9 @@ import {isBuild} from "@utils/constants/app";
 
 let {protocol, hostname, port, pathname} = window.location;
 if(isBuild){
-    protocol = 'http:';
-    hostname = 'localhost'
+    protocol = 'https:';
+    hostname = 'opencelium-demo.becon.de';
+
 }
 const apiPort = SETTINGS.PORT.API;
 const socketPort = SETTINGS.PORT.SOCKET;
@@ -33,7 +34,6 @@ export {protocol, hostname, port};
 
 export const APP_STATUS_DOWN = 'DOWN';
 export const APP_STATUS_UP = 'UP';
-
 /**
  * urls for requests
  */
