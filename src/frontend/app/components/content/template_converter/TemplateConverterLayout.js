@@ -21,6 +21,7 @@ import ComponentError from "../../general/app/ComponentError";
 import {ERROR_TYPE} from "@utils/constants/app";
 import {TemplateConverter} from '../../../../oc_modules/template_converter';
 import ViewHeader from "@components/general/view_component/Header";
+import ListHeader from "@components/general/list_of_components/Header";
 
 /**
  * Layout for TemplateConverter
@@ -32,16 +33,16 @@ class TemplateConverterLayout extends Component{
     }
 
     render(){
-        let header = {title: 'Converter', breadcrumbs: [{link: '/admin_cards', text: 'Admin Cards'}],};
+        let header = {title: 'Converter'};
         return (
-            <Container>
+            <div>
                 <Suspense fallback={(<Loading/>)}>
                     <ComponentError entity={{type: ERROR_TYPE.FRONTEND, name: this.constructor.name}}>
-                        <ViewHeader header={header}/>
+                        <ListHeader header={header}/>
                         <TemplateConverter/>
                     </ComponentError>
                 </Suspense>
-            </Container>
+            </div>
         );
     }
 }
