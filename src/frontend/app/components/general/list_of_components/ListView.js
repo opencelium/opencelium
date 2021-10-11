@@ -6,6 +6,7 @@ import ListViewHeader from "@components/general/list_of_components/ListViewHeade
 import Table from "@basic_components/table/Table";
 import {withRouter} from "react-router";
 import {ComponentHasCheckboxes} from "@decorators/ComponentHasCheckboxes";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 @ComponentHasCheckboxes()
@@ -17,6 +18,9 @@ class ListView extends React.Component{
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(prevProps.checks && prevProps.checks.length !== this.props.checks.length){
             this.props.setChecks(this.props.checks);
+        }
+        if(prevProps.deletingSelected === API_REQUEST_STATE.START && this.props.deletingSelected === API_REQUEST_STATE.FINISH && this.props.checks && this.props.checks.length !== 0){
+            this.props.clearAllChecks();
         }
     }
 

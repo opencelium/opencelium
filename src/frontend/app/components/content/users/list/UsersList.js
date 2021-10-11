@@ -100,7 +100,7 @@ class UsersList extends Component{
             entityIdName: 'id',
             entityIdsName: 'userIds',
             deleteSelected: deleteUsers,
-            isDeletingSelected: deletingUsers === API_REQUEST_STATE.START,
+            deletingSelected: deletingUsers,
             map: (user) => {
                 return [{name: 'id', value: user.id}, {name: 'email', label: t('LIST.EMAIL'), value: user.email, width: '30%'}, {name: 'groups', label: t('LIST.ASSIGNED_GROUPS'), value: user.userGroups.name}]
             },

@@ -62,6 +62,7 @@ import {CSearch} from "@classes/components/general/CSearch";
 import CurrentSchedules from "@components/content/schedules/current_schedules/CurrentSchedules";
 import Confirmation from "@components/general/app/Confirmation";
 import {withTranslation} from "react-i18next";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 
 const AMOUNT_OF_ROWS = 3;
@@ -406,6 +407,7 @@ class List extends Component{
             listViewData.deleteSelected(entityIds);
             this.setState({
                 showConfirmDeleteSelected: false,
+                checks: [],
             });
         }
     }
@@ -425,7 +427,7 @@ class List extends Component{
             mapEntity, entities, setTotalPages, exceptionEntities, permissions, authUser, load, containerStyles,
             noSearchField, currentPageItems, listViewData, readOnly, deletingEntity, t,
         } = this.props;
-        const {selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType, showConfirmDeleteSelected} = this.state;
+        const {checks, selectedCard, keyNavigateType, isPressedAddEntity, searchValue, gridViewType, entitiesProPage, viewType, sortType, showConfirmDeleteSelected} = this.state;
         let {page, translations, hasDeleteSelectedButtons} = this.props;
         let classNames = ['empty_list', 'search_field'];
         classNames = getThemeClass({classNames, authUser, styles});
@@ -438,7 +440,8 @@ class List extends Component{
         const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width, visible: element.visible, style: element.style};}) : [];
         const entityIdName = listViewData ? listViewData.entityIdName : '';
         const actionsShouldBeMinimized = listViewData && listViewData.hasOwnProperty('actionsShouldBeMinimized') ? listViewData.actionsShouldBeMinimized : false;
-        const isDeletingSelected = listViewData && listViewData.hasOwnProperty('isDeletingSelected') ? listViewData.isDeletingSelected : false;
+        const deletingSelected = listViewData && listViewData.hasOwnProperty('deletingSelected') ? listViewData.deletingSelected : false;
+        const isDeletingSelected = deletingSelected === API_REQUEST_STATE.START;
         const renderListViewItemActions = listViewData && listViewData.hasOwnProperty('renderItemActions') ? (entity) => listViewData.renderItemActions(entity, ::this.setCurrentPageItems) : null;
         const isItemActionsBefore = listViewData && listViewData.hasOwnProperty('isItemActionsBefore') ? listViewData.isItemActionsBefore : false;
         const isDeleteSelectedButtonDisabled = !::this.isOneChecked();
@@ -515,6 +518,7 @@ class List extends Component{
                                 <React.Fragment>
                                     {viewType === VIEW_TYPE.LIST &&
                                         <ListView
+                                            deletingSelected={deletingSelected}
                                             deletingEntity={deletingEntity}
                                             readOnly={readOnly}
                                             translations={translations}

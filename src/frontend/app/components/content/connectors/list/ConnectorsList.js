@@ -97,7 +97,7 @@ class ConnectorsList extends Component{
             entityIdName: 'id',
             entityIdsName: 'connectorIds',
             deleteSelected: deleteConnectors,
-            isDeletingSelected: deletingConnectors === API_REQUEST_STATE.START,
+            deletingSelected: deletingConnectors,
             map: (connector) => {
                 return [{name: 'id', value: connector.id}, {name: 'name', label: t('LIST.NAME'), value: connector.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: connector.description, width: '25%'}, {name: 'invoker', label: t('LIST.INVOKER'), value: connector.invoker.name}]
             },

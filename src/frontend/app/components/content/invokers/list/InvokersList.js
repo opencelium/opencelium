@@ -90,7 +90,7 @@ class InvokersList extends Component{
             entityIdName: 'name',
             entityIdsName: 'invokerIds',
             deleteSelected: deleteInvokers,
-            isDeletingSelected: deletingInvokers === API_REQUEST_STATE.START,
+            deletingSelected: deletingInvokers,
             map: (invoker) => {
                 return [{name: 'id', value: invoker.name}, {name: 'name', label: t('LIST.NAME'), value: invoker.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: invoker.description, width: '25%'}, {name: 'auth_type', label: t('LIST.AUTH_TYPE'), value: invoker.authType}, {name: 'operations', label: t('LIST.OPERATIONS'), value: invoker.operations.map(operation => operation.name).join(', ')}]
             },

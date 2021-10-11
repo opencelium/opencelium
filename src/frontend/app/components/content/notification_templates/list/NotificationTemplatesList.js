@@ -89,7 +89,7 @@ class NotificationTemplatesList extends Component{
             entityIdName: 'id',
             entityIdsName: 'notificationTemplateIds',
             deleteSelected: deleteNotificationTemplates,
-            isDeletingSelected: deletingNotificationTemplates === API_REQUEST_STATE.START,
+            deletingSelected: deletingNotificationTemplates,
             map: (notificationTemplate) => {
                 return [{name: 'id', value: notificationTemplate.templateId}, {name: 'name', label: t('LIST.NAME'), value: notificationTemplate.name, width: '30%'}, {name: 'type', label: t('LIST.TYPE'), value: notificationTemplate.type, width: '35%'}]
             },

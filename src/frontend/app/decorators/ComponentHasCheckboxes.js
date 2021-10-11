@@ -139,10 +139,15 @@ export function ComponentHasCheckboxes(){
                 return false;
             }
 
+            clearAllChecks(){
+                this.setState({checks: [], allChecked: false})
+            }
+
             render(){
                 const {checks} = this.state;
                 return <Component
                     {...this.props}
+                    clearAllChecks={::this.clearAllChecks}
                     checkAllEntities={::this.checkAllEntities}
                     deleteCheck={::this.deleteCheck}
                     checkOneEntity={::this.checkOneEntity}

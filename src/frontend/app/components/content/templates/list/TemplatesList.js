@@ -142,7 +142,7 @@ class TemplatesList extends Component{
             renderItemActions: renderListViewItemActions,
             isItemActionsBefore: true,
             deleteSelected: deleteTemplates,
-            isDeletingSelected: deletingTemplates === API_REQUEST_STATE.START,
+            deletingSelected: deletingTemplates,
             map: (template) => {
                 return [{name: 'id', value: template.templateId}, {name: 'name', label: t('LIST.NAME'), value: template.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: template.description}, {name: 'from_invoker', label: t('LIST.FROM_INVOKER'), value: template.connection.fromConnector.invoker.name, width: '20%'}, {name: 'to_invoker', label: t('LIST.TO_INVOKER'), value: template.connection.toConnector.invoker.name, width: '20%'}]
             },

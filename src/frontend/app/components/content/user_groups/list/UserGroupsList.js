@@ -91,7 +91,7 @@ class UserGroupsList extends Component{
             entityIdName: 'id',
             entityIdsName: 'userGroupIds',
             deleteSelected: deleteUserGroups,
-            isDeletingSelected: deletingUserGroups === API_REQUEST_STATE.START,
+            deletingSelected: deletingUserGroups,
             map: (userGroup) => {
                 return [{name: 'id', value: userGroup.id}, {name: 'name', label: t('LIST.NAME'), value: userGroup.name, width: '20%'}, {name: 'description', label: t('LIST.DESCRIPTION'), value: userGroup.description, width: '25%'}, {name: 'components', label: t('LIST.COMPONENTS'), value: userGroup.components.map(component => t(`app:COMPONENTS.${component.name}`)).join(', ')}]
             },
