@@ -84,7 +84,7 @@ class UsersList extends Component{
         const {t, users, deleteUser, params, setTotalPages, authUser, openTour, deletingUser, currentUser, deleteUsers, deletingUsers} = this.props;
         let exceptionUsers = [authUser.userId];
         let translations = {};
-        translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
+        translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         let mapEntity = {};

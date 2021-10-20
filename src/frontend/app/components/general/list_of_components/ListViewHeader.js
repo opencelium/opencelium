@@ -35,7 +35,7 @@ class ListViewHeader extends React.Component{
                     }
                     {header.map(item => {
                         const hasNoColumn = item.value === 'id' || item.visible === false;
-                        let style = item.hasOwnProperty('style') ? item.style : null;
+                        let style = item.hasOwnProperty('style') ? {...item.style} : null;
                         if(item.width){
                             if(!style){
                                 style = {};

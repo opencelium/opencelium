@@ -84,7 +84,7 @@ class UserGroupsList extends Component{
         const {authUser, t, userGroups, deleteUserGroup, deleteUserGroups, params, setTotalPages, openTour, deletingUserGroup, currentUserGroup, deletingUserGroups} = this.props;
         let exceptionUserGroups = authUser && authUser.hasOwnProperty('userGroup') && authUser.userGroup && authUser.userGroup.hasOwnProperty('groupId') ? [authUser.userGroup.groupId] : [];
         let translations = {};
-        translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
+        translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour, breadcrumbs: [{link: '/admin_cards', text: t('LIST.HEADER_ADMIN_CARDS')}],};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         let listViewData = {

@@ -80,6 +80,7 @@
     "COMPONENTS": "Components",
     "NAME": "Name",
     "DESCRIPTION": "Description",
+    "HEADER_ADMIN_CARDS": "Admin Cards",
     "ADD_BUTTON": "Add",
     "CURRENT_USER_GROUP": "Current group"
   }

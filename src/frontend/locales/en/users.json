@@ -91,6 +91,7 @@
     "ADD_BUTTON": "Add User",
     "CURRENT_USER": "Current user",
     "EMAIL": "E-mail",
+    "HEADER_ADMIN_CARDS": "Admin Cards",
     "ASSIGNED_GROUPS": "Assigned Groups"
   },
   "VIEW": {

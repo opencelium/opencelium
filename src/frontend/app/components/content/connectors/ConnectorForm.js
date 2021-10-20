@@ -250,6 +250,7 @@ export function ConnectorForm(type) {
                 }
                 return {value: true, message: ''};
             }
+
             /**
              * to validate title
              */
@@ -356,7 +357,7 @@ export function ConnectorForm(type) {
                             isActionInProcess={this.props[this.actionName] === API_REQUEST_STATE.START && !this.isNavigatingToConnection || this.startTesting && testingConnector === API_REQUEST_STATE.START || checkingConnectorTitle === API_REQUEST_STATE.START && !this.isNavigatingToConnection}
                             permissions={ConnectorPermissions}
                             clearValidationMessage={::this.clearValidationMessage}
-                            action={::this.doAction}
+                            action={::this.testAuthenticationInputs}
                             entity={parsedEntity}
                             type={type}
                             additionalButtons={additionalButtons}

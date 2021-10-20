@@ -21,7 +21,7 @@ class TestButton extends React.Component{
             <Button
                 iconClassName={iconClassName}
                 className={styles.test_button}
-                title={<span>{'Test'}</span>}
+                title={'Test'}
                 icon={disabled ? 'loading' : 'donut_large'}
                 disabled={disabled}
                 onClick={::this.test}
