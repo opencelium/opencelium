@@ -27,6 +27,10 @@ import {LIST_TOURS} from "@utils/constants/tours";
 import {tour} from "@decorators/tour";
 import ConnectionCardTitle from "@components/content/connections/list/ConnectionCardTitle";
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import Dialog from "@basic_components/Dialog";
+import TemplateConversionIcon from "@components/general/app/TemplateConversionIcon";
+import TemplateDownloadIcon from "@components/content/templates/list/TemplateDownloadIcon";
+import DuplicateIcon from "@components/content/connections/list/DuplicateIcon";
 
 
 const prefixUrl = '/connections';
@@ -79,6 +83,7 @@ class ConnectionsList extends Component{
 
     constructor(props){
         super(props);
+
     }
 
     render(){
@@ -87,9 +92,18 @@ class ConnectionsList extends Component{
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
+        const renderListViewItemActions = (connection) => {
+            if(connection)
+                return <React.Fragment>
+                    <DuplicateIcon listConnection={connection}/>
+                </React.Fragment>;
+            return null;
+        };
         let listViewData = {
             entityIdName: 'connectionId',
             entityIdsName: 'connectionIds',
+            renderItemActions: renderListViewItemActions,
+            isItemActionsBefore: true,
             deleteSelected: deleteConnections,
             deletingSelected: deletingConnections,
             map: (connection) => {
@@ -108,18 +122,22 @@ class ConnectionsList extends Component{
         //mapEntity.getGraphLink = (connection) => {return `${prefixUrl}/${connection.connectionId}/graph`;};
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteConnection;
-        return <List
-            deletingEntity={(connection) => deletingConnection === API_REQUEST_STATE.START && connection.id === currentConnection.id}
-            listViewData={listViewData}
-            entities={connections}
-            translations={translations}
-            mapEntity={mapEntity}
-            page={{pageNumber: params.pageNumber, link: `${prefixUrl}/page/`, entitiesLength: connections.length}}
-            setTotalPages={setTotalPages}
-            permissions={ConnectionPermissions}
-            authUser={authUser}
-            componentName={'connections'}
-        />;
+        return (
+            <React.Fragment>
+                <List
+                    deletingEntity={(connection) => deletingConnection === API_REQUEST_STATE.START && connection.id === currentConnection.id}
+                    listViewData={listViewData}
+                    entities={connections}
+                    translations={translations}
+                    mapEntity={mapEntity}
+                    page={{pageNumber: params.pageNumber, link: `${prefixUrl}/page/`, entitiesLength: connections.length}}
+                    setTotalPages={setTotalPages}
+                    permissions={ConnectionPermissions}
+                    authUser={authUser}
+                    componentName={'connections'}
+                />
+            </React.Fragment>
+        );
     }
 }
 

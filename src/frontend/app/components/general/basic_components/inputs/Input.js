@@ -140,12 +140,14 @@ class Input extends Component{
             'input_icon',
             'input_error',
             'input_loading',
+            'input_errored',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
         let inputElement = theme && theme.hasOwnProperty('inputElement') ? theme.inputElement : styles[classNames.input_input_element];
         let bar = theme && theme.hasOwnProperty('bar') ? theme.bar : styles[classNames.input_bar];
         let icon = theme && theme.hasOwnProperty('icon') ? theme.icon : styles[classNames.input_icon];
         let error = theme && theme.hasOwnProperty('error') ? theme.error : styles[classNames.input_error];
+        let errored = theme && theme.hasOwnProperty('errored') ? theme.errored : styles[classNames.input_errored];
         if(theme === null){
             theme = {};
         }
@@ -153,6 +155,7 @@ class Input extends Component{
         theme.bar = bar;
         theme.icon = icon;
         theme.error = error;
+        theme.errored = errored;
         if(!isPopupInput){
             return (
                 <div style={{position: 'relative'}}>
