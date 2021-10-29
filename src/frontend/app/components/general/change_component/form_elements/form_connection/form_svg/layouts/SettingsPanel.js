@@ -57,7 +57,7 @@ class SettingsPanel extends React.Component{
             titleClassName = styles.technical_settings_panel_title_center;
         }
         return(
-            <div className={settingsPanelClassName}>
+            <div className={settingsPanelClassName} onDoubleClick={minMaxClick}>
                 <TooltipFontIcon
                     className={styles.replace_icon}
                     size={20}
@@ -68,7 +68,7 @@ class SettingsPanel extends React.Component{
                     disabled={isDisabled || isReplaceIconDisabled}
                     isButton={true}
                 />
-                <div className={titleClassName}>{title}</div>
+                <div style={{cursor: 'pointer'}} className={titleClassName}>{title}</div>
                 <TooltipFontIcon
                     className={styles.min_max_icon}
                     size={20}
