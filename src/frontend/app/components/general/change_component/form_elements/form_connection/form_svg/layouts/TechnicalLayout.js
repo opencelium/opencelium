@@ -176,7 +176,7 @@ class TechnicalLayout extends React.Component{
         const isMinMaxIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         const isNewWindowIconDisabled = businessLayoutLocation === PANEL_LOCATION.NEW_WINDOW || isBusinessLayoutMinimized;
         let startingSvgX = isBusinessLayoutMinimized ? -250 : -40;
-        let startingSvgY = isBusinessLayoutMinimized ? -180 : -250;
+        let startingSvgY = isBusinessLayoutMinimized ? -280 : -150;
         let svgStyle = {};
         let settingsPanelTitle = 'Technical Layout';
         if(isAssignMode){

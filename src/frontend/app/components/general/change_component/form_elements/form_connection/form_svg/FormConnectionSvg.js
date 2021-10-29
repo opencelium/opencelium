@@ -97,9 +97,12 @@ class FormConnectionSvg extends Component{
     }
 
     componentDidMount() {
-        const {entity} = this.props;
+        const {entity, connection} = this.props;
         this.props.setConnectionData(entity, ::this.updateEntity);
         ConnectionOverviewChannel.onmessage = (e) => ::this.updateEntity(e.data);
+        if(connection.businessLayout.getItems.length === 0){
+            this.minimizeBusinessLayout();
+        }
     }
 
     componentWillUnmount() {
