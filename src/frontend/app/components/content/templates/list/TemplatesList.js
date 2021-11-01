@@ -140,13 +140,18 @@ class TemplatesList extends Component{
         translations.add_button = t('LIST.IMPORT_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         const renderListViewItemActions = (template) => {
-            const entity = CConnection.createConnection(template.connection);
-            if(template)
+            if(template) {
+                const entity = CConnection.createConnection(template.connection);
                 return <React.Fragment>
                     <TemplateConversionIcon data={{template}}/>
                     <TemplateDownloadIcon index={template.id} template={template}/>
-                    <AddTemplate name={template.name} description={template.description} data={{actions: {addTemplate: ::this.duplicateTemplate}, templateLabels: {addTemplateTitle: 'Duplicate Template'}}} entity={entity} disabled={entity.isEmpty()} iconProps={{value: 'content_copy', tooltip: 'Create Duplicate'}}/>
+                    <AddTemplate name={template.name} description={template.description} data={{
+                        actions: {addTemplate: ::this.duplicateTemplate},
+                        templateLabels: {addTemplateTitle: 'Duplicate Template'}
+                    }} entity={entity} disabled={entity.isEmpty()}
+                                 iconProps={{value: 'content_copy', tooltip: 'Create Duplicate'}}/>
                 </React.Fragment>;
+            }
             return null;
         };
         let listViewData = {

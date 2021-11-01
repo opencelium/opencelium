@@ -22,6 +22,8 @@ import styles from '@themes/default/general/change_component.scss';
 import Button from "@basic_components/buttons/Button";
 import Dialog from "@basic_components/Dialog";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {setFocusById} from "@utils/app";
+import {withTranslation} from "react-i18next";
 
 
 function mapStateToProps(state){
@@ -35,6 +37,7 @@ function mapStateToProps(state){
  * Add Template Component
  */
 @connect(mapStateToProps, {})
+@withTranslation(['templates'])
 class AddTemplate extends Component{
 
     constructor(props){
@@ -43,6 +46,7 @@ class AddTemplate extends Component{
             visibleAddTemplateDialog: false,
             addTemplateName: props.name || '',
             addTemplateDescription: props.description || '',
+            validateMessageName: '',
         };
     }
 
@@ -50,7 +54,7 @@ class AddTemplate extends Component{
      * to change template name
      */
     changeAddTemplateName(addTemplateName){
-        this.setState({addTemplateName});
+        this.setState({addTemplateName, validateMessageName: ''});
     }
 
     /**
@@ -70,20 +74,39 @@ class AddTemplate extends Component{
     }
 
     /**
+     * to validate fields
+     */
+    validateFields(){
+        const {t} = this.props;
+        const {addTemplateName} = this.state;
+        let validateMessageName = '';
+        if(addTemplateName.trim() === ''){
+            validateMessageName = t(`ADD.VALIDATION_MESSAGES.NAME_REQUIRED`);
+            setFocusById('template_name');
+        }
+        this.setState({
+            validateMessageName,
+        });
+        return validateMessageName === '';
+    }
+
+    /**
      * to add template
      */
     addTemplate(){
-        const {addTemplateName, addTemplateDescription} = this.state;
-        const {data, entity, appVersion} = this.props;
-        const {actions} = data;
-        if(actions && actions.hasOwnProperty('addTemplate')){
-            actions.addTemplate({name: addTemplateName, description: addTemplateDescription, entity, version: appVersion});
+        if(this.validateFields()){
+            const {addTemplateName, addTemplateDescription} = this.state;
+            const {data, entity, appVersion} = this.props;
+            const {actions} = data;
+            if(actions && actions.hasOwnProperty('addTemplate')){
+                actions.addTemplate({name: addTemplateName, description: addTemplateDescription, entity, version: appVersion});
+            }
+            this.toggleAddTemplateDialog();
         }
-        this.toggleAddTemplateDialog();
     }
 
     render(){
-        const {visibleAddTemplateDialog, addTemplateName, addTemplateDescription} = this.state;
+        const {visibleAddTemplateDialog, addTemplateName, addTemplateDescription, validateMessageName} = this.state;
         const {data, disabled, iconProps, buttonProps} = this.props;
         const {templateLabels} = data;
         if(!templateLabels){
@@ -102,14 +125,18 @@ class AddTemplate extends Component{
                 >
                     <div>
                         <Input
+                            id={'template_name'}
+                            error={validateMessageName}
                             onChange={::this.changeAddTemplateName}
                             value={addTemplateName}
                             label={'Name'}
                             name={'template_name'}
                             icon={'title'}
                             autoFocus
+                            required
                         />
                         <Input
+                            id={'template_description'}
                             onChange={::this.changeAddTemplateDescription}
                             value={addTemplateDescription}
                             label={'Description'}

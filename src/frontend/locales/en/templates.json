@@ -1,4 +1,10 @@
 {
+  "ADD": {
+    "VALIDATION_MESSAGES": {
+      "NAME_REQUIRED": "Name is a required field",
+      "DESCRIPTION_REQUIRED": "Description is a required field"
+    }
+  },
   "LIST":{
     "IMPORT_BUTTON": "Import template",
     "EMPTY_LIST": "The list of Templates is empty",
