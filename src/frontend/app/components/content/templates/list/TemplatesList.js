@@ -37,6 +37,9 @@ import TemplateDownloadIcon from "@components/content/templates/list/TemplateDow
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
 import Button from "@basic_components/buttons/Button";
+import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
+import CConnection from "@classes/components/content/connection/CConnection";
+import {duplicateTemplate} from "@actions/templates/add";
 
 const prefixUrl = '/templates';
 
@@ -85,7 +88,7 @@ function filterTemplateSteps(tourSteps){
 /**
  * List of the Templates
  */
-@connect(mapStateToProps, {fetchTemplates, deleteTemplate, deleteTemplates, convertTemplates, convertTemplatesRejected})
+@connect(mapStateToProps, {duplicateTemplate, fetchTemplates, deleteTemplate, deleteTemplates, convertTemplates, convertTemplatesRejected})
 @permission(TemplatePermissions.READ, true)
 @withTranslation('templates')
 @ListComponent('templates')
@@ -122,6 +125,14 @@ class TemplatesList extends Component{
             convertTemplates(convertingTemplates);
     }
 
+    /**
+     * to duplicate template
+     */
+    duplicateTemplate(template){
+        const {duplicateTemplate} = this.props;
+        duplicateTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObject()}, true);
+    }
+
     render(){
         const {authUser, t, templates, deleteTemplate, params, setTotalPages, openTour, exportedTemplate, exportingTemplate, convertingTemplates, convertingTemplatesState, deleteTemplates, deletingTemplate, deletingTemplates, currentTemplate} = this.props;
         let translations = {};
@@ -129,10 +140,12 @@ class TemplatesList extends Component{
         translations.add_button = t('LIST.IMPORT_BUTTON');
         translations.empty_list = t('LIST.EMPTY_LIST');
         const renderListViewItemActions = (template) => {
+            const entity = CConnection.createConnection(template.connection);
             if(template)
                 return <React.Fragment>
                     <TemplateConversionIcon data={{template}}/>
                     <TemplateDownloadIcon index={template.id} template={template}/>
+                    <AddTemplate name={template.name} description={template.description} data={{actions: {addTemplate: ::this.duplicateTemplate}, templateLabels: {addTemplateTitle: 'Duplicate Template'}}} entity={entity} disabled={entity.isEmpty()} iconProps={{value: 'content_copy', tooltip: 'Create Duplicate'}}/>
                 </React.Fragment>;
             return null;
         };

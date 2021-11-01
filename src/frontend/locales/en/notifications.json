@@ -42,6 +42,7 @@
     "DELETE_SCHEDULES": "The selected schedules were successfully removed",
     "FETCH_TEMPLATES": "Templates were successfully fetched",
     "ADD_TEMPLATE": "The template <1><0>{{name}}</0></1> of the <3><0>{{title}}</0></3> was successfully added",
+    "DUPLICATE_TEMPLATE": "The template <1><0>{{name}}</0></1> of the <3><0>{{title}}</0></3> was successfully duplicated",
     "CONVERT_TEMPLATE": "The template <1><0>{{name}}</0></1> was successfully converted",
     "CONVERT_TEMPLATES": "Templates were successfully converted",
     "IMPORT_TEMPLATE": "The Template <1><0>{{name}}</0></1> was successfully imported",
@@ -188,6 +189,7 @@
       "__DEFAULT__": "Templates were not fetched"
     },
     "ADD_TEMPLATE": "Template was not added",
+    "DUPLICATE_TEMPLATE": "Template was not duplicated",
     "CONVERT_TEMPLATE": "Template was not converted",
     "CONVERT_TEMPLATES": "Templates were not converted",
     "IMPORT_TEMPLATE": "Template was not imported",

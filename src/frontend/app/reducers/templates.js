@@ -21,6 +21,7 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 
 const initialState = fromJS({
     addingTemplate: API_REQUEST_STATE.INITIAL,
+    duplicatingTemplate: API_REQUEST_STATE.INITIAL,
     updatingTemplate: API_REQUEST_STATE.INITIAL,
     fetchingTemplates: API_REQUEST_STATE.INITIAL,
     deletingTemplate: API_REQUEST_STATE.INITIAL,
@@ -56,6 +57,12 @@ const reducer = (state = initialState, action) => {
             return state.set('addingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.set(templates.size, action.payload));
         case TemplatesAction.ADD_TEMPLATE_REJECTED:
             return state.set('addingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case TemplatesAction.DUPLICATE_TEMPLATE:
+            return state.set('duplicatingTemplate', API_REQUEST_STATE.START).set('error', null);
+        case TemplatesAction.DUPLICATE_TEMPLATE_FULFILLED:
+            return state.set('duplicatingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.set(templates.size, action.payload));
+        case TemplatesAction.DUPLICATE_TEMPLATE_REJECTED:
+            return state.set('duplicatingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case TemplatesAction.CONVERT_TEMPLATE:
             return state.set('isRejected', false).set('isCanceled', false).set('error', null).set('convertingTemplates', convertingTemplates.set(convertingTemplates.size, action.payload));
         case TemplatesAction.CONVERT_TEMPLATE_FULFILLED:

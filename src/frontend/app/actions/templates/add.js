@@ -52,6 +52,41 @@ const addTemplateRejected = (error) => {
         payload: error
     });
 };
+/**
+ * duplicate a template for connection
+ * @param template
+ * @returns {{type: string, payload: {}}}
+ */
+const duplicateTemplate = (template) => {
+    return {
+        type: TemplatesAction.DUPLICATE_TEMPLATE,
+        payload: Object.assign({}, template),
+    };
+};
+
+/**
+ * duplicate a template for connection fulfilled
+ * @param template
+ * @returns {{type: string, payload: {}}}
+ */
+const duplicateTemplateFulfilled = (template) => {
+    return {
+        type: TemplatesAction.DUPLICATE_TEMPLATE_FULFILLED,
+        payload: template,
+    };
+};
+
+/**
+ * duplicate a template for connection rejected
+ * @param error
+ * @returns {promise}
+ */
+const duplicateTemplateRejected = (error) => {
+    return Rx.Observable.of({
+        type: TemplatesAction.DUPLICATE_TEMPLATE_REJECTED,
+        payload: error
+    });
+};
 
 /**
  * import a template for connection
@@ -94,6 +129,9 @@ export {
     addTemplate,
     addTemplateFulfilled,
     addTemplateRejected,
+    duplicateTemplate,
+    duplicateTemplateFulfilled,
+    duplicateTemplateRejected,
     importTemplate,
     importTemplateFulfilled,
     importTemplateRejected,

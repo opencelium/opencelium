@@ -51,7 +51,7 @@ import {
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic,
     importTemplateEpic, exportTemplateEpic, convertTemplateEpic,
-    convertTemplatesEpic, deleteTemplatesEpic
+    convertTemplatesEpic, deleteTemplatesEpic, duplicateTemplateEpic,
 } from '@epics/templates';
 import {
     fetchScheduleEpic, fetchSchedulesEpic, addScheduleEpic,
@@ -173,6 +173,7 @@ export default combineEpics(
     deleteTemplatesEpic,
     fetchTemplatesEpic,
     addTemplateEpic,
+    duplicateTemplateEpic,
     convertTemplateEpic,
     convertTemplatesEpic,
     importTemplateEpic,

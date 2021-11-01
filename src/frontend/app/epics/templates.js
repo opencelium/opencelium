@@ -21,6 +21,7 @@ import {
 } from '@actions/templates/fetch';
 import {
     addTemplateFulfilled, addTemplateRejected,
+    duplicateTemplateFulfilled, duplicateTemplateRejected,
     importTemplateFulfilled, importTemplateRejected,
 } from '@actions/templates/add';
 import {
@@ -80,6 +81,22 @@ const addTemplateEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.POST, data},{
                 success: addTemplateFulfilled,
                 reject: addTemplateRejected,},
+            );
+        });
+};
+
+/**
+ * duplicate one template
+ */
+const duplicateTemplateEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.DUPLICATE_TEMPLATE)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}`;
+            let data = action.payload;
+            return doRequest({url, method: API_METHOD.POST, data},{
+                success: duplicateTemplateFulfilled,
+                reject: duplicateTemplateRejected,},
             );
         });
 };
@@ -192,6 +209,7 @@ const exportTemplateEpic = (action$, store) => {
 export {
     fetchTemplatesEpic,
     addTemplateEpic,
+    duplicateTemplateEpic,
     convertTemplateEpic,
     convertTemplatesEpic,
     deleteTemplateEpic,

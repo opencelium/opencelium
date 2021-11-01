@@ -21,6 +21,7 @@ import Input from "@basic_components/inputs/Input";
 import styles from '@themes/default/general/change_component.scss';
 import Button from "@basic_components/buttons/Button";
 import Dialog from "@basic_components/Dialog";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 function mapStateToProps(state){
@@ -40,8 +41,8 @@ class AddTemplate extends Component{
         super(props);
         this.state = {
             visibleAddTemplateDialog: false,
-            addTemplateName: '',
-            addTemplateDescription: '',
+            addTemplateName: props.name || '',
+            addTemplateDescription: props.description || '',
         };
     }
 
@@ -83,14 +84,15 @@ class AddTemplate extends Component{
 
     render(){
         const {visibleAddTemplateDialog, addTemplateName, addTemplateDescription} = this.state;
-        const {data, disabled} = this.props;
+        const {data, disabled, iconProps, buttonProps} = this.props;
         const {templateLabels} = data;
         if(!templateLabels){
             return null;
         }
         return (
             <div style={{float: 'left'}}>
-                <Button icon={'add'} title={templateLabels.addTemplate} onClick={::this.toggleAddTemplateDialog} disabled={disabled}/>
+                {iconProps && <TooltipFontIcon {...iconProps} turquoiseTheme isButton onClick={::this.toggleAddTemplateDialog} disabled={disabled}/>}
+                {buttonProps && <Button {...buttonProps} onClick={::this.toggleAddTemplateDialog} disabled={disabled}/>}
                 <Dialog
                     actions={[{label: 'Ok', onClick: ::this.addTemplate, id: 'add_template_ok'}, {label: 'Cancel', onClick: ::this.toggleAddTemplateDialog, id: 'add_template_cancel'}]}
                     active={visibleAddTemplateDialog}
@@ -127,10 +129,16 @@ AddTemplate.propTypes = {
     data: PropTypes.object.isRequired,
     entity: PropTypes.object.isRequired,
     disabled: PropTypes.bool,
+    name: PropTypes.string,
+    description: PropTypes.string,
 };
 
 AddTemplate.defaultProps = {
     disabled: false,
+    buttonProps: null,
+    iconProps: null,
+    name: '',
+    description: '',
 }
 
 export default AddTemplate;
