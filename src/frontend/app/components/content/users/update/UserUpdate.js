@@ -61,6 +61,8 @@ function mapUser(user){
     updatedUser.userDetail.department = user.department;
     updatedUser.userDetail.userTitle = user.userTitle;
     updatedUser.userDetail.profilePicture = user.profilePicture;
+    updatedUser.userDetail.bitbucketUser = user.bitbucketUser;
+    updatedUser.userDetail.bitbucketPassword = user.bitbucketPassword;
 
     return updatedUser;
 }

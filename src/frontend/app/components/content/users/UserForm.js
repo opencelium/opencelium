@@ -30,10 +30,8 @@ export function UserForm(type){
     return function (Component) {
         return(
             class C extends React.Component{
-
                 constructor(props){
                     super(props);
-
                     this.userPrefixUrl = '/users';
                     this.translationKey = type.toUpperCase();
                     this.isUpdate = type === 'update';
@@ -257,6 +255,27 @@ export function UserForm(type){
                     }
                 }
 
+                getBitbucketFields(){
+                    const {t} = this.props;
+                    const fields = [];
+                    fields.push(
+                        {...INPUTS.BITBUCKET_USER,
+                            label: t(`${this.translationKey}.FORM.BITBUCKET_USER`),
+                            defaultValue: '',
+                            readonly: this.isView,
+                        }
+                    )
+                    if(!this.isView){
+                        fields.push(
+                            {...INPUTS.BITBUCKET_PASSWORD,
+                                label: t(`${this.translationKey}.FORM.BITBUCKET_PASSWORD`),
+                                defaultValue: '',
+                            }
+                        );
+                    }
+                    return fields;
+                }
+
                 getPhotoField(){
                     const {t} = this.props;
                     if(this.isView) {
@@ -330,6 +349,7 @@ export function UserForm(type){
                                         readonly: this.isView,
                                     },
                                     ...this.getPasswordFields(),
+                                    ...this.getBitbucketFields(),
                                 ],
                                 hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
                                 header: t(`${this.translationKey}.FORM.PAGE_1`),
