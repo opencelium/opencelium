@@ -9,16 +9,16 @@ Templates, Update Assistant, Converter.
 App
 """""""""""""""""
 
-The applications menu displays list of software that OpenCelium connected with.
-If the are installed and configured on your machine,
-you can open them clicking on the card and see relations to OC. If not installed,
+The applications menu displays a list of software that OpenCelium connected with.
+If they are installed and configured on your machine,
+you can open them clicking on the card and see relations to OC. If not,
 you will see the notification message, that this system is down. Also,
 the corresponded item shows its status: enabled or disabled.
 
 |image_admin_0|
 
 For this moment, there are two items: *Kibana* and *Neo4j*. *Kibana* lets you visualize
-your scheduler jobs data. *Neo4j* is a graph database of the connections. Its UI help
+your scheduler jobs data. *Neo4j* is a graph database of the connections. Its UI helps
 you to see the whole picture of each connection via nodes and their relations.
 
 Users
@@ -60,7 +60,7 @@ required fields.
 
 |image_user_4|
 
-User Group step has only one select field - *user group* and a textarea
+User Group step has only one select field - *user group* and a readonly textarea
 with a description to selected item. Meaning of the user group you can
 find in the chapter *Groups*.
 

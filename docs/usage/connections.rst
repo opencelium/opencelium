@@ -6,8 +6,8 @@ Connection defines between which connectors do we want to do requests,
 what kind of requests and to specify mapping between them. This is a core
 element of the application. There is also a possibility to add the connection
 to the *templates*. Clicking on the |image3| button appears a window where should
-be provided a name.The list of connections displays a title, a description,
-and connectors' title.
+be provided a name. The list of connections displays a title, a description,
+and connectors' titles.
 
 |image0|
 
