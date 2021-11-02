@@ -114,7 +114,7 @@ Response
         "path" : "/api/permission/{permissionId}"
     }
 
-Get all permission list
+Get permission list
 =======================
 
 .. parsed-literal::

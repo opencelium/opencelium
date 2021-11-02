@@ -27,7 +27,7 @@ Windows  (Instruction is deprecated. It will be renewed.)
 
 	root@shell> yarn start
 
-After that, your browser should automatically open a new tab with url: `http://localhost:3000/ <http://localhost:3000/>`_
+After that, your browser should automatically open in a new tab with url: `http://localhost:3000/ <http://localhost:3000/>`_
 
 7. Install JDK and JRE.
 8. Unpack the Gradle into c:\\Gradle
@@ -162,7 +162,7 @@ Debian/Ubuntu (example for 20.04 LTS)
 	 root@shell> systemctl start elasticsearch.service
 
 .. note::
-        If elasticsearch not running, check if "transport.host: localhost" is set in /etc/elasticsearch/elasticsearch.yml
+        If elasticsearch is not running, check if "transport.host: localhost" is set in /etc/elasticsearch/elasticsearch.yml
 
 11. Install Kibana (optional)
 
@@ -242,7 +242,7 @@ Debian/Ubuntu (example for 20.04 LTS)
 	Visit opencelium http://SERVERIP:8888
 
 .. note::
-        If yarn not run use this command: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+        If yarn is not run use this command: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 
 
