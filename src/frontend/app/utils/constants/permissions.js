@@ -145,4 +145,13 @@ export const UpdateAssistantPermissions = {
     READ: {entity: 'USERGROUP', permission: 'READ'},
     UPDATE: {entity: 'USERGROUP', permission: 'UPDATE'},
     DELETE: {entity: 'USERGROUP', permission: 'DELETE'},
+}
+/*
+* TODO: change entity when backend will be ready
+*/
+export const UpdateSubscriptionPermissions = {
+    CREATE: {entity: 'USERGROUP', permission: 'CREATE'},
+    READ: {entity: 'USERGROUP', permission: 'READ'},
+    UPDATE: {entity: 'USERGROUP', permission: 'UPDATE'},
+    DELETE: {entity: 'USERGROUP', permission: 'DELETE'},
 };

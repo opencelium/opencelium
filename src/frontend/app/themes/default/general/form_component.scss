@@ -147,3 +147,13 @@
   right: 0;
   text-align: center;
 }
+
+
+.hint_area{
+  font-size: 16px;
+  padding-left: 65px;
+  margin-top: 50px;
+  .hint{
+    font-weight: bold;
+  }
+}

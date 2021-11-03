@@ -291,6 +291,18 @@ const UpdateAssistant = Loadable({
 });
 
 /**
+ * Loadable Update Subscription
+ */
+const UpdateSubscriptionLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'update_subscription_layout' */ '@components/content/update_subscription/UpdateSubscriptionLayout'),
+    loading: Loading,
+});
+const UpdateSubscription = Loadable({
+    loader: () => import(/* webpackChunkName: 'update_subscription' */ '@components/content/update_subscription/UpdateSubscription'),
+    loading: Loading,
+});
+
+/**
  * Loadable Connection Overview 2 Layout
  */
 const ConnectionOverview2 = Loadable({
@@ -408,4 +420,6 @@ export default {
     ConnectionOverviewTechnicalLayout,
     ConnectionOverviewBusinessLayout,
     Sandbox,
+    UpdateSubscriptionLayout,
+    UpdateSubscription,
 };

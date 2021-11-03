@@ -313,6 +313,10 @@ export function ConnectionForm(type) {
                 doAction(entity, this, redirectUrl);
             }
 
+            doActionAndGoToAddScheduler(entity){
+                this.doAction(entity, '/schedules/add', true);
+            }
+
             doActionAndGoToScheduler(entity){
                 this.doAction(entity, '/schedules', true);
             }
@@ -355,7 +359,7 @@ export function ConnectionForm(type) {
                     }
                     let button = null;
                     if(this.isAdd){
-                        button = <Button icon={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START) ? 'loading' : 'add'} title={t('ADD.ADD_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => ::this.doActionAndGoToScheduler(entity)}/>;
+                        button = <Button icon={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START) ? 'loading' : 'add'} title={t('ADD.ADD_BUTTON_AND_GO_TO_ADD_SCHEDULER')} onClick={() => ::this.doActionAndGoToAddScheduler(entity)}/>;
                     }
                     if(this.isUpdate){
                         button = <Button icon={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START) ? 'loading' : 'autorenew'} title={t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => ::this.doActionAndGoToScheduler(entity)}/>;

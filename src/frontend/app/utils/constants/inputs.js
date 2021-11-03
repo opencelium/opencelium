@@ -149,6 +149,13 @@ const INOTIFICATION_TEMPLATE = {
     NOTIFICATION_TEMPLATE_CONTENT,
 };
 
+
+const SUBSCRIPTION_USER = {name: 'user', type: 'select', icon: 'person'};
+
+const IUPDATE_SUBSCRIPTION = {
+    SUBSCRIPTION_USER,
+}
+
 export const INPUTS = {
     ...ICOMMON,
     ...ICONNECTION,
@@ -159,6 +166,7 @@ export const INPUTS = {
     ...INOTIFICATION_TEMPLATE,
     ...ISCHEDULE,
     ...IMYPROFILE,
+    ...IUPDATE_SUBSCRIPTION,
 };
 
 export const BACKSPACE_KEY_CODE = 8;

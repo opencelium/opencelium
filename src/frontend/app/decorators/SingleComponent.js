@@ -56,13 +56,15 @@ import {automaticallyShowTour} from "@utils/constants/tours";
             static getDerivedStateFromProps(props, state) {
                 let {entity, isCommandTriggered, resources, fetchingResource, hasStartedFetchingEntity, hasStartedTriggeringCommand, hasStartedFetchingResources} = state;
                 let hasUpdate = false;
-                if(command !== 'adding' && props[`fetching${capitalize(singleEntityName)}`] === API_REQUEST_STATE.FINISH && hasStartedFetchingEntity){
-                    entity = props[singleEntityName];
-                    hasUpdate = true;
-                }
-                if(props[command + capitalize(singleEntityName)] === API_REQUEST_STATE.FINISH && hasStartedTriggeringCommand){
-                    isCommandTriggered = true;
-                    hasUpdate = true;
+                if(singleEntityName !== ''){
+                    if(command !== 'adding' && props[`fetching${capitalize(singleEntityName)}`] === API_REQUEST_STATE.FINISH && hasStartedFetchingEntity){
+                        entity = props[singleEntityName];
+                        hasUpdate = true;
+                    }
+                    if(props[command + capitalize(singleEntityName)] === API_REQUEST_STATE.FINISH && hasStartedTriggeringCommand){
+                        isCommandTriggered = true;
+                        hasUpdate = true;
+                    }
                 }
                 if(additionalResources.length !== 0 && resources.length < additionalResources.length && hasStartedFetchingResources){
                     let currentResourceName = additionalResources[resources.length];
@@ -84,7 +86,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
             }
 
             componentDidMount(){
-                if(command !== 'adding') {
+                if(command !== 'adding' && command !== '') {
                     this.fetch();
                 }
                 if(additionalResources.length > 0) {
@@ -94,7 +96,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
 
             componentDidUpdate(){
                 const {entity, resources, fetchingResource, hasStartedFetchingEntity, hasWrongURL} = this.state;
-                if(entity === null && command !== 'adding' && !hasStartedFetchingEntity && !hasWrongURL) {
+                if(entity === null && command !== '' && command !== 'adding' && !hasStartedFetchingEntity && !hasWrongURL) {
                     this.fetch();
                 }
                 if(additionalResources.length > 0) {
@@ -167,7 +169,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
              * fetch entity
              */
             fetch(){
-                if(command !== 'adding') {
+                if(command !== 'adding' && singleEntityName !== '') {
                     let id = -1;
                     if (this.props.params) {
                         if (this.props.params.hasOwnProperty('id')) {
@@ -210,21 +212,21 @@ import {automaticallyShowTour} from "@utils/constants/tours";
             checkEntity(){
                 const {entity, isCommandTriggered, resources, hasWrongURL, redirectUrl} = this.state;
                 const {error, t, authUser, router} = this.props;
-                const cancelFetching = this.props[`fetch${capitalize(singleEntityName)}Canceled`];
+                const cancelFetching = singleEntityName !== '' ? this.props[`fetch${capitalize(singleEntityName)}Canceled`] : '';
                 if(hasWrongURL){
                     return <PageNotFound/>;
                 }
-                if(this.props[`fetching${capitalize(singleEntityName)}`] === API_REQUEST_STATE.ERROR){
+                if(singleEntityName !== '' && this.props[`fetching${capitalize(singleEntityName)}`] === API_REQUEST_STATE.ERROR){
                     return <RejectedRequest entityName={singleEntityName} error={error}/>;
                 }
                 if(resources.length < additionalResources.length && this.props[`fetching${capitalize(additionalResources[resources.length])}`] === API_REQUEST_STATE.ERROR){
                     return <RejectedRequest entityName={additionalResources[resources.length]} error={error}/>;
                 }
-                if(entity === null && command !== 'adding' || resources.length !== additionalResources.length) {
+                if((entity === null && command !== '' && command !== 'adding') || resources.length !== additionalResources.length) {
                     return <Loading cancelCallback={cancelFetching} authUser={authUser}/>;
                 }
                 if(typeof entity !== 'object' || isEmptyObject(entity)) {
-                    if(command !== 'adding') {
+                    if(command !== 'adding' && command !== '') {
                         return <PageNotFound/>;
                     }
                 }
@@ -294,26 +296,28 @@ import {automaticallyShowTour} from "@utils/constants/tours";
             }
 
             action(entity){
-                this.setState({hasStartedTriggeringCommand: true});
-                let actionName = '';
-                switch(command){
-                    case 'adding':
-                        actionName = 'add';
-                        break;
-                    case 'updating':
-                        actionName = 'update';
-                        break;
-                }
-                if(actionName !== '') {
-                    let action = `${actionName}${capitalize(singleEntityName)}`;
-                    if(this.props.hasOwnProperty(action)) {
-                        if(mapping !== null) {
-                            this.props[action](mapping(entity));
-                        } else{
-                            this.props[action](entity);
+                if(singleEntityName !== '') {
+                    this.setState({hasStartedTriggeringCommand: true});
+                    let actionName = '';
+                    switch (command) {
+                        case 'adding':
+                            actionName = 'add';
+                            break;
+                        case 'updating':
+                            actionName = 'update';
+                            break;
+                    }
+                    if (actionName !== '') {
+                        let action = `${actionName}${capitalize(singleEntityName)}`;
+                        if (this.props.hasOwnProperty(action)) {
+                            if (mapping !== null) {
+                                this.props[action](mapping(entity));
+                            } else {
+                                this.props[action](entity);
+                            }
+                        } else {
+                            consoleLog(`There is not action %c${action} for %c${singleEntityName}`, "font-weight: bold;", "font-weight: bold;");
                         }
-                    } else{
-                        consoleLog(`There is not action %c${action} for %c${singleEntityName}`, "font-weight: bold;", "font-weight: bold;");
                     }
                 }
             }

@@ -110,15 +110,15 @@ class UsersList extends Component{
         mapEntity.getAddLink = `${prefixUrl}/add`;
         mapEntity.onDelete = deleteUser;
         return <List
+            permissions={UserPermissions}
+            entities={users}
+            translations={translations}
             deletingEntity={(user) => deletingUser === API_REQUEST_STATE.START && user.id === currentUser.id}
             listViewData={listViewData}
-            entities={users}
             exceptionEntities={{label: t('LIST.CURRENT_USER'), exceptions: exceptionUsers}}
-            translations={translations}
             mapEntity={mapEntity}
             page={{pageNumber: params.pageNumber, link: `${prefixUrl}/page/`, entitiesLength: users.length}}
             setTotalPages={setTotalPages}
-            permissions={UserPermissions}
             authUser={authUser}
             componentName={'users'}
         />;
