@@ -14,9 +14,10 @@
  */
 import {List, fromJS} from 'immutable';
 
-import {TemplatesAction} from '@utils/actions';
+import {ConnectionsAction, TemplatesAction} from '@utils/actions';
 import {isArray} from "@utils/app";
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import {updateConnectionSubscriber} from "@utils/socket/connections";
 
 
 const initialState = fromJS({
@@ -29,6 +30,7 @@ const initialState = fromJS({
     exportingTemplate: API_REQUEST_STATE.INITIAL,
     importingTemplate: API_REQUEST_STATE.INITIAL,
     convertingTemplatesState: API_REQUEST_STATE.INITIAL,
+    fetchingTemplate: API_REQUEST_STATE.INITIAL,
     template: {},
     exportedTemplate: {},
     templates: List([]),
@@ -38,6 +40,7 @@ const initialState = fromJS({
     notificationData: {},
 });
 
+let template = {};
 let templates = [];
 let convertingTemplates = [];
 let index = 0;
@@ -159,6 +162,26 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingTemplates', API_REQUEST_STATE.FINISH);
         case TemplatesAction.DELETE_TEMPLATES_REJECTED:
             return state.set('deletingTemplates', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
+        case TemplatesAction.UPDATE_TEMPLATE:
+            return state.set('updatingTemplate', API_REQUEST_STATE.START).set('error', null);
+        case TemplatesAction.UPDATE_TEMPLATE_FULFILLED:
+            index = templates.findIndex(function (template) {
+                return template.templateId === action.payload.templateId;
+            });
+            if(index >= 0) {
+                template = templates.get(index);
+                template.email = action.payload.email;
+                return state.set('updatingTemplate', API_REQUEST_STATE.FINISH).set('templates', templates.set(index, template));
+            }
+            return state.set('updatingTemplate', API_REQUEST_STATE.FINISH);
+        case TemplatesAction.UPDATE_TEMPLATE_REJECTED:
+            return state.set('updatingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case TemplatesAction.FETCH_TEMPLATE:
+            return state.set('fetchingTemplate', API_REQUEST_STATE.START).set('error', null);
+        case TemplatesAction.FETCH_TEMPLATE_FULFILLED:
+            return state.set('fetchingTemplate', API_REQUEST_STATE.FINISH).set('template', action.payload);
+        case TemplatesAction.FETCH_TEMPLATE_REJECTED:
+            return state.set('fetchingTemplate', API_REQUEST_STATE.ERROR).set('error', action.payload);
         default:
             return state;
     }

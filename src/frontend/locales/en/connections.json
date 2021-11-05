@@ -36,6 +36,7 @@
     "LIST_BUTTON": "Connections",
     "ADD_BUTTON": "Add & Close",
     "ADD_BUTTON_AND_GO_TO_SCHEDULER": "Add & Go to Schedule",
+    "ADD_BUTTON_AND_GO_TO_ADD_SCHEDULER": "Add & Go to Add Schedule",
     "HEADER": "Add Connection",
     "VALIDATION_MESSAGES": {
       "TITLE_REQUIRED": "Title is a required field",

@@ -127,8 +127,50 @@ const exportTemplateCanceled = (message) => {
     };
 };
 
+/**
+ * fetch template
+ * @param template
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchTemplate = (template, settings) => {
+    return {
+        type: TemplatesAction.FETCH_TEMPLATE,
+        payload: template,
+        settings,
+    };
+};
+
+/**
+ * fetch template fulfilled
+ * @param template
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchTemplateFulfilled = (template) => {
+    return {
+        type: TemplatesAction.FETCH_TEMPLATE_FULFILLED,
+        payload: template,
+    };
+};
+
+/**
+ * fetch template rejected
+ * @param error
+ * @returns {promise}
+ */
+const fetchTemplateRejected = (error) => {
+    return Rx.Observable.of({
+        type: TemplatesAction.FETCH_TEMPLATE_REJECTED,
+        payload: error
+    });
+};
+
 
 export{
+    fetchTemplate,
+    fetchTemplateFulfilled,
+    fetchTemplateRejected,
     fetchTemplates,
     fetchTemplatesFulfilled,
     fetchTemplatesRejected,

@@ -16,11 +16,18 @@
 import jwt from 'jsonwebtoken';
 import {AuthAction} from '@utils/actions';
 import {
-    loginUserFulfilled, loginUserRejected,
+    loginUserFulfilled,
+    loginUserRejected,
     logoutUserFulfilled,
-    updateAuthUserLanguageFulfilled, updateAuthUserLanguageRejected,
+    updateAuthUserLanguageFulfilled,
+    updateAuthUserLanguageRejected,
     updateDashboardSettingsFulfilled,
-    updateThemeFulfilled, toggleAppTourFulfilled, toggleAppTourRejected, updateThemeRejected, sessionExpired,
+    updateThemeFulfilled,
+    toggleAppTourFulfilled,
+    toggleAppTourRejected,
+    updateThemeRejected,
+    sessionExpired,
+    updateSubscriptionFulfilled, updateSubscriptionRejected,
 } from '@actions/auth';
 
 import {doRequest} from '@utils/auth';
@@ -145,9 +152,25 @@ const toggleAppTourEpic = (action$, store) => {
             let appTour = !payload.userDetail.appTour;
             let url = `userDetail/${payload.userId}`;
             return doRequest({url, method: API_METHOD.PUT, data: {...payload.userDetail, appTour}}, {
-                success: toggleAppTourFulfilled,
-                reject: toggleAppTourRejected,},
+                    success: toggleAppTourFulfilled,
+                    reject: toggleAppTourRejected,},
                 res => {return payload.userDetail;}
+            );
+        });
+};
+
+/**
+ * update subscription
+ */
+const updateSubscriptionEpic = (action$, store) => {
+    return action$.ofType(AuthAction.UPDATE_SUBSCRIPTION)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let {payload} = action;
+            let url = `update_subscription`;
+            return doRequest({url, method: API_METHOD.PUT, data: {...payload}}, {
+                    success: updateSubscriptionFulfilled,
+                    reject: updateSubscriptionRejected},
             );
         });
 };
@@ -160,4 +183,5 @@ export {
     updateDashboardSettingsEpic,
     updateThemeEpic,
     toggleAppTourEpic,
+    updateSubscriptionEpic,
 };

@@ -313,6 +313,42 @@ const updateThemeRejected = (error) => {
     });
 };
 
+/**
+ * update subscription
+ * @param user
+ * @returns {{type: string, payload: {}}}
+ */
+const updateSubscription = (user) => {
+    return {
+        type: AuthAction.UPDATE_SUBSCRIPTION,
+        payload: user,
+    };
+};
+
+/**
+ * update subscription fulfilled
+ * @param data
+ * @returns {{type: string, payload: {}}}
+ */
+const updateSubscriptionFulfilled = (data) => {
+    return {
+        type: AuthAction.UPDATE_SUBSCRIPTION_FULFILLED,
+        payload: data,
+    };
+};
+
+/**
+ * update subscription rejected
+ * @param error
+ * @returns {promise}
+ */
+const updateSubscriptionRejected = (error) => {
+    return Rx.Observable.of({
+        type: AuthAction.UPDATE_SUBSCRIPTION_REJECTED,
+        payload: error
+    });
+};
+
 export {
     loginUser,
     loginUserFulfilled,
@@ -336,4 +372,7 @@ export {
     clearNotification,
     addNotification,
     toggleNotificationPanel,
+    updateSubscription,
+    updateSubscriptionFulfilled,
+    updateSubscriptionRejected,
 };

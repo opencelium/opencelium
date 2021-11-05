@@ -17,7 +17,7 @@ import Rx from 'rxjs/Rx';
 import {TemplatesAction} from '@utils/actions';
 import {
     fetchTemplatesFulfilled, fetchTemplatesRejected,
-    exportTemplateFulfilled, exportTemplateRejected,
+    exportTemplateFulfilled, exportTemplateRejected, fetchTemplateFulfilled, fetchTemplateRejected,
 } from '@actions/templates/fetch';
 import {
     addTemplateFulfilled, addTemplateRejected,
@@ -34,8 +34,16 @@ import {
     convertTemplateFulfilled,
     convertTemplateRejected,
     convertTemplatesFulfilled,
-    convertTemplatesRejected
+    convertTemplatesRejected, updateTemplateFulfilled, updateTemplateRejected
 } from "@actions/templates/update";
+import {updateConnectionFulfilled, updateConnectionRejected} from "@actions/connections/update";
+import {
+    checkNeo4j,
+    fetchConnection,
+    fetchConnectionFulfilled,
+    fetchConnectionRejected
+} from "@actions/connections/fetch";
+import {APP_STATUS_DOWN} from "@utils/constants/url";
 
 
 /*
@@ -204,6 +212,35 @@ const exportTemplateEpic = (action$, store) => {
         });
 };
 
+/**
+ * update one template
+ */
+const updateTemplateEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.UPDATE_TEMPLATE)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.templateId}`;
+            return doRequest({url, method: API_METHOD.PUT, data: action.payload},{
+                success: updateTemplateFulfilled,
+                reject: updateTemplateRejected,},
+            );
+        });
+};
+
+/**
+ * fetch one template by id
+ */
+const fetchTemplateEpic = (action$, store) => {
+    return action$.ofType(TemplatesAction.FETCH_TEMPLATE)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/${action.payload.id}`;
+            return doRequest({url},{
+                success: fetchTemplateFulfilled,
+                reject: fetchTemplateRejected,
+            });
+        });
+};
 
 
 export {
@@ -216,4 +253,6 @@ export {
     deleteTemplatesEpic,
     importTemplateEpic,
     exportTemplateEpic,
+    updateTemplateEpic,
+    fetchTemplateEpic,
 };

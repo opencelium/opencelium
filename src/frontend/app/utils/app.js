@@ -938,6 +938,8 @@ function mapUserDetail(userDetail){
         result.profilePicture = userDetail.profilePicture;
         result.phoneNumber = userDetail.phoneNumber;
         result.department = userDetail.department;
+        result.bitbucketUser = userDetail.bitbucketUser;
+        result.bitbucketPassword = userDetail.bitbucketPassword;
         result.organisation = userDetail.organisation;
         result.userTitle = userDetail.userTitle;
         result.requestTime = userDetail.requestTime;

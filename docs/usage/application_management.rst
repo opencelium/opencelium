@@ -10,8 +10,8 @@ used again and again.
 Navigation
 =========
 
-On the left side you can see the menu for navigation. It display only icons
-until you mouseover it. After it expands and show the labels. The admin item
+On the left side you can see the menu for navigation. It displays only icons
+until you mouseover it. After it expands and shows the labels. The admin item
 has subitems, that can be (un)folded clicking on the arrow.
 
 |menu|
@@ -23,7 +23,7 @@ Notification System
 =========
 
 With each entity you can do CRUD operations: Create, Read, Update and Delete.
-After a successful or rejected operation, you will be alerted with a message:
+After a successful or a rejected operation, you will be alerted with a message:
 
 |notification_alert|
 
@@ -39,8 +39,8 @@ clicking on the arrows icon.
 |notification|
 
 Moreover, sometimes the message has a concrete name of the entity that was
-in process and clicking on it you will be redirected to its replacement.
-A notification or all notifications can be easily cleared using bin icon or
+in a process and clicking on it you will be redirected to its replacement.
+A notification or all notifications can be easily cleared using a bin icon or
 *Clear all* responsively.
 
 List of Elements
@@ -51,7 +51,7 @@ optional checkboxes for multiple actions and a column with single actions.
 
 |list_view|
 
-There is a possibility also to sort data (asc/desc) by name or title |title_sort_icon|. User
+There is a possibility also to sort data (asc/desc) by name or by title |title_sort_icon|. User
 has a possibility to see data in a grid view clicking on the icon |grid_icon| and setting
 a number of elements pro row:
 

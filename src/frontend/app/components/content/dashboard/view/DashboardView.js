@@ -80,8 +80,8 @@ class DashboardView extends Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {appVersion, fetchUpdateAppVersion} = this.props;
-        if(prevProps.appVersion !== appVersion){
+        const {appVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion} = this.props;
+        if(prevProps.appVersion !== appVersion && fetchingUpdateAppVersion !== API_REQUEST_STATE.START && fetchingUpdateAppVersion !== API_REQUEST_STATE.ERROR){
             fetchUpdateAppVersion({currentAppVersion: appVersion});
         }
     }

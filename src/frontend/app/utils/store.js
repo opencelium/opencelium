@@ -64,7 +64,14 @@ let initialMiddleware = [];
  * define middlewares
  */
 const epicMiddleware = createEpicMiddleware(epics);
-let middleware = [createStateSyncMiddleware(syncConfig), errorHandlingMiddleware, notificationMiddleware, resourceMappingMiddleware, frontBackMappingMiddleware, epicMiddleware];
+let middleware = [
+    createStateSyncMiddleware(syncConfig),
+    errorHandlingMiddleware,
+    notificationMiddleware,
+    resourceMappingMiddleware,
+    frontBackMappingMiddleware,
+    epicMiddleware
+];
 if (AppSettings.reduxHasLogs){
     initialMiddleware = [createLogger(loggerOptions)];
 }

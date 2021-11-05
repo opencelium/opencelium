@@ -245,6 +245,11 @@ const TemplateImport =  Loadable({
     loader: () => import(/* webpackChunkName: 'template_import' */ '@components/content/templates/import/TemplateImport'),
     loading: Loading,
 });
+const TemplateUpdate =  Loadable({
+    loader: () => import(/* webpackChunkName: 'template_update' */ '@components/content/templates/update/TemplateUpdate'),
+    loading: Loading,
+});
+
 
 /**
  * Loadable Notification Template
@@ -287,6 +292,18 @@ const UpdateAssistantLayout = Loadable({
 });
 const UpdateAssistant = Loadable({
     loader: () => import(/* webpackChunkName: 'update_assistant' */ '@components/content/update_assistant/UpdateAssistant'),
+    loading: Loading,
+});
+
+/**
+ * Loadable Update Subscription
+ */
+const UpdateSubscriptionLayout = Loadable({
+    loader: () => import(/* webpackChunkName: 'update_subscription_layout' */ '@components/content/update_subscription/UpdateSubscriptionLayout'),
+    loading: Loading,
+});
+const UpdateSubscription = Loadable({
+    loader: () => import(/* webpackChunkName: 'update_subscription' */ '@components/content/update_subscription/UpdateSubscription'),
     loading: Loading,
 });
 
@@ -391,6 +408,7 @@ export default {
     TemplateLayout,
     TemplatesList,
     TemplateImport,
+    TemplateUpdate,
     NotificationTemplateLayout,
     NotificationTemplateAdd,
     NotificationTemplatesList,
@@ -408,4 +426,6 @@ export default {
     ConnectionOverviewTechnicalLayout,
     ConnectionOverviewBusinessLayout,
     Sandbox,
+    UpdateSubscriptionLayout,
+    UpdateSubscription,
 };

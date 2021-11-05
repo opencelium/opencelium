@@ -85,6 +85,7 @@ export const createRoutes = (store) => {
                 <IndexRoute component={LoadableRouteComponents.TemplatesList}/>
                 <Route path='/templates/import' component={LoadableRouteComponents.TemplateImport}/>
                 <Route path='/templates/page/:pageNumber' component={LoadableRouteComponents.TemplatesList}/>
+                <Route path='/templates/:id/update' component={LoadableRouteComponents.TemplateUpdate}/>
             </Route>
             <Route path='/notification_templates' component={isAuth(LoadableRouteComponents.NotificationTemplateLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.NotificationTemplatesList}/>
@@ -100,6 +101,9 @@ export const createRoutes = (store) => {
             <Route path='/update_assistant' component={isAuth(LoadableRouteComponents.UpdateAssistantLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.UpdateAssistant}/>
             </Route>
+            {/*<Route path='/update_subscription' component={isAuth(LoadableRouteComponents.UpdateSubscriptionLayout, store)}>
+                <IndexRoute component={LoadableRouteComponents.UpdateSubscription}/>
+            </Route>*/}
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfileLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.MyProfile}/>
             </Route>

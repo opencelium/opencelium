@@ -65,8 +65,10 @@ const IUSER_GROUP = {
 
 //USER
 const EMAIL = {name: 'email', type: 'email', icon: 'email'};
-const PASSWORD = {name: 'password', type: 'password', icon: 'vpn_key'};
-const REPEAT_PASSWORD = {name: 'repeatPassword', type: 'password', icon: 'vpn_key'};
+const PASSWORD = {name: 'password', type: 'secret', icon: 'vpn_key'};
+const REPEAT_PASSWORD = {name: 'repeatPassword', type: 'secret', icon: 'vpn_key'};
+const BITBUCKET_USER = {name: 'bitbucketUser', type: 'text', icon: 'perm_identity'};
+const BITBUCKET_PASSWORD = {name: 'bitbucketPassword', type: 'secret', icon: 'vpn_key'};
 const NAME = {name: 'name', type: 'text', icon: 'perm_identity'};
 const SURNAME = {name: 'surname', type: 'text', icon: 'perm_identity'};
 const PHONE_NUMBER = {name: 'phoneNumber', type: 'text', icon: 'phone'};
@@ -88,6 +90,8 @@ const IUSER = {
     USER_TITLE,
     PROFILE_PICTURE,
     USER_GROUP,
+    BITBUCKET_USER,
+    BITBUCKET_PASSWORD,
 };
 
 //MY PROFILE
@@ -145,6 +149,13 @@ const INOTIFICATION_TEMPLATE = {
     NOTIFICATION_TEMPLATE_CONTENT,
 };
 
+
+const SUBSCRIPTION_USER = {name: 'user', type: 'select', icon: 'person'};
+
+const IUPDATE_SUBSCRIPTION = {
+    SUBSCRIPTION_USER,
+}
+
 export const INPUTS = {
     ...ICOMMON,
     ...ICONNECTION,
@@ -155,6 +166,7 @@ export const INPUTS = {
     ...INOTIFICATION_TEMPLATE,
     ...ISCHEDULE,
     ...IMYPROFILE,
+    ...IUPDATE_SUBSCRIPTION,
 };
 
 export const BACKSPACE_KEY_CODE = 8;

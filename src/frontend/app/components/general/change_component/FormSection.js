@@ -54,6 +54,8 @@ import FormThemes from "@change_component/form_elements/FormThemes";
 import FormAppTour from "@change_component/form_elements/FormAppTour";
 import {getStyles} from "@utils/themes";
 import FormCronExp from "@change_component/form_elements/FormCronExp";
+import Translate from "@components/general/app/Translate";
+import {Container} from "react-grid-system";
 
 
 function mapStateToProps(state){
@@ -389,6 +391,13 @@ class FormSection extends Component{
                     </div>
                 }
                 {this.generateInputs()}
+                {content.hasHint &&
+                <div className={styles.hint_area}>
+                    <span className={styles.hint}>
+                        {`Hint: `}
+                    </span>
+                    {content.hint.text}
+                </div>}
             </div>
         );
     }

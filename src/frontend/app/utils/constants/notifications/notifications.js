@@ -98,6 +98,7 @@ export const EntitiesWithNotification = [
     {name: SchedulesAction.START_SCHEDULES, types: ['FULFILLED', 'REJECTED',]},
     {name: TemplatesAction.FETCH_TEMPLATES, types: ['REJECTED']},
     {name: TemplatesAction.ADD_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
+    {name: TemplatesAction.UPDATE_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.DUPLICATE_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.CONVERT_TEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: TemplatesAction.CONVERT_TEMPLATES, types: ['FULFILLED', 'REJECTED']},

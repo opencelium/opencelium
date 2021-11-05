@@ -26,6 +26,7 @@ const initialState = fromJS({
     authUser: {},
     isAuth: false,
     expTime: 0,
+    updatingSubscription: API_REQUEST_STATE.INITIAL,
     logining: API_REQUEST_STATE.INITIAL,
     logouting: false,
     updatingDashboardSettings: false,
@@ -98,6 +99,12 @@ const reducer = (state = initialState, action) => {
             return state.set('updatingTheme', false).set('authUser', action.payload);
         case AuthAction.UPDATE_THEME_REJECTED:
             return state.set('updatingTheme', false).set('error', fromJS(action.payload));
+        case AuthAction.UPDATE_SUBSCRIPTION:
+            return state.set('updatingSubscription', true).set('error', null);
+        case AuthAction.UPDATE_SUBSCRIPTION_FULFILLED:
+            return state.set('updatingSubscription', false);
+        case AuthAction.UPDATE_SUBSCRIPTION_REJECTED:
+            return state.set('updatingSubscription', false).set('error', fromJS(action.payload));
         case AuthAction.TOGGLE_APPTOUR:
             return state.set('togglingAppTour', API_REQUEST_STATE.START).set('error', null);
         case AuthAction.TOGGLE_APPTOUR_FULFILLED:
