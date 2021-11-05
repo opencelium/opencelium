@@ -173,14 +173,14 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                     let id = -1;
                     if (this.props.params) {
                         if (this.props.params.hasOwnProperty('id')) {
-                            id = singleEntityName !== 'invoker' ? parseInt(this.props.params.id) : this.props.params.id;
+                            id = singleEntityName !== 'invoker' && singleEntityName !== 'template' ? parseInt(this.props.params.id) : this.props.params.id;
                         } else {
                             if (this.props.hasOwnProperty('authUser')) {
-                                id = singleEntityName !== 'invoker' ? parseInt(this.props.authUser.userId) : this.props.authUser.userId;
+                                id = singleEntityName !== 'invoker' && singleEntityName !== 'template' ? parseInt(this.props.authUser.userId) : this.props.authUser.userId;
                             }
                         }
                     }
-                    if (typeof id === 'number' && id > 0 || singleEntityName === 'invoker') {
+                    if (typeof id === 'number' && id > 0 || singleEntityName === 'invoker' || singleEntityName === 'template') {
                         this.setState({hasStartedFetchingEntity: true});
                         this.props[`fetch${capitalize(singleEntityName)}`]({id});
                     } else {
@@ -311,7 +311,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                         let action = `${actionName}${capitalize(singleEntityName)}`;
                         if (this.props.hasOwnProperty(action)) {
                             if (mapping !== null) {
-                                this.props[action](mapping(entity));
+                                this.props[action](mapping(entity, this));
                             } else {
                                 this.props[action](entity);
                             }

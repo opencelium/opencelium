@@ -124,8 +124,6 @@
     "cross-env": "^7.0.2",
     "css-loader": "2.1.0",
     "css-modules-require-hook": "^4.0.5",
-    "electron": "^15.1.1",
-    "electron-packager": "^15.4.0",
     "enzyme": "^2.7.1",
     "eslint": "^7.20.0",
     "eslint-plugin-babel": "~5.3.1",

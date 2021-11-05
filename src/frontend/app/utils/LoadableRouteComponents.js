@@ -245,6 +245,11 @@ const TemplateImport =  Loadable({
     loader: () => import(/* webpackChunkName: 'template_import' */ '@components/content/templates/import/TemplateImport'),
     loading: Loading,
 });
+const TemplateUpdate =  Loadable({
+    loader: () => import(/* webpackChunkName: 'template_update' */ '@components/content/templates/update/TemplateUpdate'),
+    loading: Loading,
+});
+
 
 /**
  * Loadable Notification Template
@@ -403,6 +408,7 @@ export default {
     TemplateLayout,
     TemplatesList,
     TemplateImport,
+    TemplateUpdate,
     NotificationTemplateLayout,
     NotificationTemplateAdd,
     NotificationTemplatesList,

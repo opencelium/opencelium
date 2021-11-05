@@ -14,7 +14,7 @@
  */
 
 import Rx from 'rxjs/Rx';
-import {TemplatesAction} from "@utils/actions";
+import {ConnectionsAction, TemplatesAction} from "@utils/actions";
 
 
 /**
@@ -91,6 +91,42 @@ const convertTemplatesRejected = (error) => {
 };
 
 
+/**
+ * update template
+ * @param template
+ * @returns {{type: string, payload: {}}}
+ */
+const updateTemplate = (template) => {
+    return {
+        type: TemplatesAction.UPDATE_TEMPLATE,
+        payload: template,
+    };
+};
+
+/**
+ * update template fulfilled
+ * @param template
+ * @returns {{type: string, payload: {}}}
+ */
+const updateTemplateFulfilled = (template) => {
+    return {
+        type: TemplatesAction.UPDATE_TEMPLATE_FULFILLED,
+        payload: template,
+    };
+};
+
+/**
+ * update template rejected
+ * @param error
+ * @returns {promise}
+ */
+const updateTemplateRejected = (error) => {
+    return Rx.Observable.of({
+        type: TemplatesAction.UPDATE_TEMPLATE_REJECTED,
+        payload: error
+    });
+};
+
 export {
     convertTemplate,
     convertTemplateFulfilled,
@@ -98,4 +134,7 @@ export {
     convertTemplates,
     convertTemplatesFulfilled,
     convertTemplatesRejected,
+    updateTemplate,
+    updateTemplateFulfilled,
+    updateTemplateRejected,
 };

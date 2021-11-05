@@ -1,19 +1,17 @@
 import React from "react";
 import {setFocusById} from "@utils/app";
-import {CONNECTION_TOURS} from "@utils/constants/tours";
 import {INPUTS} from "@utils/constants/inputs";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import Form from "@change_component/Form";
-import {ConnectionPermissions} from "@utils/constants/permissions";
-import OCTour from "@basic_components/OCTour";
+import {TemplatePermissions} from "@utils/constants/permissions";
 import CConnection from "@classes/components/content/connection/CConnection";
 import {TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
 import {removeLS} from "@utils/LocalStorage";
 import styles from '@themes/default/content/connections/change.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
-import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
 import Button from "@basic_components/buttons/Button";
+import AddNewConnection from "@components/content/templates/update/AddNewConnection";
 
 export const CONNECTION_VIEW_TYPE = {
     COLUMN: 'COLUMN',
@@ -21,20 +19,20 @@ export const CONNECTION_VIEW_TYPE = {
 }
 
 /**
- * common component to add and update Connection
+ * common component to add and update Template
  */
-export function ConnectionForm(type) {
+export function TemplateForm(type) {
     return function (Component) {
         return class extends Component {
             constructor(props) {
                 super(props);
 
-                this.connectionPrefixUrl = '/connections';
+                this.templatePrefixUrl = '/templates';
                 this.translationKey = type.toUpperCase();
                 this.isUpdate = type === 'update';
                 this.isAdd = type === 'add';
                 this.isView = type === 'view';
-                this.actionName = this.isUpdate ? `updatingConnection` : `addingConnection`;
+                this.actionName = this.isUpdate ? `updatingTemplate` : `addingTemplate`;
                 this.state = {
                     hasModeInputsSection: this.isUpdate,
                     hasMethodsInputsSection: this.isUpdate,
@@ -48,16 +46,11 @@ export function ConnectionForm(type) {
                     entity: null,
                     isNewConnectionView: props.connectionViewType === CONNECTION_VIEW_TYPE.DIAGRAM,
                 };
-                this.isNavigatingToScheduler = false;
+                this.isNavigatingToConnection = false;
             }
 
             componentDidMount(){
                 setFocusById('input_title');
-            }
-
-            componentDidUpdate(prevProps, prevState, snapshot) {
-                const {checkingConnectionTitle, checkTitleResult, t, checkValidationRequest} = this.props;
-                checkValidationRequest(this, 'title', checkingConnectionTitle, checkTitleResult, t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`));
             }
 
             toggleIsNewConnectionView(){
@@ -79,15 +72,21 @@ export function ConnectionForm(type) {
              * to redirect app after adding/updating Connection
              */
             redirect(){
-                this.props.router.push(`${this.connectionPrefixUrl}`);
+                this.props.router.push(`${this.templatePrefixUrl}`);
             }
 
             getConnection(){
-                const {error} = this.props;
+                const {error, template, connectors} = this.props;
                 let connection;
                 if(this.isUpdate || this.isView){
-                    connection = this.props.connection;
+                    connection = template.connection;
                     connection.error = error;
+                    connection.title = template.name;
+                    connection.description = template.description;
+                    let fromConnector = connectors.find(connector => connector.id === template.connection.fromConnector.connectorId);
+                    let toConnector = connectors.find(connector => connector.id === template.connection.toConnector.connectorId);
+                    connection.fromConnector.title = fromConnector ? fromConnector.name : '';
+                    connection.toConnector.title = toConnector ? toConnector.name : '';
                     connection = CConnection.createConnection(connection);
                 } else{
                     connection = this.state.connection;
@@ -127,7 +126,6 @@ export function ConnectionForm(type) {
                 return {
                     ...INPUTS.CONNECTOR,
                     error: {fromConnector: validationMessages.fromConnector, toConnector: validationMessages.toConnector},
-                    tourStep: CONNECTION_TOURS.page_1[1].selector,
                     label: t(`${this.translationKey}.FORM.CONNECTORS`),
                     placeholders: [t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_1`), t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_2`)],
                     required: true,
@@ -143,7 +141,6 @@ export function ConnectionForm(type) {
                 const inputs = isNewConnectionView ? {...INPUTS.CONNECTION_SVG} : {...INPUTS.METHODS};
                 return {
                     ...inputs,
-                    tourSteps: CONNECTION_TOURS.page_3,
                     label: t(`${this.translationKey}.FORM.METHODS`),
                     templateLabels: {addTemplate: t(`${this.translationKey}.FORM.ADD_TEMPLATE`), addTemplateTitle: t(`${this.translationKey}.FORM.ADD_TEMPLATE_TITLE`)},
                     actions: {addTemplate: ::this.addTemplate},
@@ -185,16 +182,9 @@ export function ConnectionForm(type) {
              * to validate title
              */
             validateTitle(entity){
-                const {t, connection, checkConnectionTitle, checkTitleResult} = this.props;
+                const {t} = this.props;
                 if(entity.title.trim() === ''){
                     return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_REQUIRED`)};
-                } else{
-                    if(!this.isUpdate || (this.isUpdate && connection.title !== entity.title)) {
-                        if(!(this.state.entity && entity.title === this.state.entity.title && checkTitleResult && checkTitleResult.message === 'NOT_EXISTS')) {
-                            checkConnectionTitle(entity);
-                            return {value: false, message: ''};
-                        }
-                    }
                 }
                 return {value: true, message: ''};
             }
@@ -246,7 +236,7 @@ export function ConnectionForm(type) {
 
             getSecondThirdFormsSections(){
                 const {hasModeInputsSection, validationMessages, hasMethodsInputsSection, isNewConnectionView} = this.state;
-                const {t, connectors, openTour} = this.props;
+                const {t, connectors} = this.props;
                 let connectorMenuItems = this.getConnectorMenuItems();
                 let result = [];
                 const secondFormSection = {
@@ -263,7 +253,6 @@ export function ConnectionForm(type) {
                         },{
                             ...INPUTS.MODE,
                             error: validationMessages.template,
-                            tourStep: CONNECTION_TOURS.page_2[0].selector,
                             label: t(`${this.translationKey}.FORM.MODE`),
                             confirmationLabels:{title: t(`${this.translationKey}.CONFIRMATION.TITLE`), message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)},
                             modeLabels: {expert: t(`${this.translationKey}.FORM.EXPERT_MODE`), template: t(`${this.translationKey}.FORM.TEMPLATE_MODE`)},
@@ -272,7 +261,7 @@ export function ConnectionForm(type) {
                             connectors: connectors,
                         },
                     ],
-                    hint: {text: t(`${this.translationKey}.FORM.HINT_2`), openTour},
+                    hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
                     header: t(`${this.translationKey}.FORM.PAGE_2`),
                     visible: hasModeInputsSection || this.isView,
                 };
@@ -284,16 +273,16 @@ export function ConnectionForm(type) {
                         {
                             ...INPUTS.CONNECTOR_READONLY,
                             label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                        placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
-                        source: connectorMenuItems,
-                        readOnly: true,
-                        hasAddMethod: true,
-                        style: {margin: '0 65px'},
+                            placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
+                            source: connectorMenuItems,
+                            readOnly: true,
+                            hasAddMethod: true,
+                            style: {margin: '0 65px'},
                         },
                         this.getMethodsFormSection(),
                     ],
                     formClassName: styles.methods_form,
-                    hint: {text: t(`${this.translationKey}.FORM.HINT_3`), openTour},
+                    hint: {text: t(`${this.translationKey}.FORM.HINT_3`)},
                     header: t(`${this.translationKey}.FORM.PAGE_3`),
                     visible: hasMethodsInputsSection || this.isView,
                     hasFullScreenFunction: true,
@@ -306,36 +295,31 @@ export function ConnectionForm(type) {
             /**
              * to add/update Connection
              */
-            doAction(entity, redirectUrl, isNavigatingToScheduler = false){
-                this.isNavigatingToScheduler = isNavigatingToScheduler;
-                const {authUser, doAction} = this.props;
+            doAction(entity, redirectUrl, isNavigatingToConnection = false){
+                this.isNavigatingToConnection = isNavigatingToConnection;
+                const {authUser, doAction, template} = this.props;
                 removeLS(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, `connection_${authUser.userId}`);
                 doAction(entity, this, redirectUrl);
             }
 
-            doActionAndGoToAddScheduler(entity){
-                this.doAction(entity, '/schedules/add', true);
-            }
-
-            doActionAndGoToScheduler(entity){
-                this.doAction(entity, '/schedules', true);
+            doActionAndGoToConnections(entity){
+                this.doAction(entity, '/connections', true);
             }
 
             render(){
                 const {validationMessages} = this.state;
-                const {t, checkingConnectionTitle, openTour, closeTour, isTourOpen} = this.props;
+                const {t} = this.props;
                 const connection = this.getConnection();
                 let contentTranslations = {};
-                contentTranslations.header = {title: t(`${this.translationKey}.HEADER`), onHelpClick: openTour};
-                contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.connectionPrefixUrl};
-                contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.connectionPrefixUrl};
+                contentTranslations.header = {title: t(`${this.translationKey}.HEADER`)};
+                contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.templatePrefixUrl};
+                contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.templatePrefixUrl};
                 let contents = [
                     {
                         inputs: [
                             {
                                 ...INPUTS.CONNECTION_TITLE,
                                 error: validationMessages.title,
-                                tourStep: CONNECTION_TOURS.page_1[0].selector,
                                 label: t(`${this.translationKey}.FORM.TITLE`),
                                 maxLength: 256,
                                 required: true,
@@ -348,7 +332,7 @@ export function ConnectionForm(type) {
                             this.getFirstConnectorFormSection(),
                         ],
                         formClassName: this.isView ? styles.direction_form : '',
-                        hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
+                        hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
                         header: t(`${this.translationKey}.FORM.PAGE_1`),
                     },
                     ...this.getSecondThirdFormsSections(),
@@ -358,38 +342,30 @@ export function ConnectionForm(type) {
                         return null;
                     }
                     let button = null;
-                    if(this.isAdd){
-                        button = <Button icon={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START) ? 'loading' : 'add'} title={t('ADD.ADD_BUTTON_AND_GO_TO_ADD_SCHEDULER')} onClick={() => ::this.doActionAndGoToAddScheduler(entity)}/>;
-                    }
                     if(this.isUpdate){
-                        button = <Button icon={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START) ? 'loading' : 'autorenew'} title={t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => ::this.doActionAndGoToScheduler(entity)}/>;
+                        button = <AddNewConnection
+                            icon={this.isNavigatingToConnection && (this.props[this.actionName] === API_REQUEST_STATE.START) ? 'loading' : 'add'}
+                            connection={entity}
+                        />;
                     }
                     return(
                         <React.Fragment>
                             {button}
-                            <AddTemplate data={contents[2].inputs[1]} entity={entity} disabled={entity.isEmpty()} buttonProps={{icon: 'add', title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)}}/>
                         </React.Fragment>
                     );
                 }
                 return (
-                    <div>
-                        <Form
-                            contents={contents}
-                            translations={contentTranslations}
-                            isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}
-                            permissions={ConnectionPermissions}
-                            clearValidationMessage={::this.clearValidationMessage}
-                            action={::this.doAction}
-                            entity={connection}
-                            type={type}
-                            additionalButtons={additionalButtons}
-                        />
-                        <OCTour
-                            steps={ConnectionPermissions.page_1}
-                            isOpen={isTourOpen}
-                            onRequestClose={closeTour}
-                        />
-                    </div>
+                    <Form
+                        contents={contents}
+                        translations={contentTranslations}
+                        isActionInProcess={!this.isNavigatingToConnection && (this.props[this.actionName] === API_REQUEST_STATE.START)}
+                        permissions={TemplatePermissions}
+                        clearValidationMessage={::this.clearValidationMessage}
+                        action={::this.doAction}
+                        entity={connection}
+                        type={type}
+                        additionalButtons={additionalButtons}
+                    />
                 );
             }
         }

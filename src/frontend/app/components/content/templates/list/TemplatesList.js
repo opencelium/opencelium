@@ -207,6 +207,7 @@ class TemplatesList extends Component{
                 />
             );
         };
+        mapEntity.getUpdateLink = (template) => {const id = template.hasOwnProperty('id') ? template.id : template.templateId; return `${prefixUrl}/${id}/update`;};
         mapEntity.onDelete = deleteTemplate;
         return <List
             deletingEntity={(template) => deletingTemplate === API_REQUEST_STATE.START && template.id === currentTemplate.id}
