@@ -61,7 +61,8 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
                                      FilterChain chain ) throws IOException, ServletException {
 
         String url  = request.getRequestURI();
-        if (url.contains("api/webhook/execute") || url.contains("api/storage/files")){
+        if (url.contains("api/webhook/execute") || url.contains("api/storage/files") || url.contains("api/webhook/health")){
+
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Access-Control-Allow-Credentials", "true");
             response.setHeader("Access-Control-Allow-Methods",

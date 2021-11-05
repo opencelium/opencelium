@@ -68,6 +68,12 @@ public class UserDetail {
     @Column(name = "lang")
     private String lang;
 
+    @Column(name = "repo_user")
+    private String repoUser;
+
+    @Column(name = "repo_password")
+    private String repoPassword;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", updatable = false)
@@ -92,6 +98,8 @@ public class UserDetail {
         this.tutorial = userDetailResource.isAppTour();
         this.theme = userDetailResource.getTheme();
         this.lang = userDetailResource.getLang();
+        this.repoUser = userDetailResource.getBitbucketUser();
+        this.repoPassword = userDetailResource.getBitbucketPassword();
     }
 
 
@@ -189,6 +197,22 @@ public class UserDetail {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public String getRepoUser() {
+        return repoUser;
+    }
+
+    public void setRepoUser(String repoUser) {
+        this.repoUser = repoUser;
+    }
+
+    public String getRepoPassword() {
+        return repoPassword;
+    }
+
+    public void setRepoPassword(String repoPassword) {
+        this.repoPassword = repoPassword;
     }
 
     public Date getCreatedAt() {

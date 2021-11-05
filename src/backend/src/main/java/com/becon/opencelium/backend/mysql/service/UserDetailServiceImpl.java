@@ -30,6 +30,9 @@ public class UserDetailServiceImpl implements UserDetailService {
     @Autowired
     private UserDetailRepository userDetailRepository;
 
+    @Autowired
+    private UserServiceImpl userService;
+
     @Override
     public void save(UserDetail userDetail) {
         userDetailRepository.save(userDetail);
@@ -42,6 +45,7 @@ public class UserDetailServiceImpl implements UserDetailService {
 
     @Override
     public UserDetail toEntity(UserDetailResource resource) {
+
         return new UserDetail(resource);
     }
 

@@ -273,6 +273,10 @@ CREATE TABLE IF NOT EXISTS `bl_arrows` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+--changeset 2.0:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE detail ADD COLUMN IF NOT EXISTS repo_user varchar(200);
+ALTER TABLE detail ADD COLUMN IF NOT EXISTS repo_password varchar(200);
+
 
 
 
