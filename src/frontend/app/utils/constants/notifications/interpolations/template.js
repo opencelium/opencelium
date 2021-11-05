@@ -32,6 +32,24 @@ const ADD_TEMPLATE = (params) => {
     );
 }
 
+const UPDATE_TEMPLATE = (params) => {
+    const {name, connection} = params;
+    const title = connection ? connection.title : '';
+    const openTemplatePage = () => {
+        store.dispatch(setSearchValue(name));
+        navigateTo('templates');
+    }
+    const openConnectionPage = () => {
+        store.dispatch(setSearchValue(title));
+        navigateTo('connections');
+    }
+    return (
+        <Translate i18nKey="notifications:SUCCESS.UPDATE_TEMPLATE">
+            The template <span className={styles.link} onClick={openTemplatePage}>{name}</span> was successfully updated.
+        </Translate>
+    );
+}
+
 const DUPLICATE_TEMPLATE = (params) => {
     const {name, connection} = params;
     const title = connection ? connection.title : '';
@@ -93,6 +111,7 @@ const EXPORT_TEMPLATE = (params) => {
 export default {
     DELETE_TEMPLATE,
     ADD_TEMPLATE,
+    UPDATE_TEMPLATE,
     DUPLICATE_TEMPLATE,
     CONVERT_TEMPLATE,
     IMPORT_TEMPLATE,
