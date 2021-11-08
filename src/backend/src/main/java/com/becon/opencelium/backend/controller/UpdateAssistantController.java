@@ -169,7 +169,39 @@ public class UpdateAssistantController {
         }
         return ResponseEntity.ok(errorResource);
     }
+// ---------------------------------------------------------------------------------------------
+    @GetMapping("/verify/repo/credentials")
+    public ResponseEntity<?> verifyRepoCredentials() {
+        if (assistantServiceImp.repoVerification()) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.noContent().build();
+        }
+    }
 
+    @GetMapping("/subscription/repo/has/changes")
+    public ResponseEntity<?> subsRepoHasChanges() {
+        try {
+            if (assistantServiceImp.repoHasChanges()) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.noContent().build();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/subscription/repo/update")
+    public ResponseEntity<?> subsRepoUpdate() {
+        try {
+            assistantServiceImp.updateSubsFiles();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok().build();
+    }
+// ---------------------------------------------------------------------------------------------
     @GetMapping("/oc/template")
     public ResponseEntity<?> getAssistentTemplateFiles() {
         String path = PathConstant.TEMPLATE;

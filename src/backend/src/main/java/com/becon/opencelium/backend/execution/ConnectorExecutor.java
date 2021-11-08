@@ -513,7 +513,7 @@ public class ConnectorExecutor {
 
             // from url query data;
             if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasQueryParams(f.getValue())){
-                item.put(f.getName(), executionContainer.getValueFromQueryParams(f.getValue()));
+                item.put(f.getName(), executionContainer.getValueWebhookParams(f.getValue()));
                 return;
             }
 

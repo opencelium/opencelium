@@ -232,6 +232,39 @@ public class AssistantServiceImp implements ApplicationService {
 
     }
 
+    public void updateSubsFiles() throws Exception {
+        Process process = Runtime.getRuntime().exec("git pull");
+        printStream(process.getInputStream());
+        printStream(process.getErrorStream());
+    }
+
+    public boolean repoHasChanges() throws Exception {
+
+        Process fetch = Runtime.getRuntime().exec("git fetch");
+        printStream(fetch.getInputStream());
+        printStream(fetch.getErrorStream());
+
+        Process diff = Runtime.getRuntime().exec("git diff exit_code");
+        printStream(diff.getInputStream());
+        printStream(diff.getErrorStream());
+
+        return false;
+    }
+
+    public boolean repoVerification() {
+        try {
+            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
+            HttpMethod method = HttpMethod.GET;
+            HttpHeaders header = new HttpHeaders();
+            header.set("Content-Type", "application/json");
+            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
+            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @Override
     public void updateOff(String dir, String version) throws Exception {
         System.out.println("Offline update run");

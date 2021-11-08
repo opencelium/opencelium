@@ -130,7 +130,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/api/storage/files/**", "/api/webhook/execute/**");
+        web.ignoring().antMatchers("/api/storage/files/**", "/api/webhook/execute/**", "/api/webhook/health");
     }
 
     @Bean

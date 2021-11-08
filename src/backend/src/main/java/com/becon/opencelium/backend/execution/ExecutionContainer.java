@@ -216,6 +216,60 @@ public class ExecutionContainer {
         return result;
     }
 
+    public Object getValueWebhookParams(String exp) {
+        if (exp == null || exp.isEmpty()) {
+            return "";
+        }
+        Object result = null;
+        if (queryParams.isEmpty()) {
+            return null;
+        }
+        String type = "";
+        if (exp.contains(":")) {
+            exp = exp.split(":")[0].concat("}");
+            type = exp.split(":")[1].replace("}", "");
+        }
+
+        for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+            String pointer = "${" + entry.getKey() + "}";
+            if (!exp.contains(pointer)){
+                continue;
+            }
+            result = type.isEmpty() ? convertToType(entry.getValue(), type) : getProperTypeOfValue(entry.getValue(), type);
+            break;
+        }
+        return result;
+    }
+
+    private Object convertToType(Object val, String type) {
+        Object result = val.toString();
+        if (type.equalsIgnoreCase("int")){
+            result = Long.parseLong(val.toString());
+        } else if(type.equalsIgnoreCase("double") || type.equalsIgnoreCase("float")) {
+            result = Double.parseDouble(val.toString());
+        }
+
+        return result;
+    }
+
+    private Object getProperTypeOfValue(Object val, String type){
+        Object result = val.toString();
+        final Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(val.toString());
+
+        boolean isNumber = false;
+        while (matcher.find()) {
+            isNumber = true;
+        }
+
+        if (isNumber && val.toString().contains(".")) {
+            result = Double.parseDouble(val.toString());
+        } else if (isNumber) {
+            result = Long.parseLong(val.toString());
+        }
+        return result;
+    }
+
     public String getValueFromRequestData(String exp) {
         if (exp == null || exp.isEmpty()) {
             return "";

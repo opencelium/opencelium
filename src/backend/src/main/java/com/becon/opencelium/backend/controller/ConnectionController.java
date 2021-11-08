@@ -72,6 +72,7 @@ public class ConnectionController {
     @Autowired
     private RestTemplate restTemplate;
 
+    //
     @GetMapping("/all")
     public ResponseEntity<?> getAll(){
         List<Connection> connections = connectionService.findAll();
@@ -82,6 +83,8 @@ public class ConnectionController {
         return ResponseEntity.ok().body(connectionResources);
     }
 
+    // Swagger
+    // id
     @GetMapping("/all/meta")
     public ResponseEntity<?> getAllMeta(){
         List<Connection> connections = connectionService.findAll();

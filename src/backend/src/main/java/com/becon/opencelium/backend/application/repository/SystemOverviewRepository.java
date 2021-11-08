@@ -18,6 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -93,6 +96,9 @@ public class SystemOverviewRepository {
                     .build();
             Git git = new Git(repository);
             String version = git.describe().call();
+            if (version == null) {
+                throw new RuntimeException("OC_VERSION_NOT_DETERMINED");
+            }
             if (version.length() > 7) {
                 version = version.charAt(4) == '-' ? version.substring(0,4) : version.substring(0,6);
             }

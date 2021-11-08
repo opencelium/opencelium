@@ -38,6 +38,8 @@ public class UserDetailResource extends ResourceSupport {
     private boolean appTour;
     private String theme;
     private String lang;
+    private String bitbucketUser;
+    private String bitbucketPassword;
     //TODO: need to make it long type. Should be in unix timestamp like 1232341312313
     private Date requestTime;
 
@@ -57,6 +59,8 @@ public class UserDetailResource extends ResourceSupport {
         this.appTour = userDetail.getTutorial();
         this.theme = userDetail.getTheme();
         this.lang = userDetail.getLang();
+        this.bitbucketUser = userDetail.getRepoUser();
+        this.bitbucketPassword = userDetail.getRepoPassword();
         if (userDetail.getProfilePicture() != null){
             this.profilePicture = imagePath + userDetail.getProfilePicture();
         }
@@ -143,6 +147,22 @@ public class UserDetailResource extends ResourceSupport {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public String getBitbucketUser() {
+        return bitbucketUser;
+    }
+
+    public void setBitbucketUser(String bitbucketUser) {
+        this.bitbucketUser = bitbucketUser;
+    }
+
+    public String getBitbucketPassword() {
+        return bitbucketPassword;
+    }
+
+    public void setBitbucketPassword(String bitbucketPassword) {
+        this.bitbucketPassword = bitbucketPassword;
     }
 
     public Date getRequestTime() {

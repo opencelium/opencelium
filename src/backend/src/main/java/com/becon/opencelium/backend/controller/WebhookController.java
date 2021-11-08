@@ -77,6 +77,11 @@ public class WebhookController {
         return  ResponseEntity.ok().build();
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<?> checkHealth(){
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping(value = "/url/{userId}/{schedulerId}", produces = "application/hal+json")
     public ResponseEntity<?> generateUrl(@PathVariable("userId") int userId,
                                          @PathVariable("schedulerId") int schedulerId){
