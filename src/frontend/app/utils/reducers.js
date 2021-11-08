@@ -35,6 +35,7 @@ import {update_assistant} from '../reducers/update_assistant';
 import {connection_overview} from "../reducers/connection_overview2";
 import {dashboard} from "../reducers/dashboard";
 import {fromJS} from "immutable";
+import {subscription_update} from "@root/app/reducers/subscription_update";
 
 
 /**
@@ -59,6 +60,7 @@ const combinedReducers = combineReducers({
     update_assistant,
     connection_overview,
     dashboard,
+    subscription_update,
 });
 
 export default withReduxStateSync(combinedReducers, state => fromJS(state));

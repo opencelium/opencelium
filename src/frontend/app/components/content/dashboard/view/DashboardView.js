@@ -21,7 +21,7 @@ import styles from '@themes/default/content/dashboard/dashboard.scss';
 import {componentAppear, getThemeClass} from "@utils/app";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {fetchUpdateAppVersion} from "@actions/update_assistant/fetch";
-import {Col, Container, Row} from "react-grid-system";
+import {fetchSubscriptionUpdate} from "@actions/subscription_update/fetch";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {
     HAS_DASHBOARD_WIDGET_ENGINE,
@@ -39,10 +39,13 @@ function mapStateToProps(state){
     const auth = state.get('auth');
     const app = state.get('app');
     const updateAssistant = state.get('update_assistant');
+    const subscriptionUpdate = state.get('subscription_update');
     const dashboard = state.get('dashboard');
     return {
         authUser: auth.get('authUser'),
         fetchingUpdateAppVersion: updateAssistant.get('fetchingUpdateAppVersion'),
+        fetchingSubscriptionUpdate: updateAssistant.get('fetchingSubscriptionUpdate'),
+        hasSubscriptionUpdate: subscriptionUpdate.get('hasUpdate'),
         settings: dashboard.get('settings'),
         updatingWidgetSettings: dashboard.get('updatingWidgetSettings'),
         fetchingWidgets: dashboard.get('fetchingWidgets'),
@@ -57,7 +60,7 @@ function mapStateToProps(state){
  * Dashboard component
  * Important! schedules and app translations should be imported already here
  */
-@connect(mapStateToProps, {fetchUpdateAppVersion, fetchWidgetSettings, updateWidgetSettings, fetchWidgets, fetchWidgetsRejected})
+@connect(mapStateToProps, {fetchSubscriptionUpdate, fetchUpdateAppVersion, fetchWidgetSettings, updateWidgetSettings, fetchWidgets, fetchWidgetsRejected})
 @withTranslation(['dashboard', 'schedules', 'app'])
 @ListComponent('widgets', true)
 class DashboardView extends Component{
@@ -71,18 +74,25 @@ class DashboardView extends Component{
     }
 
     componentDidMount() {
-        const {fetchingUpdateAppVersion, fetchUpdateAppVersion, fetchWidgetSettings, appVersion} = this.props;
+        const {fetchingUpdateAppVersion, fetchingSubscriptionUpdate, hasSubscriptionUpdate, fetchUpdateAppVersion,
+            fetchWidgetSettings, appVersion, fetchSubscriptionUpdate} = this.props;
         if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START && appVersion !== '') {
             fetchUpdateAppVersion({currentAppVersion: appVersion});
+        }
+        if(fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && !hasSubscriptionUpdate) {
+            fetchSubscriptionUpdate({currentAppVersion: appVersion});
         }
         fetchWidgetSettings();
         componentAppear('app_content');
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {appVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion} = this.props;
+        const {appVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion, fetchingSubscriptionUpdate, hasSubscriptionUpdate, fetchSubscriptionUpdate} = this.props;
         if(prevProps.appVersion !== appVersion && fetchingUpdateAppVersion !== API_REQUEST_STATE.START && fetchingUpdateAppVersion !== API_REQUEST_STATE.ERROR){
             fetchUpdateAppVersion({currentAppVersion: appVersion});
+        }
+        if(prevProps.hasSubscriptionUpdate !== hasSubscriptionUpdate && fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && fetchingSubscriptionUpdate !== API_REQUEST_STATE.ERROR){
+            fetchSubscriptionUpdate({currentAppVersion: appVersion});
         }
     }
 

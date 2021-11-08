@@ -546,6 +546,16 @@ export const UpdateAssistantAction = {
 };
 
 /**
+ * update assistant's actions for redux state
+ */
+export const SubscriptionUpdate = {
+    FETCH_SUBSCRIPTIONUPDATE: 'FETCH_SUBSCRIPTIONUPDATE',
+    FETCH_SUBSCRIPTIONUPDATE_FULFILLED: 'FETCH_SUBSCRIPTIONUPDATE_FULFILLED',
+    FETCH_SUBSCRIPTIONUPDATE_REJECTED: 'FETCH_SUBSCRIPTIONUPDATE_REJECTED',
+    FETCH_SUBSCRIPTIONUPDATE_CANCELED: 'FETCH_SUBSCRIPTIONUPDATE_CANCELED',
+}
+
+/**
  * connection overview 2 actions for redux state
  */
 export const ConnectionOverview2Action = {
