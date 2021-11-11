@@ -28,7 +28,7 @@
     <operations>
         <operation name="TicketSearch" type="test">
             <request>
-                <method>GET</method>
+                <method>POST</method>
                 <endpoint>{url}/{WebService}/TicketSearch/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
@@ -69,13 +69,13 @@
         </operation>
         <operation name="TicketGet" type="test">
             <request>
-                <method>GET</method>
+                <method>POST</method>
                 <endpoint>{url}/{WebService}/TicketGet/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body type="object" format="json" data="raw">
-                    <field name="TicketID" type="string"/>
+                    <field name="TicketID" type="array"/>
                 </body>  
             </request>
             <response>
@@ -96,6 +96,10 @@
                         <field name="StateType" type="string"/>
                         <field name="CustomerID" type="string"/>
                         <field name="Owner" type="string"/>
+                        <field name="DynamicField" type="array">
+                            <field name="Name" type="string"/>
+                            <field name="Value" type="string"/>
+                        </field>
                     </field>
                 </body>  
                 </success>
@@ -114,7 +118,7 @@
         </operation>
         <operation name="TicketCreate" type="test">
             <request>
-                <method>GET</method>
+                <method>POST</method>
                 <endpoint>{url}/{WebService}/TicketCreate/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
@@ -125,12 +129,25 @@
                         <field name="Type" type="string"/>
                         <field name="Queue" type="string"/>
                         <field name="QueueID" type="string"/>                        
+                        <field name="Priority" type="string"/>
+                        <field name="PriorityID" type="string"/>
                         <field name="State" type="string"/>
                         <field name="StateID" type="string"/>
                         <field name="StateType" type="string"/>
                         <field name="CustomerID" type="string"/>
+                        <field name="CustomerUser" type="string"/>
                         <field name="Owner" type="string"/>
                     </field>
+                    <field name="Article" type="object">
+                        <field name="Subject" type="string"/>
+                        <field name="Body" type="string"/>
+			<field name="ContentType" type="string">text/plain; charset=utf-8</field>
+                        <field name="TimeUnit" type="string"/>
+                    </field>
+                    <field name="DynamicField" type="array">
+                        <field name="Name" type="string"/>
+                        <field name="Value" type="string"/>
+                    </field>			
                 </body>  
             </request>
             <response>
@@ -167,7 +184,7 @@
         </operation>
         <operation name="TicketUpdate" type="test">
             <request>
-                <method>GET</method>
+                <method>POST</method>
                 <endpoint>{url}/{WebService}/TicketCreate/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>

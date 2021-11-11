@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>Redmine</name>
+    <description>Redmine is a flexible project management web application written using Ruby on Rails framework.</description>
+    <hint>Read api documentation https://docs.zammad.org/en/latest/api</hint>
+    <icon>redmine.png</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="GetMyAccount" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/my/account.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="user" type="object">                      
+                            <field name="id" type="string"/>
+                            <field name="login" type="string"/>
+                            <field name="admin" type="string"/>
+                            <field name="firstname" type="string"/>
+                            <field name="lastname" type="string"/>
+                            <field name="mail" type="string"/>
+                            <field name="created_on" type="string"/>
+                            <field name="last_login_on" type="string"/>
+                            <field name="api_key" type="string"/>
+                        </field>                                                        
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetUsers" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/users.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="users" type="array">                      
+                            <field name="id" type="string"/>
+                            <field name="login" type="string"/>
+                            <field name="admin" type="string"/>
+                            <field name="firstname" type="string"/>
+                            <field name="lastname" type="string"/>
+                            <field name="mail" type="string"/>
+                            <field name="created_on" type="string"/>
+                            <field name="updated_on" type="string"/>                            
+                            <field name="last_login_on" type="string"/>
+                            <field name="passwd_changed_on" type="string"/>
+                        </field>                                                        
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>                  
+        <operation name="GetProjects" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/projects.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="name" type="string"/>
+                        <field name="identifier" type="string"/>
+                        <field name="description" type="string"/>
+                        <field name="homepage" type="string"/>
+                        <field name="is_public" type="string"/>
+                        <field name="inherit_members" type="string"/>
+                        <field name="default_assigned_to_id" type="string"/>
+                        <field name="default_version_id" type="string"/>
+                        <field name="tracker_ids" type="array"/>
+                        <field name="enabled_module_names" type="array"/>
+                        <field name="issue_custom_field_ids" type="array"/>                            
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetProject" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/projects/{id}.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="name" type="string"/>
+                        <field name="identifier" type="string"/>
+                        <field name="description" type="string"/>
+                        <field name="homepage" type="string"/>
+                        <field name="is_public" type="string"/>
+                        <field name="inherit_members" type="string"/>
+                        <field name="default_assigned_to_id" type="string"/>
+                        <field name="default_version_id" type="string"/>
+                        <field name="tracker_ids" type="array"/>
+                        <field name="enabled_module_names" type="array"/>
+                        <field name="issue_custom_field_ids" type="array"/>                        
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddProject" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/projects.json</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="project" type="object">
+                        <field name="name" type="string"/>
+                        <field name="identifier" type="string"/>
+                        <field name="description" type="string"/>
+                        <field name="homepage" type="string"/>
+                        <field name="is_public" type="string"/>
+                        <field name="inherit_members" type="string"/>
+                        <field name="default_assigned_to_id" type="string"/>
+                        <field name="default_version_id" type="string"/>
+                        <field name="tracker_ids" type="array"/>
+                        <field name="enabled_module_names" type="array"/>
+                        <field name="issue_custom_field_ids" type="array"/>
+                    </field>                                                                                                            
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UpdateProject" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/projects/{id}.json</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="project" type="object">
+                        <field name="name" type="string"/>
+                        <field name="identifier" type="string"/>
+                        <field name="description" type="string"/>
+                        <field name="homepage" type="string"/>
+                        <field name="is_public" type="string"/>
+                        <field name="inherit_members" type="string"/>
+                        <field name="default_assigned_to_id" type="string"/>
+                        <field name="default_version_id" type="string"/>
+                        <field name="tracker_ids" type="array"/>
+                        <field name="enabled_module_names" type="array"/>
+                        <field name="issue_custom_field_ids" type="array"/>
+                    </field>                                                                                
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="ArchiveProject" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/projects/{id}/archive.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UnarchiveProject" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/projects/{id}/unarchive.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="DeleteProject" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/projects/{id}.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetIssues" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/issues.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="issues" type="array">
+                            <field name="id" type="string"/>
+                            <field name="project" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="tracker" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="status" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="priority" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="author" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="subject" type="string"/>
+                            <field name="description" type="string"/>
+                            <field name="parent_issue_id" type="string"/>
+                            <field name="is_private" type="string"/>
+                            <field name="estimated_hours" type="string"/>
+                            <field name="due_date" type="string"/>                                                                    
+                            <field name="created_on" type="string"/>                                                                    
+                            <field name="updated_on" type="string"/>                                                                   
+                            <field name="custom_fields" type="array">
+                              <field name="id" type="string"/>
+                              <field name="value" type="string"/>
+                            </field>
+                       </field>                         
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetIssue" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/issues/{id}.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="issue" type="object">
+                            <field name="id" type="string"/>
+                            <field name="project" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="tracker" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="status" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="priority" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="author" type="object">
+                                <field name="id" type="string"/>
+                                <field name="name" type="string"/>
+                            </field>
+                            <field name="subject" type="string"/>
+                            <field name="description" type="string"/>
+                            <field name="parent_issue_id" type="string"/>
+                            <field name="is_private" type="string"/>
+                            <field name="estimated_hours" type="string"/>
+                            <field name="total_estimated_hours" type="string"/>
+                            <field name="spent_hours" type="string"/>
+                            <field name="total_spent_hours" type="string"/>
+                            <field name="due_date" type="string"/>                                                                    
+                            <field name="created_on" type="string"/>                                                                    
+                            <field name="updated_on" type="string"/>                                                                    
+                        </field>                         
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddIssue" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/issues.json</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="issue" type="object">
+                        <field name="project_id" type="string"/>
+                        <field name="tracker_id" type="string"/>
+                        <field name="status_id" type="string"/>
+                        <field name="priority_id" type="string"/>
+                        <field name="subject" type="string"/>
+                        <field name="description" type="string"/>
+                        <field name="category_id" type="string"/>
+                        <field name="default_version_id" type="string"/>
+                        <field name="fixed_version_id" type="string"/>
+                        <field name="assigned_to_id" type="string"/>
+                        <field name="parent_issue_id" type="string"/>
+			<field name="custom_fields" type="array">
+                              <field name="id" type="string"/>
+                              <field name="value" type="string"/>
+                        </field>				
+                        <field name="watcher_user_ids" type="array"/>
+                        <field name="is_private" type="string"/>
+                        <field name="estimated_hours" type="string"/>                                                                    
+                    </field>                                                                                    
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UpdateIssue" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/issues/{id}.json</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="issue" type="object">
+                        <field name="project_id" type="string"/>
+                        <field name="tracker_id" type="string"/>
+                        <field name="status_id" type="string"/>
+                        <field name="priority_id" type="string"/>
+                        <field name="subject" type="string"/>
+                        <field name="done_ratio" type="string"/>
+                        <field name="description" type="string"/>
+                        <field name="category_id" type="string"/>
+                        <field name="default_version_id" type="string"/>
+                        <field name="fixed_version_id" type="string"/>
+                        <field name="assigned_to_id" type="string"/>
+                        <field name="parent_issue_id" type="string"/>
+                        <field name="custom_fields" type="array"/>
+                        <field name="watcher_user_ids" type="array"/>
+                        <field name="is_private" type="string"/>
+                        <field name="estimated_hours" type="string"/>                                                                    
+                    </field>                                                                                 
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="DeleteIssue" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/issue/{id}.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>          
+        <operation name="AddWatcher" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/issues/{id}/watchers.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                        <field name="user_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="DeleteWatcher" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/issues/{id}/watchers/{user_id}.json</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="422">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>                                                	    
+    </operations>
+</invoker>
