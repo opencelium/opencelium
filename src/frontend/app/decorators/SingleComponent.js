@@ -86,7 +86,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
             }
 
             componentDidMount(){
-                if(command !== 'adding' && command !== '') {
+                if(command !== 'adding' && singleEntityName !== '') {
                     this.fetch();
                 }
                 if(additionalResources.length > 0) {
@@ -96,7 +96,7 @@ import {automaticallyShowTour} from "@utils/constants/tours";
 
             componentDidUpdate(){
                 const {entity, resources, fetchingResource, hasStartedFetchingEntity, hasWrongURL} = this.state;
-                if(entity === null && command !== '' && command !== 'adding' && !hasStartedFetchingEntity && !hasWrongURL) {
+                if(entity === null && singleEntityName !== '' && command !== 'adding' && !hasStartedFetchingEntity && !hasWrongURL) {
                     this.fetch();
                 }
                 if(additionalResources.length > 0) {
@@ -222,15 +222,15 @@ import {automaticallyShowTour} from "@utils/constants/tours";
                 if(resources.length < additionalResources.length && this.props[`fetching${capitalize(additionalResources[resources.length])}`] === API_REQUEST_STATE.ERROR){
                     return <RejectedRequest entityName={additionalResources[resources.length]} error={error}/>;
                 }
-                if((entity === null && command !== '' && command !== 'adding') || resources.length !== additionalResources.length) {
+                if((entity === null && singleEntityName !== '' && command !== 'adding') || resources.length !== additionalResources.length) {
                     return <Loading cancelCallback={cancelFetching} authUser={authUser}/>;
                 }
                 if(typeof entity !== 'object' || isEmptyObject(entity)) {
-                    if(command !== 'adding' && command !== '') {
+                    if(command !== 'adding' && singleEntityName !== '') {
                         return <PageNotFound/>;
                     }
                 }
-                if(command !== '' && isCommandTriggered){
+                if(singleEntityName !== '' && isCommandTriggered){
                     if(redirectUrl !== ''){
                         router.push(redirectUrl)
                     } else{
