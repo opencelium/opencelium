@@ -39,7 +39,7 @@ class FormUserGroupView extends Component{
     render(){
         const {t} = this.props;
         let usergroup = this.props.entity.userGroup;
-        let components = usergroup.components;
+        let components = usergroup.components || [];
         return (
             <div className={styles.user_group}>
                 <UserGroupIcon icon={usergroup.icon} className={styles.user_group_icon}/>

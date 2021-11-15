@@ -101,9 +101,9 @@ export const createRoutes = (store) => {
             <Route path='/update_assistant' component={isAuth(LoadableRouteComponents.UpdateAssistantLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.UpdateAssistant}/>
             </Route>
-            {/*<Route path='/update_subscription' component={isAuth(LoadableRouteComponents.UpdateSubscriptionLayout, store)}>
+            <Route path='/update_subscription' component={isAuth(LoadableRouteComponents.UpdateSubscriptionLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.UpdateSubscription}/>
-            </Route>*/}
+            </Route>
             <Route path='/myprofile' component={isAuth(LoadableRouteComponents.MyProfileLayout, store)}>
                 <IndexRoute component={LoadableRouteComponents.MyProfile}/>
             </Route>

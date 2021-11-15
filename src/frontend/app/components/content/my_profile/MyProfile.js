@@ -72,18 +72,20 @@ class MyProfile extends Component{
     parseEntity(){
         const {user} = this.props;
         let result = {};
-        result.id = user.id;
-        result.email = user.email;
-        result.password = '';
-        result.repeatPassword = '';
-        result.name = user.userDetail.name;
-        result.surname = user.userDetail.surname;
-        result.phoneNumber = user.userDetail.phoneNumber;
-        result.organisation = user.userDetail.organisation;
-        result.department = user.userDetail.department;
-        result.userTitle = user.userDetail.userTitle;
-        result.profilePicture = user.userDetail.profilePicture;
-        result.userGroup = user.userGroups;
+        if(user) {
+            result.id = user.id;
+            result.email = user.email;
+            result.password = '';
+            result.repeatPassword = '';
+            result.name = user.userDetail.name;
+            result.surname = user.userDetail.surname;
+            result.phoneNumber = user.userDetail.phoneNumber;
+            result.organisation = user.userDetail.organisation;
+            result.department = user.userDetail.department;
+            result.userTitle = user.userDetail.userTitle;
+            result.profilePicture = user.userDetail.profilePicture;
+            result.userGroup = user.userGroups;
+        }
         return result;
     }
 

@@ -88,6 +88,7 @@ import {
 import {
     fetchWidgetsEpic, fetchWidgetSettingsEpic, updateWidgetSettingsEpic,
 } from "@epics/dashboard";
+import {fetchSubscriptionUpdateEpic} from "@epics/subscription_update";
 
 
 /**
@@ -201,6 +202,7 @@ export default combineEpics(
     deleteNotificationTemplatesEpic,
     checkConnectionEpic,
     fetchUpdateAppVersionEpic,
+    fetchSubscriptionUpdateEpic,
     fetchOfflineUpdatesEpic,
     fetchOnlineUpdatesEpic,
     deleteVersionEpic,

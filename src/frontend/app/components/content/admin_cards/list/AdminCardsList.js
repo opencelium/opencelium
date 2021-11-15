@@ -19,6 +19,7 @@ import {withTranslation} from 'react-i18next';
 import {fetchAdminCards, loadAdminCardsLink} from '@actions/admin_cards/fetch';
 import {fetchAppVersion} from "@actions/app";
 import {fetchUpdateAppVersion} from "@actions/update_assistant/fetch";
+import {fetchSubscriptionUpdate} from "@actions/subscription_update/fetch";
 
 import List from '../../../general/list_of_components/List';
 import {ListComponent} from "@decorators/ListComponent";
@@ -39,8 +40,11 @@ function mapStateToProps(state){
     const app = state.get('app');
     const adminCards = state.get('admincards');
     const updateAssistant = state.get('update_assistant');
+    const subscriptionUpdate = state.get('subscription_update');
     return {
         authUser: auth.get('authUser'),
+        fetchingSubscriptionUpdate: updateAssistant.get('fetchingSubscriptionUpdate'),
+        hasSubscriptionUpdate: subscriptionUpdate.get('hasUpdate'),
         fetchingAdminCards: adminCards.get('fetchingAdminCards'),
         loadingAdminCardsLink: adminCards.get('loadingAdminCardsLink'),
         adminCards: adminCards.get('adminCards').toJS(),
@@ -56,7 +60,7 @@ function mapStateToProps(state){
 /**
  * List of the Admin Cards
  */
-@connect(mapStateToProps, {fetchAdminCards, loadAdminCardsLink, fetchAppVersion, fetchUpdateAppVersion})
+@connect(mapStateToProps, {fetchAdminCards, loadAdminCardsLink, fetchAppVersion, fetchUpdateAppVersion, fetchSubscriptionUpdate})
 @permission(AppPermissions.READ, true)
 @withTranslation('admin_cards')
 @ListComponent('adminCards')
@@ -68,12 +72,15 @@ class AdminCardsList extends Component{
     }
 
     componentDidMount() {
-        const {appVersion, fetchAppVersion, updateAppVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion, fetchingAppVersion} = this.props;
+        const {hasSubscriptionUpdate, fetchingSubscriptionUpdate, fetchSubscriptionUpdate, appVersion, fetchAppVersion, updateAppVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion, fetchingAppVersion} = this.props;
         if(appVersion === '' && fetchingAppVersion !== API_REQUEST_STATE.START){
             fetchAppVersion();
         }
         if(updateAppVersion === '' && fetchingUpdateAppVersion !== API_REQUEST_STATE.START){
             fetchUpdateAppVersion({background: true});
+        }
+        if(!hasSubscriptionUpdate && fetchingSubscriptionUpdate !== API_REQUEST_STATE.START){
+            fetchSubscriptionUpdate({background: true});
         }
     }
 
@@ -85,8 +92,8 @@ class AdminCardsList extends Component{
 
     render(){
         const {
-            authUser, t, adminCards, params, setTotalPages, openTour, loadAdminCardsLink, loadingAdminCardsLink,
-            updateAppVersion, appVersion, fetchingUpdateAppVersion, fetchingAppVersion} = this.props;
+            authUser, t, adminCards, params, setTotalPages, openTour, loadAdminCardsLink, loadingAdminCardsLink, hasSubscriptionUpdate,
+            updateAppVersion, appVersion, fetchingUpdateAppVersion, fetchingAppVersion, fetchingSubscriptionUpdate} = this.props;
         let translations = {};
         translations.header = {title: t('LIST.HEADER'), onHelpClick: openTour};
         translations.add_button = t('LIST.ADD_BUTTON');
@@ -110,6 +117,13 @@ class AdminCardsList extends Component{
                     result.subtitle = <Loading className={styles.update_loading}/>;
                 } else {
                     result.subtitle = appVersion === updateAppVersion ? t('LIST.NO_UPDATES') : t('LIST.UPDATES');
+                }
+            }
+            if(adminCard.link === '/update_subscription'){
+                if(fetchingSubscriptionUpdate === API_REQUEST_STATE.START){
+                    result.subtitle = <Loading className={styles.update_loading}/>;
+                } else {
+                    result.subtitle = !hasSubscriptionUpdate ? t('LIST.NO_UPDATES') : t('LIST.SUBSCRIPTION_UPDATES');
                 }
             }
             return result;

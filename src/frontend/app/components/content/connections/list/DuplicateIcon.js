@@ -154,7 +154,7 @@ class DuplicateIcon extends React.Component{
         const {t, connection, listConnection, connectors, fetchingConnection, fetchingConnectors, checkingConnectionTitle} = this.props;
         const fromConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.fromConnector.invoker.name).map(connector => {return {label: connector.name, value: connector.id}});
         const toConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.toConnector.invoker.name).map(connector => {return {label: connector.name, value: connector.id}});
-        const isLoading = fetchingConnection !== API_REQUEST_STATE.FINISH || fetchingConnectors !== API_REQUEST_STATE.FINISH || connection.connectionId !== listConnection.connectionId;
+        const isLoading = fetchingConnection !== API_REQUEST_STATE.FINISH || fetchingConnectors !== API_REQUEST_STATE.FINISH || connection && connection.connectionId !== listConnection.connectionId;
         return(
             <React.Fragment>
                 <TooltipFontIcon wrapStyles={{marginRight: '2px'}} isButton turquoiseTheme value={'content_copy'} tooltip={'Create Duplicate'} onClick={::this.toggleDuplicateForm}/>
