@@ -60,7 +60,7 @@ public class UserDetailResource extends ResourceSupport {
         this.theme = userDetail.getTheme();
         this.lang = userDetail.getLang();
         this.bitbucketUser = userDetail.getRepoUser();
-        this.bitbucketPassword = userDetail.getRepoPassword();
+//        this.bitbucketPassword = userDetail.get();
         if (userDetail.getProfilePicture() != null){
             this.profilePicture = imagePath + userDetail.getProfilePicture();
         }

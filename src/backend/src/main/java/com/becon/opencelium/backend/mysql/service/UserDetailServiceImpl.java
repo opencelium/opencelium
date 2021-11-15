@@ -45,7 +45,14 @@ public class UserDetailServiceImpl implements UserDetailService {
 
     @Override
     public UserDetail toEntity(UserDetailResource resource) {
+        if ((resource != null) && (resource.getBitbucketPassword() != null && !resource.getBitbucketPassword().isEmpty())){
+            resource.setBitbucketPassword(userService.encodePassword(resource.getBitbucketPassword()));
+        }
 
+        if (resource != null && (resource.getBitbucketPassword() == null || resource.getBitbucketPassword().isEmpty())) {
+//            UserDetail userDetail = userDetailRepository.findById()
+//            resource.setBitbucketPassword();
+        }
         return new UserDetail(resource);
     }
 

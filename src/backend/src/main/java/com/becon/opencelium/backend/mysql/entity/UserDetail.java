@@ -203,13 +203,13 @@ public class UserDetail {
         return repoUser;
     }
 
-    public void setRepoUser(String repoUser) {
-        this.repoUser = repoUser;
-    }
+//    public void setRepoUser(String repoUser) {
+//        this.repoUser = repoUser;
+//    }
 
-    public String getRepoPassword() {
-        return repoPassword;
-    }
+//    public String getRepoPassword() {
+//        return repoPassword;
+//    }
 
     public void setRepoPassword(String repoPassword) {
         this.repoPassword = repoPassword;

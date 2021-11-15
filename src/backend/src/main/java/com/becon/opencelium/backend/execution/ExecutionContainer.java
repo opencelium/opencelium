@@ -226,8 +226,8 @@ public class ExecutionContainer {
         }
         String type = "";
         if (exp.contains(":")) {
-            exp = exp.split(":")[0].concat("}");
             type = exp.split(":")[1].replace("}", "");
+            exp = exp.split(":")[0].concat("}");
         }
 
         for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
@@ -253,6 +253,9 @@ public class ExecutionContainer {
     }
 
     private Object getProperTypeOfValue(Object val, String type){
+        if (val == null) {
+            return null;
+        }
         Object result = val.toString();
         final Pattern pattern = Pattern.compile(RegExpression.isNumber, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(val.toString());
