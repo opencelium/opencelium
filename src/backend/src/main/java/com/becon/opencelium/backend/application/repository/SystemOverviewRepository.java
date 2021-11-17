@@ -90,9 +90,10 @@ public class SystemOverviewRepository {
     public String getVersion() {
         try	{
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repository = builder
-                    .readEnvironment()
-                    .findGitDir()
+            File gitDir = Paths.get("").toFile().getParentFile().getParentFile();
+            Repository repository = builder.setGitDir(gitDir).setWorkTree(gitDir)
+//                    .readEnvironment()
+//                    .findGitDir()
                     .build();
             Git git = new Git(repository);
             String version = git.describe().call();

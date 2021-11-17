@@ -222,11 +222,14 @@ public class AssistantServiceImp implements ApplicationService {
 //                .setBranch("refs/heads/specific-branch")
 //                .call();
 //        String gitUrl = env.getProperty("opencelium.assistant.repo.url");
-        Process process = Runtime.getRuntime().exec("git fetch --tags");
+        // git --git-dir=/opt/.git --work-tree=/opt/ describe
+        String gitDir = Paths.get("").toFile().getParentFile().getParentFile().getPath();
+        String workTree = gitDir + "/.git --work-tree=" + gitDir;
+        Process process = Runtime.getRuntime().exec("git " + workTree + " fetch --tags");
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
 
-        process = Runtime.getRuntime().exec("git checkout -f tag/" + version);
+        process = Runtime.getRuntime().exec("git" + workTree + " checkout -f tag/" + version);
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
 
