@@ -258,7 +258,7 @@ public class AssistantServiceImp implements ApplicationService {
         Repository repository = builder.setInitialBranch("origin/master").findGitDir().readEnvironment().build();
         Git git = new Git(repository);
 
-        return git.diff().call().isEmpty();
+        return !git.status().call().hasUncommittedChanges();
     }
 
 //    public boolean repoVerification() {
