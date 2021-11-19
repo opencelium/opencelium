@@ -16,6 +16,9 @@ import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -243,15 +246,19 @@ public class AssistantServiceImp implements ApplicationService {
 
     public boolean repoHasChanges() throws Exception {
 
-        Process fetch = Runtime.getRuntime().exec("git fetch");
-        printStream(fetch.getInputStream());
-        printStream(fetch.getErrorStream());
+//        Process fetch = Runtime.getRuntime().exec("git fetch");
+//        printStream(fetch.getInputStream());
+//        printStream(fetch.getErrorStream());
+//
+//        Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
+//        printStream(diff.getInputStream());
+//        printStream(diff.getErrorStream());
 
-        Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
-        printStream(diff.getInputStream());
-        printStream(diff.getErrorStream());
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = builder.findGitDir().readEnvironment().build();
+        Git git = new Git(repository);
 
-        return diff.exitValue() == 0;
+        return git.diff().call().isEmpty();
     }
 
 //    public boolean repoVerification() {
