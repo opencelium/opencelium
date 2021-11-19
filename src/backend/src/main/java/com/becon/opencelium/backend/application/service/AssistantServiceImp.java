@@ -19,6 +19,8 @@ import com.jayway.jsonpath.JsonPath;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -255,10 +257,11 @@ public class AssistantServiceImp implements ApplicationService {
 //        printStream(diff.getErrorStream());
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repository = builder.setInitialBranch("origin/master").findGitDir().readEnvironment().build();
+        Repository repository = builder.findGitDir().readEnvironment().build();
         Git git = new Git(repository);
-
-        return !git.status().call().hasUncommittedChanges();
+        CredentialsProvider cred = new UsernamePasswordCredentialsProvider()
+        git.fetch().setCredentialsProvider().setRemote("").call();
+        return git.status().call().hasUncommittedChanges();
     }
 
 //    public boolean repoVerification() {
