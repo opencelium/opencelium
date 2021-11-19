@@ -179,7 +179,7 @@ public class UpdateAssistantController {
         }
     }
 
-    @GetMapping("/subscription/repo/has/changes")
+    @GetMapping("subscription/repo/update/check")
     public ResponseEntity<?> subsRepoHasChanges() {
         try {
             if (assistantServiceImp.repoHasChanges()) {
@@ -192,7 +192,7 @@ public class UpdateAssistantController {
         }
     }
 
-    @GetMapping("/subscription/repo/update")
+    @GetMapping("subscription/repo/update")
     public ResponseEntity<?> subsRepoUpdate() {
         try {
             assistantServiceImp.updateSubsFiles();
