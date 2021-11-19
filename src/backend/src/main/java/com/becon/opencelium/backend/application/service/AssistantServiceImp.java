@@ -247,26 +247,26 @@ public class AssistantServiceImp implements ApplicationService {
         printStream(fetch.getInputStream());
         printStream(fetch.getErrorStream());
 
-        Process diff = Runtime.getRuntime().exec("git diff exit_code");
+        Process diff = Runtime.getRuntime().exec("git diff --exit-code");
         printStream(diff.getInputStream());
         printStream(diff.getErrorStream());
 
-        return false;
+        return diff.exitValue() == 0;
     }
 
-    public boolean repoVerification() {
-        try {
-            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
-            HttpMethod method = HttpMethod.GET;
-            HttpHeaders header = new HttpHeaders();
-            header.set("Content-Type", "application/json");
-            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
-            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
+//    public boolean repoVerification() {
+//        try {
+//            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
+//            HttpMethod method = HttpMethod.GET;
+//            HttpHeaders header = new HttpHeaders();
+//            header.set("Content-Type", "application/json");
+//            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
+//            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 
     @Override
     public void updateOff(String dir, String version) throws Exception {

@@ -170,14 +170,14 @@ public class UpdateAssistantController {
         return ResponseEntity.ok(errorResource);
     }
 // ---------------------------------------------------------------------------------------------
-    @GetMapping("/verify/repo/credentials")
-    public ResponseEntity<?> verifyRepoCredentials() {
-        if (assistantServiceImp.repoVerification()) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.noContent().build();
-        }
-    }
+//    @GetMapping("/verify/repo/credentials")
+//    public ResponseEntity<?> verifyRepoCredentials() {
+//        if (assistantServiceImp.repoVerification()) {
+//            return ResponseEntity.ok().build();
+//        } else {
+//            return ResponseEntity.noContent().build();
+//        }
+//    }
 
     @GetMapping("subscription/repo/update/check")
     public ResponseEntity<?> subsRepoHasChanges() {
