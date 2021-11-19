@@ -247,7 +247,7 @@ public class AssistantServiceImp implements ApplicationService {
         printStream(fetch.getInputStream());
         printStream(fetch.getErrorStream());
 
-        Process diff = Runtime.getRuntime().exec("git diff --exit-code");
+        Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
         printStream(diff.getInputStream());
         printStream(diff.getErrorStream());
 
