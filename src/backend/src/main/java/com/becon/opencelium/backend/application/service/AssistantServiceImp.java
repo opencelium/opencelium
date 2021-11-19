@@ -255,7 +255,7 @@ public class AssistantServiceImp implements ApplicationService {
 //        printStream(diff.getErrorStream());
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repository = builder.findGitDir().readEnvironment().build();
+        Repository repository = builder.setInitialBranch("origin/master").findGitDir().readEnvironment().build();
         Git git = new Git(repository);
 
         return git.diff().call().isEmpty();
