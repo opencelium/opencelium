@@ -92,7 +92,7 @@ public class TokenAuth implements AuthenticationType {
         }
 
 
-        String path = tokenRefParts.stream().map(Object::toString).collect(Collectors.joining(", "));;
+        String path = tokenRefParts.stream().map(Object::toString).collect(Collectors.joining("."));
         String body = responseEntity.getBody().toString();
         return JsonPath.read(body, path);
     }

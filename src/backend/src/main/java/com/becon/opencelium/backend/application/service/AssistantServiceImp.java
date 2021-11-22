@@ -16,6 +16,9 @@ import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.jayway.jsonpath.JsonPath;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -222,11 +225,14 @@ public class AssistantServiceImp implements ApplicationService {
 //                .setBranch("refs/heads/specific-branch")
 //                .call();
 //        String gitUrl = env.getProperty("opencelium.assistant.repo.url");
-        Process process = Runtime.getRuntime().exec("git fetch --tags");
+        // git --git-dir=/opt/.git --work-tree=/opt/ describe
+        String gitDir = Paths.get("").toFile().getParentFile().getParentFile().getPath();
+        String workTree = gitDir + "/.git --work-tree=" + gitDir;
+        Process process = Runtime.getRuntime().exec("git " + workTree + " fetch --tags");
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
 
-        process = Runtime.getRuntime().exec("git checkout -f tag/" + version);
+        process = Runtime.getRuntime().exec("git" + workTree + " checkout -f tag/" + version);
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
 
@@ -240,30 +246,34 @@ public class AssistantServiceImp implements ApplicationService {
 
     public boolean repoHasChanges() throws Exception {
 
-        Process fetch = Runtime.getRuntime().exec("git fetch");
-        printStream(fetch.getInputStream());
-        printStream(fetch.getErrorStream());
+//        Process fetch = Runtime.getRuntime().exec("git fetch");
+//        printStream(fetch.getInputStream());
+//        printStream(fetch.getErrorStream());
+//
+//        Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
+//        printStream(diff.getInputStream());
+//        printStream(diff.getErrorStream());
 
-        Process diff = Runtime.getRuntime().exec("git diff exit_code");
-        printStream(diff.getInputStream());
-        printStream(diff.getErrorStream());
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = builder.setInitialBranch("origin/master").findGitDir().readEnvironment().build();
+        Git git = new Git(repository);
 
-        return false;
+        return !git.status().call().hasUncommittedChanges();
     }
 
-    public boolean repoVerification() {
-        try {
-            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
-            HttpMethod method = HttpMethod.GET;
-            HttpHeaders header = new HttpHeaders();
-            header.set("Content-Type", "application/json");
-            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
-            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
+//    public boolean repoVerification() {
+//        try {
+//            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
+//            HttpMethod method = HttpMethod.GET;
+//            HttpHeaders header = new HttpHeaders();
+//            header.set("Content-Type", "application/json");
+//            HttpEntity<Object> httpEntity = new HttpEntity <Object> (header);
+//            ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 
     @Override
     public void updateOff(String dir, String version) throws Exception {
