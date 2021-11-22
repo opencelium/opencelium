@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {isArray, isObject, isString} from "@utils/app";
+import {isArray, isNumber, isObject, isString} from "@utils/app";
 
 
 export const ARRAY_SIGN = '[]';
@@ -40,9 +40,9 @@ export const dotColor = (color = '#ccc') => (color !== '#ccc' ? {
 /**
  * to mark field name as array
  */
-export function markFieldNameAsArray(fieldName){
+export function markFieldNameAsArray(fieldName, index = null){
     if(isString(fieldName)) {
-        return `${fieldName}${ARRAY_SIGN}`;
+        return isNumber(index) ? `${fieldName}[${index}]` : `${fieldName}${ARRAY_SIGN}`;
     }
     return fieldName;
 }
@@ -68,7 +68,11 @@ export function convertFieldNameForBackend(invokerBody, fieldName){
                 result += `${fieldNameSplitted[i]}`;
                 subValue = elem;
             } else if (isArray(elem) && fieldNameSplitted[i] !== WHOLE_ARRAY) {
-                result += markFieldNameAsArray(fieldNameSplitted[i]);
+                let index = i + 1 < fieldNameSplitted.length ? parseInt(fieldNameSplitted[i + 1]) : null;
+                result += markFieldNameAsArray(fieldNameSplitted[i], index);
+                if(isNumber(index)){
+                    i++;
+                }
                 subValue = elem[0];
             } else {
                 result += `${fieldNameSplitted[i]}`;
