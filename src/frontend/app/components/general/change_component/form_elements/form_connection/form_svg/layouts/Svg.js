@@ -68,7 +68,7 @@ class Svg extends React.Component {
 
         if(layout && layoutSVG) {
             let width = layout.offsetWidth;
-            let ratio = width / layoutSVG.getBoundingClientRect().width;
+            let ratio = layoutSVG.getBoundingClientRect().width ? width / layoutSVG.getBoundingClientRect().width : 0;
             const viewBox = {x: startingSvgX ? startingSvgX : CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
             CSvg.setViewBox(svgId, viewBox);
             this.setState({
@@ -80,7 +80,9 @@ class Svg extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {svgId, detailsPosition, items, startingSvgX, startingSvgY, isDraggable} = this.props;
+        const {svgId, layoutId, detailsPosition, items, startingSvgX, startingSvgY, isDraggable} = this.props;
+        const layout = document.getElementById(layoutId);
+        const layoutSVG = document.getElementById(svgId);
 
         if (detailsPosition !== prevProps.detailsPosition || prevProps.startingSvgX !== startingSvgX) {
             const x = startingSvgX ? startingSvgX : CSvg.getStartingViewBoxX(detailsPosition);
@@ -93,6 +95,13 @@ class Svg extends React.Component {
         if(items.length === 0 && !isDraggable){
             const viewBox = {x: startingSvgX ? startingSvgX : CSvg.getStartingViewBoxX(detailsPosition), y: startingSvgY, width: 1800, height: 715};
             CSvg.setViewBox(svgId, viewBox);
+        }
+        if(this.state.ratio === 0){
+            let width = layout.offsetWidth;
+            let ratio = layoutSVG.getBoundingClientRect().width ? width / layoutSVG.getBoundingClientRect().width : 0;
+            if(ratio !== 0){
+                this.setState({ratio});
+            }
         }
     }
 
