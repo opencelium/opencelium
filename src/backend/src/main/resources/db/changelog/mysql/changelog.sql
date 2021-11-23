@@ -217,9 +217,11 @@ UNLOCK TABLES;
 -- -----------------------------------------------------
 -- Table `opencelium`.`business_layout`
 -- -----------------------------------------------------
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `bl_svg_items` ;
 DROP TABLE IF EXISTS `bl_arrows` ;
 DROP TABLE IF EXISTS `business_layout` ;
+SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE IF NOT EXISTS `business_layout` (
   `id` INT NOT NULL AUTO_INCREMENT,

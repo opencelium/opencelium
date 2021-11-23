@@ -21,6 +21,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -50,6 +51,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -248,20 +250,19 @@ public class AssistantServiceImp implements ApplicationService {
 
     public boolean repoHasChanges() throws Exception {
 
-//        Process fetch = Runtime.getRuntime().exec("git fetch");
-//        printStream(fetch.getInputStream());
-//        printStream(fetch.getErrorStream());
-//
-//        Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
-//        printStream(diff.getInputStream());
-//        printStream(diff.getErrorStream());
+        Process fetch = Runtime.getRuntime().exec("git fetch");
+        printStream(fetch.getInputStream());
+        System.out.println("-------------__ERROR ------------------");
+        printStream(fetch.getErrorStream());
 
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repository = builder.findGitDir().readEnvironment().build();
-        Git git = new Git(repository);
-        CredentialsProvider cred = new UsernamePasswordCredentialsProvider()
-        git.fetch().setCredentialsProvider().setRemote("").call();
-        return git.status().call().hasUncommittedChanges();
+        System.out.println("-----------------------------------");
+//
+        Process diff = Runtime.getRuntime().exec("git diff --exit-code");
+        System.out.println(diff.getInputStream().available());
+        printStream(diff.getInputStream());
+        System.out.println("-------------__ERROR ------------------");
+        printStream(diff.getErrorStream());
+        return false;
     }
 
 //    public boolean repoVerification() {
