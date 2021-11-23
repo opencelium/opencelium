@@ -192,7 +192,7 @@ public class UpdateAssistantController {
         }
     }
 
-    @GetMapping("subscription/repo/update")
+    @GetMapping("/subscription/repo/update")
     public ResponseEntity<?> subsRepoUpdate() {
         try {
             assistantServiceImp.updateSubsFiles();
@@ -242,6 +242,7 @@ public class UpdateAssistantController {
                 assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
             });
 
+            //////test commit
             if (migrateDataResource.isOnline()) {
                 assistantServiceImp.updateOn(version);
             } else {

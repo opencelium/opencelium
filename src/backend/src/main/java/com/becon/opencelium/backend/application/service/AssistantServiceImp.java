@@ -239,7 +239,6 @@ public class AssistantServiceImp implements ApplicationService {
         process = Runtime.getRuntime().exec("git" + workTree + " checkout -f tag/" + version);
         printStream(process.getInputStream());
         printStream(process.getErrorStream());
-
     }
 
     public void updateSubsFiles() throws Exception {
@@ -252,17 +251,28 @@ public class AssistantServiceImp implements ApplicationService {
 
         Process fetch = Runtime.getRuntime().exec("git fetch");
         printStream(fetch.getInputStream());
-        System.out.println("-------------__ERROR ------------------");
         printStream(fetch.getErrorStream());
 
         System.out.println("-----------------------------------");
-//
-        Process diff = Runtime.getRuntime().exec("git diff --exit-code");
-        System.out.println(diff.getInputStream().available());
-        printStream(diff.getInputStream());
-        System.out.println("-------------__ERROR ------------------");
+        Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
+        boolean isEmpty = printStream(diff.getInputStream());
         printStream(diff.getErrorStream());
-        return false;
+        return !isEmpty;
+    }
+
+    public boolean printStream(InputStream is) {
+        boolean isEmpty = true;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is));) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                isEmpty = false;
+                System.out.println("> " + line);
+            }
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+        return isEmpty;
     }
 
 //    public boolean repoVerification() {
@@ -299,18 +309,6 @@ public class AssistantServiceImp implements ApplicationService {
 //                .setBranch("dev")
 //                .call();
     }
-
-    public void printStream(InputStream is) {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is));) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println("> " + line);
-            }
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-    }
-
 
     @Override
     public boolean checkRepoConnection() {
