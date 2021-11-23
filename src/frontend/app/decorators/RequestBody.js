@@ -15,7 +15,7 @@
 
 import React from 'react';
 import {withTranslation} from 'react-i18next';
-import {isJsonString, subArrayToString, isString} from "@utils/app";
+import {isJsonString, subArrayToString, isString, isNumber} from "@utils/app";
 import {CONNECTOR_FROM} from "@classes/components/content/connection/CConnectorItem";
 import CConnection from "@classes/components/content/connection/CConnection";
 import Dialog from "@basic_components/Dialog";
@@ -26,6 +26,7 @@ import styles from '@themes/default/general/form_methods.scss';
 import Input from "@basic_components/inputs/Input";
 import CRequest from "@classes/components/content/invoker/request/CRequest";
 import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
+import {markFieldNameAsArray} from "@change_component/form_elements/form_connection/form_methods/help";
 
 
 export function RequestBody(CRequestType){
@@ -113,7 +114,15 @@ export function RequestBody(CRequestType){
                     }
                     let fieldName = '';
                     if(value.namespace.length > 1){
-                        fieldName = `${subArrayToString(value.namespace, '.', 1, value.namespace.length)}.`;
+                        for(let i = 1; i < value.namespace.length; i++){
+                            if((i + 1) < value.namespace.length && isNumber(value.namespace[i + 1])){
+                                fieldName += markFieldNameAsArray(value.namespace[i], value.namespace[i + 1]);
+                                i++;
+                            } else{
+                                fieldName += value.namespace[i];
+                            }
+                            fieldName += '.';
+                        }
                     }
                     fieldName += value.variable.name;
                     let bindingItem = this.getCurrentBindingItem(fieldName);
