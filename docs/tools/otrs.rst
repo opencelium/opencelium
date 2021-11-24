@@ -18,7 +18,7 @@ See below the new operations
 - Service::ServiceUpdate
 
 .. note::
-	Package is compatible with otrs forks like znuny and otobo. 
+	Package is compatible with otrs forks like znuny and otobo. Use for otobo package version 10.x.x.
 
 |image0|
 
