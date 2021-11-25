@@ -66,6 +66,7 @@ class CronExpGenerator extends Component{
         if(atOrEach.value !== prevState.atOrEach.value || dayForMonth.value !== prevState.dayForMonth.value
             || timeStamp.value !== prevState.timeStamp.value || everyValue.value !== prevState.everyValue.value
             || startAtHour.value !== prevState.startAtHour.value || startAtMinute.value !== prevState.startAtMinute.value
+            || everyValue.length !== prevState.everyValue.length
         ){
             this.setState({
                 examples: ::this.defineExamples(),
@@ -90,7 +91,13 @@ class CronExpGenerator extends Component{
     getCronExp(){
         const {atOrEach, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
         let cronExp = '';
-        const value = everyValue.value;
+        const isForWeek = timeStamp.value === 'week';
+        let value = everyValue;
+        if(isForWeek){
+            value = value.map(v => v.value).join(',');
+        } else{
+            value = value.value;
+        }
         const minuteValue = startAtMinute.value;
         const hourValue = startAtHour.value;
         const dayForMonthValue = dayForMonth.value;
@@ -105,6 +112,9 @@ class CronExpGenerator extends Component{
             case 'day':
                 cronExp = isAt ? `0 ${minuteValue} ${hourValue} ${value} 1/1 ?` : `0 ${minuteValue} ${hourValue} 1/${value} 1/1 ?`;
                 break;
+            case 'week':
+                cronExp = `0 ${minuteValue} ${hourValue} * 1/1 ${value}`;
+                break;
             case 'month':
                 cronExp = isAt ? `0 ${minuteValue} ${hourValue} ${dayForMonthValue} ${value} ?` : `0 ${minuteValue} ${hourValue} 1/${dayForMonthValue} ${value} ?`;
                 break;
@@ -114,11 +124,11 @@ class CronExpGenerator extends Component{
 
     getTimeStampOptions(value = null){
         const atOrEachValue = !value ? this.state.atOrEach.value : value;
-        return [{label: `Minute${atOrEachValue === 'each' ? '(s)' : ''}`, value: 'minute'}, {label: `Hour${atOrEachValue === 'each' ? '(s)' : ''}`, value: 'hour'}, {label: `Day${atOrEachValue === 'each' ? '(s)' : ''}`, value: 'day'}, {label: `Month`, value: 'month'}];
+        return [{label: `Minute${atOrEachValue === 'each' ? '(s)' : ''}`, value: 'minute'}, {label: `Hour${atOrEachValue === 'each' ? '(s)' : ''}`, value: 'hour'}, {label: `Day${atOrEachValue === 'each' ? '(s)' : ''}`, value: 'day'}, {label: `Week`, value: 'week'}, {label: `Month`, value: 'month'}];
     }
 
     setTimeStamp(timeStamp){
-        let {cronExp} = this.state;
+        let {cronExp, atOrEach, everyValue} = this.state;
         let startAtShow = timeStamp.value !== 'minute' && timeStamp.value !== 'hour';
         let dayShow = timeStamp.value === 'month';
         const everyOptions = ::this.getEveryOptions(timeStamp.value);
@@ -133,14 +143,20 @@ class CronExpGenerator extends Component{
             case 'day':
                 cronExp = '0 0 12 1 1/1 ?';
                 break;
+            case 'week':
+                atOrEach = {label: 'Each', value: 'each'};
+                cronExp = '0 0 1 * * MON';
+                break;
             case 'month':
                 cronExp = '0 0 12 1 1 ?';
                 break;
         }
+        everyValue = timeStamp.value === 'week' ? [] : everyOptions[0];
         this.setState({
+            atOrEach,
             timeStamp,
             cronExp,
-            everyValue: everyOptions[0],
+            everyValue,
             everyOptions,
             startAtHour: {label: 12, value: 12},
             startAtMinute: {label: '00', value: 0},
@@ -249,6 +265,17 @@ class CronExpGenerator extends Component{
                     options.push({label: getLabel(i), value: i});
                 }
                 break;
+            case 'week':
+                options = [
+                    {label: 'Sunday', value: 'SUN'},
+                    {label: 'Monday', value: 'MON'},
+                    {label: 'Tuesday', value: 'TUE'},
+                    {label: 'Wednesday', value: 'WED'},
+                    {label: 'Thursday', value: 'THU'},
+                    {label: 'Friday', value: 'FRI'},
+                    {label: 'Saturday', value: 'SAT'},
+                ]
+                break;
             case 'month':
                 for(let i = 1; i <= 12; i++){
                     options.push({label: ALL_MONTHS[i - 1], value: i});
@@ -298,6 +325,8 @@ class CronExpGenerator extends Component{
             'cron_icon_tooltip',
             'cron_every',
             'cron_every_short',
+            'cron_each',
+            'cron_each_short',
             'cron_select_day_for_month',
             'cron_suffix_day_for_month',
             'cron_select_every',
@@ -311,8 +340,14 @@ class CronExpGenerator extends Component{
             'cron_suffix_hour',
             'cron_select_start_minute',
             'cron_suffix_minute',
+            'of_a_short',
+            'of_a',
+            'cron_select_timestamp_for_week',
+            'cron_select_every_for_week',
+            'cron_exp_dialog',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
+        const isForWeek = timeStamp.value === 'week';
         return (
             <React.Fragment>
                 <Dialog
@@ -320,15 +355,20 @@ class CronExpGenerator extends Component{
                     active={show}
                     toggle={::this.toggleShowGenerator}
                     title={'Generate Cron Expression'}
+                    theme={{dialog: styles[classNames.cron_exp_dialog]}}
                 >
                     <Row>
                         <Col md={12}>
-                            <Select
-                                className={styles[dayShow ? classNames.cron_every_short : classNames.cron_every]}
-                                value={atOrEach}
-                                onChange={::this.setAtOrEach}
-                                options={[{label: 'At', value: 'at'}, {label: 'Each', value: 'each'}]}
-                            />
+                            {isForWeek ?
+                                <span className={styles[classNames.cron_each]}>{'Each'}</span>
+                                :
+                                <Select
+                                    className={styles[dayShow ? classNames.cron_every_short : classNames.cron_every]}
+                                    value={atOrEach}
+                                    onChange={::this.setAtOrEach}
+                                    options={[{label: 'At', value: 'at'}, {label: 'Each', value: 'each'}]}
+                                />
+                            }
                             {dayShow &&
                                 <React.Fragment>
                                     <Select
@@ -341,13 +381,15 @@ class CronExpGenerator extends Component{
                                 </React.Fragment>
                             }
                             <Select
-                                className={styles[dayShow ? classNames.cron_select_every_short : classNames.cron_select_every]}
+                                className={styles[isForWeek ? classNames.cron_select_every_for_week : dayShow ? classNames.cron_select_every_short : classNames.cron_select_every]}
                                 value={everyValue}
                                 onChange={::this.setEveryValue}
                                 options={everyOptions}
+                                isMulti={isForWeek}
                             />
+                            {isForWeek && <span className={styles[dayShow ? classNames.of_a_short : classNames.of_a]}>{'of a'}</span>}
                             <Select
-                                className={styles[dayShow ? classNames.cron_select_timestamp_short : classNames.cron_select_timestamp]}
+                                className={styles[isForWeek ? classNames.cron_select_timestamp_for_week : dayShow ? classNames.cron_select_timestamp_short : classNames.cron_select_timestamp]}
                                 value={timeStamp}
                                 onChange={::this.setTimeStamp}
                                 options={timeStampOptions}
