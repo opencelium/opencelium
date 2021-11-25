@@ -20,7 +20,7 @@ import {
     UsersAction, UserGroupsAction, AuthAction, AppAction, ConnectorsAction,
     ConnectionsAction, SchedulesAction, TemplatesAction, WebHooksAction,
     AppsAction, AdminCardsAction, InvokersAction, NotificationTemplatesAction,
-    UpdateAssistantAction,
+    UpdateAssistantAction, SubscriptionUpdate,
 } from '@utils/actions';
 import AvailableUpdateMessage from "@basic_components/translations/AvailableUpdateMessage";
 import {ADD_USER, DELETE_USER, UPDATE_USER} from "@utils/constants/notifications/interpolations/user";
@@ -40,6 +40,7 @@ import {
     DELETE_CONNECTION,
     UPDATE_CONNECTION
 } from "@utils/constants/notifications/interpolations/connection";
+import AvailableSubscriptionUpdateMessage from "@basic_components/translations/AvailableSubscriptionUpdateMessage";
 
 
 /**
@@ -121,6 +122,7 @@ export const EntitiesWithNotification = [
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['REJECTED']},
     {name: UpdateAssistantAction.FETCH_ONLINEUPDATES, types: ['REJECTED']},
+    {name: SubscriptionUpdate.FETCH_SUBSCRIPTIONUPDATE, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.FETCH_OFFLINEUPDATES, types: ['REJECTED']},
     {name: UpdateAssistantAction.UPLOAD_VERSION, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.DELETE_VERSION, types: ['FULFILLED', 'REJECTED']},
@@ -160,6 +162,9 @@ const SuccessInterpolates = {
     ...ALL_INTERPOLATIONS,
     FETCH_UPDATEAPPVERSION: (params) => {
         return <AvailableUpdateMessage {...params}/>
+    },
+    FETCH_SUBSCRIPTIONUPDATE: (params) => {
+        return <AvailableSubscriptionUpdateMessage {...params}/>
     },
     CHANGE_LANGUAGE: '',
 };

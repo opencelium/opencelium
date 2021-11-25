@@ -10,9 +10,10 @@ import XmlBody from "@change_component/form_elements/form_connection/form_method
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
 import CConnection from "@classes/components/content/connection/CConnection";
-import {subArrayToString} from "@utils/app";
+import {isNumber, subArrayToString} from "@utils/app";
 import CEnhancement from "@classes/components/content/connection/field_binding/CEnhancement";
 import Button from "@basic_components/buttons/Button";
+import {markFieldNameAsArray} from "@change_component/form_elements/form_connection/form_methods/help";
 
 class Body extends React.Component{
     constructor(props) {
@@ -56,7 +57,15 @@ class Body extends React.Component{
         }
         let fieldName = '';
         if(value.namespace.length > 1){
-            fieldName = `${subArrayToString(value.namespace, '.', 1, value.namespace.length)}.`;
+            for(let i = 1; i < value.namespace.length; i++){
+                if((i + 1) < value.namespace.length && isNumber(value.namespace[i + 1])){
+                    fieldName += markFieldNameAsArray(value.namespace[i], value.namespace[i + 1]);
+                    i++;
+                } else{
+                    fieldName += value.namespace[i];
+                }
+                fieldName += '.';
+            }
         }
         fieldName += value.variable.name;
         let bindingItem = this.getCurrentBindingItem(fieldName);

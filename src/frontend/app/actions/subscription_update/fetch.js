@@ -40,9 +40,49 @@ const fetchSubscriptionUpdateRejected = (error) => {
         payload: error
     });
 };
+/**
+ * do subscription update
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const doSubscriptionUpdate = (settings = {background: false}) => {
+    return {
+        type: SubscriptionUpdate.DO_SUBSCRIPTIONUPDATE,
+        settings,
+    };
+};
+
+/**
+ * do subscription update fulfilled
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: {}}}
+ */
+const doSubscriptionUpdateFulfilled = (settings = {background: false}) => {
+    return {
+        type: SubscriptionUpdate.DO_SUBSCRIPTIONUPDATE_FULFILLED,
+        settings: {...settings, hasCloseButton: true},
+    };
+};
+
+/**
+ * do subscription update rejected
+ * @param error
+ * @returns {promise}
+ */
+const doSubscriptionUpdateRejected = (error) => {
+    return Rx.Observable.of({
+        type: SubscriptionUpdate.DO_SUBSCRIPTIONUPDATE_REJECTED,
+        payload: error
+    });
+};
 
 export {
     fetchSubscriptionUpdate,
     fetchSubscriptionUpdateFulfilled,
     fetchSubscriptionUpdateRejected,
+    doSubscriptionUpdate,
+    doSubscriptionUpdateFulfilled,
+    doSubscriptionUpdateRejected,
 }

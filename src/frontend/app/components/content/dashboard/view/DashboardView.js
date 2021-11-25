@@ -32,6 +32,7 @@ import {fetchWidgetSettings, fetchWidgets, fetchWidgetsRejected} from "@actions/
 import {updateWidgetSettings} from "@actions/dashboard/update";
 import {ListComponent} from "@decorators/ListComponent";
 import ListHeader from "@components/general/list_of_components/Header";
+import {getLS} from "@utils/LocalStorage";
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -74,25 +75,22 @@ class DashboardView extends Component{
     }
 
     componentDidMount() {
-        const {fetchingUpdateAppVersion, fetchingSubscriptionUpdate, hasSubscriptionUpdate, fetchUpdateAppVersion,
+        const {fetchingUpdateAppVersion, fetchingSubscriptionUpdate, fetchUpdateAppVersion,
             fetchWidgetSettings, appVersion, fetchSubscriptionUpdate} = this.props;
         if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START && appVersion !== '') {
             fetchUpdateAppVersion({currentAppVersion: appVersion});
         }
-        if(fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && !hasSubscriptionUpdate) {
-            fetchSubscriptionUpdate({currentAppVersion: appVersion});
+        if(fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && !getLS('hasSubscriptionUpdate')) {
+            fetchSubscriptionUpdate();
         }
         fetchWidgetSettings();
         componentAppear('app_content');
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {appVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion, fetchingSubscriptionUpdate, hasSubscriptionUpdate, fetchSubscriptionUpdate} = this.props;
+        const {appVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion} = this.props;
         if(prevProps.appVersion !== appVersion && fetchingUpdateAppVersion !== API_REQUEST_STATE.START && fetchingUpdateAppVersion !== API_REQUEST_STATE.ERROR){
             fetchUpdateAppVersion({currentAppVersion: appVersion});
-        }
-        if(prevProps.hasSubscriptionUpdate !== hasSubscriptionUpdate && fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && fetchingSubscriptionUpdate !== API_REQUEST_STATE.ERROR){
-            fetchSubscriptionUpdate({currentAppVersion: appVersion});
         }
     }
 

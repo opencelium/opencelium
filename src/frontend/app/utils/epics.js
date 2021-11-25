@@ -28,7 +28,7 @@ import {
 } from '@epics/usergroups';
 import {
     loginUserEpic, logoutUserEpic, updateAuthUserLanguageEpic, updateDashboardSettingsEpic,
-    updateThemeEpic, toggleAppTourEpic, updateSubscriptionEpic,
+    updateThemeEpic, toggleAppTourEpic,
 } from '@epics/auth';
 import {
     fetchComponentsEpic,
@@ -88,7 +88,7 @@ import {
 import {
     fetchWidgetsEpic, fetchWidgetSettingsEpic, updateWidgetSettingsEpic,
 } from "@epics/dashboard";
-import {fetchSubscriptionUpdateEpic} from "@epics/subscription_update";
+import {fetchSubscriptionUpdateEpic, doSubscriptionUpdateEpic} from "@epics/subscription_update";
 
 
 /**
@@ -188,7 +188,6 @@ export default combineEpics(
     deleteWebHookEpic,
     checkUserEmailEpic,
     toggleAppTourEpic,
-    updateSubscriptionEpic,
     fetchAdminCardsEpic,
     loadAdminCardsLinkEpic,
     addErrorTicketEpic,
@@ -203,6 +202,7 @@ export default combineEpics(
     checkConnectionEpic,
     fetchUpdateAppVersionEpic,
     fetchSubscriptionUpdateEpic,
+    doSubscriptionUpdateEpic,
     fetchOfflineUpdatesEpic,
     fetchOnlineUpdatesEpic,
     deleteVersionEpic,
