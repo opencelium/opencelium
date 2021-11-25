@@ -48,10 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -233,46 +230,59 @@ public class AssistantServiceImp implements ApplicationService {
         String gitDir = Paths.get("").toFile().getParentFile().getParentFile().getPath();
         String workTree = gitDir + "/.git --work-tree=" + gitDir;
         Process process = Runtime.getRuntime().exec("git " + workTree + " fetch --tags");
-        printStream(process.getInputStream());
-        printStream(process.getErrorStream());
+        getText(process.getInputStream());
+        getText(process.getErrorStream());
 
         process = Runtime.getRuntime().exec("git" + workTree + " checkout -f tag/" + version);
-        printStream(process.getInputStream());
-        printStream(process.getErrorStream());
+        getText(process.getInputStream());
+        getText(process.getErrorStream());
     }
 
     public void updateSubsFiles() throws Exception {
         Process process = Runtime.getRuntime().exec("git pull");
-        printStream(process.getInputStream());
-        printStream(process.getErrorStream());
+        getText(process.getInputStream());
+        getText(process.getErrorStream());
+    }
+
+    public List<String> getChangedFileName() throws Exception {
+
+        Process fetch = Runtime.getRuntime().exec("git fetch");
+        getText(fetch.getInputStream());
+        getText(fetch.getErrorStream());
+
+        fetch = Runtime.getRuntime().exec("git diff origin/master --name-only --exit-code");
+        getText(fetch.getErrorStream());
+        List<String> filesName = getText(fetch.getInputStream());
+        return filesName;
     }
 
     public boolean repoHasChanges() throws Exception {
 
         Process fetch = Runtime.getRuntime().exec("git fetch");
-        printStream(fetch.getInputStream());
-        printStream(fetch.getErrorStream());
+        getText(fetch.getInputStream());
+        getText(fetch.getErrorStream());
 
-        System.out.println("-----------------------------------");
         Process diff = Runtime.getRuntime().exec("git diff origin/master --exit-code");
-        boolean isEmpty = printStream(diff.getInputStream());
-        printStream(diff.getErrorStream());
-        return !isEmpty;
+        getText(diff.getErrorStream());
+        if (getText(diff.getInputStream()).isEmpty()) {
+            return false;
+        }
+        return true;
     }
 
-    public boolean printStream(InputStream is) {
-        boolean isEmpty = true;
+    public List<String> getText(InputStream is) {
+        List<String> gitText = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is));) {
             String line;
             while ((line = br.readLine()) != null) {
-                isEmpty = false;
                 System.out.println("> " + line);
+                gitText.add(line);
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
 
-        return isEmpty;
+        return gitText;
     }
 
 //    public boolean repoVerification() {
@@ -295,12 +305,12 @@ public class AssistantServiceImp implements ApplicationService {
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
         Process process = Runtime.getRuntime().exec("git pull " + s + "/assistant/application/" + dir);
-        printStream(process.getInputStream());
-        printStream(process.getErrorStream());
+        getText(process.getInputStream());
+        getText(process.getErrorStream());
 
         Process process1 = Runtime.getRuntime().exec("git checkout " + version);
-        printStream(process1.getInputStream());
-        printStream(process1.getErrorStream());
+        getText(process1.getInputStream());
+        getText(process1.getErrorStream());
 //        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
 //        Git.cloneRepository()
 //                .setURI(path)
