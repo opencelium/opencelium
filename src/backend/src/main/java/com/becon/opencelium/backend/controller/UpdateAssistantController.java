@@ -28,10 +28,7 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
-import com.becon.opencelium.backend.resource.application.MigrateDataResource;
-import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
-import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
-import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
+import com.becon.opencelium.backend.resource.application.*;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
@@ -179,7 +176,7 @@ public class UpdateAssistantController {
 //        }
 //    }
 
-    @GetMapping("subscription/repo/update/check")
+    @GetMapping("/subscription/repo/update/check")
     public ResponseEntity<?> subsRepoHasChanges() {
         try {
             if (assistantServiceImp.repoHasChanges()) {
@@ -192,7 +189,17 @@ public class UpdateAssistantController {
         }
     }
 
-    @GetMapping("subscription/repo/update")
+    @GetMapping("/subscription/repo/diff/files")
+    public ResponseEntity<?> getDiffFiles() {
+        try {
+            DiffFilesResource diffFilesName = new DiffFilesResource(assistantServiceImp.getChangedFileName());
+            return ResponseEntity.ok(diffFilesName);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/subscription/repo/update")
     public ResponseEntity<?> subsRepoUpdate() {
         try {
             assistantServiceImp.updateSubsFiles();
@@ -242,6 +249,7 @@ public class UpdateAssistantController {
                 assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
             });
 
+            //////test commit
             if (migrateDataResource.isOnline()) {
                 assistantServiceImp.updateOn(version);
             } else {
