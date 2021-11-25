@@ -41,6 +41,12 @@ function mapStateToProps(state){
     };
 }
 
+const ListOfData = () => {
+    return (
+        <ul><li>i-doit</li><li>otrs</li></ul>
+    );
+}
+
 /**
  * Layout for UpdateSubscription
  */
@@ -113,8 +119,11 @@ class UpdateSubscription extends Component{
             inputs: [
                 {
                     ...INPUTS.SUBSCRIPTION_USER,
-                    source: this.mapUsers(),
-                    label: t('FORM.USER'),
+                    readonly: true,
+                    Component: ListOfData,
+                    componentProps: {},
+                    //source: this.mapUsers(),
+                    label: t('FORM.INVOKERS'),
                     error: validationMessageUser,
                 },
             ],

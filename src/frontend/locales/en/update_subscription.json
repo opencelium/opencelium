@@ -2,8 +2,8 @@
   "FORM": {
     "HEADER": "Update Subscription",
     "UPDATE_SUBSCRIPTION": "Update",
-    "USER": "User",
+    "INVOKERS": "Invokers",
     "HINT_1": "This update overwrites all local template and invoker files provided from becon",
-    "PAGE_1": "General Data"
+    "PAGE_1": "Subscription Details"
   }
 }
