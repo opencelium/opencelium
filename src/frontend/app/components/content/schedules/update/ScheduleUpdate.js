@@ -43,7 +43,7 @@ function mapStateToProps(state){
 
 function mapSchedule(schedule){
     let updateSchedule = {};
-    updateSchedule.id = schedule.schedulerId;
+    updateSchedule.schedulerId = schedule.schedulerId;
     updateSchedule.title = schedule.title;
     updateSchedule.connectionId = schedule.connection.connectionId;
     updateSchedule.cronExp = schedule.cronExp;
