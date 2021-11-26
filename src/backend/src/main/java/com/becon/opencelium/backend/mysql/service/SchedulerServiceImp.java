@@ -73,11 +73,21 @@ public class SchedulerServiceImp implements SchedulerService {
             throw new RuntimeException("BAD_CRON_EXPRESSION");
         }
 
-        try {
-            quartzUtility.addJob(scheduler);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (existsById(scheduler.getId())) {
+            try {
+                quartzUtility.rescheduleJob(scheduler);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                quartzUtility.addJob(scheduler);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+
+
     }
 
     @Override
