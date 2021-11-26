@@ -177,7 +177,6 @@ export function ScheduleForm(type) {
                             },
                             {...INPUTS.SCHEDULE_CRON_EXPRESSION,
                                 error: validationMessages.cronExp,
-                                readonly: this.isUpdate,
                                 label: t(`${this.translationKey}.FORM.CRON_EXP`),
                                 defaultValue: '',
                                 required: true,

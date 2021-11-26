@@ -305,7 +305,7 @@ const updateScheduleEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.UPDATE_SCHEDULE)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/${action.payload.id}/title`;
+            let url = `${urlPrefix}/${action.payload.schedulerId}`;
             let {...data} = action.payload;
             return doRequest({url, method: API_METHOD.PUT, data},{
                 success: updateScheduleFulfilled,
