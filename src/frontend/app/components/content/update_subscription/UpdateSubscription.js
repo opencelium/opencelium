@@ -25,42 +25,30 @@ import {API_REQUEST_STATE} from "@utils/constants/app";
 import CVoiceControl from "@classes/voice_control/CVoiceControl";
 import Form from "@change_component/Form";
 import {logoutUserFulfilled, updateSubscription} from "@actions/auth";
-import {fetchUsers} from "@actions/users/fetch";
-import {SingleComponent} from "@decorators/SingleComponent";
+import FileNames from "@components/content/update_subscription/FileNames";
+import {doSubscriptionUpdate} from "@actions/subscription_update/fetch";
 
 
 function mapStateToProps(state){
     const auth = state.get('auth');
-    const users = state.get('users');
-    const updateAssistant = state.get('update_assistant');
+    const updateSubscription = state.get('subscription_update');
     return{
         authUser: auth.get('authUser'),
-        updatingSubscription: updateAssistant.get('updatingSubscription'),
-        fetchingUsers: users.get('fetchingUsers'),
-        users: users.get('users').toJS(),
+        doingSubscriptionUpdate: updateSubscription.get('doingSubscriptionUpdate'),
+        fileNames: updateSubscription.get('fileNames').toJS(),
     };
 }
 
 /**
  * Layout for UpdateSubscription
  */
-@connect(mapStateToProps, {updateSubscription, fetchUsers, logoutUserFulfilled})
+@connect(mapStateToProps, {doSubscriptionUpdate, logoutUserFulfilled})
 @permission(UpdateSubscriptionPermissions.CREATE, true)
 @withTranslation(['update_subscription', 'app'])
-@SingleComponent('', '', ['users'])
 class UpdateSubscription extends Component{
 
     constructor(props){
         super(props);
-        const {authUser} = this.props;
-        this.state = {
-            currentTour: 'page_1',
-            isTourOpen: automaticallyShowTour(authUser),
-            entity:{
-                user: null,
-            },
-            validationMessageUser: '',
-        };
         this.isUpdateStarted = false;
     }
 
@@ -74,48 +62,22 @@ class UpdateSubscription extends Component{
         }
     }
 
-    updateSubscription(entity){
-        if(this.validateUser(entity)){
-            this.props.updateSubscription();
-        }
-    }
-
-    mapUsers(){
-        const {users} = this.props;
-        let result = [];
-        users && users.map(user => {
-            if(user.bitbucketUser){
-                result.push({label: user.email, value: user.id});
-            }
-        });
-        return result;
-    }
-
-    /**
-     * to validate user
-     */
-    validateUser(entity){
-        const {t} = this.props;
-        if(entity.user === null){
-            this.setState({validationMessageUser: t(`FORM.VALIDATION_MESSAGES.USER_REQUIRED`)});
-            return false;
-        }
-        return true;
+    updateSubscription(){
+        this.props.doSubscriptionUpdate();
     }
 
     render(){
-        const {entity, validationMessageUser} = this.state;
-        const {t, updatingSubscription} = this.props;
+        const {t, doingSubscriptionUpdate, fileNames} = this.props;
         let contentTranslations = {};
         contentTranslations.header = {title: t('FORM.HEADER')};
-        contentTranslations.action_button = {title: `${t('FORM.UPDATE_SUBSCRIPTION')}`, isDisabled: entity.user === null};
+        contentTranslations.action_button = {title: `${t('FORM.UPDATE_SUBSCRIPTION')}`, isDisabled: fileNames.length === 0};
         let contents = [{
             inputs: [
                 {
                     ...INPUTS.SUBSCRIPTION_USER,
-                    source: this.mapUsers(),
-                    label: t('FORM.USER'),
-                    error: validationMessageUser,
+                    readonly: true,
+                    Component: FileNames,
+                    label: t('FORM.FILE_NAMES'),
                 },
             ],
             hint: {text: t('FORM.HINT_1')},
@@ -126,9 +88,8 @@ class UpdateSubscription extends Component{
             <Form
                 contents={contents}
                 translations={contentTranslations}
-                isActionInProcess={updatingSubscription}
+                isActionInProcess={doingSubscriptionUpdate === API_REQUEST_STATE.START}
                 action={::this.updateSubscription}
-                entity={entity}
                 type={'onlyText'}
             />
         );

@@ -387,6 +387,38 @@
   width: 15%;
   margin-right: 1%;
 }
+.cron_each{
+  float: left;
+  width: 15%;
+  margin-right: 1%;
+  text-align: center;
+  font-size: 18px;
+  line-height: 32px;
+}
+.cron_each_short{
+  float: left;
+  width: 15%;
+  margin-right: 1%;
+  text-align: center;
+  font-size: 18px;
+  line-height: 32px;
+}
+.of_a_short{
+  float: left;
+  width: 7%;
+  margin-right: 1%;
+  text-align: center;
+  font-size: 18px;
+  line-height: 32px;
+}
+.of_a{
+  float: left;
+  width: 7%;
+  margin-right: 1%;
+  text-align: center;
+  font-size: 18px;
+  line-height: 32px;
+}
 
 .cron_select_day_for_month{
   float: left;
@@ -408,6 +440,10 @@
   width: 23%;
   margin-right: 1%;
 }
+.cron_select_every_for_week{
+  @extend .cron_select_every;
+  width: 34%;
+}
 .cron_select_every_short {
   float: left;
   width: 20%;
@@ -423,6 +459,10 @@
   float: left;
   width: 30%;
   margin-right: 1%;
+}
+.cron_select_timestamp_for_week{
+  @extend .cron_select_timestamp;
+  width: 36%;
 }
 
 .cron_suffix{
@@ -723,4 +763,8 @@
 .notification_input_appear{
   animation-name: $ANIMATION_FADE_IN_DOWN;
   animation-duration: .3s;
+}
+
+.cron_exp_dialog{
+  min-width: 750px;
 }

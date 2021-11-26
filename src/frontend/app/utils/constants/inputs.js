@@ -150,7 +150,7 @@ const INOTIFICATION_TEMPLATE = {
 };
 
 
-const SUBSCRIPTION_USER = {name: 'user', type: 'select', icon: 'person'};
+const SUBSCRIPTION_USER = {name: 'user', type: 'component', icon: 'person'};
 
 const IUPDATE_SUBSCRIPTION = {
     SUBSCRIPTION_USER,

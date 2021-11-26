@@ -26,7 +26,6 @@ const initialState = fromJS({
     authUser: {},
     isAuth: false,
     expTime: 0,
-    updatingSubscription: API_REQUEST_STATE.INITIAL,
     logining: API_REQUEST_STATE.INITIAL,
     logouting: false,
     updatingDashboardSettings: false,
@@ -64,6 +63,8 @@ const reducer = (state = initialState, action) => {
             return state.set('logouting', true).set('error', null);
         case AuthAction.LOG_OUT_FULFILLED:
             removeLS('notifications');
+            removeLS('hasSubscriptionUpdate');
+            removeLS('subscriptionUpdateFileNames');
             return state.set('logouting', false).set('authUser', action.payload).set('isAuth', false).set('notifications', List([]));
         case AuthAction.LOG_OUT_REJECTED:
             return state.set('logouting', false).set('error', action.payload).set('isAuth', true);
@@ -75,6 +76,8 @@ const reducer = (state = initialState, action) => {
             }
             removeCryptLS('token');
             removeLS('notifications');
+            removeLS('hasSubscriptionUpdate');
+            removeLS('subscriptionUpdateFileNames');
             return state.set('isSessionExpired', true).set('notifications', List([]));
         case AuthAction.SESSION_NOTEXPIRED_FULFILLED:
             return state.set('isSessionExpired', false);
@@ -99,12 +102,6 @@ const reducer = (state = initialState, action) => {
             return state.set('updatingTheme', false).set('authUser', action.payload);
         case AuthAction.UPDATE_THEME_REJECTED:
             return state.set('updatingTheme', false).set('error', fromJS(action.payload));
-        case AuthAction.UPDATE_SUBSCRIPTION:
-            return state.set('updatingSubscription', true).set('error', null);
-        case AuthAction.UPDATE_SUBSCRIPTION_FULFILLED:
-            return state.set('updatingSubscription', false);
-        case AuthAction.UPDATE_SUBSCRIPTION_REJECTED:
-            return state.set('updatingSubscription', false).set('error', fromJS(action.payload));
         case AuthAction.TOGGLE_APPTOUR:
             return state.set('togglingAppTour', API_REQUEST_STATE.START).set('error', null);
         case AuthAction.TOGGLE_APPTOUR_FULFILLED:

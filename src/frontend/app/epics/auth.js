@@ -27,7 +27,6 @@ import {
     toggleAppTourRejected,
     updateThemeRejected,
     sessionExpired,
-    updateSubscriptionFulfilled, updateSubscriptionRejected,
 } from '@actions/auth';
 
 import {doRequest} from '@utils/auth';
@@ -159,22 +158,6 @@ const toggleAppTourEpic = (action$, store) => {
         });
 };
 
-/**
- * update subscription
- */
-const updateSubscriptionEpic = (action$, store) => {
-    return action$.ofType(AuthAction.UPDATE_SUBSCRIPTION)
-        .debounceTime(500)
-        .mergeMap((action) => {
-            let {payload} = action;
-            let url = `update_subscription`;
-            return doRequest({url, method: API_METHOD.PUT, data: {...payload}}, {
-                    success: updateSubscriptionFulfilled,
-                    reject: updateSubscriptionRejected},
-            );
-        });
-};
-
 
 export {
     updateAuthUserLanguageEpic,
@@ -183,5 +166,4 @@ export {
     updateDashboardSettingsEpic,
     updateThemeEpic,
     toggleAppTourEpic,
-    updateSubscriptionEpic,
 };

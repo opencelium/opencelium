@@ -349,7 +349,7 @@ export function UserForm(type){
                                         readonly: this.isView,
                                     },
                                     ...this.getPasswordFields(),
-                                    ...this.getBitbucketFields(),
+                                    //...this.getBitbucketFields(),
                                 ],
                                 hint: {text: t(`${this.translationKey}.FORM.HINT_1`), openTour},
                                 header: t(`${this.translationKey}.FORM.PAGE_1`),
