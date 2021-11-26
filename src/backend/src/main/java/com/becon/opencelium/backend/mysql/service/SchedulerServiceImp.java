@@ -66,6 +66,7 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void save(Scheduler scheduler) {
+        boolean update = scheduler.getId() != 0;
         if(quartzUtility.validateCronExpression(scheduler.getCronExp())) {
             schedulerRepository.save(scheduler);
         }
@@ -73,7 +74,7 @@ public class SchedulerServiceImp implements SchedulerService {
             throw new RuntimeException("BAD_CRON_EXPRESSION");
         }
 
-        if (existsById(scheduler.getId())) {
+        if (update) {
             try {
                 quartzUtility.rescheduleJob(scheduler);
             } catch (Exception e) {
