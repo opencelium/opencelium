@@ -200,8 +200,10 @@ public class InvokerParserImp {
             if (node.hasChildNodes() && (type.equals("object") || type.equals("array"))){
                 if (type.equals("array")){
                     ArrayList<Object> array = new ArrayList<>();
-                    String nodeValue = node.getTextContent().replace("\n", "")
-                            .replace("\r", "").replace(" ", "");
+                    String nodeValue = node.getTextContent()
+                            .replace("\n", "")
+                            .replace("\r", "")
+                            .trim();//.replace(" ", "");
                     if (nodeValue.length() == 0){ // if length equal to 0 it means context has child not string
                         array.add(getFields(node.getChildNodes()));
                     } else {
@@ -219,7 +221,9 @@ public class InvokerParserImp {
                 return fields;
             } else {
                 String value = node.getTextContent();
-                value = value.replace("\n", "").replace("\r", "").replace(" ", "");
+                value = value.replace("\n", "")
+                        .replace("\r", "")
+                        .trim();//.replace(" ", "");
                 if (node.getTextContent().isEmpty()){
                     value = "";
                 }
