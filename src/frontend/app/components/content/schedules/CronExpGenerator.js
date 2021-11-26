@@ -50,7 +50,7 @@ class CronExpGenerator extends Component{
             atOrEach: {label: 'At', value: 'at'},
             startAtShow: false,
             dayShow: false,
-            dayForMonth: everyOptions[0],
+            dayForMonth: [everyOptions[0]],
             cronExp: '0 1 * * * ?',
             timeStamp: timeStampOptions[0],
             timeStampOptions,
@@ -63,10 +63,10 @@ class CronExpGenerator extends Component{
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {atOrEach, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
-        if(atOrEach.value !== prevState.atOrEach.value || dayForMonth.value !== prevState.dayForMonth.value
+        if(atOrEach.value !== prevState.atOrEach.value || dayForMonth.length !== prevState.dayForMonth.length
             || timeStamp.value !== prevState.timeStamp.value || everyValue.value !== prevState.everyValue.value
             || startAtHour.value !== prevState.startAtHour.value || startAtMinute.value !== prevState.startAtMinute.value
-            || everyValue.length !== prevState.everyValue.length
+            || everyValue.length !== prevState.everyValue.length || dayForMonth.value !== prevState.dayForMonth.value
         ){
             this.setState({
                 examples: ::this.defineExamples(),
@@ -100,8 +100,8 @@ class CronExpGenerator extends Component{
         }
         const minuteValue = startAtMinute.value;
         const hourValue = startAtHour.value;
-        const dayForMonthValue = dayForMonth.value;
         const isAt = atOrEach.value === 'at';
+        const dayForMonthValue = isAt ? dayForMonth.map(v => `${v.value}`).join(',') : dayForMonth.value;
         switch (timeStamp.value) {
             case 'minute':
                 cronExp = isAt ? `0 ${value} * * * ?` : `0 0/${value} * * * ?`;
@@ -119,6 +119,7 @@ class CronExpGenerator extends Component{
                 cronExp = isAt ? `0 ${minuteValue} ${hourValue} ${dayForMonthValue} ${value} ?` : `0 ${minuteValue} ${hourValue} 1/${dayForMonthValue} ${value} ?`;
                 break;
         }
+        console.log(cronExp);
         return cronExp;
     }
 
@@ -129,6 +130,7 @@ class CronExpGenerator extends Component{
 
     setTimeStamp(timeStamp){
         let {cronExp, atOrEach, everyValue} = this.state;
+        const isAt = atOrEach.value === 'at';
         let startAtShow = timeStamp.value !== 'minute' && timeStamp.value !== 'hour';
         let dayShow = timeStamp.value === 'month';
         const everyOptions = ::this.getEveryOptions(timeStamp.value);
@@ -160,21 +162,23 @@ class CronExpGenerator extends Component{
             everyOptions,
             startAtHour: {label: 12, value: 12},
             startAtMinute: {label: '00', value: 0},
-            dayForMonth: dayForMonthOptions[0],
+            dayForMonth: isAt ? [dayForMonthOptions[0]] : dayForMonthOptions[0],
             startAtShow,
             dayShow,
         });
     }
 
     setAtOrEach(atOrEach){
+        const isAt = atOrEach.value === 'at';
         const timeStampOptions = ::this.getTimeStampOptions(atOrEach.value);
-        const everyOptions = ::this.getEveryOptions(null, atOrEach.value === 'at');
-        const dayForMonthOptions = ::this.getEveryOptions('day', atOrEach.value === 'at');
+        const everyOptions = ::this.getEveryOptions(null, isAt);
+        const dayForMonthOptions = ::this.getEveryOptions('day', isAt);
+        let dayForMonth = dayForMonthOptions[0];
         this.setState({
             atOrEach,
             timeStamp: timeStampOptions.find(option => option.value === this.state.timeStamp.value),
             timeStampOptions,
-            dayForMonth: dayForMonthOptions.find(option => option.value === this.state.dayForMonth.value),
+            dayForMonth: isAt ? [dayForMonth] : dayForMonth,
             everyValue: everyOptions.find(option => option.value === this.state.everyValue.value),
             everyOptions,
         });
@@ -228,9 +232,10 @@ class CronExpGenerator extends Component{
     }
 
     setDayForMonth(dayForMonth){
-        let {cronExp} = this.state;
+        let {cronExp, atOrEach} = this.state;
+        const isAt = atOrEach.value === 'at';
         let parts = cronExp.split(' ');
-        parts[3] = dayForMonth.value;
+        parts[3] = isAt ? dayForMonth.map(v => v.value).join(',') : dayForMonth.value;
         parts[4] = '1';
         cronExp = parts.join(' ');
         this.setState({
@@ -244,7 +249,15 @@ class CronExpGenerator extends Component{
     }
 
     changeCronExp(){
-        this.props.changeCronExp(this.getCronExp());
+        const {timeStamp} = this.state;
+        let cronExp = this.getCronExp();
+        if(timeStamp.value === 'week'){
+            let cronExpSplit = cronExp.split(' ');
+            cronExpSplit[3] = '?';
+            cronExpSplit[4] = '*';
+            cronExp = cronExpSplit.join(' ');
+        }
+        this.props.changeCronExp(cronExp);
         this.toggleShowGenerator();
     }
 
@@ -321,6 +334,7 @@ class CronExpGenerator extends Component{
             }
             allMinutes.push({label: i <= 9 ? `0${i}` : i, value: i});
         }
+        const isAt = atOrEach.value === 'at';
         let classNames = [
             'cron_icon_tooltip',
             'cron_every',
@@ -376,6 +390,7 @@ class CronExpGenerator extends Component{
                                         value={dayForMonth}
                                         onChange={::this.setDayForMonth}
                                         options={this.getEveryOptions('day')}
+                                        isMulti={isAt}
                                     />
                                     <span className={styles[classNames.cron_suffix_day_for_month]}>day{atOrEach.value === 'each' ? '(s)' : ''} of</span>
                                 </React.Fragment>
