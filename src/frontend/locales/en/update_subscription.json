@@ -1,6 +1,6 @@
 {
   "FORM": {
-    "HEADER": "Update Subscription",
+    "HEADER": "Update Invokers and Templates",
     "UPDATE_SUBSCRIPTION": "Update",
     "FILE_NAMES": "File Names",
     "HINT_1": "This update overwrites all local template and invoker files provided from becon",

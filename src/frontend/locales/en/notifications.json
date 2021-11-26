@@ -66,7 +66,7 @@
     "DELETE_NOTIFICATIONTEMPLATE": "The template <1><0>{{name}}</0></1> was successfully removed",
     "DELETE_NOTIFICATIONTEMPLATES": "The selected templates were successfully removed",
     "FETCH_UPDATEAPPVERSION": "OC Update <0>{{version}}</0> available",
-    "FETCH_SUBSCRIPTIONUPDATE": "New <0>{{update}}</0> is available",
+    "FETCH_SUBSCRIPTIONUPDATE": "New invokers and templates are available (<0>{{update}}</0>)",
     "UPLOAD_VERSION": "New version was successfully uploaded",
     "UPDATE_TEMPLATESFORASSISTANT": "Templates were successfully updated",
     "UPDATE_INVOKERSFORASSISTANT": "Invokers were successfully updated",

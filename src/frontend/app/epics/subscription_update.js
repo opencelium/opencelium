@@ -5,6 +5,7 @@ import {
     fetchSubscriptionUpdateFulfilled,
     fetchSubscriptionUpdateRejected
 } from "@actions/subscription_update/fetch";
+import {getLS} from "@utils/LocalStorage";
 
 const urlPrefix = 'assistant/subscription/';
 
@@ -17,7 +18,7 @@ const fetchSubscriptionUpdateEpic = (action$, store) => {
         .mergeMap((action) => {
             let url = `${urlPrefix}repo/diff/files`;
             return doRequest({url},{
-                success: (data) => fetchSubscriptionUpdateFulfilled(data, {...action.settings}),
+                success: (data) => fetchSubscriptionUpdateFulfilled(data, {...action.settings, background: !action.settings.background ? !getLS('hasSubscriptionUpdate') : action.settings.background}),
                 reject: fetchSubscriptionUpdateRejected,
             });
         });
