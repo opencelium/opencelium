@@ -31,7 +31,7 @@ class FileNames extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {doingSubscriptionUpdate} = this.props;
+        const {doingSubscriptionUpdate, fetchSubscriptionUpdate} = this.props;
         if(doingSubscriptionUpdate === API_REQUEST_STATE.FINISH && this.shouldCheckFilesAfterUpdate){
             this.shouldCheckFilesAfterUpdate = false;
             fetchSubscriptionUpdate({background: true});

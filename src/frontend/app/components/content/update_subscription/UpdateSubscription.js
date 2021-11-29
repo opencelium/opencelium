@@ -90,7 +90,7 @@ class UpdateSubscription extends Component{
                 translations={contentTranslations}
                 isActionInProcess={doingSubscriptionUpdate === API_REQUEST_STATE.START}
                 action={::this.updateSubscription}
-                type={'onlyText'}
+                type={'update'}
             />
         );
     }
