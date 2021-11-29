@@ -48,6 +48,7 @@ class CronExpGenerator extends Component{
         this.state = {
             show: false,
             atOrEach: {label: 'At', value: 'at'},
+            atOrEachOfHour: {label: 'At', value: 'at'},
             startAtShow: false,
             dayShow: false,
             dayForMonth: [everyOptions[0]],
@@ -62,11 +63,12 @@ class CronExpGenerator extends Component{
         };
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {atOrEach, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
+        const {atOrEach, atOrEachOfHour, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
         if(atOrEach.value !== prevState.atOrEach.value || dayForMonth.length !== prevState.dayForMonth.length
             || timeStamp.value !== prevState.timeStamp.value || everyValue.value !== prevState.everyValue.value
             || startAtHour.value !== prevState.startAtHour.value || startAtMinute.value !== prevState.startAtMinute.value
             || everyValue.length !== prevState.everyValue.length || dayForMonth.value !== prevState.dayForMonth.value
+            || atOrEachOfHour.value !== prevState.atOrEachOfHour.value
         ){
             this.setState({
                 examples: ::this.defineExamples(),
@@ -89,7 +91,7 @@ class CronExpGenerator extends Component{
     }
 
     getCronExp(){
-        const {atOrEach, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
+        const {atOrEach, atOrEachOfHour, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
         let cronExp = '';
         const isForWeek = timeStamp.value === 'week';
         let value = everyValue;
@@ -99,8 +101,12 @@ class CronExpGenerator extends Component{
             value = value.value;
         }
         const minuteValue = startAtMinute.value;
-        const hourValue = startAtHour.value;
+        let hourValue = startAtHour.value;
         const isAt = atOrEach.value === 'at';
+        const isAtOfHour = atOrEachOfHour.value === 'at';
+        if(!isAtOfHour){
+            hourValue = `*/${hourValue}`;
+        }
         const dayForMonthValue = isAt ? dayForMonth.map(v => `${v.value}`).join(',') : dayForMonth.value;
         switch (timeStamp.value) {
             case 'minute':
@@ -165,6 +171,12 @@ class CronExpGenerator extends Component{
             dayForMonth: isAt ? [dayForMonthOptions[0]] : dayForMonthOptions[0],
             startAtShow,
             dayShow,
+        });
+    }
+
+    setAtOrEachOfHour(atOrEachOfHour){
+        this.setState({
+            atOrEachOfHour,
         });
     }
 
@@ -323,7 +335,7 @@ class CronExpGenerator extends Component{
     render(){
         const {
             show, timeStamp, everyValue, startAtHour, startAtMinute, startAtShow,
-            dayShow, dayForMonth, atOrEach, timeStampOptions, everyOptions} = this.state;
+            dayShow, dayForMonth, atOrEach, timeStampOptions, everyOptions, atOrEachOfHour} = this.state;
         const {t, authUser} = this.props;
         const suffix = {minute: 'of an hour', hour: 'of a day', day: 'of a month', month: ''};
         let allHours = [];
@@ -414,7 +426,12 @@ class CronExpGenerator extends Component{
                         {
                             startAtShow &&
                             <Col md={12} style={{margin: '30px 0 0'}}>
-                                <span className={styles[classNames.cron_start_at]}>At</span>
+                                <Select
+                                    className={styles[classNames.cron_start_at]}
+                                    value={atOrEachOfHour}
+                                    onChange={::this.setAtOrEachOfHour}
+                                    options={[{label: 'At', value: 'at'}, {label: 'Each', value: 'each'}]}
+                                />
                                 <Select
                                     className={styles[classNames.cron_select_start_hour]}
                                     value={startAtHour}
