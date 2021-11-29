@@ -81,7 +81,7 @@ class DashboardView extends Component{
             fetchUpdateAppVersion({currentAppVersion: appVersion});
         }
         if(fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && !getLS('hasSubscriptionUpdate')) {
-            fetchSubscriptionUpdate();
+            fetchSubscriptionUpdate({background: getLS('hasSubscriptionUpdate')});
         }
         fetchWidgetSettings();
         componentAppear('app_content');
