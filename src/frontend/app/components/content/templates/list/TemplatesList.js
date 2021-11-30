@@ -149,7 +149,7 @@ class TemplatesList extends Component{
                         actions: {addTemplate: ::this.duplicateTemplate},
                         templateLabels: {addTemplateTitle: 'Duplicate Template'}
                     }} entity={entity} disabled={entity.isEmpty()}
-                                 iconProps={{value: 'content_copy', tooltip: 'Create Duplicate'}}/>
+                                 iconProps={{value: 'content_copy', tooltip: 'Create Duplicate', size: '24px'}}/>
                 </React.Fragment>;
             }
             return null;
