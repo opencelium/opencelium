@@ -104,7 +104,7 @@ class CronExpGenerator extends Component{
         let hourValue = startAtHour.value;
         const isAt = atOrEach.value === 'at';
         const isAtOfHour = atOrEachOfHour.value === 'at';
-        if(!isAtOfHour){
+        if(!isAtOfHour && parseInt(hourValue) !== 0){
             hourValue = `*/${hourValue}`;
         }
         const dayForMonthValue = isAt ? dayForMonth.map(v => `${v.value}`).join(',') : dayForMonth.value;
