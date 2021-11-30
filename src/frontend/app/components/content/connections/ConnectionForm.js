@@ -367,7 +367,7 @@ export function ConnectionForm(type) {
                     return(
                         <React.Fragment>
                             {button}
-                            <AddTemplate data={contents[2].inputs[1]} entity={entity} disabled={entity.isEmpty()} buttonProps={{icon: 'add', title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)}}/>
+                            <div style={{float: 'left'}}><AddTemplate data={contents[2].inputs[1]} entity={entity} disabled={entity.isEmpty()} buttonProps={{icon: 'add', title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)}}/></div>
                         </React.Fragment>
                     );
                 }

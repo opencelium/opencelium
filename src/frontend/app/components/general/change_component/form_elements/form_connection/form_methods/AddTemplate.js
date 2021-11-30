@@ -113,7 +113,7 @@ class AddTemplate extends Component{
             return null;
         }
         return (
-            <div style={{float: 'left'}}>
+            <React.Fragment>
                 {iconProps && <TooltipFontIcon {...iconProps} turquoiseTheme isButton onClick={::this.toggleAddTemplateDialog} disabled={disabled}/>}
                 {buttonProps && <Button {...buttonProps} onClick={::this.toggleAddTemplateDialog} disabled={disabled}/>}
                 <Dialog
@@ -147,7 +147,7 @@ class AddTemplate extends Component{
                         />
                     </div>
                 </Dialog>
-            </div>
+            </React.Fragment>
         );
     }
 }
