@@ -24,6 +24,7 @@ import styles from "@themes/default/content/schedules/schedules";
 import {ALL_MONTHS, consoleLog, convertTimeForCronExpression, getThemeClass} from "@utils/app";
 import Select from "@basic_components/inputs/Select";
 import cronParser from 'cron-parser';
+import {parse} from "postcss-scss";
 
 
 function mapStateToProps(state){
@@ -100,12 +101,17 @@ class CronExpGenerator extends Component{
         } else{
             value = value.value;
         }
-        const minuteValue = startAtMinute.value;
+        let minuteValue = startAtMinute.value;
         let hourValue = startAtHour.value;
         const isAt = atOrEach.value === 'at';
         const isAtOfHour = atOrEachOfHour.value === 'at';
-        if(!isAtOfHour && parseInt(hourValue) !== 0){
-            hourValue = `*/${hourValue}`;
+        if(!isAtOfHour){
+            if(parseInt(hourValue) === 0){
+                hourValue = '*';
+                minuteValue = parseInt(minuteValue) === 0 ? `*` : `*/${minuteValue}`;
+            } else{
+                hourValue = `*/${hourValue}`;
+            }
         }
         const dayForMonthValue = isAt ? dayForMonth.map(v => `${v.value}`).join(',') : dayForMonth.value;
         switch (timeStamp.value) {
