@@ -224,7 +224,7 @@ public class AssistantServiceImp implements ApplicationService {
         getText(process.getErrorStream());
 
         process = Runtime.getRuntime().exec("git"
-                + " --git-dir=" + gitDir + " --work-tree=" + workTree +  " checkout -f tag/" + version);
+                + " --git-dir=" + gitDir + " --work-tree=" + workTree +  " checkout -f tags/" + version);
         getText(process.getInputStream());
         getText(process.getErrorStream());
     }
