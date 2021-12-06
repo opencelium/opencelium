@@ -1,0 +1,89 @@
+<invoker type="RESTful">
+    <name>ocs</name>
+    <description>ocs description</description>
+    <hint>This interface provides the basic_auth. Check out the documentation </hint>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="getComputerListIds" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/v1/computers/listID</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="array" format="json" data="raw">
+                      <field name="ID" type="string"/>
+	            </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+	<operation name="getComputerByID" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/v1/computer/{ID}</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="object">
+                        <field name="hardware" type="object">
+                           <field name="NAME" type="string"/>
+			   <field name="IPSRC" type="string"/>
+                           <field name="OSNAME" type="string"/>                                
+                           <field name="OSVERSION" type="string"/>                                
+                           <field name="UUID" type="string"/>                                
+                           <field name="MEMORY" type="string"/>                                
+                           <field name="DEFAULTGATEWAY" type="string"/>                                
+                           <field name="DNS" type="string"/>                                
+                         </field>
+                         <field name="memories" type="object">
+                           <field name="CAPACITY" type="string"/>
+                           <field name="TYPE" type="string"/>
+                           <field name="CAPTION" type="string"/>
+                           <field name="SERIALNUMBER" type="string"/>
+                           <field name="SPEED" type="string"/>  
+                         </field>
+                         <field name="storages" type="array">
+                           <field name="MANUFACTURER" type="string"/>
+                           <field name="TYPE" type="string"/>
+                           <field name="MODEL" type="string"/>
+                           <field name="SERIALNUMBER" type="string"/>
+                         </field>			 
+			 <field name="softwares" type="array">
+                           <field name="NAME" type="string"/>
+                           <field name="COMMENTS" type="string"/>
+                           <field name="VERSION" type="string"/>
+                         </field>
+                         </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

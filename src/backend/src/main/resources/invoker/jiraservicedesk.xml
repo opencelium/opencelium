@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>jira service desk</name>
+    <description>jira service desk description</description>
+    <hint>This interface provides the token by user auth. It works like basic_auth. You just need to replace password with added api-token (https://id.atlassian.com/manage-profile/security/api-tokens). Check out the documentation https://developer.atlassian.com/cloud/jira/platform/rest/v3/</hint>
+    <icon>http://localhost:9090/api/storage/files/null</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="GetServicedesk" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/servicedesk</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="id" type="string"/>
+                            <field name="projectId" type="string"/>
+                            <field name="projectName" type="string"/>
+                            <field name="projectKey" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetServicedeskByID" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/servicedesk/{PROJID}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                       <field name="id" type="string"/>
+                       <field name="projectId" type="string"/>
+                       <field name="projectName" type="string"/>
+                       <field name="projectKey" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetCustomer" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/servicedesk/{PROJID}/customer</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="accountId" type="string"/>
+                            <field name="emailAddress" type="string"/>
+                            <field name="displayName" type="string"/>
+                            <field name="active" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetOrganization" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/servicedesk/{PROJID}/organization</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="id" type="string"/>
+                            <field name="name" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetRequestType" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/servicedesk/{PROJID}/requesttype</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="id" type="string"/>
+                            <field name="name" type="string"/>
+                            <field name="description" type="string"/>
+                            <field name="helpText" type="string"/>
+                            <field name="issueTypeId" type="string"/>
+                            <field name="groupIds" type="string"/>
+                            <field name="serviceDeskId" type="string"/>                                                                                                                    
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>            
+        </operation>
+        <operation name="GetRequests" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/request</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="issueId" type="string"/>
+                            <field name="issueKey" type="string"/>
+                            <field name="requestTypeId" type="string"/>
+                            <field name="serviceDeskId" type="string"/>
+                            <field name="issueTypeId" type="string"/>
+                            <field name="createdDate" type="object">
+                                <field name="iso8601" type="string"/>
+                                <field name="jira" type="string"/>
+                                <field name="friendly" type="string"/>
+                                <field name="epochMillis" type="string"/>                                
+                            </field>
+                            <field name="reporter" type="object">
+                                <field name="accountId" type="string"/>
+                                <field name="emailAddress" type="string"/>
+                                <field name="displayName" type="string"/>
+                                <field name="active" type="string"/>                                
+                            </field>
+                            <field name="requestFieldValues" type="array">
+                                <field name="fieldId" type="string"/>
+                                <field name="label" type="string"/>
+                                <field name="value" type="string"/>                            
+                            </field>                                                                                            
+                            <field name="currentStatus" type="object">
+                                <field name="status" type="string"/>
+                                <field name="statusCategory" type="string"/>
+                                <field name="statusDate" type="object">
+                                    <field name="iso8601" type="string"/>
+                                    <field name="jira" type="string"/>
+                                    <field name="friendly" type="string"/>
+                                    <field name="epochMillis" type="string"/>                                
+                                </field>
+                            </field>                                                                                                              
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>            
+        </operation>
+        <operation name="GetRequest" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/rest/api/3/issue/{ISSUEID}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>                
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                            <field name="id" type="string"/>
+                            <field name="fields" type="object">
+                              <field name="summary" type="string"/>
+                              <field name="comment" type="object">
+                                <field name="comments" type="array">
+                                  <field name="body" type="string"/>
+                                </field>
+                              </field>
+                              <field name="description" type="object">
+                                <field name="content" type="array">
+                                  <field name="content" type="array">
+                                    <field name="text" type="string"/>
+                                  </field>
+                                </field>
+                              </field>
+                              <field name="status" type="object">
+                                 <field name="id" type="string"/>
+                                 <field name="name" type="string"/>
+                              </field>
+                              <field name="reporter" type="object">
+                                <field name="accountId" type="string"/>
+                                <field name="emailAddress" type="string"/>
+                                <field name="displayName" type="string"/>
+                                <field name="active" type="string"/>
+                              </field>
+                              <field name="priority" type="object">
+                                <field name="name" type="string"/>
+                                <field name="id" type="string"/>
+                              </field>
+                            </field>
+                            <field name="renderedFields" type="string"/>
+                            <field name="key" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetTransitions" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/servicedesk/{ISSUEID}/transition</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="id" type="string"/>
+                            <field name="name" type="string"/>
+                            <field name="description" type="string"/>
+                            <field name="helpText" type="string"/>
+                            <field name="issueTypeId" type="string"/>
+                            <field name="groupIds" type="string"/>
+                            <field name="serviceDeskId" type="string"/>                                                                                                                    
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>            
+        </operation>
+        <operation name="CreateRequest" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/request</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="requestParticipants" type="string"/>
+                    <field name="serviceDeskId" type="string"/>
+                    <field name="requestTypeId" type="string"/>   
+                    <field name="requestFieldValues" type="object">
+                        <field name="summary" type="string"/>
+                        <field name="description" type="string"/>                        
+                    </field>                                                                                                      
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                        <field name="issueId" type="string"/>
+                        <field name="issueKey" type="string"/>
+                        <field name="requestTypeId" type="string"/>
+                        <field name="serviceDeskId" type="string"/>
+                        <field name="createdDate" type="object">
+                            <field name="iso8601" type="string"/>
+                            <field name="jira" type="string"/>
+                            <field name="friendly" type="string"/>
+                            <field name="epochMillis" type="string"/>                                
+                        </field>
+                        <field name="reporter" type="object">
+                            <field name="accountId" type="string"/>
+                            <field name="emailAddress" type="string"/>
+                            <field name="displayName" type="string"/>
+                            <field name="active" type="string"/>                                
+                        </field>
+                        <field name="requestFieldValues" type="array">
+                            <field name="fieldId" type="string"/>
+                            <field name="label" type="string"/>
+                            <field name="value" type="string"/>                            
+                        </field>                                                                                            
+                        <field name="currentStatus" type="object">
+                            <field name="status" type="string"/>
+                            <field name="statusCategory" type="string"/>
+                            <field name="statusDate" type="object">
+                                <field name="iso8601" type="string"/>
+                                <field name="jira" type="string"/>
+                                <field name="friendly" type="string"/>
+                                <field name="epochMillis" type="string"/>                                
+                            </field>
+                        </field>                                                                                                                                               
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>            
+        </operation>
+        <operation name="UpdateTransitions" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/request/{ISSUEID}/transition</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="id" type="string"/>
+                    <field name="additionalComment" type="object">
+                        <field name="body" type="string"/>
+                    </field>                                                                                                      
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>            
+        </operation>
+        <operation name="CreateCustomer" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/servicedesk/customer</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="displayName" type="string"/>
+                    <field name="email" type="string"/>                                                                                                
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>            
+        </operation>
+        <operation name="CreateOrganization" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/servicedesk/organization"</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                        <field name="name" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddUserToOrganization" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/servicedesk/organization/{ORGAID}/user</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                        <field name="accountIds" type="array"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="DeleteUserToOrganization" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/servicedesk/organization/{ORGAID}/user</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                        <field name="accountIds" type="array"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>                                                                          
+    </operations>
+</invoker>
