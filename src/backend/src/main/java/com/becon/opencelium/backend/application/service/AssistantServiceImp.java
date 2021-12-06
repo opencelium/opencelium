@@ -215,39 +215,18 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateOn(String version) throws Exception {
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        Repository
-//        Git git = new Git();
-//        System.out.println("Online update run");
-//        Git.cloneRepository()
-//                .setURI("https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium")
-//                .setDirectory(new File("/path/to/targetdirectory"))
-//                .setBranchesToClone(Arrays.asList("refs/heads/specific-branch"))
-//                .setBranch("refs/heads/specific-branch")
-//                .call();
-//        String gitUrl = env.getProperty("opencelium.assistant.repo.url");
-        // git --git-dir=/opt/.git --work-tree=/opt/ describe
-//        String gitDir = Paths.get("").toFile().getParentFile().getParentFile().getPath();
-//        String workTree = gitDir + "/.git --work-tree=" + gitDir;
-//        Process process = Runtime.getRuntime().exec("git " + workTree + " fetch --tags");
-//        getText(process.getInputStream());
-//        getText(process.getErrorStream());
-//
-//        process = Runtime.getRuntime().exec("git" + workTree + " checkout -f tag/" + version);
-//        getText(process.getInputStream());
-//        getText(process.getErrorStream());
-
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Path path = Paths.get("");
         File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
         File gitDir = new File(workTree.getPath() + "/.git");
-        Repository repository = builder.setGitDir(gitDir).setWorkTree(workTree)
-                .build();
+        Process process = Runtime.getRuntime().exec("git"
+                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " fetch --tags");
+        getText(process.getInputStream());
+        getText(process.getErrorStream());
 
-        Git git = new Git(repository);
-        git.fetch().call();
-        git.pull().call();
-        git.checkout().setName("tags/" + version).call();
+        process = Runtime.getRuntime().exec("git"
+                + " --git-dir=" + gitDir + " --work-tree=" + workTree +  " checkout -f tag/" + version);
+        getText(process.getInputStream());
+        getText(process.getErrorStream());
     }
 
     public void updateSubsFiles() throws Exception {
