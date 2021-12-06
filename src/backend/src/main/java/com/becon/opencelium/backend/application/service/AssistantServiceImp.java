@@ -295,20 +295,19 @@ public class AssistantServiceImp implements ApplicationService {
         System.out.println("Offline update run");
         Path currentRelativePath = Paths.get("");
         String s = currentRelativePath.toAbsolutePath().toString();
-        Process process = Runtime.getRuntime().exec("git pull " + s + "/assistant/application/" + dir);
+
+        Path path = Paths.get("");
+        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
+        File gitDir = new File(workTree.getPath() + "/.git");
+        Process process = Runtime.getRuntime().exec("git"
+                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " pull " + s + "/assistant/application/" + dir);
         getText(process.getInputStream());
         getText(process.getErrorStream());
 
-        Process process1 = Runtime.getRuntime().exec("git checkout " + version);
+        Process process1 = Runtime.getRuntime().exec("git"
+                + " --git-dir=" + gitDir + " --work-tree=" + workTree + "checkout " + version);
         getText(process1.getInputStream());
         getText(process1.getErrorStream());
-//        String path = PathConstant.ASSISTANT + "application/" + dir + "/";
-//        Git.cloneRepository()
-//                .setURI(path)
-//                .setDirectory(new File("/"))
-//                .setBranchesToClone(Arrays.asList("dev"))
-//                .setBranch("dev")
-//                .call();
     }
 
     @Override
