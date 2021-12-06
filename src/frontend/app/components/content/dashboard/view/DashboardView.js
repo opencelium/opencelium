@@ -77,21 +77,16 @@ class DashboardView extends Component{
     componentDidMount() {
         const {fetchingUpdateAppVersion, fetchingSubscriptionUpdate, fetchUpdateAppVersion,
             fetchWidgetSettings, appVersion, fetchSubscriptionUpdate} = this.props;
-        if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START && appVersion !== '') {
+        if(fetchingUpdateAppVersion !== API_REQUEST_STATE.START && appVersion !== '' && !getLS('hasCheckedUpdate')) {
             fetchUpdateAppVersion({currentAppVersion: appVersion});
         }
-        if(fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && !getLS('hasSubscriptionUpdate')) {
-            fetchSubscriptionUpdate({background: getLS('hasSubscriptionUpdate')});
+        const hasSubscriptionUpdate = getLS('hasSubscriptionUpdate');
+        let background = typeof hasSubscriptionUpdate === "boolean" ? !hasSubscriptionUpdate : false;
+        if(fetchingSubscriptionUpdate !== API_REQUEST_STATE.START && !hasSubscriptionUpdate) {
+            fetchSubscriptionUpdate({background});
         }
         fetchWidgetSettings();
         componentAppear('app_content');
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const {appVersion, fetchUpdateAppVersion, fetchingUpdateAppVersion} = this.props;
-        if(prevProps.appVersion !== appVersion && fetchingUpdateAppVersion !== API_REQUEST_STATE.START && fetchingUpdateAppVersion !== API_REQUEST_STATE.ERROR){
-            fetchUpdateAppVersion({currentAppVersion: appVersion});
-        }
     }
 
     toggleWidgetEdit(){

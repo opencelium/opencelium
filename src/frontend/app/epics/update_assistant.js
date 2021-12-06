@@ -39,6 +39,7 @@ import {
 import {
     checkResetFilesRejected, checkResetFilesFulfilled,
 } from "@actions/update_assistant/check";
+import {VERSION_STATUS} from "@components/content/update_assistant/available_updates/AvailableUpdates";
 
 
 const urlPrefix = 'assistant/oc';
@@ -50,10 +51,17 @@ const fetchUpdateAppVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_UPDATEAPPVERSION)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/version`;
+            let url = `${urlPrefix}/online/versions`;
             const currentAppVersion = action.settings.currentAppVersion;
             return doRequest({url},{
-                success: (data) => fetchUpdateAppVersionFulfilled(data, {...action.settings, background: currentAppVersion === data.version ? true : action.settings.background}),
+                success: (data) => {
+                    let versions = data.filter(v => v.status === VERSION_STATUS.AVAILABLE);
+                    let version = currentAppVersion;
+                    if(versions.length > 0){
+                        version = versions[0].name;
+                    }
+                    let background = currentAppVersion === version ? true : action.settings?.background || false;
+                    return fetchUpdateAppVersionFulfilled({version}, {...action.settings, background});},
                 reject: fetchUpdateAppVersionRejected,
             });
         });
