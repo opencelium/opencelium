@@ -227,15 +227,27 @@ public class AssistantServiceImp implements ApplicationService {
 //                .call();
 //        String gitUrl = env.getProperty("opencelium.assistant.repo.url");
         // git --git-dir=/opt/.git --work-tree=/opt/ describe
-        String gitDir = Paths.get("").toFile().getParentFile().getParentFile().getPath();
-        String workTree = gitDir + "/.git --work-tree=" + gitDir;
-        Process process = Runtime.getRuntime().exec("git " + workTree + " fetch --tags");
-        getText(process.getInputStream());
-        getText(process.getErrorStream());
+//        String gitDir = Paths.get("").toFile().getParentFile().getParentFile().getPath();
+//        String workTree = gitDir + "/.git --work-tree=" + gitDir;
+//        Process process = Runtime.getRuntime().exec("git " + workTree + " fetch --tags");
+//        getText(process.getInputStream());
+//        getText(process.getErrorStream());
+//
+//        process = Runtime.getRuntime().exec("git" + workTree + " checkout -f tag/" + version);
+//        getText(process.getInputStream());
+//        getText(process.getErrorStream());
 
-        process = Runtime.getRuntime().exec("git" + workTree + " checkout -f tag/" + version);
-        getText(process.getInputStream());
-        getText(process.getErrorStream());
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Path path = Paths.get("");
+        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
+        File gitDir = new File(workTree.getPath() + "/.git");
+        Repository repository = builder.setGitDir(gitDir).setWorkTree(workTree)
+                .build();
+
+        Git git = new Git(repository);
+        git.fetch().call();
+        git.pull().call();
+        git.checkout().setName("tags/" + version).call();
     }
 
     public void updateSubsFiles() throws Exception {

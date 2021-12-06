@@ -93,7 +93,6 @@ public class SystemOverviewRepository {
             Path path = Paths.get("");
             File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
             File gitDir = new File(workTree.getPath() + "/.git");
-            System.out.println();
             Repository repository = builder.setGitDir(gitDir).setWorkTree(workTree)
                     .build();
             Git git = new Git(repository);
