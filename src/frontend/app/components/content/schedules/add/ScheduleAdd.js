@@ -18,7 +18,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
 import {addSchedule} from "@actions/schedules/add";
-import {fetchConnections} from "@actions/connections/fetch";
+import {fetchMetaConnections as fetchConnections} from "@actions/connections/fetch";
 import {permission} from "@decorators/permission";
 import {SchedulePermissions} from "@utils/constants/permissions";
 import {SingleComponent} from "@decorators/SingleComponent";

@@ -178,6 +178,59 @@ const fetchConnectionCanceled = (message) => {
 };
 
 /**
+ * fetch all meta data of connections
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, settings: {}}}
+ */
+const fetchMetaConnections = (settings = {}) => {
+    return {
+        type: ConnectionsAction.FETCH_METACONNECTIONS,
+        settings,
+    };
+};
+
+
+/**
+ * fetch all meta data of connections fulfilled
+ * @param connections
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: [], settings: {}}}
+ */
+const fetchMetaConnectionsFulfilled = (connections, settings = {}) => {
+    return{
+        type: ConnectionsAction.FETCH_METACONNECTIONS_FULFILLED,
+        payload: connections,
+        settings,
+    };
+};
+
+/**
+ * fetch all meta data of connections rejected
+ * @param error
+ * @returns {*}
+ */
+const fetchMetaConnectionsRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectionsAction.FETCH_METACONNECTIONS_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * cancel fetching all meta data of connections
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const fetchMetaConnectionsCanceled = (message) => {
+    return {
+        type: ConnectionsAction.FETCH_METACONNECTIONS_CANCELED,
+        payload: message
+    };
+};
+
+/**
  * fetch all connections
  * @param settings = {background: bool}
  *      background - if true -> does not show a notification; else -> show a notification
@@ -289,6 +342,10 @@ export {
     fetchConnectionRejected,
     fetchConnectionFulfilled,
     fetchConnectionCanceled,
+    fetchMetaConnections,
+    fetchMetaConnectionsFulfilled,
+    fetchMetaConnectionsRejected,
+    fetchMetaConnectionsCanceled,
     fetchConnections,
     fetchConnectionsFulfilled,
     fetchConnectionsRejected,

@@ -20,7 +20,7 @@ import Graph from "react-graph-vis";
 import styles from '@themes/default/content/dashboard/dashboard.scss';
 import {ListComponent} from "@decorators/ListComponent";
 import {connect} from "react-redux";
-import {fetchConnections, fetchConnectionsCanceled} from "@actions/connections/fetch";
+import {fetchMetaConnections as fetchConnections, fetchMetaConnectionsCanceled as fetchConnectionsCanceled} from "@actions/connections/fetch";
 
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
 import DefaultConnectorImagePath from "@images/default_connector.png";

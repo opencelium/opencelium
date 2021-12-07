@@ -16,7 +16,7 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchConnections, fetchConnectionsCanceled} from '@actions/connections/fetch';
+import {fetchMetaConnections as fetchConnections, fetchMetaConnectionsCanceled as fetchConnectionsCanceled} from '@actions/connections/fetch';
 import {deleteConnection, deleteConnections} from '@actions/connections/delete';
 
 import List from '../../../general/list_of_components/List';
