@@ -59,7 +59,6 @@ public class ActionUtility {
                                         final ConnectorNode connectorNode,
                                         final String connectionName){
 
-
         LinkedList<String> indexes = getIndexes(methodResources, operatorResources);
         if (indexes.isEmpty() || !startsWithMethod(indexes.get(0), methodResources)){
             return null;
