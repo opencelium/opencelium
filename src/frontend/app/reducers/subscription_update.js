@@ -37,7 +37,6 @@ const reducer = (state = initialState, action) => {
     let fileNames = [];
     switch (action.type) {
         case SubscriptionUpdate.FETCH_SUBSCRIPTIONUPDATE:
-            setLS('hasSubscriptionUpdate', false);
             setLS('subscriptionUpdateFileNames', []);
             return state.set('fetchingSubscriptionUpdate', API_REQUEST_STATE.START).set('hasUpdate', false).set('fileNames', List([])).set('error', null);
         case SubscriptionUpdate.FETCH_SUBSCRIPTIONUPDATE_FULFILLED:

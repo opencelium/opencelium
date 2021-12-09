@@ -240,7 +240,7 @@ public class AssistantServiceImp implements ApplicationService {
         Process fetch = Runtime.getRuntime().exec("git fetch");
         getText(fetch.getInputStream());
         getText(fetch.getErrorStream());
-
+        
         fetch = Runtime.getRuntime().exec("git diff origin/master --name-only --exit-code");
         getText(fetch.getErrorStream());
         List<String> filesName = getText(fetch.getInputStream());

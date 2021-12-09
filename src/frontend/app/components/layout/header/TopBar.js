@@ -2,15 +2,12 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {withRouter} from "react-router";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import Input from "@basic_components/inputs/Input";
 import {toggleNotificationPanel} from "@actions/auth";
 import styles from "@themes/default/layout/header.scss";
 import Callout from "@components/layout/header/Callout";
 import {CNotification} from "@classes/components/general/CNotification";
 import {withTranslation} from "react-i18next";
 import Search from "@components/layout/header/Search";
-import {hasHeader} from "@utils/app";
-import Menu from "@components/layout/menu/Menu";
 
 
 function mapStateToProps(state){
@@ -39,7 +36,7 @@ class TopBar extends React.Component{
             if(!this.state.isCalloutVisible){
                 this.setState({
                     isCalloutVisible: true,
-                }, () => setTimeout(() => this.setState({isCalloutVisible: false, notificationsAmount}), 3000))
+                }, () => setTimeout(() => this.setState({isCalloutVisible: false, notificationsAmount}), 3000));
             }
         } else{
             if(this.state.notificationsAmount !== notificationsAmount && !this.state.isCalloutVisible){
@@ -48,10 +45,6 @@ class TopBar extends React.Component{
                 })
             }
         }
-    }
-
-    onClickSearchIcon(){
-
     }
 
     onClickNotifications(){

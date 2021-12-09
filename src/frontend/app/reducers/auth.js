@@ -64,6 +64,7 @@ const reducer = (state = initialState, action) => {
         case AuthAction.LOG_OUT_FULFILLED:
             removeLS('notifications');
             removeLS('hasSubscriptionUpdate');
+            removeLS('hasCheckedUpdate');
             removeLS('subscriptionUpdateFileNames');
             return state.set('logouting', false).set('authUser', action.payload).set('isAuth', false).set('notifications', List([]));
         case AuthAction.LOG_OUT_REJECTED:
@@ -77,6 +78,7 @@ const reducer = (state = initialState, action) => {
             removeCryptLS('token');
             removeLS('notifications');
             removeLS('hasSubscriptionUpdate');
+            removeLS('hasCheckedUpdate');
             removeLS('subscriptionUpdateFileNames');
             return state.set('isSessionExpired', true).set('notifications', List([]));
         case AuthAction.SESSION_NOTEXPIRED_FULFILLED:

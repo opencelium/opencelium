@@ -19,7 +19,7 @@ import {withTranslation} from 'react-i18next';
 
 import {updateSchedule} from "@actions/schedules/update";
 import {fetchSchedule} from "@actions/schedules/fetch";
-import {fetchConnections} from "@actions/connections/fetch";
+import {fetchMetaConnections as fetchConnections} from "@actions/connections/fetch";
 import {permission} from "@decorators/permission";
 import {SchedulePermissions} from "@utils/constants/permissions";
 import {SingleComponent} from "@decorators/SingleComponent";

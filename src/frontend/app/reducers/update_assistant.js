@@ -17,6 +17,7 @@ import {fromJS, List} from 'immutable';
 
 import {UpdateAssistantAction} from '@utils/actions';
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import {setLS} from "@utils/LocalStorage";
 
 
 const initialState = fromJS({
@@ -73,6 +74,7 @@ const reducer = (state = initialState, action) => {
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION:
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.START).set('error', null);
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION_FULFILLED:
+            setLS('hasCheckedUpdate', true);
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.FINISH).set('updateAppVersion', action.payload.version);
         case UpdateAssistantAction.FETCH_UPDATEAPPVERSION_REJECTED:
             return state.set('fetchingUpdateAppVersion', API_REQUEST_STATE.ERROR).set('error', action.payload);

@@ -34,7 +34,7 @@ import BrowseButton from "@basic_components/buttons/BrowseButton";
 export const ONLINE_UPDATE = 'ONLINE_UPDATE';
 export const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
 
-const VERSION_STATUS = {
+export const VERSION_STATUS = {
     OLD: 'old',
     CURRENT: 'current',
     AVAILABLE: 'available',
