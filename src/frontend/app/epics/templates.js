@@ -244,15 +244,16 @@ const fetchTemplateEpic = (action$, store) => {
 
 
 export {
+    fetchTemplateEpic,
     fetchTemplatesEpic,
     addTemplateEpic,
-    duplicateTemplateEpic,
-    convertTemplateEpic,
-    convertTemplatesEpic,
+    updateTemplateEpic,
     deleteTemplateEpic,
     deleteTemplatesEpic,
-    importTemplateEpic,
+    duplicateTemplateEpic,
     exportTemplateEpic,
-    updateTemplateEpic,
-    fetchTemplateEpic,
+
+    importTemplateEpic,
+    convertTemplateEpic,
+    convertTemplatesEpic,
 };
