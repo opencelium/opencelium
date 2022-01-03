@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ExecutionContainer {
 
@@ -235,7 +236,7 @@ public class ExecutionContainer {
             if (!exp.contains(pointer)){
                 continue;
             }
-            result = type.isEmpty() ? convertToType(entry.getValue(), type) : getProperTypeOfValue(entry.getValue(), type);
+            result = !type.isEmpty() ? convertToType(entry.getValue(), type) : getProperTypeOfValue(entry.getValue());
             break;
         }
         return result;
@@ -247,12 +248,17 @@ public class ExecutionContainer {
             result = Long.parseLong(val.toString());
         } else if(type.equalsIgnoreCase("double") || type.equalsIgnoreCase("float")) {
             result = Double.parseDouble(val.toString());
+        } else if (type.equalsIgnoreCase("array")){
+            result = val.toString().replace("[","")
+                    .replace("]","")
+                    .replace("\"","")
+                    .replace("\'","").split(",");
         }
 
         return result;
     }
 
-    private Object getProperTypeOfValue(Object val, String type){
+    private Object getProperTypeOfValue(Object val){
         if (val == null) {
             return null;
         }
