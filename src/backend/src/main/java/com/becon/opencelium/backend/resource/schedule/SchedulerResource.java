@@ -30,6 +30,7 @@ public class SchedulerResource {
     private ConnectionResource connection;
     private String title;
     private boolean status;
+    private boolean debugMode;
     private String cronExp;
     private LastExecutionResource lastExecution;
     private WebhookResource webhook;
@@ -65,6 +66,14 @@ public class SchedulerResource {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     public String getCronExp() {
