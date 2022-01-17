@@ -40,13 +40,15 @@ public class ConnectionExecutor {
     private ConnectorServiceImp connectorService;
     private ExecutionContainer executionContainer;
     private ConnectorExecutor connectorExecutor;
+    private boolean debugMode;
 
     public ConnectionExecutor(ConnectionNodeServiceImp connectionNodeService, ConnectorServiceImp connectorService,
-                              ExecutionContainer executionContainer, ConnectorExecutor connectorExecutor) {
+                              ExecutionContainer executionContainer, ConnectorExecutor connectorExecutor, boolean debugMode) {
         this.connectionNodeService = connectionNodeService;
         this.connectorService = connectorService;
         this.executionContainer = executionContainer;
         this.connectorExecutor = connectorExecutor;
+        this.debugMode = debugMode;
     }
 
     public void start(Scheduler scheduler){
@@ -62,7 +64,7 @@ public class ConnectionExecutor {
         Connector toConnector = connectorService.findById(connection.getToConnector())
                 .orElseThrow(() -> new ConnectorNotFoundException(connection.getFromConnector()));
 
-        connectorExecutor.start(connectionNode.getFromConnector(), fromConnector, toConnector, Constant.CONN_FROM);
-        connectorExecutor.start(connectionNode.getToConnector(), toConnector, fromConnector, Constant.CONN_TO);
+        connectorExecutor.start(connectionNode.getFromConnector(), fromConnector, toConnector, Constant.CONN_FROM, debugMode);
+        connectorExecutor.start(connectionNode.getToConnector(), toConnector, fromConnector, Constant.CONN_TO, debugMode);
     }
 }

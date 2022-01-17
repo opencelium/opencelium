@@ -19,6 +19,8 @@ package com.becon.opencelium.backend.execution.statement.operator;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.*;
+
 public class IsNotEmpty implements Operator{
 
 
