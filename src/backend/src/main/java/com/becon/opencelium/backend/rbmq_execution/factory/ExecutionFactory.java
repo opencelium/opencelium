@@ -1,7 +1,7 @@
-package com.becon.opencelium.backend.execution2.factory;
+package com.becon.opencelium.backend.rbmq_execution.factory;
 
 import com.becon.opencelium.backend.enums.ExecutionType;
-import com.becon.opencelium.backend.execution2.executor.*;
+import com.becon.opencelium.backend.rbmq_execution.executor.*;
 
 public class ExecutionFactory {
 

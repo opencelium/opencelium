@@ -1,8 +1,4 @@
-package com.becon.opencelium.backend.execution2.factory;
-
-import com.becon.opencelium.backend.execution2.builder.RequestBuilder;
-import com.becon.opencelium.backend.execution2.http.RestClient;
-import com.becon.opencelium.backend.execution2.http.SoapClient;
+package com.becon.opencelium.backend.rbmq_execution.factory;
 
 public class TransferProtocolFactory {
 

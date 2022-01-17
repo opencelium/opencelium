@@ -127,7 +127,7 @@ public class UserController {
         }
         userRequestResource.setUserId(id);
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if(userDetailResource.getLang() == null || userDetailResource.getLang() == ""){
+        if(userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()){
             userDetailResource.setLang("en");
             userRequestResource.setUserDetail(userDetailResource);
         }

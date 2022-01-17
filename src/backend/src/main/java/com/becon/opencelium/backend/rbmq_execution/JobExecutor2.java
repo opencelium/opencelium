@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution2;
+package com.becon.opencelium.backend.rbmq_execution;
 
 import com.becon.opencelium.backend.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;

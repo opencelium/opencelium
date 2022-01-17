@@ -35,6 +35,7 @@ import com.becon.opencelium.backend.resource.connection.MethodResource;
 import com.becon.opencelium.backend.resource.connection.OperatorResource;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import com.becon.opencelium.backend.utility.StringUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -125,7 +126,8 @@ public class ConnectorServiceImp implements ConnectorService{
         Connector connector = new Connector();
         connector.setId(resource.getConnectorId());
         connector.setTitle(resource.getTitle());
-        connector.setIcon(resource.getIcon());
+        String icon = StringUtility.findImageFromUrl(resource.getIcon());
+        connector.setIcon(icon);
         connector.setDescription(resource.getDescription());
         connector.setInvoker(resource.getInvoker().getName());
 

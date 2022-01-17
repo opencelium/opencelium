@@ -1,7 +1,5 @@
-package com.becon.opencelium.backend.execution2.http;
+package com.becon.opencelium.backend.rbmq_execution.http;
 
-import com.becon.opencelium.backend.neo4j.entity.MethodNode;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface WebServiceClient<T> {

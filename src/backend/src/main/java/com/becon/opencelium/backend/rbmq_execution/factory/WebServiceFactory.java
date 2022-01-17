@@ -1,8 +1,8 @@
-package com.becon.opencelium.backend.execution2.factory;
+package com.becon.opencelium.backend.rbmq_execution.factory;
 
-import com.becon.opencelium.backend.execution2.http.RestClient;
-import com.becon.opencelium.backend.execution2.http.SoapClient;
-import com.becon.opencelium.backend.execution2.http.WebServiceClient;
+import com.becon.opencelium.backend.rbmq_execution.http.RestClient;
+import com.becon.opencelium.backend.rbmq_execution.http.SoapClient;
+import com.becon.opencelium.backend.rbmq_execution.http.WebServiceClient;
 
 public class WebServiceFactory<T> {
 
