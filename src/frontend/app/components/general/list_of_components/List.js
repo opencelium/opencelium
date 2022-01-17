@@ -243,9 +243,6 @@ class List extends Component{
     }
 
     setCurrentPageItems(){
-        if(!this.props){
-            debugger;
-        }
         const {mapEntity, setCurrentPageItems} = this.props;
         let filteredEntities = this.filterEntities().map((entity, key) => {let data = entity.getObject ? entity.getObject() : entity; return {...data, mappedEntity: mapEntity.map(entity, key)};});
         setCurrentPageItems(filteredEntities);

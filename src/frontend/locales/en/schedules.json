@@ -105,6 +105,8 @@
       "PAGE_1": "General Data",
       "TITLE": "Title",
       "LOGS": "Logs",
+      "LOGS_TITLE_ENABLED": "Logs are activated",
+      "LOGS_TITLE_DISABLED": "Logs are deactivated",
       "CONNECTION": "Connection",
       "CONNECTION_PLACEHOLDER": "Choose connection...",
       "DESCRIPTION_DEFAULT": "Here you will see the description of the connection",
