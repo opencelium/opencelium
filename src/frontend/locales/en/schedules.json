@@ -84,6 +84,7 @@
     "LAST_DURATION": "Last Duration",
     "LAST_DURATION_SEC": "sec",
     "STATUS": "Status",
+    "LOGS": "Logs",
     "ACTION": "Action",
     "WEBHOOK": "WEBHOOK",
     "WEBHOOK_TOOLTIP": "Copy to Clipboard",
