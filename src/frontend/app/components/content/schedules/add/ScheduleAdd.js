@@ -44,6 +44,7 @@ function mapSchedule(schedule){
     updateSchedule.connectionId = schedule.connection;
     updateSchedule.cronExp = schedule.cronExp;
     updateSchedule.status = true;
+    updateSchedule.debugMode = true;
     updateSchedule.timezone = new Date().getTimezoneOffset();
     return updateSchedule;
 }
