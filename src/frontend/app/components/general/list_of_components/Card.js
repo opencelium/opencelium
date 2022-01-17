@@ -352,15 +352,13 @@ class ListCard extends Component{
         return (
             <div id={`list_card_${index}`} className={cardClassName} style={cardStyle} onClick={!isButton ? ::this.onCardClick : null} onMouseOver={::this.onMouseOverCard} onMouseLeave={::this.onMouseLeaveCard}>
                 <div className={styles[classNames.top_section]}>
-                        {isString(entity.title) &&
-                            <div className={styles[classNames.card_title]} style={cardTitleStyle}>
-                                <div className={styles[classNames.title]} title={entity.title}>{entity.title}</div>
-                                {this.renderSubtitle()}
-                            </div>
-                        }
-                        {!isString(entity.title) &&
-                            entity.title
-                        }
+                    {!entity.titleComponent ?
+                        <div className={styles[classNames.card_title]} style={cardTitleStyle}>
+                            <div className={styles[classNames.title]} title={entity.title}>{entity.title}</div>
+                            {this.renderSubtitle()}
+                        </div> :
+                        entity.title
+                    }
                     {avatar}
                 </div>
                 {this.renderActions()}
