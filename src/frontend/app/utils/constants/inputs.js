@@ -129,6 +129,7 @@ const SCHEDULE_TITLE = {name: 'title', type: 'text', maxLength: 256, icon: 'titl
 const SCHEDULE_CONNECTION = {name: 'connection', type: 'select+description', icon: 'supervised_user_circle'};
 const SCHEDULE_CONNECTION_TEXT = {name: 'connection', type: 'text', icon: 'supervised_user_circle'};
 const SCHEDULE_CRON_EXPRESSION = {name: 'cronExp', type: 'cron_exp', maxLength: 256, icon: 'title'};
+const SCHEDULE_LOG = {name: 'debugMode', type: 'switch', icon: 'summarize'};
 
 //SCHEDULE
 const ISCHEDULE = {
@@ -136,6 +137,7 @@ const ISCHEDULE = {
     SCHEDULE_CONNECTION,
     SCHEDULE_CONNECTION_TEXT,
     SCHEDULE_CRON_EXPRESSION,
+    SCHEDULE_LOG,
 }
 
 //NOTIFICATION TEMPLATE

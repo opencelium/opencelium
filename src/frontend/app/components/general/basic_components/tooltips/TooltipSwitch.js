@@ -20,10 +20,19 @@ import theme from "react-toolbox/lib/tooltip/theme.css";
 import {CustomInput} from "reactstrap";
 import styles from "@themes/default/general/basic_components";
 import Loading from "@loading";
+import {connect} from "react-redux";
 
 /**
  * Tooltip Component for FontIcon
  */
+
+function mapStateToProps(state){
+    const auth = state.get('auth');
+    return{
+        authUser: auth.get('authUser'),
+    };
+}
+@connect(mapStateToProps, {})
 class TooltipSwitch extends Component{
 
     constructor(props){

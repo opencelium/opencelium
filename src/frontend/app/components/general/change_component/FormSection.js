@@ -56,6 +56,7 @@ import {getStyles} from "@utils/themes";
 import FormCronExp from "@change_component/form_elements/FormCronExp";
 import Translate from "@components/general/app/Translate";
 import {Container} from "react-grid-system";
+import FormSwitch from "@change_component/form_elements/FormSwitch";
 
 
 function mapStateToProps(state){
@@ -310,6 +311,13 @@ class FormSection extends Component{
                 return <FormAppTour
                     key={key}
                     entity={entity}
+                    data={data}
+                />;
+            case 'switch':
+                return <FormSwitch
+                    key={key}
+                    entity={entity}
+                    updateEntity={updateEntity}
                     data={data}
                 />;
             case 'test_button':

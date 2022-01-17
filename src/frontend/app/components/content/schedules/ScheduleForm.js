@@ -166,6 +166,12 @@ export function ScheduleForm(type) {
                                 label: t(`${this.translationKey}.FORM.TITLE`),
                                 defaultValue: ''
                             },
+                            {...INPUTS.SCHEDULE_LOG,
+                                label: t(`${this.translationKey}.FORM.LOGS`),
+                                enabledTitle: t(`${this.translationKey}.FORM.LOGS_TITLE_ENABLED`),
+                                disabledTitle: t(`${this.translationKey}.FORM.LOGS_TITLE_DISABLED`),
+                                defaultValue: true,
+                            },
                             {...connectionInput,
                                 error: validationMessages.connection,
                                 label: t(`${this.translationKey}.FORM.CONNECTION`),
