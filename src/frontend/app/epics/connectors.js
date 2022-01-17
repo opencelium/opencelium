@@ -160,8 +160,8 @@ const updateConnectorEpic = (action$, store) => {
             let successResponse = updateConnectorFulfilled;
             if(data.icon && !isString(data.icon)){
                 successResponse = updateConnectorIcon;
+                delete data.icon;
             }
-            delete data.icon;
             return doRequest({url, method: API_METHOD.PUT, data: {...data}},{
                     success: successResponse,
                     reject: updateConnectorRejected,},
