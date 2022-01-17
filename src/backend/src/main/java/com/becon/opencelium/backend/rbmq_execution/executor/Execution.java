@@ -1,6 +1,6 @@
-package com.becon.opencelium.backend.execution2.executor;
+package com.becon.opencelium.backend.rbmq_execution.executor;
 
-import com.becon.opencelium.backend.execution2.mediator.ExecutionContext;
+import com.becon.opencelium.backend.rbmq_execution.mediator.ExecutionContext;
 
 public interface Execution {
     void start(ExecutionContext data);

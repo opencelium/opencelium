@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution2.http;
+package com.becon.opencelium.backend.rbmq_execution.http;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;

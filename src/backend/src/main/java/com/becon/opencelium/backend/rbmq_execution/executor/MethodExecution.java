@@ -1,12 +1,11 @@
-package com.becon.opencelium.backend.execution2.executor;
+package com.becon.opencelium.backend.rbmq_execution.executor;
 
-import com.becon.opencelium.backend.execution2.container.Method;
-import com.becon.opencelium.backend.execution2.mediator.ExecutionContext;
-import com.becon.opencelium.backend.execution2.factory.WebServiceFactory;
-import com.becon.opencelium.backend.execution2.http.OcRequest;
-import com.becon.opencelium.backend.execution2.http.WebServiceClient;
-import com.becon.opencelium.backend.execution2.service.MethodService;
-import com.becon.opencelium.backend.execution2.service.MethodServiceImp;
+import com.becon.opencelium.backend.rbmq_execution.mediator.ExecutionContext;
+import com.becon.opencelium.backend.rbmq_execution.factory.WebServiceFactory;
+import com.becon.opencelium.backend.rbmq_execution.http.OcRequest;
+import com.becon.opencelium.backend.rbmq_execution.http.WebServiceClient;
+import com.becon.opencelium.backend.rbmq_execution.service.MethodService;
+import com.becon.opencelium.backend.rbmq_execution.service.MethodServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
