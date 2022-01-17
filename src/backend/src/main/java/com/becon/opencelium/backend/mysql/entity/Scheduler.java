@@ -109,7 +109,7 @@ public class Scheduler {
         this.status = status;
     }
 
-    public boolean isDebugMode() {
+    public boolean getDebugMode() {
         return debugMode;
     }
 

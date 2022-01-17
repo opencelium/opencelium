@@ -106,7 +106,7 @@ public class JobExecutor extends QuartzJobBean {
         Scheduler scheduler = schedulerServiceImp.findById((int)schedulerId)
                 .orElseThrow(() -> new RuntimeException("Scheduler not found"));
 
-        boolean debugMode = scheduler.isDebugMode();
+        boolean debugMode = scheduler.getDebugMode();
         ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
         if(debugMode) logger.info("Executing Job with key {}", context.getJobDetail().getKey());
         if(debugMode) logger.info("Firing  Trigger with key {}", context.getTrigger().getKey());

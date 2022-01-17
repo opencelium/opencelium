@@ -181,7 +181,7 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulerResource.setTitle(entity.getTitle());
         schedulerResource.setStatus(entity.getStatus());
         schedulerResource.setCronExp(entity.getCronExp());
-        schedulerResource.setDebugMode(entity.isDebugMode());
+        schedulerResource.setDebugMode(entity.getDebugMode());
         schedulerResource.setConnection(connectionService.toResource(entity.getConnection()));
 
         if (entity.getLastExecution() != null){
