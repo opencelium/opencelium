@@ -114,7 +114,8 @@ class ConnectionsList extends Component{
         mapEntity.map = (connection, key) => {
             let result = {};
             result.id = connection.connectionId;
-            result.title = <ConnectionCardTitle title={connection.title} fromConnector={connection.fromConnector} toConnector={connection.toConnector}/>;
+            result.title = connection.title;
+            result.titleComponent = <ConnectionCardTitle title={connection.title} fromConnector={connection.fromConnector} toConnector={connection.toConnector}/>;
             return result;
         };
         mapEntity.getViewLink = (connection) => {const id = connection.hasOwnProperty('id') ? connection.id : connection.connectionId; return `${prefixUrl}/${id}/view`;};

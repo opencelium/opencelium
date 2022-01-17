@@ -276,7 +276,7 @@ class SchedulesList extends Component{
             const disabled = !::thisListScope.isOneChecked();
             return (
                 <div className={styles.actions}>
-                    <Button icon={startingSchedules === API_REQUEST_STATE.START ? 'loading' : 'play_arrow'} title={'Start'} disabled={disabled || startingSchedules === API_REQUEST_STATE.START } onClick={() => ::this.startSelectedSchedules(thisListScope.state.checks, thisListScope.setCurrentPageItems)}/>
+                    <Button icon={startingSchedules === API_REQUEST_STATE.START ? 'loading' : 'play_arrow'} title={'Start'} disabled={disabled || startingSchedules === API_REQUEST_STATE.START } onClick={() => ::this.startSelectedSchedules(thisListScope.state.checks, () => thisListScope.setCurrentPageItems())}/>
                     <Button icon={enablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'radio_button_unchecked'} title={'Enable'} disabled={disabled || enablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.enableSelectedSchedules(thisListScope.state.checks)}/>
                     <Button icon={disablingSchedules === API_REQUEST_STATE.START ? 'loading' : 'highlight_off'} title={'Disable'} disabled={disabled || disablingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.disableSelectedSchedules(thisListScope.state.checks)}/>
                     <Button icon={deletingSchedules === API_REQUEST_STATE.START ? 'loading' : 'delete'} title={'Delete'} disabled={disabled || deletingSchedules === API_REQUEST_STATE.START} onClick={() => ::this.wantDeleteSelectedSchedules(thisListScope.state.checks)}/>
