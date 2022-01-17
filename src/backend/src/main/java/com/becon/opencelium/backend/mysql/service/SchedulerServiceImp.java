@@ -162,6 +162,7 @@ public class SchedulerServiceImp implements SchedulerService {
         scheduler.setStatus(resource.isStatus());
         scheduler.setCronExp(resource.getCronExp());
         scheduler.setConnection(connection);
+        scheduler.setDebugMode(resource.isDebugMode());
 
         List<NotificationResource> notificationResources = resource.getNotificationResources();
         List<EventNotification> eventNotificationList = new ArrayList<>();
@@ -180,6 +181,7 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulerResource.setTitle(entity.getTitle());
         schedulerResource.setStatus(entity.getStatus());
         schedulerResource.setCronExp(entity.getCronExp());
+        schedulerResource.setDebugMode(entity.isDebugMode());
         schedulerResource.setConnection(connectionService.toResource(entity.getConnection()));
 
         if (entity.getLastExecution() != null){

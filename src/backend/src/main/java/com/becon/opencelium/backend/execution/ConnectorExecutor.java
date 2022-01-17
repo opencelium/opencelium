@@ -74,6 +74,7 @@ public class ConnectorExecutor {
     private ConnectorServiceImp connectorService;
     private LogMessageServiceImp logMessageService;
     private VariableNodeServiceImp statementNodeService;
+    private boolean debugMode = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, RestTemplate restTemplate,
                              ExecutionContainer executionContainer, FieldNodeServiceImp fieldNodeService,
@@ -89,7 +90,9 @@ public class ConnectorExecutor {
         this.statementNodeService = statementNodeService;
     }
 
-    public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector, String conn){
+    public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
+                      String conn, boolean debugMode){
+        this.debugMode = debugMode;
         this.invoker = invokerService.findByName(currentConnector.getInvoker());
         List<RequestData> requestData = connectorService.buildRequestData(currentConnector);
         List<RequestData> supportRequestData = connectorService.buildRequestData(supportConnector);
@@ -117,7 +120,7 @@ public class ConnectorExecutor {
             }
 // ==================================================================================
             ResponseEntity<String> responseEntity = sendRequest(methodNode);
-            System.out.println("Response : " + responseEntity.getBody());
+            if (debugMode) System.out.println("Response : " + responseEntity.getBody());
 
             messageContainer = executionContainer.getResponseData().stream()
                     .filter(m -> m.getMethodKey().equals(methodNode.getColor()))
@@ -172,14 +175,16 @@ public class ConnectorExecutor {
                 .orElseThrow(() -> new RuntimeException("Method not found in Invoker"));
         String taId = executionContainer.getTaId();
 
-        System.out.println("============================================================");
-        System.out.println("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
+        if (debugMode) {
+            System.out.println("============================================================");
+            System.out.println("Function: " + methodNode.getName() + " -- color: " + methodNode.getColor());
+        }
 
         HttpMethod method = getMethod(methodNode); // done
-        System.out.println("Method: " + method.name());
+        if (debugMode) System.out.println("Method: " + method.name());
 
         String url = buildUrl(methodNode); // done
-        System.out.println("URL: " + url);
+        if (debugMode) System.out.println("URL: " + url);
 
         LogMessage logMessage = LogMessageServiceImp.LogBuilder.newInstance()
                 .setTaId(taId)
@@ -197,7 +202,7 @@ public class ConnectorExecutor {
 
 
         HttpHeaders header = buildHeader(functionInvoker); // done
-        System.out.println("Header: " + header.toString());
+        if (debugMode) System.out.println("Header: " + header.toString());
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
                 .setTaId(taId)
                 .setOrderId(executionContainer.getOrder())
@@ -214,8 +219,8 @@ public class ConnectorExecutor {
 
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
 
-        System.out.println("Body: " + body);
-        System.out.println("============================================================");
+        if (debugMode) System.out.println("Body: " + body);
+        if (debugMode) System.out.println("============================================================");
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
                 .setTaId(taId)
                 .setOrderId(executionContainer.getOrder())
@@ -256,7 +261,7 @@ public class ConnectorExecutor {
             } else {
                 data = body;
             }
-            System.out.println("Inside CheckMK body: " + data);
+            if (debugMode) System.out.println("Inside CheckMK body: " + data);
         }
 
         // TODO: Changed string to object in httpEntity;
@@ -567,12 +572,12 @@ public class ConnectorExecutor {
     }
 
     private void executeIfStatement(StatementNode ifStatement){
-        System.out.println("=============== " + ifStatement.getOperand() + " ================= " + ifStatement.getIndex() );
+        if (debugMode) System.out.println("=============== " + ifStatement.getOperand() + " ================= " + ifStatement.getIndex() );
         OperatorAbstractFactory factory = new OperatorAbstractFactory();
         Operator operator = factory.generateFactory(OperatorType.COMPARISON).getOperator(ifStatement.getOperand());
         Object leftVariable = getValue(ifStatement.getLeftStatementVariable(), "");
 
-        if(leftVariable != null){
+        if(leftVariable != null && debugMode){
             System.out.println("Left Statement: " + leftVariable.toString());
         }
 
@@ -584,7 +589,7 @@ public class ConnectorExecutor {
             rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
         }
 
-        if (rightStatement != null){
+        if (rightStatement != null && debugMode){
             if (rightStatement.getClass().isArray()) {
                 System.out.println("Right Statement: " + Arrays.toString((String[])rightStatement));
             } else {
@@ -655,10 +660,10 @@ public class ConnectorExecutor {
         List<Object> array =
                 (List<Object>) message.getValue(condition, loopIndex);
 
-        System.out.println("============================= LOOP ======================== " + statementNode.getIndex());
+        if (debugMode) System.out.println("============================= LOOP ======================== " + statementNode.getIndex());
         String arr = ConditionUtility.getLastArray(condition);;
         for (int i = 0; i < array.size(); i++) {
-            System.out.println("Loop " + condition + "-------- index : " + i);
+            if (debugMode) System.out.println("Loop " + condition + "-------- index : " + i);
             loopIndex.put(arr, i);
             executeMethod(statementNode.getBodyFunction());
             executeDecisionStatement(statementNode.getBodyOperator());
