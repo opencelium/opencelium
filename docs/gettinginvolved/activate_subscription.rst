@@ -24,7 +24,7 @@ Send an email to support@opencelium.io to get your invitation. Please use your c
 	root@shell> cp -r opencelium.pro/* .
 	root@shell> cp -r opencelium.pro/.* .
 	root@shell> rm -rf opencelium.pro
-	root@shell> git config --global credential.helper store
+	root@shell> git config --global credential.helper store // use your bitbucket credentials
 
 3. Restart oc:
 
