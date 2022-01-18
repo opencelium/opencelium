@@ -13,7 +13,7 @@ html_favicon = 'img/favicon32x32.png'
 numpydoc_show_class_members = False
 class_members_toctree = False
 file_insertion_enabled = False
-extensions = ['sphinx.ext.intersphinx','sphinxemoji.sphinxemoji']
+extensions = ['sphinx.ext.intersphinx']
 
 source_suffix = ['.rst','.md']
 copyright = str(datetime.now().year)
