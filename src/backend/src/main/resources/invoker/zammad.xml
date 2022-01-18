@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
     <name>Zammad</name>
     <description>Zammad is a web based open source helpdesk/customer support system with many features to manage customer communication via several channels like telephone, facebook, twitter, chat and emails.</description>
-    <hint>Read api documentation https://docs.zammad.org/en/latest/api</hint>
+    <hint>Add the custom field freshdeskid to use this property. Read api documentation https://docs.zammad.org/en/latest/api</hint>
     <icon>zammad.png</icon>
     <requiredData>
         <item name="url" type="string" visibility="public"/>
@@ -561,13 +561,17 @@
         </operation>
         <operation name="TicketSearch" type="">
             <request>
-                <method>GET</method>
-                <endpoint>{url}/api/v1/tickets/search?query={search-term}&amp;limit=10</endpoint>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/tickets/search</endpoint>
                 <header>
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
+                <body type="object" format="json" data="raw">
+                    <field name="query" type="string"/>
+                    <field name="limit" type="number">10</field>
+                    <field name="expand" type="number">1</field>
+                </body>	
             </request>
             <response>
                 <success status="200">
@@ -580,7 +584,9 @@
                         <field name="customer_id" type="string"/>                      
                         <field name="note" type="string"/>
                         <field name="created_at" type="string"/>
-                        <field name="updated_at" type="string"/>                                                                 
+			<field name="updated_at" type="string"/>                                                                 
+                        <field name="freshdeskid" type="string"/>				
+                        <field name="article_ids" type="array"/>				
                     </body>
                 </success>
                 <fail status="401">
@@ -631,9 +637,10 @@
                     <field name="title" type="string"/>
                     <field name="group" type="string"/>
                     <field name="customer" type="string"/>                        
-                    <field name="article" type="array">
+                    <field name="article" type="object">
                         <field name="subject" type="string"/>
                         <field name="body" type="string"/>
+			<field name="content_type" type="string">text/html</field>
                         <field name="type" type="string"/>
                         <field name="internal" type="string"/>
                         <field name="attachment" type="array">
@@ -643,6 +650,7 @@
                         </field>                        
                     </field>
                     <field name="note" type="string"/>                        
+                    <field name="freshdeskid" type="string"/>				
                 </body>
             </request>
             <response>
@@ -730,7 +738,7 @@
         <operation name="ArticleList" type="">
             <request>
                 <method>GET</method>
-                <endpoint>{url}/api/v1/ticket_articles/by_ticket/{id}</endpoint>
+                <endpoint>{url}/api/v1/ticket_article/{id}</endpoint>
                 <header>
                     <item name="Authorization" type="string">{token}</item>
                     <item name="Content-Type" type="string">application/json</item>
@@ -760,6 +768,39 @@
                 </fail>
             </response>
         </operation>
+        <operation name="ArticleListByTicketID" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/ticket_articles/by_ticket/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="ticket_id" type="string"/>
+                        <field name="from" type="string"/>
+                        <field name="to" type="string"/>
+                        <field name="cc" type="string"/>
+                        <field name="subject" type="string"/>
+                        <field name="body" type="string"/>
+                        <field name="content_type" type="string"/>
+                        <field name="type" type="string"/>
+                        <field name="internal" type="string"/>
+                        <field name="updated_at" type="string"/>
+                        <field name="created_at" type="string"/>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>	    
         <operation name="ArticleGet" type="">
             <request>
                 <method>GET</method>

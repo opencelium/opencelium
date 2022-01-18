@@ -241,7 +241,7 @@
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemCreate/{UserLogin}/{Password}</endpoint>
                 <header>
-                    <item name="Content-Type" type="string"/>
+                        <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body type="array" format="json" data="raw">
                     <field name="ConfigItem" type="object">
@@ -282,7 +282,7 @@
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemUpdate/{UserLogin}/{Password}</endpoint>
                 <header>
-                    <item name="Content-Type" type="string"/>
+                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body type="object" format="json" data="raw">
                     <field name="ConfigItemID" type="string"/>

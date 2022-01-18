@@ -2,7 +2,7 @@
 Updating
 ##################
 
-Till OC 1.4.1
+Till OC 2.0
 """""""""""""""""
 
 .. code-block:: sh
@@ -11,10 +11,12 @@ Till OC 1.4.1
 	root@shell> cd /opt
 	root@shell> git fetch
 	root@shell> git checkout tags/<version> // e.g 1.1 
+	root@shell> cd /opt/src/frontend
+	root@shell> yarn
+	root@shell> oc restart_frontend
 	root@shell> cd /opt/src/backend
 	root@shell> gradle build
-	root@shell> cd /opt/src/frontend
-	root@shell> yarn upgrade
+	root@shell> oc restart_backend
 
 From OC 2.0
 """""""""""""""""
