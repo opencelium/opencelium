@@ -197,7 +197,7 @@ public class ConnectorExecutor {
         try {
             logMessageService.save(logMessage);
         } catch (Exception e){
-            System.err.println(e.getMessage());
+            if(debugMode) System.err.println(e.getMessage());
         }
 
 
@@ -214,7 +214,7 @@ public class ConnectorExecutor {
         try {
             logMessageService.save(logMessage);
         } catch (Exception e){
-            System.err.println(e.getMessage());
+            if(debugMode) System.err.println(e.getMessage());
         }
 
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
@@ -232,7 +232,7 @@ public class ConnectorExecutor {
         try {
             logMessageService.save(logMessage);
         } catch (Exception e){
-            System.err.println(e.getMessage());
+            if (debugMode) System.err.println(e.getMessage());
         }
 
         // TODO: added application/x-www-form-urlencoded support: need to refactor.
@@ -291,7 +291,7 @@ public class ConnectorExecutor {
         try {
             logMessageService.save(logMessage);
         } catch (Exception e){
-            System.err.println(e.getMessage());
+            if (debugMode) System.err.println(e.getMessage());
         }
 
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
@@ -305,7 +305,7 @@ public class ConnectorExecutor {
         try {
             logMessageService.save(logMessage);
         } catch (Exception e){
-            System.err.println(e.getMessage());
+            if (debugMode) System.err.println(e.getMessage());
         }
         return response;
     }
