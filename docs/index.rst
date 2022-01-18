@@ -44,6 +44,13 @@ This documentation is organized into a couple of sections:
    tools/otrs
 
 .. toctree::
+   :caption: Sources
+   :maxdepth: 2
+
+   sources/download <https://github.com/opencelium/opencelium/>
+   sources/changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
+
+.. toctree::
    :caption: REST API Reference
    :maxdepth: 2
 
@@ -60,7 +67,7 @@ This documentation is organized into a couple of sections:
 License
 ##################
 
-`becon`_ © 2013-2021 becon GmbH
+`becon`_ © 2013-2022 becon GmbH
 
 .. _becon: LICENSE.html
       

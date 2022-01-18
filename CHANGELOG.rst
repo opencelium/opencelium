@@ -24,7 +24,7 @@ Fixes
 * When you update a job, it is automatically activated (OC-423)
 
 
-Major Relase |:loudspeaker:|
+Major Relase :loudspeaker:
 ============
 
 2.0
@@ -159,7 +159,7 @@ Fixes
 * Scheduler saving (OC-250)
 * First execution job will not be updated on scheduler view (OC-225)
 
-Major Relase |:loudspeaker:|
+Major Relase :loudspeaker:
 ============
 
 1.0
