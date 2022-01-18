@@ -256,6 +256,7 @@ class SchedulesList extends Component{
                 if(!readOnly){
                     result.push({name: 'status', label: t('LIST.STATUS'), value: <StatusCell key={`status_${schedule.schedulerId}`} schedule={schedule}/>});
                 }
+                result.push({name: 'debugMode', label: t('LIST.LOGS'), value: schedule.debugMode ? 'on' : 'off'});
                 return result;
             },
         }

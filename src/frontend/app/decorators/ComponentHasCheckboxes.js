@@ -85,19 +85,20 @@ export function ComponentHasCheckboxes(){
                 const {items} = this.props;
                 let entities = this.props[this.props.entitiesName];
                 let checks = this.state.checks;
+                let entityIdName = this.props.connectionId ? this.props.connectionId : this.props.entityIdName;
                 for (let i = 0; i < entities.length; i++) {
-                    let item = items.find(item => item[0].name === this.props.entityIdName && item[0].value === entities[i][this.props.entityIdName]);
+                    let item = items.find(item => item[0].name === this.props.entityIdName && item[0].value === entities[i][entityIdName]);
                     if (item) {
-                        let index = checks.findIndex(check => check.id === entities[i][this.props.entityIdName]);
+                        let index = checks.findIndex(check => check.id === entities[i][entityIdName]);
                         if(index !== -1){
                             checks[index] = {
                                 value: value === null ? !this.state.allChecked : value,
-                                id: entities[i][this.props.entityIdName]
+                                id: entities[i][entityIdName]
                             };
                         } else{
                             checks.push({
                                 value: value === null ? !this.state.allChecked : value,
-                                id: entities[i][this.props.entityIdName]
+                                id: entities[i][entityIdName]
                             });
                         }
                     }

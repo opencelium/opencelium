@@ -27,7 +27,7 @@ Windows  (Instruction is deprecated. It will be renewed.)
 
 	root@shell> yarn start
 
-After that, your browser should automatically open a new tab with url: `http://localhost:3000/ <http://localhost:3000/>`_
+After that, your browser should automatically open in a new tab with url: `http://localhost:3000/ <http://localhost:3000/>`_
 
 7. Install JDK and JRE.
 8. Unpack the Gradle into c:\\Gradle
@@ -39,7 +39,7 @@ After that, your browser should automatically open a new tab with url: `http://l
 
 
 
-Debian/Ubuntu (example for 18.04 LTS)
+Debian/Ubuntu (example for 20.04 LTS)
 """""""""""""""""
 **Prepare environment:**
 
@@ -162,7 +162,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 	 root@shell> systemctl start elasticsearch.service
 
 .. note::
-        If elasticsearch not running, check if "transport.host: localhost" is set in /etc/elasticsearch/elasticsearch.yml
+        If elasticsearch is not running, check if "transport.host: localhost" is set in /etc/elasticsearch/elasticsearch.yml
 
 11. Install Kibana (optional)
 
@@ -182,7 +182,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
+	root@shell> git clone -b <StableVersion> https://<username>@bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags and replace <username>
 	root@shell> mv opencelium/* .
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
@@ -242,7 +242,7 @@ Debian/Ubuntu (example for 18.04 LTS)
 	Visit opencelium http://SERVERIP:8888
 
 .. note::
-        If yarn not run use this command: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+        If yarn is not run use this command: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
 
 
@@ -644,3 +644,47 @@ Ansible
 
 	root@shell> ansible-playbook --connection=local -e 'host_key_checking=False' playbooks/install_oc.yml
 
+
+Docker Compose
+"""""""""""""""""
+
+.. warning:: 
+
+	We currently do not support Docker environments in productive use. 
+	We recommend using it for use in a test phase!
+
+.. note::
+	You need at least 4 GB of RAM to run the containers. We recommend 8GB for a better performance.
+
+Docker is a container-based software framework for automating deployment of 
+applications. Compose is a tool for defining and running multi-container Docker 
+applications.
+
+This repo is meant to be the starting point for somebody who likes to use 
+dockerized multi-container OpenCelium in production. The OpenCelium Docker image uses 
+the stable branch of OpenCelium's Git repo.
+
+The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/opencelium>`_.
+
+**Install Docker Environment:**
+
+1. Install Docker:
+
+Use default Docker installation guide.
+
+   * `Docker Engine <https://docs.docker.com/engine/installation/>`_
+   * `Docker Compose <https://docs.docker.com/compose/install/>`_
+
+2. Getting started with opencelium-docker-compose:
+
+.. code-block:: sh
+	:linenos:
+
+	root@shell> git clone https://github.com/opencelium/opencelium-docker.git // we recommend to use always the latest tag version 
+	root@shell> cd opencelium-docker
+
+3. Start OpenCelium using DockerHub images
+
+.. code-block:: sh
+
+	root@shell> docker-compose up -d

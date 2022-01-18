@@ -17,7 +17,6 @@
                 <endpoint>{url}</endpoint>
                 <body data="raw" format="json" type="object">
                     <field name="method" type="string">user.login</field>
-                    <field name="auth" type="object"/>
                     <field name="id" type="string">1</field>
                     <field name="jsonrpc" type="string">2.0</field>
                     <field name="params" type="object">
@@ -186,10 +185,51 @@
             <response>
                 <success status="200">
                     <body data="raw" format="json" type="object">
-                        <field name="result" type="array">
-                            <field name="code" type=""/>
-                            <field name="status" type=""/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="hostids" type="array"/>
                         </field>
+                        <field name="id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="host.update" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="method" type="string">host.update</field>
+                    <field name="auth" type="string">{token}</field>
+                    <field name="id" type="string">1</field>
+                    <field name="jsonrpc" type="string">2.0</field>
+                    <field name="params" type="object">
+                        <field name="templates" type="array">
+                            <field name="templateid" type=""/>
+                        </field>
+                        <field name="status" type="string"/>
+                        <field name="hostid" type="string"/>
+                        <field name="groups" type="array">
+                            <field name="groupid" type=""/>
+                        </field>
+                    </field>
+                </body>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                   <body data="raw" format="json" type="object">
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="hostids" type="array"/>
+                        </field>
+                        <field name="id" type="string"/>
                     </body>
                 </success>
                 <fail status="400">
@@ -216,9 +256,11 @@
             <response>
                 <success status="200">
                     <body data="raw" format="json" type="object">
+                        <field name="jsonrpc" type="string"/>
                         <field name="result" type="object">
                             <field name="hostids" type="array"/>
                         </field>
+                        <field name="id" type="string"/>
                     </body>
                 </success>
                 <fail status="400">

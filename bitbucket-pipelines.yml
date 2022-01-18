@@ -6,7 +6,7 @@ pipelines:
              - git remote add sync git@github.com:opencelium/opencelium.git
              - git checkout prod
              - git pull    
-             - git push sync prod
+             - git push sync prod --tags
       dev:
         - step:
            script:

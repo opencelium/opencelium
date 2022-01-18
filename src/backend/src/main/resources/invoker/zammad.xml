@@ -1,0 +1,1144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>Zammad</name>
+    <description>Zammad is a web based open source helpdesk/customer support system with many features to manage customer communication via several channels like telephone, facebook, twitter, chat and emails.</description>
+    <hint>Read api documentation https://docs.zammad.org/en/latest/api</hint>
+    <icon>zammad.png</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="UserGetCurrent" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/users/me</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="firstname" type="string"/>
+                        <field name="lastname" type="string"/>
+                        <field name="email" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UserList" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/users</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="firstname" type="string"/>
+                        <field name="lastname" type="string"/>
+                        <field name="email" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UserSearch" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/users/search?query={search-term}&amp;limit=10</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="firstname" type="string"/>
+                        <field name="lastname" type="string"/>
+                        <field name="email" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UserShow" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/users/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="firstname" type="string"/>
+                        <field name="lastname" type="string"/>
+                        <field name="email" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UserCreate" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/users</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="firstname" type="string"/>
+                    <field name="lastname" type="string"/>
+                    <field name="email" type="string"/>                      
+                    <field name="organization" type="string"/>                                                                  
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="firstname" type="string"/>
+                        <field name="lastname" type="string"/>
+                        <field name="email" type="string"/>
+                        <field name="organization_id" type="string"/>                      
+                        <field name="organization" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UserUpdate" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/api/v1/users/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="id" type="string"/>
+                    <field name="firstname" type="string"/>
+                    <field name="lastname" type="string"/>
+                    <field name="email" type="string"/>                      
+                    <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="firstname" type="string"/>
+                        <field name="lastname" type="string"/>
+                        <field name="email" type="string"/>
+                        <field name="organization_id" type="string"/>                      
+                        <field name="organization" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UserDelete" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/api/v1/users/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="OrganizationList" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/organizations</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="shared" type="string"/>
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="OrganizationShow" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/organizations/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="shared" type="string"/>
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="OrganizationCreate" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/organizations</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                        <field name="name" type="string"/>
+                        <field name="shared" type="string"/>
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="shared" type="string"/>
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                              
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="OrganizationUpdate" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/api/v1/organizations/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="id" type="string"/>
+                    <field name="name" type="string"/>
+                    <field name="shared" type="string"/>
+                    <field name="active" type="string"/>                      
+                    <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="shared" type="string"/>
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                     
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="OrganizationDelete" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/api/v1/organizations/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GroupList" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/groups</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="signature_id" type="string"/>
+                        <field name="email_address_id" type="string"/>                      
+                        <field name="assignment_timeout" type="string"/>
+                        <field name="follow_up_possible" type="string"/>                      
+                        <field name="follow_up_assignment" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GroupShow" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/groups/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="signature_id" type="string"/>
+                        <field name="email_address_id" type="string"/>                      
+                        <field name="assignment_timeout" type="string"/>
+                        <field name="follow_up_possible" type="string"/>                      
+                        <field name="follow_up_assignment" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                       
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GroupCreate" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/groups</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                        <field name="name" type="string"/>
+                        <field name="signature_id" type="string"/>
+                        <field name="email_address_id" type="string"/>                      
+                        <field name="assignment_timeout" type="string"/>
+                        <field name="follow_up_possible" type="string"/>                      
+                        <field name="follow_up_assignment" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="signature_id" type="string"/>
+                        <field name="email_address_id" type="string"/>                      
+                        <field name="assignment_timeout" type="string"/>
+                        <field name="follow_up_possible" type="string"/>                      
+                        <field name="follow_up_assignment" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                       
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                               
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GroupUpdate" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/api/v1/groups/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="signature_id" type="string"/>
+                    <field name="email_address_id" type="string"/>                      
+                    <field name="assignment_timeout" type="string"/>
+                    <field name="follow_up_possible" type="string"/>                      
+                    <field name="follow_up_assignment" type="string"/>
+                    <field name="active" type="string"/>
+                    <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="signature_id" type="string"/>
+                        <field name="email_address_id" type="string"/>                      
+                        <field name="assignment_timeout" type="string"/>
+                        <field name="follow_up_possible" type="string"/>                      
+                        <field name="follow_up_assignment" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                     
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GroupDelete" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/api/v1/groups/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>                                                  
+        <operation name="TicketList" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/tickets</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="group_id" type="string"/>
+                        <field name="state_id" type="string"/>                      
+                        <field name="priority_id" type="string"/>
+                        <field name="customer_id" type="string"/>                      
+                        <field name="note" type="string"/>
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="TicketSearch" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/tickets/search?query={search-term}&amp;limit=10</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="group_id" type="string"/>
+                        <field name="state_id" type="string"/>                      
+                        <field name="priority_id" type="string"/>
+                        <field name="customer_id" type="string"/>                      
+                        <field name="note" type="string"/>
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                 
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>        
+        <operation name="TicketShow" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/tickets/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="group_id" type="string"/>
+                        <field name="state_id" type="string"/>                      
+                        <field name="priority_id" type="string"/>
+                        <field name="customer_id" type="string"/>                      
+                        <field name="note" type="string"/>
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="TicketCreate" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/tickets</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="title" type="string"/>
+                    <field name="group" type="string"/>
+                    <field name="customer" type="string"/>                        
+                    <field name="article" type="array">
+                        <field name="subject" type="string"/>
+                        <field name="body" type="string"/>
+                        <field name="type" type="string"/>
+                        <field name="internal" type="string"/>
+                        <field name="attachment" type="array">
+                            <field name="filename" type="string"/>
+                            <field name="data" type="string"/>
+                            <field name="mime-type" type="string"/>                               
+                        </field>                        
+                    </field>
+                    <field name="note" type="string"/>                        
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                     <field name="title" type="string"/>
+                        <field name="group_id" type="string"/>
+                        <field name="customer_id" type="string"/>                        
+                        <field name="article" type="array">
+                            <field name="subject" type="string"/>
+                            <field name="body" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="internal" type="string"/>
+                        </field>
+                        <field name="note" type="string"/>                                                             
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="TicketUpdate" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/api/v1/tickets/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="title" type="string"/>
+                    <field name="group" type="string"/>
+                    <field name="customer" type="string"/>                        
+                    <field name="article" type="array">
+                        <field name="subject" type="string"/>
+                        <field name="body" type="string"/>
+                    </field>
+                    <field name="note" type="string"/>                        
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="group_id" type="string"/>
+                        <field name="state_id" type="string"/>                      
+                        <field name="priority_id" type="string"/>
+                        <field name="customer_id" type="string"/>                      
+                        <field name="note" type="string"/>
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="TicketDelete" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/api/v1/tickets/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="ArticleList" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/ticket_articles/by_ticket/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="ticket_id" type="string"/>
+                        <field name="from" type="string"/>
+                        <field name="to" type="string"/>                      
+                        <field name="cc" type="string"/>
+                        <field name="subject" type="string"/>                      
+                        <field name="body" type="string"/>
+                        <field name="content_type" type="string"/>
+                        <field name="type" type="string"/>
+                        <field name="internal" type="string"/>                                                                  
+                        <field name="updated_at" type="string"/>                                                                  
+                        <field name="created_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="ArticleGet" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/ticket_articles/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="ticket_id" type="string"/>
+                        <field name="from" type="string"/>
+                        <field name="to" type="string"/>                      
+                        <field name="cc" type="string"/>
+                        <field name="subject" type="string"/>                      
+                        <field name="body" type="string"/>
+                        <field name="content_type" type="string"/>
+                        <field name="type" type="string"/>
+                        <field name="internal" type="string"/>
+                        <field name="attachments" type="array"/>                                                                
+                        <field name="updated_at" type="string"/>                                                                  
+                        <field name="created_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="ArticleCreate" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/ticket_articles</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="ticket_id" type="string"/>
+                    <field name="from" type="string"/>
+                    <field name="to" type="string"/>                      
+                    <field name="cc" type="string"/>
+                    <field name="subject" type="string"/>                      
+                    <field name="body" type="string"/>
+                    <field name="content_type" type="string"/>
+                    <field name="type" type="string"/>
+                    <field name="internal" type="string"/>
+                    <field name="time_unit" type="string"/>
+                    <field name="attachment" type="array">
+                        <field name="filename" type="string"/>
+                        <field name="data" type="string"/>
+                        <field name="mime-type" type="string"/>                               
+                    </field>                                            
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="ticket_id" type="string"/>
+                        <field name="from" type="string"/>
+                        <field name="to" type="string"/>                      
+                        <field name="cc" type="string"/>
+                        <field name="subject" type="string"/>                      
+                        <field name="body" type="string"/>
+                        <field name="content_type" type="string"/>
+                        <field name="type" type="string"/>
+                        <field name="internal" type="string"/>
+                        <field name="attachments" type="array"/>                                                                
+                        <field name="updated_at" type="string"/>                                                                  
+                        <field name="created_at" type="string"/>                                                            
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="PriorityList" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/ticket_priorities</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>       
+        <operation name="PriorityShow" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/ticket_priorities/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                 
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="PriorityCreate" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/ticket_priorities</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="active" type="string"/>
+                    <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                              
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="PriorityUpdate" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/api/v1/ticket_priorities/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="id" type="string"/>
+                    <field name="name" type="string"/>
+                    <field name="active" type="string"/>
+                    <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="active" type="string"/>
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="PriorityDelete" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/api/v1/ticket_priorities/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="StateList" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/ticket_states</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="state_type_id" type="string"/>
+                        <field name="next_state_id" type="string"/>                      
+                        <field name="ignore_escalation" type="string"/>                      
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                  
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>       
+        <operation name="StateShow" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/v1/ticket_states/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="state_type_id" type="string"/>
+                        <field name="next_state_id" type="string"/>                      
+                        <field name="ignore_escalation" type="string"/>                      
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                 
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="StateCreate" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/ticket_states</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="name" type="string"/>
+                    <field name="state_type_id" type="string"/>
+                    <field name="next_state_id" type="string"/>                      
+                    <field name="ignore_escalation" type="string"/>                      
+                    <field name="active" type="string"/>                      
+                    <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="state_type_id" type="string"/>
+                        <field name="next_state_id" type="string"/>                      
+                        <field name="ignore_escalation" type="string"/>                      
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                              
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="StateUpdate" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/api/v1/ticket_states/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="id" type="string"/>
+                    <field name="name" type="string"/>
+                    <field name="state_type_id" type="string"/>
+                    <field name="next_state_id" type="string"/>                      
+                    <field name="ignore_escalation" type="string"/>                      
+                    <field name="active" type="string"/>                      
+                    <field name="note" type="string"/>                      
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="string"/>
+                        <field name="name" type="string"/>
+                        <field name="state_type_id" type="string"/>
+                        <field name="next_state_id" type="string"/>                      
+                        <field name="ignore_escalation" type="string"/>                      
+                        <field name="active" type="string"/>                      
+                        <field name="note" type="string"/>                      
+                        <field name="created_at" type="string"/>
+                        <field name="updated_at" type="string"/>                                                                 
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="StateDelete" type="">
+            <request>
+                <method>DELETE</method>
+                <endpoint>{url}/api/v1/ticket_states/{id}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>                                                           
+    </operations>
+</invoker>

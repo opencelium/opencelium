@@ -2060,7 +2060,7 @@ If you look up to the neo4j database you will find visual representation of crea
     :align: center
 
 
-Get all Connection
+Get all Connections
 ==================
 
 .. parsed-literal::

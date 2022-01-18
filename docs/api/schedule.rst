@@ -11,7 +11,7 @@ Get Periodicity List
 ====================
 
 .. parsed-literal::
-# Http request to get list of periodicities
+    # Http request to get list of periodicities
     ``GET`` http://localhost:8080/api/scheduler/```periodicity/all``` HTTP/1.1
 
 Request

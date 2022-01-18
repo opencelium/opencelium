@@ -1,0 +1,307 @@
+<invoker type="RESTful">
+    <name>wekan</name>
+    <description>Wekan is an open-source kanban board which allows a card-based task and to-do management.</description>
+    <hint>This interface provides the token auth. Check out the documentation https://wekan.github.io/api/</hint>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="private">%{body.token}</item>
+    </requiredData>
+    <authType>token</authType>
+    <operations>
+        <operation name="login" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/users/login</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="username" type="string">{username}</field>
+                    <field name="password" type="string">{password}</field>                
+                </body>                    
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                        <field name="id" type="string"/>
+                        <field name="token" type="string"/>
+                        <field name="tokenExpires" type="string"/>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetBoards" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/boards</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="array" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                        <field name="title" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetBoardsFromUser" type="">
+            <request>
+                <method>GET</method>
+		<endpoint>{url}/api/users/{userid}/boards</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="array" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                        <field name="title" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetBoardSwimlanes" type="">
+            <request>
+                <method>GET</method>
+		<endpoint>{url}/api/boards/{board}/swimlanes</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="array" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                        <field name="title" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>	    
+        <operation name="AddBoardSwimlanes" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/boards/{board}/swimlanes</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+	        </header>
+                <body type="object" format="json" data="raw">
+                    <field name="title" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>	    
+        <operation name="GetBoardList" type="">
+            <request>
+                <method>GET</method>
+		<endpoint>{url}/api/boards/{board}/lists</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="array" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                        <field name="title" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="GetListCards" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/api/boards/{board}/lists/{list}/cards</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="array" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="description" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddBoard" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/boards</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="title" type="string"/>
+                    <field name="owner" type="string"/>
+                    <field name="permission" type="string"/>
+                    <field name="color" type="string"/>                    
+                </body>                    
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                        <field name="defaultSwimlaneId" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddList" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/boards/{board}/lists</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="title" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="AddCard" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/api/boards/{board}/lists/{list}/cards</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="authorId" type="string"/>
+                    <field name="title" type="string"/>
+                    <field name="description" type="string"/>
+                    <field name="swimlaneId" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="UpdateCard" type="">
+            <request>
+                <method>PUT</method>
+		<endpoint>{url}/api/boards/{board}/lists/{list}/cards/{card}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="authorId" type="string"/>
+                    <field name="title" type="string"/>
+                    <field name="description" type="string"/>
+                    <field name="swimlaneId" type="string"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="_id" type="string"/>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>	    
+    </operations>
+</invoker>

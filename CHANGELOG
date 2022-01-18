@@ -104,12 +104,12 @@ OC Changelog
 
 1.0 Stable Release
 --------------------------------------------------------------------------------
-[New connector]						I-doit
-[New connector]						Zabbix
+[New connector]									I-doit
+[New connector]									Zabbix
 [New business template][i-doit][Zabbix]			Create/update hosts
 [New business template][i-doit][Zabbix]			delete
-[New connector]						Icinga2
+[New connector]									Icinga2
 [New business template][i-doit][Icinga2]		Create/update hosts
 [New business template][i-doit][Icinga2]		delete
-[New connector]						OTRS
+[New connector]									OTRS
 [New business template][i-doit][OTRS]			Create/update hosts

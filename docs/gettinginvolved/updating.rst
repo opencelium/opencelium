@@ -9,7 +9,7 @@ Till OC 1.4.1
 	:linenos:
 	
 	root@shell> cd /opt
-	root@shell> git pull
+	root@shell> git fetch
 	root@shell> git checkout tags/<version> // e.g 1.1 
 	root@shell> cd /opt/src/backend
 	root@shell> gradle build

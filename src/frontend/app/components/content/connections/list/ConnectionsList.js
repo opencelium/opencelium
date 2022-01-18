@@ -100,7 +100,8 @@ class ConnectionsList extends Component{
             return null;
         };
         let listViewData = {
-            entityIdName: 'connectionId',
+            entityIdName: 'id',
+            connectionId: 'connectionId',
             entityIdsName: 'connectionIds',
             renderItemActions: renderListViewItemActions,
             isItemActionsBefore: true,

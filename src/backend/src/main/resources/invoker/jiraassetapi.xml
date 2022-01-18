@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>jira asset api</name>
+    <description>jira asset api description</description>
+    <hint>This interface provides the token by user auth. It works like basic_auth. You just need to replace password with added api-token (https://id.atlassian.com/manage-profile/security/api-tokens). Check out the documentation https://developer.atlassian.com/cloud/assetapi/rest/api-group-assets</hint>
+    <icon>http://localhost:9090/api/storage/files/null</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="GetAssetTypes" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/type</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                      <field name="values" type="array">
+                        <field name="origin" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="label" type="object">
+                            <field name="value" type="string"/>
+                        </field>
+                      </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+       </operation>
+       <operation name="CreateUpdateAssetTypes" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/type</endpoint>
+                   <body data="raw" format="json" type="object">
+                        <field name="origin" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="label" type="object">
+                            <field name="value" type="string"/>
+                        </field>
+                   </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                      <field name="value" type="array">
+                        <field name="origin" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="label" type="object">
+                            <field name="value" type="string"/>
+                        </field>
+                      </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+       </operation>
+       <operation name="DeleteAssetTypes" type="">
+            <request>
+                <method>DELETE</method>
+		<endpoint>{url}/type/{apikey}/{originId}</endpoint>
+                   <body data="raw" format="json" type="object">
+                   </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+       </operation>
+       <operation name="DeleteAssetTypes" type="">
+            <request>
+                <method>DELETE</method>
+		<endpoint>{url}/type/{apikey}/{originId}</endpoint>
+                   <body data="raw" format="json" type="object">
+                   </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+       </operation>
+       <operation name="GetAssets" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                      <field name="values" type="array">
+                        <field name="origin" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="label" type="object">
+                            <field name="value" type="string"/>
+                        </field>
+                        <field name="type" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="assignee" type="object">
+                            <field name="accountId" type="string"/>
+                        </field>                        
+                      </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+       </operation>
+       <operation name="CreateUpdateAsset" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}</endpoint>
+                   <body data="raw" format="json" type="object">
+                        <field name="origin" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="label" type="object">
+                            <field name="value" type="string"/>
+                        </field>
+                        <field name="type" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="assignee" type="object">
+                            <field name="email" type="string"/>
+                            <field name="accountId" type="string"/>                            
+		        </field>
+			<field name="fields" type="array">
+                            <field name="fieldId" type="string"/>
+                            <field name="value" type="string"/>
+                        </field>
+                   </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                        <field name="origin" type="object">
+                            <field name="appKey" type="string"/>
+                            <field name="originId" type="string"/>
+                        </field>
+                        <field name="label" type="object">
+                            <field name="value" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+       </operation>
+       <operation name="DeleteAsset" type="">
+            <request>
+                <method>DELETE</method>
+		        <endpoint>{url}/{appkey}/{originId}</endpoint>
+                   <body data="raw" format="json" type="object">
+                   </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+       </operation>       
+   </operations>
+</invoker>
