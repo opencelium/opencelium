@@ -47,8 +47,8 @@ This documentation is organized into a couple of sections:
    :caption: Sources
    :maxdepth: 2
 
-   sources/download <https://github.com/opencelium/opencelium/>
-   sources/changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
+   Downloads <https://github.com/opencelium/opencelium/>
+   Changelogs <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
    :caption: REST API Reference
