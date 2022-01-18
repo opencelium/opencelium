@@ -16,7 +16,7 @@
 import React, { Component }  from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
-import {fetchConnections, fetchConnectionsCanceled} from '@actions/connections/fetch';
+import {fetchMetaConnections as fetchConnections, fetchMetaConnectionsCanceled as fetchConnectionsCanceled} from '@actions/connections/fetch';
 import {deleteConnection, deleteConnections} from '@actions/connections/delete';
 
 import List from '../../../general/list_of_components/List';
@@ -100,7 +100,8 @@ class ConnectionsList extends Component{
             return null;
         };
         let listViewData = {
-            entityIdName: 'connectionId',
+            entityIdName: 'id',
+            connectionId: 'connectionId',
             entityIdsName: 'connectionIds',
             renderItemActions: renderListViewItemActions,
             isItemActionsBefore: true,
@@ -114,7 +115,8 @@ class ConnectionsList extends Component{
         mapEntity.map = (connection, key) => {
             let result = {};
             result.id = connection.connectionId;
-            result.title = <ConnectionCardTitle title={connection.title} fromConnector={connection.fromConnector} toConnector={connection.toConnector}/>;
+            result.title = connection.title;
+            result.titleComponent = <ConnectionCardTitle title={connection.title} fromConnector={connection.fromConnector} toConnector={connection.toConnector}/>;
             return result;
         };
         mapEntity.getViewLink = (connection) => {const id = connection.hasOwnProperty('id') ? connection.id : connection.connectionId; return `${prefixUrl}/${id}/view`;};

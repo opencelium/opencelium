@@ -89,6 +89,7 @@ kibana:
   port: 5601
 
 opencelium:
+  log: on
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
   mail:

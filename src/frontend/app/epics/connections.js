@@ -16,11 +16,22 @@
 import Rx from 'rxjs/Rx';
 import {ConnectionsAction} from '@utils/actions';
 import {
-    fetchConnection, fetchConnectionFulfilled, fetchConnectionRejected,
-    fetchConnections, fetchConnectionsFulfilled, fetchConnectionsRejected,
-    checkConnectionTitleFulfilled, checkConnectionTitleRejected,
-    validateConnectionFormMethodsFulfilled, validateConnectionFormMethodsRejected,
-    checkNeo4j, checkNeo4jFulfilled, checkNeo4jRejected, sendOperationRequestFulfilled, sendOperationRequestRejected,
+    fetchConnection,
+    fetchConnectionFulfilled,
+    fetchConnectionRejected,
+    fetchConnections,
+    fetchConnectionsFulfilled,
+    fetchConnectionsRejected,
+    checkConnectionTitleFulfilled,
+    checkConnectionTitleRejected,
+    validateConnectionFormMethodsFulfilled,
+    validateConnectionFormMethodsRejected,
+    checkNeo4j,
+    checkNeo4jFulfilled,
+    checkNeo4jRejected,
+    sendOperationRequestFulfilled,
+    sendOperationRequestRejected,
+    fetchMetaConnectionsFulfilled, fetchMetaConnectionsRejected, fetchMetaConnections,
 } from '@actions/connections/fetch';
 import {
     addConnectionFulfilled ,addConnectionRejected,
@@ -143,13 +154,37 @@ const fetchConnectionEpic = (action$, store) => {
 };
 
 /**
+ * fetch all meta data of connections
+ */
+const fetchMetaConnectionsEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.FETCH_METACONNECTIONS)
+        .debounceTime(500)
+        .mergeMap((action) => {
+            let url = `${urlPrefix}/all/meta`;
+            let neo4j = action.settings ? action.settings.neo4j : null;
+            if(!neo4j){
+                return checkNeo4j({callback: fetchMetaConnections, settings: action.settings});
+            } else{
+                if(neo4j.status === APP_STATUS_DOWN){
+                    return fetchMetaConnectionsRejected(action.settings);
+                }
+            }
+            return doRequest({url},{
+                success: (data) => fetchMetaConnectionsFulfilled(data, action.settings),
+                reject: fetchMetaConnectionsRejected,
+                cancel: action$.ofType(ConnectionsAction.FETCH_METACONNECTIONS_CANCELED)
+            });
+        });
+};
+
+/**
  * fetch all connections
  */
 const fetchConnectionsEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.FETCH_CONNECTIONS)
         .debounceTime(500)
         .mergeMap((action) => {
-            let url = `${urlPrefix}/all/meta`;
+            let url = `${urlPrefix}/all`;
             let neo4j = action.settings ? action.settings.neo4j : null;
             if(!neo4j){
                 return checkNeo4j({callback: fetchConnections, settings: action.settings});
@@ -267,6 +302,7 @@ const checkConnectionEpic = (action$, store) => {
 
 export {
     fetchConnectionEpic,
+    fetchMetaConnectionsEpic,
     fetchConnectionsEpic,
     addConnectionEpic,
     updateConnectionEpic,

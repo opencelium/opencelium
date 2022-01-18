@@ -42,6 +42,9 @@ public class Scheduler {
     @Column(name = "status")
     private boolean status;
 
+    @Column(name = "debug_mode")
+    private boolean debugMode;
+
     @Column(name = "cron_exp")
     private String cronExp;
 
@@ -104,6 +107,14 @@ public class Scheduler {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public boolean getDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     public String getCronExp() {

@@ -154,6 +154,7 @@ export function ConnectorForm(type) {
                     let result = {};
                     if (connector) {
                         result.id = params.id;
+                        result.icon = connector.icon;
                         result.title = connector.name;
                         result.description = connector.description;
                         result.invoker = connector.invoker.name;

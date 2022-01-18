@@ -439,6 +439,7 @@ class List extends Component{
         const isListViewIconDisabled = !(listViewData);
         const listViewEntitiesHeader = listViewEntities.length > 0 ? listViewEntities[0].map(element => {return {label: element.label, value: element.name, width: element.width, visible: element.visible, style: element.style};}) : [];
         const entityIdName = listViewData ? listViewData.entityIdName : '';
+        const connectionId = listViewData ? listViewData.connectionId : '';
         const actionsShouldBeMinimized = listViewData && listViewData.hasOwnProperty('actionsShouldBeMinimized') ? listViewData.actionsShouldBeMinimized : false;
         const deletingSelected = listViewData && listViewData.hasOwnProperty('deletingSelected') ? listViewData.deletingSelected : false;
         const isDeletingSelected = deletingSelected === API_REQUEST_STATE.START;
@@ -526,6 +527,7 @@ class List extends Component{
                                             toggleSortType={::this.toggleSortType}
                                             setChecks={::this.setChecks}
                                             entitiesName={'allEntities'}
+                                            connectionId={connectionId}
                                             entityIdName={entityIdName}
                                             allEntities={entities}
                                             items={listViewEntities}

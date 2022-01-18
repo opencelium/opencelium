@@ -5,7 +5,6 @@ import {
     fetchSubscriptionUpdateFulfilled,
     fetchSubscriptionUpdateRejected
 } from "@actions/subscription_update/fetch";
-import {getLS} from "@utils/LocalStorage";
 
 const urlPrefix = 'assistant/subscription/';
 

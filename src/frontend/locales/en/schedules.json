@@ -84,6 +84,7 @@
     "LAST_DURATION": "Last Duration",
     "LAST_DURATION_SEC": "sec",
     "STATUS": "Status",
+    "LOGS": "Logs",
     "ACTION": "Action",
     "WEBHOOK": "WEBHOOK",
     "WEBHOOK_TOOLTIP": "Copy to Clipboard",
@@ -103,6 +104,9 @@
     "FORM": {
       "PAGE_1": "General Data",
       "TITLE": "Title",
+      "LOGS": "Logs",
+      "LOGS_TITLE_ENABLED": "Logs are activated",
+      "LOGS_TITLE_DISABLED": "Logs are deactivated",
       "CONNECTION": "Connection",
       "CONNECTION_PLACEHOLDER": "Choose connection...",
       "DESCRIPTION_DEFAULT": "Here you will see the description of the connection",
@@ -126,6 +130,9 @@
     "COLOR_TITLE": "Color",
     "FORM": {
       "PAGE_1": "General Data",
+      "LOGS": "Logs",
+      "LOGS_TITLE_ENABLED": "Logs are activated",
+      "LOGS_TITLE_DISABLED": "Logs are deactivated",
       "TITLE": "Title",
       "CONNECTION": "Connection",
       "CONNECTION_PLACEHOLDER": "Choose connection...",

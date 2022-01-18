@@ -32,6 +32,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -100,12 +101,17 @@ public class JobExecutor extends QuartzJobBean {
     }
 
     private void execution(JobExecutionContext context) {
-        ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
-        logger.info("Executing Job with key {}", context.getJobDetail().getKey());
-        logger.info("Firing  Trigger with key {}", context.getTrigger().getKey());
-        System.out.println("==================================================================");
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         Object schedulerId = jobDataMap.getIntValue("schedulerId");
+        Scheduler scheduler = schedulerServiceImp.findById((int)schedulerId)
+                .orElseThrow(() -> new RuntimeException("Scheduler not found"));
+
+        boolean debugMode = scheduler.getDebugMode();
+        ExecutionContainer executionContainer = new ExecutionContainer(enhancementServiceImp, fieldNodeServiceImp, methodNodeServiceImp);
+        if(debugMode) logger.info("Executing Job with key {}", context.getJobDetail().getKey());
+        if(debugMode) logger.info("Firing  Trigger with key {}", context.getTrigger().getKey());
+        if(debugMode) System.out.println("==================================================================");
+
 
         Object queryParams = jobDataMap.getOrDefault("queryParams", null);
         Map<String, Object> queryParamsMap = new HashMap<>();
@@ -116,9 +122,6 @@ public class JobExecutor extends QuartzJobBean {
         Date date= new Date();
         Execution execution = new Execution();
         LastExecution lastExecution = new LastExecution();
-
-        Scheduler scheduler = schedulerServiceImp.findById((int)schedulerId)
-                .orElseThrow(() -> new RuntimeException("Scheduler not found"));
 
         execution.setStartTime(date);
         execution.setScheduler(scheduler);
@@ -140,7 +143,7 @@ public class JobExecutor extends QuartzJobBean {
                     fieldNodeServiceImp, methodNodeServiceImp,
                     connectorService, logMessageService, statementNodeService);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
-                    executionContainer, connectorExecutor);
+                    executionContainer, connectorExecutor, debugMode);
             connectionExecutor.start(scheduler);
         }catch (Exception e){
             e.printStackTrace();

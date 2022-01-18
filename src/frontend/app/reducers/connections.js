@@ -81,15 +81,19 @@ const reducer = (state = initialState, action) => {
             return state.set('fetchingConnection', API_REQUEST_STATE.FINISH).set('connection', action.payload);
         case ConnectionsAction.FETCH_CONNECTION_REJECTED:
             return state.set('fetchingConnection', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case ConnectionsAction.FETCH_METACONNECTIONS:
         case ConnectionsAction.FETCH_CONNECTIONS:
             return state.set('fetchingConnections', API_REQUEST_STATE.START).set('error', null);
+        case ConnectionsAction.FETCH_METACONNECTIONS_FULFILLED:
         case ConnectionsAction.FETCH_CONNECTIONS_FULFILLED:
             if(isEmptyObject(action.payload)){
                 return state.set('fetchingConnections', API_REQUEST_STATE.FINISH).set('connections', List([]));
             }
             return state.set('fetchingConnections', API_REQUEST_STATE.FINISH).set('connections', List(action.payload));
+        case ConnectionsAction.FETCH_METACONNECTIONS_REJECTED:
         case ConnectionsAction.FETCH_CONNECTIONS_REJECTED:
             return state.set('fetchingConnections', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case ConnectionsAction.FETCH_METACONNECTIONS_CANCELED:
         case ConnectionsAction.FETCH_CONNECTIONS_CANCELED:
             return state.set('fetchingConnections', API_REQUEST_STATE.PAUSE).set('message', action.payload);
         case ConnectionsAction.ADD_CONNECTION:

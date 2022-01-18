@@ -23,13 +23,14 @@ import CNotification from "./notification/CNotification";
  * Schedule class for Schedule module
  */
 export default class CSchedule{
-    constructor(id = 0, title = '', cronExp = '', status = false, timeZone = 0, connection, lastExecution = null, webhook = null, notifications = []){
+    constructor(id = 0, title = '', cronExp = '', status = false, timeZone = 0, connection, lastExecution = null, webhook = null, notifications = [], debugMode = true){
         if(id !== 0){
             this._id = isId(id) ? id : 0;
         }
         this._title = this.checkTitle(title) ? title : '';
         this._cronExp = cronExp;
         this._status = status;
+        this._debugMode = debugMode;
         this._timeZone = timeZone;
         this._connection = this.checkConnection(connection) ? connection : null;
         this._lastExecution = CLastExecution.createLastExecution(lastExecution);
@@ -45,12 +46,13 @@ export default class CSchedule{
         let title = schedule && schedule.hasOwnProperty('title') ? schedule.title : '';
         let cronExp = schedule && schedule.hasOwnProperty('cronExp') ? schedule.cronExp : '';
         let status = schedule && schedule.hasOwnProperty('status') ? schedule.status : false;
+        let debugMode = schedule && schedule.hasOwnProperty('debugMode') ? schedule.debugMode : true;
         let timeZone = schedule && schedule.hasOwnProperty('timeZone') ? schedule.timeZone : 0;
         let connection = schedule && schedule.hasOwnProperty('connection') ? schedule.connection : null;
         let lastExecution = schedule && schedule.hasOwnProperty('lastExecution') ? schedule.lastExecution: null;
         let webhook = schedule && schedule.hasOwnProperty('webhook') ? schedule.webhook: null;
         let notifications = schedule && schedule.hasOwnProperty('notifications') ? schedule.notifications: [];
-        return new CSchedule(id, title, cronExp, status, timeZone, connection, lastExecution, webhook, notifications);
+        return new CSchedule(id, title, cronExp, status, timeZone, connection, lastExecution, webhook, notifications, debugMode);
     }
 
     checkTitle(title){
@@ -208,6 +210,7 @@ export default class CSchedule{
             title: this._title,
             cronExp: this._cronExp,
             status: this._status,
+            debugMode: this._debugMode,
             timeZone: this._timeZone,
             connection: this._connection,
             lastExecution: this._lastExecution.getObject(),

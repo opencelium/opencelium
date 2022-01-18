@@ -19,7 +19,7 @@ import {connect} from 'react-redux';
 import {withTranslation} from "react-i18next";
 import { Row, Col } from "react-grid-system";
 import {addSchedule} from '@actions/schedules/add';
-import {fetchConnections} from '@actions/connections/fetch';
+import {fetchMetaConnections as fetchConnections} from '@actions/connections/fetch';
 
 import styles from '@themes/default/content/schedules/schedules.scss';
 import Input from '@basic_components/inputs/Input';

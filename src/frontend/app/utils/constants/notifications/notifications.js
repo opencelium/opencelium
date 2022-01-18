@@ -120,7 +120,7 @@ export const EntitiesWithNotification = [
     {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES, types: ['FULFILLED', 'REJECTED']},
-    {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['REJECTED']},
+    {name: UpdateAssistantAction.FETCH_UPDATEAPPVERSION, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.FETCH_ONLINEUPDATES, types: ['REJECTED']},
     {name: SubscriptionUpdate.FETCH_SUBSCRIPTIONUPDATE, types: ['FULFILLED']},
     {name: UpdateAssistantAction.FETCH_OFFLINEUPDATES, types: ['REJECTED']},

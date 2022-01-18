@@ -31,6 +31,7 @@ public class SchedulerRequestResource extends ResourceSupport {
     private String title;
     private boolean status;
     private String cronExp;
+    private boolean debugMode;
 
     private List<NotificationResource> notificationResources = new ArrayList<>();
 
@@ -72,6 +73,14 @@ public class SchedulerRequestResource extends ResourceSupport {
 
     public void setCronExp(String cronExp) {
         this.cronExp = cronExp;
+    }
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     public List<NotificationResource> getNotificationResources() {

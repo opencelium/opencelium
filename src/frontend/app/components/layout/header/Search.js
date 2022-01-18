@@ -74,13 +74,6 @@ class Search extends React.Component{
                     data.push({label: dataForSearch[i].components, options: [option]});
                 }
             }
-/*            for(let param in dataForSearch){
-                let options = [];
-                for(let i = 0; i < dataForSearch[param].length; i++){
-                    options.push({label: dataForSearch[param][i].title, value: dataForSearch[param][i].id, id: `${param}_${dataForSearch[param][i].id}`});
-                }
-                data.push({label: param, options});
-            }*/
         }
         return data;
     }
