@@ -1,6 +1,17 @@
 OC Changelog
 --------------------------------------------------------------------------------
 
+2.1
+--------------------------------------------------------------------------------
+[Feature]                                                       Enable/disable logs for a job
+[Feature]                                                       Dupplicate connections
+[Feature]                                                       Dupplicate business templates
+[Feature]                                                       Edit business templates
+[Bug][OC-425]                                           Image is deleted
+[Bug][OC-417]                       API Operation didnt execute correctly with the fields defined in the invoker file
+[Bug][OC-419]                       Layout problems when deleting a connection
+[Bug][OC-424]                       Starting a job
+[Bug][OC-423]                       When you update a job, it is automatically activated
 
 2.0
 --------------------------------------------------------------------------------
@@ -65,7 +76,6 @@ OC Changelog
 [Connector]							PRTG Network Monitor
 [Connector]							Aruba Clearpass
 [Connector]							CSV2API (Microsoft SQL Server)
-[Business template][PRTG][i-doit]	Status update
 [Improvement]						Autoupdate changeset of application yaml configuration
 [Improvement]						Autoupdate changeset of database structure
 [Improvement]						Better overview of the connection with the integration of history and tree view functionality
