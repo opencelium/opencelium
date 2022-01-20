@@ -1,5 +1,5 @@
 ##################
-Activate db2api
+db2api
 ##################
 
 .. note::
@@ -21,6 +21,13 @@ Usage
 """""""""""""""""
 Please read usages here https://github.com/opencelium/db2api#user-content-usage
 
+Supported Databases
+"""""""""""""""""
+- MICROSOFT
+- MYSQL
+- POSTGRESQL
+- ORACLE (untested)
+- XERIAL (untested)
 
 Services
 """""""""""""""""
