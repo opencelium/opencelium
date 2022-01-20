@@ -37,6 +37,12 @@ This documentation is organized into a couple of sections:
    usecases/manage_invokers
 
 .. toctree::
+   :caption: Services
+   :maxdepth: 2
+
+   services/db2api
+
+.. toctree::
    :caption: Tools
    :maxdepth: 2
 
