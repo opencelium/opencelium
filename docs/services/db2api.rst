@@ -32,7 +32,8 @@ Add an endpoint to get the right table.
 
 |image2|
 
-Hint: Use a rest client tool, to execute the api request to determine, how the response will be look like.
+.. note::
+        Use a rest client tool, to execute the api request to determine, to see how the response will be look like.
 
 |image3|
 
@@ -69,5 +70,5 @@ Go to folder java/security and in file java.security find option jdk.tls.disable
 .. |image2| image:: ../img/services/addTablenameAsEndpoint.png
    :align: middle
 
-.. |image3|  image:: ../img/services/insomniaOutput.png
+.. |image3| image:: ../img/services/insomniaOutput.png
    :align: middle
