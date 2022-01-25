@@ -33,11 +33,11 @@ Add an endpoint to get the right table.
 |image2|
 
 .. note::
-        Use a rest client tool, to execute the api request to determine, to see how the response will be look like.
+        Use a rest client tool to execute the api request. Thus you determine and see how the response will be look like.
 
 |image3|
 
-Please read more about the search options here  here https://github.com/opencelium/db2api#user-content-usage
+Please read more about the search options here https://github.com/opencelium/db2api#user-content-usage
 
 Supported Databases
 """""""""""""""""
