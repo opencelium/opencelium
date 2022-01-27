@@ -19,6 +19,7 @@
                 </body>
                 <header>
                     <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
                 </header>
             </request>
             <response>
