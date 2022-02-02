@@ -32,6 +32,7 @@ public class ConnectorResource extends ResourceSupport {
     private String description;
     private String icon;
     private InvokerResource invoker;
+    private boolean sslCert;
     private Map<String, String> requestData;
 
     public int getConnectorId() {
@@ -72,6 +73,14 @@ public class ConnectorResource extends ResourceSupport {
 
     public void setInvoker(InvokerResource invoker) {
         this.invoker = invoker;
+    }
+
+    public boolean isSslCert() {
+        return sslCert;
+    }
+
+    public void setSslCert(boolean sslCert) {
+        this.sslCert = sslCert;
     }
 
     public Map<String, String> getRequestData() {

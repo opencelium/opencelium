@@ -66,6 +66,9 @@ public class Connector {
     @Column(name = "icon")
     private String icon;
 
+    @Column(name = "ssl_cert")
+    private boolean sslCert;
+
     @OneToMany(mappedBy = "connector", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RequestData> requestData = new ArrayList<>();
 
@@ -139,6 +142,14 @@ public class Connector {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public boolean isSslCert() {
+        return sslCert;
+    }
+
+    public void setSslCert(boolean sslCert) {
+        this.sslCert = sslCert;
     }
 
     public List<RequestData> getRequestData() {

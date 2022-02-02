@@ -32,6 +32,7 @@ public class ConnectorNodeResource extends ResourceSupport {
     private Integer connectorId;
     private String title;
     private String icon;
+    private boolean sslCert;
     private InvokerResource invoker; // due to front end asked sending object, normally should be name of invoker
     private BusinessLayout businessLayout;
     private List<MethodResource> methods;
@@ -75,6 +76,14 @@ public class ConnectorNodeResource extends ResourceSupport {
 
     public void setInvoker(InvokerResource invoker) {
         this.invoker = invoker;
+    }
+
+    public boolean isSslCert() {
+        return sslCert;
+    }
+
+    public void setSslCert(boolean sslCert) {
+        this.sslCert = sslCert;
     }
 
     public BusinessLayout getBusinessLayout() {

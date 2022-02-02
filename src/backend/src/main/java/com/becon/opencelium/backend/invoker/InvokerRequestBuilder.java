@@ -58,6 +58,7 @@ public class InvokerRequestBuilder{
     private FunctionInvoker functionInvoker;
     private List<RequestData> requestData;
     private String invokerName;
+    private boolean sslCert;
 
     public InvokerRequestBuilder(RestTemplate restTemplate){
         this.restTemplate = restTemplate;
@@ -75,6 +76,11 @@ public class InvokerRequestBuilder{
 
     public InvokerRequestBuilder setInvokerName(String invokerName) {
         this.invokerName = invokerName;
+        return this;
+    }
+
+    public InvokerRequestBuilder setSslCert(boolean sslCert) {
+        this.sslCert = sslCert;
         return this;
     }
 
@@ -109,7 +115,7 @@ public class InvokerRequestBuilder{
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        if (invokerName.equalsIgnoreCase("IGEL") || invokerName.equalsIgnoreCase("SAPB1")){
+        if (sslCert){
             ClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory(getHttpClient());
             restTemplate.setRequestFactory(requestFactory);

@@ -75,6 +75,7 @@ public class ConnectorExecutor {
     private LogMessageServiceImp logMessageService;
     private VariableNodeServiceImp statementNodeService;
     private boolean debugMode = false;
+    private boolean sslCert = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, RestTemplate restTemplate,
                              ExecutionContainer executionContainer, FieldNodeServiceImp fieldNodeService,
@@ -91,8 +92,9 @@ public class ConnectorExecutor {
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
-                      String conn, boolean debugMode){
+                      String conn, boolean debugMode, boolean sslCert){
         this.debugMode = debugMode;
+        this.sslCert = sslCert;
         this.invoker = invokerService.findByName(currentConnector.getInvoker());
         List<RequestData> requestData = connectorService.buildRequestData(currentConnector);
         List<RequestData> supportRequestData = connectorService.buildRequestData(supportConnector);
@@ -274,7 +276,7 @@ public class ConnectorExecutor {
 //            restTemplate = getRestTemplate();
 //        }i
 
-        if (invoker.getName().equalsIgnoreCase("IGEL") || invoker.getName().equalsIgnoreCase("SAPB1")){
+        if (sslCert){
             ClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
             restTemplate.setRequestFactory(requestFactory);
