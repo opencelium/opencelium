@@ -139,7 +139,7 @@ public class JobExecutor extends QuartzJobBean {
         }
 
         try {
-            ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, restTemplate, executionContainer,
+            ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
                     connectorService, logMessageService, statementNodeService);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,

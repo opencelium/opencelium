@@ -37,15 +37,18 @@ import com.becon.opencelium.backend.utility.ConditionUtility;
 import com.becon.opencelium.backend.utility.XmlTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.handler.timeout.ReadTimeoutException;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -75,14 +78,12 @@ public class ConnectorExecutor {
     private LogMessageServiceImp logMessageService;
     private VariableNodeServiceImp statementNodeService;
     private boolean debugMode = false;
-    private boolean sslCert = false;
 
-    public ConnectorExecutor(InvokerServiceImp invokerService, RestTemplate restTemplate,
-                             ExecutionContainer executionContainer, FieldNodeServiceImp fieldNodeService,
-                             MethodNodeServiceImp methodNodeServiceImp, ConnectorServiceImp connectorService,
-                             LogMessageServiceImp logMessageService, VariableNodeServiceImp statementNodeService) {
+    public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
+                             FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
+                             ConnectorServiceImp connectorService, LogMessageServiceImp logMessageService,
+                             VariableNodeServiceImp statementNodeService) {
         this.invokerService = invokerService;
-        this.restTemplate = restTemplate;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
         this.methodNodeServiceImp = methodNodeServiceImp;
@@ -92,9 +93,9 @@ public class ConnectorExecutor {
     }
 
     public void start(ConnectorNode connectorNode, Connector currentConnector, Connector supportConnector,
-                      String conn, boolean debugMode, boolean sslCert){
+                      String conn, boolean debugMode){
         this.debugMode = debugMode;
-        this.sslCert = sslCert;
+        this.restTemplate = createRestTemplate(currentConnector);
         this.invoker = invokerService.findByName(currentConnector.getInvoker());
         List<RequestData> requestData = connectorService.buildRequestData(currentConnector);
         List<RequestData> supportRequestData = connectorService.buildRequestData(supportConnector);
@@ -102,6 +103,7 @@ public class ConnectorExecutor {
         executionContainer.setSupportRequestData(supportRequestData);
         executionContainer.setRequestData(requestData);
         executionContainer.setLoopIndex(new LinkedHashMap<>());
+
         executeMethod(connectorNode.getStartMethod());
         executeDecisionStatement(connectorNode.getStartOperator());
     }
@@ -276,11 +278,6 @@ public class ConnectorExecutor {
 //            restTemplate = getRestTemplate();
 //        }i
 
-        if (sslCert){
-            ClientHttpRequestFactory requestFactory =
-                    new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
-            restTemplate.setRequestFactory(requestFactory);
-        }
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
                 .setTaId(taId)
@@ -675,5 +672,27 @@ public class ConnectorExecutor {
         }
         executeMethod(statementNode.getNextFunction());
         executeDecisionStatement(statementNode.getNextOperator());
+    }
+
+    private RestTemplate createRestTemplate(Connector connector) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpComponentsClientHttpRequestFactory requestFactory;
+        if (connector.isSslCert()){
+//            ClientHttpRequestFactory requestFactory =
+//                    new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
+            requestFactory =  new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
+        } else {
+            requestFactory = new HttpComponentsClientHttpRequestFactory();
+        }
+
+        int timeout = connector.getTimeout();
+        if (timeout > 0) {
+            requestFactory.setConnectTimeout(timeout);
+            requestFactory.setReadTimeout(timeout);
+        }
+
+        restTemplate.setRequestFactory(requestFactory);
+
+        return restTemplate;
     }
 }

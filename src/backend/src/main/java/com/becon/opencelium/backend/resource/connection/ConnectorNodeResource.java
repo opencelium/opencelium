@@ -33,6 +33,7 @@ public class ConnectorNodeResource extends ResourceSupport {
     private String title;
     private String icon;
     private boolean sslCert;
+    private int timeout;
     private InvokerResource invoker; // due to front end asked sending object, normally should be name of invoker
     private BusinessLayout businessLayout;
     private List<MethodResource> methods;
@@ -84,6 +85,14 @@ public class ConnectorNodeResource extends ResourceSupport {
 
     public void setSslCert(boolean sslCert) {
         this.sslCert = sslCert;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     public BusinessLayout getBusinessLayout() {

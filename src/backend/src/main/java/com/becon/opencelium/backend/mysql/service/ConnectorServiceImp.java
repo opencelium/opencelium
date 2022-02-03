@@ -131,6 +131,7 @@ public class ConnectorServiceImp implements ConnectorService{
         connector.setDescription(resource.getDescription());
         connector.setInvoker(resource.getInvoker().getName());
         connector.setSslCert(resource.isSslCert());
+        connector.setTimeout(resource.getTimeout());
 
         List<RequestData> requestData = requestDataService.toEntity(resource.getRequestData());
         requestData.forEach(r -> {
@@ -167,6 +168,7 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorResource.setDescription(entity.getDescription());
         connectorResource.setIcon(path + entity.getIcon());
         connectorResource.setSslCert(entity.isSslCert());
+        connectorResource.setTimeout(entity.getTimeout());
 
         Invoker invoker = invokerServiceImp.findByName(entity.getInvoker());
         connectorResource.setInvoker(invokerServiceImp.toResource(invoker));
@@ -210,6 +212,7 @@ public class ConnectorServiceImp implements ConnectorService{
         connectorNodeResource.setTitle(entity.getTitle());
         connectorNodeResource.setIcon(imagePath + entity.getIcon());
         connectorNodeResource.setSslCert(entity.isSslCert());
+        connectorNodeResource.setTimeout(entity.getTimeout());
         return connectorNodeResource;
     }
 

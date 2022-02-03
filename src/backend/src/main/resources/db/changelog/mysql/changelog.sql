@@ -289,5 +289,7 @@ UPDATE scheduler SET debug_mode = 1;
 ALTER TABLE connector ADD COLUMN IF NOT EXISTS ssl_cert tinyint(4);
 UPDATE connector SET ssl_cert = 0;
 
+--changeset 2.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connector ADD COLUMN IF NOT EXISTS timeout INT NOT NULL;
 
 

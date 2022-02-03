@@ -26,6 +26,8 @@ import com.becon.opencelium.backend.mysql.service.EnhancementServiceImp;
 import com.becon.opencelium.backend.neo4j.entity.ConnectionNode;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -64,9 +66,10 @@ public class ConnectionExecutor {
         Connector toConnector = connectorService.findById(connection.getToConnector())
                 .orElseThrow(() -> new ConnectorNotFoundException(connection.getFromConnector()));
 
+
         connectorExecutor.start(connectionNode.getFromConnector(), fromConnector, toConnector,
-                                Constant.CONN_FROM, debugMode, fromConnector.isSslCert());
+                                Constant.CONN_FROM, debugMode);
         connectorExecutor.start(connectionNode.getToConnector(), toConnector, fromConnector,
-                                Constant.CONN_TO, debugMode, toConnector.isSslCert());
+                                Constant.CONN_TO, debugMode);
     }
 }

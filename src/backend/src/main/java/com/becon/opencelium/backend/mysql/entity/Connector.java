@@ -69,6 +69,9 @@ public class Connector {
     @Column(name = "ssl_cert")
     private boolean sslCert;
 
+    @Column(name = "timeout")
+    private int timeout;
+
     @OneToMany(mappedBy = "connector", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RequestData> requestData = new ArrayList<>();
 
@@ -150,6 +153,14 @@ public class Connector {
 
     public void setSslCert(boolean sslCert) {
         this.sslCert = sslCert;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     public List<RequestData> getRequestData() {
