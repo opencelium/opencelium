@@ -25,12 +25,18 @@ import JsonBody from "./JsonBody";
 import XmlBody from "@change_component/form_elements/form_connection/form_methods/method/XmlBody";
 import {BODY_FORMAT} from "@classes/components/content/invoker/CBody";
 import ToolboxThemeInput from "../../../../../../../hocs/ToolboxThemeInput";
+import GraphQLBody from "@change_component/form_elements/form_connection/form_methods/method/GraphQLBody";
+import Dialog from "@basic_components/Dialog";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 
 class MethodRequest extends Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            showDialog: false,
+        }
     }
 
     componentDidMount(){
@@ -48,8 +54,27 @@ class MethodRequest extends Component{
         }, 200);
     }
 
+    toggleDialog(){
+        this.setState({
+            showDialog: !this.state.showDialog,
+        })
+    }
+
     renderBody(){
         const {id, readOnly, method, connector, connection, updateEntity, isDraft} = this.props;
+        if(method.isGraphQLData()) {
+            return (
+                <GraphQLBody
+                    id={id}
+                    isDraft={isDraft}
+                    readOnly={readOnly}
+                    method={method}
+                    connection={connection}
+                    connector={connector}
+                    updateEntity={updateEntity}
+                />
+            );
+        }
         switch(method.bodyFormat){
             case BODY_FORMAT.JSON:
                 return (
@@ -80,6 +105,7 @@ class MethodRequest extends Component{
     }
 
     render(){
+        const {showDialog} = this.state;
         const {id, readOnly, method, connector, connection, updateEntity} = this.props;
         let bodyHasError = false;
         if(method.error.hasError){
@@ -87,6 +113,7 @@ class MethodRequest extends Component{
                 bodyHasError = true;
             }
         }
+        const isGraphQLData = method.isGraphQLData();
         return (
             <div id={id} className={styles.item_card_text}>
                 <CardText>
@@ -99,7 +126,25 @@ class MethodRequest extends Component{
                             updateEntity={updateEntity}
                         />
                         <ToolboxThemeInput className={styles.method_body_label} label={<span className={`${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</span>}>
-                            {this.renderBody()}
+                            {isGraphQLData ?
+                                <React.Fragment>
+                                    <Dialog
+                                        actions={[{
+                                            label: 'Ok',
+                                            onClick: () => this.toggleDialog(),
+                                            id: 'header_ok'
+                                        }]}
+                                        active={showDialog}
+                                        toggle={(a) => this.toggleDialog(a)}
+                                        title={'Body'}
+                                        theme={{dialog: styles.body_dialog_graphql, content: styles.body_content}}
+                                    >
+                                        {this.renderBody()}
+                                    </Dialog>
+                                    <TooltipFontIcon onClick={() => this.toggleDialog()} size={14} value={<span className={styles.more_details}>{`{...}`}</span>} tooltip={'Body'}/>
+                                </React.Fragment> :
+                                this.renderBody()
+                            }
                         </ToolboxThemeInput>
                     </div>
                 </CardText>

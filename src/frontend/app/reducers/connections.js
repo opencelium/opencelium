@@ -32,6 +32,7 @@ const initialState = fromJS({
     sendingOperationRequest: API_REQUEST_STATE.INITIAL,
     checkingNeo4j: false,
     checkingConnectionTitle: API_REQUEST_STATE.INITIAL,
+    loginingGraphQL: API_REQUEST_STATE.INITIAL,
     checkTitleResult: null,
     validatingFormMethods: false,
     validateFormMethodsResult: null,
@@ -43,6 +44,7 @@ const initialState = fromJS({
     message: {},
     notificationData: {},
     checkConnectionResult: {},
+    graphQLAccessToken: '',
 });
 
 let connections = [];
@@ -158,6 +160,12 @@ const reducer = (state = initialState, action) => {
             return state.set('deletingConnections', API_REQUEST_STATE.FINISH);
         case ConnectionsAction.DELETE_CONNECTIONS_REJECTED:
             return state.set('deletingConnectors', API_REQUEST_STATE.ERROR).set('isRejected', true).set('error', action.payload);
+        case ConnectionsAction.LOGIN_GRAPHQL:
+            return state.set('loginingGraphQL', API_REQUEST_STATE.START).set('error', null);
+        case ConnectionsAction.LOGIN_GRAPHQL_FULFILLED:
+            return state.set('loginingGraphQL', API_REQUEST_STATE.FINISH).set('graphQLAccessToken', JSON.parse(action.payload.body).data.authentication.login.accessToken);
+        case ConnectionsAction.LOGIN_GRAPHQL_REJECTED:
+            return state.set('loginingGraphQL', API_REQUEST_STATE.ERROR).set('error', action.payload.response);
         default:
             return state;
     }

@@ -16,6 +16,7 @@
 import CRequest from "../../invoker/request/CRequest";
 import CResponse from "../../invoker/response/CResponse";
 import CInvoker from "../../invoker/CInvoker";
+import {BODY_DATA} from "@classes/components/content/invoker/CBody";
 
 export const FIELD_TYPE_STRING = 'string';
 export const FIELD_TYPE_ARRAY = 'array';
@@ -165,6 +166,10 @@ export default class CMethodItem{
     set invoker(invoker){
         this._invoker = this.convertInvoker(invoker);
         this.updateOperation();
+    }
+
+    isGraphQLData(){
+        return this._request.body.data === BODY_DATA.GRAPHQL;
     }
 
     setRequestEndpoint(endpoint){

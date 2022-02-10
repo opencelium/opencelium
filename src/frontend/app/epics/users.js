@@ -53,7 +53,7 @@ const urlPrefix = 'user';
  */
 const checkUserEmailEpic = (action$, store) => {
     return action$.ofType(UsersAction.CHECK_USEREMAIL)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/check/${action.payload.email}`;
             return doRequest({url},{
@@ -68,7 +68,7 @@ const checkUserEmailEpic = (action$, store) => {
  */
 const fetchUserEpic = (action$, store) => {
     return action$.ofType(UsersAction.FETCH_USER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{
@@ -83,7 +83,7 @@ const fetchUserEpic = (action$, store) => {
  */
 const fetchUsersEpic = (action$, store) => {
     return action$.ofType(UsersAction.FETCH_USERS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             /*let storedUsers = store.getState().get('users').get('users');
             if(storedUsers.hasOwnProperty('size')){
@@ -109,7 +109,7 @@ const fetchUsersEpic = (action$, store) => {
  */
 const addUserEpic = (action$, store) => {
     return action$.ofType(UsersAction.ADD_USER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let profilePicture = action.payload.userDetail.profilePicture;
@@ -135,7 +135,7 @@ const addUserEpic = (action$, store) => {
  */
 const addProfilePictureEpic = (action$, store) => {
     return action$.ofType(UsersAction.ADD_PROFILEPICTURE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/profilePicture`;
             let data = new FormData();
@@ -156,7 +156,7 @@ const addProfilePictureEpic = (action$, store) => {
  */
 const updateUserEpic = (action$, store) => {
     return action$.ofType(UsersAction.UPDATE_USER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             let profilePicture = action.payload.userDetail.profilePicture;
@@ -179,7 +179,7 @@ const updateUserEpic = (action$, store) => {
  */
 const updateProfilePictureEpic = (action$, store) => {
     return action$.ofType(UsersAction.UPDATE_PROFILEPICTURE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/profilePicture`;
             let data = new FormData();
@@ -198,7 +198,7 @@ const updateProfilePictureEpic = (action$, store) => {
  */
 const updateUserDetailEpic = (action$, store) => {
     return action$.ofType(UsersAction.UPDATE_USERDETAIL)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let data = action.payload;
             let url = `${urlPrefix}/${data.id}`;
@@ -215,7 +215,7 @@ const updateUserDetailEpic = (action$, store) => {
  */
 const deleteUserEpic = (action$, store) => {
     return action$.ofType(UsersAction.DELETE_USER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -231,7 +231,7 @@ const deleteUserEpic = (action$, store) => {
  */
 const deleteUsersEpic = (action$, store) => {
     return action$.ofType(UsersAction.DELETE_USERS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;

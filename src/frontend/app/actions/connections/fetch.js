@@ -337,6 +337,60 @@ const sendOperationRequestCanceled = (message) => {
     };
 };
 
+/**
+ * login graphql
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, settings: {}}}
+ */
+const loginGraphQL = (request, settings = {}) => {
+    return {
+        type: ConnectionsAction.LOGIN_GRAPHQL,
+        payload: request,
+        settings,
+    };
+};
+
+
+/**
+ * login graphql fulfilled
+ * @param response
+ * @param settings = {background: bool}
+ *      background - if true -> does not show a notification; else -> show a notification
+ * @returns {{type: string, payload: [], settings: {}}}
+ */
+const loginGraphQLFulfilled = (response, settings = {}) => {
+    return{
+        type: ConnectionsAction.LOGIN_GRAPHQL_FULFILLED,
+        payload: response,
+        settings,
+    };
+};
+
+/**
+ * login graphql rejected
+ * @param error
+ * @returns {*}
+ */
+const loginGraphQLRejected = (error) => {
+    return Rx.Observable.of({
+        type: ConnectionsAction.LOGIN_GRAPHQL_REJECTED,
+        payload: error
+    });
+};
+
+/**
+ * cancel login graphql
+ * @param message
+ * @returns {{type: string, payload: {}}}
+ */
+const loginGraphQLCanceled = (message) => {
+    return {
+        type: ConnectionsAction.LOGIN_GRAPHQL_CANCELED,
+        payload: message
+    };
+};
+
 export {
     fetchConnection,
     fetchConnectionRejected,
@@ -363,4 +417,8 @@ export {
     sendOperationRequestCanceled,
     sendOperationRequestFulfilled,
     sendOperationRequestRejected,
+    loginGraphQL,
+    loginGraphQLCanceled,
+    loginGraphQLFulfilled,
+    loginGraphQLRejected,
 };

@@ -49,7 +49,7 @@ const urlPrefix = 'message';
  */
 const fetchNotificationTemplatesEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
@@ -64,7 +64,7 @@ const fetchNotificationTemplatesEpic = (action$, store) => {
  */
 const fetchNotificationTemplateEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{
@@ -79,7 +79,7 @@ const fetchNotificationTemplateEpic = (action$, store) => {
  */
 const addNotificationTemplateEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.ADD_NOTIFICATIONTEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return doRequest({url, method: API_METHOD.POST, data: action.payload},{
@@ -93,7 +93,7 @@ const addNotificationTemplateEpic = (action$, store) => {
  */
 const updateNotificationTemplateEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return doRequest({url, method: API_METHOD.POST, data: action.payload},{
@@ -108,7 +108,7 @@ const updateNotificationTemplateEpic = (action$, store) => {
  */
 const deleteNotificationTemplateEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -124,7 +124,7 @@ const deleteNotificationTemplateEpic = (action$, store) => {
  */
 const deleteNotificationTemplatesEpic = (action$, store) => {
     return action$.ofType(NotificationTemplatesAction.DELETE_NOTIFICATIONTEMPLATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;

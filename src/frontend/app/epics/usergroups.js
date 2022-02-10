@@ -51,7 +51,7 @@ const urlPrefix = 'role';
  */
 const fetchUserGroupEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.FETCH_USERGROUP)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{
@@ -66,7 +66,7 @@ const fetchUserGroupEpic = (action$, store) => {
  */
 const fetchUserGroupsEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.FETCH_USERGROUPS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
@@ -82,7 +82,7 @@ const fetchUserGroupsEpic = (action$, store) => {
  */
 const checkUserGroupNameEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.CHECK_USERGROUPNAME)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/exists/${action.payload.role}`;
             return doRequest({url},{
@@ -97,7 +97,7 @@ const checkUserGroupNameEpic = (action$, store) => {
  */
 const addUserGroupEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.ADD_USERGROUP)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = {...action.payload};
@@ -119,7 +119,7 @@ const addUserGroupEpic = (action$, store) => {
  */
 const addGroupIconEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.ADD_GROUPICON)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/groupIcon`;
             let data = new FormData();
@@ -138,7 +138,7 @@ const addGroupIconEpic = (action$, store) => {
  */
 const updateUserGroupEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.UPDATE_USERGROUP)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let data = {...action.payload};
             let url = `${urlPrefix}/${data.id}`;
@@ -164,7 +164,7 @@ const updateUserGroupEpic = (action$, store) => {
  */
 const updateGroupIconEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.UPDATE_GROUPICON)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/groupIcon`;
             let data = new FormData();
@@ -183,7 +183,7 @@ const updateGroupIconEpic = (action$, store) => {
  */
 const deleteUserGroupEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.DELETE_USERGROUP)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -199,7 +199,7 @@ const deleteUserGroupEpic = (action$, store) => {
  */
 const deleteUserGroupIconEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.DELETE_USERGROUPICON)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.groupId}/icon`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -215,7 +215,7 @@ const deleteUserGroupIconEpic = (action$, store) => {
  */
 const deleteUserGroupsEpic = (action$, store) => {
     return action$.ofType(UserGroupsAction.DELETE_USERGROUPS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;

@@ -46,7 +46,7 @@ import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
     updateConnectionEpic, deleteConnectionEpic, deleteConnectionsEpic, checkConnectionTitleEpic,
     validateConnectionFormMethodsEpic, checkNeo4jEpic, checkNeo4jFulfilledEpic,
-    sendOperationRequestEpic, checkConnectionEpic, fetchMetaConnectionsEpic,
+    sendOperationRequestEpic, checkConnectionEpic, fetchMetaConnectionsEpic, loginGraphQLEpic,
 } from '@epics/connections';
 import {
     deleteTemplateEpic, addTemplateEpic, fetchTemplatesEpic, fetchTemplateEpic,
@@ -219,4 +219,5 @@ export default combineEpics(
     fetchWidgetsEpic,
     updateWidgetSettingsEpic,
     checkResetFilesEpic,
+    loginGraphQLEpic,
 );

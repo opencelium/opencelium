@@ -28,6 +28,7 @@ export const BODY_FORMAT = {
 
 export const BODY_DATA = {
     RAW: 'raw',
+    GRAPHQL: 'graphql'
 };
 
 export const VALUE_PROPERTY = '__oc__value';

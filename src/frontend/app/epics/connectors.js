@@ -53,7 +53,7 @@ const urlPrefix = 'connector';
  */
 const testConnectorEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.TEST_CONNECTOR)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/check`;
             let data = action.payload;
@@ -72,7 +72,7 @@ const testConnectorEpic = (action$, store) => {
  */
 const fetchConnectorEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.FETCH_CONNECTOR)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{
@@ -87,7 +87,7 @@ const fetchConnectorEpic = (action$, store) => {
  */
 const fetchConnectorsEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.FETCH_CONNECTORS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
@@ -103,7 +103,7 @@ const fetchConnectorsEpic = (action$, store) => {
  */
 const addConnectorEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.ADD_CONNECTOR)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let connectorIcon = action.payload.icon;
@@ -128,7 +128,7 @@ const addConnectorEpic = (action$, store) => {
  */
 const addConnectorIconEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.ADD_CONNECTORICON)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/connector`;
             let data = new FormData();
@@ -152,7 +152,7 @@ const addConnectorIconEpic = (action$, store) => {
  */
 const updateConnectorEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.UPDATE_CONNECTOR)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             let connectorIcon = action.payload.icon;
@@ -178,7 +178,7 @@ const updateConnectorEpic = (action$, store) => {
  */
 const updateConnectorIconEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.UPDATE_CONNECTORICON)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/connector`;
             let data = new FormData();
@@ -197,7 +197,7 @@ const updateConnectorIconEpic = (action$, store) => {
  */
 const deleteConnectorEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.DELETE_CONNECTOR)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -213,7 +213,7 @@ const deleteConnectorEpic = (action$, store) => {
  */
 const deleteConnectorsEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.DELETE_CONNECTORS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -230,7 +230,7 @@ const deleteConnectorsEpic = (action$, store) => {
  */
 const checkConnectorTitleEpic = (action$, store) => {
     return action$.ofType(ConnectorsAction.CHECK_CONNECTORTITLE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/exists/${action.payload.title}`;
             return doRequest({url},{

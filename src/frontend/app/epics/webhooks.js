@@ -45,7 +45,7 @@ const urlPrefix = 'webhook';
  */
 const addWebHookEpic = (action$, store) => {
     return action$.ofType(WebHooksAction.ADD_WEBHOOK)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let validation = validateAddWebHook(action.payload);
             if(validation.success) {
@@ -68,7 +68,7 @@ const addWebHookEpic = (action$, store) => {
  */
 const updateWebHookEpic = (action$, store) => {
     return action$.ofType(WebHooksAction.UPDATE_WEBHOOK)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -90,7 +90,7 @@ const updateWebHookEpic = (action$, store) => {
  */
 const deleteWebHookEpic = (action$, store) => {
     return action$.ofType(WebHooksAction.DELETE_WEBHOOK)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let validation = validateDeleteWebHook(action.payload);
             if(validation.success) {

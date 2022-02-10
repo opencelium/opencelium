@@ -171,7 +171,6 @@ class DashboardView extends Component{
             <div id={'app_content'}>
                 <ListHeader header={t('dashboard:HEADER')} icons={icons}/>
                 <div className={styles.dashboard_view}>
-
                     <div>
                         {isWidgetEditOn &&
                             <DashboardToolbox

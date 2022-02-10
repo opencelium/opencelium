@@ -14,6 +14,7 @@ import {isNumber, subArrayToString} from "@utils/app";
 import CEnhancement from "@classes/components/content/connection/field_binding/CEnhancement";
 import Button from "@basic_components/buttons/Button";
 import {markFieldNameAsArray} from "@change_component/form_elements/form_connection/form_methods/help";
+import GraphQLBody from "@change_component/form_elements/form_connection/form_methods/method/GraphQLBody";
 
 class Body extends React.Component{
     constructor(props) {
@@ -103,6 +104,22 @@ class Body extends React.Component{
 
     renderBody(){
         const {readOnly, method, connection, isDraft, source, connector} = this.props;
+        if(method.isGraphQLData()){
+            return (
+                <GraphQLBody
+                    id={'description_body'}
+                    isDraft={isDraft}
+                    readOnly={readOnly}
+                    method={connector.getMethodByIndex(method.index)}
+                    connection={connection}
+                    connector={connector}
+                    updateEntity={(a) => this.updateEntity(a)}
+                    noPlaceholder={true}
+                    source={source}
+                    openEnhancement={(a, b) => this.setCurrentEnhancementClickingOnPointer(a, b)}
+                />
+            );
+        }
         switch(method.bodyFormat){
             case BODY_FORMAT.JSON:
                 return (
@@ -182,8 +199,9 @@ class Body extends React.Component{
 
     render(){
         const {isBodyVisible} = this.state;
-        const {connector, isExtended, isCurrentInfo} = this.props;
-        const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO;
+        const {connector, isExtended, isCurrentInfo, method} = this.props;
+        const isGraphQLData = method.isGraphQLData();
+        const hasEnhancement = connector.getConnectorType() === CONNECTOR_TO && !isGraphQLData;
         return(
             <React.Fragment>
                 <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Body`}</Col>
@@ -200,7 +218,7 @@ class Body extends React.Component{
                     active={isBodyVisible && !isExtended}
                     toggle={::this.toggleBodyVisible}
                     title={'Body'}
-                    theme={{dialog: hasEnhancement ? styles.body_dialog_with_enhancement : styles.body_dialog, content: styles.body_content}}
+                    theme={{dialog: isGraphQLData ? styles.body_dialog_graphql : hasEnhancement ? styles.body_dialog_with_enhancement : styles.body_dialog, content: styles.body_content}}
                 >
                     {this.renderInfo()}
                 </Dialog>
