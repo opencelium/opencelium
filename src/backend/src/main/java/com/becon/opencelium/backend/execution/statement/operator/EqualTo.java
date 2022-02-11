@@ -32,7 +32,7 @@ public class EqualTo implements Operator {
         if (val2 instanceof String) {
             v2 = (String) val2;
         } else {
-            v2 = v2.toString();
+            v2 = val2.toString();
         }
         return v1.equals(v2);
     }
