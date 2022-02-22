@@ -105,17 +105,22 @@ public class Xml {
         String xBody = PathUtility.getXPathTillBody(operationResource.getPath(), operationResource.getMethod());
         NodeList node = getNodeListByXpath(xBody);
         String[] fields = PathUtility.getFields(operationResource.getPath()).split("\\.");
+        boolean hasNewField = false;
         for (String f : fields) {
             FieldResource fr = createFieldResource(f);
             String xField = PathUtility.convretToXField(fr.getName());
             xBody = xBody + "/" + xField;
-            if (!pathExists(xBody)) {
-                Element field = createField(fr);
-                node.item(0).appendChild(field);
-                node = node.item(0).getChildNodes();
+            if (!hasNewField && pathExists(xBody)) {
+                node = getNodeListByXpath(xBody);
+                hasNewField = false;
                 continue;
             }
-            node = getNodeListByXpath(xBody);
+
+            Element field = createField(fr);
+            node.item(0).appendChild(field);
+            node = node.item(0).getChildNodes();
+            hasNewField = true;
+
         }
         return node;
     }
