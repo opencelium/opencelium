@@ -70,7 +70,7 @@ const INTERVAL_OF_GETTING_CURRENT_SCHEDULES = 2000;
  */
 const triggerScheduleEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.TRIGGER_SCHEDULE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/execute/${action.payload.id}`;
             return doRequest({url},{
@@ -90,7 +90,7 @@ const triggerScheduleEpic = (action$, store) => {
  */
 const triggerScheduleSuccessEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.TRIGGER_SCHEDULESUCCESS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             return triggerScheduleSuccessfullyFulfilled();
         });
@@ -105,7 +105,7 @@ export function cancelCurrentSchedule(){
 }
 const fetchCurrentSchedulesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_CURRENTSCHEDULES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
              let url = `${urlPrefix}/running/all`;
              return doRequest({url},{
@@ -142,7 +142,7 @@ const fetchCurrentSchedulesEpic = (action$, store) => {
  */
 const fetchScheduleEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{
@@ -156,7 +156,7 @@ const fetchScheduleEpic = (action$, store) => {
  */
 const fetchScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
             return doRequest({url},{
@@ -171,7 +171,7 @@ const fetchScheduleNotificationEpic = (action$, store) => {
  */
 const fetchSchedulesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
@@ -187,7 +187,7 @@ const fetchSchedulesEpic = (action$, store) => {
  */
 const fetchScheduleNotificationsEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}/notification/all`;
             return doRequest({url},{
@@ -203,7 +203,7 @@ const fetchScheduleNotificationsEpic = (action$, store) => {
  */
 const fetchScheduleNotificationTemplatesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULENOTIFICATIONTEMPLATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `message/all/${action.payload.notificationType}`;
             return doRequest({url},{
@@ -218,7 +218,7 @@ const fetchScheduleNotificationTemplatesEpic = (action$, store) => {
  */
 const fetchNotificationRecipientsEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_NOTIFICATIONRECIPIENTS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `user/all`;
             return doRequest({url},{
@@ -232,7 +232,7 @@ const fetchNotificationRecipientsEpic = (action$, store) => {
  */
 const fetchSlackChannelsEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SLACKCHANNELS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             const testData = [{value: 1, label: 'Channel 1'}, {value: 2, label: 'Channel 2'}];
             return Rx.Observable.of(fetchSlackChannelsFulfilled(testData));
@@ -249,7 +249,7 @@ const fetchSlackChannelsEpic = (action$, store) => {
  */
 const fetchSchedulesByIdsEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.FETCH_SCHEDULESBYIDS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/ids`;
             return doRequest({url, method: API_METHOD.POST, data: {schedulerIds: action.payload}},{
@@ -264,7 +264,7 @@ const fetchSchedulesByIdsEpic = (action$, store) => {
  */
 const addScheduleEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.ADD_SCHEDULE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -286,7 +286,7 @@ const addScheduleEpic = (action$, store) => {
  */
 const addScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.ADD_SCHEDULENOTIFICATION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}/notification`;
             let data = action.payload;
@@ -303,7 +303,7 @@ const addScheduleNotificationEpic = (action$, store) => {
  */
 const updateScheduleEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.UPDATE_SCHEDULE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}`;
             let {...data} = action.payload;
@@ -319,7 +319,7 @@ const updateScheduleEpic = (action$, store) => {
  */
 const updateScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.UPDATE_SCHEDULENOTIFICATION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
             return doRequest({url, method: API_METHOD.PUT, data: action.payload},{
@@ -335,7 +335,7 @@ const updateScheduleNotificationEpic = (action$, store) => {
  */
 const updateScheduleStatusEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.UPDATE_SCHEDULESTATUS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let {id, status, title} = action.payload;
             let url = `${urlPrefix}/${id}/status`;
@@ -352,7 +352,7 @@ const updateScheduleStatusEpic = (action$, store) => {
  */
 const deleteScheduleEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.DELETE_SCHEDULE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -368,7 +368,7 @@ const deleteScheduleEpic = (action$, store) => {
  */
 const deleteScheduleNotificationEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.DELETE_SCHEDULENOTIFICATION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.schedulerId}/notification/${action.payload.notificationId}`;
             let data = action.payload;
@@ -385,7 +385,7 @@ const deleteScheduleNotificationEpic = (action$, store) => {
  */
 const startSchedulesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.START_SCHEDULES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/startAll`;
             let data = action.payload;
@@ -402,7 +402,7 @@ const startSchedulesEpic = (action$, store) => {
  */
 const enableSchedulesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.ENABLE_SCHEDULES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/enableAll`;
             let data = action.payload;
@@ -419,7 +419,7 @@ const enableSchedulesEpic = (action$, store) => {
  */
 const disableSchedulesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.DISABLE_SCHEDULES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/disableAll`;
             let data = action.payload;
@@ -436,7 +436,7 @@ const disableSchedulesEpic = (action$, store) => {
  */
 const deleteSchedulesEpic = (action$, store) => {
     return action$.ofType(SchedulesAction.DELETE_SCHEDULES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;

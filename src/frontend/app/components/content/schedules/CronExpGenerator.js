@@ -24,7 +24,6 @@ import styles from "@themes/default/content/schedules/schedules";
 import {ALL_MONTHS, consoleLog, convertTimeForCronExpression, getThemeClass} from "@utils/app";
 import Select from "@basic_components/inputs/Select";
 import cronParser from 'cron-parser';
-import {parse} from "postcss-scss";
 
 
 function mapStateToProps(state){

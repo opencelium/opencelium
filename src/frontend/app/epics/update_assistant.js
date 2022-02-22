@@ -49,7 +49,7 @@ const urlPrefix = 'assistant/oc';
  */
 const fetchUpdateAppVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_UPDATEAPPVERSION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/online/versions`;
             const currentAppVersion = action.settings.currentAppVersion;
@@ -72,7 +72,7 @@ const fetchUpdateAppVersionEpic = (action$, store) => {
  */
 const fetchOnlineUpdatesEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_ONLINEUPDATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/online/versions`;
             //return Rx.Observable.of(fetchOnlineUpdatesFulfilled(ONLINE_UPDATES));
@@ -89,7 +89,7 @@ const fetchOnlineUpdatesEpic = (action$, store) => {
  */
 const fetchOfflineUpdatesEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_OFFLINEUPDATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/offline/versions`;
             //return Rx.Observable.of(fetchOfflineUpdatesFulfilled(OFFLINE_UPDATES));
@@ -106,7 +106,7 @@ const fetchOfflineUpdatesEpic = (action$, store) => {
  */
 const deleteVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.DELETE_VERSION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/assistant/zipfile/${action.payload.folder}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -122,7 +122,7 @@ const deleteVersionEpic = (action$, store) => {
  */
 const uploadVersionEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.UPLOAD_VERSION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/assistant/zipfile`;
             let data = new FormData();
@@ -140,7 +140,7 @@ const uploadVersionEpic = (action$, store) => {
  */
 const updateTemplatesForAssistantEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.UPDATE_TEMPLATESFORASSISTANT)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             let data = action.payload;
@@ -158,7 +158,7 @@ const updateTemplatesForAssistantEpic = (action$, store) => {
  */
 const updateInvokersForAssistantEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.UPDATE_INVOKERSFORASSISTANT)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             let data = action.payload;
@@ -176,7 +176,7 @@ const updateInvokersForAssistantEpic = (action$, store) => {
  */
 const updateConnectionsForAssistantEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             let data = action.payload;
@@ -194,7 +194,7 @@ const updateConnectionsForAssistantEpic = (action$, store) => {
  */
 const updateSystemForAssistantEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.UPDATE_SYSTEM)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `assistant/oc/migrate`;
             let data = action.payload;
@@ -210,7 +210,7 @@ const updateSystemForAssistantEpic = (action$, store) => {
  */
 const fetchSystemRequirementsEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             //const url = `${urlPrefix}/system/overview`;
             const url = 'actuator/health';
@@ -226,7 +226,7 @@ const fetchSystemRequirementsEpic = (action$, store) => {
  */
 const addConvertTemplatesLogsEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.ADD_CONVERTTEMPLATESLOGS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return Rx.Observable.of(addConvertTemplatesLogsFulfilled(action.payload));
@@ -242,7 +242,7 @@ const addConvertTemplatesLogsEpic = (action$, store) => {
  */
 const addConvertInvokersLogsEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.ADD_CONVERTINVOKERSLOGS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return Rx.Observable.of(addConvertInvokersLogsFulfilled(action.payload));
@@ -258,7 +258,7 @@ const addConvertInvokersLogsEpic = (action$, store) => {
  */
 const addConvertConnectionsLogsEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.ADD_CONVERTCONNECTIONSLOGS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return Rx.Observable.of(addConvertConnectionsLogsFulfilled(action.payload));
@@ -274,7 +274,7 @@ const addConvertConnectionsLogsEpic = (action$, store) => {
  */
 const checkResetFilesEpic = (action$, store) => {
     return action$.ofType(UpdateAssistantAction.CHECK_RESETFILES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/restart/file/exists`;
             return doRequest({url},{

@@ -38,7 +38,7 @@ const urlPrefix = 'https://becon88.atlassian.net/rest/collectors/1.0/template/fo
  */
 const addErrorTicketEpic = (action$, store) => {
     return action$.ofType(AppAction.ADD_ERRORTICKET)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -54,7 +54,7 @@ const addErrorTicketEpic = (action$, store) => {
  */
 const fetchAppVersionEpic = (action$, store) => {
     return action$.ofType(AppAction.FETCH_APPVERSION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `assistant/oc/version`;
             return doRequest({url},{

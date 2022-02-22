@@ -55,7 +55,7 @@ const urlPrefix = 'admin_cards';
  */
 const fetchAdminCardsEpic = (action$, store) => {
     return action$.ofType(AdminCardsAction.FETCH_ADMINCARDS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             /*let url = `${urlPrefix}/all`;1
             return doRequest({url},{
@@ -68,7 +68,7 @@ const fetchAdminCardsEpic = (action$, store) => {
 
 const loadAdminCardsLinkEpic = (action$, store) => {
     return action$.ofType(AdminCardsAction.LOAD_ADMINCARD)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = action.payload.link;
             return doRequest({fullUrl: true, url}, {

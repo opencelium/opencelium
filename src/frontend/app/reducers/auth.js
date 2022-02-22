@@ -19,7 +19,6 @@ import {AuthAction} from '@utils/actions';
 import {updateDashboardSettingsSubscriber} from "@utils/socket/users";
 import {API_REQUEST_STATE} from "@utils/constants/app";
 import {getCryptLS, getLS, removeCryptLS, removeLS, setCryptLS, setLS} from "@utils/LocalStorage";
-import {VIEW_TYPE} from "@components/general/list_of_components/List";
 
 const notifications = getLS('notifications');
 const initialState = fromJS({

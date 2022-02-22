@@ -32,6 +32,7 @@ import {
     sendOperationRequestFulfilled,
     sendOperationRequestRejected,
     fetchMetaConnectionsFulfilled, fetchMetaConnectionsRejected, fetchMetaConnections,
+    loginGraphQLFulfilled, loginGraphQLRejected, loginGraphQLCanceled,
 } from '@actions/connections/fetch';
 import {
     addConnectionFulfilled ,addConnectionRejected,
@@ -63,7 +64,7 @@ const urlPrefix = 'connection';
  */
 const validateConnectionFormMethodsEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.VALIDATE_FORMMETHODS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/validate`;
             return doRequest({url, method: API_METHOD.POST, data: action.payload},{
@@ -78,7 +79,7 @@ const validateConnectionFormMethodsEpic = (action$, store) => {
  */
 const checkNeo4jEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.CHECK_NEO4J)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = 'actuator/health/neo4j';
             let {callbackData} = action;
@@ -99,7 +100,7 @@ const checkNeo4jEpic = (action$, store) => {
  */
 const checkNeo4jFulfilledEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.CHECK_NEO4J_FULFILLED, ConnectionsAction.CHECK_NEO4J_REJECTED)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let {callbackData, neo4j} = action.payload;
             if(callbackData && callbackData.hasOwnProperty('callback')){
@@ -120,7 +121,7 @@ const checkNeo4jFulfilledEpic = (action$, store) => {
  */
 const checkConnectionTitleEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.CHECK_CONNECTIONTITLE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/check/${action.payload.title}`;
             return doRequest({url},{
@@ -135,7 +136,7 @@ const checkConnectionTitleEpic = (action$, store) => {
  */
 const fetchConnectionEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.FETCH_CONNECTION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             let neo4j = action.settings ? action.settings.neo4j : null;
@@ -158,7 +159,7 @@ const fetchConnectionEpic = (action$, store) => {
  */
 const fetchMetaConnectionsEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.FETCH_METACONNECTIONS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all/meta`;
             let neo4j = action.settings ? action.settings.neo4j : null;
@@ -182,7 +183,7 @@ const fetchMetaConnectionsEpic = (action$, store) => {
  */
 const fetchConnectionsEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.FETCH_CONNECTIONS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             let neo4j = action.settings ? action.settings.neo4j : null;
@@ -206,7 +207,7 @@ const fetchConnectionsEpic = (action$, store) => {
  */
 const addConnectionEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.ADD_CONNECTION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -222,7 +223,7 @@ const addConnectionEpic = (action$, store) => {
  */
 const updateConnectionEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.UPDATE_CONNECTION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             let {id, ...data} = action.payload;
@@ -238,7 +239,7 @@ const updateConnectionEpic = (action$, store) => {
  */
 const deleteConnectionEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.DELETE_CONNECTION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -254,7 +255,7 @@ const deleteConnectionEpic = (action$, store) => {
  */
 const deleteConnectionsEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.DELETE_CONNECTIONS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             const data = action.payload;
@@ -271,7 +272,7 @@ const deleteConnectionsEpic = (action$, store) => {
  */
 const sendOperationRequestEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.SEND_OPERATIONREQUEST)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             const data = action.payload;
             const url = `${urlPrefix}/remoteapi/test`;
@@ -287,7 +288,7 @@ const sendOperationRequestEpic = (action$, store) => {
  */
 const checkConnectionEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.CHECK_CONNECTION)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/check`;
             let data = action.payload;
@@ -295,6 +296,22 @@ const checkConnectionEpic = (action$, store) => {
             return doRequest({url, method: API_METHOD.POST, data},{
                 success: checkConnectionFulfilled,
                 reject: checkConnectionRejected,},
+            );
+        });
+};
+
+/**
+ * login graphql
+ */
+const loginGraphQLEpic = (action$, store) => {
+    return action$.ofType(ConnectionsAction.LOGIN_GRAPHQL)
+        .debounceTime(100)
+        .mergeMap((action) => {
+            const data = action.payload;
+            const url = `${urlPrefix}/remoteapi/test`;
+            return doRequest({url, method: API_METHOD.POST, data: {url: data.endpoint, header: data.header, method: data.method, body: data.body}},{
+                success: loginGraphQLFulfilled,
+                reject: loginGraphQLRejected,},
             );
         });
 };
@@ -314,4 +331,5 @@ export {
     checkNeo4jFulfilledEpic,
     sendOperationRequestEpic,
     checkConnectionEpic,
+    loginGraphQLEpic,
 };

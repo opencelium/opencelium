@@ -43,7 +43,7 @@ const urlPrefix = 'actuator/health';
  */
 const fetchAppsEpic = (action$, store) => {
     return action$.ofType(AppsAction.FETCH_APPS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return doRequest({url, isApi: false, hasAuthHeader: true},{
@@ -62,7 +62,7 @@ const fetchAppsEpic = (action$, store) => {
 
 const checkAppEpic = (action$, store) => {
     return action$.ofType(AppsAction.CHECK_APP)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.value}`;
             return doRequest({url, isApi: false, hasAuthHeader: true},{

@@ -65,7 +65,7 @@ const urlPrefix = 'template';
  */
 const fetchTemplatesEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.FETCH_TEMPLATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let from = action.settings ? action.settings.from : null;
             let to = action.settings ? action.settings.to : null;
@@ -82,7 +82,7 @@ const fetchTemplatesEpic = (action$, store) => {
  */
 const addTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.ADD_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -98,7 +98,7 @@ const addTemplateEpic = (action$, store) => {
  */
 const duplicateTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.DUPLICATE_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -114,7 +114,7 @@ const duplicateTemplateEpic = (action$, store) => {
  */
 const convertTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.CONVERT_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.templateId}`;
             let {...data} = action.payload;
@@ -131,7 +131,7 @@ const convertTemplateEpic = (action$, store) => {
  */
 const convertTemplatesEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.CONVERT_TEMPLATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             let data = action.payload;
@@ -150,7 +150,7 @@ const convertTemplatesEpic = (action$, store) => {
  */
 const deleteTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.DELETE_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let id = action.payload.hasOwnProperty('templateId') ? action.payload.templateId : action.payload.id;
             let url = `${urlPrefix}/${id}`;
@@ -167,7 +167,7 @@ const deleteTemplateEpic = (action$, store) => {
  */
 const deleteTemplatesEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.DELETE_TEMPLATES)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;
@@ -184,7 +184,7 @@ const deleteTemplatesEpic = (action$, store) => {
  */
 const importTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.IMPORT_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `storage/${urlPrefix}`;
             let data = new FormData();
@@ -201,7 +201,7 @@ const importTemplateEpic = (action$, store) => {
  */
 const exportTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.EXPORT_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = action.payload.link;
             return doRequest({url, fullUrl: true},{
@@ -217,7 +217,7 @@ const exportTemplateEpic = (action$, store) => {
  */
 const updateTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.UPDATE_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.templateId}`;
             return doRequest({url, method: API_METHOD.PUT, data: action.payload},{
@@ -232,7 +232,7 @@ const updateTemplateEpic = (action$, store) => {
  */
 const fetchTemplateEpic = (action$, store) => {
     return action$.ofType(TemplatesAction.FETCH_TEMPLATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{

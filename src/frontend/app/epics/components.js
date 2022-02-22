@@ -35,7 +35,7 @@ const urlPrefix = 'component';
  */
 const fetchComponentsEpic = (action$, store) => {
     return action$.ofType(ComponentsAction.FETCH_COMPONENTS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{

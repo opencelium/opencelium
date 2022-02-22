@@ -49,7 +49,7 @@ const urlPrefix = 'invoker';
  */
 const fetchInvokersEpic = (action$, store) => {
     return action$.ofType(InvokersAction.FETCH_INVOKERS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             return doRequest({url},{
@@ -68,7 +68,7 @@ const fetchInvokersEpic = (action$, store) => {
  */
 const fetchDefaultInvokersEpic = (action$, store) => {
     return action$.ofType(InvokersAction.FETCH_DEFAULTINVOKERS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/all`;
             /*
@@ -86,7 +86,7 @@ const fetchDefaultInvokersEpic = (action$, store) => {
  */
 const fetchInvokerEpic = (action$, store) => {
     return action$.ofType(InvokersAction.FETCH_INVOKER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url},{
@@ -101,7 +101,7 @@ const fetchInvokerEpic = (action$, store) => {
  */
 const addInvokerEpic = (action$, store) => {
     return action$.ofType(InvokersAction.ADD_INVOKER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return doRequest({url, method: API_METHOD.POST, data: action.payload},{
@@ -116,7 +116,7 @@ const addInvokerEpic = (action$, store) => {
  */
 const updateInvokerEpic = (action$, store) => {
     return action$.ofType(InvokersAction.UPDATE_INVOKER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             return doRequest({url, method: API_METHOD.POST, data: action.payload},{
@@ -131,7 +131,7 @@ const updateInvokerEpic = (action$, store) => {
  */
 const deleteInvokerEpic = (action$, store) => {
     return action$.ofType(InvokersAction.DELETE_INVOKER)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}/${action.payload.id}`;
             return doRequest({url, method: API_METHOD.DELETE},{
@@ -147,7 +147,7 @@ const deleteInvokerEpic = (action$, store) => {
  */
 const deleteInvokersEpic = (action$, store) => {
     return action$.ofType(InvokersAction.DELETE_INVOKERS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}`;
             let data = action.payload;

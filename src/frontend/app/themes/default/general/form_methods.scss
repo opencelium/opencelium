@@ -347,6 +347,16 @@
   padding-bottom: 0;
 }
 
+.body_dialog_graphql{
+  min-width: 90vw;
+  max-width: 90vw;
+  width: 90vw;
+}
+.body_content{
+  min-height: 90vh;
+  max-height: 90vh;
+  height: 90vh;
+}
 .methods_method_item{
   font-family: $FONT_FAMILY;
   cursor: pointer;
@@ -354,6 +364,16 @@
   display: inline-block;
   height: 20px;
   margin-right: 5px;
+}
+.more_details {
+  color: #c0c0c5;
+  cursor: pointer;
+  padding: 0 3px;
+}
+.more_details:hover{
+  color: #444b4c;
+  padding: 0 3px;
+  box-shadow: #9f9f9f 0 1px 3px 0;
 }
 
 .dropdown_menu_menu{

@@ -43,7 +43,7 @@ import {API_METHOD} from "@utils/constants/app";
  */
 const updateAuthUserLanguageEpic = (action$, store) => {
     return action$.ofType(AuthAction.UPDATE_AUTH_USER_LANGUAGE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let userId = store.getState('auth').get('auth').get('authUser').id;
             let url = 'user/changeLanguage';
@@ -60,7 +60,7 @@ const updateAuthUserLanguageEpic = (action$, store) => {
  */
  const loginUserEpic = (action$, store) => {
     return action$.ofType(AuthAction.LOG_IN)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = 'login';
             const {email, password} = action.payload;
@@ -101,7 +101,7 @@ const updateAuthUserLanguageEpic = (action$, store) => {
  */
 const logoutUserEpic = (action$, store) => {
     return action$.ofType(AuthAction.LOG_OUT)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             return logoutUserFulfilled({});
         });
@@ -112,7 +112,7 @@ const logoutUserEpic = (action$, store) => {
  */
 const updateDashboardSettingsEpic = (action$, store) => {
     return action$.ofType(AuthAction.UPDATE_DASHBOARDSETTINGS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             if(action.payload.dashboard.settings.url){
                 return updateDashboardSettingsFulfilled(action.payload);
@@ -126,7 +126,7 @@ const updateDashboardSettingsEpic = (action$, store) => {
  */
 const updateThemeEpic = (action$, store) => {
     return action$.ofType(AuthAction.UPDATE_THEME)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let authUser = action.payload;
             let url = `userDetail/${authUser.userId}`;
@@ -145,7 +145,7 @@ const updateThemeEpic = (action$, store) => {
  */
 const toggleAppTourEpic = (action$, store) => {
     return action$.ofType(AuthAction.TOGGLE_APPTOUR)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let {payload} = action;
             let appTour = !payload.userDetail.appTour;

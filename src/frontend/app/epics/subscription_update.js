@@ -13,7 +13,7 @@ const urlPrefix = 'assistant/subscription/';
  */
 const fetchSubscriptionUpdateEpic = (action$, store) => {
     return action$.ofType(SubscriptionUpdate.FETCH_SUBSCRIPTIONUPDATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}repo/diff/files`;
             return doRequest({url},{
@@ -27,7 +27,7 @@ const fetchSubscriptionUpdateEpic = (action$, store) => {
  */
 const doSubscriptionUpdateEpic = (action$, store) => {
     return action$.ofType(SubscriptionUpdate.DO_SUBSCRIPTIONUPDATE)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `${urlPrefix}repo/update`;
             return doRequest({url},{

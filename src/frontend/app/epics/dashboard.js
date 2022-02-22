@@ -32,7 +32,7 @@ import {API_METHOD} from "@utils/constants/app";
  */
 const fetchWidgetSettingsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.FETCH_WIDGETSETTINGS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let authUser = store.getState('auth').get('auth').get('authUser');
             let url = `widget_setting/user/${authUser.userId}`;
@@ -52,7 +52,7 @@ const fetchWidgetSettingsEpic = (action$, store) => {
  */
 const fetchWidgetsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.FETCH_WIDGETS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let url = `widget/all`;
             return doRequest({url},{
@@ -67,7 +67,7 @@ const fetchWidgetsEpic = (action$, store) => {
  */
 const updateWidgetSettingsEpic = (action$, store) => {
     return action$.ofType(DashboardAction.UPDATE_WIDGETSETTINGS)
-        .debounceTime(500)
+        .debounceTime(100)
         .mergeMap((action) => {
             let authUser = store.getState('auth').get('auth').get('authUser');
             let url = `widget_setting`;
