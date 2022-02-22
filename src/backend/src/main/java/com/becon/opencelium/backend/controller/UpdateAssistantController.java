@@ -193,7 +193,7 @@ public class UpdateAssistantController {
         }
     }
 
-    @GetMapping("/subscription/repo/update")
+    @GetMapping("/subscription/repo/updateAll")
     public ResponseEntity<?> subsRepoUpdate() {
         try {
             assistantServiceImp.updateSubsFiles();
@@ -250,7 +250,7 @@ public class UpdateAssistantController {
                 assistantServiceImp.updateOff(dir, version);
             }
 
-            // after update need to move or replace files in main project
+            // after updateAll need to move or replace files in main project
             Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
             List<File> invokers = Files.list(filePath)
                     .filter(Files::isRegularFile)

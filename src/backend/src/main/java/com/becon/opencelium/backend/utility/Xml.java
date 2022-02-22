@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.utility;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.invoker.resource.FieldResource;
+import com.becon.opencelium.backend.invoker.resource.OperationResource;
+import org.w3c.dom.*;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -11,20 +11,35 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class XmlTransformer {
+public class Xml {
 
-    Document document;
+    private Document document;
+    private XPathFactory xPathfactory = XPathFactory.newInstance();
+    private XPath xpath = xPathfactory.newXPath();
+    private String fileName;
 
-    public XmlTransformer(Document document) {
+    public Xml(Document document) {
         this.document = document;
     }
 
-    public String xmlToString(Object xmlMap){
+    public Xml(Document document, String fileName) {
+        this.document = document;
+        this.fileName = fileName;
+    }
+
+    public String toString(Object xmlMap){
         Map<String, Object> map = (Map<String, Object>) xmlMap;
         Map.Entry<String,Object> entry = map.entrySet().iterator().next();
 
@@ -41,6 +56,72 @@ public class XmlTransformer {
             attrs.forEach(element::setAttributeNode);
         }
         return nodeToString(element);
+    }
+
+    public List<Element> createFields(List<FieldResource> fields) {
+        return fields.stream().map(this::createField).collect(Collectors.toList());
+    }
+
+    public Element createField(FieldResource field) {
+        Element element = document.createElement("field");
+        element.setAttribute("name", field.getName());
+        element.setAttribute("type", field.getType());
+        element.setTextContent(field.getValue().toString());
+        return element;
+    }
+
+    public NodeList getNodeListByXpath(String xPath) throws XPathExpressionException{
+
+        return (NodeList) xpath.compile(xPath).evaluate(document, XPathConstants.NODESET);
+    }
+
+    public void addFields(String xPath, OperationResource operationResource) throws XPathExpressionException {
+        NodeList nl = getNodeListByXpath(xPath);
+//        if (!pathExists(xPath)) {
+//            nl = addNewFieldFromPath(xPath);
+//        }
+
+        if (pathExists(xPath)) {
+            for (Element e : createFields(operationResource.getFields())) {
+                String field = xPath + "/field[@name='" + e.getAttributeNode("name").getValue() + "']";
+                try {
+                    if(pathExists(field)) {
+                        return;
+                    }
+                    assert nl != null;
+                    nl.item(0).appendChild(e);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+    }
+
+    private NodeList addNewFieldFromPath(String xpath) {
+
+        return null;
+    }
+
+    public NodeList findElementInNodeList(NodeList nodeList, String xPath) throws XPathExpressionException {
+        return (NodeList) xpath.compile(xPath).evaluate(nodeList, XPathConstants.NODESET);
+    }
+
+    // If result != null it means that xPath exists in xml and we don't need to create new element
+    public boolean pathExists(String xPath) throws XPathExpressionException {
+        return getNodeListByXpath(xPath).item(0) != null;
+    }
+
+    public void save() throws FileNotFoundException, TransformerException {
+        TransformerFactory transformerFactory = TransformerFactory
+                .newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(document);
+
+        String f = PathConstant.INVOKER + fileName + ".xml";
+        FileOutputStream output = new FileOutputStream(f);
+        StreamResult result = new StreamResult(output);
+        transformer.transform(source, result);
+
     }
 
     private List<Element> mapToNode(Map<String, Object> map) {
@@ -159,7 +240,6 @@ public class XmlTransformer {
 
         return attrs;
     }
-
 
     private String nodeToString(Node node) {
         StringWriter sw = new StringWriter();

@@ -16,14 +16,15 @@
 
 package com.becon.opencelium.backend.invoker.service;
 
-import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
+import org.w3c.dom.Document;
 
+import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +49,10 @@ public interface InvokerService {
     String findFieldType(String name, String methodName, String exchangeType, String result, String fieldName);
 
     String findFieldByPath(String invoker, String method, String path);
+
+    Document getDocument(String name) throws Exception;
+
+    void save(Document document);
 
     Map<String, String> findAllByPathAsString(String path);
 

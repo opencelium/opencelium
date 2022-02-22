@@ -97,7 +97,7 @@ public class InvokerParserImp {
         return xmlDomParser.doAction("operations", node -> getFunctions(node.getChildNodes()));
     }
 
-    private List<FunctionInvoker> getFunctions(NodeList nodeList){
+    public List<FunctionInvoker> getFunctions(NodeList nodeList){
         List<FunctionInvoker> functions = new ArrayList<>();
         InvokerParserFactory<List<FunctionInvoker>> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, List<FunctionInvoker>> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);

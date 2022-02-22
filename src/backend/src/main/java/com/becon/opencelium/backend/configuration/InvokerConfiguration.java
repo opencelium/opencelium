@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.authentication.BasicAuth;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.InvokerContainer;

@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.neo4j.entity.BodyNode;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
@@ -39,12 +40,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.xml.crypto.dsig.TransformException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -57,13 +63,15 @@ import java.util.stream.Stream;
 import static java.nio.file.Files.exists;
 
 @Service
-public class InvokerServiceImp implements InvokerService{
+public class InvokerServiceImp implements InvokerService {
 
     @Autowired
     private InvokerContainer invokerContainer;
 
     @Autowired
     private StorageService storageService;
+
+    private final Path filePath = Paths.get(PathConstant.INVOKER);
 
     @Override
     public Invoker toEntity(InvokerResource resource) {
@@ -246,6 +254,25 @@ public class InvokerServiceImp implements InvokerService{
     @Override
     public Map<String, Invoker> findAllAsMap() {
         return null;
+    }
+
+    @Override
+    public Document getDocument(String name) throws Exception {
+        File file = new File(filePath.toString() + "/" + name);
+        if(!FilenameUtils.getExtension(file.getName()).equals("xml")){
+            return null;
+        }
+        DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        return dBuilder.parse(file);
+    }
+
+    @Override
+    public void save(Document document) {
+        InvokerParserImp parser = new InvokerParserImp(document);
+        File f = new File(document.getDocumentURI());
+        String invoker = FilenameUtils.removeExtension(f.getName());
+        invoker = invoker.replace("%20", " ");
+        invokerContainer.update(invoker, parser.parse());
     }
 
     private static Document convertStringToXMLDocument(String xmlString)
