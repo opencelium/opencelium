@@ -457,7 +457,7 @@ class IfOperator extends Component{
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let {hasValue} = this.isOperatorHasValue();
         let {leftField} = this.state;
-        const {operator, readOnly, connector, updateEntity} = this.props;
+        const {connection, operator, readOnly, connector, updateEntity} = this.props;
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
@@ -477,6 +477,7 @@ class IfOperator extends Component{
                 >
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}
+                        selectedMethod={operator.condition.leftStatement ? connection.getMethodByColor(operator.condition.leftStatement.color) : null}
                         updateConnection={updateEntity}
                         className={styles.operator_left_field}
                         placeholder={'param'}
@@ -586,7 +587,7 @@ class IfOperator extends Component{
     }
 
     renderPropertyInputRight(){
-        const {connector, operator, readOnly, updateEntity} = this.props;
+        const {connection, connector, operator, readOnly, updateEntity} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let {leftField, rightProperty} = this.state;
         let divStyles = {transition: isOperatorHasThreeParams ? 'width 0.3s ease 0s' : 'none', width: isOperatorHasThreeParams ? '17.5%' : '0', float: 'left'};
@@ -608,6 +609,7 @@ class IfOperator extends Component{
                     >
                         <SelectSearch
                             id={`if_operator_${operator.type}_${operator.index}`}
+                            selectedMethod={operator.condition.leftStatement ? connection.getMethodByColor(operator.condition.leftStatement.color) : null}
                             updateConnection={updateEntity}
                             className={styles.operator_right_field}
                             placeholder={'param'}
@@ -871,6 +873,7 @@ class IfOperator extends Component{
                 >
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}
+                        selectedMethod={operator.condition.rightStatement ? connection.getMethodByColor(operator.condition.rightStatement.color) : null}
                         updateConnection={updateEntity}
                         className={styles.operator_right_field}
                         placeholder={'param'}

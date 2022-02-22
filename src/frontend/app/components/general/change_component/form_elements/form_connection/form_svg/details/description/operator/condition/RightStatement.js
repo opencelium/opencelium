@@ -101,6 +101,7 @@ class RightStatement extends React.Component{
             <React.Fragment>
                 <PropertyInput
                     {...this.getPropertyStyles()}
+                    selectedMethod={condition.leftMethod ? connection.getMethodByColor(condition.leftMethod.color) : null}
                     updateConnection={updateConnection}
                     id={propertyId}
                     readOnly={readOnly}
@@ -135,6 +136,7 @@ class RightStatement extends React.Component{
                     /> :
                     <ParamInput
                         id={paramId}
+                        selectedMethod={condition.rightMethod ? connection.getMethodByColor(condition.rightMethod.color) : null}
                         updateConnection={updateConnection}
                         readOnly={readOnly}
                         hasMethod={hasRightMethod}

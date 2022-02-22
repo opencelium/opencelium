@@ -47,6 +47,7 @@ class SelectSearch extends Component{
         super(props);
 
         this.state = {
+            inputValue: props.inputValue,
             currentItems: isArray(props.items) ? props.items : [],
             currentItem: 0,
             isOpenedParamDialog: false,
@@ -85,7 +86,12 @@ class SelectSearch extends Component{
     changeInputValue(value){
         const {onInputChange} = this.props;
         let filteredFields = this.filterFields(value);
-        this.setState({currentItems: filteredFields,}, () => onInputChange(value));
+        this.setState({inputValue: value});
+        this.setState({currentItems: filteredFields,}, () => {
+            if(!(filteredFields.length === 1 && filteredFields[0].value === '-1')) {
+                onInputChange(value);
+            }
+        });
     }
 
     /**
@@ -136,8 +142,8 @@ class SelectSearch extends Component{
      * to clear currentItems state
      */
     onBlur(e){
-        const {currentItems} = this.state;
-        const {id} = this.props;
+        const {currentItems, inputValue} = this.state;
+        const {id, onInputChange} = this.props;
         if(currentItems.length !== 0) {
             if(e.relatedTarget && e.relatedTarget.id === `${id}_param_button`) {
                 return;
@@ -147,6 +153,13 @@ class SelectSearch extends Component{
         if(this.props.onBlur){
             this.props.onBlur();
         }
+        let newValue = inputValue;
+        let splitValue = inputValue ? inputValue.split(PARAM_DELIMITER) : [];
+        if (splitValue.length > 1 && currentItems.length > 0 && currentItems[0].value !== '-1') {
+            splitValue[splitValue.length - 1] = currentItems[0].value;
+            newValue = splitValue.join(PARAM_DELIMITER);
+        }
+        onInputChange(newValue)
     }
 
     closeMenu(){
@@ -160,16 +173,16 @@ class SelectSearch extends Component{
      * to set currentItems state
      */
     onFocus(e) {
-        const {inputValue} = this.props;
+        const {inputValue} = this.state;
         this.setState({currentItems: this.filterFields(inputValue)});
-
     }
 
     /**
      * to select item in menu
      */
     onSelectItem(e, value){
-        const {inputValue, submitEdit, id} = this.props;
+        const {inputValue} = this.state;
+        const {submitEdit, id} = this.props;
         if(value){
             if(value.value !== "-1") {
                 let newValue = value.value;
@@ -191,7 +204,8 @@ class SelectSearch extends Component{
      * to check if exist in items
      */
     isExistInItems(key) {
-        const {inputValue, items} = this.props;
+        const {inputValue} = this.state;
+        const {items} = this.props;
         let filteredFields = this.filterFields(`${inputValue}${key}`);
         if(items === null || inputValue.length < MIN_SEARCH_WORD_LENGTH){
             return true;
@@ -226,7 +240,12 @@ class SelectSearch extends Component{
             if(inputValue.length > 0 && inputValue[inputValue.length - 1] === '.'){
                 showParam = false;
             }
-            let noParamComponent = showParam ? <div style={{position: 'relative'}}><div style={{width: 'calc(100% - 40px)'}}>No params</div><AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/></div> : "No Params";
+            let noParamComponent = showParam ? <div style={{position: 'relative'}}>
+                <div style={{width: 'calc(100% - 40px)'}}>
+                    No params
+                </div>
+                <AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
+            </div> : "No Params";
             result = [{label: noParamComponent, value: '-1', disabled: true}];
         }
         return result;
@@ -266,7 +285,8 @@ class SelectSearch extends Component{
     }
 
     render(){
-        let {authUser, items, onInputChange, inputValue, doAction, icon, predicator, submitEdit, currentConnector, isPopupMultiline, popupRows,dropdownClassName, ...props} = this.props;
+        const {inputValue} = this.state;
+        let {authUser, items, onInputChange, doAction, icon, predicator, submitEdit, currentConnector, isPopupMultiline, popupRows,dropdownClassName, ...props} = this.props;
         let {theme, className, disabled, placeholder} = this.props;
         let classNames = [
             'input_input_element',

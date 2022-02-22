@@ -41,12 +41,21 @@ class AddParam extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {updatingInvokerMethod, method, updateConnection, cleanMethod, connector} = this.props;
+        const {name} = this.state;
+        const {updatingInvokerMethod, method, updateConnection, cleanMethod, connector, selectedMethod, changeInputValue, path} = this.props;
         if(updatingInvokerMethod === API_REQUEST_STATE.FINISH && method !== null){
             let invoker = connector.invoker;
             invoker.replaceOperation(method);
+            connector.invoker = invoker;
+            selectedMethod.response.success.body.fields = method.response.success.body.fields;
             updateConnection();
             cleanMethod();
+            if(changeInputValue){
+                let splitPath = path.split('.');
+                const pathValueWithoutName = subArrayToString(splitPath, '.', 0);
+                changeInputValue(`${pathValueWithoutName}${pathValueWithoutName !== '' ? '.' : ''}${name}`)
+            }
+            this.toggleForm();
         }
     }
 
@@ -98,30 +107,28 @@ class AddParam extends React.Component{
 
     updateMethod(){
         const {name, type} = this.state;
-        const {connector, path, updateMethod, changeInputValue, selectedMethod} = this.props;
+        const {path, updateMethod, selectedMethod} = this.props;
         if(this.validate()){
-            const invokerName = connector.invoker.name;
+            const invokerName = selectedMethod.invoker.name;
             let splitPath = path.split('.');
             const pathValueWithoutName = subArrayToString(splitPath, '.', 0);
             let dataPath = `(response.success)${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
+            let newName = name;
             if(name[0] === ATTRIBUTES_MARK){
                 dataPath += `.${ATTRIBUTES_PROPERTY}`;
+                newName = name.substr(1, name.length);
             }
             const data = {
                 method: selectedMethod.name,
                 path: dataPath,
                 fields: [
                     {
-                        //name: name.substr(1, name.length), //name
-                        name,
+                        name: newName,
                         type,
                         value: null,
                     }
                 ]
             };
-            if(changeInputValue){
-                changeInputValue(`${pathValueWithoutName}${pathValueWithoutName !== '' ? '.' : ''}${name}`)
-            }
             updateMethod({invokerName, methodData: data});
         }
     }
