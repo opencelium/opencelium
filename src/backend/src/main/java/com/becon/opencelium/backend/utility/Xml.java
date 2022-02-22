@@ -83,11 +83,14 @@ public class Xml {
 //            nl = addNewFieldFromPath(xPath);
 //        }
 
+        List<Element> fields = createFields(operationResource.getFields());
         if (pathExists(xPath)) {
-            for (Element e : createFields(operationResource.getFields())) {
+            for (Element e : fields) {
                 String field = xPath + "/field[@name='" + e.getAttributeNode("name").getValue() + "']";
                 try {
                     if(pathExists(field)) {
+                        Node oldField = getNodeListByXpath(field).item(0);
+                        nl.item(0).replaceChild(e, oldField);
                         return;
                     }
                     assert nl != null;
