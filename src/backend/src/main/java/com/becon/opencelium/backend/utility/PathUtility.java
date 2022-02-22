@@ -47,4 +47,8 @@ public class PathUtility {
     public static String convertToXpath(String path, String method) {
         return getXPathTillBody(path, method) + "/" + getFieldsAsXpath(getFields(path));
     }
+
+    public static String convretToXField(String field) {
+        return "field[@name='" + field + "']";
+    }
 }

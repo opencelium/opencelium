@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.utility;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.invoker.resource.FieldResource;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
+import org.springframework.security.core.parameters.P;
 import org.w3c.dom.*;
 
 import javax.xml.transform.OutputKeys;
@@ -18,9 +19,8 @@ import javax.xml.xpath.XPathFactory;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Xml {
@@ -79,10 +79,9 @@ public class Xml {
 
     public void addFields(String xPath, OperationResource operationResource) throws XPathExpressionException {
         NodeList nl = getNodeListByXpath(xPath);
-//        if (!pathExists(xPath)) {
-//            nl = addNewFieldFromPath(xPath);
-//        }
-
+        if (!pathExists(xPath)) {
+            nl = addNewFieldFromPath(operationResource);
+        }
         List<Element> fields = createFields(operationResource.getFields());
         if (pathExists(xPath)) {
             for (Element e : fields) {
@@ -102,10 +101,42 @@ public class Xml {
         }
     }
 
-    private NodeList addNewFieldFromPath(String xpath) {
+    private NodeList addNewFieldFromPath(OperationResource operationResource) throws XPathExpressionException {
+        String xBody = PathUtility.getXPathTillBody(operationResource.getPath(), operationResource.getMethod());
+        NodeList node = getNodeListByXpath(xBody);
+        String[] fields = PathUtility.getFields(operationResource.getPath()).split("\\.");
+        boolean hasNewField = false;
+        for (String f : fields) {
+            FieldResource fr = createFieldResource(f);
+            String xField = PathUtility.convretToXField(fr.getName());
+            xBody = xBody + "/" + xField;
+            if (!hasNewField && pathExists(xBody)) {
+                node = getNodeListByXpath(xBody);
+                hasNewField = false;
+                continue;
+            }
 
-        return null;
+            Element field = createField(fr);
+            node.item(0).appendChild(field);
+            node = node.item(0).getChildNodes();
+            hasNewField = true;
+
+        }
+        return node;
     }
+
+    private FieldResource createFieldResource(String field) {
+        String type = field.contains("[]") ? "array" : "object";
+        String name = field.replace("[]", "");
+        FieldResource fieldResource = new FieldResource();
+        fieldResource.setName(name);
+        fieldResource.setType(type);
+        return fieldResource;
+    }
+
+//    public boolean pathExists(String xPath, NodeList nodeList) throws XPathExpressionException {
+//        return ((NodeList) xpath.compile(xPath).evaluate(nodeList, XPathConstants.NODESET)).item(0) != null;
+//    }
 
     public NodeList findElementInNodeList(NodeList nodeList, String xPath) throws XPathExpressionException {
         return (NodeList) xpath.compile(xPath).evaluate(nodeList, XPathConstants.NODESET);
