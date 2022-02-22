@@ -66,7 +66,9 @@ public class Xml {
         Element element = document.createElement("field");
         element.setAttribute("name", field.getName());
         element.setAttribute("type", field.getType());
-        element.setTextContent(field.getValue().toString());
+        if (field.getValue() != null) {
+            element.setTextContent(field.getValue().toString());
+        }
         return element;
     }
 
