@@ -42,7 +42,7 @@ class AddParam extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {updatingInvokerMethod, method, updateConnection, cleanMethod, connector} = this.props;
-        if(updatingInvokerMethod === API_REQUEST_STATE.FINISH && this.props.method !== null){
+        if(updatingInvokerMethod === API_REQUEST_STATE.FINISH && method !== null){
             let invoker = connector.invoker;
             invoker.replaceOperation(method);
             updateConnection();
@@ -98,31 +98,31 @@ class AddParam extends React.Component{
 
     updateMethod(){
         const {name, type} = this.state;
-        const {connector, path, updateMethod, changeInputValue} = this.props;
+        const {connector, path, updateMethod, changeInputValue, selectedMethod} = this.props;
         if(this.validate()){
             const invokerName = connector.invoker.name;
             let splitPath = path.split('.');
             const pathValueWithoutName = subArrayToString(splitPath, '.', 0);
-            let dataPath = `(request)${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
+            let dataPath = `(response.success)${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
             if(name[0] === ATTRIBUTES_MARK){
                 dataPath += `.${ATTRIBUTES_PROPERTY}`;
             }
             const data = {
-                method: connector.getCurrentItem().name,
+                method: selectedMethod.name,
                 path: dataPath,
                 fields: [
                     {
-                        name: name.substr(1, name.length), //name
+                        //name: name.substr(1, name.length), //name
+                        name,
                         type,
                         value: null,
                     }
                 ]
             };
-            console.log(data);
             if(changeInputValue){
                 changeInputValue(`${pathValueWithoutName}${pathValueWithoutName !== '' ? '.' : ''}${name}`)
             }
-            //updateMethod({invokerName, methodData: data});
+            updateMethod({invokerName, methodData: data});
         }
     }
 

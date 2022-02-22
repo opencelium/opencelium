@@ -81,7 +81,7 @@ class UpdateParam extends React.Component{
             const invokerName = connector.invoker.name;
             let splitPath = path.split('.');
             const pathValueWithoutName = subArrayToString(splitPath, '.', 0);
-            let dataPath = `(request)${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
+            let dataPath = `(response).success${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
             const data = {
                 method: connector.getCurrentItem().name,
                 path: dataPath,

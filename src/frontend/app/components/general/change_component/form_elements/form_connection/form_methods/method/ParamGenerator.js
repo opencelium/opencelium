@@ -281,6 +281,7 @@ class ParamGenerator extends Component {
                 >
                     <SelectSearch
                         id={`param_generator_${method.index}`}
+                        selectedMethod={connector.getMethodByColor(color)}
                         updateConnection={updateConnection}
                         className={styles.operator_left_field}
                         placeholder={'param'}

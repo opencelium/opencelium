@@ -19,7 +19,7 @@ import {connect} from 'react-redux';
 import styles from '@themes/default/general/basic_components.scss';
 import {getThemeClass, isArray} from "@utils/app";
 import TooltipFontIcon from "../tooltips/TooltipFontIcon";
-import {
+import CMethodItem, {
     FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
 } from "@classes/components/content/connection/method/CMethodItem";
 import Input from "./Input";
@@ -204,7 +204,7 @@ class SelectSearch extends Component{
      */
     filterFields(inputValue){
         const {} = this.state;
-        let {id, items, predicator, currentConnector, onBlur, hasParamEditor, updateConnection} = this.props;
+        let {id, items, predicator, currentConnector, onBlur, hasParamEditor, updateConnection, selectedMethod} = this.props;
         if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
@@ -217,7 +217,7 @@ class SelectSearch extends Component{
                     <div style={{width: 'calc(100% - 40px)'}} onMouseDown={value.value !== "-1" ? (e) => ::this.onSelectItem(e, {value, type}) : null}>
                         {labelText}
                     </div>
-                    <UpdateParam id={`${id}_param_button`} type={type} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
+                    <UpdateParam id={`${id}_param_button`} selectedMethod={selectedMethod} type={type} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
                 </div>;
                 return {label, value, type};
             });
@@ -226,7 +226,7 @@ class SelectSearch extends Component{
             if(inputValue.length > 0 && inputValue[inputValue.length - 1] === '.'){
                 showParam = false;
             }
-            let noParamComponent = showParam ? <div style={{position: 'relative'}}><div style={{width: 'calc(100% - 40px)'}}>No params</div><AddParam id={`${id}_param_button`} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/></div> : "No Params";
+            let noParamComponent = showParam ? <div style={{position: 'relative'}}><div style={{width: 'calc(100% - 40px)'}}>No params</div><AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/></div> : "No Params";
             result = [{label: noParamComponent, value: '-1', disabled: true}];
         }
         return result;
@@ -322,6 +322,7 @@ SelectSearch.propTypes = {
     icon: PropTypes.string,
     hasParamEditor: PropTypes.bool,
     updateConnection: PropTypes.func.isRequired,
+    selectedMethod: PropTypes.instanceOf(CMethodItem)
 };
 
 SelectSearch.defaultProps = {

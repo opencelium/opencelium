@@ -46,7 +46,7 @@ const updateMethod = (data) => {
  */
 const updateMethodFulfilled = (methodData) => {
     return {
-        type: InvokersAction.UPDATE_INVOKER_FULFILLED,
+        type: InvokersAction.UPDATE_INVOKERMETHOD_FULFILLED,
         payload: methodData,
     };
 };
@@ -58,7 +58,7 @@ const updateMethodFulfilled = (methodData) => {
  */
 const updateMethodRejected = (error) => {
     return Rx.Observable.of({
-        type: InvokersAction.UPDATE_INVOKER_REJECTED,
+        type: InvokersAction.UPDATE_INVOKERMETHOD_REJECTED,
         payload: error
     });
 };
