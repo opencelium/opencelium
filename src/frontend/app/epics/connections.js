@@ -305,7 +305,7 @@ const checkConnectionEpic = (action$, store) => {
  */
 const loginGraphQLEpic = (action$, store) => {
     return action$.ofType(ConnectionsAction.LOGIN_GRAPHQL)
-        .debounceTime(100)
+        .debounceTime(1000)
         .mergeMap((action) => {
             const data = action.payload;
             const url = `${urlPrefix}/remoteapi/test`;

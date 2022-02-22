@@ -6,11 +6,13 @@ import Loading from "@components/general/app/Loading";
 import {loginGraphQL} from "@actions/connections/fetch";
 import {baseUrlApi} from "@utils/constants/url";
 import {getCryptLS} from "@utils/LocalStorage";
+import {API_REQUEST_STATE} from "@utils/constants/app";
 
 function mapStateToProps(state){
     const connection = state.get('connections');
     return{
         accessToken: connection.get('graphQLAccessToken'),
+        loginingGraphQL: connection.get('loginingGraphQL'),
     }
 }
 
@@ -18,9 +20,26 @@ function mapStateToProps(state){
 class GraphiQLEditor extends React.Component{
     constructor(props) {
         super(props);
+
+        this.state = {
+            shouldRevokeToken: false,
+        }
     }
 
     componentDidMount() {
+        this.login();
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.state.shouldRevokeToken && this.props.loginingGraphQL !== API_REQUEST_STATE.ERROR){
+            this.login();
+            this.setState({
+                shouldRevokeToken: false,
+            })
+        }
+    }
+
+    login(){
         const {user, password, url} = this.props.credentials;
         const props = {
             body: {
@@ -51,16 +70,16 @@ class GraphiQLEditor extends React.Component{
             url: credentials.url,
         }
         return fetch(`${baseUrlApi}connection/remoteapi/test`, {
-            method: "post",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": getCryptLS('token'),
-                "crossDomain": "1"
-            },
-            body: JSON.stringify(requestProps)
-        }).then(response => response.json().then((data) => {
-            return JSON.parse(data.body);
-        }));
+                method: "post",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${getCryptLS('token')}`,
+                    "crossDomain": "1"
+                },
+                body: JSON.stringify(requestProps)})
+            .then(response => response.json().then((data) => {return JSON.parse(data.body);})).catch((error) => {
+                this.setState({shouldRevokeToken: true});
+            });
     }
 
     generateQuery(query){
@@ -69,9 +88,12 @@ class GraphiQLEditor extends React.Component{
     }
 
     render(){
-        const {query, accessToken, readOnly} = this.props;
+        const {query, accessToken, readOnly, loginingGraphQL} = this.props;
+        if(loginingGraphQL === API_REQUEST_STATE.ERROR){
+            return <div>Please, check your connection</div>;
+        }
         if(accessToken === ''){
-            return <Loading/>;
+            return <div style={{height: '100%', display: 'grid', placeItems: 'center'}}><Loading/></div>;
         }
         return(
             <div style={{height: 'calc(100% - 20px)', margin: '10px 0', width: '100%'}}>

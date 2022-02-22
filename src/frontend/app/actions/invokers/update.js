@@ -19,6 +19,51 @@ import { InvokersAction } from '@utils/actions';
 
 
 /**
+ * clean method of invoker
+ * @returns {{type: string, payload: {}}}
+ */
+const cleanMethod = () => {
+    return {
+        type: InvokersAction.CLEAN_INVOKERMETHOD,
+    }
+}
+/**
+ * update method of invoker
+ * @param data: {invokerName, methodData}
+ * @returns {{type: string, payload: {}}}
+ */
+const updateMethod = (data) => {
+    return {
+        type: InvokersAction.UPDATE_INVOKERMETHOD,
+        payload: data,
+    }
+}
+
+/**
+ * update method of invoker
+ * @param methodData
+ * @returns {{type: string, payload: {}}}
+ */
+const updateMethodFulfilled = (methodData) => {
+    return {
+        type: InvokersAction.UPDATE_INVOKERMETHOD_FULFILLED,
+        payload: methodData,
+    };
+};
+
+/**
+ * update method of invoker
+ * @param error
+ * @returns {*}
+ */
+const updateMethodRejected = (error) => {
+    return Rx.Observable.of({
+        type: InvokersAction.UPDATE_INVOKERMETHOD_REJECTED,
+        payload: error
+    });
+};
+
+/**
  * create a new invoker
  * @param invoker
  * @returns {{type: string, payload: {}}}
@@ -57,6 +102,10 @@ const updateInvokerRejected = (error) => {
 
 
 export{
+    cleanMethod,
+    updateMethod,
+    updateMethodFulfilled,
+    updateMethodRejected,
     updateInvoker,
     updateInvokerFulfilled,
     updateInvokerRejected,

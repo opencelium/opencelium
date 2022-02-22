@@ -258,7 +258,7 @@ class ParamGenerator extends Component {
 
     renderParamInput(){
         let {field, color, readOnly} = this.state;
-        let {method, connector, submitEdit, theme} = this.props;
+        let {method, connector, submitEdit, theme, updateConnection} = this.props;
         let hasMethod = color !== '';
         let inputTheme = {};
         let divStyles = {float: 'left', width: '130px'};
@@ -281,6 +281,8 @@ class ParamGenerator extends Component {
                 >
                     <SelectSearch
                         id={`param_generator_${method.index}`}
+                        selectedMethod={connector.getMethodByColor(color)}
+                        updateConnection={updateConnection}
                         className={styles.operator_left_field}
                         placeholder={'param'}
                         items={hasMethod ? this.getParamSource() : []}
@@ -393,6 +395,7 @@ ParamGenerator.defaultProps = {
     theme: null,
     isArrowVisible: true,
     isAlwaysVisible: false,
+    updateConnection: null,
 };
 
 export default ParamGenerator;

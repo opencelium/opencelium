@@ -2,6 +2,8 @@ import React from 'react';
 import MethodSelect from "./MethodSelect";
 import ParamInput from "./ParamInput";
 import {DEFAULT_COLOR} from "@classes/components/content/connection/operator/CStatement";
+import PropertyInput
+    from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/PropertyInput";
 
 class LeftStatement extends React.Component{
     constructor(props) {
@@ -46,7 +48,7 @@ class LeftStatement extends React.Component{
     }
 
     render(){
-        let {condition, connection, connector, operator, readOnly, isOperatorHasValue, hasLeftMethod} = this.props;
+        let {condition, connection, connector, operator, readOnly, isOperatorHasValue, hasLeftMethod, updateConnection} = this.props;
         let {hasValue} = isOperatorHasValue();
         let methodSource = connection.getOptionsForMethods(connector, operator, {statement: 'leftStatement', isKeyConsidered: false, exceptCurrent: false});
         if(methodSource.length === 0) {
@@ -72,6 +74,7 @@ class LeftStatement extends React.Component{
                 />
                 <ParamInput
                     id={paramId}
+                    updateConnection={updateConnection}
                     readOnly={readOnly}
                     hasMethod={hasLeftMethod}
                     connector={connector}

@@ -76,6 +76,7 @@
     "UPDATE_THEME": "The application theme was successfully changed"
   },
   "ERROR": {
+    "LOGIN_GRAPHQL": "GraphQL was not connected",
     "ADD_USER": {
       "__DEFAULT__": "The user was not added."
     },

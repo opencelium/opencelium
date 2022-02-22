@@ -26,9 +26,11 @@ const initialState = fromJS({
     fetchingInvoker: API_REQUEST_STATE.INITIAL,
     addingInvoker: API_REQUEST_STATE.INITIAL,
     updatingInvoker: API_REQUEST_STATE.INITIAL,
+    updatingInvokerMethod: API_REQUEST_STATE.INITIAL,
     deletingInvoker: API_REQUEST_STATE.INITIAL,
     deletingInvokers: API_REQUEST_STATE.INITIAL,
     invoker: null,
+    method: null,
     invokers: List([]),
     defaultInvokers: List([]),
     error: null,
@@ -96,6 +98,14 @@ const reducer = (state = initialState, action) => {
             return state.set('updatingInvoker', API_REQUEST_STATE.FINISH);
         case InvokersAction.UPDATE_INVOKER_REJECTED:
             return state.set('updatingInvoker', API_REQUEST_STATE.ERROR).set('error', action.payload);
+        case InvokersAction.CLEAN_INVOKERMETHOD:
+            return state.set('updatingInvoker', API_REQUEST_STATE.INITIAL).set('method', null);
+        case InvokersAction.UPDATE_INVOKERMETHOD:
+            return state.set('updatingInvokerMethod', API_REQUEST_STATE.START).set('error', null);
+        case InvokersAction.UPDATE_INVOKERMETHOD_FULFILLED:
+            return state.set('updatingInvokerMethod', API_REQUEST_STATE.FINISH).set('method', action.payload);
+        case InvokersAction.UPDATE_INVOKERMETHOD_REJECTED:
+            return state.set('updatingInvokerMethod', API_REQUEST_STATE.ERROR).set('error', action.payload);
         case InvokersAction.DELETE_INVOKER:
             return state.set('deletingInvoker', API_REQUEST_STATE.START).set('error', null).set('invoker', action.payload);
         case InvokersAction.DELETE_INVOKER_FULFILLED:

@@ -19,12 +19,13 @@ import {connect} from 'react-redux';
 import styles from '@themes/default/general/basic_components.scss';
 import {getThemeClass, isArray} from "@utils/app";
 import TooltipFontIcon from "../tooltips/TooltipFontIcon";
-import {
+import CMethodItem, {
     FIELD_TYPE_ARRAY, FIELD_TYPE_OBJECT,
-    FIELD_TYPE_STRING
 } from "@classes/components/content/connection/method/CMethodItem";
 import Input from "./Input";
 import CResponseResult from "@classes/components/content/invoker/response/CResponseResult";
+import AddParam from "@basic_components/inputs/AddParam";
+import UpdateParam from "@basic_components/inputs/UpdateParam";
 
 const PARAM_DELIMITER = '.';
 const MIN_SEARCH_WORD_LENGTH = 0;
@@ -48,7 +49,30 @@ class SelectSearch extends Component{
         this.state = {
             currentItems: isArray(props.items) ? props.items : [],
             currentItem: 0,
+            isOpenedParamDialog: false,
         };
+        this.searchResultRef = React.createRef();
+    }
+
+    componentDidMount() {
+        document.addEventListener("mousedown", ::this.checkIfClickedOutside)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousedown", ::this.checkIfClickedOutside)
+    }
+
+    paramCallback(isOpenedParamDialog){
+        this.setState({isOpenedParamDialog});
+    }
+
+    checkIfClickedOutside(e){
+        const {currentItems, isOpenedParamDialog} = this.state;
+        const {hasParamEditor} = this.props;
+        const showParamEditor = hasParamEditor && currentItems.length === 1 && currentItems[0].value === "-1";
+        if (showParamEditor && this.searchResultRef.current && !this.searchResultRef.current.contains(e.target) && !isOpenedParamDialog) {
+            this.closeMenu()
+        }
     }
 
     currentHoveredItem(e, key){
@@ -111,10 +135,22 @@ class SelectSearch extends Component{
     /**
      * to clear currentItems state
      */
-    onBlur(){
-        if(this.state.currentItems.length !== 0) {
+    onBlur(e){
+        const {currentItems} = this.state;
+        const {id} = this.props;
+        if(currentItems.length !== 0) {
+            if(e.relatedTarget && e.relatedTarget.id === `${id}_param_button`) {
+                return;
+            }
             this.setState({currentItems: []});
         }
+        if(this.props.onBlur){
+            this.props.onBlur();
+        }
+    }
+
+    closeMenu(){
+        this.setState({currentItems: []});
         if(this.props.onBlur){
             this.props.onBlur();
         }
@@ -124,7 +160,7 @@ class SelectSearch extends Component{
      * to set currentItems state
      */
     onFocus(e) {
-        const {id, inputValue} = this.props;
+        const {inputValue} = this.props;
         this.setState({currentItems: this.filterFields(inputValue)});
 
     }
@@ -144,7 +180,8 @@ class SelectSearch extends Component{
                 }
                 this.changeInputValue(newValue);
             }
-            if(!(value.type !== FIELD_TYPE_ARRAY && value.type !== FIELD_TYPE_OBJECT)){
+            const isButtonClicked = document.getElementById(`${id}_param_button`)?.contains(e.target) || false;
+            if(!(value.type !== FIELD_TYPE_ARRAY && value.type !== FIELD_TYPE_OBJECT) || isButtonClicked){
                 e.preventDefault();
             }
         }
@@ -166,7 +203,8 @@ class SelectSearch extends Component{
      * to filter fields
      */
     filterFields(inputValue){
-        let {items, predicator, currentConnector} = this.props;
+        const {} = this.state;
+        let {id, items, predicator, currentConnector, onBlur, hasParamEditor, updateConnection, selectedMethod} = this.props;
         if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
@@ -174,11 +212,22 @@ class SelectSearch extends Component{
         if(isArray(result) && result.length > 0) {
             result = result.map(field => {
                 let {value, type} = field;
-                let label = field.hasOwnProperty('label') ? field.label : field.value;
+                const labelText = field.hasOwnProperty('label') ? field.label : field.value;
+                let label = <div style={{position: 'relative'}}>
+                    <div style={{width: 'calc(100% - 40px)'}} onMouseDown={value.value !== "-1" ? (e) => ::this.onSelectItem(e, {value, type}) : null}>
+                        {labelText}
+                    </div>
+                    <UpdateParam id={`${id}_param_button`} selectedMethod={selectedMethod} type={type} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
+                </div>;
                 return {label, value, type};
             });
         } else{
-            result = [{label: 'No params', value: '-1', disabled: true}];
+            let showParam = hasParamEditor;
+            if(inputValue.length > 0 && inputValue[inputValue.length - 1] === '.'){
+                showParam = false;
+            }
+            let noParamComponent = showParam ? <div style={{position: 'relative'}}><div style={{width: 'calc(100% - 40px)'}}>No params</div><AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/></div> : "No Params";
+            result = [{label: noParamComponent, value: '-1', disabled: true}];
         }
         return result;
     }
@@ -201,7 +250,6 @@ class SelectSearch extends Component{
                 <div
                     className={`${styles[classNames.item]} ${currentItem === key ? styles[classNames.item_hover] : ''}`}
                     key={key}
-                    onMouseDown={(e) => ::this.onSelectItem(e, value)}
                     onMouseOver={(e) => ::this.currentHoveredItem(e, key)}
                 >
                     {value.label}
@@ -235,7 +283,7 @@ class SelectSearch extends Component{
             props.rows = popupRows;
         }
         return (
-            <div>
+            <div ref={this.searchResultRef}>
                 <Input
                     {...props}
                     placeholder={placeholder}
@@ -272,6 +320,9 @@ class SelectSearch extends Component{
 SelectSearch.propTypes = {
     doAction: PropTypes.func,
     icon: PropTypes.string,
+    hasParamEditor: PropTypes.bool,
+    updateConnection: PropTypes.func.isRequired,
+    selectedMethod: PropTypes.instanceOf(CMethodItem)
 };
 
 SelectSearch.defaultProps = {
@@ -285,6 +336,7 @@ SelectSearch.defaultProps = {
     isPopupMultiline: false,
     popupRows: 1,
     dropdownClassName: '',
+    hasParamEditor: true,
 };
 
 export default SelectSearch;
