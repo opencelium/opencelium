@@ -53,7 +53,7 @@ class AddParam extends React.Component{
             if(changeInputValue){
                 let splitPath = path.split('.');
                 const pathValueWithoutName = subArrayToString(splitPath, '.', 0);
-                changeInputValue(`${pathValueWithoutName}${pathValueWithoutName !== '' ? '.' : ''}${name}`)
+                setTimeout(() => changeInputValue(`${pathValueWithoutName}${pathValueWithoutName !== '' ? '.' : ''}${name}`), 100);
             }
             this.toggleForm();
         }
@@ -111,7 +111,7 @@ class AddParam extends React.Component{
         if(this.validate()){
             const invokerName = selectedMethod.invoker.name;
             let splitPath = path.split('.');
-            const pathValueWithoutName = subArrayToString(splitPath, '.', 0);
+            const pathValueWithoutName = subArrayToString(splitPath, '.', 0).replace(/(\[(.(?!\.))+\])/g, '[]');
             let dataPath = `(response.success)${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
             let newName = name;
             if(name[0] === ATTRIBUTES_MARK){

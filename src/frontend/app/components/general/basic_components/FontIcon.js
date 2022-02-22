@@ -36,7 +36,7 @@ class FontIcon extends Component{
         let {onClick, id, className, iconClassName, isButton, darkTheme, turquoiseTheme, blueTheme, grayTheme, darkBlueTheme, whiteTheme, value, myRef, iconStyles, onButtonFocus, onButtonBlur, disabled, ...props} = this.props;
         let theme = darkTheme === true ? styles.dark_theme : '';
         let size = isNumber(this.props.size) ? `${this.props.size}px` : this.props.size;
-        let sizeStyle = {width: `${size}px`, height: `${size}px`};
+        let sizeStyle = {width: `${size}`, height: `${size}`};
         if(turquoiseTheme === true){
             theme = styles.turquoise_theme;
         }

@@ -26,6 +26,7 @@ import Input from "./Input";
 import CResponseResult from "@classes/components/content/invoker/response/CResponseResult";
 import AddParam from "@basic_components/inputs/AddParam";
 import UpdateParam from "@basic_components/inputs/UpdateParam";
+import SearchValue from "@basic_components/inputs/SearchValue";
 
 const PARAM_DELIMITER = '.';
 const MIN_SEARCH_WORD_LENGTH = 0;
@@ -64,7 +65,11 @@ class SelectSearch extends Component{
     }
 
     paramCallback(isOpenedParamDialog){
-        this.setState({isOpenedParamDialog});
+        let filteredFields = this.filterFields(this.state.inputValue);
+        this.setState({
+            isOpenedParamDialog,
+            currentItems: filteredFields,
+        });
     }
 
     checkIfClickedOutside(e){
@@ -227,12 +232,21 @@ class SelectSearch extends Component{
             result = result.map(field => {
                 let {value, type} = field;
                 const labelText = field.hasOwnProperty('label') ? field.label : field.value;
-                let label = <div style={{position: 'relative'}}>
-                    <div style={{width: 'calc(100% - 40px)'}} onMouseDown={value.value !== "-1" ? (e) => ::this.onSelectItem(e, {value, type}) : null}>
-                        {labelText}
-                    </div>
-                    <UpdateParam id={`${id}_param_button`} selectedMethod={selectedMethod} type={type} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
-                </div>;
+                let label = <SearchValue
+                    id={id}
+                    name={field.value}
+                    value={value}
+                    type={type}
+                    labelText={labelText}
+                    selectedMethod={selectedMethod}
+                    currentConnector={currentConnector}
+                    inputValue={inputValue}
+                    updateConnection={updateConnection}
+                    paramCallback={(a) => this.paramCallback(a)}
+                    onSelectItem={(a, b) => this.onSelectItem(a, b)}
+                    closeMenu={() => this.closeMenu()}
+                    changeInputValue={(a) => this.changeInputValue(a)}
+                />;
                 return {label, value, type};
             });
         } else{
