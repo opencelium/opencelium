@@ -142,6 +142,13 @@ export default class CInvoker{
         this._operations.push(this.convertOperation(operation));
     }
 
+    replaceOperation(operation){
+        let index = this._operations.findIndex(o => o.name === operation.name);
+        if(index !== -1){
+            this._operations[index] = this.convertOperation(operation);
+        }
+    }
+
     set operations(operations){
         this._operations = this.convertOperations(operations);
     }

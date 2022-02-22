@@ -82,7 +82,7 @@ class RightStatement extends React.Component{
     }
 
     render(){
-        let {condition, connection, connector, operator, readOnly, isOperatorHasValue, isOperatorHasThreeParams, hasLeftMethod, hasRightMethod, hasRightParam} = this.props;
+        let {condition, connection, connector, operator, readOnly, isOperatorHasValue, isOperatorHasThreeParams, hasLeftMethod, hasRightMethod, hasRightParam, updateConnection} = this.props;
         let {hasValue, isMultiline, isRightStatementOption, options} = isOperatorHasValue();
         const propertyId = `if_operator_property_${operator.index}`;
         const propertyItems = hasLeftMethod ? connection.getConnectorMethodByColor(condition.leftMethod.color).response.success : [];
@@ -101,6 +101,7 @@ class RightStatement extends React.Component{
             <React.Fragment>
                 <PropertyInput
                     {...this.getPropertyStyles()}
+                    updateConnection={updateConnection}
                     id={propertyId}
                     readOnly={readOnly}
                     connector={connector}
@@ -134,6 +135,7 @@ class RightStatement extends React.Component{
                     /> :
                     <ParamInput
                         id={paramId}
+                        updateConnection={updateConnection}
                         readOnly={readOnly}
                         hasMethod={hasRightMethod}
                         connector={connector}

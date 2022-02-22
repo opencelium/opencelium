@@ -275,7 +275,7 @@ export function RequestBody(CRequestType){
 
                 render(){
                     const {isBodyEditOpened} = this.state;
-                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder, openEnhancement} = this.props;
+                    const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder, openEnhancement, updateEntity} = this.props;
                     if(!isBodyEditOpened && !noPlaceholder){
                         return this.renderPlaceholder();
                     }
@@ -311,6 +311,7 @@ export function RequestBody(CRequestType){
                                                 isAbsolute={CRequestType.isAbsolute()}
                                                 parent={CRequestType.getParent(textarea)}
                                                 hasArrowIcon={true}
+                                                updateConnection={updateEntity}
                                             />
                                         );},
                                     id: `${id}_reference_component`,

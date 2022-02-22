@@ -23,7 +23,7 @@ import {
     addInvokerFulfilled, addInvokerRejected,
 } from '@actions/invokers/add';
 import {
-    updateInvokerFulfilled, updateInvokerRejected,
+    updateInvokerFulfilled, updateInvokerRejected, updateMethodFulfilled, updateMethodRejected,
 } from '@actions/invokers/update';
 import {
     deleteInvokerFulfilled, deleteInvokerRejected,
@@ -127,6 +127,22 @@ const updateInvokerEpic = (action$, store) => {
 };
 
 /**
+ * update invoker method
+ */
+const updateInvokerMethodEpic = (action$, store) => {
+    return action$.ofType(InvokersAction.UPDATE_INVOKERMETHOD)
+        .debounceTime(100)
+        .mergeMap((action) => {
+            const {invokerName, methodData} = action.payload;
+            let url = `${urlPrefix}/${invokerName}/xml`;
+            return doRequest({url, method: API_METHOD.POST, data: methodData},{
+                success: updateMethodFulfilled,
+                reject: updateMethodRejected,},
+            );
+        });
+};
+
+/**
  * delete one invoker by id
  */
 const deleteInvokerEpic = (action$, store) => {
@@ -166,6 +182,7 @@ export {
     fetchInvokerEpic,
     addInvokerEpic,
     updateInvokerEpic,
+    updateInvokerMethodEpic,
     deleteInvokerEpic,
     deleteInvokersEpic,
     fetchDefaultInvokersEpic

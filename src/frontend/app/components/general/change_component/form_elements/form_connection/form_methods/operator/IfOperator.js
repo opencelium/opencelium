@@ -457,7 +457,7 @@ class IfOperator extends Component{
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let {hasValue} = this.isOperatorHasValue();
         let {leftField} = this.state;
-        const {operator, readOnly, connector} = this.props;
+        const {operator, readOnly, connector, updateEntity} = this.props;
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
@@ -477,6 +477,7 @@ class IfOperator extends Component{
                 >
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}
+                        updateConnection={updateEntity}
                         className={styles.operator_left_field}
                         placeholder={'param'}
                         items={hasMethod ? this.getParamSource('leftStatement') : []}
@@ -585,7 +586,7 @@ class IfOperator extends Component{
     }
 
     renderPropertyInputRight(){
-        const {connector, operator, readOnly} = this.props;
+        const {connector, operator, readOnly, updateEntity} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let {leftField, rightProperty} = this.state;
         let divStyles = {transition: isOperatorHasThreeParams ? 'width 0.3s ease 0s' : 'none', width: isOperatorHasThreeParams ? '17.5%' : '0', float: 'left'};
@@ -607,6 +608,7 @@ class IfOperator extends Component{
                     >
                         <SelectSearch
                             id={`if_operator_${operator.type}_${operator.index}`}
+                            updateConnection={updateEntity}
                             className={styles.operator_right_field}
                             placeholder={'param'}
                             items={this.getParamSource('leftStatement')}
@@ -758,7 +760,7 @@ class IfOperator extends Component{
     renderParamInputRight(){
         let {hasValue, isRightStatementText, isRightStatementOption, options, isMultiline, popupInputStyles} = this.isOperatorHasValue();
         let {rightField} = this.state;
-        const {connection, connector, operator, readOnly} = this.props;
+        const {connection, connector, operator, readOnly, updateEntity} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let statement = operator.condition.rightStatement;
         let method = connection.toConnector.getMethodByColor(statement.color);
@@ -869,6 +871,7 @@ class IfOperator extends Component{
                 >
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}
+                        updateConnection={updateEntity}
                         className={styles.operator_right_field}
                         placeholder={'param'}
                         items={this.getParamSource('rightStatement')}

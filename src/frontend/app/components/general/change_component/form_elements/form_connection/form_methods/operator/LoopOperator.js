@@ -246,7 +246,7 @@ class LoopOperator extends Component{
 
     renderParamInput(){
         let {field} = this.state;
-        const {operator, connector, readOnly} = this.props;
+        const {operator, connector, readOnly, updateEntity} = this.props;
         let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
         let inputTheme = {};
         let divStyles = {float: 'left', width: '70%'};
@@ -266,6 +266,7 @@ class LoopOperator extends Component{
                 >
                     <SelectSearch
                         id={`loop_operator_${operator.type}_${operator.index}`}
+                        updateConnection={updateEntity}
                         className={styles.operator_left_field}
                         placeholder={'param'}
                         items={hasMethod ? this.getParamSource() : []}

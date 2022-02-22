@@ -40,7 +40,7 @@ import {
 } from '@epics/connectors';
 import {
     fetchInvokersEpic, fetchInvokerEpic, addInvokerEpic,
-    updateInvokerEpic, deleteInvokerEpic, fetchDefaultInvokersEpic, deleteInvokersEpic,
+    updateInvokerEpic, deleteInvokerEpic, fetchDefaultInvokersEpic, deleteInvokersEpic, updateInvokerMethodEpic,
 } from '@epics/invokers';
 import {
     fetchConnectionEpic, fetchConnectionsEpic, addConnectionEpic,
@@ -132,6 +132,7 @@ export default combineEpics(
     fetchInvokerEpic,
     addInvokerEpic,
     updateInvokerEpic,
+    updateInvokerMethodEpic,
     deleteInvokerEpic,
     deleteInvokersEpic,
     fetchDefaultInvokersEpic,

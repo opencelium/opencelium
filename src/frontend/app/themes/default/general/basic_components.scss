@@ -15,6 +15,19 @@
 
 @import '../constants';
 
+.param_buttons{
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(0, -50%);
+  button{
+    font-size: 8px !important;
+    margin-left: 5px;
+  }
+}
+.close_add_param{
+  color: $ERROR_COLOR;
+}
 
 /*font icon*/
 .clear_button{

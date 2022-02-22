@@ -292,7 +292,7 @@ class Endpoint extends Component{
     }
 
     render(){
-        const {connection, connector, method, readOnly, theme, isParamGeneratorArrowVisible, isParamGeneratorAlwaysVisible} = this.props;
+        const {connection, connector, method, readOnly, theme, isParamGeneratorArrowVisible, isParamGeneratorAlwaysVisible, updateEntity} = this.props;
         const {contentEditableValue, actionButtonTooltip, actionButtonValue, caretPosition} = this.state;
         let hasError = false;
         if(method.error.hasError){
@@ -325,6 +325,7 @@ class Endpoint extends Component{
                         style={contentEditableStyles}
                     />
                     <ParamGenerator
+                        updateConnection={updateEntity}
                         connection={connection}
                         connector={connector}
                         method={method}
