@@ -19,11 +19,9 @@ package com.becon.opencelium.backend.invoker;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
-import com.becon.opencelium.backend.utility.XmlTransformer;
+import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -40,12 +38,10 @@ import org.w3c.dom.Document;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
@@ -222,8 +218,8 @@ public class InvokerRequestBuilder{
             String result = "";
             if (body.getFormat().equals("xml")) {
                 Document document = createDocument();
-                XmlTransformer transformer = new XmlTransformer(document);
-                result = transformer.xmlToString(body.getFields());
+                Xml transformer = new Xml(document);
+                result = transformer.toString(body.getFields());
             } else {
                 result = objectMapper.writeValueAsString(body.getFields());
             }

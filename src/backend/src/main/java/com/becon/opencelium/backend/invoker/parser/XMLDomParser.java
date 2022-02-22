@@ -45,7 +45,7 @@ public class XMLDomParser<R> implements XMLParser<Node, R> {
                 continue;
             }
 
-            String elem = element.getNodeName();
+//            String elem = element.getNodeName();
             if (!element.getNodeName().equals(node)){
                 continue;
             }

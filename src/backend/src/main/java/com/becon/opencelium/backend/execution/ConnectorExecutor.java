@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
@@ -34,21 +33,17 @@ import com.becon.opencelium.backend.neo4j.service.MethodNodeServiceImp;
 import com.becon.opencelium.backend.neo4j.service.VariableNodeServiceImp;
 import com.becon.opencelium.backend.execution.statement.operator.Operator;
 import com.becon.opencelium.backend.utility.ConditionUtility;
-import com.becon.opencelium.backend.utility.XmlTransformer;
+import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netty.handler.timeout.ReadTimeoutException;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -393,8 +388,8 @@ public class ConnectorExecutor {
             switch (bodyNode.getFormat()) {
                 case "xml" :
                     Document document = createDocument();
-                    XmlTransformer transformer = new XmlTransformer(document);
-                    result = transformer.xmlToString(content);
+                    Xml transformer = new Xml(document);
+                    result = transformer.toString(content);
                     break;
                 case "json":
                     result = new ObjectMapper().writeValueAsString(content);

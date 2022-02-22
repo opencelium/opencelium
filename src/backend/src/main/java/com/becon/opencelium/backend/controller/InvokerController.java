@@ -19,17 +19,16 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
+import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
+import com.becon.opencelium.backend.invoker.resource.OperationResource;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.mysql.entity.User;
-import com.becon.opencelium.backend.mysql.entity.UserDetail;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.connector.ConnectorResource;
+import com.becon.opencelium.backend.resource.connector.FunctionResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
-import com.becon.opencelium.backend.storage.StorageService;
-import com.becon.opencelium.backend.storage.UserStorageService;
+import com.becon.opencelium.backend.utility.PathUtility;
+import com.becon.opencelium.backend.utility.Xml;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
@@ -45,7 +44,6 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -61,7 +59,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -127,7 +124,7 @@ public class InvokerController {
             String invoker = FilenameUtils.removeExtension(f.getName());
             container.put(invoker, parser.parse());
         });
-        invokerContainer.update(container);
+        invokerContainer.updateAll(container);
         return ResponseEntity.ok().build();
     }
 
@@ -161,7 +158,7 @@ public class InvokerController {
             invoker = invoker.replace("%20", " ");
             container.put(invoker, parser.parse());
         });
-        invokerContainer.update(container);
+        invokerContainer.updateAll(container);
 
         Invoker invoker = invokerContainer.getByName(filename);
         InvokerResource invokerResource = invokerService.toResource(invoker);
@@ -181,6 +178,32 @@ public class InvokerController {
             invokerService.delete(name);
         });
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{invokerName}/xml")
+    public ResponseEntity<FunctionResource> updateField(@PathVariable String invokerName,
+                                                        @RequestBody OperationResource operationResource) {
+        try {
+            Document invoker = invokerService.getDocument(invokerName + ".xml");
+            Xml xml = new Xml(invoker, invokerName);
+            String path = operationResource.getPath();
+            String method = operationResource.getMethod();
+
+            // /invoker/.../.../f1/f2/f3
+            String xpath = PathUtility.convertToXpath(path, method);
+            xml.addFields(xpath, operationResource);
+            xml.save();
+            invokerService.save(invoker);
+
+            NodeList methodNode = xml.getNodeListByXpath(PathUtility.getXPathTillMethod(method));
+            InvokerParserImp invokerParserImp = new InvokerParserImp(invoker);
+            FunctionInvoker functionInvoker = invokerParserImp.getFunctions(methodNode).get(0);
+            FunctionResource resource = new FunctionResource(functionInvoker);
+            return ResponseEntity.ok(resource);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex);
+        }
     }
 
     private static Document convertStringToXMLDocument(String xmlString)

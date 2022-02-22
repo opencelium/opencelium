@@ -54,8 +54,12 @@ public class InvokerContainer {
         return invokers.get(name) != null;
     }
 
-    public void update(Map<String, Invoker> invokers){
+    public void updateAll(Map<String, Invoker> invokers){
         this.invokers = invokers;
+    }
+
+    public void update(String name, Invoker invoker) {
+        invokers.put(name, invoker);
     }
 
     public void remove(String name){
