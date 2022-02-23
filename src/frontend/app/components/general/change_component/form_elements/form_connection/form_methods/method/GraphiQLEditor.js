@@ -37,6 +37,9 @@ class GraphiQLEditor extends React.Component{
                 shouldRevokeToken: false,
             })
         }
+        if(this.props.query !== '' && prevProps.loginingGraphQL === API_REQUEST_STATE.START && this.props.loginingGraphQL === API_REQUEST_STATE.FINISH){
+            document.querySelector('div.execute-button-wrap > button').click();
+        }
     }
 
     login(){
@@ -77,8 +80,17 @@ class GraphiQLEditor extends React.Component{
                     "crossDomain": "1"
                 },
                 body: JSON.stringify(requestProps)})
-            .then(response => response.json().then((data) => {return JSON.parse(data.body);})).catch((error) => {
-                this.setState({shouldRevokeToken: true});
+            .then(response => response.json().then((data) => {
+                const result = JSON.parse(data.body);
+                if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes &&  result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){
+                    if(result.errors[0].extensions.causes[0].error === 'AccessDeniedException'){
+                        this.setState({shouldRevokeToken: true});
+                        return {};
+                    }
+                }
+                return result;
+            })).catch((error) => {
+                //this.setState({shouldRevokeToken: true});
             });
     }
 
@@ -92,7 +104,7 @@ class GraphiQLEditor extends React.Component{
         if(loginingGraphQL === API_REQUEST_STATE.ERROR){
             return <div>Please, check your connection</div>;
         }
-        if(accessToken === ''){
+        if(accessToken === '' || loginingGraphQL === API_REQUEST_STATE.START){
             return <div style={{height: '100%', display: 'grid', placeItems: 'center'}}><Loading/></div>;
         }
         return(
