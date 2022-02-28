@@ -672,7 +672,7 @@ public class ConnectorExecutor {
     private RestTemplate createRestTemplate(Connector connector) {
         RestTemplate restTemplate = new RestTemplate();
         HttpComponentsClientHttpRequestFactory requestFactory;
-        if (connector.isSslCert()){
+        if (!connector.isSslCert()){
 //            ClientHttpRequestFactory requestFactory =
 //                    new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
             requestFactory =  new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
