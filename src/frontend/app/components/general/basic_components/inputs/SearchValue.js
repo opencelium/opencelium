@@ -8,7 +8,7 @@ class SearchValue extends React.Component{
 
 
     render(){
-        const {id, name, value, type, labelText, selectedMethod, currentConnector, inputValue, updateConnection, paramCallback, onSelectItem, closeMenu, changeInputValue} = this.props;
+        const {id, name, value, type, labelText, selectedMethod, selectedConnector, currentConnector, inputValue, updateConnection, paramCallback, onSelectItem, closeMenu, changeInputValue, connection} = this.props;
         return(
             <div style={{position: 'relative'}}>
                 <div style={{width: 'calc(100% - 40px)'}} onMouseDown={value.value !== "-1" ? (e) => onSelectItem(e, {value, type}) : null}>
@@ -18,6 +18,8 @@ class SearchValue extends React.Component{
                     id={`${id}_param_button`}
                     name={name}
                     selectedMethod={selectedMethod}
+                    selectedConnector={selectedConnector}
+                    connection={connection}
                     type={type}
                     toggleCallback={(a) => paramCallback(a)}
                     changeInputValue={(a) => changeInputValue(a)}

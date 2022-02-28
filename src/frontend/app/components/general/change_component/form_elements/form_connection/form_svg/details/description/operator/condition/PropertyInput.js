@@ -8,13 +8,15 @@ class PropertyInput extends React.Component{
     }
 
     render(){
-        const {readOnly, style, equalStyle, predicator, id, updateProperty, items, connector, property, updateConnection, selectedMethod} = this.props;
+        const {readOnly, style, equalStyle, predicator, id, updateProperty, items, connector, property, updateConnection, selectedMethod, connection, selectedConnector} = this.props;
         return (
             <React.Fragment>
                 <div style={style}>
                     <SelectSearch
                         id={id}
                         selectedMethod={selectedMethod}
+                        selectedConnector={selectedConnector}
+                        connection={connection}
                         updateConnection={updateConnection}
                         className={styles.operator_right_field}
                         placeholder={'param'}

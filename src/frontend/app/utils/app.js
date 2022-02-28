@@ -1023,6 +1023,12 @@ function mapConnector(connector){
         if(connector.hasOwnProperty('invoker')) {
             result.invoker = mapInvoker(connector.invoker);
         }
+        if(connector.hasOwnProperty('timeout')) {
+            result.timeout = connector.timeout;
+        }
+        if(connector.hasOwnProperty('sslCert')) {
+            result.sslCert = connector.sslCert;
+        }
         if(connector.hasOwnProperty('icon')) {
             result.icon = mapInvoker(connector.icon);
         }

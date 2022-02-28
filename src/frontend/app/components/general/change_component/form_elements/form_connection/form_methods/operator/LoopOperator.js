@@ -267,6 +267,8 @@ class LoopOperator extends Component{
                     <SelectSearch
                         id={`loop_operator_${operator.type}_${operator.index}`}
                         selectedMethod={operator.condition.leftStatement ? connection.getMethodByColor(operator.condition.leftStatement.color) : null}
+                        selectedConnector={operator.condition.leftStatement ? connection.getConnectorByMethodColor(operator.condition.leftStatement.color) : null}
+                        connection={connection}
                         updateConnection={updateEntity}
                         className={styles.operator_left_field}
                         placeholder={'param'}

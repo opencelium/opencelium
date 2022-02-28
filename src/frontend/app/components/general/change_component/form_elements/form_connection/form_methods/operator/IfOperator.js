@@ -478,7 +478,9 @@ class IfOperator extends Component{
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}
                         selectedMethod={operator.condition.leftStatement ? connection.getMethodByColor(operator.condition.leftStatement.color) : null}
+                        selectedConnector={operator.condition.leftStatement ? connection.getConnectorByMethodColor(operator.condition.leftStatement.color) : null}
                         updateConnection={updateEntity}
+                        connection={connection}
                         className={styles.operator_left_field}
                         placeholder={'param'}
                         items={hasMethod ? this.getParamSource('leftStatement') : []}
@@ -610,7 +612,9 @@ class IfOperator extends Component{
                         <SelectSearch
                             id={`if_operator_${operator.type}_${operator.index}`}
                             selectedMethod={operator.condition.leftStatement ? connection.getMethodByColor(operator.condition.leftStatement.color) : null}
+                            selectedConnector={operator.condition.leftStatement ? connection.getConnectorByMethodColor(operator.condition.leftStatement.color) : null}
                             updateConnection={updateEntity}
+                            connection={connection}
                             className={styles.operator_right_field}
                             placeholder={'param'}
                             items={this.getParamSource('leftStatement')}
@@ -874,6 +878,8 @@ class IfOperator extends Component{
                     <SelectSearch
                         id={`if_operator_${operator.type}_${operator.index}`}
                         selectedMethod={operator.condition.rightStatement ? connection.getMethodByColor(operator.condition.rightStatement.color) : null}
+                        selectedConnector={operator.condition.rightStatement ? connection.getConnectorByMethodColor(operator.condition.rightStatement.color) : null}
+                        connection={connection}
                         updateConnection={updateEntity}
                         className={styles.operator_right_field}
                         placeholder={'param'}

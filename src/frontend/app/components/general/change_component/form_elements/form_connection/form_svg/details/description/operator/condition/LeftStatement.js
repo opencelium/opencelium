@@ -44,7 +44,7 @@ class LeftStatement extends React.Component{
         if(isLoopOperator){
             width = '70%';
         }
-        return {float: 'left', width, position: 'relative'};
+        return {float: 'left', width};
     }
 
     render(){
@@ -75,7 +75,9 @@ class LeftStatement extends React.Component{
                 <ParamInput
                     id={paramId}
                     selectedMethod={condition.leftMethod ? connection.getMethodByColor(condition.leftMethod.color) : null}
+                    selectedConnector={condition.leftMethod ? connection.getConnectorByMethodColor(condition.leftMethod.color) : null}
                     updateConnection={updateConnection}
+                    connection={connection}
                     readOnly={readOnly}
                     hasMethod={hasLeftMethod}
                     connector={connector}

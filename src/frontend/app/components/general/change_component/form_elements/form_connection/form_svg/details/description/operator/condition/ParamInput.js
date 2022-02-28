@@ -8,7 +8,7 @@ class ParamInput extends React.Component{
     }
 
     render(){
-        const {readOnly, param, style, id, connector, items, updateParam, isMultiline, updateConnection, selectedMethod} = this.props;
+        const {readOnly, param, style, id, connector, items, updateParam, isMultiline, updateConnection, selectedMethod, selectedConnector, connection} = this.props;
         let inputTheme = {};
         inputTheme.input = styles.input_pointer_param_if;
         return (
@@ -16,7 +16,9 @@ class ParamInput extends React.Component{
                 <SelectSearch
                     id={id}
                     selectedMethod={selectedMethod}
+                    selectedConnector={selectedConnector}
                     updateConnection={updateConnection}
+                    connection={connection}
                     className={styles.operator_left_field}
                     placeholder={'param'}
                     items={items}
