@@ -10,4 +10,5 @@ public interface RegExpression {
     String arrayWithNumberIndex = "\\[([0-9]+)\\]";
     String wholeArray = "\\[([*]){1}\\]";
     String isNumber = "^[+-]?\\d+(\\.\\d+)?$";
+    String webhook = "\\$\\{(.*?)\\}";
 }

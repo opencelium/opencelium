@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.utility.StringUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,47 +200,80 @@ public class ExecutionContainer {
     }
 
     public String getValueFromQueryParams(String exp) {
-        if (exp == null || exp.isEmpty()) {
-            return "";
-        }
-        String result = exp;
-        if (queryParams.isEmpty()) {
-            return null;
+
+        try {
+            if (exp == null || exp.isEmpty()) {
+                return "";
+            }
+            StringBuilder result = new StringBuilder(exp);
+            if (queryParams.isEmpty()) {
+                return null;
+            }
+
+            String message = new ObjectMapper().writeValueAsString(queryParams);
+//        JsonPath.read(message, jsonPath)
+
+            Pattern r = Pattern.compile(RegExpression.webhook);
+            Matcher m = r.matcher(exp);
+
+            while (m.find()) {
+                String s = "$." + m.group().replace("${", "").replace("}", "");
+                Object val = JsonPath.read(message, s);
+                result.append(exp.replace(m.group(), val.toString()));
+            }
+
+//            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+//                String pointer = "${" + entry.getKey() + "}";
+//                if (!result.contains(pointer)){
+//                    continue;
+//                }
+//                result = result.replace(pointer, entry.getValue().toString());
+//            }
+            return result.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
 
-        for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
-            String pointer = "${" + entry.getKey() + "}";
-            if (!result.contains(pointer)){
-                continue;
-            }
-            result = result.replace(pointer, entry.getValue().toString());
-        }
-        return result;
     }
 
     public Object getValueWebhookParams(String exp) {
-        if (exp == null || exp.isEmpty()) {
-            return "";
-        }
-        Object result = null;
-        if (queryParams.isEmpty()) {
-            return null;
-        }
-        String type = "";
-        if (exp.contains(":")) {
-            type = exp.split(":")[1].replace("}", "");
-            exp = exp.split(":")[0].concat("}");
+        try {
+            if (exp == null || exp.isEmpty()) {
+                return "";
+            }
+            Object result = null;
+            if (queryParams.isEmpty()) {
+                return null;
+            }
+            String type = "";
+            if (exp.contains(":")) {
+                type = exp.split(":")[1].replace("}", "");
+                exp = exp.split(":")[0].concat("}");
+            }
+
+            String message = new ObjectMapper().writeValueAsString(queryParams);
+//        JsonPath.read(message, jsonPath)
+
+            Pattern r = Pattern.compile(RegExpression.webhook);
+            Matcher m = r.matcher(exp);
+            while (m.find()) {
+                String s = "$." + m.group().replace("${", "").replace("}", "");
+                Object val = JsonPath.read(message, s);
+                result = !type.isEmpty() ? convertToType(val, type) : getProperTypeOfValue(val);
+            }
+//            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+//                String pointer = "${" + entry.getKey() + "}";
+//                if (!exp.contains(pointer)){
+//                    continue;
+//                }
+//                result = !type.isEmpty() ? convertToType(entry.getValue(), type) : getProperTypeOfValue(entry.getValue());
+//                break;
+//            }
+            return result;
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException();
         }
 
-        for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
-            String pointer = "${" + entry.getKey() + "}";
-            if (!exp.contains(pointer)){
-                continue;
-            }
-            result = !type.isEmpty() ? convertToType(entry.getValue(), type) : getProperTypeOfValue(entry.getValue());
-            break;
-        }
-        return result;
     }
 
     private Object convertToType(Object val, String type) {
