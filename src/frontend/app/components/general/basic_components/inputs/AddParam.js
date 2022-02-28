@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import CConnectorItem from "@classes/components/content/connection/CConnectorItem";
 import Input from "@basic_components/inputs/Input";
 import RadioButtons from "@basic_components/inputs/RadioButtons";
-import {
+import CMethodItem, {
     FIELD_TYPE_ARRAY,
     FIELD_TYPE_OBJECT,
     FIELD_TYPE_STRING
@@ -42,13 +42,13 @@ class AddParam extends React.Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {name} = this.state;
-        const {updatingInvokerMethod, method, updateConnection, cleanMethod, connector, selectedMethod, changeInputValue, path} = this.props;
+        const {updatingInvokerMethod, method, updateConnection, cleanMethod, selectedConnector, selectedMethod, changeInputValue, path, connection} = this.props;
         if(updatingInvokerMethod === API_REQUEST_STATE.FINISH && method !== null){
-            let invoker = connector.invoker;
+            let invoker = selectedConnector.invoker;
             invoker.replaceOperation(method);
-            connector.invoker = invoker;
+            selectedConnector.invoker = invoker;
             selectedMethod.response.success.body.fields = method.response.success.body.fields;
-            updateConnection();
+            updateConnection(connection);
             cleanMethod();
             if(changeInputValue){
                 let splitPath = path.split('.');
@@ -176,7 +176,8 @@ class AddParam extends React.Component{
 }
 
 AddParam.propTypes = {
-    connector: PropTypes.instanceOf(CConnectorItem).isRequired,
+    selectedConnector: PropTypes.instanceOf(CConnectorItem).isRequired,
+    selectedMethod: PropTypes.instanceOf(CMethodItem).isRequired,
     path: PropTypes.string.isRequired,
     updateConnection: PropTypes.func.isRequired,
 }

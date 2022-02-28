@@ -223,7 +223,7 @@ class SelectSearch extends Component{
      */
     filterFields(inputValue){
         const {} = this.state;
-        let {id, items, predicator, currentConnector, onBlur, hasParamEditor, updateConnection, selectedMethod} = this.props;
+        let {id, items, predicator, currentConnector, onBlur, hasParamEditor, updateConnection, selectedMethod, selectedConnector, connection} = this.props;
         if(inputValue.length < MIN_SEARCH_WORD_LENGTH || items === null){
             return [];
         }
@@ -239,6 +239,8 @@ class SelectSearch extends Component{
                     type={type}
                     labelText={labelText}
                     selectedMethod={selectedMethod}
+                    selectedConnector={selectedConnector}
+                    connection={connection}
                     currentConnector={currentConnector}
                     inputValue={inputValue}
                     updateConnection={updateConnection}
@@ -258,8 +260,8 @@ class SelectSearch extends Component{
                 <div style={{width: 'calc(100% - 40px)'}}>
                     No params
                 </div>
-                <AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
-            </div> : "No Params";
+                <AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} selectedConnector={selectedConnector} connection={connection} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
+            </div> : "No params";
             result = [{label: noParamComponent, value: '-1', disabled: true}];
         }
         return result;

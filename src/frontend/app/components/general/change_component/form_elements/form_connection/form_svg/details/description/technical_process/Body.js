@@ -88,17 +88,18 @@ class Body extends React.Component{
         this.setState({currentEnhancement: currentEnhancement instanceof CEnhancement ? currentEnhancement.getObject() : currentEnhancement});
     }
 
-    updateEntity(){
+    updateEntity(entity = null){
         const {currentFieldName} = this.state;
         const {connection, updateConnection} = this.props;
-        updateConnection(connection);
+        let currentEntity = entity === null ? connection : entity;
+        updateConnection(currentEntity);
         if(currentFieldName !== '') {
             let bindingItem = this.getCurrentBindingItem(currentFieldName);
             if (bindingItem) {
                 bindingItem = bindingItem.to[0];
-                connection.setCurrentFieldBindingTo(bindingItem);
+                currentEntity.setCurrentFieldBindingTo(bindingItem);
             }
-            this.setCurrentEnhancement(connection.getEnhancementByTo());
+            this.setCurrentEnhancement(currentEntity.getEnhancementByTo());
         }
     }
 

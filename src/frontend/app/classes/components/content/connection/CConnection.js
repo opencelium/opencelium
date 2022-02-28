@@ -180,6 +180,20 @@ export default class CConnection{
         }
     }
 
+    getConnectorByMethodColor(color){
+        let index = this.fromConnector.methods.findIndex(m => m.color === color);
+        if(index !== -1){
+            return this.fromConnector;
+        } else{
+            index = this.toConnector.methods.findIndex(m => m.color === color);
+            if(index !== -1){
+                return this.toConnector;
+            } else{
+                return null;
+            }
+        }
+    }
+
     getConnectorByType(type){
         if(type === CONNECTOR_FROM){
             return this._fromConnector;
