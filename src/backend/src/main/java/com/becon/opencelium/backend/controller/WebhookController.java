@@ -77,6 +77,41 @@ public class WebhookController {
         return  ResponseEntity.ok().build();
     }
 
+    @PostMapping("execute/{token}")
+    public ResponseEntity<?> executeConn(@PathVariable("token") String token, @RequestBody Map<String, Object> queryParam) {
+        WebhookTokenResource webhookToken = webhookService.getTokenObject(token).orElse(null);
+        if (webhookToken == null){
+            throw new RuntimeException("TOKEN_NOT_FOUND");
+        }
+
+        Webhook webhook = webhookService.findByUIID(webhookToken.getUuid()).orElse(null);
+        if (webhook == null){
+            throw new RuntimeException("WEBHOOK_NOT_FOUND");
+        }
+
+        if (!webhook.getUuid().equals(webhookToken.getUuid())){
+            throw new RuntimeException("WEBHOOK_UUID_WRONG");
+        }
+
+        Scheduler scheduler = schedulerService.findById(webhookToken.getSchedulerId()).orElse(null);
+        if (scheduler == null){
+            throw new RuntimeException("SCHEDULER_NOT_FOUND");
+        }
+
+        try {
+            if (queryParam.isEmpty()) {
+                schedulerService.startNow(scheduler);
+            } else {
+                schedulerService.startNow(scheduler, queryParam);
+            }
+        }
+        catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+        return  ResponseEntity.ok().build();
+    }
+
     @GetMapping("/health")
     public ResponseEntity<?> checkHealth(){
         return ResponseEntity.ok().build();
