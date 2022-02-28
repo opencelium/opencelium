@@ -14,6 +14,7 @@ import Dialog from "@basic_components/Dialog";
 import {setFocusById, subArrayToString} from "@utils/app";
 import {updateMethod, cleanMethod} from "@actions/invokers/update";
 import {API_REQUEST_STATE} from "@utils/constants/app";
+import {ATTRIBUTES_MARK, ATTRIBUTES_PROPERTY} from "@classes/components/content/invoker/CBody";
 
 function mapStateToProps(state){
     const invokerReducer = state.get('invokers');
@@ -35,25 +36,31 @@ class UpdateParam extends React.Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {updatingInvokerMethod, method, updateConnection, cleanMethod, connector} = this.props;
-        if(updatingInvokerMethod === API_REQUEST_STATE.FINISH && this.props.method !== null){
+        const {isOpenedForm} = this.state;
+        const {updatingInvokerMethod, method, updateConnection, cleanMethod, connector, selectedMethod} = this.props;
+        if(updatingInvokerMethod === API_REQUEST_STATE.FINISH && method !== null){
             let invoker = connector.invoker;
             invoker.replaceOperation(method);
+            connector.invoker = invoker;
+            selectedMethod.response.success.body.fields = method.response.success.body.fields;
             updateConnection();
             cleanMethod();
+            if(isOpenedForm){
+                this.toggleForm();
+            }
         }
     }
 
     toggleForm(){
         const {isOpenedForm, type} = this.state;
         const {toggleCallback} = this.props;
-        if(toggleCallback){
-            toggleCallback(!isOpenedForm);
-        }
         this.setState({
             isOpenedForm: !isOpenedForm,
-            type: !isOpenedForm ? type : '',
             typeError: '',
+        }, () => {
+            if(toggleCallback){
+                toggleCallback(!isOpenedForm);
+            }
         });
     }
 
@@ -76,24 +83,29 @@ class UpdateParam extends React.Component{
 
     updateMethod(){
         const {type} = this.state;
-        const {connector, path} = this.props;
+        const {name, path, updateMethod, selectedMethod} = this.props;
         if(this.validate()){
-            const invokerName = connector.invoker.name;
+            const invokerName = selectedMethod.invoker.name;
             let splitPath = path.split('.');
-            const pathValueWithoutName = subArrayToString(splitPath, '.', 0);
-            let dataPath = `(response).success${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
+            const pathValueWithoutName = subArrayToString(splitPath, '.', 0).replace(/(\[(.(?!\.))+\])/g, '[]');
+            let dataPath = `(response.success)${splitPath.length > 1 ? `.${pathValueWithoutName}` : ''}`;
+            let newName = name.replace(/(\[(.(?!\.))+\])/g, '');
+            if(name[0] === ATTRIBUTES_MARK){
+                dataPath += `.${ATTRIBUTES_PROPERTY}`;
+                newName = name.substr(1, name.length);
+            }
             const data = {
-                method: connector.getCurrentItem().name,
+                method: selectedMethod.name,
                 path: dataPath,
                 fields: [
                     {
+                        name: newName,
                         type,
                         value: null,
                     }
                 ]
             };
-            console.log(data);
-            //updateMethod({invokerName, methodData: data});
+            updateMethod({invokerName, methodData: data});
         }
     }
 
@@ -103,7 +115,7 @@ class UpdateParam extends React.Component{
         return(
             <React.Fragment>
                 <div className={styles.param_buttons}>
-                    <Button id={id} icon={updatingInvokerMethod === API_REQUEST_STATE.START ? 'loading' : 'create'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
+                    <Button id={id} icon={isOpenedForm && updatingInvokerMethod === API_REQUEST_STATE.START ? 'loading' : 'create'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
                 </div>
                 <Dialog
                     actions={[{label: 'Update', onClick: () => this.updateMethod()}, {label: 'Cancel', onClick: () => this.toggleForm()}]}

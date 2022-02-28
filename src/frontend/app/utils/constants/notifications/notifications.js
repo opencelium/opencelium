@@ -131,7 +131,7 @@ export const EntitiesWithNotification = [
     {name: UpdateAssistantAction.UPDATE_CONNECTIONSFORASSISTANT, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.UPDATE_SYSTEM, types: ['FULFILLED', 'REJECTED']},
     {name: UpdateAssistantAction.FETCH_SYSTEMREQUIREMENTS, types: ['REJECTED']},
-    {name: ConnectionsAction.LOGIN_GRAPHQL, types: ['REJECTED']},
+    {name: ConnectionsAction.LOGIN_GRAPHQL, types: ['FULFILLED', 'REJECTED']},
 ];
 
 /**

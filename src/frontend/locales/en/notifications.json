@@ -1,5 +1,6 @@
 {
   "SUCCESS": {
+    "LOGIN_GRAPHQL": "GraphQL is connected. Requests are available now.",
     "ADD_USER": "The user <1><0>{{email}}</0></1> was successfully added.",
     "ADD_PROFILEPICTURE": "The user {{name}} was successfully added.",
     "FETCH_USERS": "The list of users was successfully fetched.",

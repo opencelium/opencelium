@@ -66,8 +66,12 @@ class Loading extends Component{
             classNames = getThemeClass({classNames, authUser, styles});
             loadingClassName = styles[classNames.loading];
         }
+        let divStyle = {...style};
+        if(spinnerStyle && spinnerStyle.hasOwnProperty('width')){
+            divStyle.width = spinnerStyle.width;
+        }
         return (
-            <div className={`${loadingClassName} ${className}`} style={style}>
+            <div className={`${loadingClassName} ${className}`} style={divStyle}>
                 <Spinner type="grow" color="primary" style={spinnerStyle}/>
                 {this.renderCancelButton()}
             </div>

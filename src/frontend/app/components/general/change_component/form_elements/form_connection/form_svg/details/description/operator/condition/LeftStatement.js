@@ -74,6 +74,7 @@ class LeftStatement extends React.Component{
                 />
                 <ParamInput
                     id={paramId}
+                    selectedMethod={condition.leftMethod ? connection.getMethodByColor(condition.leftMethod.color) : null}
                     updateConnection={updateConnection}
                     readOnly={readOnly}
                     hasMethod={hasLeftMethod}

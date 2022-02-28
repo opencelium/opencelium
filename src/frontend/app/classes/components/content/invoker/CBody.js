@@ -128,7 +128,7 @@ export default class CBody{
     }
 
     _getProperty(property){
-        return ATTRIBUTES_MARK === property ? ATTRIBUTES_PROPERTY : property;
+        return property.length > 0 && ATTRIBUTES_MARK === property[0] ? ATTRIBUTES_PROPERTY : property;
     }
 
     _getSubField(fields, property){
@@ -247,11 +247,22 @@ export default class CBody{
                         if(this._isAttributeProperty(property)){
                             for (let item in fields[property]) {
                                 if(fields[property].hasOwnProperty(item)) {
-                                    result.push({
-                                        value: `${ATTRIBUTES_MARK}${item}`,
-                                        type: FIELD_TYPE_STRING,
-                                        label: item
-                                    });
+
+                                    if(properties[i].length > 1){
+                                        if(item.includes(properties[i].substr(1))){
+                                            result.push({
+                                                value: `${ATTRIBUTES_MARK}${item}`,
+                                                type: FIELD_TYPE_STRING,
+                                                label: item
+                                            });
+                                        }
+                                    } else{
+                                        result.push({
+                                            value: `${ATTRIBUTES_MARK}${item}`,
+                                            type: FIELD_TYPE_STRING,
+                                            label: item
+                                        });
+                                    }
                                 }
                             }
                             return this._sortResultFields(result);
