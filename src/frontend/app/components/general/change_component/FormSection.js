@@ -152,9 +152,10 @@ class FormSection extends Component{
                     updateEntity={updateEntity}
                     data={data}
                 />;
-            case 'password':
             case 'text':
+            case 'number':
             case 'email':
+            case 'password':
             case 'textarea':
                 return <FormInput
                     key={key}

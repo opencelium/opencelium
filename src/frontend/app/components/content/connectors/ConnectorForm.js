@@ -107,6 +107,8 @@ export function ConnectorForm(type) {
                 data['title'] = connector.title;
                 data['icon'] = connector.icon;
                 data['description'] = connector.description;
+                data['timeout'] = connector.timeout;
+                data['sslCert'] = connector.sslCert;
                 data['invoker'] = {name: connector.invoker.hasOwnProperty('value') ? connector.invoker.value : connector.invoker};
                 data['requestData'] = {};
                 for(let field in authenticationFields){
@@ -156,6 +158,8 @@ export function ConnectorForm(type) {
                         result.id = params.id;
                         result.icon = connector.icon;
                         result.title = connector.name;
+                        result.timeout = connector.timeout;
+                        result.sslCert = connector.sslCert;
                         result.description = connector.description;
                         result.invoker = connector.invoker.name;
                         for (let i = 0; i < connector.invoker.requiredData.length; i++) {
@@ -327,6 +331,16 @@ export function ConnectorForm(type) {
                             description: {name: 'description', label: t(`${this.translationKey}.FORM.INVOKER_DESCRIPTION`), values: descriptions},
                             callback: ::this.chooseInvoker,
                             defaultValue: 0,
+                        },
+                        {
+                            ...INPUTS.TIMEOUT,
+                            label: t(`${this.translationKey}.FORM.TIMEOUT`)
+                        },
+                        {
+                            ...INPUTS.SSL_CERT,
+                            label: t(`${this.translationKey}.FORM.SSL_CERT`),
+                            enabledTitle: t(`${this.translationKey}.FORM.SSL_CERT_ENABLED`),
+                            disabledTitle: t(`${this.translationKey}.FORM.SSL_CERT_DISABLED`),
                         },
                         {...INPUTS.ICON,
                             label: t(`${this.translationKey}.FORM.ICON`),

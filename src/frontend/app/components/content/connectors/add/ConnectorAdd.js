@@ -45,10 +45,12 @@ function mapStateToProps(state){
 
 function mapConnector(connector){
     let data = {};
-    const {title, description, icon, invoker, authenticationFields} = connector;
+    const {title, description, icon, invoker, timeout, sslCert, authenticationFields} = connector;
     data['title'] = title;
     data['description'] = description;
     data['icon'] = icon;
+    data['timeout'] = timeout;
+    data['sslCert'] = sslCert;
     data['invoker'] = {name: invoker.hasOwnProperty('value') ? invoker.value : invoker};
     data['requestData'] = {};
     for(let field in authenticationFields){

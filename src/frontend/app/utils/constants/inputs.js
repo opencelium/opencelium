@@ -43,9 +43,13 @@ const ICONNECTION = {
 
 //CONNECTOR
 const INVOKER = {name: 'invoker', type: 'select+description', icon: 'web_asset'};
+const TIMEOUT = {name: 'timeout', type: 'number', icon: 'history_toggle_off'};
+const SSL_CERT = {name: 'sslCert', type: 'switch', icon: 'summarize'}
 const TEST_BUTTON = {type: 'test_button'};
 const ICONNECTOR = {
     INVOKER,
+    TIMEOUT,
+    SSL_CERT,
     TEST_BUTTON,
 };
 
