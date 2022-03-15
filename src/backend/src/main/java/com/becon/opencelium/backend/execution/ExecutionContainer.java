@@ -67,6 +67,7 @@ public class ExecutionContainer {
         this.methodNodeService = methodNodeService;
     }
 
+    // TODO: arguments should be String path
     public Object getValueFromEnhancementData(FieldNode outgoingFiled){
         Enhancement enhancement = enhancementService.findByFieldId(outgoingFiled.getId());
 //        List<FieldNode> incomingFields = fieldNodeService.findIncoming(outgoingFiled.getId());
