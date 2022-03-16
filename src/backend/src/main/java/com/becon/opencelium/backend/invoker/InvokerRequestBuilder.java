@@ -111,7 +111,7 @@ public class InvokerRequestBuilder{
             httpEntity = new HttpEntity <Object> (header);
         }
 
-        if (sslCert){
+        if (!sslCert){
             ClientHttpRequestFactory requestFactory =
                     new HttpComponentsClientHttpRequestFactory(getHttpClient());
             restTemplate.setRequestFactory(requestFactory);

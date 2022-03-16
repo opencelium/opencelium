@@ -358,13 +358,13 @@ public class ConnectorExecutor {
 
     public String buildUrl(MethodNode methodNode){
         String endpoint = methodNode.getRequestNode().getEndpoint();
-
+        String format = methodNode.getRequestNode().getBodyNode().getFormat();
         String requiredField;
         String refRegex = "\\{(.*?)\\}";
         Pattern pattern = Pattern.compile(refRegex);
         Matcher matcher = pattern.matcher(endpoint);
         if(matcher.find()) {
-            endpoint = replaceRefValue(endpoint);
+            endpoint = replaceRefValue(endpoint, format);
         }
         return endpoint;
     }
@@ -375,7 +375,7 @@ public class ConnectorExecutor {
         }
         Map<String, Object> fields = replaceValues(bodyNode.getFields());
 //        body = fieldNodeService.deleteEmptyFields(body); // user should determine which fields should be in body.
-        Object content = new Object();
+        Object content = null;
         if (bodyNode.getType() != null && bodyNode.getType().equals("array")){
             List<Object> c = new ArrayList<>();
             c.add(fields);
@@ -417,6 +417,7 @@ public class ConnectorExecutor {
         HttpHeaders httpHeaders = new HttpHeaders();
         final Map<String, String> header = functionInvoker.getRequest().getHeader();
         Map<String, String> headerItem = new HashMap<>();
+        String format = functionInvoker.getRequest().getBody().getFormat();
 
 
         header.forEach((k,v) -> {
@@ -424,7 +425,7 @@ public class ConnectorExecutor {
             Pattern pattern = Pattern.compile(refRegex);
             Matcher matcher = pattern.matcher(v);
             if(matcher.find()) {
-                String exp = replaceRefValue(v);
+                String exp = replaceRefValue(v, format);
                 headerItem.put(k, exp);
                 return;
             }
@@ -434,13 +435,37 @@ public class ConnectorExecutor {
         return httpHeaders;
     }
 
-    private String replaceRefValue(String exp) {
-        String result = exp;
+    private static String incrementIndexes(String path){
+        String result = "";
+        List<String> pathParts = Arrays.asList( path.split("\\."));
+
+        for (String part : pathParts) {
+            final Pattern pattern = Pattern.compile(RegExpression.arrayWithNumberIndex, Pattern.MULTILINE);
+            final Matcher matcher = pattern.matcher(part);
+
+            int intIndex = 0;
+            while (matcher.find()) {
+                String index = matcher.group(1);
+                intIndex = Integer.parseInt(index) + 1;
+                part = part.replaceFirst("\\[" + index + "\\]", "[" + intIndex + "]");
+            }
+
+            if (!result.isEmpty()) {
+                result = result + "." + part;
+            } else {
+                result = result + part;
+            }
+        }
+        return result;
+    }
+
+    private String replaceRefValue(String url, String format) {
+        String result = url;
 //        String refRegex = RegExpression.requiredData;
         String refRegex = "(\\{(.*?)\\}|\\$\\{(.*?)\\})";
         String refResRegex = RegExpression.responsePointer;
         Pattern pattern = Pattern.compile(refRegex);
-        Matcher matcher = pattern.matcher(exp);
+        Matcher matcher = pattern.matcher(url);
         List<String> refParts = new ArrayList<>();
         while (matcher.find()){
             refParts.add(matcher.group());
@@ -449,6 +474,9 @@ public class ConnectorExecutor {
         for (String pointer : refParts) {
             if (pointer.matches(refResRegex)) {
                 String ref = pointer.replace("{%", "").replace("%}", "");
+                if (format.equals("xml")) {
+                    ref = incrementIndexes(ref);
+                }
                 Object responseValue = executionContainer.getValueFromResponseData(ref);
                 String value = "";
                 if (responseValue instanceof Integer) {
@@ -457,7 +485,7 @@ public class ConnectorExecutor {
                     value = Double.toString((double) responseValue);
                 }
                 else {
-                    value = (String) executionContainer.getValueFromResponseData(ref);
+                    value = executionContainer.getValueFromResponseData(ref).toString();
                 }
 
                 result = result.replace(pointer, value);
@@ -672,7 +700,7 @@ public class ConnectorExecutor {
     private RestTemplate createRestTemplate(Connector connector) {
         RestTemplate restTemplate = new RestTemplate();
         HttpComponentsClientHttpRequestFactory requestFactory;
-        if (connector.isSslCert()){
+        if (!connector.isSslCert()){
 //            ClientHttpRequestFactory requestFactory =
 //                    new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());
             requestFactory =  new HttpComponentsClientHttpRequestFactory(getDisabledHttpsClient());

@@ -20,7 +20,7 @@ public class ContainsSubStr implements Operator {
                 }
 
                 String str = (String) s;
-                if (str.contains((String)value)) {
+                if (str.contains(value.toString())) {
                     return true;
                 }
             }
@@ -34,7 +34,7 @@ public class ContainsSubStr implements Operator {
                 }
 
                 String str = (String) s;
-                if (str.contains((String)val2)) {
+                if (str.contains(val2.toString())) {
                     return true;
                 }
             }

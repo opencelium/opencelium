@@ -61,12 +61,14 @@ public class ExecutionContainer {
     private FieldNodeServiceImp fieldNodeService;
     private MethodNodeServiceImp methodNodeService;
 
-    public ExecutionContainer(EnhancementServiceImp enhancementService, FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeService) {
+    public ExecutionContainer(EnhancementServiceImp enhancementService, FieldNodeServiceImp fieldNodeService,
+                              MethodNodeServiceImp methodNodeService) {
         this.enhancementService = enhancementService;
         this.fieldNodeService = fieldNodeService;
         this.methodNodeService = methodNodeService;
     }
 
+    // TODO: arguments should be String path
     public Object getValueFromEnhancementData(FieldNode outgoingFiled){
         Enhancement enhancement = enhancementService.findByFieldId(outgoingFiled.getId());
 //        List<FieldNode> incomingFields = fieldNodeService.findIncoming(outgoingFiled.getId());
@@ -85,12 +87,12 @@ public class ExecutionContainer {
         MethodNode outMethod = methodNodeService.getByFieldNodeId(outgoingFiled.getId())
                 .orElseThrow(() -> new RuntimeException("Method not found"));
 //        String outFieldPath = fieldNodeService.getPath(outMethod, outgoingFiled);
-        String outFieldPath = enhVars.entrySet().stream()
-                .filter(e -> e.getValue().equals("RESULT_VAR"))
-                .map(e -> e.getKey()).findFirst().get();
-        String outFieldValue = fieldNodeService.getFieldValue(outgoingFiled);
-        outFieldPath = outFieldPath.replace("__oc__attributes.", "@").replace(".__oc__value", "");
-        expertVarProperties.put(outFieldPath, outFieldValue);
+//        String outFieldPath = enhVars.entrySet().stream()
+//                .filter(e -> e.getValue().equals("RESULT_VAR"))
+//                .map(e -> e.getKey()).findFirst().get();
+//        String outFieldValue = fieldNodeService.getFieldValue(outgoingFiled);
+//        outFieldPath = outFieldPath.replace("__oc__attributes.", "@").replace(".__oc__value", "");
+//        expertVarProperties.put(outFieldPath, outFieldValue);
 
         List<String> incomeRef = Arrays.asList(outgoingFiled.getValue().split(";"));
         String format = outMethod.getRequestNode().getBodyNode().getFormat();
@@ -136,8 +138,8 @@ public class ExecutionContainer {
         try {
             engine.eval(enhancement.getExpertCode());
 
-            String v = enhVars.get(outFieldPath);
-            Object o = engine.get(v);
+//            String v = enhVars.get("RESULT_VAR");
+            Object o = engine.get("RESULT_VAT");
             ScriptObjectMirror JSON = (ScriptObjectMirror) engine.eval("JSON");
             Object stringified = JSON.callMember("stringify", o);
             String result = stringified.toString();
@@ -153,7 +155,7 @@ public class ExecutionContainer {
                 }
                 return convertToArray(result);
             } else {
-                result = result.replace("\"", "");
+//                result = result.replace("\"", "");
                 if(o.getClass() == Double.class) {
                     Double dd = (Double) o;
                     return dd.intValue();

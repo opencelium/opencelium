@@ -465,13 +465,10 @@ public class FieldNodeServiceImp implements FieldNodeService {
             JsonFactory factory = mapper.getFactory();
             JsonParser parser = factory.createParser(json);
             JsonNode jsonObj = mapper.readTree(parser);
-            if (jsonObj instanceof ObjectNode){
-                isJson = true;
-            } else if (jsonObj instanceof  ArrayNode){
+            if (jsonObj instanceof ObjectNode || jsonObj instanceof  ArrayNode){
                 isJson = true;
             }
-        } catch (IOException e) {
-            isJson = false;
+        } catch (IOException ignored) {
         }
 
         return isJson;
