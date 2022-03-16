@@ -44,6 +44,6 @@ public class StringUtility {
 
         return parts.stream()
                 .filter(p -> p.contains(".jpg") || p.contains("jpeg") || p.contains("png"))
-                .findFirst().get();
+                .findFirst().orElseThrow(() -> new RuntimeException("Format should be jpg, jpeg or png"));
     }
 }
