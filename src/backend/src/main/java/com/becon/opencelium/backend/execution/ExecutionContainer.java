@@ -61,7 +61,8 @@ public class ExecutionContainer {
     private FieldNodeServiceImp fieldNodeService;
     private MethodNodeServiceImp methodNodeService;
 
-    public ExecutionContainer(EnhancementServiceImp enhancementService, FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeService) {
+    public ExecutionContainer(EnhancementServiceImp enhancementService, FieldNodeServiceImp fieldNodeService,
+                              MethodNodeServiceImp methodNodeService) {
         this.enhancementService = enhancementService;
         this.fieldNodeService = fieldNodeService;
         this.methodNodeService = methodNodeService;
