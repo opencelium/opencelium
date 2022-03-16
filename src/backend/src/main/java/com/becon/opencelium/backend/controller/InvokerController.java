@@ -93,9 +93,9 @@ public class InvokerController {
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         Path location = Paths.get(PathConstant.INVOKER);
         String filename = file.getName();
-        if (invokerService.existsByName(file.getName())){
-            throw new RuntimeException("INVOKER_ALREADY_EXISTS");
-        }
+//        if (invokerService.existsByName(file.getName())){
+//            throw new RuntimeException("INVOKER_ALREADY_EXISTS");
+//        }
 
         try {
             if (file.isEmpty()) {
