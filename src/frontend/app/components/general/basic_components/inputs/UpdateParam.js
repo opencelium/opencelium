@@ -112,13 +112,14 @@ class UpdateParam extends React.Component{
     render(){
         const {type, isOpenedForm, typeError} = this.state;
         const {id, updatingInvokerMethod} = this.props;
+        const isLoading = isOpenedForm && updatingInvokerMethod === API_REQUEST_STATE.START;
         return(
             <React.Fragment>
                 <div className={styles.param_buttons}>
-                    <Button id={id} icon={isOpenedForm && updatingInvokerMethod === API_REQUEST_STATE.START ? 'loading' : 'create'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
+                    <Button id={id} icon={'create'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
                 </div>
                 <Dialog
-                    actions={[{label: 'Update', onClick: () => this.updateMethod()}, {label: 'Cancel', onClick: () => this.toggleForm()}]}
+                    actions={[{label: 'Update', isLoading, onClick: () => this.updateMethod()}, {label: 'Cancel', onClick: () => this.toggleForm()}]}
                     active={isOpenedForm}
                     toggle={() => this.toggleForm()}
                     title={'Update Param'}

@@ -84,7 +84,8 @@ class Dialog extends Component{
     renderButtons(){
         const {actions} = this.props;
         return actions.map(action => {
-            return <Button key={action.label} title={action.label} onClick={action.onClick} id={action.id ? action.id : `button_${action.label}`}/>
+            let isLoading = action.isLoading || false;
+            return <Button key={action.label} icon={isLoading ? 'loading' : ''} disabled={isLoading} title={isLoading ? '' : action.label} onClick={action.onClick} id={action.id ? action.id : `button_${action.label}`}/>
         });
     }
 

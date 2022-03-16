@@ -115,6 +115,7 @@ export const EntitiesWithNotification = [
     {name: InvokersAction.ADD_INVOKER, types: ['FULFILLED', 'REJECTED']},
     {name: InvokersAction.DELETE_INVOKER, types: ['FULFILLED', 'REJECTED']},
     {name: InvokersAction.DELETE_INVOKERS, types: ['FULFILLED', 'REJECTED']},
+    {name: InvokersAction.UPDATE_INVOKERMETHOD, types: ['REJECTED']},
     {name: NotificationTemplatesAction.FETCH_NOTIFICATIONTEMPLATES, types: ['REJECTED']},
     {name: NotificationTemplatesAction.ADD_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
     {name: NotificationTemplatesAction.UPDATE_NOTIFICATIONTEMPLATE, types: ['FULFILLED', 'REJECTED']},
