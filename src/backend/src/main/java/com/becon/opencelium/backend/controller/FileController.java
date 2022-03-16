@@ -222,7 +222,7 @@ public class FileController {
                                 + filename);
             }
             try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, location.resolve(filename),
+                Files.copy(inputStream, location.resolve(filename + ".xml"),
                         StandardCopyOption.REPLACE_EXISTING);
             }
         }
