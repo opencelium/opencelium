@@ -206,7 +206,7 @@ public class FileController {
     @PostMapping("/invoker")
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
         Path location = Paths.get(PathConstant.INVOKER);
-        String filename = file.getName();
+        String filename = file.getOriginalFilename();
 //        if (invokerService.existsByName(file.getName())){
 //            throw new RuntimeException("INVOKER_ALREADY_EXISTS");
 //        }
@@ -222,7 +222,7 @@ public class FileController {
                                 + filename);
             }
             try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, location.resolve(filename + ".xml"),
+                Files.copy(inputStream, location.resolve(filename),
                         StandardCopyOption.REPLACE_EXISTING);
             }
         }
