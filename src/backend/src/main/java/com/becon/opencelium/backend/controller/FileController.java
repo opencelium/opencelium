@@ -22,6 +22,10 @@ import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.invoker.InvokerContainer;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
+import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.User;
 import com.becon.opencelium.backend.mysql.entity.UserDetail;
@@ -32,6 +36,7 @@ import com.becon.opencelium.backend.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
+import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
@@ -46,11 +51,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping(value = "/api/storage")
@@ -76,6 +93,12 @@ public class FileController {
 
     @Autowired
     private UpdatePackageServiceImp updatePackageServiceImp;
+
+    @Autowired
+    private InvokerContainer invokerContainer;
+
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
 
     private final UserStorageService storageService;
 
@@ -180,6 +203,48 @@ public class FileController {
         }
     }
 
+    @PostMapping("/invoker")
+    public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
+        Path location = Paths.get(PathConstant.INVOKER);
+        String filename = file.getName();
+//        if (invokerService.existsByName(file.getName())){
+//            throw new RuntimeException("INVOKER_ALREADY_EXISTS");
+//        }
+
+        try {
+            if (file.isEmpty()) {
+                throw new StorageException("Failed to store empty file " + filename);
+            }
+            if (filename.contains("..")) {
+                // This is a security check
+                throw new StorageException(
+                        "Cannot store file with relative path outside current directory "
+                                + filename);
+            }
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, location.resolve(filename),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+        catch (IOException e) {
+            throw new StorageException("Failed to store file " + filename, e);
+        }
+
+        List<Document> invokers = getAllInvokers();
+        Map<String, Invoker> container = new HashMap<>();
+        invokers.forEach(document -> {
+            InvokerParserImp parser = new InvokerParserImp(document);
+            File f = new File(document.getDocumentURI());
+            String invoker = FilenameUtils.removeExtension(f.getName());
+            container.put(invoker, parser.parse());
+        });
+        invokerContainer.updateAll(container);
+
+        Invoker invoker = container.get(FilenameUtils.removeExtension(filename));
+        InvokerResource invokerResource = invokerServiceImp.toResource(invoker);
+        return ResponseEntity.ok(invokerResource);
+    }
+
     @PostMapping(value = "/connector")
     public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
                                              @RequestParam("connectorId") int connectorId) {
@@ -261,5 +326,28 @@ public class FileController {
             return false;
         }
         return true;
+    }
+
+    private List<Document> getAllInvokers(){
+        Path location = Paths.get(PathConstant.INVOKER);
+        try {
+            Stream<Path> allInvokers = Files.walk(location, 1)
+                    .filter(path -> !path.equals(location))
+                    .map(location::relativize);
+
+            return allInvokers.map(p -> new File(location.toString() + "/" + p.getFileName()))
+                    .map(file -> {
+                        try {
+                            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                            return dBuilder.parse(file);
+                        }
+                        catch (Exception e){
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList());
+        }
+        catch (IOException e) {
+            throw new StorageException("Failed to read stored files", e);
+        }
     }
 }

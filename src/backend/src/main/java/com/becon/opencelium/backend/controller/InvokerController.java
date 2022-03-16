@@ -89,45 +89,6 @@ public class InvokerController {
         return ResponseEntity.ok(resources);
     }
 
-    @PostMapping("/file")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
-        Path location = Paths.get(PathConstant.INVOKER);
-        String filename = file.getName();
-//        if (invokerService.existsByName(file.getName())){
-//            throw new RuntimeException("INVOKER_ALREADY_EXISTS");
-//        }
-
-        try {
-            if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + filename);
-            }
-            if (filename.contains("..")) {
-                // This is a security check
-                throw new StorageException(
-                        "Cannot store file with relative path outside current directory "
-                                + filename);
-            }
-            try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, location.resolve(filename),
-                        StandardCopyOption.REPLACE_EXISTING);
-            }
-        }
-        catch (IOException e) {
-            throw new StorageException("Failed to store file " + filename, e);
-        }
-
-        List<Document> invokers = getAllInvokers();
-        Map<String, Invoker> container = new HashMap<>();
-        invokers.forEach(document -> {
-            InvokerParserImp parser = new InvokerParserImp(document);
-            File f = new File(document.getDocumentURI());
-            String invoker = FilenameUtils.removeExtension(f.getName());
-            container.put(invoker, parser.parse());
-        });
-        invokerContainer.updateAll(container);
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping
     public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource)  {
         Document doc = convertStringToXMLDocument(invokerXMLResource.getXml());
