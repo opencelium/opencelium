@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.utility;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.invoker.resource.FieldResource;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.security.core.parameters.P;
 import org.w3c.dom.*;
 
@@ -35,7 +36,8 @@ public class Xml {
 
     public Xml(Document document, String fileName) {
         this.document = document;
-        this.fileName = fileName;
+        this.fileName = FilenameUtils.getExtension(fileName)
+                .equalsIgnoreCase("xml") ? fileName : fileName + ".xml";
     }
 
     public String toString(Object xmlMap){
@@ -152,11 +154,10 @@ public class Xml {
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(document);
 
-        String f = PathConstant.INVOKER + fileName + ".xml";
+        String f = PathConstant.INVOKER + fileName;
         FileOutputStream output = new FileOutputStream(f);
         StreamResult result = new StreamResult(output);
         transformer.transform(source, result);
-
     }
 
     private List<Element> mapToNode(Map<String, Object> map) {

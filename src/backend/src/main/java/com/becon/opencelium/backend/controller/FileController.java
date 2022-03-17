@@ -42,6 +42,7 @@ import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateService;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
+import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,8 +95,8 @@ public class FileController {
     @Autowired
     private UpdatePackageServiceImp updatePackageServiceImp;
 
-    @Autowired
-    private InvokerContainer invokerContainer;
+//    @Autowired
+//    private InvokerContainer invokerContainer;
 
     @Autowired
     private InvokerServiceImp invokerServiceImp;
@@ -205,11 +206,7 @@ public class FileController {
 
     @PostMapping("/invoker")
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
-        Path location = Paths.get(PathConstant.INVOKER);
         String filename = file.getOriginalFilename();
-//        if (invokerService.existsByName(file.getName())){
-//            throw new RuntimeException("INVOKER_ALREADY_EXISTS");
-//        }
 
         try {
             if (file.isEmpty()) {
@@ -221,26 +218,19 @@ public class FileController {
                         "Cannot store file with relative path outside current directory "
                                 + filename);
             }
-            try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, location.resolve(filename),
-                        StandardCopyOption.REPLACE_EXISTING);
-            }
+            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document doc = dBuilder.parse(file.getInputStream());
+            doc.setDocumentURI(PathConstant.INVOKER + filename);
+            Xml xml = new Xml(doc, filename);
+            xml.save();
+            invokerServiceImp.save(doc);
         }
-        catch (IOException e) {
+        catch (Exception e) {
+            invokerServiceImp.delete(FilenameUtils.removeExtension(filename));
             throw new StorageException("Failed to store file " + filename, e);
         }
 
-        List<Document> invokers = getAllInvokers();
-        Map<String, Invoker> container = new HashMap<>();
-        invokers.forEach(document -> {
-            InvokerParserImp parser = new InvokerParserImp(document);
-            File f = new File(document.getDocumentURI());
-            String invoker = FilenameUtils.removeExtension(f.getName());
-            container.put(invoker, parser.parse());
-        });
-        invokerContainer.updateAll(container);
-
-        Invoker invoker = container.get(FilenameUtils.removeExtension(filename));
+        Invoker invoker = invokerServiceImp.findByName(FilenameUtils.removeExtension(filename));
         InvokerResource invokerResource = invokerServiceImp.toResource(invoker);
         return ResponseEntity.ok(invokerResource);
     }
