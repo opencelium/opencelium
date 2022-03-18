@@ -157,7 +157,7 @@ class SelectSearch extends Component{
         if(this.props.onBlur){
             this.props.onBlur();
         }
-        onInputChange(newValue)
+        onInputChange(inputValue)
     }
 
     closeMenu(){
