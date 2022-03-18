@@ -146,7 +146,7 @@ public class InvokerController {
                                                         @RequestBody OperationResource operationResource) {
         try {
             Document invoker = invokerService.getDocument(invokerName + ".xml");
-            Xml xml = new Xml(invoker, invokerName);
+            Xml xml = new Xml(invoker, invokerName + ".xml");
             String path = operationResource.getPath();
             String method = operationResource.getMethod();
 

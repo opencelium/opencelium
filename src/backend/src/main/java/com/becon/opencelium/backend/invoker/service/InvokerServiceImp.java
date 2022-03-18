@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.invoker.service;
 
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
@@ -263,7 +264,7 @@ public class InvokerServiceImp implements InvokerService {
             return null;
         }
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return dBuilder.parse(file);
+        return file.exists() ? dBuilder.parse(file) : null;
     }
 
     @Override
