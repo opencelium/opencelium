@@ -293,6 +293,6 @@ UPDATE connector SET ssl_cert = 0;
 ALTER TABLE connector ADD COLUMN IF NOT EXISTS timeout INT NOT NULL;
 
 --changeset 2.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE detail CHANGE organization organization varchar(100);
+ALTER TABLE detail CHANGE organisation organization varchar(100);
 
 
