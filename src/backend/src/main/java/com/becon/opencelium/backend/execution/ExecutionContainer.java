@@ -139,7 +139,7 @@ public class ExecutionContainer {
             engine.eval(enhancement.getExpertCode());
 
 //            String v = enhVars.get("RESULT_VAR");
-            Object o = engine.get("RESULT_VAT");
+            Object o = engine.get("RESULT_VAR");
             ScriptObjectMirror JSON = (ScriptObjectMirror) engine.eval("JSON");
             Object stringified = JSON.callMember("stringify", o);
             String result = stringified.toString();
@@ -156,10 +156,10 @@ public class ExecutionContainer {
                 return convertToArray(result);
             } else {
 //                result = result.replace("\"", "");
-                if(o.getClass() == Double.class) {
-                    Double dd = (Double) o;
-                    return dd.intValue();
-                }
+//                if(o.getClass() == Double.class) {
+//                    Double dd = (Double) o;
+//                    return dd.intValue();
+//                }
                 return o;
             }
         } catch (ScriptException | IOException e){
