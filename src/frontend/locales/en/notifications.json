@@ -77,6 +77,7 @@
     "UPDATE_THEME": "The application theme was successfully changed"
   },
   "ERROR": {
+    "UPDATE_INVOKERMETHOD": "The invoker operation was not updated",
     "LOGIN_GRAPHQL": "GraphQL was not connected",
     "ADD_USER": {
       "__DEFAULT__": "The user was not added."

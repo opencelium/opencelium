@@ -136,13 +136,14 @@ class AddParam extends React.Component{
     render(){
         const {name, type, isOpenedForm, nameError, typeError} = this.state;
         const {id, updatingInvokerMethod} = this.props;
+        const isLoading = updatingInvokerMethod === API_REQUEST_STATE.START;
         return(
             <React.Fragment>
                 <div className={styles.param_buttons}>
-                    <Button id={id} icon={updatingInvokerMethod === API_REQUEST_STATE.START ? 'loading' : 'add'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
+                    <Button id={id} icon={'add'} onClick={() => this.toggleForm()} iconSize={'13px'}/>
                 </div>
                 <Dialog
-                    actions={[{label: 'Add', onClick: () => this.updateMethod()}, {label: 'Cancel', onClick: () => this.toggleForm()}]}
+                    actions={[{label: 'Add', isLoading, onClick: () => this.updateMethod()}, {label: 'Cancel', onClick: () => this.toggleForm()}]}
                     active={isOpenedForm}
                     toggle={() => this.toggleForm()}
                     title={'Add Param'}

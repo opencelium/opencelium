@@ -25,7 +25,6 @@ import CMethodItem, {
 import Input from "./Input";
 import CResponseResult from "@classes/components/content/invoker/response/CResponseResult";
 import AddParam from "@basic_components/inputs/AddParam";
-import UpdateParam from "@basic_components/inputs/UpdateParam";
 import SearchValue from "@basic_components/inputs/SearchValue";
 
 const PARAM_DELIMITER = '.';
@@ -158,13 +157,7 @@ class SelectSearch extends Component{
         if(this.props.onBlur){
             this.props.onBlur();
         }
-        let newValue = inputValue;
-        let splitValue = inputValue ? inputValue.split(PARAM_DELIMITER) : [];
-        if (splitValue.length > 1 && currentItems.length > 0 && currentItems[0].value !== '-1') {
-            splitValue[splitValue.length - 1] = currentItems[0].value;
-            newValue = splitValue.join(PARAM_DELIMITER);
-        }
-        onInputChange(newValue)
+        onInputChange(inputValue)
     }
 
     closeMenu(){

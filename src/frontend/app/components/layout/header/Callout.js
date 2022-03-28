@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '@themes/default/layout/header.scss';
 import {CNotification} from "@classes/components/general/CNotification";
+import ReactDOM from "react-dom";
 
 class Callout extends React.Component{
     constructor(props) {
@@ -9,12 +10,11 @@ class Callout extends React.Component{
 
     render(){
         const {message, type, isBottom} = this.props;
-        return(
-            <div className={`${styles.callout} ${isBottom ? styles.bottom : ''}`}>
+        return ReactDOM.createPortal(<div className={`${styles.callout} ${isBottom ? styles.bottom : ''}`}>
                 {CNotification.getTypeIcon(type, 16)}
                 <div className={styles.message}>{message}</div>
-            </div>
-        );
+            </div>,
+            document.getElementById('oc_callout'));
     }
 }
 
