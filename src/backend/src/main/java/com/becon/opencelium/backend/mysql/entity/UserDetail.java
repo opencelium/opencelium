@@ -22,8 +22,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 
 @Entity
@@ -53,8 +51,8 @@ public class UserDetail {
     @Column(name = "department")
     private String department;
 
-    @Column(name = "organisation")
-    private String organisation;
+    @Column(name = "organization")
+    private String organization;
 
     @Column(name = "profile_picture")
     private String profilePicture;
@@ -91,7 +89,7 @@ public class UserDetail {
         this.name = userDetailResource.getName();
         this.surname = userDetailResource.getSurname();
         this.phoneNumber = userDetailResource.getPhoneNumber();
-        this.organisation = userDetailResource.getOrganisation();
+        this.organization = userDetailResource.getOrganization();
         this.department = userDetailResource.getDepartment();
         this.title = userDetailResource.getUserTitle();
         this.profilePicture = StringUtility.findImageFromUrl(userDetailResource.getProfilePicture());
@@ -151,12 +149,12 @@ public class UserDetail {
         this.department = department;
     }
 
-    public String getOrganisation() {
-        return organisation;
+    public String getOrganization() {
+        return organization;
     }
 
-    public void setOrganisation(String organisation) {
-        this.organisation = organisation;
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
     public String getTitle() {

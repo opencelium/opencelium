@@ -494,7 +494,7 @@ CREATE TABLE `detail` (
   `surname` varchar(45) DEFAULT NULL,
   `title` varchar(10) DEFAULT NULL,
   `department` varchar(45) DEFAULT NULL,
-  `organisation` varchar(45) DEFAULT NULL,
+  `organization` varchar(45) DEFAULT NULL,
   `phone_number` varchar(45) DEFAULT NULL,
   `profile_picture` varchar(192) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,

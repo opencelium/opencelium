@@ -33,7 +33,7 @@ public class UserDetailResource extends ResourceSupport {
     private String userTitle;
     private String phoneNumber;
     private String department;
-    private String organisation;
+    private String organization;
     private String profilePicture;
     private boolean appTour;
     private String theme;
@@ -54,7 +54,7 @@ public class UserDetailResource extends ResourceSupport {
         this.surname = userDetail.getSurname();
         this.phoneNumber = userDetail.getPhoneNumber();
         this.department = userDetail.getDepartment();
-        this.organisation = userDetail.getOrganisation();
+        this.organization = userDetail.getOrganization();
         this.userTitle = userDetail.getTitle();
         this.appTour = userDetail.getTutorial();
         this.theme = userDetail.getTheme();
@@ -101,12 +101,12 @@ public class UserDetailResource extends ResourceSupport {
         this.department = department;
     }
 
-    public String getOrganisation() {
-        return organisation;
+    public String getOrganization() {
+        return organization;
     }
 
-    public void setOrganisation(String organisation) {
-        this.organisation = organisation;
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
     public String getUserTitle() {
