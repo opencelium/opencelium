@@ -33,7 +33,7 @@
     "webpack-dev-server": "^4.0.0"
   },
   "scripts": {
-    "start_dev": "webpack serve",
+    "start_prod": "webpack serve",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },

@@ -53,7 +53,7 @@ const rootReducer = combineReducers({
 })
 
 const middlewares = [
-    logger,
+    //logger,
     authMiddleware,
     applicationMiddleware,
     notificationMiddleware,
