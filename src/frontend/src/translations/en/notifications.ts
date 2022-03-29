@@ -132,7 +132,9 @@ const NotificationTranslations = {
       "__DEFAULT__": "Unsuccessfully tested"
     },
     [getConnectorById.rejected.type]: "There is an error fetching connector.",
-    [getAllConnectors.rejected.type]: "There is an error fetching connectors.",
+    [getAllConnectors.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching connectors."
+    },
     [addConnector.rejected.type]: "The connector <1><0>{{title}}</0></1> was not added",
     [updateConnector.rejected.type]: "The connector <1><0>{{title}}</0></1> was not updated",
     [uploadConnectorImage.rejected.type]: "The image of the connector <1><0>{{title}}</0></1> was not uploaded.",

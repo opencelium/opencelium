@@ -17,7 +17,7 @@ const CalloutStyled = styled.div<CalloutStyledProps>`
     border-radius: 5px;
     margin: 25px;
     min-height: 50px;
-    border: 1px solid #fff;
+    border: 1px solid ${({hasFoot}) => hasFoot ? '#fff' : '#eee'};
     &:before {
         content: "";
         width: 0px;

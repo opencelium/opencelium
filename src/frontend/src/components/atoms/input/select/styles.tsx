@@ -23,7 +23,7 @@ const OptionsStyled = styled.div<OptionsStyledProps | HTMLDivElement>`
     z-index: 1000;
     border-bottom-left-radius: ${({height}) => height !== 0 ? `5px` : '0'};
     border-bottom-right-radius: ${({height}) => height !== 0 ? `5px` : '0'};
-    border: ${({isVisible, color}) => isVisible ? `1px solid #c1c1c1` : 'none'};
+    border: ${({isVisible}) => isVisible ? `1px solid #c1c1c1` : 'none'};
     border-top: none;
     height: ${({height}) => `${height}px` || 0};
     max-height: 200px;

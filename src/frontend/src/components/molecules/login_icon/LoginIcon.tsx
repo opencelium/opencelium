@@ -15,7 +15,7 @@ const LoginIcon: FC<LoginIconProps> =
         const {
             isAuth,
             logining,
-        } = Auth.reduxState;
+        } = Auth.getReduxState();
         const [hasRotation, toggleRotation] = useState(false);
         const onClick = () => {
             toggleRotation(true);

@@ -18,7 +18,10 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
         isAccessDenied = response?.status === 401 || (response?.status === 500 && response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE) || false;
     }
     if(isAccessDenied){
-        return next(logout());
+        const authState = storeApi.getState().authReducer;
+        if(authState.isAuth){
+            return next(logout());
+        }
     }
     if (login.fulfilled.type === action.type || updateAuthUserDetail.fulfilled.type === action.type) {
         const storage = LocalStorage.getStorage(true);
