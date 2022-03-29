@@ -37,11 +37,24 @@ This documentation is organized into a couple of sections:
    usecases/manage_invokers
 
 .. toctree::
+   :caption: Services
+   :maxdepth: 2
+
+   services/db2api
+
+.. toctree::
    :caption: Tools
    :maxdepth: 2
 
    tools/idoit
    tools/otrs
+
+.. toctree::
+   :caption: Sources
+   :maxdepth: 2
+
+   Downloads <https://github.com/opencelium/opencelium/>
+   Changelogs <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
    :caption: REST API Reference
@@ -60,7 +73,7 @@ This documentation is organized into a couple of sections:
 License
 ##################
 
-`becon`_ © 2013-2021 becon GmbH
+`becon`_ © 2013-2022 becon GmbH
 
 .. _becon: LICENSE.html
       

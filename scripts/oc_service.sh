@@ -46,7 +46,7 @@ start_backend(){
 		        sleep 2
 	    	else
 	        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
-	        	echo "backend started..."
+	        	echo "backend started on 0.0.0.0:9090"
 	        	return 1
 		fi
 	done
@@ -65,7 +65,7 @@ rebuild_frontend(){
 
 stop_frontend()
 {
-	/usr/lib/klibc/bin/kill $(pgrep -f "bin/node server.js")
+	kill $(pgrep -f "bin/node server.js")
 	sleep 1
 }
 
@@ -81,7 +81,7 @@ start_frontend(){
                 	sleep 2
 		else
         		cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_prod > /opt/logs/oc_frontend.out &
-		        echo "frontend started..."
+		        echo "frontend started on 0.0.0.0:8888"
                 	return 1
 		fi
 	done
@@ -117,7 +117,45 @@ check_backend(){
                 return 1
         fi
 
-        echo "Backtend already started."
+        echo "Backend already started."
+}
+
+services(){
+        for d in /opt/services/*; do
+                filename=$(basename $d)
+                echo $filename;
+        done
+}
+
+
+stop_db2api(){
+	kill $(pgrep -f "/usr/bin/java -classpath /usr/share/maven/boot/plexus-classworlds-2.x.jar")
+}
+
+start_db2api(){
+        
+        RETRY=20
+        
+        while [ $RETRY -gt 0 ]
+        do      
+                if lsof -Pi :8080 -sTCP:LISTEN -t >/dev/null ;
+                then    
+                        echo "Port 8080 is used. Retrying Again" >&2
+                        RETRY=$((RETRY-1))
+                        sleep 2
+                else    
+                        mvn compile exec:java -f /opt/services/db2api  > /opt/logs/oc_db2api.out &
+                        echo "db2api started on 0.0.0.0:8080"
+                        return 1
+                fi
+        done
+        
+        echo "Server couldnt be started. Port 8080 is used."
+}
+
+restart_db2api(){
+        stop_db2api
+        start_db2api
 }
 
 helpBackup()
@@ -247,6 +285,7 @@ restore(){
 	/usr/bin/oc start_frontend
 
 	echo "[Hint] If the frontend doesnt start, please execute the commands rebuild_frontend and start_frontend."
+	exit
 }
 
 ###### MAIN
@@ -268,6 +307,9 @@ else
     echo "restart_frontend	- restart frontend service"
     echo "check_frontend		- checks if frontend is running. Otherwise the frontend will be started automatically"
     echo "check_backend		- checks if backend is running. Otherwise the backend will be started automatically"
+    echo "services		- show available services" 
+    echo "start_SERVICENAME	- start service"
+    echo "stop_SERVICENAME	- stop service"
     echo "backup			- creates a backup of the entire system"
     echo "restore			- restores the system"
 fi

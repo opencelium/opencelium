@@ -182,7 +182,7 @@ Debian/Ubuntu (example for 20.04 LTS)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b <StableVersion> https://<username>@bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags and replace <username>
+	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 	root@shell> mv opencelium/* .
 	root@shell> mv opencelium/.* .
 	root@shell> rmdir opencelium
