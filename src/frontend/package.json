@@ -1,8 +1,11 @@
 {
-  "name": "TypeScript.Classes",
-  "version": "1.0.0",
+  "name": "opencelium",
+  "version": "2.2",
+  "description": "OpenSource API-Hub",
+  "private": true,
   "main": "src/index.js",
-  "license": "MIT",
+  "license": "becon",
+  "author": "becon GmbH",
   "devDependencies": {
     "@babel/core": "^7.15.0",
     "@babel/node": "^7.14.9",
