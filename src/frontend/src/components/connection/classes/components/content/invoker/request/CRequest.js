@@ -21,6 +21,7 @@ import {
 import CBody from "@classes/components/content/invoker/CBody";
 import {instanceOf} from "prop-types";
 import {API_METHOD} from "@utils/constants/app";
+import COperation from "@classes/components/content/invoker/COperation";
 export const METHOD_TYPES = [
     {value: API_METHOD.POST, label: 'POST'},
     {value: API_METHOD.GET, label: 'GET'},
@@ -36,7 +37,7 @@ export default class CRequest{
         this._operation = operation ? operation : null;
         this._endpoint = endpoint;
         this._body = CBody.createBody(body);
-        this._invokerBody = CBody.createBody(body);
+        this._invokerBody = CBody.createBody(CRequest.getInvokerBody(operation, body));
         this._method = method;
         this._header = parseHeader(header);
     }
@@ -48,6 +49,15 @@ export default class CRequest{
         let header = request && request.hasOwnProperty('header') ? request.header : [];
         let operation = request && request.hasOwnProperty('operation') ? request.operation : null;
         return new CRequest(endpoint, body, method, header, operation);
+    }
+
+    static getInvokerBody(operation, body){
+        if(operation instanceof COperation){
+            if(operation.request && operation.request.invokerBody){
+                return {...operation.request.invokerBody.fields};
+            }
+        }
+        return body;
     }
 
     checkHeaderItem(headerItem){

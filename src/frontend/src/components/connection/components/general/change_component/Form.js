@@ -5,7 +5,6 @@ import {connect} from 'react-redux';
 import styles from '@themes/default/general/form_component.scss';
 import FormSection from "@change_component/FormSection";
 import {isArray, isEmptyObject} from "@utils/app";
-import {Col, Row} from "react-grid-system";
 import ListHeader from "@components/general/list_of_components/Header";
 import ListButton from "@components/general/view_component/ListButton";
 import {ActionButton, SubFormSections} from "@change_component/FormComponents";
