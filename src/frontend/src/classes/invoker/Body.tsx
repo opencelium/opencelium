@@ -1,0 +1,88 @@
+import React, {ReactElement} from "react";
+import {HookStateClass} from "../application/HookStateClass";
+import {Application as App} from "../application/Application";
+import {DataType, IBody, IBodyRadios, IBodyText, ResponseFormat, ResponseType} from "@interface/invoker/IBody";
+import {IInput} from "@interface/application/core";
+import {InputTextProps} from "@atom/input/text/interfaces";
+import {InvokerState} from "@slice/InvokerSlice";
+import {RootState} from "@store/store";
+import {InputRadiosProps} from "@atom/input/radio/interfaces";
+import {isString} from "../../utils";
+import InputJsonView from "@atom/input/json_view/InputJsonView";
+import {InputElementProps} from "@atom/input/interfaces";
+import {isArray, isEmptyObject} from "../../components/utils";
+
+
+export class Body extends HookStateClass implements IBody{
+    nodeId: any;
+    static reduxState?: InvokerState;
+
+    @App.inputType
+    format: ResponseFormat = ResponseFormat.Json;
+
+    @App.inputType
+    fields: any = {};
+
+    type: ResponseType = ResponseType.Object;
+
+    data: DataType = DataType.Raw;
+
+    constructor(body?: Partial<IBody> | null) {
+        // @ts-ignore
+        super(body?.validations || {}, body?._readOnly);
+        this.format = body?.format || ResponseFormat.Json;
+        this.data = body?.data || DataType.Raw;
+        this.type = body?.type || ResponseType.Object;
+        this.fields = body?.fields || {};
+        this.setType(this.type);
+    }
+
+    static createState<T>(args?: Partial<IBody>, observation?: any):T{
+        return super.createState<IBody>(Body, (state: RootState) => state.invokerReducer, args,[{functionName: 'updateState', value: observation}]);
+    }
+
+    setType(type: ResponseType){
+        this.type = type;
+        switch (this.type){
+            case ResponseType.Object:
+                this.fields = isArray(this.fields) ? this.fields.length > 0 ? this.fields[0] : {} : this.fields;
+                break;
+            case ResponseType.Array:
+                this.fields = [this.fields];
+                break;
+        }
+    }
+
+    getText(data: IInput<IBodyText, InputTextProps>):ReactElement{
+        return super.getInputText<IBodyText, InputTextProps>(data);
+    }
+
+    getRadios(data: IInput<IBodyRadios, InputRadiosProps>): ReactElement {
+        return super.getInputRadios<IBodyRadios, InputRadiosProps>(data);
+    }
+
+    getFields(props?: InputElementProps): ReactElement{
+        // @ts-ignore
+        const updateJson = (json: any) => this[`updateFields`](this, isString(json) ? JSON.parse(json) : json)
+        return <InputJsonView
+            jsonViewProps={{
+                name: 'body',
+                collapsed: false,
+                src: this.fields,
+            }}
+            updateJson={updateJson}
+            icon={'data_object'}
+            label={'Body'}
+            {...props}
+        />;
+    }
+
+    getObject(){
+        return {
+            type: this.type,
+            format: this.format,
+            data: this.data,
+            fields: isEmptyObject(this.fields) ? null : this.fields,
+        };
+    }
+}

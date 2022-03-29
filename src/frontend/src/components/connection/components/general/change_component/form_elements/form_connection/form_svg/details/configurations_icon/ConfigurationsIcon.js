@@ -1,0 +1,100 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import styles from "@themes/default/content/connections/connection_overview_2";
+import Dialog from "@basic_components/Dialog";
+import {connect} from "react-redux";
+import {setPanelConfigurations} from "@slice/connection/ConnectionSlice";
+import ColorMode from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/ColorMode";
+import BusinessLabelMode
+    from "@change_component/form_elements/form_connection/form_svg/details/configurations_icon/BusinessLabelMode";
+
+function mapStateToProps(store){
+    const connectionOverview = store.connectionReducer;
+    return{
+        colorMode: connectionOverview.colorMode,
+        businessLabelMode: connectionOverview.businessLabelMode,
+    }
+}
+
+@connect(mapStateToProps, {setPanelConfigurations})
+class ConfigurationsIcon extends React.Component{
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            isVisibleSettingsWindow: false,
+            colorMode: props.colorMode,
+            businessLabelMode: props.businessLabelMode,
+        };
+    }
+
+    toggleIsVisibleSettingsWindow(){
+        this.setState({
+            isVisibleSettingsWindow: !this.state.isVisibleSettingsWindow,
+        }, () => {
+            if(!this.state.isVisibleSettingsWindow){
+                setTimeout(() => document.activeElement.blur(), 500);
+            }
+        })
+    }
+
+    onChangeColorMode(colorMode){
+        this.setState({
+            colorMode,
+        })
+    }
+
+    onChangeBusinessLabelMode(businessLabelMode){
+        this.setState({
+            businessLabelMode,
+        })
+    }
+
+    save(){
+        const {colorMode, businessLabelMode} = this.state;
+        const {setPanelConfigurations} = this.props;
+        setPanelConfigurations({colorMode, businessLabelMode});
+        this.toggleIsVisibleSettingsWindow();
+    }
+
+    render(){
+        const {isVisibleSettingsWindow, colorMode, businessLabelMode} = this.state;
+        const {disabled, tooltipPosition} = this.props;
+        return(
+            <React.Fragment>
+                <TooltipFontIcon
+                    size={20}
+                    className={styles.configurations_icon}
+                    onClick={(a) => this.toggleIsVisibleSettingsWindow(a)}
+                    tooltip={disabled ? '' : 'Settings'}
+                    value={'settings'}
+                    tooltipPosition={tooltipPosition}
+                    disabled={disabled}
+                    isButton={true}
+                />
+                <Dialog
+                    actions={[{label: 'Save', onClick: (a) => this.save(a)}, {label: 'Cancel', onClick: (a) => this.toggleIsVisibleSettingsWindow(a)}]}
+                    active={isVisibleSettingsWindow}
+                    toggle={(a) => this.toggleIsVisibleSettingsWindow(a)}
+                    title={'Settings'}
+                >
+                    <React.Fragment>
+                        <ColorMode colorMode={colorMode} onChangeColorMode={(a) => this.onChangeColorMode(a)}/>
+                        <BusinessLabelMode businessLabelMode={businessLabelMode} onChangeBusinessLabelMode={(a) => this.onChangeBusinessLabelMode(a)}/>
+                    </React.Fragment>
+                </Dialog>
+            </React.Fragment>
+        );
+    }
+}
+
+ConfigurationsIcon.propTypes = {
+    disabled: PropTypes.bool,
+};
+
+ConfigurationsIcon.defaultProps = {
+    disabled: false,
+};
+
+export default ConfigurationsIcon;

@@ -1,0 +1,77 @@
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import {CommonState} from "../../store";
+import {ICommonState} from "@interface/application/core";
+import {checkAllExternalApplications, checkElasticsearch, checkNeo4j} from "@action/external_application/ExternalApplicationCreators";
+import {
+    ActuatorHealthResponseProps,
+    ElasticSearchResponseProps,
+    Neo4jResponseProps
+} from "@requestInterface/external_application/IExternalApplication";
+import {IResponse} from "@requestInterface/application/IResponse";
+
+export interface ExternalApplicationSlice extends ICommonState{
+    checkingNeo4j: API_REQUEST_STATE,
+    checkingElasticSearch: API_REQUEST_STATE,
+    checkingAll: API_REQUEST_STATE,
+    neo4jCheckResults: Neo4jResponseProps,
+    elasticSearchCheckResults: ElasticSearchResponseProps,
+    actuatorHealth: ActuatorHealthResponseProps,
+}
+
+const initialState: ExternalApplicationSlice = {
+    checkingNeo4j: API_REQUEST_STATE.INITIAL,
+    checkingElasticSearch: API_REQUEST_STATE.INITIAL,
+    checkingAll: API_REQUEST_STATE.INITIAL,
+    neo4jCheckResults: null,
+    elasticSearchCheckResults: null,
+    actuatorHealth: null,
+    ...CommonState,
+}
+
+export const externalApplicationSlice = createSlice({
+    name: 'external_application',
+    initialState,
+    reducers: {
+    },
+    extraReducers: {
+        [checkNeo4j.pending.type]: (state) => {
+            state.checkingNeo4j = API_REQUEST_STATE.START;
+        },
+        [checkNeo4j.fulfilled.type]: (state, action: PayloadAction<Neo4jResponseProps>) => {
+            state.checkingNeo4j = API_REQUEST_STATE.FINISH;
+            state.neo4jCheckResults = action.payload;
+            state.error = null;
+        },
+        [checkNeo4j.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingNeo4j = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [checkElasticsearch.pending.type]: (state) => {
+            state.checkingElasticSearch = API_REQUEST_STATE.START;
+        },
+        [checkElasticsearch.fulfilled.type]: (state, action: PayloadAction<ElasticSearchResponseProps>) => {
+            state.checkingElasticSearch = API_REQUEST_STATE.FINISH;
+            state.elasticSearchCheckResults = action.payload;
+            state.error = null;
+        },
+        [checkElasticsearch.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingElasticSearch = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [checkAllExternalApplications.pending.type]: (state) => {
+            state.checkingAll = API_REQUEST_STATE.START;
+        },
+        [checkAllExternalApplications.fulfilled.type]: (state, action: PayloadAction<ActuatorHealthResponseProps>) => {
+            state.checkingAll = API_REQUEST_STATE.FINISH;
+            state.actuatorHealth = action.payload;
+            state.error = null;
+        },
+        [checkAllExternalApplications.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingAll = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+    }
+})
+
+export default externalApplicationSlice.reducer;

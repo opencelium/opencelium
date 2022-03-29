@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "jsx": "react",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@request/*": ["./src/requests/classes/*"],
+      "@requestInterface/*": ["./src/requests/interfaces/*"],
+      "@class/*": ["./src/classes/*"],
+      "@collection/*": ["./src/collections/*"],
+      "@interface/*": ["./src/interfaces/*"],
+      "@atom/*": ["./src/components/atoms/*"],
+      "@molecule/*": ["./src/components/molecules/*"],
+      "@organism/*": ["./src/components/organisms/*"],
+      "@page/*": ["./src/components/pages/*"],
+      "@template/*": ["./src/components/templates/*"],
+      "@action/*": ["./src/store/action_creators/*"],
+      "@store/*": ["./src/store/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@translations/*": ["./src/translations/*"],
+      "@slice/*": ["./src/store/reducers/*"],
+      "@oc_modules/*": ["./oc_modules/*"],
+
+      "@change_component/*": ["./src/components/connection/components/general/change_component*"],
+      "@basic_components/*": ["./src/components/connection/components/general/basic_components/*"],
+      "@themes/*": ["./src/components/connection/themes/*"],
+      "@list_of_components/*": ["./src/components/connection/list_of_components/*"],
+      "@view_component/*": ["./src/components/connection/view_component/*"],
+      "@utils/*": ["./src/components/connection/utils/*"],
+      "@classes/*": ["./src/components/connection/classes/*"],
+
+      "@root/*": ["./src/components/connection/*"],
+      "@actions/*": ["/src/components/connection/actions/*"],
+      "@components/*": ["/src/components/connection/components/*"],
+      "@loading/*": ["/src/components/connection/components/general/app/Loading/*"],
+      "@decorators/*": ["/src/components/connection/decorators/*"],
+      "@epics/*": ["/src/components/connection/epics/*"],
+      "@validations/*": ["/src/components/connection/validations/*"],
+      "@update_assistant/*": ["/src/components/update_assistant/*"]
+    }
+  },
+  "baseUrl": "./",
+  "paths": {
+    "crypto": [
+      "node_modules/crypto-js"
+    ]
+  }
+}
