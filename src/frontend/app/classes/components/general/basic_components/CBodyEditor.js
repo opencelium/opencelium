@@ -13,10 +13,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {convertFieldNameForBackend} from "@change_component/form_elements/form_connection/form_methods/help";
+import {
+    convertFieldNameForBackend,
+    markFieldNameAsArray
+} from "@change_component/form_elements/form_connection/form_methods/help";
 import CBindingItem from "@classes/components/content/connection/field_binding/CBindingItem";
 import {CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import {consoleLog, isString} from "@utils/app";
+import {consoleLog, isNumber, isString} from "@utils/app";
 import {STATEMENT_REQUEST, STATEMENT_RESPONSE} from "@classes/components/content/connection/operator/CStatement";
 import {RESPONSE_FAIL, RESPONSE_SUCCESS} from "@classes/components/content/invoker/response/CResponse";
 
@@ -77,7 +80,19 @@ export class CBodyEditor{
                                 if (parents.length === 0) {
                                     item.field = bodyData.name;
                                 } else {
-                                    item.field = `${parents.join('.')}.${bodyData.name}`;
+                                    item.field = '';
+                                    for(let i = 0; i < parents.length; i++){
+                                        if(i < parents.length - 1){
+                                            if(isNumber(parseInt(parents[i + 1]))){
+                                                item.field += markFieldNameAsArray(parents[i], parents[i + 1]);
+                                                i++;
+                                            }
+                                        } else{
+                                            item.field += `${parents[i]}`;
+                                        }
+                                        item.field += '.';
+                                    }
+                                    item.field += bodyData.name;
                                 }
                                 item.type = 'request';
                                 connection.cleanFieldBinding(CONNECTOR_TO, {to: [CBindingItem.createBindingItem(item)]});

@@ -68,9 +68,9 @@ export function convertFieldNameForBackend(invokerBody, fieldName){
                 result += `${fieldNameSplitted[i]}`;
                 subValue = elem;
             } else if (isArray(elem) && fieldNameSplitted[i] !== WHOLE_ARRAY) {
-                let index = i + 1 < fieldNameSplitted.length ? parseInt(fieldNameSplitted[i + 1]) : null;
+                let index = i + 1 < fieldNameSplitted.length ? parseInt(fieldNameSplitted[i + 1]) : '';
                 result += markFieldNameAsArray(fieldNameSplitted[i], index);
-                if(isNumber(index)){
+                if(index !== ''){
                     i++;
                 }
                 subValue = elem[0];

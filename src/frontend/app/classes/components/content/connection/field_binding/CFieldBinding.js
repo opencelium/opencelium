@@ -16,6 +16,7 @@
 
 import CEnhancement from "./CEnhancement";
 import CBindingItem from "./CBindingItem";
+import {ARRAY_SIGN} from "@change_component/form_elements/form_connection/form_methods/help";
 
 /**
  * Field binding class for Connection class
@@ -64,7 +65,7 @@ export default class CFieldBinding{
         if((bindingItem1.field === '' && bindingItem1.type === '') || (bindingItem2.field === '' && bindingItem2.type === '')){
             return bindingItem1.color === bindingItem2.color;
         }
-        return bindingItem1.field === bindingItem2.field && bindingItem1.color === bindingItem2.color && bindingItem1.type === bindingItem2.type;
+        return bindingItem1.field.replace(ARRAY_SIGN, '') === bindingItem2.field.replace(ARRAY_SIGN, '') && bindingItem1.color === bindingItem2.color && bindingItem1.type === bindingItem2.type;
     }
 
     get from(){
