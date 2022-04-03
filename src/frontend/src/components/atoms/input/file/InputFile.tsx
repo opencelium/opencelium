@@ -1,9 +1,25 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {FC, useRef, useState} from 'react';
 import {InputFileProps} from './interfaces';
 import {ButtonStyled, CheckboxStyled, FileStyled, TextStyled} from "./styles";
 import {ColorTheme} from "../../../general/Theme";
 import Input from "../Input";
 import ReactCrop from "@atom/crop/ReactCrop";
+import {withTheme} from "styled-components";
 
 
 const InputFile: FC<InputFileProps> = ({
@@ -24,6 +40,7 @@ const InputFile: FC<InputFileProps> = ({
     hasCheckbox,
     accept,
     hasCrop,
+    theme,
     ...props
 }) => {
     const [fileName, setFileName] = useState('');
@@ -69,7 +86,7 @@ const InputFile: FC<InputFileProps> = ({
             <TextStyled hasCheckbox={hasCheckbox} hasBorder={!hasNoImage && !hasValue} color={textColor} paddingLeft={hasIcon ? '30px' : '0'} value={placeholder} display={'inline-block'}/>
             {!hasNoImage && <FileStyled accept={accept} hasCheckbox={hasCheckbox} onChange={(e) => onChooseImage(e)} ref={inputFile} tabIndex={-1} type={'file'} color={color}/>}
             {hasCrop && <ReactCrop src={src} setImage={onChange}/>}
-            {!hasNoImage && <ButtonStyled hasCheckbox={hasCheckbox} id={id} isLoading={!hasIcon && isLoading} padding={`0.175rem .5rem`} emphasizeColor={color} iconSize={'16px'} size={12} background={color} label={'Choose'} icon={'upload'} handleClick={() => {inputFile.current.click()}} position={'absolute'} right={0} top={`-5px`}/>}
+            {!hasNoImage && <ButtonStyled hasCheckbox={hasCheckbox} id={id} isLoading={!hasIcon && isLoading} padding={`0.175rem .5rem`} emphasizeColor={color} iconSize={'16px'} size={12} background={theme.button.background.quite || ColorTheme.Blue} label={'Choose'} icon={'upload'} handleClick={() => {inputFile.current.click()}} position={'absolute'} right={0} top={`-5px`}/>}
         </Input>
     )
 }
@@ -86,4 +103,4 @@ InputFile.defaultProps = {
     hasCheckbox: false,
 }
 
-export default InputFile;
+export default withTheme(InputFile);

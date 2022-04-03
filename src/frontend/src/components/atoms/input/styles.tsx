@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import styled, {css} from "styled-components";
 import {ITheme} from "../../general/Theme";
 import {InputStyledProps, LabelStyledProps, IconStyledProps, ErrorStyledProps, ElementProps} from "./interfaces";
@@ -31,10 +46,11 @@ const ErrorStyled = styled.span<ErrorStyledProps>`
     opacity: 1 !important;
     position: absolute;
     left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
-    bottom: ${({theme}) => `-${theme.input.inputElement.paddingTop}` || 0};
+    bottom: ${({theme}) => `-calc(${theme.input.inputElement.paddingTop} / 2)` || 0};
     font-size: 12px;
     color: ${({color, theme}: {color?: string, theme: ITheme}) => color || theme.input.error.color};
     transition: color 0.5s;
+    padding-left: ${({paddingLeft}) => paddingLeft || 0}; 
 `;
 
 const InputElementStyled = styled.div<InputStyledProps | HTMLDivElement>`
@@ -46,6 +62,8 @@ const InputElementStyled = styled.div<InputStyledProps | HTMLDivElement>`
     height: ${({height}) => height};
     margin-left: ${({marginLeft}) => marginLeft || '0'};
     padding-top: ${({paddingTop}) => paddingTop || '0'};
+    padding-right: ${({paddingRight}) => paddingRight || '0'};
+    padding-left: ${({paddingLeft}) => paddingLeft || '0'};
     padding-bottom: ${({paddingBottom}) => paddingBottom || '0'};
     min-height: ${({minHeight}) => minHeight || 0};
     display: ${({display}) => display || 'block'};
@@ -56,7 +74,7 @@ const NumberCounterStyled = styled.span`
     transition: opacity 0.3s ease-in-out;
     position: absolute;
     right: 0;
-    bottom: ${({theme}) => `-${theme.input.inputElement.paddingTop}` || 0};
+    bottom: ${({theme}) => `-calc(${theme.input.inputElement.paddingTop} / 2)` || 0};
     font-size: 12px;
     color: #888888;
 `;

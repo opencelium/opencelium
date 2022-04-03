@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React from "react";
 import ListCollection from "../classes/application/ListCollection";
 import {ITemplate} from "@interface/connection/ITemplate";
@@ -55,7 +70,7 @@ class Templates extends ListCollection{
             <React.Fragment>
                 <AddTemplateButton name={entity.name} description={entity.description} connection={entity.connection}/>
                 <PermissionButton hasBackground={false} handleClick={() => this.dispatch(exportTemplate(exportTemplateData))} icon={'file_download'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
-                {/*<PermissionButton href={`${entity.id}/update`} hasBackground={false} icon={'refresh'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>*/}
+                <PermissionButton href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );

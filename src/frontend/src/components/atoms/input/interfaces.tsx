@@ -1,9 +1,23 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {Ref} from "react";
 import {ITheme} from "../../general/Theme";
 
 
 interface CheckStyledProps{
-    hasLabel?: boolean,
     marginTop?: string | number,
     paddingTop?: string | number,
 }
@@ -38,7 +52,8 @@ interface InputProps extends InputElementProps{
     labelMargin?: string,
     paddingTop?: string | number,
     paddingBottom?: string,
-    paddingLeft?: string,
+    paddingLeft?: string | number,
+    paddingRight?: string | number,
     minHeight?: string | number,
     hasUnderline?: boolean,
     afterInputComponent?: any,
@@ -80,6 +95,8 @@ interface InputStyledProps{
     paddingTop?: string | number,
     paddingBottom?: string,
     marginTop?: string | number,
+    paddingLeft?: string | number,
+    paddingRight?: string | number,
     marginLeft?: string,
     minHeight?: string | number,
     height?: string | number,
@@ -97,6 +114,7 @@ interface IconStyledProps{
 interface ErrorStyledProps{
     isIconInside?: boolean,
     hasIcon?: boolean,
+    paddingLeft?: string | number;
 }
 
 interface LabelStyledProps{

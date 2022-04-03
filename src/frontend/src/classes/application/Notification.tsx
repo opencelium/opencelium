@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import ReactDOMServer from "react-dom/server";
 import React from "react";
 import {INotification, NotificationType} from "@interface/application/INotification";
@@ -9,6 +24,8 @@ import i18next from "i18next";
 import {getActionWithoutType} from "../../utils";
 import {AppDispatch} from "@store/store";
 import {NavigateFunction} from "react-router";
+import {login} from "@action/application/AuthCreators";
+import {ResponseMessages} from "@requestInterface/application/IResponse";
 
 export class CNotification implements INotification{
     id: string | number;
@@ -26,6 +43,18 @@ export class CNotification implements INotification{
         this.createdTime = notification?.createdTime || '';
         this.type = notification?.type || NotificationType.NOTE;
         this.params = notification?.params || null;
+    }
+
+    static getAccessDeniedMessage(message?: string): INotification{
+        const date = new Date();
+        return {
+            id: date.getTime(),
+            type: NotificationType.ERROR,
+            title: 'OC',
+            actionType: login.rejected.type,
+            createdTime: date.getTime().toString(),
+            params: {message: message || ResponseMessages.NETWORK_ERROR}
+        };
     }
 
     getMessageData(onClick?: any, dispatch?: AppDispatch, navigate?: NavigateFunction){

@@ -1,8 +1,23 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import styled from "styled-components";
 import {EmphasizeInputStyleLines} from "../styles";
 import {CheckStyledProps, ElementProps} from "../interfaces";
 import {ITheme} from "../../../general/Theme";
-import chroma from "chroma-js";
+import Button from "@atom/button/Button";
 
 const InputStyled = styled.input<ElementProps>`
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
@@ -23,16 +38,12 @@ const InputStyled = styled.input<ElementProps>`
     ${EmphasizeInputStyleLines}
 `;
 
-const CheckStyled = styled.input<CheckStyledProps | ElementProps>`
+const CheckStyled = styled(Button)<CheckStyledProps>`
     position: absolute;
     right: 6px;
     top: 7px;
     margin-top: ${({marginTop, paddingTop}) => marginTop || paddingTop || 0};
-    &:focus, &:focus-within{
-        background: ${({emphasizeColor, theme}: {emphasizeColor?: string, theme: ITheme}) => emphasizeColor || theme.button.background.quite};
-        box-shadow: 0 0 0 0.2rem ${({emphasizeColor, color, theme, hasBackground}: {emphasizeColor?: string, color?: string, theme: ITheme, hasBackground: boolean}) => `${chroma(emphasizeColor || theme.button.background.quite).alpha(0.4)}`};
-        outline: none;
-    }
+    opacity: 1 !important;
 `;
 
 export {

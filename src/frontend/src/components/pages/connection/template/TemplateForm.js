@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React from "react";
 import {INPUTS} from "@utils/constants/inputs";
 import {CONNECTION_VIEW_TYPE} from "@utils/constants/app";
@@ -14,6 +29,8 @@ import {capitalize, setFocusById} from "@utils/app";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@interface/application/IApplication";
 import {TextSize} from "@atom/text/interfaces";
 import ContentLoading from "@molecule/loading/ContentLoading";
+import {from} from "rxjs/observable/from";
+import {AddNewConnectionButton} from "@page/connection/template/AddNewConnectionButton";
 
 
 /**
@@ -44,6 +61,7 @@ export function TemplateForm(type) {
                     entity: null,
                     isNewConnectionView: props.connectionViewType === CONNECTION_VIEW_TYPE.DIAGRAM,
                     mode: EXPERT_MODE,
+                    isDataUploaded: false,
                 };
                 this.isNavigatingToScheduler = false;
                 this.startCheckingName = false;
@@ -63,17 +81,17 @@ export function TemplateForm(type) {
             }
 
             componentDidUpdate(prevProps, prevState, snapshot) {
-                const {checkingTemplateName, checkTitleResult, t, navigate, error, fetchingTemplate} = this.props;
+                const {checkingTemplateName, checkTitleResult, t, navigate, error, fetchingTemplate, fetchingConnectors} = this.props;
                 this.checkValidationRequest('title', checkingTemplateName === API_REQUEST_STATE.FINISH, checkTitleResult === TRIPLET_STATE.FALSE, t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`));
                 if(this.props[this.actionName] === API_REQUEST_STATE.FINISH && this.startAction){
                     this.startAction = false;
                     navigate(this.redirectUrl, { replace: false });
                 }
-                if(fetchingTemplate && prevProps.fetchingTemplate === API_REQUEST_STATE.START && fetchingTemplate === API_REQUEST_STATE.FINISH){
-                    this.isFetchedTemplate = true;
-                    let connectionData = this.props.template ? {...this.props.template.connection, title: this.props.template.name, description: this.props.template.description, error} : null;
+                if(!this.state.isDataUploaded && fetchingTemplate === API_REQUEST_STATE.FINISH && fetchingConnectors === API_REQUEST_STATE.FINISH){
+                    let connectionData = this.props.template ? {...this.props.template.connection, ...this.getConnectionConnectors(), title: this.props.template.name, description: this.props.template.description, error} : null;
                     this.setState({
                         connection: CConnection.createConnection(connectionData),
+                        isDataUploaded: true,
                     })
                 }
             }
@@ -144,11 +162,31 @@ export function TemplateForm(type) {
                 this.props.navigate(this.redirectUrl, { replace: false });
             }
 
+            getConnectionConnectors(){
+                const {template, connectors} = this.props;
+                let fromConnectorSource = connectors ? connectors.find(c => c.connectorId === template.connection.fromConnector.connectorId) : null;
+                let toConnectorSource = connectors ? connectors.find(c => c.connectorId === template.connection.toConnector.connectorId) : null;
+                let fromConnectorInvoker = fromConnectorSource ? fromConnectorSource.invoker : null;
+                let toConnectorInvoker = toConnectorSource ? toConnectorSource.invoker : null;
+                let fromConnector = {...template.connection.fromConnector};
+                let toConnector = {...template.connection.toConnector};
+                if(fromConnectorInvoker){
+                    fromConnector.invoker = fromConnectorInvoker;
+                }
+                if(toConnectorInvoker){
+                    toConnector.invoker = toConnectorInvoker;
+                }
+                return{
+                    fromConnector,
+                    toConnector,
+                }
+            }
+
             getConnection(){
-                const {error, template} = this.props;
+                const {error, template, connectors} = this.props;
                 let connection;
                 if((this.isUpdate || this.isView) && template){
-                    connection = CConnection.createConnection({...template.connection, title: template.name, description: template.description, error});
+                    connection = CConnection.createConnection({...template.connection, ...this.getConnectionConnectors(), title: template.name, description: template.description, error});
                 } else{
                     connection = this.state.connection;
                     connection.setError(error);
@@ -398,9 +436,9 @@ export function TemplateForm(type) {
                 this.startAction = true;
 
                 const convertedObject = {...template, name: entity.title, description: entity.description, connection: typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : entity};
-
+                console.log(convertedObject);
                 if(this.isUpdate){
-                    updateTemplate(convertedObject);
+                   // updateTemplate(convertedObject);
                 }
             }
             /**
@@ -424,13 +462,13 @@ export function TemplateForm(type) {
             }
 
             render(){
-                const {validationMessages, connection} = this.state;
-                const {t, error, checkingTemplateName, fetchingConnectors} = this.props;
-                if((!this.isView && fetchingConnectors !== API_REQUEST_STATE.FINISH) || (!this.isAdd && !this.isFetchedTemplate)){
+                const {validationMessages, connection, isDataUploaded} = this.state;
+                const {t, error, checkingTemplateName} = this.props;
+                if(!isDataUploaded){
                     return <ContentLoading/>;
                 }
                 let contentTranslations = {};
-                contentTranslations.header = {title: t(`${this.translationKey}.HEADER`)};
+                contentTranslations.header = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'Update Template'}];
                 if(this.isView){
                     contentTranslations.list_button = {title: t(`connections:VIEW.LIST_BUTTON`), link: this.redirectUrl};
                 } else{
@@ -464,11 +502,8 @@ export function TemplateForm(type) {
                     if(this.isView || contents.length < 2){
                         return null;
                     }
-                    let button = <Button icon={'add'} isLoading={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingTemplateName === API_REQUEST_STATE.START)} title={t('ADD_CONNECTION.BUTTON')} onClick={() => this.doActionAndGoToScheduler(entity)} size={TextSize.Size_16}/>;
                     return(
-                        <React.Fragment>
-                            {button}
-                        </React.Fragment>
+                        <AddNewConnectionButton connection={entity}/>
                     );
                 }
                 return (

@@ -1,6 +1,21 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import styled from "styled-components";
 import {SlideToTop} from "../../../styles/animations";
-import {CalloutStyledProps} from "@organism/top_bar/interfaces";
+import {CalloutStyledProps, CalloutMessageStyledProps} from "@organism/top_bar/interfaces";
 import {ITheme} from "../../general/Theme";
 
 const CalloutStyled = styled.div<CalloutStyledProps>`
@@ -9,7 +24,7 @@ const CalloutStyled = styled.div<CalloutStyledProps>`
     position: fixed;
     right: 8px;
     top: 34px;
-    height: 50px;
+    height: ${({hasFoot}) => hasFoot ? '50px' : 'auto'};
     width: 200px;
     color: black;
     background-color: #fff;
@@ -33,11 +48,11 @@ const CalloutStyled = styled.div<CalloutStyledProps>`
    
 `;
 
-const CalloutMessageStyled = styled.div`
+const CalloutMessageStyled = styled.div<CalloutMessageStyledProps>`
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;
+    white-space: ${({hasFoot}) => hasFoot ? 'nowrap' : 'normal'};
     display: inline-block;
     width: 86%;
     margin-left: 2%;

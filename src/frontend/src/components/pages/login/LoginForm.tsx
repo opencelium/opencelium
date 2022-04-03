@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {FC, useEffect} from "react";
 import {Auth} from "@class/application/Auth";
 import {IAuth} from "@interface/application/IAuth";
@@ -38,7 +53,9 @@ const LoginForm: FC<LoginFormProps> = ({}) => {
             background: ColorTheme.White,
             minHeight: isAuth ? 0 : 73,
             height: isAuth ? 0 : 'unset',
-            paddingTop: isAuth ? 0 : '30px',
+            paddingTop: isAuth ? '0' : '20px',
+            paddingLeft: '5px',
+            paddingRight: '5px',
             placeholder: 'E-Mail',
             paddingLeftInput: '5px',
             paddingRightInput: '5px',
@@ -54,12 +71,13 @@ const LoginForm: FC<LoginFormProps> = ({}) => {
             background: ColorTheme.White,
             minHeight: isAuth ? 0 : 73,
             height: isAuth ? 0 : 'unset',
-            paddingTop: isAuth ? 0 : '30px',
+            paddingTop: isAuth ? '0' : '20px',
+            paddingLeft: '5px',
+            paddingRight: '5px',
             placeholder: 'Password',
             paddingLeftInput: '5px',
             paddingRightInput: '25px',
             overflow: isAuth ? 'hidden' : 'unset',
-            maxLength: 16,
             onKeyPress: (e) => onEnter(e, () => LoginForm.login()),
         }
     })

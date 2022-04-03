@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {FC} from 'react';
 import {InputProps} from './interfaces';
 import {ErrorStyled, IconStyled, InputElementStyled, LabelStyled, NumberCounterStyled} from './styles';
@@ -37,6 +52,7 @@ const Input: FC<InputProps> =
         overflow,
         className,
         labelMargin,
+        paddingRight,
     }) => {
         const hasMaxLength = maxLength !== Infinity && !readOnly;
         const hasLabel = label !== '';
@@ -60,7 +76,7 @@ const Input: FC<InputProps> =
                     isIconInside,
                     marginTop: hasLabel ? '20px' : 0,
                     paddingLeft: paddingLeft ? paddingLeft : hasIcon && isIconInside ? '50px' : '0',
-                    paddingRight: isLoadingWithoutIcon ? '30px' : 0,
+                    paddingRight: paddingRight ? paddingRight : isLoadingWithoutIcon ? '30px' : 0,
                 });
             }
             return child;
@@ -73,12 +89,12 @@ const Input: FC<InputProps> =
         }
         const showIcon = (hasIcon || isLoadingWithoutIcon) && !noIcon;
         return (
-            <InputElementStyled className={className} overflow={overflow} height={height} marginTop={marginTop} background={background} ref={componentRef} display={display} minHeight={`${minHeight}px`} paddingTop={paddingTop} paddingBottom={paddingBottom} width={width}>
+            <InputElementStyled paddingLeft={paddingLeft} paddingRight={paddingRight} className={className} overflow={overflow} height={height} marginTop={marginTop} background={background} ref={componentRef} display={display} minHeight={`${minHeight}px`} paddingTop={paddingTop} paddingBottom={paddingBottom} width={width}>
                 {childrenWithProps}
                 {hasUnderline && <div/>}
                 {showIcon && <IconStyled paddingTop={paddingTop ? paddingTop : '0'} top={hasLabel ? '24px' : '2px'} left={!isLoadingWithoutIcon && isIconInside ? '3px' : '10px'} right={isLoadingWithoutIcon ? isTextarea ? '15px' : '3px' : 'unset'}><Icon color={ColorTheme.LightGray} isLoading={isLoading} name={icon} size={TextSize.Size_24}/></IconStyled>}
                 {hasLabel && <LabelStyled labelMargin={labelMargin} paddingTop={paddingTop ? paddingTop : '0'} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={label} size={TextSize.Size_12}/></LabelStyled>}
-                {hasError && <ErrorStyled hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={TextSize.Size_12} color={ColorTheme.Red}/></ErrorStyled>}
+                {hasError && <ErrorStyled paddingLeft={paddingLeft} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={TextSize.Size_12} color={ColorTheme.Red}/></ErrorStyled>}
                 {hasMaxLength && <NumberCounterStyled>{`${value ? value.toString().length : 0}/${maxLength}`}</NumberCounterStyled>}
                 {afterInputComponent}
             </InputElementStyled>

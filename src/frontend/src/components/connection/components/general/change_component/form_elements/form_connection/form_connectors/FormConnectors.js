@@ -1,5 +1,7 @@
+
+
 /*
- * Copyright (C) <2021>  <becon GmbH>
+ * Copyright (C) <2022>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,7 +198,7 @@ class FormConnectors extends Component{
                     {hasApiDocs && HAS_API_DOCS && <InvokerButton onClick={() => this.toggleFromInvoker()} tooltip={fromConnectorValue} isOpened={isFromInvokerOpened}/>}
                     {this.renderFromInvoker()}
                 </Col>
-                <Col md={2} style={{textAlign: 'center'}}>
+                <Col md={2} style={{textAlign: 'center', alignSelf: 'center'}}>
                     <ArrowRight className={styles.input_direction_arrow_readonly}/>
                 </Col>
                 <Col md={5} className={`${styles.form_select_connector}`}>

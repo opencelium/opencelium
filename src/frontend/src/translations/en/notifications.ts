@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import {addUser, updateUser, uploadUserImage, deleteUserById, deleteUsersById, getUserById, getAllUsers, checkUserEmail, deleteUserImage} from "@action/UserCreators";
 import {addUserGroup, updateUserGroup, uploadUserGroupImage, deleteUserGroupById, deleteUserGroupsById, getUserGroupById, getAllUserGroups, checkUserGroupName, deleteUserGroupImage} from "@action/UserGroupCreators";
 import {addConnector, deleteConnectorById, updateConnector, testRequestData, uploadConnectorImage, deleteConnectorsById, getConnectorById, getAllConnectors, checkConnectorTitle, deleteConnectorImage} from "@action/ConnectorCreators";
@@ -99,9 +114,9 @@ const NotificationTranslations = {
     [graphQLLogin.rejected.type]: "GraphQL was not connected",
     [login.rejected.type]: {
       "__DEFAULT__": "There is an error during the login",
+      "UNSUPPORTED_HEADER_AUTH_TYPE": "Your session is expired",
       "UNAUTHORIZED": "Wrong email or password",
-      "WRONG_CREDENTIALS": "Wrong email or password",
-      "NETWORK_ERROR": "The server connection problem.",
+      "Network Error": "The server connection problem."
     },
     [checkNeo4j.rejected.type]: {
       "DOWN": "Neo4j is down",
@@ -111,22 +126,54 @@ const NotificationTranslations = {
       "DOWN": "Elasticsearch is down",
       "__DEFAULT__": "Neo4j could not be checked"
     },
-    [getUserById.rejected.type]: "There is an error fetching user.",
-    [getAllUsers.rejected.type]: "There is an error fetching users.",
-    [checkUserEmail.rejected.type]: "There is an error checking email uniqueness.",
-    [deleteUserImage.rejected.type]: "There is an error removing user's image.",
-    [addUser.rejected.type]: "The user <1><0>{{email}}</0></1> was not added.",
-    [updateUser.rejected.type]: "The user <1><0>{{email}}</0></1> was not updated.",
-    [uploadUserImage.rejected.type]: "The image of the user <1><0>{{email}}</0></1> was not uploaded.",
-    [deleteUserById.rejected.type]: "The user <1><0>{{email}}</0></1> was not removed.",
-    [deleteUsersById.rejected.type]: "The selected users were not removed.",
-    [getUserGroupById.rejected.type]: "There is an error fetching user group.",
-    [getAllUserGroups.rejected.type]: "There is an error fetching user groups.",
-    [addUserGroup.rejected.type]: "The user group <1><0>{{name}}</0></1> was not added.",
-    [updateUserGroup.rejected.type]: "The user group <1><0>{{name}}</0></1> was not updated.",
-    [uploadUserGroupImage.rejected.type]: "The image of the user group <1><0>{{name}}</0></1> was not uploaded.",
-    [deleteUserGroupById.rejected.type]: "The user group <1><0>{{name}}</0></1> was not removed.",
-    [deleteUserGroupsById.rejected.type]: "The selected user groups were not removed.",
+    [getUserById.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching user."
+    },
+    [getAllUsers.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching users."
+    },
+    [checkUserEmail.rejected.type]: {
+      "__DEFAULT__": "There is an error checking email uniqueness."
+    },
+    [deleteUserImage.rejected.type]: {
+      "__DEFAULT__": "There is an error removing user's image."
+    },
+    [addUser.rejected.type]: {
+      "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not added."
+    },
+    [updateUser.rejected.type]: {
+      "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not updated."
+    },
+    [uploadUserImage.rejected.type]: {
+      "__DEFAULT__": "The image of the user <1><0>{{email}}</0></1> was not uploaded."
+    },
+    [deleteUserById.rejected.type]: {
+      "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not removed."
+    },
+    [deleteUsersById.rejected.type]: {
+      "__DEFAULT__": "The selected users were not removed."
+    },
+    [getUserGroupById.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching user group."
+    },
+    [getAllUserGroups.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching user groups."
+    },
+    [addUserGroup.rejected.type]: {
+      "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not added."
+    },
+    [updateUserGroup.rejected.type]: {
+      "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not updated."
+    },
+    [uploadUserGroupImage.rejected.type]: {
+      "__DEFAULT__": "The image of the user group <1><0>{{name}}</0></1> was not uploaded."
+    },
+    [deleteUserGroupById.rejected.type]: {
+      "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not removed."
+    },
+    [deleteUserGroupsById.rejected.type]: {
+      "__DEFAULT__": "The selected user groups were not removed."
+    },
     [testRequestData.rejected.type]: {
       "COMMUNICATION_FAILED": "Connection was failed",
       "__DEFAULT__": "Unsuccessfully tested"
@@ -135,60 +182,164 @@ const NotificationTranslations = {
     [getAllConnectors.rejected.type]: {
       "__DEFAULT__": "There is an error fetching connectors."
     },
-    [addConnector.rejected.type]: "The connector <1><0>{{title}}</0></1> was not added",
-    [updateConnector.rejected.type]: "The connector <1><0>{{title}}</0></1> was not updated",
-    [uploadConnectorImage.rejected.type]: "The image of the connector <1><0>{{title}}</0></1> was not uploaded.",
-    [deleteConnectorById.rejected.type]: "The connector <1><0>{{title}}</0></1> was not removed",
-    [deleteConnectorsById.rejected.type]: "The selected connectors were not removed",
-    [getConnectionById.rejected.type]: "There is an error fetching connection.",
-    [getAllConnections.rejected.type]: "There is an error fetching connections.",
+    [addConnector.rejected.type]: {
+      "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not added"
+    },
+    [updateConnector.rejected.type]: {
+      "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not updated"
+    },
+    [uploadConnectorImage.rejected.type]: {
+      "__DEFAULT__": "The image of the connector <1><0>{{title}}</0></1> was not uploaded."
+    },
+    [deleteConnectorById.rejected.type]: {
+      "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not removed"
+    },
+    [deleteConnectorsById.rejected.type]: {
+      "__DEFAULT__": "The selected connectors were not removed"
+    },
+    [getConnectionById.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching connection."
+    },
+    [getAllConnections.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching connections."
+    },
     [addConnection.rejected.type]: "The connection <1><0>{{title}}</0></1> was not added",
     [updateConnection.rejected.type]: "The connection <1><0>{{title}}</0></1> was not updated",
-    [deleteConnectionById.rejected.type]: "The connection <1><0>{{title}}</0></1> was not removed",
-    [deleteConnectionsById.rejected.type]: "The selected connections were not removed",
-    [getScheduleById.rejected.type]: "There is an error fetching schedule.",
-    [getSchedulesById.rejected.type]: "There is an error fetching schedules.",
-    [startSchedule.rejected.type]: "The job <1><0>{{title}}</0></1> was not triggered",
-    [addSchedule.rejected.type]: "The schedule <1><0>{{title}}</0></1> was not added",
-    [deleteScheduleById.rejected.type]: "The schedule <1><0>{{title}}</0></1> was not removed",
-    [updateSchedule.rejected.type]: "The schedule <1><0>{{title}}</0></1> was not updated",
-    [switchScheduleStatus.rejected.type]: "The status of the job <1><0>{{title}}</0></1> was not updated",
-    [enableSchedules.rejected.type]: "The selected schedules were not enabled",
-    [disableSchedules.rejected.type]: "The selected schedules were not disabled",
-    [startSchedules.rejected.type]: "The selected schedules were not started",
-    [deleteSchedulesById.rejected.type]: "The selected schedules were not removed",
-    [getTemplateById.rejected.type]: "There is an error fetching template.",
-    [getAllTemplates.rejected.type]: "There is an error fetching templates.",
-    [addTemplate.rejected.type]: "The template <1><0>{{name}}</0></1> of the <3><0>{{title}}</0></3> was not added",
-    [updateTemplate.rejected.type]: "The template <1><0>{{name}}</0></1> was not updated",
-    [updateTemplates.rejected.type]: "The templates were not updated",
-    [importTemplate.rejected.type]: "The Template <1><0>{{name}}</0></1> was not imported",
-    [exportTemplate.rejected.type]: "The Template <1><0>{{name}}</0></1> was not downloaded",
-    [deleteTemplateById.rejected.type]: "The template <1><0>{{name}}</0></1> was not removed",
-    [deleteTemplatesById.rejected.type]: "The selected templates were not removed",
-    [getWebhook.rejected.type]: "The webhook of the job <1><0>{{name}}</0></1> was not created",
-    [deleteWebhook.rejected.type]: "The webhook of the job <1><0>{{name}}</0></1> was not removed",
-    [getInvokerByName.rejected.type]: "There is an error fetching invoker.",
-    [getAllInvokers.rejected.type]: "There is an error fetching invokers.",
-    [addInvoker.rejected.type]: "The invoker <1><0>{{name}}</0></1> was not added.",
-    [importInvoker.rejected.type]: "The invoker was not imported.",
-    [deleteInvokerByName.rejected.type]: "The invoker <1><0>{{name}}</0></1> was not removed",
-    [deleteInvokersById.rejected.type]: "The selected invokers were not removed",
-    [updateInvoker.rejected.type]: "The invoker <1><0>{{name}}</0></1> was not updated",
-    [uploadInvokerImage.rejected.type]: "The image of the invoker <1><0>{{name}}</0></1> was not uploaded.",
-    [getNotificationTemplateById.rejected.type]: "There is an error fetching notification template.",
-    [getAllNotificationTemplates.rejected.type]: "There is an error fetching notification templates.",
-    [addNotificationTemplate.rejected.type]: "The notification <1><0>{{name}}</0></1> was not added",
-    [updateNotificationTemplate.rejected.type]: "The notification <1><0>{{name}}</0></1> was not updated",
-    [deleteNotificationTemplateById.rejected.type]: "The notification <1><0>{{name}}</0></1> was not removed",
-    [deleteNotificationTemplatesById.rejected.type]: "The selected templates were not removed",
-    [checkForUpdates.rejected.type]: "OC Update <1><0>{{version}}</0></1> available",
-    [getResources.rejected.type]: "New invokers and templates are available (<1><0>{{update}}</0></1>)",
-    [uploadApplicationFile.rejected.type]: "New version was not uploaded",
-    [deleteApplicationFile.rejected.type]: "The version was not removed",
-    [updateResources.rejected.type]: "",
-    [updateApplication.rejected.type]: "Opencelium was not updated",
-    [updateAuthUserDetail.rejected.type]: "The settings were not updated",
+    [deleteConnectionById.rejected.type]: {
+      "__DEFAULT__": "The connection <1><0>{{title}}</0></1> was not removed"
+    },
+    [deleteConnectionsById.rejected.type]: {
+      "__DEFAULT__": "The selected connections were not removed"
+    },
+    [getScheduleById.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching schedule."
+    },
+    [getSchedulesById.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching schedules."
+    },
+    [startSchedule.rejected.type]: {
+      "__DEFAULT__": "The job <1><0>{{title}}</0></1> was not triggered"
+    },
+    [addSchedule.rejected.type]: {
+      "__DEFAULT__": "The schedule <1><0>{{title}}</0></1> was not added"
+    },
+    [deleteScheduleById.rejected.type]: {
+      "__DEFAULT__": "The schedule <1><0>{{title}}</0></1> was not removed"
+    },
+    [updateSchedule.rejected.type]: {
+      "__DEFAULT__": "The schedule <1><0>{{title}}</0></1> was not updated"
+    },
+    [switchScheduleStatus.rejected.type]: {
+      "__DEFAULT__": "The status of the job <1><0>{{title}}</0></1> was not updated"
+    },
+    [enableSchedules.rejected.type]: {
+      "__DEFAULT__": "The selected schedules were not enabled"
+    },
+    [disableSchedules.rejected.type]: {
+      "__DEFAULT__": "The selected schedules were not disabled"
+    },
+    [startSchedules.rejected.type]: {
+      "__DEFAULT__": "The selected schedules were not started"
+    },
+    [deleteSchedulesById.rejected.type]: {
+      "__DEFAULT__": "The selected schedules were not removed"
+    },
+    [getTemplateById.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching template."
+    },
+    [getAllTemplates.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching templates."
+    },
+    [addTemplate.rejected.type]: {
+      "__DEFAULT__": "The template <1><0>{{name}}</0></1> of the <3><0>{{title}}</0></3> was not added"
+    },
+    [updateTemplate.rejected.type]: {
+      "__DEFAULT__": "The template <1><0>{{name}}</0></1> was not updated"
+    },
+    [updateTemplates.rejected.type]: {
+      "__DEFAULT__": "The templates were not updated"
+    },
+    [importTemplate.rejected.type]: {
+      "__DEFAULT__": "The Template <1><0>{{name}}</0></1> was not imported"
+    },
+    [exportTemplate.rejected.type]: {
+      "__DEFAULT__": "The Template <1><0>{{name}}</0></1> was not downloaded"
+    },
+    [deleteTemplateById.rejected.type]: {
+      "__DEFAULT__": "The template <1><0>{{name}}</0></1> was not removed"
+    },
+    [deleteTemplatesById.rejected.type]: {
+      "__DEFAULT__": "The selected templates were not removed"
+    },
+    [getWebhook.rejected.type]: {
+      "__DEFAULT__": "The webhook of the job <1><0>{{name}}</0></1> was not created"
+    },
+    [deleteWebhook.rejected.type]: {
+      "__DEFAULT__": "The webhook of the job <1><0>{{name}}</0></1> was not removed"
+    },
+    [getInvokerByName.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching invoker."
+    },
+    [getAllInvokers.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching invokers."
+    },
+    [addInvoker.rejected.type]: {
+      "__DEFAULT__": "The invoker <1><0>{{name}}</0></1> was not added."
+    },
+    [importInvoker.rejected.type]: {
+      "__DEFAULT__": "The invoker was not imported."
+    },
+    [deleteInvokerByName.rejected.type]: {
+      "__DEFAULT__": "The invoker <1><0>{{name}}</0></1> was not removed"
+    },
+    [deleteInvokersById.rejected.type]: {
+      "__DEFAULT__": "The selected invokers were not removed"
+    },
+    [updateInvoker.rejected.type]: {
+      "__DEFAULT__": "The invoker <1><0>{{name}}</0></1> was not updated"
+    },
+    [uploadInvokerImage.rejected.type]: {
+      "__DEFAULT__": "The image of the invoker <1><0>{{name}}</0></1> was not uploaded."
+    },
+    [getNotificationTemplateById.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching notification template."
+    },
+    [getAllNotificationTemplates.rejected.type]: {
+      "__DEFAULT__": "There is an error fetching notification templates."
+    },
+    [addNotificationTemplate.rejected.type]: {
+      "__DEFAULT__": "The notification <1><0>{{name}}</0></1> was not added"
+    },
+    [updateNotificationTemplate.rejected.type]: {
+      "__DEFAULT__": "The notification <1><0>{{name}}</0></1> was not updated"
+    },
+    [deleteNotificationTemplateById.rejected.type]: {
+      "__DEFAULT__": "The notification <1><0>{{name}}</0></1> was not removed"
+    },
+    [deleteNotificationTemplatesById.rejected.type]: {
+      "__DEFAULT__": "The selected templates were not removed"
+    },
+    [checkForUpdates.rejected.type]: {
+      "__DEFAULT__": "OC Update <1><0>{{version}}</0></1> available"
+    },
+    [getResources.rejected.type]: {
+      "__DEFAULT__": "New invokers and templates are available (<1><0>{{update}}</0></1>)"
+    },
+    [uploadApplicationFile.rejected.type]: {
+      "__DEFAULT__": "New version was not uploaded"
+    },
+    [deleteApplicationFile.rejected.type]: {
+      "__DEFAULT__": "The version was not removed"
+    },
+    [updateResources.rejected.type]: {
+      "__DEFAULT__": ""
+    },
+    [updateApplication.rejected.type]: {
+      "__DEFAULT__": "Opencelium was not updated"
+    },
+    [updateAuthUserDetail.rejected.type]: {
+      "__DEFAULT__": "The settings were not updated"
+    },
   }
 }
 

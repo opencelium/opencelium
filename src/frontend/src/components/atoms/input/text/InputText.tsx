@@ -1,7 +1,23 @@
+/*
+ * Copyright (C) <2022>  <becon GmbH>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {FC, useState} from 'react';
 import {InputTextProps, InputTextType} from './interfaces';
 import {CheckStyled, InputStyled} from "./styles";
 import Input from "../Input";
+import {ColorTheme} from "../../../general/Theme";
 
 
 const InputText: FC<InputTextProps> = ({
@@ -32,6 +48,8 @@ const InputText: FC<InputTextProps> = ({
     overflow,
     inputHeight,
     isVisible,
+    paddingLeft,
+    paddingRight,
     ...props
 }) => {
     if(!isVisible){
@@ -45,8 +63,8 @@ const InputText: FC<InputTextProps> = ({
     const showPassword = type === InputTextType.Password && checked;
     const hasLabel = label !== '';
     return(
-        <Input overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width}
-               afterInputComponent={hasCheck ? <CheckStyled paddingTop={paddingTop ? paddingTop : '0'} emphasizeColor={color} marginTop={hasLabel ? '20px' : 0} hasLabel={hasLabel} type={'checkbox'} checked={checked} onChange={changeHandler}/> : null}
+        <Input overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
+               afterInputComponent={hasCheck ? <CheckStyled hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.DarkBlue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
                display={display} hasUnderline={hasUnderline} readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputStyled
                 emphasizeColor={color}
@@ -62,6 +80,7 @@ const InputText: FC<InputTextProps> = ({
                 paddingLeftInput={paddingLeftInput}
                 paddingRightInput={paddingRightInput}
                 height={inputHeight ? inputHeight : height}
+                paddingRight={paddingRight}
                 {...props}
             />
         </Input>

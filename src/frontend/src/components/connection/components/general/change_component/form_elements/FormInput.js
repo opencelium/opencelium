@@ -1,5 +1,7 @@
+
+
 /*
- * Copyright (C) <2021>  <becon GmbH>
+ * Copyright (C) <2022>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +66,7 @@ class FormInput extends Component{
             return <InputTextarea
                 error={error}
                 onChange={(e) => this.handleInput(e.target.value)}
-                onBlur={(a) => this.onBlur(a)}
+                //onBlur={(a) => this.onBlur(a)}
                 name={name}
                 id={'input_'+name}
                 label={label}
@@ -79,7 +81,7 @@ class FormInput extends Component{
         return <InputText
             error={error}
             onChange={(e) => this.handleInput(e.target.value)}
-            onBlur={(a) => this.onBlur(a)}
+            //onBlur={(a) => this.onBlur(a)}
             name={name}
             id={'input_'+name}
             label={label}
