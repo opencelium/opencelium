@@ -13,34 +13,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import {FormElement} from "@decorators/FormElement";
-import Operations from "./operation_item/Operations";
+import {ITheme} from "../../general/Theme";
 
-
-/**
- * Component for Form Connection
- */
-@FormElement()
-class FormOperations extends Component{
-
-    constructor(props){
-        super(props);
-    }
-
-
-    render(){
-        return (
-            <Operations {...this.props}/>
-        );
-    }
+interface InterpolateTranslationProps{
+    theme?: ITheme,
+    children?: any,
+    i18nKey: string,
 }
 
-FormOperations.propTypes = {
-    entity: PropTypes.object.isRequired,
-    data: PropTypes.object.isRequired,
-};
-
-
-export default FormOperations;
+export {
+    InterpolateTranslationProps,
+}

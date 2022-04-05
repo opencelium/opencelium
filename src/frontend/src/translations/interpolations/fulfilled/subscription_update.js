@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import InterpolateTranslation from "@translations/InterpolateTranslation";
+import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import React from "react";
 import {getResources} from "@action/application/ApplicationCreators";

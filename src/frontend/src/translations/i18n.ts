@@ -49,10 +49,11 @@ export default i18n
         preload: ['en'],
         interpolation: {
             escapeValue: false,
-        },/*
+        },
         react: {
             useSuspense: false,
-        },*/
+            wait: true,
+        },
         backend: {
             backends: [HttpBackend, resourcesToBackend(localResources)],
             backendOptions: [{loadPath: `${window.location.protocol}//${window.location.host}/locales/{{lng}}/{{ns}}.json`}],

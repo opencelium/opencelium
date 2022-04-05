@@ -14,7 +14,7 @@
  */
 
 import React from "react";
-import InterpolateTranslation from "../../InterpolateTranslation";
+import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import {addConnector, deleteConnectorById, updateConnector, uploadConnectorImage} from "@action/ConnectorCreators";
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import {getActionWithoutType} from "../../../utils";

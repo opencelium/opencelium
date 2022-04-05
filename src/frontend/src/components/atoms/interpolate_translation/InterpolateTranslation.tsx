@@ -1,5 +1,3 @@
- 
-
 /*
  * Copyright (C) <2022>  <becon GmbH>
  *
@@ -13,22 +11,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */ 
+ */
 
-import React from 'react';
-import {Trans} from 'react-i18next';
-import i18n from "./i18n";
 
-class InterpolateTranslation extends React.Component{
-    constructor(props) {
-        super(props);
+import React, {FC} from 'react';
+import {withTheme} from 'styled-components';
+import {Trans, useTranslation} from "react-i18next";
+import {InterpolateTranslationProps} from "./interfaces";
+
+const InterpolateTranslation: FC<InterpolateTranslationProps> = ({i18nKey, children}) => {
+    const {i18n} = useTranslation();
+    let transKey = i18nKey;
+    if(i18n.exists(`${i18nKey}.__DEFAULT__`)){
+        transKey = `${i18nKey}.__DEFAULT__`;
     }
-
-    render(){
-        return(
-            <Trans {...this.props}>{this.props.children}</Trans>
-        );
-    }
+    return(
+        <Trans i18nKey={transKey}>{children}</Trans>
+    );
 }
 
-export default InterpolateTranslation;
+InterpolateTranslation.defaultProps = {
+}
+
+
+export {
+    InterpolateTranslation,
+};
+
+export default withTheme(InterpolateTranslation);

@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) <2022>  <becon GmbH>
  *

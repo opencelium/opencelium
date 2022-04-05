@@ -14,7 +14,6 @@
  */
 
 import React from "react";
-import InterpolateTranslation from "@translations/InterpolateTranslation";
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import {checkForUpdates} from "@action/application/UpdateAssistantCreators";
 import {IApplicationResponse} from "@requestInterface/application/IResponse";
@@ -23,6 +22,7 @@ import {NotificationType} from "@interface/application/INotification";
 import {getActionWithoutType} from "../../../utils";
 import {NavigateFunction} from "react-router";
 import {AppDispatch} from "@store/store";
+import { InterpolateTranslation } from "@atom/interpolate_translation/InterpolateTranslation";
 
 const GET_LAST_AVAILABLE_VERSION = (responseType: NotificationType, dispatch: AppDispatch, navigate: NavigateFunction, params: IApplicationResponse<CheckForUpdateProps>) => {
     // @ts-ignore

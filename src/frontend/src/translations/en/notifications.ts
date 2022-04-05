@@ -323,7 +323,7 @@ const NotificationTranslations = {
       "__DEFAULT__": "OC Update <1><0>{{version}}</0></1> available"
     },
     [getResources.rejected.type]: {
-      "__DEFAULT__": "New invokers and templates are available (<1><0>{{update}}</0></1>)"
+      "__DEFAULT__": "The request of getting resources was rejected."
     },
     [uploadApplicationFile.rejected.type]: {
       "__DEFAULT__": "New version was not uploaded"

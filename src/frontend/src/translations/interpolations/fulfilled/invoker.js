@@ -14,7 +14,7 @@
  */
 
 import React from "react";
-import InterpolateTranslation from "../../InterpolateTranslation";
+import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import {addInvoker, deleteInvokerByName, importInvoker, updateInvoker} from "@action/InvokerCreators";
 import {getActionWithoutType} from "../../../utils";

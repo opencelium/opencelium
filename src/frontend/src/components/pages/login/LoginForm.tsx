@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from "react";
+import React, {FC, Suspense, useEffect} from "react";
 import {Auth} from "@class/application/Auth";
 import {IAuth} from "@interface/application/IAuth";
 import {LoginIcon} from "@molecule/login_icon/LoginIcon";
@@ -25,6 +25,7 @@ import {useLocation, useNavigate} from "react-router";
 import NotificationItem from "@organism/top_bar/NotificationItem";
 import {LoginFormProps} from "@page/login/interfaces";
 import {createGlobalStyle} from "styled-components";
+import LayoutLoading from "@molecule/loading/LayoutLoading";
 
 const Global = createGlobalStyle`
     body{
@@ -82,7 +83,7 @@ const LoginForm: FC<LoginFormProps> = ({}) => {
         }
     })
     return(
-        <React.Fragment>
+        <Suspense fallback={(<LayoutLoading/>)}>
             <Global/>
             {!isAuth && <NotificationItem/>}
             <LoginFormStyled isAuth={isAuth}>
@@ -91,7 +92,7 @@ const LoginForm: FC<LoginFormProps> = ({}) => {
                 {PasswordInput}
                 <LoginIcon login={() => LoginForm.login()}/>
             </LoginFormStyled>
-        </React.Fragment>
+        </Suspense>
     )
 }
 

@@ -14,7 +14,7 @@
  */
 
 import React from "react";
-import InterpolateTranslation from "../../InterpolateTranslation";
+import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import {addUserGroup, deleteUserGroupById, updateUserGroup} from "@action/UserGroupCreators";
 import {getActionWithoutType} from "../../../utils";
