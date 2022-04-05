@@ -51,7 +51,9 @@ export const getResources = createAsyncThunk(
         try{
             const request = new ApplicationRequest();
             const response = await request.getResources();
-            return {data: response.data, settings};
+            // @ts-ignore
+            const withoutNotification = setting && settings?.withoutNotification ? settings.withoutNotification : response.data.files_name.length === 0;
+            return {data: response.data, settings: {withoutNotification}};
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
