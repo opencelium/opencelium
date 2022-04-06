@@ -1,5 +1,6 @@
-node_modules
-.idea
-readme.txt
 dist
+.idea
+node_modules
+.gitlab-ci.yml
 debug.log
+readme.txt

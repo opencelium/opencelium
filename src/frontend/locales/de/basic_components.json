@@ -1,9 +1,0 @@
-{
-  "INPUTS": {
-    "SELECT_SEARCH": {
-      "TOOLTIP_NO_PARAMS": "No Params",
-      "TOOLTIP_USE_PARAM": "User Param",
-      "TOOLTIP_SEARCH_PARAM": "Search Param"
-    }
-  }
-}

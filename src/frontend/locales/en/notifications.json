@@ -1,6 +1,5 @@
 {
   "SUCCESS": {
-    "LOGIN_GRAPHQL": "GraphQL is connected. Requests are available now.",
     "ADD_USER": "The user <1><0>{{email}}</0></1> was successfully added.",
     "ADD_PROFILEPICTURE": "The user {{name}} was successfully added.",
     "FETCH_USERS": "The list of users was successfully fetched.",
@@ -77,8 +76,6 @@
     "UPDATE_THEME": "The application theme was successfully changed"
   },
   "ERROR": {
-    "UPDATE_INVOKERMETHOD": "The invoker operation was not updated",
-    "LOGIN_GRAPHQL": "GraphQL was not connected",
     "ADD_USER": {
       "__DEFAULT__": "The user was not added."
     },

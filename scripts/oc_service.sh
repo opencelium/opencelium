@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (C) <2019>  <becon GmbH>
+#  Copyright (C) <2022>  <becon GmbH>
 #  
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ rebuild_backend(){
 
 stop_backend()
 {
-	/usr/lib/klibc/bin/kill $(pgrep -f "java -Dserver")
+	kill $(pgrep -f "java -Dserver")
 }
 
 start_backend(){
@@ -45,7 +45,7 @@ start_backend(){
 		        RETRY=$((RETRY-1))
 		        sleep 2
 	    	else
-	        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
+	        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
 	        	echo "backend started..."
 	        	return 1
 		fi
@@ -60,12 +60,12 @@ restart_backend(){
 }
 
 rebuild_frontend(){
-        cd /opt/src/frontend/ && yarn upgrade --cwd /opt/src/frontend --cache-folder /opt/src/frontend > /opt/logs/oc_frontend.out &
+        cd /opt/src/frontend/ && nohup /usr/bin/node server.js > /opt/logs/oc_frontend.out &
 }
 
 stop_frontend()
 {
-	/usr/lib/klibc/bin/kill $(pgrep -f "bin/node server.js")
+	kill $(pgrep -f "bin/node server.js")
 	sleep 1
 }
 
@@ -73,20 +73,20 @@ start_frontend(){
         RETRY=20
 
         while [ $RETRY -gt 0 ]
-        do	
+        do
 		if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ;
         	then
         		echo "Port 8888 is used. Retrying Again" >&2
 		        RETRY=$((RETRY-1))
                 	sleep 2
 		else
-        		cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_prod > /opt/logs/oc_frontend.out &
+        		cd /opt/src/frontend/ && nohup /usr/bin/node server.js > /opt/logs/oc_frontend.out &
 		        echo "frontend started..."
                 	return 1
 		fi
 	done
 
-        echo "Server couldnt be started. Port 8888 is used."	
+        echo "Server couldnt be started. Port 8888 is used."
 }
 
 restart_frontend(){
@@ -95,16 +95,16 @@ restart_frontend(){
 }
 
 check_frontend(){
-                
+
 	if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ;
         then echo ""
         else
-        	cd /opt/src/frontend/ && nohup yarn --cwd /opt/src/frontend --cache-folder /opt/src/frontend start_prod > /opt/logs/oc_frontend.out &
+        	cd /opt/src/frontend/ && nohup /usr/bin/node server.js > /opt/logs/oc_frontend.out &
                 echo "frontend started..."
                 return 1
         fi
 
-        echo "Frontend already started."    
+        echo "Frontend already started."
 }
 
 check_backend(){
@@ -112,7 +112,7 @@ check_backend(){
         if lsof -Pi :9090 -sTCP:LISTEN -t >/dev/null ;
         then echo ""
         else
-        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar > /opt/logs/oc_backend.out &
+        	cd /opt/src/backend/ && nohup java -Dserver.port=9090 -jar /opt/src/backend/build/libs/opencelium.backend-0.0.1-SNAPSHOT.jar --spring.config.location=/opt/src/backend/src/main/resources/application.yml > /opt/logs/oc_backend.out &
                 echo "backend started..."
                 return 1
         fi
@@ -145,21 +145,21 @@ backup(){
 	      ? ) helpBackup ;; # Print helpInfo in case parameter is non-existent
 	   esac
 	done
-	
+
 	# Init name
 	if [ -z "$name" ]
 	then
            current_time=$(date "+%Y%m%d%H%M%S")
 	   name="OC_$current_time"
 	fi
-	
+
 	        # Print helpInfo in case parameters are empty
         if [ -z "$backupdir" ] || [ -z "$username" ] || [ -z "$password" ]
         then
            echo "Some or all of the parameters are empty";
            helpBackup
         fi
-	
+
 	### clear old backups
 	rm -rf $backupdir/graph.db.dump
 	rm -rf $backupdir/oc_data.sql
@@ -211,7 +211,7 @@ restore(){
 	      ? ) helpRestore ;; # Print helpInfo in case parameter is non-existent
 	   esac
 	done
-	
+
 	        # Print helpInfo in case parameters are empty
         if [ -z "$backupdir" ] || [ -z "$username" ] || [ -z "$password" ] || [ -z "$name" ]
         then
@@ -230,7 +230,7 @@ restore(){
 	### database backup
 	/usr/bin/neo4j-admin load --database=graph.db --from=$backupdir/graph.db.dump --force
 	/usr/bin/mysql -u $username -p$password opencelium < $backupdir/oc_data.sql
-	
+
 	### change owner rights
 	chown -R neo4j:neo4j /var/lib/neo4j/data/databases/graph.db/
 

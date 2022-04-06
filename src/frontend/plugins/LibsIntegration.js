@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2021>  <becon GmbH>
+ * Copyright (C) <2022>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 const fs = require("fs");
 const fileNames = ['react-toolbox/lib/dropdown/Dropdown.js','react-toolbox/lib/link/Link.js', 'storm-react-diagrams/dist/main.js',
-    'storm-react-diagrams/dist/main.js.map', 'storm-react-diagrams/dist/style.min.css', 'react-json-view/dist/main.js', 'react-loadable/lib/index.js'];
+    'storm-react-diagrams/dist/main.js.map', 'storm-react-diagrams/dist/style.min.css', 'react-json-view/dist/main.js'];
 
 
 /**

@@ -32,7 +32,28 @@
                 </fail>
             </response>
         </operation>
-	<operation name="getComputerByID" type="">
+        <operation name="getComputers" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/v1/computers?start=0&amp;limit=100</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>        
+	    <operation name="getComputerByID" type="">
             <request>
                 <method>GET</method>
                 <endpoint>{url}/v1/computer/{ID}</endpoint>
@@ -50,7 +71,7 @@
                         <field name="result" type="object">
                         <field name="hardware" type="object">
                            <field name="NAME" type="string"/>
-			   <field name="IPSRC" type="string"/>
+                           <field name="IPSRC" type="string"/>
                            <field name="OSNAME" type="string"/>                                
                            <field name="OSVERSION" type="string"/>                                
                            <field name="UUID" type="string"/>                                
@@ -71,7 +92,7 @@
                            <field name="MODEL" type="string"/>
                            <field name="SERIALNUMBER" type="string"/>
                          </field>			 
-			 <field name="softwares" type="array">
+			             <field name="softwares" type="array">
                            <field name="NAME" type="string"/>
                            <field name="COMMENTS" type="string"/>
                            <field name="VERSION" type="string"/>
@@ -85,5 +106,131 @@
                 </fail>
             </response>
         </operation>
+        <operation name="getComputerByIDAndSpecificDetail" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/v1/computer/{ID/{specificDetail}</endpoint>
+                <header>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="object">
+                        <field name="hardware" type="object">
+                           <field name="NAME" type="string"/>
+                           <field name="IPSRC" type="string"/>
+                           <field name="OSNAME" type="string"/>                                
+                           <field name="OSVERSION" type="string"/>                                
+                           <field name="UUID" type="string"/>                                
+                           <field name="MEMORY" type="string"/>                                
+                           <field name="DEFAULTGATEWAY" type="string"/>                                
+                           <field name="DNS" type="string"/>                                
+                         </field>
+                         <field name="memories" type="object">
+                           <field name="CAPACITY" type="string"/>
+                           <field name="TYPE" type="string"/>
+                           <field name="CAPTION" type="string"/>
+                           <field name="SERIALNUMBER" type="string"/>
+                           <field name="SPEED" type="string"/>  
+                         </field>
+                         <field name="storages" type="array">
+                           <field name="MANUFACTURER" type="string"/>
+                           <field name="TYPE" type="string"/>
+                           <field name="MODEL" type="string"/>
+                           <field name="SERIALNUMBER" type="string"/>
+                         </field>            
+                         <field name="softwares" type="array">
+                           <field name="NAME" type="string"/>
+                           <field name="COMMENTS" type="string"/>
+                           <field name="VERSION" type="string"/>
+                         </field>
+                         </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getComputerBySearch" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/v1/computers/search?start=0&amp;limit=100&amp;{SEARCHCRITERIA}={VALUETOMATCH}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="array" format="json" data="raw">
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getSNMPTypeList" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/v1/snmps/typeList</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="array" format="json" data="raw">
+                           <field name="ID" type="string"/>
+                           <field name="TABLE_TYPE_NAME" type="string"/>
+                           <field name="TYPE_NAME" type="string"/>
+                           <field name="CONDITION_OID" type="string"/>
+                           <field name="CONDITION_VALUE" type="string"/>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getSNMPTypeListDetails" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/v1/snmps/{TABLE_TYPE_NAME}/{ID}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body/>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body type="object" format="json" data="raw">
+                           <field name="ID" type="string"/>
+                           <field name="TABLE_TYPE_NAME" type="string"/>
+                           <field name="TYPE_NAME" type="string"/>
+                           <field name="CONDITION_OID" type="string"/>
+                           <field name="CONDITION_VALUE" type="string"/>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>                       
     </operations>
 </invoker>

@@ -1,8 +1,0 @@
-{
-  "LIST":{
-    "ADD_BUTTON": "Add App",
-    "EMPTY_LIST": "The list of Apps is empty",
-    "HEADER": "Apps",
-    "HEADER_ADMIN_CARDS": "Admin Cards"
-  }
-}

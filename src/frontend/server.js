@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <2021>  <becon GmbH>
+ * Copyright (C) <2022>  <becon GmbH>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,11 +12,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+const integrateLibs = require('./plugins/LibsIntegration');
+const WebpackDevServer = require('webpack-dev-server');
+const webpack = require('webpack');
+const config = require('./webpack.config')({envVar: {'process.env.isProduction': true}});
+integrateLibs();
+const compiler = webpack({
+    ...config,
+    mode: 'production',
+    performance: {
+        hints: false,
+    }
+});
+const server = new WebpackDevServer({...config.devServer, client: {logging: 'none'}}, compiler);
+server.startCallback(() => {
+    console.log("Starting client...");
+});
 
-const NodeParams = require('./plugins/NodeParams');
-const Server = require('./plugins/ServerIntegration');
-
-if(NodeParams.HAS_SOCKET) {
-    Server.SOCKET_SERVER.run();
-}
-Server.DEV_SERVER.run();
