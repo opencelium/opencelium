@@ -14,6 +14,7 @@
  */
 
 import styled, {css} from "styled-components";
+import chroma from "chroma-js";
 import {ITheme} from "../../general/Theme";
 import {InputStyledProps, LabelStyledProps, IconStyledProps, ErrorStyledProps, ElementProps} from "./interfaces";
 
@@ -83,7 +84,7 @@ const EmphasizeInputStyleLines = css`
     & + div{
         opacity: ${({hasNotUnderline}: ElementProps) => hasNotUnderline ? '0 !important' : '1 !important'};
         margin-left: ${({marginLeft, hasIcon, isIconInside, theme}: ElementProps) => marginLeft ? marginLeft : (!hasIcon || isIconInside) ? 0 : theme.input.iconInputDistance};
-        height: 2px;
+        height: 4px;
         background: transparent;
         transition: ${({noAnimation}: ElementProps) => noAnimation ? 'unset' : 'color, width 0.5s ease-in-out'}; 
         width: 0;
@@ -105,7 +106,7 @@ const EmphasizeInputStyleLines = css`
         background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? `linear-gradient(180deg, rgba(255,255,255,0) 45%, ${emphasizeColor || theme.input.text.color.quite} 100%)` : 'unset'};
     }
     &:focus ~ span{
-        color: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
+        color: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? chroma(emphasizeColor || theme.input.text.color.quite).darken(1.2).toString() : 'unset'};
         opacity: 1;
     }
     &:focus ~ div > span{

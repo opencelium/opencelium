@@ -25,7 +25,6 @@ const InputStyled = styled.input<ElementProps>`
     outline: none;
     border: none;
     cursor: ${({readOnly}) => readOnly ? 'default' : 'text'};
-    border-bottom: ${({value}) => !value || value.toString().length === 0 ? '1px solid #c1c1c1' : 'none'};
     transition: border-bottom-color 0.5s;
     padding-left: ${({paddingLeft, paddingLeftInput}) => paddingLeftInput ? paddingLeftInput : paddingLeft || 0};
     padding-right: ${({paddingRight, paddingRightInput}) => paddingRightInput ? paddingRightInput : paddingRight || 0};

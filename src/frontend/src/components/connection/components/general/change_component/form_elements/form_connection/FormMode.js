@@ -31,6 +31,7 @@ import {ExpertButtonStyled, TemplateButtonStyled} from "@change_component/form_e
 import InputSelect from "@atom/input/select/InputSelect";
 import {TextSize} from "@atom/text/interfaces";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import InputTextarea from "@atom/input/textarea/InputTextarea";
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
@@ -265,16 +266,14 @@ class FormMode extends Component{
             value = !value.description ? 'There is no description for this template' : value.description;
         }
         return(
-            <Input
+            <InputTextarea
                 name={'template_description'}
                 type={'text'}
                 value={value}
-                multiline={true}
-                rows={4}
                 readOnly={true}
-                className={styles.template_description}
+                icon={'notes'}
             />
-        );
+        )
     }
 
     renderTemplateSelect(){
@@ -364,26 +363,28 @@ class FormMode extends Component{
             tourStep = '';
         }
         return (
-            <div className={`${tourStep}`} style={{margin: '20px 65px 0'}}>
-                <div style={{textAlign: 'center'}}>
-                    <ExpertButtonStyled
-                        size={TextSize.Size_16}
-                        isActive={mode === EXPERT_MODE}
-                        authUser={authUser}
-                        title={modeLabels.expert}
-                        onClick={(e) => this.toggleConfirm(e, EXPERT_MODE)}
-                    />
-                    <TemplateButtonStyled
-                        size={TextSize.Size_16}
-                        isActive={mode === TEMPLATE_MODE}
-                        authUser={authUser}
-                        title={modeLabels.template}
-                        onClick={(e) => this.toggleConfirm(e, TEMPLATE_MODE)}
-                    />
+            <React.Fragment>
+                <div className={`${tourStep}`} style={{margin: '20px 65px 0'}}>
+                    <div style={{textAlign: 'center'}}>
+                        <ExpertButtonStyled
+                            size={TextSize.Size_16}
+                            isActive={mode === EXPERT_MODE}
+                            authUser={authUser}
+                            title={modeLabels.expert}
+                            onClick={(e) => this.toggleConfirm(e, EXPERT_MODE)}
+                        />
+                        <TemplateButtonStyled
+                            size={TextSize.Size_16}
+                            isActive={mode === TEMPLATE_MODE}
+                            authUser={authUser}
+                            title={modeLabels.template}
+                            onClick={(e) => this.toggleConfirm(e, TEMPLATE_MODE)}
+                        />
+                    </div>
                 </div>
                 {this.renderTemplateSelect()}
                 {this.renderConfirmation()}
-            </div>
+            </React.Fragment>
         );
     }
 }

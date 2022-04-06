@@ -24,7 +24,7 @@ const InputSwitcherStyled = styled.div<InputSwitchStyledProps>`
     border-radius: 15px;
     border: 1px solid #aaa;
     transition: background 0.3s;
-    background: ${({isChecked, theme}) => isChecked ? theme.input.text.color.quite : '#fff'};
+    background: ${({isChecked, theme}) => isChecked ? theme.button.background.quite : '#fff'};
     &:after{
         content: '';
         position: absolute;

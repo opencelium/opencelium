@@ -59,7 +59,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
             });
         } else{
             return (
-                <EmptyListStyled>There are no triggering schedules</EmptyListStyled>
+                <EmptyListStyled value={"There are no triggering schedules"}/>
             )
         }
     }

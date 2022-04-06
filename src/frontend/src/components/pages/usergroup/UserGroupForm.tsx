@@ -67,7 +67,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         }
     },[addingUserGroup, updatingUserGroup]);
     const NameInput = userGroup.getText({
-        propertyName: "name", props: {autoFocus: true, required: true, icon: 'person', label: 'Name', isLoading: checkingUserGroupName === API_REQUEST_STATE.START, error: isCurrentUserGroupHasUniqueName === TRIPLET_STATE.FALSE ? 'The name must be unique' : ''}
+        propertyName: "name", props: {autoFocus: !isView, required: true, icon: 'person', label: 'Name', isLoading: checkingUserGroupName === API_REQUEST_STATE.START, error: isCurrentUserGroupHasUniqueName === TRIPLET_STATE.FALSE ? 'The name must be unique' : ''}
     })
     const DescriptionInput = userGroup.getTextarea({
         propertyName: "description", props: {icon: "notes", label: "Description"}
@@ -83,6 +83,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     }})
     const Permissions = userGroup.getPermissionComponent();
     let actions = [<Button
+        autoFocus={isView}
         key={'list_button'}
         label={formData.listButton.label}
         icon={formData.listButton.icon}
@@ -105,7 +106,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             <FormSection label={{value: 'user details'}}>
                 {NameInput}
                 {DescriptionInput}
-                {Avatar}
+                {!isView && Avatar}
             </FormSection>,
             <React.Fragment>
                 <FormSection label={{value: 'credentials'}}>

@@ -27,7 +27,6 @@ const TextareaStyled = styled.textarea<ElementProps>`
     outline: none;
     border: none;
     cursor: ${({readOnly}) => readOnly ? 'default' : 'text'};
-    border-bottom: ${({value}) => !value || value.toString().length === 0 ? '1px solid #c1c1c1' : 'none'};
     transition: border-bottom-color 0.5s;
     padding-left: ${({paddingLeft}) => paddingLeft || 0};
     padding-right: ${({paddingRight}) => paddingRight || 0};

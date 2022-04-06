@@ -98,7 +98,6 @@ InputFile.defaultProps = {
     label: '',
     error: '',
     required: false,
-    color: ColorTheme.DarkBlue,
     hasNoImage: true,
     hasCheckbox: false,
 }

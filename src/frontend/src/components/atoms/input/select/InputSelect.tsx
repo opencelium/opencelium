@@ -221,13 +221,13 @@ const InputSelect: FC<InputSelectProps> = ({
                             return (
                                 <span key={`${label}_${index}`}>
                                     {label}
-                                    <Button hasBackground={false} icon={'close'} onBlur={toggleRemoveLabel} handleClick={() => removeLabel(label)} color={ColorTheme.Black} iconSize={'10px'} position={'absolute'} right={0} top={0}/>
+                                    {!readOnly && <Button hasBackground={false} icon={'close'} onBlur={toggleRemoveLabel} handleClick={() => removeLabel(label)} color={ColorTheme.Black} iconSize={'10px'} position={'absolute'} right={0} top={0}/>}
                                 </span>
                             );
                         })
                     }
                     {
-                        isSearchable &&
+                        isSearchable && !readOnly &&
                         <SearchInputStyled
                             id={id}
                             readOnly={readOnly}
@@ -249,7 +249,7 @@ const InputSelect: FC<InputSelectProps> = ({
                 }
             </InputContainerStyled>
             {!isSearchable && <SelectStyled id={id} ref={inputSelectRef} tabIndex={-1} color={color} onClick={() => toggleOptions(isToggled)}/>}
-            {!readOnly && <ToggleStyled noAnimation={isHidden} hasNotUnderline={isHidden} hasBackground={false} isLoading={!hasIcon && isLoading} emphasizeColor={color} size={16} color={ColorTheme.DarkBlue} icon={isToggled ? 'arrow_drop_up' : 'arrow_drop_down'} handleClick={() => toggleOptions(!isToggled)} position={'absolute'} right={1} top={`5px`}/>}
+            {!readOnly && <ToggleStyled noAnimation={isHidden} hasNotUnderline={isHidden} hasBackground={false} isLoading={!hasIcon && isLoading} emphasizeColor={color} size={16} color={ColorTheme.ToolboxBlue} icon={isToggled ? 'arrow_drop_up' : 'arrow_drop_down'} handleClick={() => toggleOptions(!isToggled)} position={'absolute'} right={1} top={`5px`}/>}
             <LineStyled/>
             <OptionsStyled ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
                 {

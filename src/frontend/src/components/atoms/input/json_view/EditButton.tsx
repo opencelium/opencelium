@@ -63,7 +63,7 @@ const EditButton: FC<EditButtonProps> =
                 position={'absolute'}
                 hasBackground={false}
                 iconSize={TextSize.Size_16}
-                color={ColorTheme.Turquoise}
+                color={ColorTheme.Blue}
             />
             <Dialog
                 actions={actions}

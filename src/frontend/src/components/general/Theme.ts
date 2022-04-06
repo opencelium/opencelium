@@ -20,6 +20,7 @@ export enum ColorTheme {
     White = '#fff',
     Turquoise = '#00ACC2',
     Blue = '#007bff',
+    ToolboxBlue = '#0062cc',
     LightGray= 'rgba(33, 33, 33, 0.26)',
     Gray = '#777',
     DarkBlue = '#012E55',
@@ -56,6 +57,7 @@ type IInputElement = {
 }
 type IInput = {
     iconInputDistance?: string,
+    inputRightDistance?: string,
     inputElement?: IInputElement,
     text: IInputText,
     error: IInputError,
@@ -101,13 +103,14 @@ const defaultTheme: ITheme = {
     },
     input: {
         iconInputDistance: '50px',
+        inputRightDistance: '20px',
         inputElement: {
             paddingTop: '5px',
             paddingBottom: '3px',
         },
         text:{
             color: {
-                quite: ColorTheme.DarkBlue,
+                quite: ColorTheme.ToolboxBlue,
                 disable: ColorTheme.Gray,
             },
         },
