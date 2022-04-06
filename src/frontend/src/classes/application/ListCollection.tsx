@@ -20,7 +20,7 @@ import {ColorTheme} from "../../components/general/Theme";
 import {TextSize} from "@atom/text/interfaces";
 import {DeleteButtonStyled} from "@organism/collection_view/styles";
 import {ComponentPermissionProps} from "@constants/permissions";
-import {PermissionButton} from "@atom/button/PermissionButton";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ViewType} from "@organism/collection_view/CollectionView";
 import {AppDispatch} from "@store/store";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
@@ -52,7 +52,7 @@ class ListCollection implements IListCollection{
         return (
             <React.Fragment>
                 <PermissionButton href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
-                <PermissionButton href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
+                <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );

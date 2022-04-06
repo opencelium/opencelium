@@ -19,7 +19,7 @@ import {ITemplate} from "@interface/connection/ITemplate";
 import {Template} from "@class/connection/Template";
 import {SortType} from "@organism/collection_view/interfaces";
 import {ListProp} from "@interface/application/IListCollection";
-import {PermissionButton} from "@atom/button/PermissionButton";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ComponentPermissionProps, TemplatePermissions} from "@constants/permissions";
 import {ViewType} from "@organism/collection_view/CollectionView";
 import {deleteTemplatesById, exportTemplate} from "@action/connection/TemplateCreators";
@@ -70,7 +70,7 @@ class Templates extends ListCollection{
             <React.Fragment>
                 <AddTemplateButton name={entity.name} description={entity.description} connection={entity.connection}/>
                 <PermissionButton hasBackground={false} handleClick={() => this.dispatch(exportTemplate(exportTemplateData))} icon={'file_download'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
-                <PermissionButton href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );

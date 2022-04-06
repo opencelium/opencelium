@@ -68,12 +68,15 @@ const rootReducer = combineReducers({
 })
 
 const middlewares = [
-    logger,
     authMiddleware,
     applicationMiddleware,
     notificationMiddleware,
     createStateSyncMiddleware(syncConfig),
 ]
+
+if(process.env.isDevelopment){
+    middlewares.unshift(logger);
+}
 
 export const setupStore = () => {
     return configureStore({

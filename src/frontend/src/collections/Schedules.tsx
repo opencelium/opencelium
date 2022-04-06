@@ -22,7 +22,7 @@ import {SortType} from "@organism/collection_view/interfaces";
 import {ColorTheme} from "../components/general/Theme";
 import {ListProp} from "@interface/application/IListCollection";
 import {AppDispatch} from "@store/store";
-import {PermissionButton} from "@atom/button/PermissionButton";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ComponentPermissionProps, SchedulePermissions} from "@constants/permissions";
 import {ViewType} from "@organism/collection_view/CollectionView";
 import {
@@ -133,7 +133,7 @@ class Schedules extends ListCollection{
         return (
             <React.Fragment>
                 {/*<PermissionButton href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>*/}
-                <PermissionButton href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
+                <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 <PermissionButton hasBackground={false} handleClick={() => this.dispatch(startSchedule(entity))} icon={'play_arrow'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 <PermissionButton hasBackground={false} handleClick={webhookAction} icon={entity.webhook ? 'link_off' : 'link'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 <ScheduleNotificationsIcon schedule={entity}/>

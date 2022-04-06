@@ -12,13 +12,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+const integrateLibs = require('./plugins/LibsIntegration');
+const WebpackDevServer = require('webpack-dev-server');
+const webpack = require('webpack');
+const config = require('./webpack.config')({envVar: {'process.env.isDevelopment': true}});
+integrateLibs();
+const compiler = webpack({
+    ...config,
+    mode: 'development',
+    devtool: 'eval-source-map',
+});
+const server = new WebpackDevServer({...config.devServer}, compiler);
+server.startCallback(() => {
+    console.log("Starting client...");
+});
 
-import {permission} from "../../../decorators/permission";
-import {ButtonProps} from "@atom/button/interfaces";
-import Button from "@atom/button/Button";
-import {TooltipButton} from "@molecule/tooltip_button/TooltipButton";
-import {TooltipButtonProps} from "@molecule/tooltip_button/interfaces";
-import {TooltipProps} from "reactstrap";
-
-export const PermissionButton = permission<ButtonProps>(null, false)(Button);
-export const PermissionTooltipButton = permission<TooltipButtonProps & ButtonProps & Partial<TooltipProps>>(null, false)(TooltipButton);

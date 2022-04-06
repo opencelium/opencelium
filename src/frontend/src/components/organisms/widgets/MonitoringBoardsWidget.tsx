@@ -41,7 +41,7 @@ const MonitoringBoardsWidget: FC =
         * TODO: implement update dashboard settings
         */
     }
-    return (
+        return (
         <MonitoringBoardsWidgetStyled >
             <WidgetTitle title={'Monitoring'}/>
             <Iframe
@@ -52,7 +52,8 @@ const MonitoringBoardsWidget: FC =
                 display="block"
                 position="relative"
                 allowFullScreen
-                sandbox={`allow-same-origin`}
+                // @ts-ignore
+                sandbox={`allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-top-navigation`}
             />
         </MonitoringBoardsWidgetStyled>
     )

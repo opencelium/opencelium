@@ -21,7 +21,7 @@ import {Invoker} from "@class/invoker/Invoker";
 import {ListProp} from "@interface/application/IListCollection";
 import {AppDispatch} from "@store/store";
 import {ComponentPermissionProps, InvokerPermissions} from "@constants/permissions";
-import {PermissionButton} from "@atom/button/PermissionButton";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ViewType} from "@organism/collection_view/CollectionView";
 import {deleteInvokersById} from "@action/InvokerCreators";
 import {ColorTheme} from "../components/general/Theme";
@@ -62,7 +62,7 @@ class Invokers extends ListCollection{
         return (
             <React.Fragment>
                 <PermissionButton href={`${entity.name}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
-                <PermissionButton href={`${entity.name}/update`} hasBackground={false} icon={'refresh'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
+                <PermissionTooltipButton target={`update_entity_${entity.name.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.name}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteByName()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );
