@@ -295,4 +295,7 @@ ALTER TABLE connector ADD COLUMN IF NOT EXISTS timeout INT NOT NULL;
 --changeset 2.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE detail CHANGE organisation organization varchar(100);
 
+--changeset 2.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE enhancement MODIFY expert_var TEXT;
+
 
