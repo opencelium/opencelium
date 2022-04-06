@@ -53,6 +53,14 @@ const Menu: FC<MenuProps> =
     useEffect(() => {
         setTimeout(() => resizeWindow(), 500);
     },[isExpanded]);
+    useEffect(() => {
+        return () => {
+            const bodyElement = document.querySelector('body');
+            if (bodyElement) {
+                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+            }
+        }
+    }, [])
     const toggle = () => {
         toggleExpanded(!isExpanded);
         let bodyElement = document.querySelector('body');
