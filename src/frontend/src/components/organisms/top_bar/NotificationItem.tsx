@@ -40,7 +40,7 @@ const NotificationItem: FC<NotificationItemProps> =
     const [lastNotification, setLastNotification] = useState(null);
     let calloutMessage = lastNotification ? lastNotification.getMessageData().message : '';
     if(calloutMessage && isString(calloutMessage)){
-        calloutMessage = <Text value={calloutMessage} transKey={calloutMessage} size={TextSize.Size_14}/>
+        calloutMessage = <Text value={calloutMessage} transKey={calloutMessage} size={TextSize.Size_12}/>
     }
     useEffect(() => {
         if(notificationAmount < notifications.length){

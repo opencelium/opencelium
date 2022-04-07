@@ -94,7 +94,7 @@ const ListRow: FC<ListRowProps> =
                     })
                 }
                 {collection.hasActions &&
-                <td>
+                <td style={{whiteSpace: 'nowrap'}}>
                     {actionsData}
                 </td>
                 }

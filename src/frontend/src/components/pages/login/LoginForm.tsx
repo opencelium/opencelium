@@ -77,7 +77,6 @@ const LoginForm: FC<LoginFormProps> = ({}) => {
             paddingRight: '5px',
             placeholder: 'Password',
             paddingLeftInput: '5px',
-            paddingRightInput: '25px',
             overflow: isAuth ? 'hidden' : 'unset',
             onKeyPress: (e) => onEnter(e, () => LoginForm.login()),
         }

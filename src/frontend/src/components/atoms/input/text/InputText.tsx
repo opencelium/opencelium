@@ -64,7 +64,7 @@ const InputText: FC<InputTextProps> = ({
     const hasLabel = label !== '';
     return(
         <Input overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
-               afterInputComponent={hasCheck ? <CheckStyled hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
+               afterInputComponent={hasCheck ? <CheckStyled hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingRight={paddingRight} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
                display={display} hasUnderline={hasUnderline} readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputStyled
                 emphasizeColor={color}
@@ -78,7 +78,7 @@ const InputText: FC<InputTextProps> = ({
                 background={background}
                 marginTop={marginTop}
                 paddingLeftInput={paddingLeftInput}
-                paddingRightInput={paddingRightInput}
+                paddingRightInput={hasCheck ? `calc(${paddingRightInput || '0px'} + 30px)` : paddingRightInput || '0'}
                 height={inputHeight ? inputHeight : height}
                 paddingRight={paddingRight}
                 {...props}

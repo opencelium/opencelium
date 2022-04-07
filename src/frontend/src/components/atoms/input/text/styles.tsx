@@ -39,7 +39,7 @@ const InputStyled = styled.input<ElementProps>`
 
 const CheckStyled = styled(Button)<CheckStyledProps>`
     position: absolute;
-    right: 6px;
+    right: ${({paddingRight}) => `calc(${paddingRight || '0px'} + 2px)` || '2px'};
     top: 7px;
     margin-top: ${({marginTop, paddingTop}) => marginTop || paddingTop || 0};
     opacity: 1 !important;

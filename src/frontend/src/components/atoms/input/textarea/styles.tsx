@@ -34,9 +34,6 @@ const TextareaStyled = styled.textarea<ElementProps>`
     margin-left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
     margin-top: ${({marginTop}) => marginTop || 0};
     ${EmphasizeInputStyleLines}
-    & + div{
-        height: 3px;
-    }
 `;
 
 export {

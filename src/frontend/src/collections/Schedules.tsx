@@ -42,6 +42,7 @@ import LastFailExecution from "@molecule/last_fail_execution/LastFailExecution";
 import {LastDurationExecution} from "@molecule/last_duration_execution/LastDurationExecution";
 import ExecutionStatus from "@molecule/execution_status/ExecutionStatus";
 import {SchedulesIdRequestProps} from "@requestInterface/schedule/ISchedule";
+import { Link } from "react-router-dom";
 
 class Schedules extends ListCollection{
     hasElasticSearch: boolean = false;
@@ -70,6 +71,11 @@ class Schedules extends ListCollection{
     }, {
         propertyKey: 'connection.title',
         width: '15%',
+        getValue: (schedule: ISchedule) => {
+            return(
+                <Link to={`/connections/${schedule.connection.connectionId}/update`} title={schedule.connection.title} style={{color: 'black'}}>{schedule.connection.title}</Link>
+            );
+        },
     }, {
         propertyKey: 'cronExp',
         width: '10%',
@@ -100,7 +106,7 @@ class Schedules extends ListCollection{
         width: '10%',
     }, {
         propertyKey: 'debugMode',
-        getValue: (schedule: ISchedule) => {return schedule.debugMode ? 'yes' : 'no'},
+        getValue: (schedule: ISchedule) => {return schedule.debugMode ? 'on' : 'off'},
         width: '10%',
     }];
     gridProps = {title: 'title'};

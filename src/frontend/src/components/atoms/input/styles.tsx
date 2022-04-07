@@ -88,7 +88,6 @@ const EmphasizeInputStyleLines = css`
         background: transparent;
         transition: ${({noAnimation}: ElementProps) => noAnimation ? 'unset' : 'color, width 0.5s ease-in-out'}; 
         width: 0;
-        margin-top: ${({isTextarea}: ElementProps) => isTextarea ? '-7px' : '-1px'};
     }
     &~span:last-of-type{
         opacity: 0;
