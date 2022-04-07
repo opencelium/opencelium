@@ -25,6 +25,8 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
     ({
         invoker,
         isAdd,
+        isView,
+        isReadonly,
     }) => {
     const {
         isCurrentInvokerHasUniqueTitle, checkingInvokerTitle, currentInvoker,
@@ -35,6 +37,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
     return (
         <React.Fragment>
             <InputText
+                autoFocus={!isView}
                 icon={'person'}
                 label={'Name'}
                 value={name}
@@ -47,6 +50,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
                 onBlur={() => {
                     invoker.name = name;
                 }}
+                readOnly={isReadonly}
             />
             <InputTextarea
                 icon={'notes'}
@@ -58,6 +62,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
                 onBlur={() => {
                     invoker.description = description;
                 }}
+                readOnly={isReadonly}
             />
             <InputText
                 icon={'label'}
@@ -69,6 +74,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
                 onBlur={() => {
                     invoker.hint = hint;
                 }}
+                readOnly={isReadonly}
             />
         </React.Fragment>
     )

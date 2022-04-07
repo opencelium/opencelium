@@ -20,6 +20,8 @@ interface InvokerGeneralDataProps{
     theme?: ITheme,
     invoker?: IInvoker,
     isAdd?: boolean,
+    isView?: boolean,
+    isReadonly?: boolean,
 }
 
 export {

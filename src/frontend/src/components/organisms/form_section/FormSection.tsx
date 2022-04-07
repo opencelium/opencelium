@@ -34,7 +34,7 @@ const FormSection: FC<FormSectionProps> =
     }
     const hasLabel = label !== null;
     return (
-        <FormSectionStyled isVisible={isVisible} padding={`${hasLabel ? '50px' : '20px'} 10px 20px`} margin={`${hasLabel ? '31px' : '10px'} 0 0`}>
+        <FormSectionStyled isVisible={isVisible} padding={`${hasLabel ? '50px' : '20px'} 30px 20px 10px`} margin={`${hasLabel ? '31px' : '10px'} 0 0`}>
             {hasLabel && <Label {...label} position={'absolute'}/>}
             <Inputs>{children}</Inputs>
         </FormSectionStyled>

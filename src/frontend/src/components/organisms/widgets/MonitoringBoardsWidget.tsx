@@ -25,7 +25,7 @@ const MonitoringBoardsWidget: FC =
 
     }) => {
     const {authUser} = Auth.getReduxState();
-    let defaultUrl = `https://www.delftstack.com/howto/javascript/iframe-onload/`;
+    let defaultUrl = `${protocol}//${hostname}:19999/oc-mode.html`;
     if(authUser.hasOwnProperty('dashboard')){
         if(authUser.dashboard.hasOwnProperty('settings')
             && authUser.dashboard.settings.url !== ''){

@@ -192,9 +192,6 @@ const InputSelect: FC<InputSelectProps> = ({
         setLocalOptions(source.filter(option => multipleValue.findIndex(v => v.value === option.value && v.value !== labelValue) === -1));
     }
     const hasIcon = !!icon;
-    if(!placeholder){
-        placeholder = 'Please select...';
-    }
     let height = isToggled ? (localOptions.length > 0 ? localOptions.length : 1) * 34 + 1 : 0;
     let multipleLabels = [];
     let hasValue = !!value;
@@ -212,6 +209,8 @@ const InputSelect: FC<InputSelectProps> = ({
             }
         }
     }
+    const searchPlaceholder = !!placeholder ? placeholder : "Please type to search...";
+    const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
     return(
         <Input className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputContainerStyled hasBorder={!hasValue && !isToggled} ref={containerRef} color={currentOption ? ColorTheme.Black : ColorTheme.Gray}>
@@ -227,11 +226,11 @@ const InputSelect: FC<InputSelectProps> = ({
                         })
                     }
                     {
-                        isSearchable && !readOnly &&
+                        hasSearchInput &&
                         <SearchInputStyled
                             id={id}
                             readOnly={readOnly}
-                            placeholder={"Please type to search..."}
+                            placeholder={searchPlaceholder}
                             onKeyDown={searchInputPressed}
                             ref={inputSelectRef}
                             onFocus={() => toggleOptions(true)}

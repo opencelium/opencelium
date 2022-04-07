@@ -24,14 +24,17 @@ import Loading from "@loading";
 import {EXPERT_MODE, TEMPLATE_MODE} from "@classes/components/content/connection/CTemplate";
 import CConnection from "@classes/components/content/connection/CConnection";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@classes/components/content/connection/CConnectorItem";
-import FontIcon from "@basic_components/FontIcon";
-import Input from "@basic_components/inputs/Input";
 import {getTemplatesByConnectors as fetchTemplates, deleteTemplateById as deleteTemplate} from "@action/connection/TemplateCreators";
-import {ExpertButtonStyled, TemplateButtonStyled} from "@change_component/form_elements/form_connection/styles";
+import {
+    DeleteTemplateButtonStyled,
+    ExpertButtonStyled,
+    TemplateButtonStyled
+} from "@change_component/form_elements/form_connection/styles";
 import InputSelect from "@atom/input/select/InputSelect";
 import {TextSize} from "@atom/text/interfaces";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
 import InputTextarea from "@atom/input/textarea/InputTextarea";
+import {ColorTheme} from "../../../../../../general/Theme";
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
@@ -63,6 +66,7 @@ class FormMode extends Component{
             if(!template){
                 template = null;
             } else{
+                template = {...template};
                 template.label = template.name;
                 template.value = template.templateId;
             }
@@ -234,7 +238,7 @@ class FormMode extends Component{
         const {template} = this.state;
         const {deleteTemplate, entity, updateEntity} = this.props;
         if(template !== null) {
-            deleteTemplate({templateId: template.value});
+            deleteTemplate({id: template.value});
             entity.template.templateId = -1;
             entity.template.label = '';
             entity.resetToEmptyTemplate();
@@ -267,6 +271,7 @@ class FormMode extends Component{
         }
         return(
             <InputTextarea
+                label={' '}
                 name={'template_description'}
                 type={'text'}
                 value={value}
@@ -284,10 +289,8 @@ class FormMode extends Component{
         let isDeleteEnabled = template;
         let deleteButtonStyle = {};
         if(isDeleteEnabled){
-            deleteButtonStyle.color = 'black';
             deleteButtonStyle.cursor = 'pointer';
         } else{
-            deleteButtonStyle.color = 'gray';
             deleteButtonStyle.cursor = 'default';
         }
         if(mode === TEMPLATE_MODE) {
@@ -305,28 +308,34 @@ class FormMode extends Component{
             }
             return (
                 <div className={`second-tour-step ${styles.template_select}`}>
-                    <InputSelect
-                        id={'templates'}
-                        error={error}
-                        label={'Templates'}
-                        icon={'file_copy'}
-                        className={styles.form_mode_template}
-                        name={'connection_mode'}
-                        value={template}
-                        onChange={(a) => this.handleChangeTemplate(a)}
-                        options={options}
-                        placeholder={`Choose template`}
-                        isDisabled={readOnly}
-                        isSearchable={!readOnly}
-                    />
-                    <FontIcon
-                        className={styles.item_delete_button}
-                        style={{lineHeight: 0, right: '-20px', top: '35px', ...deleteButtonStyle}}
-                        value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
-                        onMouseOver={(a) => this.isOnDeleteButtonOver(a)}
-                        onMouseLeave={(a) => this.isNotOnDeleteButtonOver(a)}
-                        onClick={(a) => this.toggleConfirmDelete(a)}
-                    />
+                    <div style={{position: "relative"}}>
+                        <InputSelect
+                            id={'templates'}
+                            error={error}
+                            label={'Templates'}
+                            icon={'file_copy'}
+                            className={styles.form_mode_template}
+                            name={'connection_mode'}
+                            value={template}
+                            onChange={(a) => this.handleChangeTemplate(a)}
+                            options={options}
+                            placeholder={`Choose template`}
+                            isDisabled={readOnly}
+                            isSearchable={!readOnly}
+                        />
+                        <DeleteTemplateButtonStyled
+                            tooltip={'Delete'}
+                            position={'bottom'}
+                            target={'delete_template_button'}
+                            color={ColorTheme.Blue}
+                            hasBackground={false}
+                            isDisabled={!isDeleteEnabled}
+                            icon={onDeleteButtonOver ? 'delete_forever' : 'delete'}
+                            onMouseOver={(a) => this.isOnDeleteButtonOver(a)}
+                            onMouseLeave={(a) => this.isNotOnDeleteButtonOver(a)}
+                            onClick={(a) => this.toggleConfirmDelete(a)}
+                        />
+                    </div>
                     {this.renderTemplateDescription(options)}
                     <Confirmation
                         okClick={(a) => this.deleteTemplate(a)}

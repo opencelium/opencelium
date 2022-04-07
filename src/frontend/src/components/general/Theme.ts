@@ -57,7 +57,6 @@ type IInputElement = {
 }
 type IInput = {
     iconInputDistance?: string,
-    inputRightDistance?: string,
     inputElement?: IInputElement,
     text: IInputText,
     error: IInputError,
@@ -103,7 +102,6 @@ const defaultTheme: ITheme = {
     },
     input: {
         iconInputDistance: '50px',
-        inputRightDistance: '20px',
         inputElement: {
             paddingTop: '5px',
             paddingBottom: '3px',

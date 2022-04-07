@@ -451,7 +451,7 @@ class CronGenerator extends Component{
                         </div>
                     </div>
                 </Dialog>
-                <Button color={ColorTheme.Turquoise} handleClick={() => this.toggleShowGenerator()} icon={'edit'} hasBackground={false}/>
+                <Button color={ColorTheme.Blue} handleClick={() => this.toggleShowGenerator()} icon={'edit'} hasBackground={false}/>
             </CronGeneratorStyled>
         );
     }

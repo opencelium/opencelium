@@ -249,16 +249,16 @@ class Items extends Component{
         };
         return (
             <div className={styles.items}>
-                <InputHierarchy
+                {!connector.isEmpty() && <InputHierarchy
                     id={`input_hierarchy_${connector.getConnectorType()}${isDraft && '_draft'}`}
                     hierarchy={connector.getObject()}
                     currentItem={connector.getCurrentItem()}
                     onItemClick={(a,b) => this.setCurrentItem(a, b)}
                     onAppear={(a) => this.openHierarchy(a)}
                     onDisappear={(a) => this.closeHierarchy(a)}
-                />
+                />}
                 <div className={styles.history_label}>
-                    <TooltipFontIcon tooltip={'History'} value={'history'} style={{color: history.length === 0 ? '#eee' : 'black'}} className={styles.icon}/>
+                    {history.length > 0 && <TooltipFontIcon tooltip={'History'} value={'history'} style={{color: history.length === 0 ? '#eee' : 'black'}} className={styles.icon}/>}
                     {
                         history.length > 0
                         ?

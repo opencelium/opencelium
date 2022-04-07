@@ -15,6 +15,7 @@
 
 import Button from "@basic_components/buttons/Button";
 import styled from "styled-components";
+import {TooltipButton} from "@molecule/tooltip_button/TooltipButton";
 
 const ExpertButtonStyled = styled(Button)`
     margin: 0 110px 0 0;
@@ -29,7 +30,14 @@ const TemplateButtonStyled = styled(Button)`
     justify-content: center;
 `;
 
+const DeleteTemplateButtonStyled = styled(TooltipButton)`    
+    position: absolute;
+    top: 27px;
+    right: -25px;
+`;
+
 export {
     ExpertButtonStyled,
     TemplateButtonStyled,
+    DeleteTemplateButtonStyled,
 }

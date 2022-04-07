@@ -60,6 +60,7 @@ interface InputSelectProps extends InputElementProps{
     id?: string,
     value?: any,
     color?: ColorTheme,
+    placeholder?: string,
     options?: OptionProps[] | AsyncOptionProps,
     isSearchable?: boolean,
     onChange?: (option: string | string[])=>void,
