@@ -155,6 +155,7 @@ class Body extends React.Component{
                 return (
                     <XmlBody
                         id={'description_body'}
+                        requestBodyClassName={styles.svg_description_xml_body}
                         isDraft={isDraft}
                         readOnly={readOnly}
                         method={connector.getMethodByIndex(method.index)}

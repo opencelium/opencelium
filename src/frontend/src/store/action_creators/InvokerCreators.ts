@@ -66,11 +66,11 @@ export const addInvoker = createAsyncThunk(
     'invoker/add',
     async(invoker: IInvoker, thunkAPI) => {
         try {
-            const checkEmailRequest = new InvokerRequest({endpoint: `/check/${invoker.name}`});
-            const responseNameRequest = await checkEmailRequest.checkInvokerTitle();
+            /*const checkNameRequest = new InvokerRequest({endpoint: `/check/${invoker.name}`});
+            const responseNameRequest = await checkNameRequest.checkInvokerTitle();
             if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(responseNameRequest.data);
-            }
+            }*/
             const request = new InvokerRequest();
             const response = await request.addInvoker(invoker);
             if (invoker.icon) {

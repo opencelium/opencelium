@@ -380,7 +380,7 @@ class FormConnectionSvg extends Component{
         } = this.state;
         const verticalPanelParams = this.getPanelGroupParams();
         return (
-            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`} style={{padding: isFullScreen ? '0 0 0 7rem' : '0'}}>
+            <div className={`${styles.connection_editor} ${isTechnicalLayoutMinimized ? 'technical_layout_is_minimized' : ''}`} style={{padding: isFullScreen ? '0 0 0 15px' : '0'}}>
                 <Details
                     readOnly={data.readOnly}
                     moveDetailsRight={() => this.moveDetailsRight()}

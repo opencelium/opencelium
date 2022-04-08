@@ -16,70 +16,75 @@
 import ReactDOM from "react-dom";
 import React, {FC, useEffect, useState} from 'react';
 import Graph from "react-graph-vis";
-import { ConnectionOverviewWidgetStyled } from './styles';
+import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled} from './styles';
 import {Connection} from "@class/connection/Connection";
 import DefaultConnectorImagePath from "@images/default_connector.png";
 import OpenCeliumBackgroundImagePath from "@images/oc_connection_widget_background.png"
 import OpenCeliumImagePath from "@images/logo.png";
 import {isValidIconUrl} from "../../../utils";
 import Toast from "@atom/toast/Toast";
-import {WidgetTitle} from "@molecule/widget_title/WidgetTitle";
 import {useAppDispatch} from "../../../hooks/redux";
 import {getAllConnections} from "@action/connection/ConnectionCreators";
-import {OC_NAME, OC_DESCRIPTION} from "@interface/application/IApplication";
+import {OC_NAME, OC_DESCRIPTION, API_REQUEST_STATE} from "@interface/application/IApplication";
+import ContentLoading from "@molecule/loading/ContentLoading";
 
 const ConnectionOverviewWidget: FC =
     ({
 
     }) => {
     const dispatch = useAppDispatch();
-    let tooltip = document.createElement('div');
-    document.body.appendChild(tooltip);
-    const {connections} = Connection.getReduxState();
-    const [usedConnectors, setUserConnectors] = useState([]);
+    const {connections, gettingConnections} = Connection.getReduxState();
+    const [nodes, setNodes] = useState([]);
+    const [graph, setGraph] = useState({nodes: [], edges: []});
+    const [hasConnections, setHasConnections] = useState<boolean>(false);
     useEffect(() => {
         dispatch(getAllConnections());
     }, [])
     useEffect(() => {
-        setUserConnectors([...connections.map(connection => connection.fromConnector), ...connections.map(connection => connection.toConnector)])
-    }, [connections])
-    let nodes: any[] = [];
-    for(let i = 0; i < usedConnectors.length; i++){
-        if(nodes.findIndex(c => c.id === usedConnectors[i].connectorId) === -1){
-            /*
-            * TODO: if u want to load connector description then change to usedConnectors[i].description
-            *  but backend should send this data
-            */
-            let description = usedConnectors[i].invoker.description;
-            let image = isValidIconUrl(usedConnectors[i].icon) ? usedConnectors[i].icon : isValidIconUrl(usedConnectors[i].invoker.icon) ? usedConnectors[i].invoker.icon : DefaultConnectorImagePath;
-            nodes.push({
-                id: usedConnectors[i].connectorId,
-                title: usedConnectors[i].title,
-                description,
+        if(gettingConnections === API_REQUEST_STATE.FINISH) {
+            const usedConnectors: any[] = [...connections.map(connection => connection.fromConnector), ...connections.map(connection => connection.toConnector)];
+            let newNodes = [];
+            for (let i = 0; i < usedConnectors.length; i++) {
+                if (newNodes.findIndex(c => c.id === usedConnectors[i].connectorId) === -1) {
+                    let description = usedConnectors[i].invoker.description;
+                    let image = isValidIconUrl(usedConnectors[i].icon) ? usedConnectors[i].icon : isValidIconUrl(usedConnectors[i].invoker.icon) ? usedConnectors[i].invoker.icon : DefaultConnectorImagePath;
+                    newNodes.push({
+                        id: usedConnectors[i].connectorId,
+                        title: usedConnectors[i].title,
+                        description,
+                        shape: 'circularImage',
+                        brokenImage: DefaultConnectorImagePath,
+                        image,
+                    });
+                }
+            }
+            newNodes.push({
+                id: OC_NAME,
+                title: OC_NAME,
+                description: OC_DESCRIPTION,
                 shape: 'circularImage',
-                brokenImage: DefaultConnectorImagePath,
-                image,
-            });
-        }
-    }
-    nodes.push({
-        id: OC_NAME,
-        title: OC_NAME,
-        description: OC_DESCRIPTION,
-        shape: 'circularImage',
-        brokenImage: OpenCeliumImagePath,
-        image: OpenCeliumImagePath,
-        size: 32,
-    })
-    const graph = {
-        nodes,
-        edges: [
-            ...nodes.slice(0, nodes.length - 1).map(node => {
-                return {from: node.id, to: OC_NAME, arrows: {from: false, to: false}};
+                brokenImage: OpenCeliumImagePath,
+                image: OpenCeliumImagePath,
+                size: 32,
             })
-        ]
-    };
+            const newGrapth = {
+                nodes: newNodes,
+                edges: [
+                    ...newNodes.slice(0, newNodes.length - 1).map(node => {
+                        return {from: node.id, to: OC_NAME, arrows: {from: false, to: false}};
+                    })
+                ]
+            };
+            setNodes(newNodes);
+            setGraph(newGrapth);
+            setHasConnections(true);
+        }
+    }, [connections]);
+
     const options = {
+        physics: {
+            stabilization: true
+        },
         edges: {
             chosen: false,
             color: {
@@ -99,28 +104,34 @@ const ConnectionOverviewWidget: FC =
             },
         }
     };
-
-    const events = {
-        select: function(event: any) {
-            const { nodes, edges } = event;
-        }
-    };
+    if(!hasConnections){
+        return (
+            <ContentLoading/>
+        )
+    }
     return (
         <ConnectionOverviewWidgetStyled >
-            <WidgetTitle title={'Connection Overview'}/>
+            <ConnectionOverviewTitle title={'Connection Overview'}/>
             <Graph
                 style={{
                     backgroundImage: `url("${OpenCeliumBackgroundImagePath}")`,
+                    backgroundPosition: 'center center',
                     width: '100%',
                     height: '100%',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',
+                    backgroundColor: '#fff',
+                    borderRadius: '5px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
                 }}
                 graph={graph}
                 options={options}
-                events={events}
+                events={{
+                    select: function(event: any) {
+                        const { nodes, edges } = event;
+                    }
+                }}
                 getNetwork={(network:any) => {
-                    const that: any = this;
                     network.on("click", function(params: any) {
                         const selectedNodeId = params.nodes.length === 1 ? params.nodes[0] : null;
                         let domElement = null;
@@ -133,7 +144,7 @@ const ConnectionOverviewWidget: FC =
                                 domElement = <Toast header={header} body={body} left={x} top={y}/>;
                             }
                         }
-                        ReactDOM.render(domElement, that.tooltip);
+                        ReactDOM.render(domElement, document.getElementById('connection_overview_description'));
                     });
                     network.on("initRedrew", function(params: any) {
                         // Get the node ID

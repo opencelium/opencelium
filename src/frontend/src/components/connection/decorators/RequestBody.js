@@ -274,6 +274,7 @@ export function RequestBody(CRequestType){
 
                 render(){
                     const {isBodyEditOpened} = this.state;
+                    const {requestBodyClassName, ...componentProps} = this.props;
                     const {id, readOnly, method, connector, connection, bodyStyles, isDraft, noPlaceholder, openEnhancement, updateEntity} = this.props;
                     if(!isBodyEditOpened && !noPlaceholder){
                         return this.renderPlaceholder();
@@ -284,12 +285,12 @@ export function RequestBody(CRequestType){
                         ownBodyStyles = bodyStyles;
                     }
                     return(
-                        <ToolboxThemeInput className={styles[CRequestType.getClassName({isDraft, noPlaceholder})]} style={ownBodyStyles}>
+                        <ToolboxThemeInput className={`${requestBodyClassName ? `${requestBodyClassName} ` : ''}${styles[CRequestType.getClassName({isDraft, noPlaceholder})]}`} style={ownBodyStyles}>
                             <div style={{display: 'none'}} id={`${id}_reference_component`}/>
                             {!noPlaceholder && this.renderCloseMenuEditButton()}
                             {this.renderEnhancement()}
                             <Component
-                                {...this.props}
+                                {...componentProps}
                                 openEnhancement={(a, b) => this.openEnhancement(a, b)}
                                 updateBody={(a) => this.updateBody(a)}
                                 ReferenceComponent={hasReferenceComponent ? {
