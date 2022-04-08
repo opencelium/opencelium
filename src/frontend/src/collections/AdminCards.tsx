@@ -29,7 +29,9 @@ class AdminCards extends ListCollection{
     title = 'Admin Cards';
     keyPropName ='id';
     sortingProps = ['name'];
-    listProps: ListProp[] = [{propertyKey: 'name'}];
+    listProps: ListProp[] = [{propertyKey: 'name', replace: true, getValue: (AdminCard: IAdminCard) => {
+        return <td style={{textAlign: 'left'}}>{AdminCard.name}</td>
+    }}];
     gridProps = {title: 'name'};
     translations = {
         name: 'Name',
