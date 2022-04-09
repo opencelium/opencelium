@@ -23,10 +23,14 @@ import {DispatchParamsProps, IObservation} from "@interface/application/IApplica
 import {AsyncThunk} from "@reduxjs/toolkit";
 import {useAppSelector} from "../../hooks/redux";
 import {isString} from "../../components/utils";
+import {baseUrl} from "@request/application/url";
 
 
 export class Application{
     static isDebugging = false;
+    static isExternalUrl(url: string){
+        return url.indexOf(baseUrl) === 0;
+    }
     static getReduxState(){
         return useAppSelector((state: RootState) => state.applicationReducer);
     }
