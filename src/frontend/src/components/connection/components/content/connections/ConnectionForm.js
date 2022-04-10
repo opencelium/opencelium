@@ -495,6 +495,8 @@ export function ConnectionForm(type) {
                     if(this.isUpdate){
                         button = <Button icon={'autorenew'} isLoading={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)} title={t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => this.doActionAndGoToScheduler(entity)} size={TextSize.Size_16}/>;
                     }
+                    const isDisabled = entity.fromConnector.methods.length === 0 && entity.fromConnector.operators.length === 0
+                                        && entity.toConnector.methods.length === 0 && entity.toConnector.operators.length === 0;
                     return(
                         <React.Fragment>
                             {button}
@@ -502,7 +504,7 @@ export function ConnectionForm(type) {
                                 <AddTemplate
                                     data={contents[2].inputs[1]}
                                     entity={entity}
-                                    disabled={entity.isEmpty()}
+                                    disabled={isDisabled}
                                     buttonProps={{
                                         size: TextSize.Size_16,
                                         icon: 'add',

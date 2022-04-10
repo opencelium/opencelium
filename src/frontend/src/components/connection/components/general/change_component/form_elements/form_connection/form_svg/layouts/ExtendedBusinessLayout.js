@@ -52,7 +52,7 @@ class ExtendedBusinessLayout extends React.Component{
 
     componentDidMount() {
         ConnectionOverviewExtendedChannel.onmessage = (e) => {
-            this.props.setConnectionData({connection: e.data.getObjectForConnectionOverview()});
+            this.props.setConnectionData({connection: e.data.hasOwnProperty('getObjectForConnectionOverview') ? e.data.getObjectForConnectionOverview() : e.data})
         }
     }
 

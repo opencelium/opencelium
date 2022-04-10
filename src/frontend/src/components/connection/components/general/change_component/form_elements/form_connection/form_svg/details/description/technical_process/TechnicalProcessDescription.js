@@ -79,7 +79,7 @@ class TechnicalProcessDescription extends React.Component{
             {name: 'Invoker', value: invokerName},
             {name: 'Format', value: requestFormat},
         ];
-        const label = details && details.entity ? details.entity.label : '';
+        const label = details && details.entity ? details.entity.label || '' : '';
         return(
             <Row className={styles.row}>
                 <Name {...this.props}/>

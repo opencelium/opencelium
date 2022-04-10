@@ -53,12 +53,12 @@ class ExtendedTechnicalLayout extends React.Component{
             createElementPanelPosition: {x: 0, y: 0},
         }
     }
-
+/*
     componentDidMount() {
         ConnectionOverviewExtendedChannel.onmessage = (e) => {
-            this.props.setConnectionData({connection: e.data.getObjectForConnectionOverview()})
+            this.props.setConnectionData({connection: e.data.hasOwnProperty('getObjectForConnectionOverview') ? e.data.getObjectForConnectionOverview() : e.data})
         };
-    }
+    }*/
 
     updateConnection(connection){
         const {updateConnectionInOpener, setConnectionData} = this.props;

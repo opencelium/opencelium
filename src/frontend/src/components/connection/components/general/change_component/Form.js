@@ -177,10 +177,10 @@ Form.propTypes = {
     type: PropTypes.string,
     contents: PropTypes.array,
     translations: PropTypes.shape({
-        header: PropTypes.shape({
-            title: PropTypes.string.isRequired,
-            onHelpClick: PropTypes.func,
-        }),
+        header: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.object,
+        ]),
         list_button: PropTypes.shape({
             title: PropTypes.string.isRequired,
             link: PropTypes.string.isRequired,
