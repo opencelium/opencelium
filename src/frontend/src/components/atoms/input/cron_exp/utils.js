@@ -35,7 +35,7 @@ export function convertTimeForCronExpression(timeStamp){
     hours = hours < 10 ? '0'+hours : hours;
     dateValue = dateValue < 10 ? '0'+dateValue : dateValue;
     month = month < 10 ? '0'+month : month;
-    return <span><span style={{width: '60px', display: 'inline-block', textAlign: 'right'}}>{`${hours}:${minutes}:${seconds}`}</span><span style={{width: '45px', display: 'inline-block'}}>{days[day]}</span><span style={{width: '55px', display: 'inline-block'}}>{`${dateValue}.${month}.${year}`}</span></span>;
+    return <li key={`cron_example_${date.valueOf()}`}><span style={{width: '60px', display: 'inline-block', textAlign: 'right'}}>{`${hours}:${minutes}:${seconds}`}</span><span style={{width: '45px', display: 'inline-block'}}>{days[day]}</span><span style={{width: '55px', display: 'inline-block'}}>{`${dateValue}.${month}.${year}`}</span></li>;
 }
 
 

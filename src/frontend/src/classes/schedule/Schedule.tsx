@@ -38,6 +38,7 @@ import {useAppDispatch, useAppSelector} from "../../hooks/redux";
 import {IConnection} from "@interface/connection/IConnection";
 import {InputSwitchProps} from "@atom/input/switch/interfaces";
 import InputCronExp from "@atom/input/cron_exp/InputCronExp";
+import {ModelSchedule} from "../../requests/models/schedule/Schedule";
 
 
 export class Schedule extends HookStateClass implements ISchedule{
@@ -194,23 +195,42 @@ export class Schedule extends HookStateClass implements ISchedule{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(addSchedule)
+    @App.dispatch(addSchedule, {mapping: (schedule: ISchedule) => {return schedule.getModel(true)}})
     add(): boolean{
         return this.validateAdd();
     }
 
-    @App.dispatch(updateSchedule)
+    @App.dispatch(updateSchedule, {mapping: (schedule: ISchedule) => {return schedule.getModel(true)}})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();
     }
 
-    @App.dispatch<ISchedule>(deleteScheduleById, {hasNoValidation: true})
+    @App.dispatch<ISchedule>(deleteScheduleById, {mapping: (schedule: ISchedule) => {return schedule.getModel()}, hasNoValidation: true})
     deleteById(): boolean{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(checkScheduleTitle, {hasNoValidation: true})
+    @App.dispatch(checkScheduleTitle, {mapping: (schedule: ISchedule) => {return schedule.getModel()}, hasNoValidation: true})
     checkTitle(): boolean{
         return this.validateTitle();
+    }
+
+    getModel(isForApiRequest: boolean = false): ModelSchedule{
+        let mappedSchedule: ModelSchedule = {
+            title: this.title,
+            debugMode: this.debugMode,
+            connectionId: parseInt(this.connectionSelect.value.toString()),
+            cronExp: this.cronExp,
+            status: this.status,
+        };
+        if(this.id !== 0){
+            mappedSchedule.schedulerId = this.id;
+        }
+        if(!isForApiRequest){
+            mappedSchedule.connection = this.connection;
+            mappedSchedule.lastExecution = this.lastExecution;
+            mappedSchedule.webhook = this.webhook;
+        }
+        return mappedSchedule;
     }
 }

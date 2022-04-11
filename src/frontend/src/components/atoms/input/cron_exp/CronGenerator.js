@@ -348,11 +348,7 @@ class CronGenerator extends Component{
             <Text value={
                 <ExampleStyled>
                     {
-                        examples.map(example => {
-                            return (
-                                <li>{example}</li>
-                            );
-                        })
+                        examples.map(example => example)
                     }
                 </ExampleStyled>
             }/>

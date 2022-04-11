@@ -101,7 +101,7 @@ class Schedules extends ListCollection{
         width: '10%',
     }, {
         propertyKey: 'status',
-        getValue: (schedule: ISchedule) => {return <ExecutionStatus schedule={schedule} hasActions={this.hasActions} onClick={() => {schedule.status = schedule.status === 0 ? 1 : 0; this.dispatch(switchScheduleStatus(schedule))}}/>},
+        getValue: (schedule: ISchedule) => {return <ExecutionStatus key={schedule.id} schedule={schedule} hasActions={this.hasActions} onClick={() => {schedule.status = schedule.status === 0 ? 1 : 0; this.dispatch(switchScheduleStatus(schedule.getModel()))}}/>},
         replace: true,
         width: '10%',
     }, {
@@ -133,14 +133,15 @@ class Schedules extends ListCollection{
             </React.Fragment>
         );
     };
-    getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
+    getListActions?: (entity: ISchedule, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: ISchedule, componentPermission: ComponentPermissionProps) => {
         const hasDeleteButton = !this.isCurrentItem(entity);
-        const webhookAction = entity.webhook ? () => this.dispatch(deleteWebhook(entity)) : () => this.dispatch(getWebhook(entity));
+        const scheduleModel = entity.getModel();
+        const webhookAction = entity.webhook ? () => this.dispatch(deleteWebhook(scheduleModel)) : () => this.dispatch(getWebhook(scheduleModel));
         return (
             <React.Fragment>
                 {/*<PermissionButton href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>*/}
                 <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
-                <PermissionButton hasBackground={false} handleClick={() => this.dispatch(startSchedule(entity))} icon={'play_arrow'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
+                <PermissionButton hasBackground={false} handleClick={() => this.dispatch(startSchedule(scheduleModel))} icon={'play_arrow'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 <PermissionButton hasBackground={false} handleClick={webhookAction} icon={entity.webhook ? 'link_off' : 'link'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
                 <ScheduleNotificationsIcon schedule={entity}/>
                 {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}

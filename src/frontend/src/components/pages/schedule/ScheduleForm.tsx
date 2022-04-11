@@ -46,7 +46,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     if(shouldFetchConnection){
         connectionId = parseInt(urlParams.id);
     }
-    const schedule = Schedule.createState<ISchedule>({id: connectionId, _readOnly: isView}, isAdd ? null : currentSchedule);
+    const schedule = Schedule.createState<ISchedule>({id: connectionId, _readOnly: isView, status: 1}, isAdd ? null : currentSchedule);
     useEffect(() => {
         if(shouldFetchConnection){
             schedule.getById()

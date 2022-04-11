@@ -13,11 +13,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ModelCurrentSchedule } from "src/requests/models/schedule/CurrentSchedule";
 import {ITheme} from "../../general/Theme";
 
 interface ProgressBarElementProps{
     theme?: ITheme
-    schedule: any,
+    schedule: ModelCurrentSchedule,
     iterator: number,
 }
 

@@ -19,6 +19,7 @@ import {ScheduleState} from "@slice/schedule/ScheduleSlice";
 import {IWebhook} from "./IWebhook";
 import {IConnection} from "@interface/connection/IConnection";
 import React from "react";
+import {ModelSchedule} from "../../requests/models/schedule/Schedule";
 
 
 
@@ -70,4 +71,5 @@ export interface ISchedule extends IScheduleForm{
     webhook: IWebhook;
     lastExecution?: ILastExecution,
     connection: IConnection,
+    getModel?: (isForApiRequest?: boolean) => ModelSchedule,
 }

@@ -17,15 +17,16 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {WebhookRequest} from "@request/schedule/Webhook";
 import {ISchedule} from "@interface/schedule/ISchedule";
 import {errorHandler} from "../../../components/utils";
+import { ModelSchedule } from "src/requests/models/schedule/Schedule";
 
 
 export const getWebhook = createAsyncThunk(
     'schedule/webhook/get/byUserIdAndScheduleId',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
             // @ts-ignore
             const userId = thunkAPI.getState().authReducer.authUser.id;
-            const request = new WebhookRequest({endpoint: `/url/${userId}/${schedule.id}`});
+            const request = new WebhookRequest({endpoint: `/url/${userId}/${schedule.schedulerId}`});
             const response = await request.getWebhookByUserIdAndScheduleId();
             schedule.webhook = response.data;
             return schedule;
@@ -37,7 +38,7 @@ export const getWebhook = createAsyncThunk(
 
 export const deleteWebhook = createAsyncThunk(
     'schedule/webhook/delete/byScheduleId',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
             const request = new WebhookRequest({endpoint: `/${schedule.webhook.webhookId}`});
             await request.deleteWebhookById();

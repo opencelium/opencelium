@@ -14,11 +14,11 @@
  */
 
 import {ITheme} from "../../general/Theme";
-import {Schedule} from "@class/schedule/Schedule";
+import {ISchedule} from "@interface/schedule/ISchedule";
 
 interface ScheduleNotificationsIconProps{
     theme?: ITheme,
-    schedule: Schedule,
+    schedule: ISchedule,
 }
 
 export {

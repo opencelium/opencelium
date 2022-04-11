@@ -15,7 +15,6 @@
 
 import {Request} from "../application/Request";
 import {AxiosResponse} from "axios";
-import {ISchedule} from "@interface/schedule/ISchedule";
 import {
     IScheduleRequest,
     ScheduleStatusRequestProps,
@@ -23,6 +22,8 @@ import {
 } from "../../interfaces/schedule/ISchedule";
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
+import { ModelSchedule } from "src/requests/models/schedule/Schedule";
+import { ModelCurrentSchedule } from "src/requests/models/schedule/CurrentSchedule";
 
 
 export class ScheduleRequest extends Request implements IScheduleRequest{
@@ -58,51 +59,35 @@ export class ScheduleRequest extends Request implements IScheduleRequest{
         return super.put<IResponse>(data);
     }
 
-    async getScheduleById(): Promise<AxiosResponse<ISchedule>>{
-        return super.get<ISchedule>();
+    async getScheduleById(): Promise<AxiosResponse<ModelSchedule>>{
+        return super.get<ModelSchedule>();
     }
 
-    async getSchedulesById(data: SchedulesIdRequestProps): Promise<AxiosResponse<ISchedule[]>>{
-        return super.post<ISchedule[]>(data);
+    async getSchedulesById(data: SchedulesIdRequestProps): Promise<AxiosResponse<ModelSchedule[]>>{
+        return super.post<ModelSchedule[]>(data);
     }
 
-    async getAllSchedules(): Promise<AxiosResponse<ISchedule[]>>{
-        return super.get<ISchedule[]>();
+    async getAllSchedules(): Promise<AxiosResponse<ModelSchedule[]>>{
+        return super.get<ModelSchedule[]>();
     }
 
-    async getCurrentSchedules(): Promise<AxiosResponse<ISchedule[]>>{
-        return super.get<ISchedule[]>();
+    async getCurrentSchedules(): Promise<AxiosResponse<ModelCurrentSchedule[]>>{
+        return super.get<ModelCurrentSchedule[]>();
     }
 
-    async addSchedule(schedule: ISchedule): Promise<AxiosResponse<ISchedule>>{
-        return super.post<ISchedule>(this.backendMap(schedule));
+    async addSchedule(schedule: ModelSchedule): Promise<AxiosResponse<ModelSchedule>>{
+        return super.post<ModelSchedule>(schedule);
     }
 
-    async updateSchedule(schedule: ISchedule): Promise<AxiosResponse<ISchedule>>{
-        return super.put<ISchedule>(this.backendMap(schedule));
+    async updateSchedule(schedule: ModelSchedule): Promise<AxiosResponse<ModelSchedule>>{
+        return super.put<ModelSchedule>(schedule);
     }
 
-    async deleteScheduleById(): Promise<AxiosResponse<ISchedule>>{
-        return super.delete<ISchedule>();
+    async deleteScheduleById(): Promise<AxiosResponse<ModelSchedule>>{
+        return super.delete<ModelSchedule>();
     }
 
     async deleteSchedulesById(scheduleIds: number[]): Promise<AxiosResponse<number[]>>{
         return super.delete<number[]>({data: scheduleIds});
-    }
-
-    backendMap(schedule: ISchedule){
-        let mappedSchedule = {
-            title: schedule.title,
-            debugMode: schedule.debugMode,
-            connectionId: schedule.connectionSelect.value,
-            cronExp: schedule.cronExp,
-        };
-        if(schedule.id !== 0){
-            return {
-                schedulerId: schedule.id,
-                ...mappedSchedule,
-            }
-        }
-        return mappedSchedule;
     }
 }
