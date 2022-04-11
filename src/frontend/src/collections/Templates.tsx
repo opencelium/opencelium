@@ -70,7 +70,7 @@ class Templates extends ListCollection{
         return (
             <React.Fragment>
                 {/*<AddTemplateButton name={entity.name} description={entity.description} connection={entity.connection}/>*/}
-                <TemplateConversionIcon data={{template: entity.getModel()}}/>
+                <TemplateConversionIcon data={{template: entity.getModel()}} turquoiseTheme={true}/>
                 <PermissionButton hasBackground={false} handleClick={() => this.dispatch(exportTemplate(exportTemplateData))} icon={'file_download'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 {/*<PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>*/}
                 {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}

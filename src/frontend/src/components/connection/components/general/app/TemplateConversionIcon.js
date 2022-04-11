@@ -58,7 +58,7 @@ class TemplateConversionIcon extends Component{
     */
     render(){
         const {appVersion, data} = this.props;
-        let {classNameIcon} = this.props;
+        let {classNameIcon, turquoiseTheme, blueTheme} = this.props;
         let invalidVersion = data.template.version !== appVersion;
         let styleIcon = {};
         styleIcon.transform = 'scaleX(-1) rotate(-45deg)';
@@ -67,7 +67,7 @@ class TemplateConversionIcon extends Component{
             <React.Fragment>
                 {
                     invalidVersion &&
-                    <TooltipFontIcon turquoiseTheme isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={() => this.convert()} size={'24px'}/>
+                    <TooltipFontIcon turquoiseTheme={turquoiseTheme} blueTheme={blueTheme} isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={() => this.convert()} size={'24px'}/>
                 }
             </React.Fragment>
         );
@@ -79,6 +79,13 @@ TemplateConversionIcon.propTypes = {
         template: PropTypes.any.isRequired,
     }).isRequired,
     classNameIcon: PropTypes.string,
+    turquoiseTheme: PropTypes.bool,
+    blueTheme: PropTypes.bool,
 };
+
+TemplateConversionIcon.defaultProps = {
+    turquoiseTheme: false,
+    blueTheme: false,
+}
 
 export default TemplateConversionIcon;

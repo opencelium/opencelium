@@ -16,6 +16,11 @@
 
 @import '../constants';
 
+.conversion_icon{
+  position: absolute;
+  right: 3px;
+}
+
 .item{
   display: block !important;
   font-family: $FONT_FAMILY;
