@@ -29,8 +29,8 @@ import {SchedulesIdRequestProps} from "@requestInterface/schedule/ISchedule";
 import {deleteWebhook, getWebhook} from "@action/schedule/WebhookCreators";
 import {ICommonState} from "@interface/application/core";
 import {CommonState} from "../../store";
-import {ModelCurrentSchedule} from "../../../requests/models/schedule/CurrentSchedule";
-import { ModelSchedule } from "src/requests/models/schedule/Schedule";
+import ModelCurrentSchedule from "@model/schedule/CurrentSchedule";
+import ModelSchedule from "@model/schedule/Schedule";
 
 export interface ScheduleState extends ICommonState{
     schedules: ModelSchedule[],

@@ -19,7 +19,7 @@ import {ScheduleState} from "@slice/schedule/ScheduleSlice";
 import {IWebhook} from "./IWebhook";
 import {IConnection} from "@interface/connection/IConnection";
 import React from "react";
-import {ModelSchedule} from "../../requests/models/schedule/Schedule";
+import ModelSchedule from "@model/schedule/Schedule";
 
 
 

@@ -15,9 +15,8 @@
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {WebhookRequest} from "@request/schedule/Webhook";
-import {ISchedule} from "@interface/schedule/ISchedule";
 import {errorHandler} from "../../../components/utils";
-import { ModelSchedule } from "src/requests/models/schedule/Schedule";
+import ModelSchedule from "@model/schedule/Schedule";
 
 
 export const getWebhook = createAsyncThunk(

@@ -1,4 +1,4 @@
-export interface ModelCurrentSchedule{
+export default interface ModelCurrentSchedule{
     schedulerId: number;
     title: string;
     avgDuration: number;

@@ -22,8 +22,8 @@ import {
 } from "../../interfaces/schedule/ISchedule";
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
-import { ModelSchedule } from "src/requests/models/schedule/Schedule";
-import { ModelCurrentSchedule } from "src/requests/models/schedule/CurrentSchedule";
+import ModelSchedule from "@model/schedule/Schedule";
+import ModelCurrentSchedule from "@model/schedule/CurrentSchedule";
 
 
 export class ScheduleRequest extends Request implements IScheduleRequest{

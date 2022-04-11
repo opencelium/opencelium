@@ -15,8 +15,8 @@
 
 import {AxiosResponse} from "axios";
 import {IResponse} from "../application/IResponse";
-import {ModelSchedule} from "../../models/schedule/Schedule";
-import { ModelCurrentSchedule } from "src/requests/models/schedule/CurrentSchedule";
+import ModelSchedule from "@model/schedule/Schedule";
+import ModelCurrentSchedule from "@model/schedule/CurrentSchedule";
 
 
 export interface ScheduleStatusRequestProps{

@@ -38,7 +38,7 @@ import {useAppDispatch, useAppSelector} from "../../hooks/redux";
 import {IConnection} from "@interface/connection/IConnection";
 import {InputSwitchProps} from "@atom/input/switch/interfaces";
 import InputCronExp from "@atom/input/cron_exp/InputCronExp";
-import {ModelSchedule} from "../../requests/models/schedule/Schedule";
+import ModelSchedule from "@model/schedule/Schedule";
 
 
 export class Schedule extends HookStateClass implements ISchedule{

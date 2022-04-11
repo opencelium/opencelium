@@ -19,7 +19,7 @@ import {
     SchedulesIdRequestProps,
 } from "@requestInterface/schedule/ISchedule";
 import {errorHandler} from "../../../components/utils";
-import {ModelSchedule} from "../../../requests/models/schedule/Schedule";
+import ModelSchedule from "@model/schedule/Schedule";
 
 export const checkScheduleTitle = createAsyncThunk(
     'schedule/exist/title',

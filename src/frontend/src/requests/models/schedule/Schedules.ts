@@ -1,6 +1,6 @@
-import { ModelSchedule } from "./Schedule";
+import ModelSchedule from "./Schedule";
 
-export interface Schedules extends ModelSchedule{
+export default interface Schedules extends ModelSchedule{
     connection: {
         connectionId: number;
         description: string;

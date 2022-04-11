@@ -87,6 +87,7 @@ const getConfig = ({envVar}) => {
             alias: {
                 '@images': path.resolve('./src/img'),
                 '@request': path.resolve(__dirname, './src/requests/classes/'),
+                '@model': path.resolve(__dirname, './src/requests/models/'),
                 '@requestInterface': path.resolve(__dirname, './src/requests/interfaces/'),
                 '@class': path.resolve(__dirname, './src/classes/'),
                 '@collection': path.resolve(__dirname, './src/collections/'),

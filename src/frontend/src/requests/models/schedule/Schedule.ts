@@ -1,6 +1,6 @@
-import { ModelWebhook } from "./Webhook";
+import ModelWebhook from "./Webhook";
 
-export interface ModelSchedule{
+export default interface ModelSchedule{
     cronExp: string;
     debugMode: boolean;
     schedulerId?: number;
