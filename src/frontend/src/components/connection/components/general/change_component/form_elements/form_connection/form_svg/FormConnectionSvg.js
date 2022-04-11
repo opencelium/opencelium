@@ -25,7 +25,6 @@ import styles from "@themes/default/content/connections/connection_overview_2.sc
 import {PANEL_LOCATION} from "@utils/constants/app";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CreateElementPanel from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
-import {ConnectionOverviewChannel, ConnectionOverviewExtendedChannel} from "@utils/app";
 import {setCurrentBusinessItem, setCurrentTechnicalItem, setConnectionData} from "@slice/connection/ConnectionSlice";
 import {LocalStorage} from "@class/application/LocalStorage";
 import CConnection from "@classes/components/content/connection/CConnection";
@@ -101,9 +100,6 @@ class FormConnectionSvg extends Component{
         const {entity, connection, setConnectionData} = this.props;
         let connectionData = entity instanceof CConnection ? entity.getObjectForConnectionOverview() : entity;
         setConnectionData({connection: connectionData});
-        ConnectionOverviewChannel.onmessage = (e) => {
-            this.updateEntity(CConnection.createConnection(e.data));
-        }
         if(connection.businessLayout.getItems.length === 0){
             this.minimizeBusinessLayout();
         }
@@ -230,8 +226,8 @@ class FormConnectionSvg extends Component{
         let technicalLayoutLocation = this.props ? this.props.technicalLayoutLocation : PANEL_LOCATION.SAME_WINDOW;
         let businessLayoutLocation = this.props ? this.props.businessLayoutLocation : PANEL_LOCATION.SAME_WINDOW;
         let panelWidths = [
-            {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
-            {minSize: LAYOUT_SETTINGS.MIN_WIDTH,},
+            {minSize: LAYOUT_SETTINGS.MIN_WIDTH},
+            {minSize: LAYOUT_SETTINGS.MIN_WIDTH},
         ];
         if(isMinimized.layoutOne){
             if(layoutPosition === LAYOUT_POSITION.TOP){
@@ -330,18 +326,10 @@ class FormConnectionSvg extends Component{
         if(connection) {
             const storage = LocalStorage.getStorage();
             storage.set(`${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`, JSON.stringify(connection.getObject()));
-            if (entity === null) {
-                updateEntity(connection);
-                if(!settings || settings.hasOwnProperty('hasPostMessage') && settings.hasPostMessage !== false){
-                    ConnectionOverviewExtendedChannel.postMessage(connection);
-                }
-            } else {
+            if (entity !== null) {
                 let connectionData = entity instanceof CConnection ? entity.getObjectForConnectionOverview() : entity;
                 updateEntity(entity);
                 setConnectionData({connection: connectionData});
-                if(!settings || settings.hasOwnProperty('hasPostMessage') && settings.hasPostMessage !== false){
-                    ConnectionOverviewExtendedChannel.postMessage(entity);
-                }
             }
         }
     }

@@ -25,7 +25,6 @@ import {
 import CreateElementPanel
     from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel";
 import {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation, setConnectionData} from "@slice/connection/ConnectionSlice";
-import {ConnectionOverviewExtendedChannel} from "@utils/app";
 
 function mapStateToProps(state){
     const {currentBusinessItem, currentTechnicalItem, connection} = mapItemsToClasses(state);
@@ -37,7 +36,6 @@ function mapStateToProps(state){
         items,
         arrows,
         connection,
-        updateConnectionInOpener: window.opener.updateConnection,
     };
 }
 
@@ -53,17 +51,9 @@ class ExtendedTechnicalLayout extends React.Component{
             createElementPanelPosition: {x: 0, y: 0},
         }
     }
-/*
-    componentDidMount() {
-        ConnectionOverviewExtendedChannel.onmessage = (e) => {
-            this.props.setConnectionData({connection: e.data.hasOwnProperty('getObjectForConnectionOverview') ? e.data.getObjectForConnectionOverview() : e.data})
-        };
-    }*/
 
     updateConnection(connection){
-        const {updateConnectionInOpener, setConnectionData} = this.props;
-        updateConnectionInOpener(connection.getObjectForConnectionOverview(), {hasPostMessage: false});
-        setConnectionData({connection: connection.getObjectForConnectionOverview()});
+        this.props.setConnectionData({connection: connection.getObjectForConnectionOverview()});
     }
 
     setCreateElementPanelPosition(position){
