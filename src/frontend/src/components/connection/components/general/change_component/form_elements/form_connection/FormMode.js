@@ -35,6 +35,7 @@ import {TextSize} from "@atom/text/interfaces";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
 import InputTextarea from "@atom/input/textarea/InputTextarea";
 import {ColorTheme} from "../../../../../../general/Theme";
+import TemplateConversionIcon from "@components/general/app/TemplateConversionIcon";
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
@@ -322,6 +323,7 @@ class FormMode extends Component{
                             placeholder={`Choose template`}
                             isDisabled={readOnly}
                             isSearchable={!readOnly}
+                            getOptionRightComponent={(option) => {return (<TemplateConversionIcon data={{template: option.template}}/>);}}
                         />
                         <DeleteTemplateButtonStyled
                             tooltip={'Delete'}

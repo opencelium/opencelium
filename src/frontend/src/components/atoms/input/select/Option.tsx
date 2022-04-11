@@ -20,15 +20,20 @@ import { OptionStyled } from './styles';
 
 const Option: FC<OptionProps> =
     ({
+         getOptionRightComponent,
         ...props
     }) => {
     return (
-        <OptionStyled readOnly={true} {...props}/>
+        <React.Fragment>
+            <OptionStyled readOnly={true} {...props}/>
+            {getOptionRightComponent && getOptionRightComponent({...props})}
+        </React.Fragment>
     )
 }
 
 Option.defaultProps = {
     isCurrent: false,
+    getOptionRightComponent: null,
 }
 
 

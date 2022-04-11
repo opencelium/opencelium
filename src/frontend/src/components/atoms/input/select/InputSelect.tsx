@@ -50,6 +50,7 @@ const InputSelect: FC<InputSelectProps> = ({
     onChange,
     isMultiple,
     className,
+    getOptionRightComponent,
     ...props
 }) => {
     let source: OptionProps[];
@@ -261,6 +262,7 @@ const InputSelect: FC<InputSelectProps> = ({
                                 onClick={() => setOption(option)}
                                 {...option}
                                 value={option.label}
+                                getOptionRightComponent={getOptionRightComponent}
                             />
                         );
                     }) : <EmptyOptionsStyled>{'There are no options'}</EmptyOptionsStyled>
@@ -281,6 +283,7 @@ InputSelect.defaultProps = {
     isMultiple: false,
     callback: null,
     className: '',
+    getOptionRightComponent: null,
 }
 
 export default InputSelect;

@@ -19,8 +19,6 @@ import {connect} from "react-redux";
 import {updateTemplate as convertTemplate} from "@action/connection/TemplateCreators";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CExecution from "@classes/components/content/template_converter/CExecution";
-import CVoiceControl from "@classes/voice_control/CVoiceControl";
-import CTemplateVoiceControl from "@classes/voice_control/CTemplateVoiceControl";
 
 function mapStateToProps(state){
     const appVersion = state.applicationReducer.version;
@@ -40,19 +38,18 @@ class TemplateConversionIcon extends Component{
     }
 
     componentDidMount(){
-        CVoiceControl.initCommands({component:this}, CTemplateVoiceControl);
+        //CVoiceControl.initCommands({component:this}, CTemplateVoiceControl);
     }
 
     componentWillUnmount(){
-        CVoiceControl.removeCommands({component:this}, CTemplateVoiceControl);
+        //CVoiceControl.removeCommands({component:this}, CTemplateVoiceControl);
     }
 
     convert(){
         let {appVersion, data, convertTemplate} = this.props;
         let {template} = data;
         const {jsonData, error} = CExecution.executeConfig({fromVersion: template.version, toVersion: appVersion}, template.connection);
-        template = {...template, connection: jsonData, version: appVersion, id: template.templateId};
-        delete template.templateId;
+        template = {...template, connection: jsonData, version: appVersion};
         convertTemplate({...template});
     }
 
@@ -79,7 +76,7 @@ class TemplateConversionIcon extends Component{
 
 TemplateConversionIcon.propTypes = {
     data: PropTypes.shape({
-        template: PropTypes.object.isRequired,
+        template: PropTypes.any.isRequired,
     }).isRequired,
     classNameIcon: PropTypes.string,
 };

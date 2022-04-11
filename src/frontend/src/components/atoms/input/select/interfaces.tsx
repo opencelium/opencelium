@@ -49,6 +49,7 @@ interface OptionProps extends OptionStyledProps{
     tabIndex?: number,
     onKeyDown?: any,
     data?: any,
+    getOptionRightComponent?: (option: OptionProps) => any,
 }
 
 interface AsyncOptionProps{
@@ -57,6 +58,7 @@ interface AsyncOptionProps{
 }
 
 interface InputSelectProps extends InputElementProps{
+    getOptionRightComponent?: (option: OptionProps) => any,
     id?: string,
     value?: any,
     color?: ColorTheme,
