@@ -47,8 +47,8 @@ const DuplicateIcon: FC<DuplicateIconProps> =
     const [validateMessageTitle, setValidateMessageTitle] = useState('');
     const [validateMessageFromConnector, setValidateMessageFromConnector] = useState('');
     const [validateMessageToConnector, setValidateMessageToConnector] = useState('');
-    const fromConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.fromConnector.invoker.name).map((connector: any) => {return {label: connector.title, value: connector.id}});
-    const toConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.toConnector.invoker.name).map((connector: any) => {return {label: connector.title, value: connector.id}});
+    const fromConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.fromConnector.invoker.name).map((connector: any) => {return {label: connector.title, value: connector.connectorId}});
+    const toConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.toConnector.invoker.name).map((connector: any) => {return {label: connector.title, value: connector.connectorId}});
     const isLoading = gettingConnection !== API_REQUEST_STATE.FINISH || gettingConnectors !== API_REQUEST_STATE.FINISH || currentConnection && currentConnection.connectionId !== listConnection.id;
 
     const onChangeTitle = (title: string) => {
@@ -98,22 +98,39 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         }
         return false;
     }
+    const clearFromNodeId = (param: any) => {
+        const {nodeId, ...paramProps} = param;
+        return paramProps;
+    }
+    const clearMethodFromNodeId = (method: any) => {
+        const requestProps = clearFromNodeId(method.request);
+        let responseProps = clearFromNodeId(method.response);
+        const successProps = clearFromNodeId(responseProps.success);
+        const failProps = clearFromNodeId(responseProps.fail);
+        responseProps.success = successProps;
+        responseProps.fail = failProps;
+        return{
+            ...clearFromNodeId(method),
+            request: requestProps,
+            response: responseProps,
+        }
+    }
     const duplicate = () => {
-        const fromConnectorData: any = fromConnector ? connectors.find(connector => connector.id === fromConnector.value) : null;
-        const toConnectorData: any = toConnector ? connectors.find(connector => connector.id === toConnector.value) : null;
+        const fromConnectorData: any = fromConnector ? connectors.find(connector => connector.connectorId === fromConnector.value) : null;
+        const toConnectorData: any = toConnector ? connectors.find(connector => connector.connectorId === toConnector.value) : null;
         let connection: any = {...currentConnection};
         let tmpFromConnector: any = currentConnection?.fromConnector ? {...currentConnection.fromConnector} : null;
+        let fromMethods = tmpFromConnector?.methods ? [...tmpFromConnector.methods] : [];
+        fromMethods = fromMethods.map(m => clearMethodFromNodeId(m))
         let tmpToConnector: any = currentConnection?.toConnector ? {...currentConnection.toConnector} : null;
+        let toMethods = tmpToConnector?.methods ? [...tmpToConnector.methods] : [];
+        toMethods = toMethods.map(m => clearMethodFromNodeId(m))
         if(fromConnectorData && toConnectorData) {
             connection.title = title;
-            tmpFromConnector.connectorId = fromConnectorData.connectorId;
-            tmpFromConnector.title = fromConnectorData.name;
-            tmpFromConnector.icon = fromConnectorData.icon;
-            tmpToConnector.connectorId = toConnectorData.connectorId;
-            tmpToConnector.title = toConnectorData.name;
-            tmpToConnector.icon = toConnectorData.icon;
-            connection.fromConnector = tmpFromConnector;
-            connection.toConnector = tmpToConnector;
+            tmpFromConnector.methods = [...fromMethods];
+            tmpToConnector.methods = [...toMethods];
+            connection.fromConnector = {...tmpFromConnector};
+            connection.toConnector = {...tmpToConnector};
             delete connection.connectionId;
             if(connection.businessLayout){
                 delete connection.businessLayout.id;
