@@ -102,8 +102,8 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         const fromConnectorData: any = fromConnector ? connectors.find(connector => connector.id === fromConnector.value) : null;
         const toConnectorData: any = toConnector ? connectors.find(connector => connector.id === toConnector.value) : null;
         let connection: any = {...currentConnection};
-        let tmpFromConnector: any = currentConnection.fromConnector ? {...currentConnection.fromConnector} : null;
-        let tmpToConnector: any = currentConnection.fromConnector ? {...currentConnection.fromConnector} : null;
+        let tmpFromConnector: any = currentConnection?.fromConnector ? {...currentConnection.fromConnector} : null;
+        let tmpToConnector: any = currentConnection?.toConnector ? {...currentConnection.toConnector} : null;
         if(fromConnectorData && toConnectorData) {
             connection.title = title;
             tmpFromConnector.connectorId = fromConnectorData.connectorId;
