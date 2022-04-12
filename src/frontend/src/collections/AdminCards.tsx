@@ -59,6 +59,7 @@ class AdminCards extends ListCollection{
     }
 
     search(adminCard: IAdminCard, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkName = adminCard.name ? adminCard.name.toLowerCase().indexOf(searchValue) !== -1 : false;
         return checkName;
     }

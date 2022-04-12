@@ -61,6 +61,7 @@ class NotificationTemplates extends ListCollection{
     }
 
     search(notificationTemplate: INotificationTemplate, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkName = notificationTemplate.name ? notificationTemplate.name.toLowerCase().indexOf(searchValue) !== -1 : false;
         // @ts-ignore
         let checkType = notificationTemplate.type ? notificationTemplate.type.toLowerCase().indexOf(searchValue) !== -1 : false;

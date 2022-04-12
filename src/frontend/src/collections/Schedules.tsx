@@ -166,6 +166,7 @@ class Schedules extends ListCollection{
     }
 
     search(schedule: ISchedule, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkTitle = schedule.title ? schedule.title.toLowerCase().indexOf(searchValue) !== -1 : false;
         // @ts-ignore
         let checkConnectionTitle = schedule.connection.title ? schedule.connection.title.toLowerCase().indexOf(searchValue) !== -1 : false;

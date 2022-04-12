@@ -101,6 +101,7 @@ class Templates extends ListCollection{
     }
 
     search(template: ITemplate, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkName = template.name ? template.name.toLowerCase().indexOf(searchValue) !== -1 : false;
         let checkDescription = template.description ? template.description.toLowerCase().indexOf(searchValue) !== -1 : false;
         // @ts-ignore

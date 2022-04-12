@@ -71,6 +71,7 @@ class UserGroups extends ListCollection{
     }
 
     search(userGroup: IUserGroup, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkName = userGroup.name ? userGroup.name.toLowerCase().indexOf(searchValue) !== -1 : false;
         let checkDescription = userGroup.description ? userGroup.description.toLowerCase().indexOf(searchValue) !== -1 : false;
         // @ts-ignore

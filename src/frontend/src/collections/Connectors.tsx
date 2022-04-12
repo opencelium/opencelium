@@ -71,6 +71,7 @@ class Connectors extends ListCollection{
     }
 
     search(connector: IConnector, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkTitle = connector.title ? connector.title.toLowerCase().indexOf(searchValue) !== -1 : false;
         let checkDescription = connector.description ? connector.description.toLowerCase().indexOf(searchValue) !== -1 : false;
         // @ts-ignore

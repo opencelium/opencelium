@@ -79,6 +79,7 @@ class Connections extends ListCollection{
     }
 
     search(connection: IConnection, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkTitle = connection.title ? connection.title.toLowerCase().indexOf(searchValue) !== -1 : false;
         let checkDescription = connection.description ? connection.description.toLowerCase().indexOf(searchValue) !== -1 : false;
         // @ts-ignore
