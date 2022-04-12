@@ -76,7 +76,7 @@ export class Template extends HookStateClass implements ITemplate{
         return super.getInputTexts<ITemplateText, InputTextProps>(data);
     }
 
-    @App.dispatch<ITemplate>(deleteTemplateById, {hasNoValidation: true})
+    @App.dispatch<ITemplate>(deleteTemplateById, {mapping: (template: ITemplate) => {return template.id}, hasNoValidation: true})
     deleteById(){
         return this.validateId(this.id);
     }

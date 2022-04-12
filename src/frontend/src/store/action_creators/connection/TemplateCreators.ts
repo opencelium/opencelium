@@ -143,11 +143,11 @@ export const getAllTemplates = createAsyncThunk(
 
 export const deleteTemplateById = createAsyncThunk(
     'template/delete/byId',
-    async(template: ITemplate, thunkAPI) => {
+    async(id: string, thunkAPI) => {
         try {
-            const request = new TemplateRequest({endpoint: `/${template.id}`});
+            const request = new TemplateRequest({endpoint: `/${id}`});
             await request.deleteTemplateById();
-            return template;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

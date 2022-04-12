@@ -206,7 +206,7 @@ export class NotificationTemplate extends HookStateClass implements INotificatio
         return this.validateId(this.id) && this.validateAdd();
     }
 
-    @App.dispatch<INotificationTemplate>(deleteNotificationTemplateById, {hasNoValidation: true})
+    @App.dispatch<INotificationTemplate>(deleteNotificationTemplateById, {mapping: (notificationTemplate: INotificationTemplate) => {return notificationTemplate.id}, hasNoValidation: true})
     deleteById(): boolean{
         return this.validateId(this.id);
     }

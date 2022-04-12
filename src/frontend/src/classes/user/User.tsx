@@ -281,7 +281,7 @@ export class User extends HookStateClass implements IUser{
         return this.validateId(this.id) && this.validateAdd();
     }
 
-    @App.dispatch<IUser>(deleteUserById, {hasNoValidation: true})
+    @App.dispatch<IUser>(deleteUserById, {mapping: (user: IUser) => {return user.id;}, hasNoValidation: true})
     deleteById(): boolean{
         return this.validateId(this.id);
     }

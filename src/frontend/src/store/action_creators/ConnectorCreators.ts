@@ -145,11 +145,11 @@ export const getAllConnectors = createAsyncThunk(
 
 export const deleteConnectorById = createAsyncThunk(
     'connector/delete/byId',
-    async(connector: IConnector, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new ConnectorRequest({endpoint: `/${connector.id}`});
+            const request = new ConnectorRequest({endpoint: `/${id}`});
             await request.deleteConnectorById();
-            return connector;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

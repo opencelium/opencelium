@@ -203,11 +203,11 @@ export const updateSchedule = createAsyncThunk(
 
 export const deleteScheduleById = createAsyncThunk(
     'schedule/delete/byId',
-    async(schedule: ModelSchedule, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new ScheduleRequest({endpoint: `/${schedule.schedulerId}`});
+            const request = new ScheduleRequest({endpoint: `/${id}`});
             await request.deleteScheduleById();
-            return schedule.schedulerId;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

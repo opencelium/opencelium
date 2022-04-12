@@ -169,10 +169,10 @@ export const connectorSlice = createSlice({
         [deleteConnectorById.pending.type]: (state) => {
             state.deletingConnectorById = API_REQUEST_STATE.START;
         },
-        [deleteConnectorById.fulfilled.type]: (state, action: PayloadAction<IConnector>) => {
+        [deleteConnectorById.fulfilled.type]: (state, action: PayloadAction<number>) => {
             state.deletingConnectorById = API_REQUEST_STATE.FINISH;
-            state.connectors = state.connectors.filter(connector => connector.connectorId !== action.payload.id);
-            if(state.currentConnector && state.currentConnector.connectorId === action.payload.id){
+            state.connectors = state.connectors.filter(connector => connector.connectorId !== action.payload);
+            if(state.currentConnector && state.currentConnector.connectorId === action.payload){
                 state.currentConnector = null;
             }
             state.error = null;

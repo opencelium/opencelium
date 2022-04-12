@@ -244,11 +244,11 @@ export const connectionSlice = createSlice({
         [deleteConnectionById.pending.type]: (state) => {
             state.deletingConnectionById = API_REQUEST_STATE.START;
         },
-        [deleteConnectionById.fulfilled.type]: (state, action: PayloadAction<IConnection>) => {
+        [deleteConnectionById.fulfilled.type]: (state, action: PayloadAction<number>) => {
             state.deletingConnectionById = API_REQUEST_STATE.FINISH;
-            state.connections = state.connections.filter(connection => connection.connectionId !== action.payload.id);
-            state.metaConnections = state.metaConnections.filter(connection => connection.connectionId !== action.payload.id);
-            if(state.currentConnection && state.currentConnection.connectionId === action.payload.id){
+            state.connections = state.connections.filter(connection => connection.connectionId !== action.payload);
+            state.metaConnections = state.metaConnections.filter(connection => connection.connectionId !== action.payload);
+            if(state.currentConnection && state.currentConnection.connectionId === action.payload){
                 state.currentConnection = null;
             }
             state.error = null;

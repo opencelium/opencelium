@@ -95,7 +95,7 @@ export class Connection extends HookStateClass implements IConnection{
         return true;
     }
 
-    @App.dispatch<IConnection>(deleteConnectionById, {hasNoValidation: true})
+    @App.dispatch<IConnection>(deleteConnectionById, {mapping: (connection: IConnection) => {return connection.id;}, hasNoValidation: true})
     deleteById(){
         return this.validateId(this.id);
     }

@@ -21,7 +21,7 @@ import {CollectionView} from "@organism/collection_view/CollectionView";
 import {useAppDispatch} from "../../../hooks/redux";
 import {getAllMetaConnections} from "@action/connection/ConnectionCreators";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
-import {ConnectionPermissions, ConnectorPermissions} from "@constants/permissions";
+import {ConnectionPermissions} from "@constants/permissions";
 import {permission} from "../../../decorators/permission";
 import {checkNeo4j} from "@action/external_application/ExternalApplicationCreators";
 import {ExternalApplication} from "@class/external_application/ExternalApplication";
@@ -29,11 +29,11 @@ import {ExternalApplicationStatus} from "@requestInterface/external_application/
 import {INotification, NotificationType} from "@interface/application/INotification";
 import { addNotification } from '@store/reducers/application/ApplicationSlice';
 
-const ConnectionList: FC<ConnectionListProps> = permission(ConnectorPermissions.READ)(({}) => {
+const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
-    const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {gettingMetaConnections, metaConnections, deletingConnectionsById} = Connection.getReduxState();
     const {neo4jCheckResults} = ExternalApplication.getReduxState();
+    const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
         dispatch(getAllMetaConnections());
         dispatch(checkNeo4j())

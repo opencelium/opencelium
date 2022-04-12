@@ -235,7 +235,7 @@ export class Invoker extends HookStateClass implements IInvoker{
         return this.validateAdd();
     }
 
-    @App.dispatch<IInvoker>(deleteInvokerByName, {hasNoValidation: true})
+    @App.dispatch<IInvoker>(deleteInvokerByName, {mapping: (invoker: IInvoker) => {return invoker.name}, hasNoValidation: true})
     deleteByName(): boolean{
         return this.validateName();
     }

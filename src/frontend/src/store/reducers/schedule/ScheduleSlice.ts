@@ -259,10 +259,9 @@ export const scheduleSlice = createSlice({
             state.deletingScheduleById = API_REQUEST_STATE.START;
         },
         [deleteScheduleById.fulfilled.type]: (state, action: PayloadAction<number>) => {
-            const schedulerId = action.payload;
             state.deletingScheduleById = API_REQUEST_STATE.FINISH;
-            state.schedules = state.schedules.filter(schedule => schedule.schedulerId !== schedulerId);
-            if(state.currentSchedule && state.currentSchedule.schedulerId === schedulerId){
+            state.schedules = state.schedules.filter(schedule => schedule.schedulerId !== action.payload);
+            if(state.currentSchedule && state.currentSchedule.schedulerId === action.payload){
                 state.currentSchedule = null;
             }
             state.error = null;
