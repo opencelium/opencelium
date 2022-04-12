@@ -182,6 +182,7 @@ export const connectionSlice = createSlice({
         [addConnection.fulfilled.type]: (state, action: PayloadAction<IConnection>) => {
             state.addingConnection = API_REQUEST_STATE.FINISH;
             state.connections.push(action.payload);
+            state.metaConnections.push(action.payload);
             state.error = null;
         },
         [addConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {

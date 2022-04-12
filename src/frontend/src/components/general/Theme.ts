@@ -20,6 +20,7 @@ export enum ColorTheme {
     White = '#fff',
     Turquoise = '#00ACC2',
     Blue = '#007bff',
+    ToolboxBlue = '#0062cc',
     LightGray= 'rgba(33, 33, 33, 0.26)',
     Gray = '#777',
     DarkBlue = '#012E55',
@@ -107,7 +108,7 @@ const defaultTheme: ITheme = {
         },
         text:{
             color: {
-                quite: ColorTheme.DarkBlue,
+                quite: ColorTheme.ToolboxBlue,
                 disable: ColorTheme.Gray,
             },
         },

@@ -45,13 +45,11 @@ export const ERROR_TYPE = {
     BACKEND: 'BACKEND',
 };
 
-
 export const SOCKET_IS_ON = false;
 
 export const ENABLE_VOICE_CONTROL = false;
 
 export const ENABLE_DEBUG_VOICE_CONTROL = false;
-
 
 export const NO_DATA = '-';
 
@@ -61,8 +59,6 @@ export const API_METHOD = {
     PUT: 'PUT',
     DELETE: 'DELETE'
 };
-
-
 
 export const PANEL_LOCATION = {
     NEW_WINDOW: 'new_window',

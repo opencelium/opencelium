@@ -46,7 +46,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     if(shouldFetchConnection){
         connectionId = parseInt(urlParams.id);
     }
-    const schedule = Schedule.createState<ISchedule>({id: connectionId, _readOnly: isView}, isAdd ? null : currentSchedule);
+    const schedule = Schedule.createState<ISchedule>({id: connectionId, _readOnly: isView, status: 1}, isAdd ? null : currentSchedule);
     useEffect(() => {
         if(shouldFetchConnection){
             schedule.getById()
@@ -63,7 +63,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
         }
     },[addingSchedule, updatingSchedule]);
     const TitleInput = schedule.getText({
-        propertyName: "title", props: {autoFocus: true, icon: 'title', label: 'Title', required: true}
+        propertyName: "title", props: {autoFocus: !isView, icon: 'title', label: 'Title', required: true}
     })
     const ConnectionForm = schedule.getSelect({propertyName: 'connectionSelect', props: {
             icon: 'sync_alt',
@@ -87,6 +87,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
         label={formData.listButton.label}
         icon={formData.listButton.icon}
         href={'/schedules'}
+        autoFocus={isView}
     />];
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => schedule.add() : () => schedule.update();

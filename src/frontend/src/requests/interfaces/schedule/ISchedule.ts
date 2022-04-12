@@ -14,8 +14,9 @@
  */
 
 import {AxiosResponse} from "axios";
-import { ISchedule } from "@interface/schedule/ISchedule";
 import {IResponse} from "../application/IResponse";
+import ModelSchedule from "@model/schedule/Schedule";
+import ModelCurrentSchedule from "@model/schedule/CurrentSchedule";
 
 
 export interface ScheduleStatusRequestProps{
@@ -50,26 +51,26 @@ export interface IScheduleRequest{
     disableSchedules(data: SchedulesIdRequestProps): Promise<AxiosResponse<IResponse>>,
 
     //to get schedule by id
-    getScheduleById(): Promise<AxiosResponse<ISchedule>>,
+    getScheduleById(): Promise<AxiosResponse<ModelSchedule>>,
 
     //to get schedules by id
-    getSchedulesById(data: SchedulesIdRequestProps): Promise<AxiosResponse<ISchedule[]>>,
+    getSchedulesById(data: SchedulesIdRequestProps): Promise<AxiosResponse<ModelSchedule[]>>,
 
     //to get all schedules of authorized user
-    getAllSchedules(): Promise<AxiosResponse<ISchedule[]>>,
+    getAllSchedules(): Promise<AxiosResponse<ModelSchedule[]>>,
 
     //to get schedules of authorized user that currently working on
-    getCurrentSchedules(): Promise<AxiosResponse<ISchedule[]>>,
+    getCurrentSchedules(): Promise<AxiosResponse<ModelCurrentSchedule[]>>,
 
     //to add schedule
-    addSchedule(notificationTemplate: ISchedule): Promise<AxiosResponse<ISchedule>>,
+    addSchedule(schedule: ModelSchedule): Promise<AxiosResponse<ModelSchedule>>,
 
     //to update schedule
-    updateSchedule(notificationTemplate: ISchedule): Promise<AxiosResponse<ISchedule>>,
+    updateSchedule(schedule: ModelSchedule): Promise<AxiosResponse<ModelSchedule>>,
 
     //to delete schedule by id
-    deleteScheduleById(): Promise<AxiosResponse<ISchedule>>,
+    deleteScheduleById(): Promise<AxiosResponse<ModelSchedule>>,
 
     //to delete schedules by id
-    deleteSchedulesById(notificationTemplate: number[]): Promise<AxiosResponse<number[]>>,
+    deleteSchedulesById(scheduleIds: number[]): Promise<AxiosResponse<number[]>>,
 }

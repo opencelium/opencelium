@@ -29,6 +29,7 @@ import Tooltip from "../../atoms/tooltip/Tooltip";
 import {useAppDispatch} from "../../../hooks/redux";
 import {createGlobalStyle} from "styled-components";
 import {resizeWindow} from "../../../utils";
+import {Application} from "@class/application/Application";
 
 
 const Global = createGlobalStyle`
@@ -41,7 +42,7 @@ const Menu: FC<MenuProps> =
     ({
 
     }) => {
-    const dispatch = useAppDispatch();
+    const {isFullScreen} = Application.getReduxState();
     const [isExpanded, toggleExpanded] = useState(false);
     const [isMouseOver, toggleMouseOver] = useState(false);
     const onMouseOver = () => {
@@ -53,6 +54,16 @@ const Menu: FC<MenuProps> =
     useEffect(() => {
         setTimeout(() => resizeWindow(), 500);
     },[isExpanded]);
+    useEffect(() => {
+        const bodyElement = document.querySelector('body');
+        if (bodyElement) {
+            if(isFullScreen){
+                bodyElement.style['padding'] = '2rem';
+            } else{
+                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+            }
+        }
+    }, [isFullScreen])
     useEffect(() => {
         return () => {
             const bodyElement = document.querySelector('body');
@@ -77,7 +88,7 @@ const Menu: FC<MenuProps> =
     return (
         <React.Fragment>
             <Global/>
-            <MenuStyled isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
+            <MenuStyled isFullScreen={isFullScreen} isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
                 <NavStyled>
                     <div>
                         <MenuTop>

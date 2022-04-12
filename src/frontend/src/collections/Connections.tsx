@@ -19,12 +19,15 @@ import {IConnection} from "@interface/connection/IConnection";
 import {Connection} from "@class/connection/Connection";
 import {SortType} from "@organism/collection_view/interfaces";
 import {ListProp} from "@interface/application/IListCollection";
-import {PermissionButton} from "@atom/button/PermissionButton";
-import {ConnectionPermissions} from "@constants/permissions";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
+import {ComponentPermissionProps, ConnectionPermissions} from "@constants/permissions";
 import {ViewType} from "@organism/collection_view/CollectionView";
 import {deleteConnectionsById} from "@action/connection/ConnectionCreators";
 import {AppDispatch} from "@store/store";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import {ColorTheme} from "../components/general/Theme";
+import {TextSize} from "@atom/text/interfaces";
+import DuplicateIcon from "@molecule/duplicate_icon/DuplicateIcon";
 
 class Connections extends ListCollection{
     entities: IConnection[];
@@ -45,6 +48,17 @@ class Connections extends ListCollection{
             <React.Fragment>
                 <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Connection'} permission={ConnectionPermissions.CREATE}/>
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteConnectionsById(checkedIds))} permission={ConnectionPermissions.DELETE}/>}
+            </React.Fragment>
+        );
+    };
+    getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
+        const hasDeleteButton = !this.isCurrentItem(entity);
+        return (
+            <React.Fragment>
+                <DuplicateIcon listConnection={entity}/>
+                <PermissionButton href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
+                {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );
     };

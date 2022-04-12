@@ -14,6 +14,7 @@
  */
 
 import styled from "styled-components";
+import {Text} from "@atom/text/Text";
 
 const CurrentSchedulesStyled = styled.div`
     padding: 1vw 1vw 0.5vw;
@@ -32,7 +33,7 @@ const HeaderStyled = styled.div`
     margin-bottom: 30px;
 `;
 
-const EmptyListStyled = styled.div`
+const EmptyListStyled = styled(Text)`
 `;
 
 export {

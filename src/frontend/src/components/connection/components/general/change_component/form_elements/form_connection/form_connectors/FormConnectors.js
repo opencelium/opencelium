@@ -188,7 +188,8 @@ class FormConnectors extends Component{
             <Row>
                 <Col md={5} className={`${styles.form_select_connector}`} style={{textAlign: 'right'}}>
                     <InputSelect
-                        isSearchable={false}
+                        icon={'share'}
+                        label={'Connectors'}
                         value={{label: fromConnectorValue, value: fromConnectorValue}}
                         readOnly
                         options={data.source}
@@ -197,11 +198,11 @@ class FormConnectors extends Component{
                     {this.renderFromInvoker()}
                 </Col>
                 <Col md={2} style={{textAlign: 'center', alignSelf: 'center'}}>
-                    <ArrowRight className={styles.input_direction_arrow_readonly}/>
+                    <ArrowRight className={styles.input_direction_arrow_readonly} style={{marginTop: '20px'}}/>
                 </Col>
                 <Col md={5} className={`${styles.form_select_connector}`}>
                     <InputSelect
-                        isSearchable={false}
+                        label={' '}
                         value={{label: toConnectorValue, value: toConnectorValue}}
                         readOnly
                         options={data.source}

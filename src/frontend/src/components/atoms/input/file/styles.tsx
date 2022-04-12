@@ -44,11 +44,11 @@ const ButtonStyled = styled(Button)<ButtonStyledProps>`
     ${EmphasizeInputStyleLines}
     &:hover + div{
         width: ${({hasIcon, isIconInside, width, theme, hasCheckbox}) => width ? width : (!hasIcon || isIconInside) ? '100%' : `calc(100% - ${theme.input.iconInputDistance}${hasCheckbox ? ' - 20px' : ''})`};
-        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? `linear-gradient(180deg, rgba(255,255,255,0) 45%, ${emphasizeColor || theme.input.text.color.quite} 100%)` : 'unset'};
+        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
     }
     &:focus + div{
         width: ${({hasIcon, isIconInside, width, theme, hasCheckbox}) => width ? width : (!hasIcon || isIconInside) ? '100%' : `calc(100% - ${theme.input.iconInputDistance}${hasCheckbox ? ' - 20px' : ''})`};
-        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? `linear-gradient(180deg, rgba(255,255,255,0) 45%, ${emphasizeColor || theme.input.text.color.quite} 100%)` : 'unset'};
+        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
     }
     & + div{
         margin-left: ${({marginLeft, hasIcon, isIconInside, theme, hasCheckbox}) => marginLeft ? marginLeft : (!hasIcon || isIconInside) ? 0 : `calc(${theme.input.iconInputDistance}${hasCheckbox ? ' + 20px' : ''})`};

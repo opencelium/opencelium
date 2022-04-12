@@ -16,6 +16,7 @@
 import {IForm} from "@interface/application/core";
 import {TemplateState} from "@slice/connection/TemplateSlice";
 import {IConnection} from "@interface/connection/IConnection";
+import ModelTemplate from "@model/connection/Template";
 
 
 export interface ITemplateText{
@@ -37,4 +38,5 @@ export interface ITemplate extends ITemplateForm{
     version?: string;
     connection?: IConnection;
     templateContent?: any;
+    getModel?: (isForApiRequest?: boolean) => ModelTemplate,
 }

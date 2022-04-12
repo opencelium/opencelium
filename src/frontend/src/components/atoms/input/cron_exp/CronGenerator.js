@@ -348,11 +348,7 @@ class CronGenerator extends Component{
             <Text value={
                 <ExampleStyled>
                     {
-                        examples.map(example => {
-                            return (
-                                <li>{example}</li>
-                            );
-                        })
+                        examples.map(example => example)
                     }
                 </ExampleStyled>
             }/>
@@ -451,7 +447,7 @@ class CronGenerator extends Component{
                         </div>
                     </div>
                 </Dialog>
-                <Button color={ColorTheme.Turquoise} handleClick={() => this.toggleShowGenerator()} icon={'edit'} hasBackground={false}/>
+                <Button color={ColorTheme.Blue} handleClick={() => this.toggleShowGenerator()} icon={'edit'} hasBackground={false}/>
             </CronGeneratorStyled>
         );
     }

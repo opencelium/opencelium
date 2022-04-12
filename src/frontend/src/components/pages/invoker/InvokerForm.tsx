@@ -102,6 +102,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
         label={formData.listButton.label}
         icon={formData.listButton.icon}
         href={'/invokers'}
+        autoFocus={isView}
     />];
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => invoker.add(connection, localOperations) : () => invoker.update(connection, localOperations);
@@ -118,7 +119,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
         actions,
         formSections: [
             <FormSection label={{value: 'General Data'}}>
-                <InvokerGeneralData invoker={invoker} isAdd={isAdd}/>
+                <InvokerGeneralData invoker={invoker} isAdd={isAdd} isView={isView} isReadonly={isView}/>
                 {/*!isView && Icon*/}
             </FormSection>,
             <FormSection label={{value: 'Authentication'}}>

@@ -14,7 +14,6 @@
  */
 
 import {createSlice, PayloadAction, current} from "@reduxjs/toolkit";
-import {ISchedule} from "@interface/schedule/ISchedule";
 import {
     addSchedule,
     checkScheduleTitle,
@@ -30,10 +29,12 @@ import {SchedulesIdRequestProps} from "@requestInterface/schedule/ISchedule";
 import {deleteWebhook, getWebhook} from "@action/schedule/WebhookCreators";
 import {ICommonState} from "@interface/application/core";
 import {CommonState} from "../../store";
+import ModelCurrentSchedule from "@model/schedule/CurrentSchedule";
+import ModelSchedule from "@model/schedule/Schedule";
 
 export interface ScheduleState extends ICommonState{
-    schedules: ISchedule[],
-    currentSchedules: ISchedule[],
+    schedules: ModelSchedule[],
+    currentSchedules: ModelCurrentSchedule[],
     isCurrentScheduleHasUniqueTitle: TRIPLET_STATE,
     checkingScheduleTitle: API_REQUEST_STATE,
     switchingScheduleStatus: API_REQUEST_STATE,
@@ -51,7 +52,7 @@ export interface ScheduleState extends ICommonState{
     deletingSchedulesById: API_REQUEST_STATE,
     gettingWebhook: API_REQUEST_STATE,
     deletingWebhook: API_REQUEST_STATE,
-    currentSchedule: ISchedule,
+    currentSchedule: ModelSchedule,
 }
 
 const initialState: ScheduleState = {
@@ -101,9 +102,9 @@ export const scheduleSlice = createSlice({
         [switchScheduleStatus.pending.type]: (state) => {
             state.switchingScheduleStatus = API_REQUEST_STATE.START;
         },
-        [switchScheduleStatus.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [switchScheduleStatus.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.switchingScheduleStatus = API_REQUEST_STATE.FINISH;
-            let index = state.schedules.findIndex(schedule => schedule.schedulerId === action.payload.id);
+            let index = state.schedules.findIndex(schedule => schedule.schedulerId === action.payload.schedulerId);
             if(index !== -1){
                 state.schedules[index] = action.payload;
             }
@@ -116,9 +117,8 @@ export const scheduleSlice = createSlice({
         [startSchedule.pending.type]: (state) => {
             state.startingSchedule = API_REQUEST_STATE.START;
         },
-        [startSchedule.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [startSchedule.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.startingSchedule = API_REQUEST_STATE.FINISH;
-            //state.currentSchedule = action.payload;
             state.error = null;
         },
         [startSchedule.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -166,10 +166,10 @@ export const scheduleSlice = createSlice({
             state.disablingSchedules = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [addSchedule.pending.type]: (state, action: PayloadAction<ISchedule>) => {
+        [addSchedule.pending.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.addingSchedule = API_REQUEST_STATE.START;
         },
-        [addSchedule.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [addSchedule.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.addingSchedule = API_REQUEST_STATE.FINISH;
             state.schedules.push(action.payload);
             state.error = null;
@@ -184,12 +184,9 @@ export const scheduleSlice = createSlice({
         [updateSchedule.pending.type]: (state) => {
             state.updatingSchedule = API_REQUEST_STATE.START;
         },
-        [updateSchedule.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [updateSchedule.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.updatingSchedule = API_REQUEST_STATE.FINISH;
             state.schedules = state.schedules.map(schedule => schedule.schedulerId === action.payload.schedulerId ? action.payload : schedule);
-            if(state.currentSchedule && state.currentSchedule.schedulerId === action.payload.schedulerId){
-                state.currentSchedule = action.payload;
-            }
             state.error = null;
         },
         [updateSchedule.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -202,7 +199,7 @@ export const scheduleSlice = createSlice({
         [getScheduleById.pending.type]: (state) => {
             state.gettingScheduleById = API_REQUEST_STATE.START;
         },
-        [getScheduleById.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [getScheduleById.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.gettingScheduleById = API_REQUEST_STATE.FINISH;
             state.currentSchedule = action.payload;
             state.error = null;
@@ -214,13 +211,13 @@ export const scheduleSlice = createSlice({
         [getSchedulesById.pending.type]: (state) => {
             state.gettingSchedulesById = API_REQUEST_STATE.START;
         },
-        [getSchedulesById.fulfilled.type]: (state, action: PayloadAction<ISchedule[]>) => {
+        [getSchedulesById.fulfilled.type]: (state, action: PayloadAction<ModelSchedule[]>) => {
             state.gettingSchedulesById = API_REQUEST_STATE.FINISH;
             if(state.schedules.length === 0){
                 state.schedules = action.payload;
             } else{
                 state.schedules = current(state.schedules).map(schedule => {
-                    let index = action.payload.findIndex(newSchedule => schedule.schedulerId ? newSchedule.schedulerId === schedule.schedulerId : newSchedule.schedulerId === schedule.id);
+                    let index = action.payload.findIndex(newSchedule => schedule.schedulerId ? newSchedule.schedulerId === schedule.schedulerId : newSchedule.schedulerId === schedule.schedulerId);
                     if(index === -1){
                         return schedule;
                     } else{
@@ -237,7 +234,7 @@ export const scheduleSlice = createSlice({
         [getCurrentSchedules.pending.type]: (state) => {
             state.gettingCurrentSchedules = API_REQUEST_STATE.START;
         },
-        [getCurrentSchedules.fulfilled.type]: (state, action: PayloadAction<ISchedule[]>) => {
+        [getCurrentSchedules.fulfilled.type]: (state, action: PayloadAction<ModelCurrentSchedule[]>) => {
             state.gettingCurrentSchedules = API_REQUEST_STATE.FINISH;
             state.currentSchedules = action.payload;
             state.error = null;
@@ -249,7 +246,7 @@ export const scheduleSlice = createSlice({
         [getAllSchedules.pending.type]: (state) => {
             state.gettingAllSchedules = API_REQUEST_STATE.START;
         },
-        [getAllSchedules.fulfilled.type]: (state, action: PayloadAction<ISchedule[]>) => {
+        [getAllSchedules.fulfilled.type]: (state, action: PayloadAction<ModelSchedule[]>) => {
             state.gettingAllSchedules = API_REQUEST_STATE.FINISH;
             state.schedules = action.payload;
             state.error = null;
@@ -261,10 +258,11 @@ export const scheduleSlice = createSlice({
         [deleteScheduleById.pending.type]: (state) => {
             state.deletingScheduleById = API_REQUEST_STATE.START;
         },
-        [deleteScheduleById.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [deleteScheduleById.fulfilled.type]: (state, action: PayloadAction<number>) => {
+            const schedulerId = action.payload;
             state.deletingScheduleById = API_REQUEST_STATE.FINISH;
-            state.schedules = state.schedules.filter(schedule => schedule.schedulerId !== action.payload.id);
-            if(state.currentSchedule && state.currentSchedule.schedulerId === action.payload.id){
+            state.schedules = state.schedules.filter(schedule => schedule.schedulerId !== schedulerId);
+            if(state.currentSchedule && state.currentSchedule.schedulerId === schedulerId){
                 state.currentSchedule = null;
             }
             state.error = null;
@@ -291,9 +289,9 @@ export const scheduleSlice = createSlice({
         [getWebhook.pending.type]: (state) => {
             state.gettingWebhook = API_REQUEST_STATE.START;
         },
-        [getWebhook.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [getWebhook.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.gettingWebhook = API_REQUEST_STATE.FINISH;
-            state.schedules = state.schedules.map(schedule => schedule.schedulerId === action.payload.id ? {...schedule, webhook: action.payload.webhook} : schedule);
+            state.schedules = state.schedules.map(schedule => schedule.schedulerId === action.payload.schedulerId ? {...schedule, webhook: action.payload.webhook} : schedule);
             state.error = null;
         },
         [getWebhook.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -303,9 +301,9 @@ export const scheduleSlice = createSlice({
         [deleteWebhook.pending.type]: (state) => {
             state.deletingWebhook = API_REQUEST_STATE.START;
         },
-        [deleteWebhook.fulfilled.type]: (state, action: PayloadAction<ISchedule>) => {
+        [deleteWebhook.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.deletingWebhook = API_REQUEST_STATE.FINISH;
-            state.schedules = state.schedules.map(schedule => schedule.schedulerId === action.payload.id ? {...schedule, webhook: null} : schedule);
+            state.schedules = state.schedules.map(schedule => schedule.schedulerId === action.payload.schedulerId ? {...schedule, webhook: null} : schedule);
             state.error = null;
         },
         [deleteWebhook.rejected.type]: (state, action: PayloadAction<IResponse>) => {

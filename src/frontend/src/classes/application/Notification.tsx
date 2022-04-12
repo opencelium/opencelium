@@ -13,7 +13,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ReactDOMServer from "react-dom/server";
 import React from "react";
 import {INotification, NotificationType} from "@interface/application/INotification";
 import {ColorTheme} from "../../components/general/Theme";
@@ -21,7 +20,7 @@ import {TypeIconStyled, WarningIconStyled} from "@molecule/notification/styles";
 import FulfilledInterpolations from "@translations/interpolations/fulfilled/index";
 import {stringToHTML} from "../../components/utils";
 import i18next from "i18next";
-import {getActionWithoutType} from "../../utils";
+import {getActionWithoutType, reactElementToText} from "../../utils";
 import {AppDispatch} from "@store/store";
 import {NavigateFunction} from "react-router";
 import {login} from "@action/application/AuthCreators";
@@ -79,7 +78,7 @@ export class CNotification implements INotification{
                 messageData.message = translationKey;
             }
         }
-        const clearText = stringToHTML(ReactDOMServer.renderToString(messageData.message)).innerText
+        const clearText = stringToHTML(reactElementToText(messageData.message)).innerText
         messageData.length = clearText.length;
         if(messageData.length > CNotification.MAX_NOTIFICATION_MESSAGE_LENGTH) {
             const shortMessage = clearText.substr(0, CNotification.MAX_NOTIFICATION_MESSAGE_LENGTH);

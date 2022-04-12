@@ -14,19 +14,19 @@
  */
 
 import styled from "styled-components";
+import {MenuStyledProps} from "./interfaces";
 
-const MenuStyled = styled.div`
+const MenuStyled = styled.div<MenuStyledProps>`
     position: fixed;
     top: 0;
     left: 0;
-    width: 95px;
+    width: ${({isFullScreen, isExpanded}) => isFullScreen ? '0' : isExpanded ? 'width: calc(95px + 9.25rem) !important;' : '95px'};
+    padding: ${({isFullScreen}) => isFullScreen ? '0' : '1.5rem 1.5rem 2rem'};
     height: 100vh;
     background: ${({theme}) => theme.menu.background || '#012E55'};
     color: #eee;
-    padding: 1.5rem 1.5rem 2rem;
     transition: .5s;
     z-index: 1001;
-    ${({isExpanded}:{isExpanded: boolean}) => isExpanded ? 'width: calc(95px + 9.25rem) !important;' : ''}
 `;
 
 const NavStyled = styled.nav`

@@ -23,7 +23,12 @@ import {mapItemsToClasses} from "../utils";
 import Description from "@change_component/form_elements/form_connection/form_svg/details/description/Description";
 import {withTranslation} from "react-i18next";
 import {PageNotFound} from "@template/PageNotFound";
-import {ConnectionOverviewChannel} from "@utils/app";
+import {
+    setConnectionData,
+    setCurrentBusinessItem,
+    setCurrentTechnicalItem,
+    setTechnicalLayoutLocation
+} from "@slice/connection/ConnectionSlice";
 
 function mapStateToProps(state){
     const {currentBusinessItem, currentTechnicalItem, connection} = mapItemsToClasses(state);
@@ -34,7 +39,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setCurrentBusinessItem, setCurrentTechnicalItem, setTechnicalLayoutLocation, setConnectionData})
 @withTranslation('basic_components')
 class ExtendedDetails extends React.Component{
     constructor(props) {
@@ -44,6 +49,9 @@ class ExtendedDetails extends React.Component{
             currentInfo: '',
         }
     }
+    componentDidMount() {
+        this.props.setConnectionData({connection: this.props.connection.getObjectForConnectionOverview()});
+    }
 
     setCurrentInfo(currentInfo){
         this.setState({
@@ -51,9 +59,8 @@ class ExtendedDetails extends React.Component{
         });
     }
 
-    updateConnection(){
-        const {connection} = this.props;
-        ConnectionOverviewChannel.postMessage(connection.getObjectForConnectionOverview());
+    updateConnection(connection){
+        this.props.setConnectionData({connection: connection.getObjectForConnectionOverview()});
     }
 
     render(){

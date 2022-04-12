@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {ConnectionListProps} from "./interfaces";
 import Connections from "@collection/Connections";
 import {Connection} from "@class/connection/Connection";
@@ -31,12 +31,16 @@ import { addNotification } from '@store/reducers/application/ApplicationSlice';
 
 const ConnectionList: FC<ConnectionListProps> = permission(ConnectorPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
+    const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {gettingMetaConnections, metaConnections, deletingConnectionsById} = Connection.getReduxState();
     const {neo4jCheckResults} = ExternalApplication.getReduxState();
     useEffect(() => {
         dispatch(getAllMetaConnections());
         dispatch(checkNeo4j())
     }, [])
+    useEffect(() => {
+        setShouldBeUpdated(!shouldBeUpdated);
+    }, [metaConnections])
     useEffect(() => {
         if(neo4jCheckResults?.status === ExternalApplicationStatus.DOWN){
             let date = new Date();
@@ -52,7 +56,7 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectorPermissions.
     },[neo4jCheckResults])
     const CConnections = new Connections(metaConnections, dispatch, deletingConnectionsById);
     return (
-        <CollectionView collection={CConnections} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
+        <CollectionView collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
     )
 })
 

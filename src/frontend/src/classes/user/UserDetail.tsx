@@ -82,7 +82,7 @@ export class UserDetail extends HookStateClass implements IUserDetail{
         this.department = userDetail?.department || '';
         this.organization = userDetail?.organization || '';
         this.profilePictureFile = userDetail?.profilePictureFile || null;
-        this.theme = userDetail?.theme || '';
+        this.theme = userDetail?.theme || 'default';
         this.appTour = userDetail?.appTour || false;
         this.profilePicture = userDetail?.profilePicture || '';
         this.shouldDeletePicture = userDetail?.shouldDeletePicture || false;

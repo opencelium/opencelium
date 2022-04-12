@@ -60,13 +60,13 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         }
     },[addingNotificationTemplate, updatingNotificationTemplate]);
     const NameInput = notificationTemplate.getText({
-        propertyName: "name", props: {autoFocus: true, icon: 'title', label: 'Name', required: true, isLoading: checkingNotificationTemplateName === API_REQUEST_STATE.START, error: isCurrentNotificationTemplateHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
+        propertyName: "name", props: {autoFocus: !isView, icon: 'title', label: 'Name', required: true, isLoading: checkingNotificationTemplateName === API_REQUEST_STATE.START, error: isCurrentNotificationTemplateHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
     })
     const Type = notificationTemplate.getSelect({propertyName: 'typeSelect', props: {
             icon: 'mail',
             label: 'Type',
             options:[
-                {value: '1', label: 'E-Mail'},
+                {value: 'email', label: 'E-Mail'},
             ],
             required: true,
         }})
@@ -81,6 +81,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         label={formData.listButton.label}
         icon={formData.listButton.icon}
         href={'/notification_templates'}
+        autoFocus={isView}
     />];
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => notificationTemplate.add() : () => notificationTemplate.update();

@@ -19,6 +19,7 @@ import {ITemplate} from "@interface/connection/ITemplate";
 import {ITemplateRequest} from "../../interfaces/connection/ITemplate";
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
+import ModelTemplate from "@model/connection/Template";
 
 
 export class TemplateRequest extends Request implements ITemplateRequest{
@@ -49,11 +50,11 @@ export class TemplateRequest extends Request implements ITemplateRequest{
     }
 
     async addTemplate(template: ITemplate): Promise<AxiosResponse<ITemplate>>{
-        return super.post<ITemplate>(this.backendMap(template));
+        return super.post<ITemplate>(template.getModel(true));
     }
 
-    async updateTemplate(template: ITemplate): Promise<AxiosResponse<ITemplate>>{
-        return super.put<ITemplate>(this.backendMap(template));
+    async updateTemplate(template: ModelTemplate): Promise<AxiosResponse<ITemplate>>{
+        return super.put<ITemplate>(template);
     }
 
     async updateTemplates(templates: ITemplate[]): Promise<AxiosResponse<ITemplate[]>>{
@@ -67,21 +68,5 @@ export class TemplateRequest extends Request implements ITemplateRequest{
 
     async deleteTemplatesById(templateIds: number[]): Promise<AxiosResponse<number[]>>{
         return super.delete<number[]>({data: templateIds});
-    }
-
-    backendMap(template: ITemplate){
-        let mappedTemplate = {
-            name: template.name,
-            description: template.description,
-            version: template.version,
-            connection: template.connection,
-        };
-        if(template.id !== ''){
-            return {
-                templateId: template.id,
-                ...mappedTemplate,
-            }
-        }
-        return mappedTemplate;
     }
 }

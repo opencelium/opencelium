@@ -36,7 +36,7 @@ import {authMiddleware} from "../middlewares/auth";
 import {notificationMiddleware} from "../middlewares/notification";
 
 import {createStateSyncMiddleware, withReduxStateSync} from "redux-state-sync";
-import {setItems, setArrows, setCurrentTechnicalItem, setCurrentBusinessItem, setDetailsLocation, } from "@slice/connection/ConnectionSlice";
+import {setItems, setArrows, setCurrentTechnicalItem, setCurrentBusinessItem, setDetailsLocation, setConnectionData } from "@slice/connection/ConnectionSlice";
 import {applicationMiddleware} from "../middlewares/application";
 const syncConfig: any = {
     whitelist: [
@@ -45,6 +45,7 @@ const syncConfig: any = {
         setCurrentTechnicalItem.type,
         setCurrentBusinessItem.type,
         setDetailsLocation.type,
+        setConnectionData.type,
     ],
 }
 

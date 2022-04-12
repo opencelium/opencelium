@@ -23,6 +23,7 @@ import {IResponse, ResponseMessages} from "@requestInterface/application/IRespon
 import {getResources, getVersion} from "@action/application/ApplicationCreators";
 import {checkForUpdates} from "@action/application/UpdateAssistantCreators";
 import {LogoutProps} from "@interface/application/IAuth";
+import {API_REQUEST_STATE} from "@interface/application/IApplication";
 
 export const authMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
@@ -31,7 +32,8 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
     let isAccessDenied = false;
     const response: IResponse = action.payload;
     if(isRequestRejected){
-        isAccessDenied = response?.status === 403 || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || response?.message === ResponseMessages.NETWORK_ERROR || false;
+        const applicationState = storeApi.getState().applicationReducer;
+        isAccessDenied = applicationState.openingExternalUrl !== API_REQUEST_STATE.START && (response?.status === 403 || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || response?.message === ResponseMessages.NETWORK_ERROR || false);
     }
     if(isAccessDenied){
         const authState = storeApi.getState().authReducer;

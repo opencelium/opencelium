@@ -100,6 +100,9 @@ const InputContainerStyled = styled.span<InputContainerStyledProps>`
 const ToggleStyled = styled(Button)<ToggleStyledProps>`
     margin-top: ${({marginTop}) => marginTop || 0};
     ${EmphasizeInputStyleLines}
+    & + div{
+        height: 3px;
+    }
 `;
 
 const SelectStyled = styled.input<ElementProps>`
@@ -116,7 +119,7 @@ const SelectStyled = styled.input<ElementProps>`
     margin-top: ${({marginTop}) => marginTop || 0};
     &:hover ~div:first-of-type{
         width: ${({hasIcon, isIconInside, theme}: ElementProps) => (!hasIcon || isIconInside) ? '100%' : `calc(100% - ${theme.input.iconInputDistance})`};
-        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? `linear-gradient(180deg, rgba(255,255,255,0) 45%, ${emphasizeColor || theme.input.text.color.quite} 100%)` : 'unset'};
+        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
     }
 `;
 

@@ -13,24 +13,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*!
- *
- *  * Copyright (C) <2022>  <becon GmbH>
- *  *
- *  * This program is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, version 3 of the License.
- *  * This program is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- * /
- */
-
-
 
 @import '../constants';
 
@@ -452,6 +434,7 @@
   height: 38px;
   padding-left: 5px !important;
   margin-top: 0 !important;
+  border-bottom: 1px solid #2121211f !important;
 }
 .input_input_element:focus:not([disabled]):not([readonly]) ~ .input_icon{
   color: $INPUT_SELECT_COLOR !important;
@@ -853,7 +836,7 @@
   min-width: 250px;
   max-width: 250px;
   right: 0;
-  z-index: 100;
+  z-index: 10000;
   animation: APopupInputAppear .25s;
   position: absolute;
   transition: all 0.3s ease 0s;

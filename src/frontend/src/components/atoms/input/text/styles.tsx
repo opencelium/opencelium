@@ -25,7 +25,6 @@ const InputStyled = styled.input<ElementProps>`
     outline: none;
     border: none;
     cursor: ${({readOnly}) => readOnly ? 'default' : 'text'};
-    border-bottom: ${({value}) => !value || value.toString().length === 0 ? '1px solid #c1c1c1' : 'none'};
     transition: border-bottom-color 0.5s;
     padding-left: ${({paddingLeft, paddingLeftInput}) => paddingLeftInput ? paddingLeftInput : paddingLeft || 0};
     padding-right: ${({paddingRight, paddingRightInput}) => paddingRightInput ? paddingRightInput : paddingRight || 0};
@@ -40,7 +39,7 @@ const InputStyled = styled.input<ElementProps>`
 
 const CheckStyled = styled(Button)<CheckStyledProps>`
     position: absolute;
-    right: 6px;
+    right: ${({paddingRight}) => `calc(${paddingRight || '0px'} + 2px)` || '2px'};
     top: 7px;
     margin-top: ${({marginTop, paddingTop}) => marginTop || paddingTop || 0};
     opacity: 1 !important;

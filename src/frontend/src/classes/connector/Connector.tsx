@@ -80,7 +80,7 @@ export class Connector extends HookStateClass implements IConnector{
         this.title = connector?.title || '';
         this.description = connector?.description || '';
         this.sslCert = connector?.sslCert || false;
-        this.timeout = connector?.timeout || 0;
+        this.timeout = connector?.timeout || 1000;
         this.iconFile = connector?.iconFile || null;
         this.icon = connector?.icon || '';
         this.invokerSelect = connector?.invokerSelect || null;

@@ -18,6 +18,8 @@ import {ApplicationRequest} from "@request/application/Application";
 import {ITicket} from "@interface/application/ITicket";
 import {errorHandler} from "../../../components/utils";
 import {SettingsProps} from "@requestInterface/application/IResponse";
+import {RemoteApiRequestProps} from "@requestInterface/application/IApplication";
+import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
 
 export const addTicket = createAsyncThunk(
     'application/add/ticket',
@@ -113,6 +115,21 @@ export const openExternalUrl = createAsyncThunk(
     }
 )
 
+export const requestRemoteApi = createAsyncThunk(
+    'application/remote_request/send',
+    async(requestProps: RemoteApiRequestProps, thunkAPI) => {
+        try{
+            const request = new ApplicationRequest();
+            const response = await request.remoteApiRequest(requestProps);
+            return response.data;
+        }catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+
+
 export default {
     addTicket,
     getVersion,
@@ -121,4 +138,5 @@ export default {
     getAllComponents,
     updateResources,
     openExternalUrl,
+    requestRemoteApi,
 }

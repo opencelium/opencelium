@@ -17,6 +17,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {TemplateRequest} from "@request/connection/Template";
 import { ITemplate } from "@interface/connection/ITemplate";
 import {errorHandler} from "../../../components/utils";
+import ModelTemplate from "@model/connection/Template";
 
 
 export const checkTemplateName = createAsyncThunk(
@@ -75,9 +76,9 @@ export const addTemplate = createAsyncThunk(
 
 export const updateTemplate = createAsyncThunk(
     'template/update',
-    async(template: ITemplate, thunkAPI) => {
+    async(template: ModelTemplate, thunkAPI) => {
         try {
-            const request = new TemplateRequest({endpoint: `/${template.id}`});
+            const request = new TemplateRequest({endpoint: `/${template.templateId}`});
             const response = await request.updateTemplate(template);
             return response.data;
         } catch(e){

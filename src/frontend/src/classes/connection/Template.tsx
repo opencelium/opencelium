@@ -27,6 +27,7 @@ import {TemplateState} from "@slice/connection/TemplateSlice";
 import {IConnection} from "@interface/connection/IConnection";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux";
 import {deleteTemplateById} from "@action/connection/TemplateCreators";
+import ModelTemplate from "@model/connection/Template";
 
 
 export class Template extends HookStateClass implements ITemplate{
@@ -78,5 +79,21 @@ export class Template extends HookStateClass implements ITemplate{
     @App.dispatch<ITemplate>(deleteTemplateById, {hasNoValidation: true})
     deleteById(){
         return this.validateId(this.id);
+    }
+
+    getModel(isForApiRequest: boolean = false): ModelTemplate{
+        let mappedTemplate: ModelTemplate = {
+            name: this.name,
+            description: this.description,
+            version: this.version,
+            connection: this.connection,
+        };
+        if(this.id !== ''){
+            return {
+                templateId: this.id,
+                ...mappedTemplate,
+            }
+        }
+        return mappedTemplate;
     }
 }

@@ -21,7 +21,6 @@ import styles from "@themes/default/content/connections/connection_overview_2";
 import CreateElementPanel from "../elements/create_element_panel/CreateElementPanel";
 import {HAS_LAYOUTS_SCALING} from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import {setConnectionData, setCurrentBusinessItem, setBusinessLayoutLocation} from "@slice/connection/ConnectionSlice";
-import {ConnectionOverviewExtendedChannel} from "@utils/app";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -29,7 +28,6 @@ function mapStateToProps(state){
     return{
         currentBusinessItem,
         connection,
-        updateConnectionInOpener: window.opener.updateConnection,
         items: connection.businessLayout.getItems(),
         arrows: connection.businessLayout.getArrows(),
         technicalLayoutLocation: connectionOverview.technicalLayoutLocation,
@@ -50,16 +48,8 @@ class ExtendedBusinessLayout extends React.Component{
         }
     }
 
-    componentDidMount() {
-        ConnectionOverviewExtendedChannel.onmessage = (e) => {
-            this.props.setConnectionData({connection: e.data.getObjectForConnectionOverview()});
-        }
-    }
-
     updateConnection(connection){
-        const {updateConnectionInOpener, setConnectionData} = this.props;
-        updateConnectionInOpener(connection);
-        setConnectionData({connection: connection.getObjectForConnectionOverview()});
+        this.props.setConnectionData({connection: connection.getObjectForConnectionOverview()});
     }
 
     setCreateElementPanelPosition(position){
@@ -77,7 +67,7 @@ class ExtendedBusinessLayout extends React.Component{
 
     setCurrentItem(currentItem){
         const {setCurrentBusinessItem, connection} = this.props;
-        setCurrentBusinessItem(currentItem.getObject());
+        setCurrentBusinessItem(currentItem ? currentItem.getObject() : currentItem);
         if(connection) {
             connection.businessLayout.setCurrentSvgItem(currentItem);
             this.updateConnection(connection);

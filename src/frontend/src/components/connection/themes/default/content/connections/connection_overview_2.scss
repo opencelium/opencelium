@@ -13,24 +13,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*!
- *
- *  * Copyright (C) <2022>  <becon GmbH>
- *  *
- *  * This program is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, version 3 of the License.
- *  * This program is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- * /
- */
-
-
 
 @import "../../constants";
 
@@ -454,6 +436,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   }
 }
 .settings_panel_title{
+  top: 0;
   width: 100%;
   text-align: center;
   font-size: $FONT_SIZE_14;
@@ -817,4 +800,11 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   fill: none !important;
   stroke: #00acc2 !important;
   stroke-width: 2px;
+}
+
+.svg_description_xml_body{
+  padding: 20px 5px 5px !important;
+  position: inherit !important;
+  box-shadow: none !important;
+  margin: 8px !important;
 }

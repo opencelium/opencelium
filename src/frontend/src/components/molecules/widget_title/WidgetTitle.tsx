@@ -24,9 +24,10 @@ import Text from "@atom/text/Text";
 const WidgetTitle: FC<WidgetTitleProps> =
     ({
         title,
+        className,
     }) => {
     return (
-        <WidgetTitleStyled>
+        <WidgetTitleStyled className={className}>
             <span>
                 <Text
                     value={title}
@@ -40,6 +41,7 @@ const WidgetTitle: FC<WidgetTitleProps> =
 }
 
 WidgetTitle.defaultProps = {
+    className: '',
 }
 
 

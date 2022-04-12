@@ -19,7 +19,7 @@ import {CommonState} from "../../store";
 import {ICommonState} from "@interface/application/core";
 import {
     ApplicationVersionResponseProps,
-    GlobalSearchResponseProps,
+    GlobalSearchResponseProps, RemoteApiResponseProps,
     ResourcesProps
 } from "@requestInterface/application/IApplication";
 import {IComponent} from "@interface/application/IComponent";
@@ -29,7 +29,7 @@ import {
     getGlobalSearchData,
     getResources,
     getVersion,
-    openExternalUrl,
+    openExternalUrl, requestRemoteApi,
     updateResources
 } from "@action/application/ApplicationCreators";
 import {IApplicationResponse, IResponse} from "@requestInterface/application/IResponse";
@@ -51,6 +51,8 @@ export interface AuthState extends ICommonState{
     gettingComponents: API_REQUEST_STATE,
     updatingResources: API_REQUEST_STATE,
     openingExternalUrl: API_REQUEST_STATE,
+    requestingRemoteApi: API_REQUEST_STATE,
+    remoteApiData: RemoteApiResponseProps,
     isNotificationPanelOpened: boolean,
     version: string,
     resources: ResourcesProps,
@@ -82,6 +84,8 @@ const initialState: AuthState = {
     gettingComponents: API_REQUEST_STATE.INITIAL,
     updatingResources: API_REQUEST_STATE.INITIAL,
     openingExternalUrl: API_REQUEST_STATE.INITIAL,
+    requestingRemoteApi: API_REQUEST_STATE.INITIAL,
+    remoteApiData: null,
     isNotificationPanelOpened: false,
     version: version || '',
     resources: null,
@@ -222,6 +226,19 @@ export const applicationSlice = createSlice({
         },
         [openExternalUrl.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.openingExternalUrl = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [requestRemoteApi.pending.type]: (state) => {
+            state.requestingRemoteApi = API_REQUEST_STATE.START;
+            state.remoteApiData = null;
+        },
+        [requestRemoteApi.fulfilled.type]: (state, action: PayloadAction<RemoteApiResponseProps>) => {
+            state.requestingRemoteApi = API_REQUEST_STATE.FINISH;
+            state.remoteApiData = action.payload;
+            state.error = null;
+        },
+        [requestRemoteApi.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.requestingRemoteApi = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

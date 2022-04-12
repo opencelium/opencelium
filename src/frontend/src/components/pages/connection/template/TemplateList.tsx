@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {TemplateListProps} from "../interfaces";
 import Templates from "@collection/Templates";
 import {Template} from "@class/connection/Template";
@@ -28,21 +28,19 @@ import {Connector} from "@class/connector/Connector";
 
 const TemplateList: FC<TemplateListProps> = permission(TemplatePermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
+    const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {gettingTemplates, templates, deletingTemplatesById} = Template.getReduxState();
     const {gettingConnectors, connectors} = Connector.getReduxState();
     useEffect(() => {
         dispatch(getAllTemplates());
         dispatch(getAllConnectors());
     }, [])
-    const filteredTemplates = templates.filter((template) => {
-        // @ts-ignore
-        return connectors.findIndex(connector => connector.connectorId === template.connection.fromConnector.connectorId && connector.invoker.name === template.connection.fromConnector.invoker.name) !== -1 &&
-        // @ts-ignore
-            connectors.findIndex(connector => connector.connectorId === template.connection.toConnector.connectorId && connector.invoker.name === template.connection.toConnector.invoker.name) !== -1
-    });
-    const CTemplates = new Templates(filteredTemplates, dispatch, deletingTemplatesById);
+    useEffect(() => {
+        setShouldBeUpdated(!shouldBeUpdated);
+    }, [templates])
+    const CTemplates = new Templates(templates, dispatch, deletingTemplatesById);
     return (
-        <CollectionView collection={CTemplates} isLoading={gettingTemplates === API_REQUEST_STATE.START || gettingConnectors === API_REQUEST_STATE.START} componentPermission={TemplatePermissions}/>
+        <CollectionView collection={CTemplates} shouldBeUpdated={shouldBeUpdated} isLoading={gettingTemplates === API_REQUEST_STATE.START || gettingConnectors === API_REQUEST_STATE.START} componentPermission={TemplatePermissions}/>
     )
 })
 

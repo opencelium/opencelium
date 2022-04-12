@@ -14,7 +14,8 @@
  */
 
 import ReactDOM from 'react-dom';
-import {useEffect, useRef} from "react";
+import ReactDOMServer from "react-dom/server";
+import {ReactElement, useEffect, useRef} from "react";
 
 export function findTopLeftPosition(elem: any) {
     if(typeof elem  === 'string'){
@@ -126,4 +127,9 @@ export function getFocusableElements(elem: any = document): HTMLElement[]{
         return elem.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     }
     return [];
+}
+
+
+export function reactElementToText(node: ReactElement): string {
+    return ReactDOMServer.renderToString(node);
 }

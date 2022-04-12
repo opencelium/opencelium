@@ -13,7 +13,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 import React, {FC} from 'react';
 import {withTheme} from 'styled-components';
 import {Trans, useTranslation} from "react-i18next";

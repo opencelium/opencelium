@@ -19,11 +19,20 @@ import Iframe from 'react-iframe';
 import {hostname, protocol} from "@request/application/url";
 import {Auth} from "@class/application/Auth";
 import {WidgetTitle} from "@molecule/widget_title/WidgetTitle";
+import {requestRemoteApi} from "@action/application/ApplicationCreators";
+import {useAppDispatch} from "../../../hooks/redux";
+import {Application} from "@class/application/Application";
+import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import ContentLoading from "@molecule/loading/ContentLoading";
+import {Text} from "@atom/text/Text";
+import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
 
 const MonitoringBoardsWidget: FC =
     ({
 
     }) => {
+    const dispatch = useAppDispatch();
+    const {requestingRemoteApi, remoteApiData} = Application.getReduxState();
     const {authUser} = Auth.getReduxState();
     let defaultUrl = `${protocol}//${hostname}:19999/oc-mode.html`;
     if(authUser.hasOwnProperty('dashboard')){
@@ -32,29 +41,33 @@ const MonitoringBoardsWidget: FC =
             defaultUrl = authUser.dashboard.settings.url;
         }
     }
-    const [url, setUrl] = useState<string>(defaultUrl);
     useEffect(() => {
-        loadUrl();
+        dispatch(requestRemoteApi({url: defaultUrl, method: REQUEST_METHOD.GET, body: null, header: {}}));
     }, [])
-    const loadUrl = () => {
-        /*
-        * TODO: implement update dashboard settings
-        */
+    if(requestingRemoteApi !== API_REQUEST_STATE.FINISH && requestingRemoteApi !== API_REQUEST_STATE.ERROR){
+        return <ContentLoading/>;
     }
-        return (
+    return (
         <MonitoringBoardsWidgetStyled >
             <WidgetTitle title={'Monitoring'}/>
-            <Iframe
-                url={url}
-                width="100%"
-                height="50%"
-                id="monitoringIframe"
-                display="block"
-                position="relative"
-                allowFullScreen
-                // @ts-ignore
-                sandbox={`allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-top-navigation`}
-            />
+            {remoteApiData?.statusCodeValue !== 200 ?
+                <Text value={"Feature not installed"}/>
+                :
+                <Iframe
+                    onLoad={() => {
+                        console.log('loaded')
+                    }}
+                    url={defaultUrl}
+                    width="100%"
+                    height="50%"
+                    id="monitoringIframe"
+                    display="block"
+                    position="relative"
+                    allowFullScreen
+                    // @ts-ignore
+                    sandbox={`allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-top-navigation`}
+                />
+            }
         </MonitoringBoardsWidgetStyled>
     )
 }

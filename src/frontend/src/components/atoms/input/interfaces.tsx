@@ -20,6 +20,7 @@ import {ITheme} from "../../general/Theme";
 interface CheckStyledProps{
     marginTop?: string | number,
     paddingTop?: string | number,
+    paddingRight?: string | number,
 }
 
 interface InputElementProps{

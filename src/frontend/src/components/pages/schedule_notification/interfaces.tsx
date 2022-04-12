@@ -15,19 +15,19 @@
 
 import {IForm} from "@interface/application/IForm";
 import {ITheme} from "../../general/Theme";
-import {Schedule} from "@class/schedule/Schedule";
+import { ISchedule } from "@interface/schedule/ISchedule";
 
 
 interface ScheduleNotificationFormProps extends IForm{
     toggle: () => void,
     isToggled: boolean,
-    schedule: Schedule,
+    schedule: ISchedule,
     notificationId: number,
 }
 
 interface ScheduleNotificationListProps extends ScheduleNotificationListStyledProps{
     theme?: ITheme,
-    schedule: Schedule,
+    schedule: ISchedule,
     isVisible?: boolean,
     close: () => void,
 }

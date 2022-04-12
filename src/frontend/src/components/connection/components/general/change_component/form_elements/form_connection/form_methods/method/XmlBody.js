@@ -52,12 +52,14 @@ XmlBody.propTypes = {
     connection: PropTypes.instanceOf(CConnection),
     connector: PropTypes.instanceOf(CConnectorItem),
     updateBody: PropTypes.func,
+    className: PropTypes.string,
 };
 
 XmlBody.defaultProps = {
     readOnly: false,
     isDraft: false,
     source: null,
+    className: '',
 };
 
 export default XmlBody;

@@ -16,6 +16,7 @@
 import {AxiosResponse} from "axios";
 import { ITemplate } from "@interface/connection/ITemplate";
 import {IResponse} from "../application/IResponse";
+import ModelTemplate from "@model/connection/Template";
 
 export interface ITemplateRequest{
 
@@ -38,7 +39,7 @@ export interface ITemplateRequest{
     addTemplate(template: ITemplate): Promise<AxiosResponse<ITemplate>>,
 
     //to update template
-    updateTemplate(template: ITemplate): Promise<AxiosResponse<ITemplate>>,
+    updateTemplate(template: ModelTemplate): Promise<AxiosResponse<ITemplate>>,
 
     //to update templates
     updateTemplates(template: ITemplate[]): Promise<AxiosResponse<ITemplate[]>>,

@@ -50,6 +50,7 @@ const InputSelect: FC<InputSelectProps> = ({
     onChange,
     isMultiple,
     className,
+    getOptionRightComponent,
     ...props
 }) => {
     let source: OptionProps[];
@@ -192,9 +193,6 @@ const InputSelect: FC<InputSelectProps> = ({
         setLocalOptions(source.filter(option => multipleValue.findIndex(v => v.value === option.value && v.value !== labelValue) === -1));
     }
     const hasIcon = !!icon;
-    if(!placeholder){
-        placeholder = 'Please select...';
-    }
     let height = isToggled ? (localOptions.length > 0 ? localOptions.length : 1) * 34 + 1 : 0;
     let multipleLabels = [];
     let hasValue = !!value;
@@ -212,6 +210,8 @@ const InputSelect: FC<InputSelectProps> = ({
             }
         }
     }
+    const searchPlaceholder = !!placeholder ? placeholder : "Please type to search...";
+    const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
     return(
         <Input className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputContainerStyled hasBorder={!hasValue && !isToggled} ref={containerRef} color={currentOption ? ColorTheme.Black : ColorTheme.Gray}>
@@ -221,17 +221,17 @@ const InputSelect: FC<InputSelectProps> = ({
                             return (
                                 <span key={`${label}_${index}`}>
                                     {label}
-                                    <Button hasBackground={false} icon={'close'} onBlur={toggleRemoveLabel} handleClick={() => removeLabel(label)} color={ColorTheme.Black} iconSize={'10px'} position={'absolute'} right={0} top={0}/>
+                                    {!readOnly && <Button hasBackground={false} icon={'close'} onBlur={toggleRemoveLabel} handleClick={() => removeLabel(label)} color={ColorTheme.Black} iconSize={'10px'} position={'absolute'} right={0} top={0}/>}
                                 </span>
                             );
                         })
                     }
                     {
-                        isSearchable &&
+                        hasSearchInput &&
                         <SearchInputStyled
                             id={id}
                             readOnly={readOnly}
-                            placeholder={"Please type to search..."}
+                            placeholder={searchPlaceholder}
                             onKeyDown={searchInputPressed}
                             ref={inputSelectRef}
                             onFocus={() => toggleOptions(true)}
@@ -249,7 +249,7 @@ const InputSelect: FC<InputSelectProps> = ({
                 }
             </InputContainerStyled>
             {!isSearchable && <SelectStyled id={id} ref={inputSelectRef} tabIndex={-1} color={color} onClick={() => toggleOptions(isToggled)}/>}
-            {!readOnly && <ToggleStyled noAnimation={isHidden} hasNotUnderline={isHidden} hasBackground={false} isLoading={!hasIcon && isLoading} emphasizeColor={color} size={16} color={ColorTheme.DarkBlue} icon={isToggled ? 'arrow_drop_up' : 'arrow_drop_down'} handleClick={() => toggleOptions(!isToggled)} position={'absolute'} right={1} top={`5px`}/>}
+            {!readOnly && <ToggleStyled noAnimation={isHidden} hasNotUnderline={isHidden} hasBackground={false} isLoading={!hasIcon && isLoading} emphasizeColor={color} size={16} color={ColorTheme.ToolboxBlue} icon={isToggled ? 'arrow_drop_up' : 'arrow_drop_down'} handleClick={() => toggleOptions(!isToggled)} position={'absolute'} right={1} top={`5px`}/>}
             <LineStyled/>
             <OptionsStyled ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
                 {
@@ -262,6 +262,7 @@ const InputSelect: FC<InputSelectProps> = ({
                                 onClick={() => setOption(option)}
                                 {...option}
                                 value={option.label}
+                                getOptionRightComponent={getOptionRightComponent}
                             />
                         );
                     }) : <EmptyOptionsStyled>{'There are no options'}</EmptyOptionsStyled>
@@ -282,6 +283,7 @@ InputSelect.defaultProps = {
     isMultiple: false,
     callback: null,
     className: '',
+    getOptionRightComponent: null,
 }
 
 export default InputSelect;

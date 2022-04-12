@@ -24,6 +24,8 @@ import Dialog from "@basic_components/Dialog";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {setFocusById} from "@utils/app";
 import {withTranslation} from "react-i18next";
+import InputText from "@atom/input/text/InputText";
+import InputTextarea from "@atom/input/textarea/InputTextarea";
 
 
 function mapStateToProps(state){
@@ -124,10 +126,10 @@ class AddTemplate extends Component{
                     theme={{title: styles.template_dialog_title}}
                 >
                     <div>
-                        <Input
+                        <InputText
                             id={'template_name'}
                             error={validateMessageName}
-                            onChange={(a) => this.changeAddTemplateName(a)}
+                            onChange={(e) => this.changeAddTemplateName(e.target.value)}
                             value={addTemplateName}
                             label={'Name'}
                             name={'template_name'}
@@ -135,15 +137,13 @@ class AddTemplate extends Component{
                             autoFocus
                             required
                         />
-                        <Input
+                        <InputTextarea
                             id={'template_description'}
-                            onChange={(a) => this.changeAddTemplateDescription(a)}
+                            onChange={(e) => this.changeAddTemplateDescription(e.target.value)}
                             value={addTemplateDescription}
                             label={'Description'}
                             name={'template_description'}
                             icon={'notes'}
-                            multiline={true}
-                            rows={4}
                         />
                     </div>
                 </Dialog>

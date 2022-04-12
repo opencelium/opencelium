@@ -59,9 +59,9 @@ export interface ResourcesProps{
 
 export interface RemoteApiRequestProps{
     url: string,
-    header: any,
+    header?: any,
     method: REQUEST_METHOD,
-    body: any,
+    body?: any,
 }
 
 export interface RemoteApiResponseProps{

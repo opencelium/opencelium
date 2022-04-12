@@ -20,6 +20,7 @@ import {ColorTheme} from "../components/general/Theme";
 import {ReactCropStyles} from "./react_crop";
 import {ReactGridLayoutStyled} from "./react_grid_layout";
 import {ReactResizableStyles} from "./react_resizable";
+import {SlickCarousel} from "./slick_carousel";
 
 
 export const Global = createGlobalStyle`
@@ -48,4 +49,5 @@ export const Global = createGlobalStyle`
     ${ReactCropStyles}
     ${ReactGridLayoutStyled}
     ${ReactResizableStyles}
+    ${SlickCarousel}
 `;

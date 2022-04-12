@@ -21,8 +21,13 @@ interface AdminMenuItemProps{
 interface MenuProps{
     theme?: ITheme,
 }
+interface MenuStyledProps{
+    isExpanded?: boolean,
+    isFullScreen?: boolean,
+}
 
 export {
     AdminMenuItemProps,
     MenuProps,
+    MenuStyledProps,
 }

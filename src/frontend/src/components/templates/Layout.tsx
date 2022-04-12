@@ -15,21 +15,30 @@
 
 import React, {FC, Suspense} from 'react';
 import Menu from "@organism/menu/Menu";
-import {Outlet} from "react-router";
+import {Outlet, useLocation} from "react-router";
 import NotificationPanel from "@organism/notification_panel/NotificationPanel";
 import TopBar from "@organism/top_bar/TopBar";
 import LayoutLoading from "@molecule/loading/LayoutLoading";
 import ContentLoading from "@molecule/loading/ContentLoading";
 
+const OnlyOutletPages = ["/connection_overview_details", "/connection_overview_technical_layout", "/connection_overview_business_layout"]
+
 const Layout: FC =
     ({
         children,
     }) => {
+    const {pathname} = useLocation();
+    const isOnlyOutletPage = OnlyOutletPages.indexOf(pathname) !== -1;
     return (
         <Suspense fallback={(<LayoutLoading/>)}>
-            <TopBar/>
-            <Menu/>
-            <NotificationPanel/>
+            {
+                !isOnlyOutletPage &&
+                    <React.Fragment>
+                        <TopBar/>
+                        <Menu/>
+                        <NotificationPanel/>
+                    </React.Fragment>
+            }
             <Suspense fallback={(<ContentLoading/>)}>
                 <Outlet/>
             </Suspense>

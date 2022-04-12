@@ -14,6 +14,7 @@
  */
 
 import styled, {css} from "styled-components";
+import chroma from "chroma-js";
 import {ITheme} from "../../general/Theme";
 import {InputStyledProps, LabelStyledProps, IconStyledProps, ErrorStyledProps, ElementProps} from "./interfaces";
 
@@ -87,25 +88,24 @@ const EmphasizeInputStyleLines = css`
         background: transparent;
         transition: ${({noAnimation}: ElementProps) => noAnimation ? 'unset' : 'color, width 0.5s ease-in-out'}; 
         width: 0;
-        margin-top: ${({isTextarea}: ElementProps) => isTextarea ? '-7px' : '-1px'};
     }
     &~span:last-of-type{
         opacity: 0;
     }
     &:hover + div{
         width: ${({hasIcon, isIconInside, width, theme}: ElementProps) => width ? width : (!hasIcon || isIconInside) ? '100%' : `calc(100% - ${theme.input.iconInputDistance})`};
-        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? `linear-gradient(180deg, rgba(255,255,255,0) 45%, ${emphasizeColor || theme.input.text.color.quite} 100%)` : 'unset'};
+        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
     }
     & + div:hover {
         width: ${({hasIcon, isIconInside, width, theme}: ElementProps) => width ? width : (!hasIcon || isIconInside) ? '100%' : `calc(100% - ${theme.input.iconInputDistance})`};
-        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? `linear-gradient(180deg, rgba(255,255,255,0) 45%, ${emphasizeColor || theme.input.text.color.quite} 100%)` : 'unset'};
+        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
     }
     &:focus + div{
         width: ${({hasIcon, isIconInside, width, theme}: ElementProps) => width ? width : (!hasIcon || isIconInside) ? '100%' : `calc(100% - ${theme.input.iconInputDistance})`};
-        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? `linear-gradient(180deg, rgba(255,255,255,0) 45%, ${emphasizeColor || theme.input.text.color.quite} 100%)` : 'unset'};
+        background: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
     }
     &:focus ~ span{
-        color: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? emphasizeColor || theme.input.text.color.quite : 'unset'};
+        color: ${({readOnly, emphasizeColor, theme}: ElementProps) => !readOnly ? chroma(emphasizeColor || theme.input.text.color.quite).darken(1.2).toString() : 'unset'};
         opacity: 1;
     }
     &:focus ~ div > span{

@@ -54,12 +54,12 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
         if(currentSchedules && currentSchedules.length > 0) {
             return currentSchedules.map((schedule, key) => {
                 return (
-                    <ProgressBarElement key={schedule.id} schedule={schedule} iterator={key + 1}/>
+                    <ProgressBarElement key={schedule.schedulerId} schedule={schedule} iterator={key + 1}/>
                 )
             });
         } else{
             return (
-                <EmptyListStyled>There are no triggering schedules</EmptyListStyled>
+                <EmptyListStyled value={"There are no triggering schedules"}/>
             )
         }
     }

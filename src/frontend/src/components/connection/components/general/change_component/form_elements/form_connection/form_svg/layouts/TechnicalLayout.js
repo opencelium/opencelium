@@ -99,7 +99,7 @@ class TechnicalLayout extends React.Component{
             convertedItems = items;
         }
         const storage = LocalStorage.getStorage();
-        storage.set('connection_overview', {...this.props.connectionOverviewState.toJS(), items: convertedItems, arrows: this.props.arrows});
+        storage.set('connection_overview', {...this.props.connectionOverviewState, items: convertedItems, arrows: this.props.arrows});
         this.props.openInNewWindow();
     }
 

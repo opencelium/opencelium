@@ -15,15 +15,15 @@
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ScheduleRequest} from "@request/schedule/Schedule";
-import { ISchedule } from "@interface/schedule/ISchedule";
 import {
     SchedulesIdRequestProps,
 } from "@requestInterface/schedule/ISchedule";
 import {errorHandler} from "../../../components/utils";
+import ModelSchedule from "@model/schedule/Schedule";
 
 export const checkScheduleTitle = createAsyncThunk(
     'schedule/exist/title',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
             const request = new ScheduleRequest({endpoint: `/exists/${schedule.title}`});
             const response = await request.checkScheduleTitle();
@@ -36,9 +36,9 @@ export const checkScheduleTitle = createAsyncThunk(
 
 export const switchScheduleStatus = createAsyncThunk(
     'schedule/switch/status',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
-            const request = new ScheduleRequest({endpoint: `/${schedule.id}/status`});
+            const request = new ScheduleRequest({endpoint: `/${schedule.schedulerId}/status`});
             await request.switchScheduleStatus({status: schedule.status});
             return schedule;
         } catch(e){
@@ -49,9 +49,9 @@ export const switchScheduleStatus = createAsyncThunk(
 
 export const startSchedule = createAsyncThunk(
     'schedule/start',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
-            const request = new ScheduleRequest({endpoint: `/execute/${schedule.id}`});
+            const request = new ScheduleRequest({endpoint: `/execute/${schedule.schedulerId}`});
             await request.startSchedule();
             return schedule;
         } catch(e){
@@ -156,7 +156,7 @@ export const getCurrentSchedules = createAsyncThunk(
 
 export const addSchedule = createAsyncThunk(
     'schedule/add',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
             /*
             * TODO: uncomment when backend has check title method
@@ -177,7 +177,7 @@ export const addSchedule = createAsyncThunk(
 
 export const updateSchedule = createAsyncThunk(
     'schedule/update',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
             /*
             * TODO: uncomment when backend has check title method
@@ -192,7 +192,7 @@ export const updateSchedule = createAsyncThunk(
                     return thunkAPI.rejectWithValue(responseTitleRequest.data);
                 }
             }*/
-            const updateScheduleRequest = new ScheduleRequest({endpoint: `/${schedule.id}`});
+            const updateScheduleRequest = new ScheduleRequest({endpoint: `/${schedule.schedulerId}`});
             const response = await updateScheduleRequest.updateSchedule(schedule);
             return response.data;
         } catch(e){
@@ -203,11 +203,11 @@ export const updateSchedule = createAsyncThunk(
 
 export const deleteScheduleById = createAsyncThunk(
     'schedule/delete/byId',
-    async(schedule: ISchedule, thunkAPI) => {
+    async(schedule: ModelSchedule, thunkAPI) => {
         try {
-            const request = new ScheduleRequest({endpoint: `/${schedule.id}`});
+            const request = new ScheduleRequest({endpoint: `/${schedule.schedulerId}`});
             await request.deleteScheduleById();
-            return schedule;
+            return schedule.schedulerId;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

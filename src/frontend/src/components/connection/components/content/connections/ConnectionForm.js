@@ -56,7 +56,7 @@ export function ConnectionForm(type) {
                         toConnector: '',
                         template: '',
                     },
-                    connection: CConnection.createConnection(null),
+                    connection: CConnection.createConnection(),
                     entity: null,
                     isNewConnectionView: props.connectionViewType === CONNECTION_VIEW_TYPE.DIAGRAM,
                     mode: EXPERT_MODE,
@@ -133,7 +133,11 @@ export function ConnectionForm(type) {
                             }
                         }
                         if(isFreeToDoAction){
-                            this.doAction(this.state.entity);
+                            if(this.isNavigatingToScheduler){
+                                this.doAction(this.state.entity, this.redirectUrl, true);
+                            } else{
+                                this.doAction(this.state.entity);
+                            }
                         }
                         this.startDoingAction = false;
                     }
@@ -347,6 +351,7 @@ export function ConnectionForm(type) {
                             setMode: (a, b = null) => this.setMode(a, b),
                         },
                     ],
+                    formClassName: styles.mode_form,
                     hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
                     header: t(`${this.translationKey}.FORM.PAGE_2`),
                     visible: hasModeInputsSection || this.isView,
@@ -494,6 +499,8 @@ export function ConnectionForm(type) {
                     if(this.isUpdate){
                         button = <Button icon={'autorenew'} isLoading={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)} title={t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => this.doActionAndGoToScheduler(entity)} size={TextSize.Size_16}/>;
                     }
+                    const isDisabled = entity.fromConnector.methods.length === 0 && entity.fromConnector.operators.length === 0
+                                        && entity.toConnector.methods.length === 0 && entity.toConnector.operators.length === 0;
                     return(
                         <React.Fragment>
                             {button}
@@ -501,7 +508,7 @@ export function ConnectionForm(type) {
                                 <AddTemplate
                                     data={contents[2].inputs[1]}
                                     entity={entity}
-                                    disabled={entity.isEmpty()}
+                                    disabled={isDisabled}
                                     buttonProps={{
                                         size: TextSize.Size_16,
                                         icon: 'add',

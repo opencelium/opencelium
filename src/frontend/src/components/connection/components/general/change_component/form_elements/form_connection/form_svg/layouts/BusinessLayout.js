@@ -72,7 +72,7 @@ class BusinessLayout extends React.Component{
 
     openInNewWindow(){
         const storage = LocalStorage.getStorage();
-        storage.set('connection_overview', {...this.props.connectionOverviewState.toJS()});
+        storage.set('connection_overview', {...this.props.connectionOverviewState});
         this.props.openInNewWindow();
     }
 

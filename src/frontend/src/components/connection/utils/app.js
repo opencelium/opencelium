@@ -19,8 +19,6 @@ import CUserGroup from "@classes/components/content/user_group/CUserGroup";
 import CComponent from "@classes/components/content/user_group/CComponent";
 import _ from 'lodash';
 import {SEPARATE_WINDOW} from "@utils/constants/app";
-import {CBusinessProcess} from "@classes/components/content/connection_overview_2/process/CBusinessProcess";
-import {CBusinessOperator} from "@classes/components/content/connection_overview_2/operator/CBusinessOperator";
 import {Application} from "@class/application/Application";
 
 
@@ -28,8 +26,6 @@ export const VIEW_TYPE = {
     LIST: 'LIST',
     GRID: 'GRID',
 };
-export const ConnectionOverviewChannel = new BroadcastChannel('connection_overview');
-export const ConnectionOverviewExtendedChannel = new BroadcastChannel('connection_overview_extended');
 /**
  * flag for debugging in console
  */

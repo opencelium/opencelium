@@ -13,6 +13,7 @@
     "resolveJsonModule": true,
     "paths": {
       "@request/*": ["./src/requests/classes/*"],
+      "@model/*": ["./src/requests/models/*"],
       "@requestInterface/*": ["./src/requests/interfaces/*"],
       "@class/*": ["./src/classes/*"],
       "@collection/*": ["./src/collections/*"],
