@@ -91,8 +91,10 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         setValidateMessageFromConnector(validateMessageFromConnector);
         setValidateMessageToConnector(validateMessageToConnector);
         if(title !== '' && fromConnector && toConnector){
-            duplicate();
-            //dispatch(checkConnectionTitle(new Connection({title})));
+            //duplicate();
+            // @ts-ignore
+            const tmpConnection = new Connection({title, dispatch});
+            dispatch(checkConnectionTitle(tmpConnection));
         }
         return false;
     }
