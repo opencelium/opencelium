@@ -272,7 +272,7 @@ public class ConnectorExecutor {
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i
-
+        
         ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
                 .setTaId(taId)

@@ -168,6 +168,7 @@ public class ConnectorController {
 
         Map<String, Object> failBody = null;
         String formatType = "";
+        String type = "";
         if (functionInvoker.getResponse().getFail().getBody() != null) {
             formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
             failBody = functionInvoker.getResponse().getFail().getBody().getFields();

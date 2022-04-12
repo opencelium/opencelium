@@ -29,6 +29,7 @@ public class Xml {
     private XPathFactory xPathfactory = XPathFactory.newInstance();
     private XPath xpath = xPathfactory.newXPath();
     private String fileName;
+    private String format;
 
     public Xml(Document document) {
         this.document = document;
@@ -36,6 +37,8 @@ public class Xml {
 
     public Xml(Document document, String fileName) {
         this.document = document;
+        this.format = document.getElementsByTagName("invoker").item(0)
+                .getAttributes().getNamedItem("type").getNodeValue();
         this.fileName = FilenameUtils.getExtension(fileName)
                 .equalsIgnoreCase("xml") ? fileName : fileName + ".xml";
     }
@@ -63,6 +66,10 @@ public class Xml {
         return fields.stream().map(this::createField).collect(Collectors.toList());
     }
 
+    public List<Element> createXmlFields(List<FieldResource> fields) {
+        return fields.stream().map(this::createXmlField).collect(Collectors.toList());
+    }
+
     public Element createField(FieldResource field) {
         Element element = document.createElement("field");
         element.setAttribute("name", field.getName());
@@ -70,6 +77,27 @@ public class Xml {
         if (field.getValue() != null) {
             element.setTextContent(field.getValue().toString());
         }
+        return element;
+    }
+
+    public Element createXmlField(FieldResource field) {
+        Element element = document.createElement("field");
+        element.setAttribute("name", field.getName());
+        element.setAttribute("type", "object");
+
+        Element attr = document.createElement("field");
+        attr.setAttribute("name", "__oc__attributes");
+        attr.setAttribute("type", "object");
+
+        Element value = document.createElement("field");
+        value.setAttribute("name", "__oc__value");
+        value.setAttribute("type", "string");
+
+        if (field.getValue() != null) {
+            value.setTextContent(field.getValue().toString());
+        }
+        element.appendChild(attr);
+        element.appendChild(value);
         return element;
     }
 
@@ -83,7 +111,9 @@ public class Xml {
         if (!pathExists(xPath)) {
             nl = addNewFieldFromPath(operationResource);
         }
-        List<Element> fields = createFields(operationResource.getFields());
+        List<Element> fields = format.equalsIgnoreCase("restfull")
+                                    ? createFields(operationResource.getFields())
+                                    : createXmlFields(operationResource.getFields());
         if (pathExists(xPath)) {
             for (Element e : fields) {
                 String field = xPath + "/field[@name='" + e.getAttributeNode("name").getValue() + "']";
@@ -117,7 +147,7 @@ public class Xml {
                 continue;
             }
 
-            Element field = createField(fr);
+            Element field = format.equalsIgnoreCase("restfull") ? createField(fr) : createXmlField(fr);
             node.item(0).appendChild(field);
             node = node.item(0).getChildNodes();
             hasNewField = true;
