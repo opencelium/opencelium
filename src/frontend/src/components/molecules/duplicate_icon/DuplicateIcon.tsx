@@ -128,7 +128,13 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         if(fromConnectorData && toConnectorData) {
             connection.title = title;
             tmpFromConnector.methods = [...fromMethods];
+            tmpFromConnector.connectorId = fromConnectorData.connectorId;
+            tmpFromConnector.title = fromConnectorData.title;
+            tmpFromConnector.icon = fromConnectorData.icon;
             tmpToConnector.methods = [...toMethods];
+            tmpToConnector.connectorId = toConnectorData.connectorId;
+            tmpToConnector.title = toConnectorData.title;
+            tmpToConnector.icon = toConnectorData.icon;
             connection.fromConnector = {...tmpFromConnector};
             connection.toConnector = {...tmpToConnector};
             delete connection.connectionId;

@@ -85,7 +85,7 @@ export class Connector extends HookStateClass implements IConnector{
         this.icon = connector?.icon || '';
         this.invokerSelect = connector?.invokerSelect || null;
         this.invoker = connector?.invoker || null;
-        if((!this.invokerSelect && this.invoker) || this.invokerSelect?.value !== this.invoker?.name){
+        if((!this.invokerSelect && this.invoker) || (this.invokerSelect && this.invoker && this.invokerSelect.value !== this.invoker?.name)){
             this.invokerSelect = {label: this.invoker.name, value: this.invoker.name, data: this.invoker.requiredData};
         }
         this.shouldDeleteIcon = connector?.shouldDeleteIcon || false;
