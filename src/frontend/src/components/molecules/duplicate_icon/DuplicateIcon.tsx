@@ -38,7 +38,7 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         listConnection,
     }) => {
     const dispatch = useAppDispatch();
-    const {gettingConnection, connection, checkingConnectionTitle, isCurrentConnectionHasUniqueTitle} = Connection.getReduxState();
+    const {gettingConnection, currentConnection, checkingConnectionTitle, isCurrentConnectionHasUniqueTitle} = Connection.getReduxState();
     const {connectors, gettingConnectors} = Connector.getReduxState();
     const [isOpened, setIsOpened] = useState<boolean>(false);
     const [title, setTitle] = useState<string>('');
@@ -47,26 +47,9 @@ const DuplicateIcon: FC<DuplicateIconProps> =
     const [validateMessageTitle, setValidateMessageTitle] = useState('');
     const [validateMessageFromConnector, setValidateMessageFromConnector] = useState('');
     const [validateMessageToConnector, setValidateMessageToConnector] = useState('');
-    const fromConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.fromConnector.invoker.name).map((connector: any) => {return {label: connector.name, value: connector.id}});
-    const toConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.toConnector.invoker.name).map((connector: any) => {return {label: connector.name, value: connector.id}});
-    const isLoading = gettingConnection !== API_REQUEST_STATE.FINISH || gettingConnectors !== API_REQUEST_STATE.FINISH || connection && connection.connectionId !== listConnection.connectionId;
-
-    useEffect(() => {
-        if(isOpened) {
-            dispatch(getConnectionById(listConnection.id));
-            dispatch(getAllConnectors());
-        }
-    },[isOpened ])
-
-    useEffect(() => {
-        if(isCurrentConnectionHasUniqueTitle === TRIPLET_STATE.TRUE){
-            duplicate();
-        }
-        if(isCurrentConnectionHasUniqueTitle === TRIPLET_STATE.FALSE){
-            setValidateMessageTitle('Title should be unique');
-            setFocusById('duplicate_title');
-        }
-    }, [checkingConnectionTitle])
+    const fromConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.fromConnector.invoker.name).map((connector: any) => {return {label: connector.title, value: connector.id}});
+    const toConnectorOptions = connectors.filter(connector => connector.invoker.name === listConnection.toConnector.invoker.name).map((connector: any) => {return {label: connector.title, value: connector.id}});
+    const isLoading = gettingConnection !== API_REQUEST_STATE.FINISH || gettingConnectors !== API_REQUEST_STATE.FINISH || currentConnection && currentConnection.connectionId !== listConnection.id;
 
     const onChangeTitle = (title: string) => {
         setTitle(title);
@@ -93,36 +76,42 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         let validateMessageFromConnector = '';
         let validateMessageToConnector = '';
         if(title === ''){
-            validateMessageTitle = `ADD.VALIDATION_MESSAGES.TITLE_REQUIRED`;
+            validateMessageTitle = `Title is a required field`;
             setFocusById('duplicate_title');
         }
         if(!fromConnector){
-            validateMessageFromConnector = `ADD.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED`;
+            validateMessageFromConnector = `From Connector is a required fields`;
             if(validateMessageTitle === '') setFocusById('duplicate_from_connector');
         }
         if(!toConnector){
-            validateMessageToConnector = `ADD.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED`;
+            validateMessageToConnector = `To Connector is a required fields`;
             if(validateMessageTitle === '' && validateMessageFromConnector === '') setFocusById('duplicate_to_connector');
         }
         setValidateMessageTitle(validateMessageTitle);
         setValidateMessageFromConnector(validateMessageFromConnector);
         setValidateMessageToConnector(validateMessageToConnector);
         if(title !== '' && fromConnector && toConnector){
-            dispatch(checkConnectionTitle(new Connection({title})));
+            duplicate();
+            //dispatch(checkConnectionTitle(new Connection({title})));
         }
         return false;
     }
     const duplicate = () => {
         const fromConnectorData: any = fromConnector ? connectors.find(connector => connector.id === fromConnector.value) : null;
         const toConnectorData: any = toConnector ? connectors.find(connector => connector.id === toConnector.value) : null;
+        let connection: any = {...currentConnection};
+        let tmpFromConnector: any = currentConnection.fromConnector ? {...currentConnection.fromConnector} : null;
+        let tmpToConnector: any = currentConnection.fromConnector ? {...currentConnection.fromConnector} : null;
         if(fromConnectorData && toConnectorData) {
             connection.title = title;
-            connection.fromConnector.connectorId = fromConnectorData.id;
-            connection.fromConnector.title = fromConnectorData.name;
-            connection.fromConnector.icon = fromConnectorData.icon;
-            connection.toConnector.connectorId = toConnectorData.id;
-            connection.toConnector.title = toConnectorData.name;
-            connection.toConnector.icon = toConnectorData.icon;
+            tmpFromConnector.connectorId = fromConnectorData.connectorId;
+            tmpFromConnector.title = fromConnectorData.name;
+            tmpFromConnector.icon = fromConnectorData.icon;
+            tmpToConnector.connectorId = toConnectorData.connectorId;
+            tmpToConnector.title = toConnectorData.name;
+            tmpToConnector.icon = toConnectorData.icon;
+            connection.fromConnector = tmpFromConnector;
+            connection.toConnector = tmpToConnector;
             delete connection.connectionId;
             if(connection.businessLayout){
                 delete connection.businessLayout.id;
@@ -131,11 +120,27 @@ const DuplicateIcon: FC<DuplicateIconProps> =
             toggleDuplicateForm();
         }
     }
+    useEffect(() => {
+        if(isOpened) {
+            dispatch(getConnectionById(listConnection.id));
+            dispatch(getAllConnectors());
+        }
+    },[isOpened ])
+
+    useEffect(() => {
+        if(isCurrentConnectionHasUniqueTitle === TRIPLET_STATE.TRUE){
+            duplicate();
+        }
+        if(isCurrentConnectionHasUniqueTitle === TRIPLET_STATE.FALSE){
+            setValidateMessageTitle('Title should be unique');
+            setFocusById('duplicate_title');
+        }
+    }, [checkingConnectionTitle])
+
     return (
         <DuplicateIconStyled >
             <PermissionButton hasBackground={false} handleClick={toggleDuplicateForm} icon={'content_copy'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={ConnectionPermissions.UPDATE}/>
             <Dialog
-                styles={{body: {margin: '0 auto'}}}
                 actions={[
                     {id: 'duplicate_ok', label: 'Ok', onClick: validateFields},
                     {id: 'duplicate_cancel', label: 'Cancel', onClick: toggleDuplicateForm}]}

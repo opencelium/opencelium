@@ -133,7 +133,11 @@ export function ConnectionForm(type) {
                             }
                         }
                         if(isFreeToDoAction){
-                            this.doAction(this.state.entity);
+                            if(this.isNavigatingToScheduler){
+                                this.doAction(this.state.entity, this.redirectUrl, true);
+                            } else{
+                                this.doAction(this.state.entity);
+                            }
                         }
                         this.startDoingAction = false;
                     }
