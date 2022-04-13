@@ -92,11 +92,11 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => userGroup.add() : () => userGroup.update();
         actions.unshift(<Button
-            key={'add_button'}
+            key={'action_button'}
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}
-            isLoading={addingUserGroup === API_REQUEST_STATE.START}
+            isLoading={addingUserGroup === API_REQUEST_STATE.START || updatingUserGroup === API_REQUEST_STATE.START}
         />);
     }
     const data = {

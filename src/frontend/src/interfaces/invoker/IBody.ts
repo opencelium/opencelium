@@ -16,22 +16,8 @@
 import {IForm} from "@interface/application/core";
 import {ReactElement} from "react";
 import {InputElementProps} from "@atom/input/interfaces";
+import {DataType, ResponseFormat, ResponseType} from "@model/invoker/Body";
 
-export enum DataType{
-    Raw= 'raw',
-    GraphQL= 'graphql',
-};
-
-export enum ResponseFormat{
-    Json= 'json',
-    Xml= 'xml',
-}
-
-export enum ResponseType{
-    Object= 'object',
-    Array= 'array',
-    String= 'string',
-}
 
 export interface IBodyRadios{
     format: ResponseFormat,

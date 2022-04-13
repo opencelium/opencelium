@@ -193,10 +193,10 @@ export const templateSlice = createSlice({
         [deleteTemplateById.pending.type]: (state) => {
             state.deletingTemplateById = API_REQUEST_STATE.START;
         },
-        [deleteTemplateById.fulfilled.type]: (state, action: PayloadAction<ITemplate>) => {
+        [deleteTemplateById.fulfilled.type]: (state, action: PayloadAction<string>) => {
             state.deletingTemplateById = API_REQUEST_STATE.FINISH;
-            state.templates = state.templates.filter(template => template.templateId !== action.payload.id);
-            if(state.currentTemplate && state.currentTemplate.templateId === action.payload.id){
+            state.templates = state.templates.filter(template => template.templateId !== action.payload);
+            if(state.currentTemplate && state.currentTemplate.templateId === action.payload){
                 state.currentTemplate = null;
             }
             state.error = null;

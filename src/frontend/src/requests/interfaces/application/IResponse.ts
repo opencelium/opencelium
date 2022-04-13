@@ -19,7 +19,9 @@ export enum ResponseMessages{
     'UNSUPPORTED_HEADER_AUTH_TYPE'= 'UNSUPPORTED_HEADER_AUTH_TYPE',
     'CONNECTOR_COMMUNICATION_FAILED'= 'COMMUNICATION_FAILED',
     'CONNECTOR_EXISTS'= 'CONNECTOR_ALREADY_EXISTS',
+    'TITLE_EXISTS'= 'TITLE_EXISTS',
     'NETWORK_ERROR'= 'Network Error',
+    'ACCESS_DENIED'= 'Access Denied',
     'SESSION_EXPIRED'= 'SESSION_EXPIRED'
 }
 
@@ -27,7 +29,7 @@ export interface IResponse{
     error: string,
     message: string,
     path: string,
-    status: number,
+    status: number | string,
     timestamp: string,
 }
 

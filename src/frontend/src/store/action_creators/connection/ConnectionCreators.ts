@@ -101,11 +101,11 @@ export const getAllMetaConnections = createAsyncThunk(
 
 export const deleteConnectionById = createAsyncThunk(
     'connection/delete/byId',
-    async(connection: IConnection, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new ConnectionRequest({endpoint: `/${connection.id}`});
+            const request = new ConnectionRequest({endpoint: `/${id}`});
             await request.deleteConnectionById();
-            return connection;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

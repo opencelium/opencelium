@@ -15,18 +15,22 @@
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ConnectorRequest} from "@request/connector/Connector";
-import { IConnector } from "@interface/connector/IConnector";
 import {errorHandler} from "../../components/utils";
 import {ResponseMessages} from "@requestInterface/application/IResponse";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
 
 
 export const testRequestData = createAsyncThunk(
     'connector/test/request_data',
-    async(connector: IConnector, thunkAPI) => {
+    async(connector: ModelConnectorPoust, thunkAPI) => {
         try {
             const request = new ConnectorRequest({endpoint: '/check'});
             const response = await request.testRequestData(connector);
-            return response.data;
+            if(parseInt(response.data.status.toString()) > 299){
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_COMMUNICATION_FAILED}));
+            } else{
+                return response;
+            }
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -35,9 +39,9 @@ export const testRequestData = createAsyncThunk(
 
 export const checkConnectorTitle = createAsyncThunk(
     'connector/exist/title',
-    async(connector: IConnector, thunkAPI) => {
+    async(title: string, thunkAPI) => {
         try {
-            const request = new ConnectorRequest({endpoint: `/exists/${connector.title}`});
+            const request = new ConnectorRequest({endpoint: `/exists/${title}`});
             const response = await request.checkConnectorTitle();
             return response.data;
         } catch(e){
@@ -48,27 +52,27 @@ export const checkConnectorTitle = createAsyncThunk(
 
 export const addConnector = createAsyncThunk(
     'connector/add',
-    async(connector: IConnector, thunkAPI) => {
+    async({connector, iconFile, shouldDeleteIcon} : {connector: ModelConnectorPoust, iconFile: any[], shouldDeleteIcon: boolean}, thunkAPI) => {
         try {
             const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${connector.title}`});
             const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-            if (responseTitleRequest.data.message === ResponseMessages.CONNECTOR_EXISTS) {
-                return thunkAPI.rejectWithValue(responseTitleRequest.data);
+            if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
             }
             const testDataRequest = new ConnectorRequest({endpoint: '/check'});
             const responseDataRequest = await testDataRequest.testRequestData(connector);
-            if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED){
-                return thunkAPI.rejectWithValue(responseTitleRequest.data);
+            if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_COMMUNICATION_FAILED}));
             }
             const addConnectorRequest = new ConnectorRequest();
             const response = await addConnectorRequest.addConnector(connector);
-            if(connector.iconFile){
+            if(iconFile){
                 let data: FormData = new FormData();
                 data.append('connectorId', response.data.connectorId.toString());
-                data.append('file', connector.iconFile[0]);
+                data.append('file', iconFile[0]);
                 const uploadIconRequest = new ConnectorRequest({isFormData: true});
                 await uploadIconRequest.uploadConnectorImage(data);
-            } else if(connector.shouldDeleteIcon){
+            } else if(shouldDeleteIcon){
                 const deleteIconRequest = new ConnectorRequest({endpoint: `/${response.data.connectorId}/icon`});
                 await deleteIconRequest.deleteConnectorImage();
             }
@@ -81,32 +85,32 @@ export const addConnector = createAsyncThunk(
 
 export const updateConnector = createAsyncThunk(
     'connector/update',
-    async(connector: IConnector, thunkAPI) => {
+    async({connector, iconFile, shouldDeleteIcon} : {connector: ModelConnectorPoust, iconFile: any[], shouldDeleteIcon: boolean}, thunkAPI) => {
         try {
             // @ts-ignore
             const connectorState = thunkAPI.getState().connectorReducer;
             if(connectorState.currentConnector.title !== connector.title){
                 const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${connector.title}`});
                 const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-                if (responseTitleRequest.data.message === ResponseMessages.CONNECTOR_EXISTS) {
-                    return thunkAPI.rejectWithValue(responseTitleRequest.data);
+                if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
+                    return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
                 }
             }
             const testDataRequest = new ConnectorRequest({endpoint: '/check'});
             const responseDataRequest = await testDataRequest.testRequestData(connector);
-            if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED){
-                return thunkAPI.rejectWithValue(responseDataRequest.data);
+            if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_COMMUNICATION_FAILED}));
             }
-            const updateConnectorRequest = new ConnectorRequest({endpoint: `/${connector.id}`});
-            let response = await updateConnectorRequest.updateConnector(connector);
-            if(connector.iconFile){
+            const updateConnectorRequest = new ConnectorRequest({endpoint: `/${connector.connectorId}`});
+            let response: any = await updateConnectorRequest.updateConnector(connector);
+            if(iconFile){
                 let data: FormData = new FormData();
-                data.append('connectorId', connector.id.toString());
-                data.append('file', connector.iconFile[0]);
+                data.append('connectorId', connector.connectorId.toString());
+                data.append('file', iconFile[0]);
                 const uploadIconRequest = new ConnectorRequest({isFormData: true});
                 response = await uploadIconRequest.uploadConnectorImage(data);
-            } else if(connector.shouldDeleteIcon){
-                const deleteIconRequest = new ConnectorRequest({endpoint: `/${connector.id}/icon`});
+            } else if(shouldDeleteIcon){
+                const deleteIconRequest = new ConnectorRequest({endpoint: `/${connector.connectorId}/icon`});
                 await deleteIconRequest.deleteConnectorImage();
             }
             return response.data;
@@ -145,11 +149,11 @@ export const getAllConnectors = createAsyncThunk(
 
 export const deleteConnectorById = createAsyncThunk(
     'connector/delete/byId',
-    async(connector: IConnector, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new ConnectorRequest({endpoint: `/${connector.id}`});
+            const request = new ConnectorRequest({endpoint: `/${id}`});
             await request.deleteConnectorById();
-            return connector;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -187,11 +191,11 @@ export const uploadConnectorImage = createAsyncThunk(
 
 export const deleteConnectorImage = createAsyncThunk(
     'connector/delete/image',
-    async(connector: IConnector, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new ConnectorRequest({endpoint: `/${connector.id}/icon`});
+            const request = new ConnectorRequest({endpoint: `/${id}/icon`});
             await request.deleteConnectorImage();
-            return connector;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

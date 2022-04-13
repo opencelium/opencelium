@@ -191,7 +191,7 @@ export class User extends HookStateClass implements IUser{
             isNotValid = true;
             this.validations['password'] = 'The password is a required field';
         }
-        if(this.password.length < 8){
+        if(!isNotValid && this.password.length < 8){
             isNotValid = true;
             this.validations['password'] = 'The password should have at least 8 symbols';
         }
@@ -281,7 +281,7 @@ export class User extends HookStateClass implements IUser{
         return this.validateId(this.id) && this.validateAdd();
     }
 
-    @App.dispatch<IUser>(deleteUserById, {hasNoValidation: true})
+    @App.dispatch<IUser>(deleteUserById, {mapping: (user: IUser) => {return user.id;}, hasNoValidation: true})
     deleteById(): boolean{
         return this.validateId(this.id);
     }

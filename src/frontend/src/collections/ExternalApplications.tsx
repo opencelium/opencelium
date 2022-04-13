@@ -63,6 +63,7 @@ class ExternalApplications extends ListCollection{
     }
 
     search(externalApplication: IExternalApplication, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         const checkName = externalApplication.name ? externalApplication.name.toLowerCase().indexOf(searchValue) !== -1 : false;
         return checkName;
     }

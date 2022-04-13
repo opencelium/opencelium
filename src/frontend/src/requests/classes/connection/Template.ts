@@ -50,7 +50,7 @@ export class TemplateRequest extends Request implements ITemplateRequest{
     }
 
     async addTemplate(template: ITemplate): Promise<AxiosResponse<ITemplate>>{
-        return super.post<ITemplate>(template.getModel(true));
+        return super.post<ITemplate>(template);
     }
 
     async updateTemplate(template: ModelTemplate): Promise<AxiosResponse<ITemplate>>{

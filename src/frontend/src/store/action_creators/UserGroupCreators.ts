@@ -121,11 +121,11 @@ export const getAllUserGroups = createAsyncThunk(
 
 export const deleteUserGroupById = createAsyncThunk(
     'user_group/delete/byId',
-    async(userGroup: IUserGroup, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new UserGroupRequest({endpoint: `/${userGroup.id}`});
+            const request = new UserGroupRequest({endpoint: `/${id}`});
             await request.deleteUserGroupById();
-            return userGroup;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

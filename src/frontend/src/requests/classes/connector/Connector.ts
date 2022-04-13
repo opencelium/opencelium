@@ -15,10 +15,11 @@
 
 import {Request} from "../application/Request";
 import {AxiosResponse} from "axios";
-import {IConnector} from "@interface/connector/IConnector";
 import {IConnectorRequest} from "../../interfaces/connector/IConnector";
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
+import ModelConnector from "@model/connector/Connector";
 
 
 export class ConnectorRequest extends Request implements IConnectorRequest{
@@ -27,62 +28,44 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         super({url: 'connector', ...settings});
     }
 
-    async testRequestData(connector: IConnector): Promise<AxiosResponse<IResponse>>{
-        return super.post<IResponse>(this.backendMap(connector));
+    async testRequestData(connector: ModelConnectorPoust): Promise<AxiosResponse<IResponse>>{
+        return super.post<IResponse>(connector);
     }
 
     async checkConnectorTitle(): Promise<AxiosResponse<IResponse>>{
         return super.get<IResponse>();
     }
 
-    async getConnectorById(): Promise<AxiosResponse<IConnector>>{
-        return super.get<IConnector>();
+    async getConnectorById(): Promise<AxiosResponse<ModelConnector>>{
+        return super.get<ModelConnector>();
     }
 
-    async getAllConnectors(): Promise<AxiosResponse<IConnector[]>>{
-        return super.get<IConnector[]>();
+    async getAllConnectors(): Promise<AxiosResponse<ModelConnector[]>>{
+        return super.get<ModelConnector[]>();
     }
 
-    async addConnector(connector: IConnector): Promise<AxiosResponse<IConnector>>{
-        return super.post<IConnector>(this.backendMap(connector));
+    async addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>{
+        return super.post<ModelConnector>(connector);
     }
 
-    async updateConnector(connector: IConnector): Promise<AxiosResponse<IConnector>>{
-        return super.put<IConnector>(this.backendMap(connector));
+    async updateConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>{
+        return super.put<ModelConnector>(connector);
     }
 
-    async deleteConnectorById(): Promise<AxiosResponse<IConnector>>{
-        return super.delete<IConnector>();
+    async deleteConnectorById(): Promise<AxiosResponse<IResponse>>{
+        return super.delete<IResponse>();
     }
 
     async deleteConnectorsById(connectorIds: number[]): Promise<AxiosResponse<number[]>>{
         return super.delete<number[]>({data: connectorIds});
     }
 
-    async uploadConnectorImage(data: FormData): Promise<AxiosResponse<IConnector>>{
+    async uploadConnectorImage(data: FormData): Promise<AxiosResponse<ModelConnector>>{
         this.url = 'storage/connector';
-        return super.post<IConnector>(data);
+        return super.post<ModelConnector>(data);
     }
 
-    async deleteConnectorImage(): Promise<AxiosResponse<IConnector>>{
-        return super.delete<IConnector>();
-    }
-
-    backendMap(connector: IConnector){
-        let mappedConnector = {
-            title: connector.title,
-            description: connector.description,
-            invoker: {name: connector.invokerSelect.value},
-            requestData: connector.requestData,
-            sslCert: connector.sslCert,
-            timeout: connector.timeout,
-        };
-        if(connector.id !== 0){
-            return {
-                connectorId: connector.id,
-                ...mappedConnector,
-            }
-        }
-        return mappedConnector;
+    async deleteConnectorImage(): Promise<AxiosResponse<ModelConnector>>{
+        return super.delete<ModelConnector>();
     }
 }

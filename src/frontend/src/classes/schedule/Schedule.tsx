@@ -205,7 +205,7 @@ export class Schedule extends HookStateClass implements ISchedule{
         return this.validateId(this.id) && this.validateAdd();
     }
 
-    @App.dispatch<ISchedule>(deleteScheduleById, {mapping: (schedule: ISchedule) => {return schedule.getModel()}, hasNoValidation: true})
+    @App.dispatch<ISchedule>(deleteScheduleById, {mapping: (schedule: ISchedule) => {return schedule.id}, hasNoValidation: true})
     deleteById(): boolean{
         return this.validateId(this.id);
     }

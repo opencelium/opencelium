@@ -48,26 +48,11 @@ const CollectionView: FC<CollectionViewProps> =
         hasTopBar,
         hasTitle,
     }) => {
-        if(isLoading){
-            return(
-                <ContentLoading/>
-            )
-        }
         const dispatch = useAppDispatch();
         const {searchValue, viewType, gridViewType} = Application.getReduxState();
         const [isRefreshing, setIsRefreshing] = useState(false);
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
-        const onChangeViewType = (newViewType: ViewType) => {
-            setIsRefreshing(true);
-            setTimeout(() => {
-                dispatch(setViewTypeGlobally(newViewType));
-                setIsRefreshing(false);
-            }, 300);
-        }
-        const onChangeViewGridType = (newGridViewType: GridViewType) => {
-            dispatch(setGridViewTypeGlobally(newGridViewType));
-        }
         const [currentPage, setCurrentPage] = useState(1);
         const [totalPages, setTotalPages] = useState(Math.ceil(collection.entities.length / entitiesPerPage))
         useEffect(() => {
@@ -99,6 +84,16 @@ const CollectionView: FC<CollectionViewProps> =
         useEffect(() => {
             return () => {dispatch(setSearchValue(''))};
         }, [])
+        const onChangeViewType = (newViewType: ViewType) => {
+            setIsRefreshing(true);
+            setTimeout(() => {
+                dispatch(setViewTypeGlobally(newViewType));
+                setIsRefreshing(false);
+            }, 300);
+        }
+        const onChangeViewGridType = (newGridViewType: GridViewType) => {
+            dispatch(setGridViewTypeGlobally(newGridViewType));
+        }
         const setPage = (page: number) => {
             setIsRefreshing(true);
             setTimeout(() => {
@@ -117,6 +112,11 @@ const CollectionView: FC<CollectionViewProps> =
             }
         }
         const hasSearch = collection.hasSearch && collection.entities.length > 0;
+        if(isLoading){
+            return(
+                <ContentLoading/>
+            )
+        }
         return (
             <ErrorBoundary>
                 <CollectionViewStyled>

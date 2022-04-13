@@ -121,11 +121,11 @@ export const getAllUsers = createAsyncThunk(
 
 export const deleteUserById = createAsyncThunk(
     'user/delete/byId',
-    async(user: IUser, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new UserRequest({endpoint: `/${user.id}`});
+            const request = new UserRequest({endpoint: `/${id}`});
             await request.deleteUserById();
-            return user;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

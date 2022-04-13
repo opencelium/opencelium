@@ -230,7 +230,7 @@ export class UserGroup extends HookStateClass implements IUserGroup{
         return this.validateId(this.id) && this.validateAdd();
     }
 
-    @App.dispatch<IUserGroup>(deleteUserGroupById, {hasNoValidation: true})
+    @App.dispatch<IUserGroup>(deleteUserGroupById, {mapping: (userGroup: IUserGroup) => {return userGroup.id;}, hasNoValidation: true})
     deleteById(): boolean{
         return true;
     }

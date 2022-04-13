@@ -35,7 +35,7 @@ const LogoutMenuItem: FC =
                 }}
                 name={'logout'}
                 label={'Log Out'}
-                size={24}
+                size={30}
                 hasConfirmation={true}
                 confirmationText={'Do you want to logout?'}
             />

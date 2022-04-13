@@ -107,7 +107,7 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => invoker.add(connection, localOperations) : () => invoker.update(connection, localOperations);
         actions.unshift(<Button
-            key={'add_button'}
+            key={'action_button'}
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}

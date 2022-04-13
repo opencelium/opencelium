@@ -87,8 +87,8 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
     const Avatar = user.userDetail.getFile({propertyName: "profilePictureFile", props:{label: "Avatar",}});
     const Credentials = user.getTexts([
         {propertyName: "email", props: {error: isCurrentUserHasUniqueEmail === TRIPLET_STATE.FALSE ? 'The email is already exist' : '', icon: 'email', label: "Email", maxLength: 255, required: true, isLoading: checkingUserEmail === API_REQUEST_STATE.START}},
-        {propertyName: "password", props: {isVisible: !isView, icon: 'vpn_key', label: "Password", maxLength: 16, type: InputTextType.Password, required: true}},
-        {propertyName: "repeatPassword", props: {isVisible: !isView, icon: 'vpn_key', label: "Repeat Password", type: InputTextType.Password, maxLength: 16, required: true}},
+        {propertyName: "password", props: {isVisible: !isView, icon: 'vpn_key', label: "Password", maxLength: 64, type: InputTextType.Password, required: true}},
+        {propertyName: "repeatPassword", props: {isVisible: !isView, icon: 'vpn_key', label: "Repeat Password", type: InputTextType.Password, maxLength: 64, required: true}},
     ]);
     const UserGroupComponent = user.getSelect({propertyName: 'userGroupSelect', props: {
         icon: 'supervised_user_circle',
@@ -111,11 +111,11 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => user.add() : () => user.update();
         actions.unshift(<Button
-            key={'add_button'}
+            key={'action_button'}
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}
-            isLoading={addingUser === API_REQUEST_STATE.START}
+            isLoading={addingUser === API_REQUEST_STATE.START || updatingUser === API_REQUEST_STATE.START}
         />);
     }
 

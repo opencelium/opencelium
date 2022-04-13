@@ -94,6 +94,7 @@ class Invokers extends ListCollection{
     }
 
     search(invoker: IInvoker, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkName = invoker.name ? invoker.name.toLowerCase().indexOf(searchValue) !== -1 : false;
         return checkName;
     }

@@ -30,7 +30,7 @@ class AdminCards extends ListCollection{
     keyPropName ='id';
     sortingProps = ['name'];
     listProps: ListProp[] = [{propertyKey: 'name', replace: true, getValue: (AdminCard: IAdminCard) => {
-        return <td style={{textAlign: 'left'}}>{AdminCard.name}</td>
+        return <td key={AdminCard.id} style={{textAlign: 'left'}}>{AdminCard.name}</td>
     }}];
     gridProps = {title: 'name'};
     translations = {
@@ -59,6 +59,7 @@ class AdminCards extends ListCollection{
     }
 
     search(adminCard: IAdminCard, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkName = adminCard.name ? adminCard.name.toLowerCase().indexOf(searchValue) !== -1 : false;
         return checkName;
     }

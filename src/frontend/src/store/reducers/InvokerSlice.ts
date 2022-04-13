@@ -178,10 +178,10 @@ export const invokerSlice = createSlice({
         [deleteInvokerByName.pending.type]: (state) => {
             state.deletingInvokerById = API_REQUEST_STATE.START;
         },
-        [deleteInvokerByName.fulfilled.type]: (state, action: PayloadAction<IInvoker>) => {
+        [deleteInvokerByName.fulfilled.type]: (state, action: PayloadAction<string>) => {
             state.deletingInvokerById = API_REQUEST_STATE.FINISH;
-            state.invokers = state.invokers.filter(invoker => invoker.name !== action.payload.name);
-            if(state.currentInvoker && state.currentInvoker.name === action.payload.name){
+            state.invokers = state.invokers.filter(invoker => invoker.name !== action.payload);
+            if(state.currentInvoker && state.currentInvoker.name === action.payload){
                 state.currentInvoker = null;
             }
             state.error = null;

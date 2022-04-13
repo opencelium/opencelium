@@ -33,7 +33,11 @@ const TextareaStyled = styled.textarea<ElementProps>`
     width: ${({width, isIconInside, hasIcon, theme}) => width || isIconInside || !hasIcon ? '100%' : `calc(100% - ${theme.input.iconInputDistance})`};
     margin-left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
     margin-top: ${({marginTop}) => marginTop || 0};
+    border-bottom: 1px solid #e9e9e9;
     ${EmphasizeInputStyleLines}
+    & + div{
+        margin-top: -6px;
+    }
 `;
 
 export {

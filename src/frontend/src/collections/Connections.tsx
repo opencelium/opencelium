@@ -70,7 +70,7 @@ class Connections extends ListCollection{
         let connectionInstances = [];
         if(connections) {
             for (let i = 0; i < connections.length; i++) {
-                connectionInstances.push(new Connection(connections[i]));
+                connectionInstances.push(new Connection({...connections[i], dispatch}));
             }
         }
         this.dispatch = dispatch;
@@ -79,6 +79,7 @@ class Connections extends ListCollection{
     }
 
     search(connection: IConnection, searchValue: string){
+        searchValue = searchValue.toLowerCase();
         let checkTitle = connection.title ? connection.title.toLowerCase().indexOf(searchValue) !== -1 : false;
         let checkDescription = connection.description ? connection.description.toLowerCase().indexOf(searchValue) !== -1 : false;
         // @ts-ignore

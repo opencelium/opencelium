@@ -138,10 +138,10 @@ export const userSlice = createSlice({
         [deleteUserById.pending.type]: (state) => {
             state.deletingUserById = API_REQUEST_STATE.START;
         },
-        [deleteUserById.fulfilled.type]: (state, action: PayloadAction<IUser>) => {
+        [deleteUserById.fulfilled.type]: (state, action: PayloadAction<number>) => {
             state.deletingUserById = API_REQUEST_STATE.FINISH;
-            state.users = state.users.filter(user => user.userId !== action.payload.id);
-            if(state.currentUser && state.currentUser.userId === action.payload.id){
+            state.users = state.users.filter(user => user.userId !== action.payload);
+            if(state.currentUser && state.currentUser.userId === action.payload){
                 state.currentUser = null;
             }
             state.error = null;

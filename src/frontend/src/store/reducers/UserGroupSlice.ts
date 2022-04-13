@@ -140,10 +140,10 @@ export const userGroupSlice = createSlice({
         [deleteUserGroupById.pending.type]: (state) => {
             state.deletingUserGroupById = API_REQUEST_STATE.START;
         },
-        [deleteUserGroupById.fulfilled.type]: (state, action: PayloadAction<IUserGroup>) => {
+        [deleteUserGroupById.fulfilled.type]: (state, action: PayloadAction<number>) => {
             state.deletingUserGroupById = API_REQUEST_STATE.FINISH;
-            state.userGroups = state.userGroups.filter(userGroup => userGroup.groupId !== action.payload.id);
-            if(state.currentUserGroup && state.currentUserGroup.groupId === action.payload.id){
+            state.userGroups = state.userGroups.filter(userGroup => userGroup.groupId !== action.payload);
+            if(state.currentUserGroup && state.currentUserGroup.groupId === action.payload){
                 state.currentUserGroup = null;
             }
             state.error = null;

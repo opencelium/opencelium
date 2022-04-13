@@ -34,6 +34,7 @@ const InputStyled = styled.input<ElementProps>`
     margin-left: ${({marginLeft, hasIcon, isIconInside, theme}) => marginLeft ? marginLeft : !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
     margin-top: ${({marginTop}) => marginTop || 0};
     height: ${({height}) => height || 'auto'};
+    border-bottom: 1px solid #e9e9e9;
     ${EmphasizeInputStyleLines}
 `;
 

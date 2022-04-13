@@ -17,7 +17,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "../../../components/utils";
 import {ApplicationRequest} from "@request/application/Application";
 import {RemoteApiRequestProps} from "@requestInterface/application/IApplication";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 import {GraphQLLoginProps, GraphQLRequestProps} from "@requestInterface/graphql/IGraphQL";
 
 

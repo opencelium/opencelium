@@ -56,7 +56,7 @@ export class Connection extends HookStateClass implements IConnection{
 
     constructor(connection?: Partial<IConnection> | null) {
         // @ts-ignore
-        super(connection?.validations || {});
+        super(connection?.validations || {}, connection?._readOnly, connection?.wholeInstance);
         this.id = connection?.id || connection?.connectionId || 0;
         this.title = connection?.title || '';
         this.description = connection?.description || '';
@@ -95,7 +95,7 @@ export class Connection extends HookStateClass implements IConnection{
         return true;
     }
 
-    @App.dispatch<IConnection>(deleteConnectionById, {hasNoValidation: true})
+    @App.dispatch<IConnection>(deleteConnectionById, {mapping: (connection: IConnection) => {return connection.id;}, hasNoValidation: true})
     deleteById(){
         return this.validateId(this.id);
     }

@@ -14,8 +14,8 @@
  */
 
 import {IForm} from "@interface/application/core";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
 import {IBody} from "@interface/invoker/IBody";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 
 export interface IRequestText{
     endpoint: string;

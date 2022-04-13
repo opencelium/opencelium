@@ -16,8 +16,8 @@
 import {Operation} from "@class/invoker/Operation";
 import {InputTextProps} from "@atom/input/text/interfaces";
 import {InputRadiosProps} from "@atom/input/radio/interfaces";
-import {ResponseFormat} from "@interface/invoker/IBody";
 import {ITheme} from "../../general/Theme";
+import {ResponseFormat} from "@model/invoker/Body";
 
 interface DefaultProps{
     operationItem: Operation,

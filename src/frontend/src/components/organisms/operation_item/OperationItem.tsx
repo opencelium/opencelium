@@ -29,7 +29,7 @@ import {Type} from "@molecule/operation/type/Type";
 import {Body} from "@molecule/operation/body/Body";
 import {NavLinkStyled} from "@organism/operation_item/styles";
 import {Header} from "@molecule/operation/header/Header";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 
 
 const OperationItem: FC<OperationItemProps> = (

@@ -19,7 +19,6 @@ import {ITicket} from "@interface/application/ITicket";
 import {errorHandler} from "../../../components/utils";
 import {SettingsProps} from "@requestInterface/application/IResponse";
 import {RemoteApiRequestProps} from "@requestInterface/application/IApplication";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
 
 export const addTicket = createAsyncThunk(
     'application/add/ticket',
