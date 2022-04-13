@@ -54,14 +54,6 @@ public class Webhook {
     @JoinColumn(name = "scheduler_id")
     private Scheduler scheduler;
 
-    public Webhook() {
-    }
-
-    public Webhook(Long connectionId,String uuid, String token) {
-        this.uuid = uuid;
-        this.token = token;
-    }
-
     public int getId() {
         return id;
     }

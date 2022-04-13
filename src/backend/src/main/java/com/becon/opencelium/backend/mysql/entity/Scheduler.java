@@ -70,8 +70,7 @@ public class Scheduler {
     @JoinColumn(name = "connection_id")
     private Connection connection;
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "scheduler", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(mappedBy = "scheduler", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Webhook webhook;
 
     @JsonIgnore
