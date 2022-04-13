@@ -14,10 +14,9 @@
  */
 
 import {AxiosResponse} from "axios";
-import { IConnector } from "@interface/connector/IConnector";
 import {IResponse} from "../application/IResponse";
 import ModelConnectorPoust from "@model/connector/ConnectorPoust";
-import ModelConnectorResponse from "@model/connector/ConnectorResponse";
+import ModelConnector from "@model/connector/Connector";
 
 export interface IConnectorRequest{
     //to test validity of request data
@@ -27,25 +26,25 @@ export interface IConnectorRequest{
     checkConnectorTitle(): Promise<AxiosResponse<IResponse>>,
 
     //to get connector by id
-    getConnectorById(): Promise<AxiosResponse<IConnector>>,
+    getConnectorById(): Promise<AxiosResponse<ModelConnector>>,
 
     //to get all connectors of authorized user
-    getAllConnectors(): Promise<AxiosResponse<IConnector[]>>,
+    getAllConnectors(): Promise<AxiosResponse<ModelConnector[]>>,
 
     //to add connector
-    addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnectorResponse>>,
+    addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>,
 
     //to update connector
-    updateConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnectorResponse>>,
+    updateConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>,
 
     //to delete connector by id
-    deleteConnectorById(): Promise<AxiosResponse<IConnector>>,
+    deleteConnectorById(): Promise<AxiosResponse<IResponse>>,
 
     //to delete connectors by id
     deleteConnectorsById(connector: number[]): Promise<AxiosResponse<number[]>>,
 
     //to upload image of connector
-    uploadConnectorImage(data: FormData): Promise<AxiosResponse<IConnector>>,
+    uploadConnectorImage(data: FormData): Promise<AxiosResponse<ModelConnector>>,
 
     /*
     * TODO: do not exist such method on the server

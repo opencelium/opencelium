@@ -26,6 +26,7 @@ import {ViewType} from "@organism/collection_view/CollectionView";
 import {deleteConnectorsById, uploadConnectorImage} from "@action/ConnectorCreators";
 import {Application} from "@class/application/Application";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import ModelConnector from "@model/connector/Connector";
 
 class Connectors extends ListCollection{
     entities: IConnector[];
@@ -58,10 +59,11 @@ class Connectors extends ListCollection{
     deletingEntitiesState: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
     uploadingImage: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
 
-    constructor(connectors: any[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, uploadingImage?: API_REQUEST_STATE) {
+    constructor(connectors: ModelConnector[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, uploadingImage?: API_REQUEST_STATE) {
         super();
         let connectorInstances = [];
         for(let i = 0; i < connectors.length; i++){
+            //@ts-ignore
             connectorInstances.push(new Connector({...connectors[i], dispatch}));
         }
         this.dispatch = dispatch;

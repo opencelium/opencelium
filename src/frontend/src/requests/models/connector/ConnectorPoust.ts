@@ -1,6 +1,6 @@
-import ModelConnector from "./Connector";
+import ModelConnector from "./ConnectorParent";
 
-export default interface ModelConnectorPoust extends ModelConnector{
+export default interface ModelConnectorPoust extends Partial<ModelConnector>{
     invoker: {
         name: string;
     },

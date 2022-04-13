@@ -14,7 +14,6 @@
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {IConnector} from "@interface/connector/IConnector";
 import {
     addConnector,
     checkConnectorTitle,
@@ -31,9 +30,11 @@ import {IResponse, ResponseMessages} from "@requestInterface/application/IRespon
 import {ICommonState} from "@interface/application/core";
 import {CommonState} from "../store";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@interface/application/IApplication";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
+import ModelConnector from "@model/connector/Connector";
 
 export interface ConnectorState extends ICommonState{
-    connectors: IConnector[],
+    connectors: ModelConnector[],
     isCurrentConnectorHasInvalidRequestData: TRIPLET_STATE,
     isCurrentConnectorHasUniqueTitle: TRIPLET_STATE,
     testingRequestData: API_REQUEST_STATE,
@@ -46,7 +47,7 @@ export interface ConnectorState extends ICommonState{
     deletingConnectorsById: API_REQUEST_STATE,
     uploadingConnectorImage: API_REQUEST_STATE,
     deletingConnectorImage: API_REQUEST_STATE,
-    currentConnector: IConnector,
+    currentConnector: ModelConnector,
 }
 
 const initialState: ConnectorState = {
@@ -73,7 +74,7 @@ export const connectorSlice = createSlice({
     reducers: {
     },
     extraReducers: {
-        [testRequestData.pending.type]: (state, action: PayloadAction<IConnector>) => {
+        [testRequestData.pending.type]: (state, action: PayloadAction<ModelConnectorPoust>) => {
             state.testingRequestData = API_REQUEST_STATE.START;
             state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.FALSE;
         },
@@ -103,10 +104,10 @@ export const connectorSlice = createSlice({
             state.checkingConnectorTitle = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [addConnector.pending.type]: (state, action: PayloadAction<IConnector>) => {
+        [addConnector.pending.type]: (state) => {
             state.addingConnector = API_REQUEST_STATE.START;
         },
-        [addConnector.fulfilled.type]: (state, action: PayloadAction<IConnector>) => {
+        [addConnector.fulfilled.type]: (state, action: PayloadAction<ModelConnector>) => {
             state.addingConnector = API_REQUEST_STATE.FINISH;
             state.connectors.push(action.payload);
             state.error = null;
@@ -124,7 +125,7 @@ export const connectorSlice = createSlice({
         [updateConnector.pending.type]: (state) => {
             state.updatingConnector = API_REQUEST_STATE.START;
         },
-        [updateConnector.fulfilled.type]: (state, action: PayloadAction<IConnector>) => {
+        [updateConnector.fulfilled.type]: (state, action: PayloadAction<ModelConnector>) => {
             state.updatingConnector = API_REQUEST_STATE.FINISH;
             state.connectors = state.connectors.map(connector => connector.connectorId === action.payload.connectorId ? action.payload : connector);
             if(state.currentConnector && state.currentConnector.connectorId === action.payload.connectorId){
@@ -147,7 +148,7 @@ export const connectorSlice = createSlice({
             state.isCurrentConnectorHasUniqueTitle = TRIPLET_STATE.INITIAL;
             state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.INITIAL;
         },
-        [getConnectorById.fulfilled.type]: (state, action: PayloadAction<IConnector>) => {
+        [getConnectorById.fulfilled.type]: (state, action: PayloadAction<ModelConnector>) => {
             state.gettingConnector = API_REQUEST_STATE.FINISH;
             state.currentConnector = action.payload;
             state.error = null;
@@ -159,7 +160,7 @@ export const connectorSlice = createSlice({
         [getAllConnectors.pending.type]: (state) => {
             state.gettingConnectors = API_REQUEST_STATE.START;
         },
-        [getAllConnectors.fulfilled.type]: (state, action: PayloadAction<IConnector[]>) => {
+        [getAllConnectors.fulfilled.type]: (state, action: PayloadAction<ModelConnector[]>) => {
             state.gettingConnectors = API_REQUEST_STATE.FINISH;
             state.connectors = action.payload;
             state.isCurrentConnectorHasUniqueTitle = TRIPLET_STATE.INITIAL;
@@ -203,10 +204,10 @@ export const connectorSlice = createSlice({
         [uploadConnectorImage.pending.type]: (state) => {
             state.uploadingConnectorImage = API_REQUEST_STATE.START;
         },
-        [uploadConnectorImage.fulfilled.type]: (state, action: PayloadAction<IConnector>) => {
+        [uploadConnectorImage.fulfilled.type]: (state, action: PayloadAction<ModelConnector>) => {
             state.uploadingConnectorImage = API_REQUEST_STATE.FINISH;
             state.connectors = state.connectors.map(connector => connector.connectorId === action.payload.connectorId ? action.payload : connector);
-            if(state.currentConnector && state.currentConnector.connectorId === action.payload.id){
+            if(state.currentConnector && state.currentConnector.connectorId === action.payload.connectorId){
                 state.currentConnector = action.payload;
             }
             state.error = null;
@@ -218,11 +219,11 @@ export const connectorSlice = createSlice({
         [deleteConnectorImage.pending.type]: (state) => {
             state.deletingConnectorImage = API_REQUEST_STATE.START;
         },
-        [deleteConnectorImage.fulfilled.type]: (state, action: PayloadAction<IConnector>) => {
+        [deleteConnectorImage.fulfilled.type]: (state, action: PayloadAction<number>) => {
             state.deletingConnectorImage = API_REQUEST_STATE.FINISH;
-            state.connectors = state.connectors.map(connector => connector.connectorId === action.payload.connectorId ? action.payload : connector);
-            if(state.currentConnector && state.currentConnector.connectorId === action.payload.id){
-                state.currentConnector = action.payload;
+            state.connectors = state.connectors.map(connector => connector.connectorId === action.payload ? {...connector, icon: ''} : connector);
+            if(state.currentConnector && state.currentConnector.connectorId === action.payload){
+                state.currentConnector = {...state.currentConnector, icon: ''};
             }
             state.error = null;
         },

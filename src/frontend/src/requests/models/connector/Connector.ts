@@ -1,9 +1,7 @@
-export default interface ModelConnector{
-    connectorId?: number;
-    description: string;
-    icon?: string;
-    requestData: any;
-    sslCert: boolean;
-    timeout: number;
-    title: string;
+import ModelConnectorParent from "./ConnectorParent";
+
+export default interface ModelConnector extends Partial<ModelConnectorParent>{
+    invoker: {
+        name: string;
+    },
 }

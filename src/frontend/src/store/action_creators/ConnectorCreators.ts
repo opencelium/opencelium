@@ -15,7 +15,6 @@
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ConnectorRequest} from "@request/connector/Connector";
-import { IConnector } from "@interface/connector/IConnector";
 import {errorHandler} from "../../components/utils";
 import {ResponseMessages} from "@requestInterface/application/IResponse";
 import ModelConnectorPoust from "@model/connector/ConnectorPoust";
@@ -192,11 +191,11 @@ export const uploadConnectorImage = createAsyncThunk(
 
 export const deleteConnectorImage = createAsyncThunk(
     'connector/delete/image',
-    async(connector: IConnector, thunkAPI) => {
+    async(id: number, thunkAPI) => {
         try {
-            const request = new ConnectorRequest({endpoint: `/${connector.id}/icon`});
+            const request = new ConnectorRequest({endpoint: `/${id}/icon`});
             await request.deleteConnectorImage();
-            return connector;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
