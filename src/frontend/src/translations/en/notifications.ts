@@ -115,6 +115,7 @@ const NotificationTranslations = {
     [login.rejected.type]: {
       "__DEFAULT__": "There is an error during the login",
       "UNSUPPORTED_HEADER_AUTH_TYPE": "Your session is expired",
+      "Access Denied": "Your session is expired",
       "UNAUTHORIZED": "Wrong email or password",
       "Network Error": "The server connection problem."
     },
