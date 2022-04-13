@@ -70,7 +70,7 @@ class Connections extends ListCollection{
         let connectionInstances = [];
         if(connections) {
             for (let i = 0; i < connections.length; i++) {
-                connectionInstances.push(new Connection(connections[i]));
+                connectionInstances.push(new Connection({...connections[i], dispatch}));
             }
         }
         this.dispatch = dispatch;
