@@ -20,11 +20,13 @@ import {UserGroup} from "@class/usergroup/UserGroup";
 import {SortType} from "@organism/collection_view/interfaces";
 import {ListProp} from "@interface/application/IListCollection";
 import {AppDispatch} from "@store/store";
-import {PermissionButton} from "@atom/button/PermissionButton";
-import {UserGroupPermissions} from "@constants/permissions";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
+import {ComponentPermissionProps, UserGroupPermissions} from "@constants/permissions";
 import {ViewType} from "@organism/collection_view/CollectionView";
 import {deleteUserGroupsById} from "@action/UserGroupCreators";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import {ColorTheme} from "../components/general/Theme";
+import {TextSize} from "@atom/text/interfaces";
 
 class UserGroups extends ListCollection{
     entities: IUserGroup[];
@@ -47,6 +49,16 @@ class UserGroups extends ListCollection{
             <React.Fragment>
                 <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Group'} permission={UserGroupPermissions.CREATE}/>
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteUserGroupsById(checkedIds))} permission={UserGroupPermissions.DELETE}/>}
+            </React.Fragment>
+        );
+    };
+    getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
+        const hasDeleteButton = !this.isCurrentItem(entity);
+        return (
+            <React.Fragment>
+                <PermissionButton href={`${entity.id}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                {/*<PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'bottom'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>*/}
+                {hasDeleteButton && <PermissionButton hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );
     };

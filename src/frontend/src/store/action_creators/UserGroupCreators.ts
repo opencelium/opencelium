@@ -39,7 +39,7 @@ export const addUserGroup = createAsyncThunk(
             const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${userGroup.name}`});
             const responseNameRequest = await checkNameRequest.checkUserGroupName();
             if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
-                return thunkAPI.rejectWithValue(responseNameRequest.data);
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
             }
             const addUserGroupRequest = new UserGroupRequest();
             const response = await addUserGroupRequest.addUserGroup(userGroup);
@@ -70,7 +70,7 @@ export const updateUserGroup = createAsyncThunk(
                 const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${userGroup.name}`});
                 const responseNameRequest = await checkNameRequest.checkUserGroupName();
                 if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
-                    return thunkAPI.rejectWithValue(responseNameRequest.data);
+                    return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
                 }
             }
             const updateUserGroupRequest = new UserGroupRequest({endpoint: `/${userGroup.id}`});

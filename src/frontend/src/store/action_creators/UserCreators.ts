@@ -21,9 +21,9 @@ import {errorHandler} from "../../components/utils";
 
 export const checkUserEmail = createAsyncThunk(
     'user/exist/email',
-    async(user: IUser, thunkAPI) => {
+    async(email: string, thunkAPI) => {
         try {
-            const request = new UserRequest({endpoint: `/check/${user.email}`});
+            const request = new UserRequest({endpoint: `/check/${email}`});
             const response = await request.checkUserEmail();
             return response.data;
         } catch(e){
@@ -39,7 +39,7 @@ export const addUser = createAsyncThunk(
             const checkEmailRequest = new UserRequest({endpoint: `/check/${user.email}`});
             const responseEmailRequest = await checkEmailRequest.checkUserEmail();
             if (responseEmailRequest.data.message === ResponseMessages.EXISTS) {
-                return thunkAPI.rejectWithValue(responseEmailRequest.data);
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
             }
             const addUserRequest = new UserRequest();
             const response = await addUserRequest.addUser(user);
@@ -70,7 +70,7 @@ export const updateUser = createAsyncThunk(
                 const checkEmailRequest = new UserRequest({endpoint: `/check/${user.email}`});
                 const responseEmailRequest = await checkEmailRequest.checkUserEmail();
                 if (responseEmailRequest.data.message === ResponseMessages.EXISTS) {
-                    return thunkAPI.rejectWithValue(responseEmailRequest.data);
+                    return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
                 }
             }
             const request = new UserRequest({endpoint: `/${user.id}`});
@@ -163,11 +163,11 @@ export const uploadUserImage = createAsyncThunk(
 
 export const deleteUserImage = createAsyncThunk(
     'user/delete/image/byId',
-    async(user: IUser, thunkAPI) => {
+    async(id: string, thunkAPI) => {
         try{
-            const request = new UserRequest({endpoint: `/${user.id}/profilePicture`});
+            const request = new UserRequest({endpoint: `/${id}/profilePicture`});
             await request.deleteUserImage();
-            return user;
+            return id;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

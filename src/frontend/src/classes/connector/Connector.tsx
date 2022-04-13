@@ -39,6 +39,7 @@ import {IInvoker} from "@interface/invoker/IInvoker";
 import {InputSwitchProps} from "@atom/input/switch/interfaces";
 import ModelSchedule from "@model/schedule/Schedule";
 import ModelConnectorPoust from "@model/connector/ConnectorPoust";
+import {IEntityWithImage} from "@requestInterface/application/IRequest";
 
 
 export class Connector extends HookStateClass implements IConnector{
@@ -250,12 +251,12 @@ export class Connector extends HookStateClass implements IConnector{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(addConnector, {mapping: (connector: IConnector) => {return {connector: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
+    @App.dispatch(addConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
     add(): boolean{
         return this.validateAdd();
     }
 
-    @App.dispatch(updateConnector, {mapping: (connector: IConnector) => {return {connector: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
+    @App.dispatch(updateConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();
     }

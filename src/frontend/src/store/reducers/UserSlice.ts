@@ -112,6 +112,8 @@ export const userSlice = createSlice({
         },
         [getUserById.pending.type]: (state) => {
             state.currentUser = null;
+            state.isCurrentUserHasUniqueEmail = TRIPLET_STATE.INITIAL;
+            state.checkingUserEmail = API_REQUEST_STATE.INITIAL;
             state.gettingUser = API_REQUEST_STATE.START;
         },
         [getUserById.fulfilled.type]: (state, action: PayloadAction<IUser>) => {
@@ -125,6 +127,8 @@ export const userSlice = createSlice({
         },
         [getAllUsers.pending.type]: (state) => {
             state.gettingUsers = API_REQUEST_STATE.START;
+            state.isCurrentUserHasUniqueEmail = TRIPLET_STATE.INITIAL;
+            state.checkingUserEmail = API_REQUEST_STATE.INITIAL;
         },
         [getAllUsers.fulfilled.type]: (state, action: PayloadAction<IUser[]>) => {
             state.gettingUsers = API_REQUEST_STATE.FINISH;
@@ -183,11 +187,11 @@ export const userSlice = createSlice({
         [deleteUserImage.pending.type]: (state) => {
             state.deletingUserImage = API_REQUEST_STATE.START;
         },
-        [deleteUserImage.fulfilled.type]: (state, action: PayloadAction<IUser>) => {
+        [deleteUserImage.fulfilled.type]: (state, action: PayloadAction<number>) => {
             state.deletingUserImage = API_REQUEST_STATE.FINISH;
-            state.users = state.users.map(user => user.userId === action.payload.userId ? action.payload : user);
-            if(state.currentUser && state.currentUser.userId === action.payload.id){
-                state.currentUser = action.payload;
+            state.users = state.users.map(user => user.userId === action.payload ? {...user, userDetail: {...user.userDetail, profilePicture: ''}} : user);
+            if(state.currentUser && state.currentUser.userId === action.payload){
+                state.currentUser = {...state.currentUser, userDetail: {...state.currentUser.userDetail, profilePicture: ''}};
             }
             state.error = null;
         },

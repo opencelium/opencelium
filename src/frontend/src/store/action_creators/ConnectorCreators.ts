@@ -18,6 +18,7 @@ import {ConnectorRequest} from "@request/connector/Connector";
 import {errorHandler} from "../../components/utils";
 import {ResponseMessages} from "@requestInterface/application/IResponse";
 import ModelConnectorPoust from "@model/connector/ConnectorPoust";
+import {IEntityWithImage} from "@requestInterface/application/IRequest";
 
 
 export const testRequestData = createAsyncThunk(
@@ -52,20 +53,20 @@ export const checkConnectorTitle = createAsyncThunk(
 
 export const addConnector = createAsyncThunk(
     'connector/add',
-    async({connector, iconFile, shouldDeleteIcon} : {connector: ModelConnectorPoust, iconFile: any[], shouldDeleteIcon: boolean}, thunkAPI) => {
+    async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelConnectorPoust>, thunkAPI) => {
         try {
-            const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${connector.title}`});
+            const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${entityData.title}`});
             const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
             if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
             }
             const testDataRequest = new ConnectorRequest({endpoint: '/check'});
-            const responseDataRequest = await testDataRequest.testRequestData(connector);
+            const responseDataRequest = await testDataRequest.testRequestData(entityData);
             if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_COMMUNICATION_FAILED}));
             }
             const addConnectorRequest = new ConnectorRequest();
-            const response = await addConnectorRequest.addConnector(connector);
+            const response = await addConnectorRequest.addConnector(entityData);
             if(iconFile){
                 let data: FormData = new FormData();
                 data.append('connectorId', response.data.connectorId.toString());
@@ -85,32 +86,32 @@ export const addConnector = createAsyncThunk(
 
 export const updateConnector = createAsyncThunk(
     'connector/update',
-    async({connector, iconFile, shouldDeleteIcon} : {connector: ModelConnectorPoust, iconFile: any[], shouldDeleteIcon: boolean}, thunkAPI) => {
+    async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelConnectorPoust>, thunkAPI) => {
         try {
             // @ts-ignore
             const connectorState = thunkAPI.getState().connectorReducer;
-            if(connectorState.currentConnector.title !== connector.title){
-                const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${connector.title}`});
+            if(connectorState.currentConnector.title !== entityData.title){
+                const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${entityData.title}`});
                 const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
                 if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
                 }
             }
             const testDataRequest = new ConnectorRequest({endpoint: '/check'});
-            const responseDataRequest = await testDataRequest.testRequestData(connector);
+            const responseDataRequest = await testDataRequest.testRequestData(entityData);
             if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_COMMUNICATION_FAILED}));
             }
-            const updateConnectorRequest = new ConnectorRequest({endpoint: `/${connector.connectorId}`});
-            let response: any = await updateConnectorRequest.updateConnector(connector);
+            const updateConnectorRequest = new ConnectorRequest({endpoint: `/${entityData.connectorId}`});
+            let response: any = await updateConnectorRequest.updateConnector(entityData);
             if(iconFile){
                 let data: FormData = new FormData();
-                data.append('connectorId', connector.connectorId.toString());
+                data.append('connectorId', entityData.connectorId.toString());
                 data.append('file', iconFile[0]);
                 const uploadIconRequest = new ConnectorRequest({isFormData: true});
                 response = await uploadIconRequest.uploadConnectorImage(data);
             } else if(shouldDeleteIcon){
-                const deleteIconRequest = new ConnectorRequest({endpoint: `/${connector.connectorId}/icon`});
+                const deleteIconRequest = new ConnectorRequest({endpoint: `/${entityData.connectorId}/icon`});
                 await deleteIconRequest.deleteConnectorImage();
             }
             return response.data;

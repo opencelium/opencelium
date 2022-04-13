@@ -114,7 +114,10 @@ export const userGroupSlice = createSlice({
             state.error = action.payload;
         },
         [getUserGroupById.pending.type]: (state) => {
+            state.checkingUserGroupName = API_REQUEST_STATE.INITIAL;
+            state.isCurrentUserGroupHasUniqueName = TRIPLET_STATE.INITIAL;
             state.gettingUserGroup = API_REQUEST_STATE.START;
+            state.currentUserGroup = null;
         },
         [getUserGroupById.fulfilled.type]: (state, action: PayloadAction<IUserGroup>) => {
             state.gettingUserGroup = API_REQUEST_STATE.FINISH;
@@ -126,7 +129,10 @@ export const userGroupSlice = createSlice({
             state.error = action.payload;
         },
         [getAllUserGroups.pending.type]: (state) => {
+            state.checkingUserGroupName = API_REQUEST_STATE.INITIAL;
+            state.isCurrentUserGroupHasUniqueName = TRIPLET_STATE.INITIAL;
             state.gettingUserGroups = API_REQUEST_STATE.START;
+            state.currentUserGroup = null;
         },
         [getAllUserGroups.fulfilled.type]: (state, action: PayloadAction<IUserGroup[]>) => {
             state.gettingUserGroups = API_REQUEST_STATE.FINISH;

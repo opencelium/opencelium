@@ -65,7 +65,7 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
     },[]);
     useEffect(() => {
         if (didMount.current) {
-            if(error === null && (addingUser === API_REQUEST_STATE.FINISH || updatingUser === API_REQUEST_STATE.FINISH)){
+            if(error === null && (isAdd && addingUser === API_REQUEST_STATE.FINISH || isUpdate && updatingUser === API_REQUEST_STATE.FINISH)){
                 navigate('/users', { replace: false });
             }
         } else {
@@ -86,7 +86,7 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
     ]);
     const Avatar = user.userDetail.getFile({propertyName: "profilePictureFile", props:{label: "Avatar",}});
     const Credentials = user.getTexts([
-        {propertyName: "email", props: {error: isCurrentUserHasUniqueEmail === TRIPLET_STATE.FALSE ? 'The email is already exist' : '', icon: 'email', label: "Email", maxLength: 255, required: true, isLoading: checkingUserEmail === API_REQUEST_STATE.START}},
+        {propertyName: "email", props: {error: isCurrentUserHasUniqueEmail === TRIPLET_STATE.FALSE ? 'The email is already in use' : '', icon: 'email', label: "Email", maxLength: 255, required: true, isLoading: checkingUserEmail === API_REQUEST_STATE.START}},
         {propertyName: "password", props: {isVisible: !isView, icon: 'vpn_key', label: "Password", maxLength: 64, type: InputTextType.Password, required: true}},
         {propertyName: "repeatPassword", props: {isVisible: !isView, icon: 'vpn_key', label: "Repeat Password", type: InputTextType.Password, maxLength: 64, required: true}},
     ]);
@@ -115,7 +115,7 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}
-            isLoading={addingUser === API_REQUEST_STATE.START || updatingUser === API_REQUEST_STATE.START}
+            isLoading={isAdd && addingUser === API_REQUEST_STATE.START || isUpdate && updatingUser === API_REQUEST_STATE.START}
         />);
     }
 
