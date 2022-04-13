@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.mysql.service.SchedulerServiceImp;
+import com.becon.opencelium.backend.mysql.service.WebhookServiceImp;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -44,11 +45,18 @@ public class SchedulerController {
     @Autowired
     private SchedulerServiceImp schedulerService;
 
+    @Autowired
+    private WebhookServiceImp webhookServiceImp;
+
     @GetMapping("/all")
     public ResponseEntity<?> getAll() throws Exception {
         List<Scheduler> schedulers = schedulerService.findAll();
         List<SchedulerResource> scheduleList = schedulers.stream()
-                .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
+//                .map(s -> {
+//            s.setWebhook(webhookServiceImp.findBySchedulerId(s.getId()).orElse(null));
+//            return s;
+//        })
+        .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
         final Resources<SchedulerResource> resources = new Resources<>(scheduleList);
         return ResponseEntity.ok(resources);
     }
@@ -56,6 +64,7 @@ public class SchedulerController {
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable int id) throws Exception {
         Scheduler scheduler = schedulerService.findById(id).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
+//        scheduler.setWebhook(webhookServiceImp.findBySchedulerId(scheduler.getId()).orElse(null));
         SchedulerResource schedulerResource = schedulerService.toResource(scheduler);
         final Resource<SchedulerResource> resource = new Resource<>(schedulerResource);
         return ResponseEntity.ok(resource);

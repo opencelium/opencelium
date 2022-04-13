@@ -31,5 +31,6 @@ public interface WebhookRepository extends JpaRepository<Webhook, Integer> {
     @Transactional
     void deleteAllBySchedulerId(int id);
     Optional<Webhook> findByUuid(String id);
+    Optional<Webhook> findBySchedulerId(String id);
     boolean existsBySchedulerId(int id);
 }
