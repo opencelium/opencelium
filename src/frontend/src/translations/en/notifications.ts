@@ -184,9 +184,13 @@ const NotificationTranslations = {
       "__DEFAULT__": "There is an error fetching connectors."
     },
     [addConnector.rejected.type]: {
+      "COMMUNICATION_FAILED": "Connection was failed",
+      "CONNECTOR_ALREADY_EXISTS": "Connector with such title already exists",
       "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not added"
     },
     [updateConnector.rejected.type]: {
+      "COMMUNICATION_FAILED": "Connection was failed",
+      "CONNECTOR_ALREADY_EXISTS": "Connector with such title already exists",
       "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not updated"
     },
     [uploadConnectorImage.rejected.type]: {

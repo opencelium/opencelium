@@ -25,7 +25,7 @@ import {Application} from "@class/application/Application";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
 import ContentLoading from "@molecule/loading/ContentLoading";
 import {Text} from "@atom/text/Text";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 
 const MonitoringBoardsWidget: FC =
     ({

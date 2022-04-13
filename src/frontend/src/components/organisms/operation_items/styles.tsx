@@ -15,7 +15,7 @@
 
 import styled from "styled-components";
 import {MethodTitleStyledProps} from "@organism/operation_items/interfaces";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 import Button from "@atom/button/Button";
 
 const OperationItemsStyled = styled.div`

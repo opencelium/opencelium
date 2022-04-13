@@ -75,10 +75,11 @@ export const connectorSlice = createSlice({
     extraReducers: {
         [testRequestData.pending.type]: (state, action: PayloadAction<IConnector>) => {
             state.testingRequestData = API_REQUEST_STATE.START;
+            state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.FALSE;
         },
         [testRequestData.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.testingRequestData = API_REQUEST_STATE.FINISH;
-            if(action.payload?.status > 299){
+            if(parseInt(action.payload?.status.toString()) > 299){
                 state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.TRUE;
             } else{
                 state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.FALSE;
@@ -87,7 +88,7 @@ export const connectorSlice = createSlice({
         },
         [testRequestData.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.testingRequestData = API_REQUEST_STATE.ERROR;
-            state.isCurrentConnectorHasInvalidRequestData = action.payload.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
+            state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.TRUE;
             state.error = action.payload;
         },
         [checkConnectorTitle.pending.type]: (state) => {
@@ -143,6 +144,8 @@ export const connectorSlice = createSlice({
         },
         [getConnectorById.pending.type]: (state) => {
             state.gettingConnector = API_REQUEST_STATE.START;
+            state.isCurrentConnectorHasUniqueTitle = TRIPLET_STATE.INITIAL;
+            state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.INITIAL;
         },
         [getConnectorById.fulfilled.type]: (state, action: PayloadAction<IConnector>) => {
             state.gettingConnector = API_REQUEST_STATE.FINISH;
@@ -160,6 +163,7 @@ export const connectorSlice = createSlice({
             state.gettingConnectors = API_REQUEST_STATE.FINISH;
             state.connectors = action.payload;
             state.isCurrentConnectorHasUniqueTitle = TRIPLET_STATE.INITIAL;
+            state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.INITIAL;
             state.error = null;
         },
         [getAllConnectors.rejected.type]: (state, action: PayloadAction<IResponse>) => {

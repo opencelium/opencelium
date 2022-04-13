@@ -86,11 +86,11 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => notificationTemplate.add() : () => notificationTemplate.update();
         actions.unshift(<Button
-            key={'add_button'}
+            key={'action_button'}
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}
-            isLoading={addingNotificationTemplate === API_REQUEST_STATE.START}
+            isLoading={addingNotificationTemplate === API_REQUEST_STATE.START || updatingNotificationTemplate === API_REQUEST_STATE.START}
         />);
     }
     const data = {

@@ -26,7 +26,7 @@ import {RootState} from "@store/store";
 import {InputRadiosProps} from "@atom/input/radio/interfaces";
 import {Body} from "./Body";
 import {IBody} from "@interface/invoker/IBody";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 
 
 export class Request extends HookStateClass implements IRequest{

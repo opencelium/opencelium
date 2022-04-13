@@ -92,11 +92,11 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => schedule.add() : () => schedule.update();
         actions.unshift(<Button
-            key={'add_button'}
+            key={'action_button'}
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}
-            isLoading={addingSchedule === API_REQUEST_STATE.START}
+            isLoading={addingSchedule === API_REQUEST_STATE.START || updatingSchedule === API_REQUEST_STATE.START}
         />);
     }
     const data = {

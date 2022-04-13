@@ -19,6 +19,8 @@ import {IConnector} from "@interface/connector/IConnector";
 import {IConnectorRequest} from "../../interfaces/connector/IConnector";
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
+import ModelConnectorResponse from "@model/connector/ConnectorResponse";
 
 
 export class ConnectorRequest extends Request implements IConnectorRequest{
@@ -27,8 +29,8 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         super({url: 'connector', ...settings});
     }
 
-    async testRequestData(connector: IConnector): Promise<AxiosResponse<IResponse>>{
-        return super.post<IResponse>(this.backendMap(connector));
+    async testRequestData(connector: ModelConnectorPoust): Promise<AxiosResponse<IResponse>>{
+        return super.post<IResponse>(connector);
     }
 
     async checkConnectorTitle(): Promise<AxiosResponse<IResponse>>{
@@ -43,12 +45,12 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         return super.get<IConnector[]>();
     }
 
-    async addConnector(connector: IConnector): Promise<AxiosResponse<IConnector>>{
-        return super.post<IConnector>(this.backendMap(connector));
+    async addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnectorResponse>>{
+        return super.post<ModelConnectorResponse>(connector);
     }
 
-    async updateConnector(connector: IConnector): Promise<AxiosResponse<IConnector>>{
-        return super.put<IConnector>(this.backendMap(connector));
+    async updateConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnectorResponse>>{
+        return super.put<ModelConnectorResponse>(connector);
     }
 
     async deleteConnectorById(): Promise<AxiosResponse<IConnector>>{
@@ -66,23 +68,5 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
 
     async deleteConnectorImage(): Promise<AxiosResponse<IConnector>>{
         return super.delete<IConnector>();
-    }
-
-    backendMap(connector: IConnector){
-        let mappedConnector = {
-            title: connector.title,
-            description: connector.description,
-            invoker: {name: connector.invokerSelect.value},
-            requestData: connector.requestData,
-            sslCert: connector.sslCert,
-            timeout: connector.timeout,
-        };
-        if(connector.id !== 0){
-            return {
-                connectorId: connector.id,
-                ...mappedConnector,
-            }
-        }
-        return mappedConnector;
     }
 }

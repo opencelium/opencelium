@@ -16,7 +16,7 @@
 import React, {ReactElement} from "react";
 import {HookStateClass} from "../application/HookStateClass";
 import {Application as App} from "../application/Application";
-import {DataType, IBody, IBodyRadios, IBodyText, ResponseFormat, ResponseType} from "@interface/invoker/IBody";
+import {IBody, IBodyRadios, IBodyText} from "@interface/invoker/IBody";
 import {IInput} from "@interface/application/core";
 import {InputTextProps} from "@atom/input/text/interfaces";
 import {InvokerState} from "@slice/InvokerSlice";
@@ -26,6 +26,7 @@ import {isString} from "../../utils";
 import InputJsonView from "@atom/input/json_view/InputJsonView";
 import {InputElementProps} from "@atom/input/interfaces";
 import {isArray, isEmptyObject} from "../../components/utils";
+import {DataType, ResponseFormat, ResponseType} from "@model/invoker/Body";
 
 
 export class Body extends HookStateClass implements IBody{

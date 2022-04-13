@@ -111,11 +111,11 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
     if(isAdd || isUpdate){
         let handleClick = isAdd ? () => user.add() : () => user.update();
         actions.unshift(<Button
-            key={'add_button'}
+            key={'action_button'}
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}
-            isLoading={addingUser === API_REQUEST_STATE.START}
+            isLoading={addingUser === API_REQUEST_STATE.START || updatingUser === API_REQUEST_STATE.START}
         />);
     }
 

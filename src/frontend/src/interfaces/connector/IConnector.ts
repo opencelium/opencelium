@@ -18,6 +18,7 @@ import {OptionProps} from "@atom/input/select/interfaces";
 import {ConnectorState} from "@slice/ConnectorSlice";
 import {InputTextProps} from "@atom/input/text/interfaces";
 import {IInvoker} from "@interface/invoker/IInvoker";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
 
 
 export interface IConnectorFile{
@@ -50,6 +51,7 @@ export interface IConnectorForm extends IConnectorText, IConnectorTextarea, ICon
     deleteById: () => boolean;
     reduxState?: ConnectorState;
     getCredentials: (props: InputTextProps) => any;
+    getPoustModel: () => ModelConnectorPoust;
 }
 
 export interface IConnector extends IConnectorForm{

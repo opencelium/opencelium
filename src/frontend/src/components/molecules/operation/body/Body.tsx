@@ -16,10 +16,10 @@
 import React, {FC} from 'react';
 import {BodyProps} from "@molecule/operation/interfaces";
 import InputJsonView from "@atom/input/json_view/InputJsonView";
-import {ResponseFormat} from "@interface/invoker/IBody";
 import {useTranslation} from "react-i18next";
 import InputXmlView from "@atom/input/xml_view/InputXmlView";
 import CXmlEditor from "@classes/components/general/basic_components/xml_editor/CXmlEditor";
+import {ResponseFormat} from "@model/invoker/Body";
 
 
 const Body: FC<BodyProps> =

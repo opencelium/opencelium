@@ -17,7 +17,7 @@ import {AxiosResponse} from "axios";
 import {ITicket} from "@interface/application/ITicket";
 import {IResponse} from "./IResponse";
 import {IComponent} from "@interface/application/IComponent";
-import {REQUEST_METHOD} from "./IRequest";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 
 export interface ApplicationVersionResponseProps{
     /*

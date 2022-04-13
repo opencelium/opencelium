@@ -16,7 +16,7 @@
 import React, {FC} from 'react';
 import {StatusProps} from "@molecule/operation/interfaces";
 import InputRadios from "@atom/input/radio/InputRadios";
-import {ResponseFormat, ResponseType} from "@interface/invoker/IBody";
+import {ResponseFormat} from "@model/invoker/Body";
 
 const Format: FC<StatusProps> =
     ({

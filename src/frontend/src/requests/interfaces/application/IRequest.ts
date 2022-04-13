@@ -15,13 +15,6 @@
 
 import {AxiosRequestConfig, AxiosResponse} from "axios";
 
-export enum REQUEST_METHOD{
-    GET = 'GET',
-    POST = 'POST',
-    PUT = 'PUT',
-    DELETE = 'DELETE',
-}
-
 export interface IRequestSettings{
     url: string,
     //end part of the url

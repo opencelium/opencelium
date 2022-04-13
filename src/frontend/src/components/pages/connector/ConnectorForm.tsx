@@ -61,7 +61,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
     },[]);
     useEffect(() => {
         if (didMount.current) {
-            if(error === null && (addingConnector === API_REQUEST_STATE.FINISH || updatingConnector === API_REQUEST_STATE.FINISH)){
+            if(error === null && (isAdd && addingConnector === API_REQUEST_STATE.FINISH || isUpdate && updatingConnector === API_REQUEST_STATE.FINISH)){
                 if(shouldNavigateToConnection){
                     navigate('/connections/add', { replace: false });
                 } else{
@@ -73,7 +73,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         }
     },[addingConnector, updatingConnector]);
     const test = () => {
-        dispatch(testRequestData(connector));
+        dispatch(testRequestData(connector.getPoustModel()));
     }
     const TitleInput = connector.getText({
         propertyName: "title", props: {autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
@@ -110,7 +110,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         href={'/connectors'}
     />];
     if(isAdd || isUpdate){
-        let handleAddClick = isAdd ? () => connector.add() : () => connector.update();
+        let handleAddClick = isAdd ? () => {setShouldNavigateToConnection(false); connector.add()} : () => connector.update();
         let handleAddAndGoToConnection = () => {setShouldNavigateToConnection(true); connector.add()};
         if(isAdd) {
             actions.unshift(<Button
@@ -122,11 +122,11 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
             />);
         }
         actions.unshift(<Button
-            key={'add_button'}
+            key={'action_button'}
             label={`${formData.actionButton.label} & Close`}
             icon={formData.actionButton.icon}
             handleClick={handleAddClick}
-            isLoading={addingConnector === API_REQUEST_STATE.START}
+            isLoading={isAdd && addingConnector === API_REQUEST_STATE.START && !shouldNavigateToConnection || isUpdate && updatingConnector === API_REQUEST_STATE.START}
         />);
     }
     const data = {

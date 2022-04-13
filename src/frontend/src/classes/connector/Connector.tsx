@@ -37,6 +37,8 @@ import {addConnector, deleteConnectorById, getConnectorById, updateConnector} fr
 import {useAppDispatch, useAppSelector} from "../../hooks/redux";
 import {IInvoker} from "@interface/invoker/IInvoker";
 import {InputSwitchProps} from "@atom/input/switch/interfaces";
+import ModelSchedule from "@model/schedule/Schedule";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
 
 
 export class Connector extends HookStateClass implements IConnector{
@@ -211,17 +213,20 @@ export class Connector extends HookStateClass implements IConnector{
     validateRequestData(){
         let isValid = true;
         let index = -1;
-        for(let i = 0; i < this.invokerSelect.data.length; i++){
-            if(!this.requestData || !this.requestData.hasOwnProperty(this.invokerSelect.data[i]) || this.requestData[this.invokerSelect.data[i]] === ''){
-                this.validations[`_${this.invokerSelect.data[i]}`] = `${capitalize(putSpaceInCamelWords(this.invokerSelect.data[i]))} is a required field`;
-                isValid = false;
-                if(index === -1){
-                    index = i;
+        if(this.invokerSelect) {
+            for (let i = 0; i < this.invokerSelect.data.length; i++) {
+                if (!this.requestData || !this.requestData.hasOwnProperty(this.invokerSelect.data[i]) || this.requestData[this.invokerSelect.data[i]] === '') {
+                    this.validations[`_${this.invokerSelect.data[i]}`] = `${capitalize(putSpaceInCamelWords(this.invokerSelect.data[i]))} is a required field`;
+                    isValid = false;
+                    if (index === -1) {
+                        index = i;
+                    }
                 }
             }
         }
         if(!isValid){
-            this.forceUpdate(this);
+            // @ts-ignore
+            this.updateInvokerSelect(this, this.invokerSelect);
             if(index !== -1) {
                 if (!this.isFocused) {
                     document.getElementById(`input_${this.invokerSelect.data[index]}`).focus();
@@ -245,12 +250,12 @@ export class Connector extends HookStateClass implements IConnector{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(addConnector)
+    @App.dispatch(addConnector, {mapping: (connector: IConnector) => {return {connector: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
     add(): boolean{
         return this.validateAdd();
     }
 
-    @App.dispatch(updateConnector)
+    @App.dispatch(updateConnector, {mapping: (connector: IConnector) => {return {connector: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();
     }
@@ -258,6 +263,24 @@ export class Connector extends HookStateClass implements IConnector{
     @App.dispatch<IConnector>(deleteConnectorById, {mapping: (connector: IConnector) => {return connector.id;}, hasNoValidation: true})
     deleteById(){
         return this.validateId(this.id);
+    }
+
+    getPoustModel(): ModelConnectorPoust{
+        let mappedConnector: ModelConnectorPoust = {
+            title: this.title,
+            description: this.description,
+            invoker: {name: this.invokerSelect.value.toString()},
+            requestData: this.requestData,
+            sslCert: this.sslCert,
+            timeout: this.timeout,
+        };
+        if(this.id !== 0){
+            return {
+                connectorId: this.id,
+                ...mappedConnector,
+            }
+        }
+        return mappedConnector;
     }
 
 }

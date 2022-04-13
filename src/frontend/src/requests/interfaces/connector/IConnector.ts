@@ -16,10 +16,12 @@
 import {AxiosResponse} from "axios";
 import { IConnector } from "@interface/connector/IConnector";
 import {IResponse} from "../application/IResponse";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
+import ModelConnectorResponse from "@model/connector/ConnectorResponse";
 
 export interface IConnectorRequest{
     //to test validity of request data
-    testRequestData(connector: IConnector): Promise<AxiosResponse<IResponse>>,
+    testRequestData(connector: ModelConnectorPoust): Promise<AxiosResponse<IResponse>>,
 
     //to check if connector with such title already exists
     checkConnectorTitle(): Promise<AxiosResponse<IResponse>>,
@@ -31,10 +33,10 @@ export interface IConnectorRequest{
     getAllConnectors(): Promise<AxiosResponse<IConnector[]>>,
 
     //to add connector
-    addConnector(connector: IConnector): Promise<AxiosResponse<IConnector>>,
+    addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnectorResponse>>,
 
     //to update connector
-    updateConnector(connector: IConnector): Promise<AxiosResponse<IConnector>>,
+    updateConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnectorResponse>>,
 
     //to delete connector by id
     deleteConnectorById(): Promise<AxiosResponse<IConnector>>,

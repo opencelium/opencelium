@@ -14,7 +14,7 @@
  */
 
 import {ITheme} from "../../general/Theme";
-import {REQUEST_METHOD} from "@requestInterface/application/IRequest";
+import { REQUEST_METHOD } from "@model/invoker/Request";
 import {Operation} from "@class/invoker/Operation";
 
 interface OperationItemsProps{
