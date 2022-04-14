@@ -207,7 +207,7 @@ public class ExecutionContainer {
             if (exp == null || exp.isEmpty()) {
                 return "";
             }
-            StringBuilder result = new StringBuilder(exp);
+//            StringBuilder result = new StringBuilder(exp);
             if (queryParams.isEmpty()) {
                 return null;
             }
@@ -221,7 +221,7 @@ public class ExecutionContainer {
             while (m.find()) {
                 String s = "$." + m.group().replace("${", "").replace("}", "");
                 Object val = JsonPath.read(message, s);
-                result.append(exp.replace(m.group(), val.toString()));
+                exp = exp.replace(m.group(), val.toString());
             }
 
 //            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
@@ -231,7 +231,7 @@ public class ExecutionContainer {
 //                }
 //                result = result.replace(pointer, entry.getValue().toString());
 //            }
-            return result.toString();
+            return exp;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
