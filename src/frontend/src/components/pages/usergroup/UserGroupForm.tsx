@@ -59,7 +59,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     },[]);
     useEffect(() => {
         if (didMount.current) {
-            if(error === null && (addingUserGroup === API_REQUEST_STATE.FINISH || updatingUserGroup === API_REQUEST_STATE.FINISH)){
+            if(error === null && (isAdd && addingUserGroup === API_REQUEST_STATE.FINISH || isUpdate && updatingUserGroup === API_REQUEST_STATE.FINISH)){
                 navigate('/usergroups', { replace: false });
             }
         } else {
@@ -67,7 +67,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         }
     },[addingUserGroup, updatingUserGroup]);
     const NameInput = userGroup.getText({
-        propertyName: "name", props: {autoFocus: !isView, required: true, icon: 'person', label: 'Name', isLoading: checkingUserGroupName === API_REQUEST_STATE.START, error: isCurrentUserGroupHasUniqueName === TRIPLET_STATE.FALSE ? 'The name must be unique' : ''}
+        propertyName: "name", props: {autoFocus: !isView, required: true, icon: 'person', label: 'Name', isLoading: checkingUserGroupName === API_REQUEST_STATE.START, error: isCurrentUserGroupHasUniqueName === TRIPLET_STATE.FALSE ? 'The name is already in use' : ''}
     })
     const DescriptionInput = userGroup.getTextarea({
         propertyName: "description", props: {icon: "notes", label: "Description"}
@@ -96,7 +96,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             label={formData.actionButton.label}
             icon={formData.actionButton.icon}
             handleClick={handleClick}
-            isLoading={addingUserGroup === API_REQUEST_STATE.START || updatingUserGroup === API_REQUEST_STATE.START}
+            isLoading={isAdd && addingUserGroup === API_REQUEST_STATE.START || isUpdate && updatingUserGroup === API_REQUEST_STATE.START}
         />);
     }
     const data = {

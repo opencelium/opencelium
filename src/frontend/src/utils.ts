@@ -88,13 +88,8 @@ export function cleanString(str: string){
 }
 
 export function useEventListener(eventName: string, handler: any, element = window, hasListener = false): void{
-    // Create a ref that stores handler
     const savedHandler:any = useRef();
     const eventListener = (event: any) => savedHandler.current(event);
-    // Update ref.current value if handler changes.
-    // This allows our effect below to always get latest handler ...
-    // ... without us needing to pass it in effect deps array ...
-    // ... and potentially cause effect to re-run every render.
     if(!hasListener){
         element.removeEventListener(eventName, eventListener);
     }
@@ -103,21 +98,16 @@ export function useEventListener(eventName: string, handler: any, element = wind
     }, [handler]);
     useEffect(
         () => {
-            // Make sure element supports addEventListener
-            // On
             const isSupported = element && element.addEventListener;
             if (!isSupported) return;
-            // Create event listener that calls handler function stored in ref
-            // Add event listener
             if(hasListener) {
                 element.addEventListener(eventName, eventListener);
             }
-            // Remove event listener on cleanup
             return () => {
                 element.removeEventListener(eventName, eventListener);
             };
         },
-        [eventName, element, hasListener] // Re-run if eventName or element changes
+        [eventName, element, hasListener]
     );
 }
 

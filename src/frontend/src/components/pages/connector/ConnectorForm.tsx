@@ -76,7 +76,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         dispatch(testRequestData(connector.getPoustModel()));
     }
     const TitleInput = connector.getText({
-        propertyName: "title", props: {autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
+        propertyName: "title", props: {autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : ''}
     })
     const DescriptionInput = connector.getTextarea({
         propertyName: "description", props: {label: "Description"}

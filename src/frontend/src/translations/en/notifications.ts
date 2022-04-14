@@ -140,9 +140,11 @@ const NotificationTranslations = {
       "__DEFAULT__": "There is an error removing user's image."
     },
     [addUser.rejected.type]: {
+      "EXISTS": "User with such email is already in use",
       "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not added."
     },
     [updateUser.rejected.type]: {
+      "EXISTS": "User with such email is already in use",
       "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not updated."
     },
     [uploadUserImage.rejected.type]: {
@@ -161,9 +163,11 @@ const NotificationTranslations = {
       "__DEFAULT__": "There is an error fetching user groups."
     },
     [addUserGroup.rejected.type]: {
+      "EXISTS": "User Group with such name is already in use",
       "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not added."
     },
     [updateUserGroup.rejected.type]: {
+      "EXISTS": "User Group with such name is already in use",
       "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not updated."
     },
     [uploadUserGroupImage.rejected.type]: {
@@ -185,12 +189,12 @@ const NotificationTranslations = {
     },
     [addConnector.rejected.type]: {
       "COMMUNICATION_FAILED": "Connection was failed",
-      "CONNECTOR_ALREADY_EXISTS": "Connector with such title already exists",
+      "CONNECTOR_ALREADY_EXISTS": "Connector with such title is already in use",
       "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not added"
     },
     [updateConnector.rejected.type]: {
       "COMMUNICATION_FAILED": "Connection was failed",
-      "CONNECTOR_ALREADY_EXISTS": "Connector with such title already exists",
+      "CONNECTOR_ALREADY_EXISTS": "Connector with such title is already in use",
       "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not updated"
     },
     [uploadConnectorImage.rejected.type]: {

@@ -15,6 +15,12 @@
 
 import {AxiosRequestConfig, AxiosResponse} from "axios";
 
+export interface IEntityWithImage<T>{
+    entityData: T,
+    iconFile: any,
+    shouldDeleteIcon: boolean,
+}
+
 export interface IRequestSettings{
     url: string,
     //end part of the url

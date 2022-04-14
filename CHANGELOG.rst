@@ -2,6 +2,27 @@
 Changelog
 *********
 
+2.2
+===
+:Date: April 14, 2022
+
+Features
+--------
+
+* Support POST Request for webhooks
+* Enable/disable SSL verification for connectors
+* Manage connection timeouts for connectors
+
+Fixes
+-----
+
+* ssl_verify error (OC-435)
+* can't save the template (OC-444)
+* increment index on arrays in xml (OC-440)
+* new invokers and templates are available (OC-443)
+* new frontend engine has some issues… (OC-438)
+* error during updateing a connector (OC-439)
+
 2.1
 ===
 :Date: Januar 18, 2022
