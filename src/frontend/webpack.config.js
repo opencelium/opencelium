@@ -128,7 +128,7 @@ const getConfig = ({isBuild, envVar}) => {
         output: {
             filename: '[name].bundle.js',
             path: path.resolve(__dirname, 'dist'),
-            publicPath: 'auto',
+            publicPath: isBuild ? 'auto' : '/',
             clean: true,
         },
         devServer: {
@@ -157,7 +157,7 @@ const getConfig = ({isBuild, envVar}) => {
                     {
                         from: path.resolve(__dirname, 'locales'),
                         to: path.resolve(__dirname, 'dist/locales')
-                    },
+                    },/*
                     {
                         from: path.resolve(__dirname, 'src/img'),
                         to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
@@ -165,7 +165,7 @@ const getConfig = ({isBuild, envVar}) => {
                     {
                         from: path.resolve(__dirname, 'src/styles/css'),
                         to: path.resolve(__dirname, 'dist/styles/css')
-                    },
+                    },*/
                 ]
             }),
             new webpack.DefinePlugin({...envVar})

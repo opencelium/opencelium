@@ -19,7 +19,8 @@ import Themes, {ThemeNames} from "./general/Theme";
 import {BrowserRouter} from "react-router-dom";
 import {Global} from "../styles/global";
 import {getRoutes} from "@store/routes";
-import {Auth} from "@class/../classes/application/Auth";
+import {Auth} from "@class/application/Auth";
+
 
 
 const App = ({}) => {
