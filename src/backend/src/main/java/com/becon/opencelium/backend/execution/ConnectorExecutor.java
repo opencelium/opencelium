@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
 import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
+import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
@@ -358,7 +359,8 @@ public class ConnectorExecutor {
 
     public String buildUrl(MethodNode methodNode){
         String endpoint = methodNode.getRequestNode().getEndpoint();
-        String format = methodNode.getRequestNode().getBodyNode().getFormat();
+        BodyNode b = methodNode.getRequestNode().getBodyNode();
+        String format = b == null ? "json" : b.getFormat();
         String requiredField;
         String refRegex = "\\{(.*?)\\}";
         Pattern pattern = Pattern.compile(refRegex);
@@ -417,7 +419,9 @@ public class ConnectorExecutor {
         HttpHeaders httpHeaders = new HttpHeaders();
         final Map<String, String> header = functionInvoker.getRequest().getHeader();
         Map<String, String> headerItem = new HashMap<>();
-        String format = functionInvoker.getRequest().getBody().getFormat();
+
+        Body b = functionInvoker.getRequest().getBody();
+        String format = b == null ? "json" : b.getFormat();
 
 
         header.forEach((k,v) -> {
@@ -490,7 +494,7 @@ public class ConnectorExecutor {
 
                 result = result.replace(pointer, value);
             } else if(pointer.matches("\\$\\{(.*?)\\}")) {
-                String value = executionContainer.getValueFromQueryParams(pointer);
+                String value = executionContainer.getValueWebhookParams(pointer).toString();
                 result = result.replace(pointer, value);
             } else {
                 // replace from request data
