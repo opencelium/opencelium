@@ -7,7 +7,7 @@
   "license": "becon",
   "author": "becon GmbH",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.build.js",
     "start_dev": "node server_dev.js",
     "start_prod": "node server.js",
     "storybook": "start-storybook -p 6006",

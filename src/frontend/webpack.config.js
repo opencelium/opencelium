@@ -173,7 +173,5 @@ const getConfig = ({isBuild, envVar}) => {
     };
 };
 
-//only for build
-module.exports = {...getConfig({envVar: {'process.env.isProduction': true}}), mode: "production"};
 //to run in development or in production mode
 module.exports.getConfig = getConfig;
