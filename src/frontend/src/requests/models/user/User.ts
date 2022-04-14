@@ -12,19 +12,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-const integrateLibs = require('./plugins/LibsIntegration');
-const WebpackDevServer = require('webpack-dev-server');
-const webpack = require('webpack');
-const {getConfig} = require('./webpack.config');
-const config = getConfig({envVar: {'process.env.isDevelopment': true}});
-integrateLibs();
-const compiler = webpack({
-    ...config,
-    mode: 'development',
-    devtool: 'eval-source-map',
-});
-const server = new WebpackDevServer({...config.devServer}, compiler);
-server.startCallback(() => {
-    console.log("Starting client...");
-});
 
+import ModelUserParent from "./UserParent";
+import ModelUserGroup from "./UserGroup";
+
+export default interface ModelUser extends Partial<ModelUserParent>{
+    userGroup: ModelUserGroup,
+}

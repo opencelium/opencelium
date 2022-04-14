@@ -23,7 +23,7 @@ import {
     importTemplate,
     updateTemplate
 } from "@action/connection/TemplateCreators";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 const DELETE_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;

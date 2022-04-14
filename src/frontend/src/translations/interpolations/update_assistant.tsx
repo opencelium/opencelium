@@ -19,7 +19,7 @@ import {checkForUpdates} from "@action/application/UpdateAssistantCreators";
 import {IApplicationResponse} from "@requestInterface/application/IResponse";
 import {CheckForUpdateProps} from "@requestInterface/application/IUpdateAssistant";
 import {NotificationType} from "@interface/application/INotification";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 import {NavigateFunction} from "react-router";
 import {AppDispatch} from "@store/store";
 import { InterpolateTranslation } from "@atom/interpolate_translation/InterpolateTranslation";

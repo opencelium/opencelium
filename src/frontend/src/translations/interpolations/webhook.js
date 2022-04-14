@@ -17,7 +17,7 @@ import React from "react";
 import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import {deleteWebhook, getWebhook} from "@action/schedule/WebhookCreators";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 const ADD_WEBHOOK = (responseType, dispatch, navigate, params) => {
     const title = params.schedule ? params.schedule.title : '';

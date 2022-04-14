@@ -18,9 +18,9 @@ import React, {FC, useEffect, useState} from 'react';
 import Graph from "react-graph-vis";
 import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled} from './styles';
 import {Connection} from "@class/connection/Connection";
-import DefaultConnectorImagePath from "@images/default_connector.png";
-import OpenCeliumBackgroundImagePath from "@images/oc_connection_widget_background.png"
-import OpenCeliumImagePath from "@images/logo.png";
+import DefaultConnectorImagePath from "@image/default_connector.png";
+import OpenCeliumBackgroundImagePath from "@image/oc_connection_widget_background.png"
+import OpenCeliumImagePath from "@image/logo.png";
 import {isValidIconUrl} from "../../../utils";
 import Toast from "@atom/toast/Toast";
 import {useAppDispatch} from "../../../hooks/redux";

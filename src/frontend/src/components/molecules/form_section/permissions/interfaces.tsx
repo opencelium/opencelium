@@ -14,15 +14,10 @@
  */
 
 import {ITheme} from "../../../general/Theme";
-import {ElementProps, InputElementProps} from "../../../atoms/input/interfaces";
+import {ElementProps, InputElementProps} from "@atom/input/interfaces";
 import {OptionProps} from "@atom/input/select/interfaces";
+import { PermissionTypes } from "@model/user/Component";
 
-export enum PERMISSION_TYPES {
-    CREATE= 'CREATE',
-    READ= 'READ',
-    UPDATE= 'UPDATE',
-    DELETE= 'DELETE',
-}
 
 interface PermissionsStyledProps extends ElementProps{
     hasLabel?: boolean,
@@ -31,11 +26,11 @@ interface PermissionsStyledProps extends ElementProps{
 export interface ComponentProps{
     componentId: number,
     name: string,
-    permissions: PERMISSION_TYPES[],
+    permissions: PermissionTypes[],
 }
 
 export interface PermissionProps{
-    [key: string]: PERMISSION_TYPES[],
+    [key: string]: PermissionTypes[],
 }
 
 interface PermissionsProps extends InputElementProps, PermissionsStyledProps{

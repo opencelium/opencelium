@@ -22,7 +22,7 @@ import InputFile from "@atom/input/file/InputFile";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
 import Button from "@atom/button/Button";
 import {checkImage} from "@utils/app";
-import DefaultConnectorImagePath from "@images/default_connector.png";
+import DefaultConnectorImagePath from "@image/default_connector.png";
 
 const Image: FC<ImageProps> =
     ({

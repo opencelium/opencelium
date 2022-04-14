@@ -21,7 +21,7 @@ import {
     deleteNotificationTemplateById,
     updateNotificationTemplate
 } from "@action/schedule/NotificationTemplateCreators";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 const ADD_NOTIFICATION_TEMPLATE = (responseType, dispatch, navigate, params) => {
     const {name} = params;

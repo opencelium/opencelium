@@ -24,7 +24,7 @@ import {
     switchScheduleStatus,
     updateSchedule
 } from "@action/schedule/ScheduleCreators";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 const ADD_SCHEDULE = (responseType, dispatch, navigate, params) => {
     const {title} = params;

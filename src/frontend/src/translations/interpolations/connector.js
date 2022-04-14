@@ -17,7 +17,7 @@ import React from "react";
 import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import {addConnector, deleteConnectorById, updateConnector, uploadConnectorImage} from "@action/ConnectorCreators";
 import LinkMessage from "@molecule/link_message/LinkMessage";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 
 const ADD_CONNECTOR = (responseType, dispatch, navigate, params) => {

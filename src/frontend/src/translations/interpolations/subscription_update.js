@@ -17,7 +17,7 @@ import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateT
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import React from "react";
 import {getResources} from "@action/application/ApplicationCreators";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 const GET_RESOURCES = (responseType, dispatch, navigate, params) => {
     return (

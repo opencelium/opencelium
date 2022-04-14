@@ -85,7 +85,8 @@ const getConfig = ({envVar}) => {
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss'],
             alias: {
-                '@images': path.resolve('./src/img'),
+                '@style': path.resolve('./src/styles/css'),
+                '@image': path.resolve('./src/img'),
                 '@request': path.resolve(__dirname, './src/requests/classes/'),
                 '@model': path.resolve(__dirname, './src/requests/models/'),
                 '@requestInterface': path.resolve(__dirname, './src/requests/interfaces/'),
@@ -127,7 +128,8 @@ const getConfig = ({envVar}) => {
         output: {
             filename: '[name].bundle.js',
             path: path.resolve(__dirname, 'dist'),
-            publicPath: '/',
+            publicPath: 'auto',
+            clean: true,
         },
         devServer: {
             static: {
@@ -147,7 +149,7 @@ const getConfig = ({envVar}) => {
         plugins: [
             new HtmlWebpackPlugin({
                 template: path.join(__dirname, "src", "index.html"),
-                favicon: path.join(__dirname, "src", "img/fav_icon.png"),
+                favicon: path.join(__dirname, "src", "./img/fav_icon.png"),
             }),
             new NodePolyfillPlugin(),
             new CopyWebpackPlugin({
@@ -156,6 +158,14 @@ const getConfig = ({envVar}) => {
                         from: path.resolve(__dirname, 'locales'),
                         to: path.resolve(__dirname, 'dist/locales')
                     },
+                    {
+                        from: path.resolve(__dirname, 'src/img'),
+                        to: path.resolve(__dirname, 'dist/img')
+                    },
+                    {
+                        from: path.resolve(__dirname, 'src/styles/css'),
+                        to: path.resolve(__dirname, 'dist/styles/css')
+                    },
                 ]
             }),
             new webpack.DefinePlugin({...envVar})
@@ -163,4 +173,7 @@ const getConfig = ({envVar}) => {
     };
 };
 
-module.exports = getConfig;
+//only for build
+module.exports = {...getConfig({envVar: {'process.env.isProduction': true}}), mode: "production"};
+//to run in development or in production mode
+module.exports.getConfig = getConfig;

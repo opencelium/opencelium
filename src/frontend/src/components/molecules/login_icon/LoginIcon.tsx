@@ -15,7 +15,7 @@
 
 import React, {FC, useState} from 'react';
 import {LoginIconStyled} from './styles';
-import LogoOcWhiteImagePath from "@images/logo_oc_white.png";
+import LogoOcWhiteImagePath from "@image/logo_oc_white.png";
 import {LoginIconProps} from "@molecule/login_icon/interfaces";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
 import Icon from "@atom/icon/Icon";

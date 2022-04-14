@@ -17,7 +17,7 @@ import React from "react";
 import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@molecule/link_message/LinkMessage";
 import {addUserGroup, deleteUserGroupById, updateUserGroup} from "@action/UserGroupCreators";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 const ADD_USER_GROUP = (responseType, dispatch, navigate, params) => {
     const {name} = params;

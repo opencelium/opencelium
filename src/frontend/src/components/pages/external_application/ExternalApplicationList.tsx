@@ -24,8 +24,8 @@ import {ExternalApplication} from "@class/external_application/ExternalApplicati
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
 import {ExternalApplicationPermissions} from "@constants/permissions";
 import {permission} from "../../../decorators/permission";
-import KibanaImagePath from "@images/apps/kibana.png";
-import Neo4jImagePath from "@images/apps/neo4j.png";
+import KibanaImagePath from "@image/apps/kibana.png";
+import Neo4jImagePath from "@image/apps/neo4j.png";
 
 const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(ExternalApplicationPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();

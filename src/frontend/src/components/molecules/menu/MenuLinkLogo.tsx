@@ -16,7 +16,7 @@
 import React from "react";
 import {LinkProps} from "react-router-dom";
 import {LogoImageStyled, MenuLinkLogoStyled} from "./styles";
-import LogoOcWhiteImagePath from "@images/logo_oc_white.png";
+import LogoOcWhiteImagePath from "@image/logo_oc_white.png";
 
 export const MenuLinkLogo = (props: Partial<LinkProps>) => {
     return(

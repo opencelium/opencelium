@@ -17,7 +17,7 @@ import React from "react";
 import {InterpolateTranslation} from "@atom/interpolate_translation/InterpolateTranslation";
 import {addUser, deleteUserById, updateUser} from "@action/UserCreators";
 import LinkMessage from "@molecule/link_message/LinkMessage";
-import {getActionWithoutType} from "../../../utils";
+import {getActionWithoutType} from "../../utils";
 
 const ADD_USER = (responseType, dispatch, navigate, params) => {
     const {email} = params;

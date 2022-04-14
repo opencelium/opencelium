@@ -15,10 +15,12 @@
 const integrateLibs = require('./plugins/LibsIntegration');
 const WebpackDevServer = require('webpack-dev-server');
 const webpack = require('webpack');
-const config = require('./webpack.config')({envVar: {'process.env.isProduction': true}});
+const {getConfig} = require('./webpack.config');
+const config = getConfig({envVar: {'process.env.isProduction': true}});
 integrateLibs();
 const compiler = webpack({
     ...config,
+    devtool: 'source-map',
     mode: 'production',
     performance: {
         hints: false,

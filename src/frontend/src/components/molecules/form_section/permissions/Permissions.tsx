@@ -13,20 +13,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useState} from 'react';
+import React, {FC} from 'react';
 import {withTheme} from 'styled-components';
-import {ComponentProps, PERMISSION_TYPES, PermissionProps, PermissionsProps} from './interfaces';
+import {PermissionProps, PermissionsProps} from './interfaces';
 import { PermissionsStyled } from './styles';
 import {removeFromArrayByValue} from "../../../utils";
 import Input from "../../../atoms/input/Input";
 import {Text} from "@atom/text/Text";
 import {OptionProps} from "@atom/input/select/interfaces";
 import {capitalize} from "../../../../utils";
+import { PermissionTypes } from '@model/user/Component';
 
-export function getAllPermissions() : PERMISSION_TYPES[]{
-    let permissions : PERMISSION_TYPES[] = [];
-    for (let item in PERMISSION_TYPES) {
-        permissions.push(item as PERMISSION_TYPES);
+export function getAllPermissions() : PermissionTypes[]{
+    let permissions : PermissionTypes[] = [];
+    for (let item in PermissionTypes) {
+        permissions.push(item as PermissionTypes);
     }
     return [...permissions];
 }
@@ -54,7 +55,7 @@ const Permissions: FC<PermissionsProps> =
             }
             return newPermissions;
         }
-        const check = (component: OptionProps, permissionType: PERMISSION_TYPES, value: boolean, curPermissions: any = null) => {
+        const check = (component: OptionProps, permissionType: PermissionTypes, value: boolean, curPermissions: any = null) => {
             let checkedPermissions = curPermissions === null ? getPermissions() : curPermissions;
             if(checkedPermissions[component.label]){
                 if(value){
@@ -69,11 +70,11 @@ const Permissions: FC<PermissionsProps> =
             }
             return checkedPermissions;
         }
-        const toggleCheck = (component: OptionProps, permissionType: PERMISSION_TYPES, value: boolean) => {
+        const toggleCheck = (component: OptionProps, permissionType: PermissionTypes, value: boolean) => {
             onChange(check(component, permissionType, value));
         }
 
-        const toggleAllByPermissionType = (permissionType: PERMISSION_TYPES) => {
+        const toggleAllByPermissionType = (permissionType: PermissionTypes) => {
             let newValue = !isAllCheckedByPermissionType(permissionType);
             let newPermissions = getPermissions();
             for(let i = 0; i < components.length; i++){
@@ -115,7 +116,7 @@ const Permissions: FC<PermissionsProps> =
             }
             return result;
         }
-        const isAllCheckedByPermissionType = (permissionType: PERMISSION_TYPES) => {
+        const isAllCheckedByPermissionType = (permissionType: PermissionTypes) => {
             let result = false;
             let allPermissionKeys = Object.keys(permissions);
             if(allPermissionKeys.length < components.length){
@@ -165,7 +166,7 @@ const Permissions: FC<PermissionsProps> =
                             return(
                                 <tr key={component.value}>
                                     <td><Text value={capitalize(component.label.toLowerCase())}/></td>
-                                    {allPermissionTypes.map((permissionType: PERMISSION_TYPES) => {
+                                    {allPermissionTypes.map((permissionType: PermissionTypes) => {
                                         return (
                                             <td key={`${component.value}_${permissionType}`}>
                                                 {readOnly

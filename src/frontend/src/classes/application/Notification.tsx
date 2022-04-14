@@ -17,7 +17,7 @@ import React from "react";
 import {INotification, NotificationType} from "@interface/application/INotification";
 import {ColorTheme} from "../../components/general/Theme";
 import {TypeIconStyled, WarningIconStyled} from "@molecule/notification/styles";
-import FulfilledInterpolations from "@translations/interpolations/fulfilled/index";
+import FulfilledInterpolations from "@translations/interpolations";
 import {stringToHTML} from "../../components/utils";
 import i18next from "i18next";
 import {getActionWithoutType, reactElementToText} from "../../utils";

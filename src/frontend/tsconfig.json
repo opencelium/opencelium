@@ -12,6 +12,8 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
+      "@style/*": ["./src/styles/css/*"],
+      "@image/*": ["./src/img/*"],
       "@request/*": ["./src/requests/classes/*"],
       "@model/*": ["./src/requests/models/*"],
       "@requestInterface/*": ["./src/requests/interfaces/*"],
