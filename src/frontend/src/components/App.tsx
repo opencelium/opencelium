@@ -21,7 +21,6 @@ import {Global} from "../styles/global";
 import {getRoutes} from "@store/routes";
 import {Auth} from "@class/../classes/application/Auth";
 
-import "../styles/css/bootstrap.css";
 
 const App = ({}) => {
     const {authUser} = Auth.getReduxState();

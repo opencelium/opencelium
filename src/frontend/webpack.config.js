@@ -19,7 +19,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
-const getConfig = ({envVar}) => {
+const getConfig = ({isBuild, envVar}) => {
     return {
         entry: ['@babel/polyfill', './src/index.jsx'],
         module: {
@@ -160,7 +160,7 @@ const getConfig = ({envVar}) => {
                     },
                     {
                         from: path.resolve(__dirname, 'src/img'),
-                        to: path.resolve(__dirname, 'dist/img')
+                        to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
                     },
                     {
                         from: path.resolve(__dirname, 'src/styles/css'),
