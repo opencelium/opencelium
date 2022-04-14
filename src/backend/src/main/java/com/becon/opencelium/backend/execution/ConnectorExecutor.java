@@ -494,7 +494,7 @@ public class ConnectorExecutor {
 
                 result = result.replace(pointer, value);
             } else if(pointer.matches("\\$\\{(.*?)\\}")) {
-                String value = executionContainer.getValueFromQueryParams(pointer);
+                String value = executionContainer.getValueWebhookParams(pointer).toString();
                 result = result.replace(pointer, value);
             } else {
                 // replace from request data
