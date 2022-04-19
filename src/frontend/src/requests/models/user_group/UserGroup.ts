@@ -13,7 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ModelComponent from "./Component";
+import ModelComponent from "@model/user/Component";
+
 
 export default interface ModelUserGroup{
     components: ModelComponent[],

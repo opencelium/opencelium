@@ -18,6 +18,9 @@ import {UserRequest} from "@request/user/User";
 import { IUser } from "@interface/user/IUser";
 import {ResponseMessages} from "@requestInterface/application/IResponse";
 import {errorHandler} from "../../components/utils";
+import {IEntityWithImage} from "@requestInterface/application/IRequest";
+import ModelConnectorPoust from "@model/connector/ConnectorPoust";
+import ModelUserPoust from "@model/user/UserPoust";
 
 export const checkUserEmail = createAsyncThunk(
     'user/exist/email',
@@ -34,23 +37,23 @@ export const checkUserEmail = createAsyncThunk(
 
 export const addUser = createAsyncThunk(
     'user/add',
-    async(user: IUser, thunkAPI) => {
+    async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelUserPoust>, thunkAPI) => {
         try {
-            const checkEmailRequest = new UserRequest({endpoint: `/check/${user.email}`});
+            const checkEmailRequest = new UserRequest({endpoint: `/check/${entityData.email}`});
             const responseEmailRequest = await checkEmailRequest.checkUserEmail();
             if (responseEmailRequest.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
             }
             const addUserRequest = new UserRequest();
-            const response = await addUserRequest.addUser(user);
-            if (user.userDetail.profilePictureFile) {
+            const response = await addUserRequest.addUser(entityData);
+            if (iconFile) {
                 let data: FormData = new FormData();
-                data.append('email', user.email);
-                data.append('file', user.userDetail.profilePictureFile[0]);
+                data.append('email', entityData.email);
+                data.append('file', iconFile[0]);
                 const uploadImageRequest = new UserRequest({isFormData: true});
                 await uploadImageRequest.uploadUserImage(data);
-            } else if (user.userDetail.shouldDeletePicture) {
-                const deleteImageRequest = new UserRequest({endpoint: `/${user.id}/profilePicture`});
+            } else if (shouldDeleteIcon) {
+                const deleteImageRequest = new UserRequest({endpoint: `/${entityData.userId}/profilePicture`});
                 await deleteImageRequest.deleteUserImage();
             }
             return response.data;
@@ -62,27 +65,27 @@ export const addUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
     'user/update',
-    async(user: IUser, thunkAPI) => {
+    async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelUserPoust>, thunkAPI) => {
         try {
             // @ts-ignore
             const userState = thunkAPI.getState().userReducer;
-            if(userState.currentUser.email !== user.email ){
-                const checkEmailRequest = new UserRequest({endpoint: `/check/${user.email}`});
+            if(userState.currentUser.email !== entityData.email ){
+                const checkEmailRequest = new UserRequest({endpoint: `/check/${entityData.email}`});
                 const responseEmailRequest = await checkEmailRequest.checkUserEmail();
                 if (responseEmailRequest.data.message === ResponseMessages.EXISTS) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
                 }
             }
-            const request = new UserRequest({endpoint: `/${user.id}`});
-            const response = await request.updateUser(user);
-            if (user.userDetail.profilePictureFile) {
+            const request = new UserRequest({endpoint: `/${entityData.userId}`});
+            const response = await request.updateUser(entityData);
+            if (iconFile) {
                 let data: FormData = new FormData();
-                data.append('email', user.email);
-                data.append('file', user.userDetail.profilePictureFile[0]);
+                data.append('email', entityData.email);
+                data.append('file', iconFile[0]);
                 const request = new UserRequest({isFormData: true});
                 await request.uploadUserImage(data);
-            } else if (user.userDetail.shouldDeletePicture) {
-                const deleteImageRequest = new UserRequest({endpoint: `/${user.id}/profilePicture`});
+            } else if (shouldDeleteIcon) {
+                const deleteImageRequest = new UserRequest({endpoint: `/${entityData.userId}/profilePicture`});
                 await deleteImageRequest.deleteUserImage();
             }
             return response.data;

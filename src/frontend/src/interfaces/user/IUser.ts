@@ -18,6 +18,7 @@ import {UserState} from "@slice/UserSlice";
 import { IUserGroup } from "../usergroup/IUserGroup";
 import {OptionProps} from "@atom/input/select/interfaces";
 import {IUserDetail} from "@interface/user/IUserDetail";
+import ModelUserPoust from "@model/user/UserPoust";
 
 export interface IUserSwitch{
 }
@@ -58,4 +59,5 @@ export interface IUser extends IUserForm{
     userDetail: Partial<IUserDetail>,
     userGroup: IUserGroup,
     getFullName?: () => string,
+    getPoustModel?: (isForApiRequest?: boolean) => ModelUserPoust,
 }

@@ -34,6 +34,8 @@ import {
     uploadUserImage,
 } from "@action/UserCreators";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux";
+import ModelUserPoust from "@model/user/UserPoust";
+import {IEntityWithImage} from "@requestInterface/application/IRequest";
 
 
 export class User extends HookStateClass implements IUser{
@@ -271,12 +273,12 @@ export class User extends HookStateClass implements IUser{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(addUser)
+    @App.dispatch(addUser, {mapping: (user: IUser):IEntityWithImage<ModelUserPoust> => { return {entityData: user.getPoustModel(), iconFile: user.userDetail.profilePictureFile, shouldDeleteIcon: false};}})
     add(): boolean{
         return this.validateAdd();
     }
 
-    @App.dispatch(updateUser)
+    @App.dispatch(updateUser, {mapping: (user: IUser):IEntityWithImage<ModelUserPoust> => { return {entityData: user.getPoustModel(), iconFile: user.userDetail.profilePictureFile, shouldDeleteIcon: false};}})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();
     }
@@ -299,5 +301,29 @@ export class User extends HookStateClass implements IUser{
     @App.dispatch(checkUserEmail, {hasNoValidation: true})
     checkEmail(): boolean{
         return this.validateEmail();
+    }
+
+    getPoustModel(isForApiRequest: boolean = false): ModelUserPoust{
+        let mappedUser: ModelUserPoust = {
+            email: this.email,
+            password: this.password,
+            repeatPassword: this.repeatPassword,
+            userGroup: parseInt(this.userGroupSelect.value.toString()),
+            userDetail: {
+                userTitle: this.userDetail.userTitle,
+                surname: this.userDetail.surname,
+                name: this.userDetail.name,
+                department: this.userDetail.department,
+                organization: this.userDetail.organization,
+                phoneNumber: this.userDetail.phoneNumber,
+            }
+        };
+        if(this.id !== 0){
+            return {
+                userId: this.id,
+                ...mappedUser,
+            }
+        }
+        return mappedUser;
     }
 }

@@ -14,8 +14,9 @@
  */
 
 import {AxiosResponse} from "axios";
-import {IUser} from "@interface/user/IUser";
 import {IResponse} from "../application/IResponse";
+import ModelUser from "@model/user/User";
+import ModelUserPoust from "@model/user/UserPoust";
 
 export interface IUserRequest{
 
@@ -23,16 +24,16 @@ export interface IUserRequest{
     checkUserEmail(): Promise<AxiosResponse<IResponse>>,
 
     //to get user by id
-    getUserById(): Promise<AxiosResponse<IUser>>,
+    getUserById(): Promise<AxiosResponse<ModelUser>>,
 
     //to get all users of authorized user
-    getAllUsers(): Promise<AxiosResponse<IUser[]>>,
+    getAllUsers(): Promise<AxiosResponse<ModelUser[]>>,
 
     //to add user
-    addUser(user: IUser): Promise<AxiosResponse<IUser>>,
+    addUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>,
 
     //to update user
-    updateUser(user: IUser): Promise<AxiosResponse<IUser>>,
+    updateUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>,
 
     //to delete user by id
     deleteUserById(): Promise<AxiosResponse<IResponse>>,
@@ -41,11 +42,11 @@ export interface IUserRequest{
     deleteUsersById(user: number[]): Promise<AxiosResponse<number[]>>,
 
     //to upload image of user
-    uploadUserImage(data: FormData): Promise<AxiosResponse<any>>,
+    uploadUserImage(data: FormData): Promise<AxiosResponse<ModelUser>>,
 
     /*
     * TODO: do not exist suck method on the server
     */
     //to delete image of user
-    deleteUserImage(): Promise<AxiosResponse<any>>,
+    deleteUserImage(): Promise<AxiosResponse<IResponse>>,
 }

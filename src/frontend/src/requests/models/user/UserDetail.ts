@@ -13,18 +13,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+export enum UserTitle{
+    MR= 'mr',
+    MRS= 'mrs',
+    NOT_SET= '',
+}
 export default interface ModelUserDetail{
-    appTour: boolean;
+    appTour?: boolean;
     bitbucketPassword?: string;
     bitbucketUser?: string;
-    department: string;
-    lang: string;
+    department?: string;
+    lang?: string;
     name: string;
-    organization: string;
-    phoneNumber: string;
-    profilePicture: string;
-    requestTime: string;
+    organization?: string;
+    phoneNumber?: string;
+    profilePicture?: string;
+    requestTime?: string;
     surname: string;
-    theme: string;
-    userTitle: boolean;
+    theme?: string;
+    userTitle: UserTitle;
 }

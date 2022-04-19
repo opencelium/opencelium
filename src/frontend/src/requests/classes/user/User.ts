@@ -15,10 +15,11 @@
 
 import {Request} from "../application/Request";
 import {AxiosResponse} from "axios";
-import {IUser} from "@interface/user/IUser";
 import {IUserRequest} from "../../interfaces/user/IUser";
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
+import ModelUser from "@model/user/User";
+import ModelUserPoust from "@model/user/UserPoust";
 
 
 export class UserRequest extends Request implements IUserRequest{
@@ -31,20 +32,20 @@ export class UserRequest extends Request implements IUserRequest{
         return super.get<IResponse>();
     }
 
-    async getUserById(): Promise<AxiosResponse<IUser>>{
-        return super.get<IUser>();
+    async getUserById(): Promise<AxiosResponse<ModelUser>>{
+        return super.get<ModelUser>();
     }
 
-    async getAllUsers(): Promise<AxiosResponse<IUser[]>>{
-        return super.get<IUser[]>();
+    async getAllUsers(): Promise<AxiosResponse<ModelUser[]>>{
+        return super.get<ModelUser[]>();
     }
 
-    async addUser(user: IUser): Promise<AxiosResponse<IUser>>{
-        return super.post<IUser>(UserRequest.backendMap(user));
+    async addUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>{
+        return super.post<ModelUser>(user);
     }
 
-    async updateUser(user: IUser): Promise<AxiosResponse<IUser>>{
-        return super.put<IUser>(UserRequest.backendMap(user));
+    async updateUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>{
+        return super.put<ModelUser>(user);
     }
 
     async deleteUserById(): Promise<AxiosResponse<IResponse>>{
@@ -55,36 +56,12 @@ export class UserRequest extends Request implements IUserRequest{
         return super.delete<number[]>({data: userIds});
     }
 
-    async uploadUserImage(data: FormData): Promise<AxiosResponse<any>>{
+    async uploadUserImage(data: FormData): Promise<AxiosResponse<ModelUser>>{
         this.url = 'storage/profilePicture';
-        return super.post<FormData>(data);
+        return super.post<ModelUser>(data);
     }
 
-    async deleteUserImage(): Promise<AxiosResponse<any>>{
+    async deleteUserImage(): Promise<AxiosResponse<IResponse>>{
         return super.delete<any>();
-    }
-
-    static backendMap(user: IUser){
-        let mappedUser = {
-            email: user.email,
-            password: user.password,
-            repeatPassword: user.repeatPassword,
-            userGroup: user.userGroupSelect.value,
-            userDetail: {
-                userTitle: user.userDetail.userTitle,
-                surname: user.userDetail.surname,
-                name: user.userDetail.name,
-                department: user.userDetail.department,
-                organization: user.userDetail.organization,
-                phoneNumber: user.userDetail.phoneNumber,
-            }
-        };
-        if(user.id !== 0){
-            return {
-                id: user.id,
-                ...mappedUser,
-            }
-        }
-        return mappedUser;
     }
 }

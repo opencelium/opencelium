@@ -18,7 +18,7 @@ import {User} from "@class/user/User";
 import FormSection from "@organism/form_section/FormSection";
 import Form from "@organism/form/Form";
 import {UserDetail} from "@class/user/UserDetail";
-import {IUserDetail, UserTitle} from "@interface/user/IUserDetail";
+import {IUserDetail} from "@interface/user/IUserDetail";
 import {UserGroup} from "@class/usergroup/UserGroup";
 import {IUserGroup} from "@interface/usergroup/IUserGroup";
 import { MyProfileListProps } from "./interfaces";

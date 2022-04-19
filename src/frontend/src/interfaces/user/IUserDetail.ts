@@ -14,11 +14,7 @@
  */
 
 import {IForm} from "@interface/application/core";
-export enum UserTitle{
-    MR= 'mr',
-    MRS= 'mrs',
-    NOT_SET= '',
-}
+import { UserTitle } from "@model/user/UserDetail";
 export interface IUserDetailSwitch{
     appTour: boolean,
 }

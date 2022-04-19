@@ -14,7 +14,6 @@
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {IUser} from "@interface/user/IUser";
 import {
     addUser,
     checkUserEmail,
@@ -28,9 +27,10 @@ import {IResponse, ResponseMessages} from "@requestInterface/application/IRespon
 import {ICommonState} from "@interface/application/core";
 import {CommonState} from "../store";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@interface/application/IApplication";
+import ModelUser from "@model/user/User";
 
 export interface UserState extends ICommonState{
-    users: IUser[],
+    users: ModelUser[],
     isCurrentUserHasUniqueEmail: TRIPLET_STATE,
     checkingUserEmail: API_REQUEST_STATE,
     addingUser: API_REQUEST_STATE,
@@ -41,7 +41,7 @@ export interface UserState extends ICommonState{
     deletingUsersById: API_REQUEST_STATE,
     uploadingUserImage: API_REQUEST_STATE,
     deletingUserImage: API_REQUEST_STATE,
-    currentUser: IUser,
+    currentUser: ModelUser,
 }
 
 const initialState: UserState = {
@@ -79,11 +79,11 @@ export const userSlice = createSlice({
             state.checkingUserEmail = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [addUser.pending.type]: (state, action: PayloadAction<IUser>) => {
+        [addUser.pending.type]: (state) => {
             state.addingUser = API_REQUEST_STATE.START;
             state.isCurrentUserHasUniqueEmail = TRIPLET_STATE.INITIAL;
         },
-        [addUser.fulfilled.type]: (state, action: PayloadAction<IUser>) => {
+        [addUser.fulfilled.type]: (state, action: PayloadAction<ModelUser>) => {
             state.addingUser = API_REQUEST_STATE.FINISH;
             state.users.push(action.payload);
             state.error = null;
@@ -98,7 +98,7 @@ export const userSlice = createSlice({
         [updateUser.pending.type]: (state) => {
             state.updatingUser = API_REQUEST_STATE.START;
         },
-        [updateUser.fulfilled.type]: (state, action: PayloadAction<IUser>) => {
+        [updateUser.fulfilled.type]: (state, action: PayloadAction<ModelUser>) => {
             state.error = null;
             state.updatingUser = API_REQUEST_STATE.FINISH;
             state.users = state.users.map(user => user.userId === action.payload.userId ? action.payload : user);
@@ -116,7 +116,7 @@ export const userSlice = createSlice({
             state.checkingUserEmail = API_REQUEST_STATE.INITIAL;
             state.gettingUser = API_REQUEST_STATE.START;
         },
-        [getUserById.fulfilled.type]: (state, action: PayloadAction<IUser>) => {
+        [getUserById.fulfilled.type]: (state, action: PayloadAction<ModelUser>) => {
             state.gettingUser = API_REQUEST_STATE.FINISH;
             state.currentUser = action.payload;
             state.error = null;
@@ -130,7 +130,7 @@ export const userSlice = createSlice({
             state.isCurrentUserHasUniqueEmail = TRIPLET_STATE.INITIAL;
             state.checkingUserEmail = API_REQUEST_STATE.INITIAL;
         },
-        [getAllUsers.fulfilled.type]: (state, action: PayloadAction<IUser[]>) => {
+        [getAllUsers.fulfilled.type]: (state, action: PayloadAction<ModelUser[]>) => {
             state.gettingUsers = API_REQUEST_STATE.FINISH;
             state.users = action.payload;
             state.error = null;
@@ -172,10 +172,10 @@ export const userSlice = createSlice({
         [uploadUserImage.pending.type]: (state) => {
             state.uploadingUserImage = API_REQUEST_STATE.START;
         },
-        [uploadUserImage.fulfilled.type]: (state, action: PayloadAction<IUser>) => {
+        [uploadUserImage.fulfilled.type]: (state, action: PayloadAction<ModelUser>) => {
             state.uploadingUserImage = API_REQUEST_STATE.FINISH;
             state.users = state.users.map(user => user.userId === action.payload.userId ? action.payload : user);
-            if(state.currentUser && state.currentUser.userId === action.payload.id){
+            if(state.currentUser && state.currentUser.userId === action.payload.userId){
                 state.currentUser = action.payload;
             }
             state.error = null;

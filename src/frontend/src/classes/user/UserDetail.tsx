@@ -24,7 +24,6 @@ import {
     IUserDetailSwitch,
     IUserDetailText,
     IUserDetailTextarea,
-    UserTitle
 } from "@interface/user/IUserDetail";
 import {IInput} from "@interface/application/core";
 import {InputTextProps} from "@atom/input/text/interfaces";
@@ -35,6 +34,7 @@ import {InputTextareaProps} from "@atom/input/textarea/interfaces";
 import {UserState} from "@slice/UserSlice";
 import {RootState} from "@store/store";
 import {InputSwitchProps} from "@atom/input/switch/interfaces";
+import {UserTitle} from "@model/user/UserDetail";
 
 
 export class UserDetail extends HookStateClass implements IUserDetail{

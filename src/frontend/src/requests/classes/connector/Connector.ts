@@ -65,7 +65,7 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         return super.post<ModelConnector>(data);
     }
 
-    async deleteConnectorImage(): Promise<AxiosResponse<ModelConnector>>{
-        return super.delete<ModelConnector>();
+    async deleteConnectorImage(): Promise<AxiosResponse<IResponse>>{
+        return super.delete<IResponse>();
     }
 }

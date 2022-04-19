@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ModelUserParent from "@model/user/UserParent";
+import ModelUserParent from "./UserParent";
 
 export default interface ModelUserPoust extends Partial<ModelUserParent>{
     userGroup: number,

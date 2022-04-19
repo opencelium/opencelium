@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ModelBody from "@model/invoker/Body";
+import ModelBody from "./Body";
 
 export default interface ModelSuccess {
     body: ModelBody;

@@ -13,8 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import ModelUserGroup from "@model/user_group/UserGroup";
 import ModelUserParent from "./UserParent";
-import ModelUserGroup from "./UserGroup";
 
 export default interface ModelUser extends Partial<ModelUserParent>{
     userGroup: ModelUserGroup,
