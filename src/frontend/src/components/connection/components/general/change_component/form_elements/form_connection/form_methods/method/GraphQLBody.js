@@ -41,7 +41,7 @@ class GraphQLBody extends React.Component{
     }
 
     render(){
-        const {readOnly, method, source, connectors, connector} = this.props;
+        const {readOnly, method, connectors, connector} = this.props;
         const currentConnector = connectors.find(c => c.connectorId === connector.id);
         let credentials = {url: '', user: '', password: ''};
         if(currentConnector){
