@@ -51,11 +51,11 @@ class GraphQLBody extends React.Component{
                 password: currentConnector.requestData.password,
             }
         }
-        const defaultValue = source === null ? method.request.getBodyFields() : source;
+        const value = method.request.getBodyFields();
         return(
             <GraphiQLEditor
                 update={(data) => this.update(data)}
-                defaultQuery={defaultValue.query}
+                query={value.query}
                 readOnly={readOnly}
                 credentials={credentials}
             />
