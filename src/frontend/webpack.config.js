@@ -18,7 +18,48 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
+const fs = require("fs");
+const SETTINGS = require('./settings.json');
 
+function getHttpsSettings(){
+    let https = false;
+    if(SETTINGS.hasOwnProperty('HTTPS')){
+        if(typeof SETTINGS.HTTPS === 'boolean'){
+            https = SETTINGS.HTTPS;
+        } else{
+            https = {};
+            if(SETTINGS.HTTPS.hasOwnProperty('key')){
+                if(fs.existsSync(SETTINGS.HTTPS.key)){
+                    https.key = fs.readFileSync(SETTINGS.HTTPS.key);
+                } else{
+                    console.log('There is no Key file for https connection.')
+                }
+            } else{
+                console.log('There is no Key Parameter for https connection in settings.json file.')
+            }
+            if(SETTINGS.HTTPS.hasOwnProperty('cert')){
+                if(fs.existsSync(SETTINGS.HTTPS.cert)) {
+                    https.cert = fs.readFileSync(SETTINGS.HTTPS.cert);
+                } else{
+                    console.log('There is no Cert file for https connection.')
+                }
+            } else{
+                console.log('There is no Cert Parameter for https connection in settings.json file.')
+            }
+            if(SETTINGS.HTTPS.hasOwnProperty('ca')){
+                if(fs.existsSync(SETTINGS.HTTPS.ca)) {
+                    https.ca = fs.readFileSync(SETTINGS.HTTPS.ca);
+                } else{
+                    console.log('There is no Ca file for https connection.')
+                }
+            }
+            if(!https.hasOwnProperty('key') || !https.hasOwnProperty('cert')){
+                https = false;
+            }
+        }
+    }
+    return https;
+}
 const getConfig = ({isBuild, envVar}) => {
     return {
         entry: ['@babel/polyfill', './src/index.jsx'],
@@ -145,6 +186,7 @@ const getConfig = ({isBuild, envVar}) => {
             liveReload: true,
             historyApiFallback: true,
             allowedHosts: 'all',
+            https: getHttpsSettings(),
         },
         plugins: [
             new HtmlWebpackPlugin({
