@@ -81,7 +81,7 @@ export class Template extends HookStateClass implements ITemplate{
         return this.validateId(this.id);
     }
 
-    getModel(isForApiRequest: boolean = false): ModelTemplate{
+    getModel(): ModelTemplate{
         let mappedTemplate: ModelTemplate = {
             name: this.name,
             description: this.description,

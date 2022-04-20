@@ -38,5 +38,5 @@ export interface ITemplate extends ITemplateForm{
     version?: string;
     connection?: IConnection;
     templateContent?: any;
-    getModel?: (isForApiRequest?: boolean) => ModelTemplate,
+    getModel?: () => ModelTemplate,
 }

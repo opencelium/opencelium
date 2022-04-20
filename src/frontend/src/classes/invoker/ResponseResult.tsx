@@ -59,6 +59,7 @@ export class ResponseResult extends HookStateClass implements IResponseResult{
     getText(data: IInput<IResponseResultText, InputTextProps>):ReactElement{
         return super.getInputText<IResponseResultText, InputTextProps>(data);
     }
+
     getObject(params = {bodyOnlyConvert: false}){
         let obj: any = {
             status: this.status,
