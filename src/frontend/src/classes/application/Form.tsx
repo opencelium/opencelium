@@ -16,10 +16,17 @@
 import {FormDataButtonProps, FormDataProps, IForm} from "@interface/application/IForm";
 import {capitalize} from "../../utils";
 
+// class to work with forms
 export class Form implements IForm{
+
+    // view form (readonly)
     isView?: boolean;
-    isUpdate?: boolean;
+
+    // add form
     isAdd?: boolean;
+
+    // update form
+    isUpdate?: boolean;
 
     constructor(form?: Partial<IForm>) {
         this.isView = form?.isView || false;
@@ -27,6 +34,10 @@ export class Form implements IForm{
         this.isAdd = form?.isAdd || false;
     }
 
+    /**
+     * read FormDataProps to understand what data it returns
+     * @param entityName - name bases on form data
+     */
     getFormData(entityName: string): FormDataProps{
         let formTitle = '';
         let actionButton: FormDataButtonProps = {icon: '', label: ''};

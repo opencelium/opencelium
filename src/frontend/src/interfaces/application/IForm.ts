@@ -22,8 +22,13 @@ export interface FormDataButtonProps{
 }
 
 export interface FormDataProps{
+    // title of the form
     formTitle: string,
+
+    // action(add/update) button data
     actionButton?: FormDataButtonProps,
+
+    // list button data
     listButton?: FormDataButtonProps,
 }
 

@@ -43,11 +43,9 @@ export class UserDetail extends HookStateClass implements IUserDetail{
 
     static reduxState?: UserState;
 
-    @App.required
     @App.inputType
     name: string = '';
 
-    @App.required
     @App.inputType
     surname: string = '';
 

@@ -30,16 +30,19 @@ import {IObservation} from "@interface/application/IApplication";
 import {Console} from "./Console";
 import {IHookState} from "@interface/application/IHookState";
 
-
+// class to work with form's states
 export class HookStateClass implements IHookState {
 
+    // check if input in form is focused
     isFocused: boolean = false;
 
+    // validation messages of the form
     validations: any;
 
+    // set if form is readonly
     _readOnly: boolean;
 
-
+    // property to update the whole entity in inputType annotation in Application class
     @App.inputType
     wholeInstance: any;
 
@@ -49,14 +52,17 @@ export class HookStateClass implements IHookState {
         this.wholeInstance = wholeInstance;
     }
 
+    // read Application.createState class
     static createState<Props>(Instance: any, selector: any, args?: Partial<Props>, observations?: IObservation[]): any {
         Instance.reduxState = useAppSelector(selector);
         const [instance] = App.createState<any>(new Instance(args), useAppDispatch(), observations);
         return instance;
     }
 
+    // to update state of class entity
     updateState?(instance: any): void;
 
+    // to force update of the class entity
     forceUpdate(reference: any){
         const Instance = reference.getClass();
         const newData = new Instance({...reference});
@@ -71,6 +77,7 @@ export class HookStateClass implements IHookState {
         return this.constructor;
     }
 
+    // to validate class extended by HookStateClass before dispatch
     validate(){
         let isValid = true;
         let validationMessages = {};
@@ -107,6 +114,10 @@ export class HookStateClass implements IHookState {
         return isValid;
     }
 
+    /**
+     * returns InputText component linked to class property with inputType annotation
+     * @param data - read IInput
+     */
     getInputText<T, P>(data: IInput<T, P>):ReactElement{
         const updateFunctionName = this.getFunctionName(data.propertyName);
         // @ts-ignore
@@ -125,6 +136,11 @@ export class HookStateClass implements IHookState {
             />
         );
     }
+
+    /**
+     * returns array of InputText components linked to class properties with inputType annotation
+     * @param data - read IInput
+     */
     getInputTexts<T, P>(data: IInput<T, P>[]):ReactNodeArray{
         const inputs = [];
         for(let i = 0; i < data.length; i++){
@@ -134,12 +150,18 @@ export class HookStateClass implements IHookState {
         }
         return inputs;
     }
+
+    /**
+     * returns InputSelect component linked to class property with inputType annotation
+     * @param data - read IInput
+     */
     getInputSelect<T, P>(data: IInput<T, P>):ReactElement{
         const updateFunctionName = this.getFunctionName(data.propertyName);
         // @ts-ignore
         let validationMessage = this.validations[data.propertyName] || '';
         let value = null;
         let props: InputSelectProps = data.props;
+        // check if property value is clear (without label)
         // @ts-ignore
         if(isString(this[data.propertyName]) || isNumber(this[data.propertyName])){
             // @ts-ignore
@@ -161,6 +183,11 @@ export class HookStateClass implements IHookState {
             />
         );
     }
+
+    /**
+     * returns InputRadios component linked to class property with inputType annotation
+     * @param data - read IInput
+     */
     getInputRadios<T, P>(data: IInput<T, P>):ReactElement{
         const updateFunctionName = this.getFunctionName(data.propertyName);
         // @ts-ignore
@@ -182,6 +209,11 @@ export class HookStateClass implements IHookState {
             />
         );
     }
+
+    /**
+     * returns InputFile component linked to class property with inputType annotation
+     * @param data - read IInput
+     */
     getInputFile<T, P>(data: IInput<T, P>):ReactElement{
         const updateFunctionName = this.getFunctionName(data.propertyName);
         // @ts-ignore
@@ -201,7 +233,12 @@ export class HookStateClass implements IHookState {
             />
         );
     }
-    getInputTextarea<T, P>(data: IInput<T, P>):ReactElement{
+
+    /**
+     * returns InputTextarea component linked to class property with inputType annotation
+     * @param data - read IInput
+     */
+    getInputTextarea<T, P>(data: IInput<T, P>): ReactElement{
         const updateFunctionName = this.getFunctionName(data.propertyName);
         // @ts-ignore
         let validationMessage = this.validations[data.propertyName] || '';
@@ -219,7 +256,12 @@ export class HookStateClass implements IHookState {
             />
         );
     }
-    getInputSwitch<T, P>(data: IInput<T, P>):ReactElement{
+
+    /**
+     * returns InputSwitch component linked to class property with inputType annotation
+     * @param data - read IInput
+     */
+    getInputSwitch<T, P>(data: IInput<T, P>): ReactElement{
         const updateFunctionName = this.getFunctionName(data.propertyName);
         // @ts-ignore
         let validationMessage = this.validations[data.propertyName] || '';
@@ -237,10 +279,18 @@ export class HookStateClass implements IHookState {
         );
     }
 
+    /**
+     * return name of the function to update class property with inputType annotation
+     * @param name - name of the property
+     */
     getFunctionName(name: string | number | symbol): string{
         return `update${capitalize(name)}`;
     }
 
+    /**
+     * validate id
+     * @param id
+     */
     validateId(id: number | string): boolean{
         let isIdValid = id !== 0 && id !== '';
         if(!isIdValid){

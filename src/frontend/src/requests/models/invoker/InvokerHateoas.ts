@@ -13,11 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//api description of connection template
-export default interface ModelTemplate{
-    templateId?: string;
-    name: string;
-    description: string;
-    version: string;
-    connection: any;
+import ModelInvoker from "./Invoker";
+
+//api description of getting invokers based on Hateoas constraint
+export default interface ModelInvokerHateoas{
+    _embedded: {
+        invokerResourceList: ModelInvoker[],
+    },
 }

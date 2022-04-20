@@ -16,6 +16,8 @@
 import {AxiosResponse} from "axios";
 import { IUserGroup } from "@interface/usergroup/IUserGroup";
 import {IResponse} from "../application/IResponse";
+import ModelUserGroupHateoas from "@model/user_group/UserGroupHateoas";
+import ModelUserGroup from "@model/user_group/UserGroup";
 
 export interface IUserGroupRequest{
 
@@ -26,16 +28,16 @@ export interface IUserGroupRequest{
     getUserGroupById(): Promise<AxiosResponse<IUserGroup>>,
 
     //to get all user groups of authorized user
-    getAllUserGroups(): Promise<AxiosResponse<IUserGroup[]>>,
+    getAllUserGroups(): Promise<AxiosResponse<ModelUserGroupHateoas | null>>,
 
     //to add user group
-    addUserGroup(userGroup: IUserGroup): Promise<AxiosResponse<IUserGroup>>,
+    addUserGroup(userGroup: ModelUserGroup): Promise<AxiosResponse<ModelUserGroup>>,
 
     /*
     * TODO: check update on the server
     */
     //to update user group
-    updateUserGroup(userGroup: IUserGroup): Promise<AxiosResponse<IUserGroup>>,
+    updateUserGroup(userGroup: ModelUserGroup): Promise<AxiosResponse<ModelUserGroup>>,
 
     //to delete user group by id
     deleteUserGroupById(): Promise<AxiosResponse<IUserGroup>>,

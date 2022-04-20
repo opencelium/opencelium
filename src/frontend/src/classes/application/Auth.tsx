@@ -27,7 +27,7 @@ import {AuthState} from "@slice/application/AuthSlice";
 import {login} from "@action/application/AuthCreators";
 import {useAppSelector} from "../../hooks/redux";
 
-
+// class to login into the application
 export class Auth extends HookStateClass implements IAuth{
     id: number;
 

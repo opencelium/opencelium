@@ -15,6 +15,7 @@
 
 import ModelUserParent from "./UserParent";
 
+//api description of posting/putting user
 export default interface ModelUserPoust extends Partial<ModelUserParent>{
     userGroup: number,
 }

@@ -15,6 +15,7 @@
 
 import ModelConnectorParent from "./ConnectorParent";
 
+//api description of getting connector
 export default interface ModelConnector extends Partial<ModelConnectorParent>{
     invoker: {
         name: string;

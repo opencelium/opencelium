@@ -14,7 +14,6 @@
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {IUserGroup} from "@interface/usergroup/IUserGroup";
 import {
     addUserGroup,
     checkUserGroupName,
@@ -30,9 +29,10 @@ import {IResponse, ResponseMessages} from "@requestInterface/application/IRespon
 import {CommonState} from "../store";
 import {ICommonState} from "@interface/application/core";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@interface/application/IApplication";
+import ModelUserGroup from "@model/user_group/UserGroup";
 
 export interface UserGroupState extends ICommonState{
-    userGroups: IUserGroup[],
+    userGroups: ModelUserGroup[],
     isCurrentUserGroupHasUniqueName: TRIPLET_STATE,
     checkingUserGroupName: API_REQUEST_STATE,
     addingUserGroup: API_REQUEST_STATE,
@@ -43,7 +43,7 @@ export interface UserGroupState extends ICommonState{
     deletingUserGroupsById: API_REQUEST_STATE,
     uploadingUserGroupImage: API_REQUEST_STATE,
     deletingUserGroupImage: API_REQUEST_STATE,
-    currentUserGroup: IUserGroup,
+    currentUserGroup: ModelUserGroup,
 }
 
 const initialState: UserGroupState = {
@@ -80,10 +80,10 @@ export const userGroupSlice = createSlice({
             state.checkingUserGroupName = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [addUserGroup.pending.type]: (state, action: PayloadAction<IUserGroup>) => {
+        [addUserGroup.pending.type]: (state) => {
             state.addingUserGroup = API_REQUEST_STATE.START;
         },
-        [addUserGroup.fulfilled.type]: (state, action: PayloadAction<IUserGroup>) => {
+        [addUserGroup.fulfilled.type]: (state, action: PayloadAction<ModelUserGroup>) => {
             state.addingUserGroup = API_REQUEST_STATE.FINISH;
             state.userGroups.push(action.payload);
             state.error = null;
@@ -98,7 +98,7 @@ export const userGroupSlice = createSlice({
         [updateUserGroup.pending.type]: (state) => {
             state.updatingUserGroup = API_REQUEST_STATE.START;
         },
-        [updateUserGroup.fulfilled.type]: (state, action: PayloadAction<IUserGroup>) => {
+        [updateUserGroup.fulfilled.type]: (state, action: PayloadAction<ModelUserGroup>) => {
             state.updatingUserGroup = API_REQUEST_STATE.FINISH;
             state.userGroups = state.userGroups.map(userGroup => userGroup.groupId === action.payload.groupId ? action.payload : userGroup);
             if(state.currentUserGroup && state.currentUserGroup.groupId === action.payload.groupId){
@@ -119,7 +119,7 @@ export const userGroupSlice = createSlice({
             state.gettingUserGroup = API_REQUEST_STATE.START;
             state.currentUserGroup = null;
         },
-        [getUserGroupById.fulfilled.type]: (state, action: PayloadAction<IUserGroup>) => {
+        [getUserGroupById.fulfilled.type]: (state, action: PayloadAction<ModelUserGroup>) => {
             state.gettingUserGroup = API_REQUEST_STATE.FINISH;
             state.currentUserGroup = action.payload;
             state.error = null;
@@ -134,7 +134,7 @@ export const userGroupSlice = createSlice({
             state.gettingUserGroups = API_REQUEST_STATE.START;
             state.currentUserGroup = null;
         },
-        [getAllUserGroups.fulfilled.type]: (state, action: PayloadAction<IUserGroup[]>) => {
+        [getAllUserGroups.fulfilled.type]: (state, action: PayloadAction<ModelUserGroup[]>) => {
             state.gettingUserGroups = API_REQUEST_STATE.FINISH;
             state.userGroups = action.payload;
             state.error = null;
@@ -176,10 +176,10 @@ export const userGroupSlice = createSlice({
         [uploadUserGroupImage.pending.type]: (state) => {
             state.uploadingUserGroupImage = API_REQUEST_STATE.START;
         },
-        [uploadUserGroupImage.fulfilled.type]: (state, action: PayloadAction<IUserGroup>) => {
+        [uploadUserGroupImage.fulfilled.type]: (state, action: PayloadAction<ModelUserGroup>) => {
             state.uploadingUserGroupImage = API_REQUEST_STATE.FINISH;
             state.userGroups = state.userGroups.map(userGroup => userGroup.groupId === action.payload.groupId ? action.payload : userGroup);
-            if(state.currentUserGroup && state.currentUserGroup.groupId === action.payload.id){
+            if(state.currentUserGroup && state.currentUserGroup.groupId === action.payload.groupId){
                 state.currentUserGroup = action.payload;
             }
             state.error = null;
@@ -191,10 +191,10 @@ export const userGroupSlice = createSlice({
         [deleteUserGroupImage.pending.type]: (state) => {
             state.deletingUserGroupImage = API_REQUEST_STATE.START;
         },
-        [deleteUserGroupImage.fulfilled.type]: (state, action: PayloadAction<IUserGroup>) => {
+        [deleteUserGroupImage.fulfilled.type]: (state, action: PayloadAction<ModelUserGroup>) => {
             state.deletingUserGroupImage = API_REQUEST_STATE.FINISH;
             state.userGroups = state.userGroups.map(userGroup => userGroup.groupId === action.payload.groupId ? action.payload : userGroup);
-            if(state.currentUserGroup && state.currentUserGroup.groupId === action.payload.id){
+            if(state.currentUserGroup && state.currentUserGroup.groupId === action.payload.groupId){
                 state.currentUserGroup = action.payload;
             }
             state.error = null;

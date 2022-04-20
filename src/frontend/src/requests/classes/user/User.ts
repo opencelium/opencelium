@@ -20,6 +20,7 @@ import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
 import ModelUser from "@model/user/User";
 import ModelUserPoust from "@model/user/UserPoust";
+import ModelUserHateoas from "@model/user/UserHateoas";
 
 
 export class UserRequest extends Request implements IUserRequest{
@@ -36,8 +37,8 @@ export class UserRequest extends Request implements IUserRequest{
         return super.get<ModelUser>();
     }
 
-    async getAllUsers(): Promise<AxiosResponse<ModelUser[]>>{
-        return super.get<ModelUser[]>();
+    async getAllUsers(): Promise<AxiosResponse<ModelUserHateoas | null>>{
+        return super.get<ModelUserHateoas | null>();
     }
 
     async addUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>{

@@ -48,21 +48,17 @@ export class Schedule extends HookStateClass implements ISchedule{
 
     static reduxState?: ScheduleState;
 
-    @App.required
     @App.inputType
     title: string = '';
 
-    @App.required
     @App.inputType
     cronExp: string = '';
 
     lastExecution: ILastExecution = null;
 
-    @App.required
     @App.inputType
     connectionSelect: OptionProps;
 
-    @App.required
     @App.inputType
     debugMode: boolean = false;
 

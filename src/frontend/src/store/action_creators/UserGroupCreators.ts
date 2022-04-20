@@ -15,15 +15,16 @@
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {UserGroupRequest} from "@request/user_group/UserGroup";
-import { IUserGroup } from "@interface/usergroup/IUserGroup";
 import {errorHandler} from "../../components/utils";
 import {ResponseMessages} from "@requestInterface/application/IResponse";
+import {IEntityWithImage} from "@requestInterface/application/IRequest";
+import ModelUserGroup from "@model/user_group/UserGroup";
 
 export const checkUserGroupName = createAsyncThunk(
     'user_group/exist/name',
-    async(userGroup: IUserGroup, thunkAPI) => {
+    async(name: string, thunkAPI) => {
         try {
-            const request = new UserGroupRequest({endpoint: `/exists/${userGroup.name}`});
+            const request = new UserGroupRequest({endpoint: `/exists/${name}`});
             const response = await request.checkUserGroupName();
             return response.data;
         } catch(e){
@@ -34,23 +35,23 @@ export const checkUserGroupName = createAsyncThunk(
 
 export const addUserGroup = createAsyncThunk(
     'user_group/add',
-    async(userGroup: IUserGroup, thunkAPI) => {
+    async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelUserGroup>, thunkAPI) => {
         try {
-            const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${userGroup.name}`});
+            const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${entityData.name}`});
             const responseNameRequest = await checkNameRequest.checkUserGroupName();
             if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
             }
             const addUserGroupRequest = new UserGroupRequest();
-            const response = await addUserGroupRequest.addUserGroup(userGroup);
-            if(userGroup.iconFile){
+            const response = await addUserGroupRequest.addUserGroup(entityData);
+            if(iconFile){
                 let data: FormData = new FormData();
-                data.append('userGroupId', userGroup.id.toString());
-                data.append('file', userGroup.icon[0]);
+                data.append('userGroupId', entityData.groupId.toString());
+                data.append('file', iconFile[0]);
                 const uploadIconRequest = new UserGroupRequest({isFormData: true});
                 await uploadIconRequest.uploadUserGroupImage(data);
-            } else if(userGroup.shouldDeleteIcon){
-                const deleteIconRequest = new UserGroupRequest({endpoint: `/${userGroup.id}/icon`});
+            } else if(shouldDeleteIcon){
+                const deleteIconRequest = new UserGroupRequest({endpoint: `/${entityData.groupId}/icon`});
                 await deleteIconRequest.deleteUserGroupImage();
             }
             return response.data;
@@ -62,27 +63,27 @@ export const addUserGroup = createAsyncThunk(
 
 export const updateUserGroup = createAsyncThunk(
     'user_group/update',
-    async(userGroup: IUserGroup, thunkAPI) => {
+    async({entityData, iconFile, shouldDeleteIcon} : IEntityWithImage<ModelUserGroup>, thunkAPI) => {
         try {
             // @ts-ignore
             const userGroupState = thunkAPI.getState().userGroupReducer;
-            if(userGroupState.currentUserGroup.name !== userGroup.name) {
-                const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${userGroup.name}`});
+            if(userGroupState.currentUserGroup.name !== entityData.name) {
+                const checkNameRequest = new UserGroupRequest({endpoint: `/exists/${entityData.name}`});
                 const responseNameRequest = await checkNameRequest.checkUserGroupName();
                 if (responseNameRequest.data.message === ResponseMessages.EXISTS) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
                 }
             }
-            const updateUserGroupRequest = new UserGroupRequest({endpoint: `/${userGroup.id}`});
-            const response = await updateUserGroupRequest.updateUserGroup(userGroup);
-            if(userGroup.iconFile){
+            const updateUserGroupRequest = new UserGroupRequest({endpoint: `/${entityData.groupId}`});
+            const response = await updateUserGroupRequest.updateUserGroup(entityData);
+            if(iconFile){
                 let data: FormData = new FormData();
-                data.append('userGroupId', userGroup.id.toString());
-                data.append('file', userGroup.icon[0]);
+                data.append('userGroupId', entityData.groupId.toString());
+                data.append('file', iconFile[0]);
                 const uploadIconRequest = new UserGroupRequest({isFormData: true});
                 await uploadIconRequest.uploadUserGroupImage(data);
-            } else if(userGroup.shouldDeleteIcon){
-                const deleteIconRequest = new UserGroupRequest({endpoint: `/${userGroup.id}/icon`});
+            } else if(shouldDeleteIcon){
+                const deleteIconRequest = new UserGroupRequest({endpoint: `/${entityData.groupId}/icon`});
                 await deleteIconRequest.deleteUserGroupImage();
             }
             return response.data;
@@ -111,7 +112,6 @@ export const getAllUserGroups = createAsyncThunk(
         try {
             const request = new UserGroupRequest({endpoint: `/all`});
             const response = await request.getAllUserGroups();
-            // @ts-ignore
             return response.data._embedded?.userRoleResourceList || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -147,10 +147,10 @@ export const deleteUserGroupsById = createAsyncThunk(
 
 export const uploadUserGroupImage = createAsyncThunk(
     'user_group/upload/image',
-    async(userGroup: IUserGroup, thunkAPI) => {
+    async(userGroup: ModelUserGroup, thunkAPI) => {
         try{
             let data: FormData = new FormData();
-            data.append('userGroupId', userGroup.id.toString());
+            data.append('userGroupId', userGroup.groupId.toString());
             data.append('file', userGroup.icon[0]);
             const request = new UserGroupRequest({isFormData: true});
             await request.uploadUserGroupImage(data);
@@ -163,9 +163,9 @@ export const uploadUserGroupImage = createAsyncThunk(
 
 export const deleteUserGroupImage = createAsyncThunk(
     'user_group/delete/image',
-    async(userGroup: IUserGroup, thunkAPI) => {
+    async(userGroup: ModelUserGroup, thunkAPI) => {
         try {
-            const request = new UserGroupRequest({endpoint: `/${userGroup.id}/icon`});
+            const request = new UserGroupRequest({endpoint: `/${userGroup.groupId}/icon`});
             await request.deleteUserGroupImage();
             return userGroup;
         } catch(e){

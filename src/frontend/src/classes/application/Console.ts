@@ -13,20 +13,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {Application} from "@class/application/Application";
+
+// class to print debugging data
 export class Console{
 
     constructor() {
     }
 
+    /**
+     * print data in debug mode
+     * @param info
+     */
     static print(info: string | number | object | Array<any>): void{
-        if(typeof(info) === 'string' || typeof(info) === 'number'){
-            console.log(info);
-        } else if(Array.isArray(info)){
-            console.table(info);
-        } else if(info && typeof info === 'object' && info.constructor === Object){
-            console.table(info);
-        } else{
-            console.table(info);
+        if(Application.isDebugging) {
+            if (typeof (info) === 'string' || typeof (info) === 'number') {
+                console.log(info);
+            } else if (Array.isArray(info)) {
+                console.table(info);
+            } else if (info && typeof info === 'object' && info.constructor === Object) {
+                console.table(info);
+            } else {
+                console.table(info);
+            }
         }
     }
 

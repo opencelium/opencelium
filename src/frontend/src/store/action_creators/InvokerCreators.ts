@@ -51,9 +51,9 @@ export const updateOperation = createAsyncThunk(
 
 export const checkInvokerName = createAsyncThunk(
     'invoker/exist/name',
-    async(invoker: IInvoker, thunkAPI) => {
+    async(name: string, thunkAPI) => {
         try {
-            const request = new InvokerRequest({endpoint: `/exists/${invoker.name}`});
+            const request = new InvokerRequest({endpoint: `/exists/${name}`});
             const response = await request.checkInvokerTitle();
             return response.data;
         } catch(e){
@@ -141,7 +141,6 @@ export const getAllInvokers = createAsyncThunk(
         try {
             const request = new InvokerRequest({endpoint: `/all`});
             const response = await request.getAllInvokers();
-            // @ts-ignore
             return response.data._embedded?.invokerResourceList || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

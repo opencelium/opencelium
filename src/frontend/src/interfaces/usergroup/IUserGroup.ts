@@ -21,6 +21,8 @@ import {
 } from "@molecule/form_section/permissions/interfaces";
 import {UserGroupState} from "@slice/UserGroupSlice";
 import {OptionProps} from "@atom/input/select/interfaces";
+import ModelUserPoust from "@model/user/UserPoust";
+import ModelUserGroup from "@model/user_group/UserGroup";
 
 
 export interface IUserGroupFile{
@@ -55,4 +57,5 @@ export interface IUserGroup extends IUserGroupForm{
     getPermissionComponent: (props?: PermissionsProps) => {},
     shouldDeleteIcon?: boolean,
     icon?: string,
+    getPoustModel?: () => ModelUserGroup,
 }

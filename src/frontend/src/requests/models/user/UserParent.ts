@@ -15,6 +15,7 @@
 
 import ModelUserDetail from "./UserDetail";
 
+//api description of user
 export default interface ModelUserParent{
     userId?: number;
     email: string;

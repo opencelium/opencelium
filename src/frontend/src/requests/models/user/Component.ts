@@ -20,8 +20,9 @@ export enum PermissionTypes {
     DELETE= 'DELETE',
 }
 
+//api description of component
 export default interface ModelComponent {
     componentId: number;
-    name: string;
+    name?: string;
     permissions: PermissionTypes[];
 }

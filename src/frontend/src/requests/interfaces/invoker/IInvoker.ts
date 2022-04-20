@@ -17,6 +17,7 @@ import {AxiosResponse} from "axios";
 import { IInvoker } from "@interface/invoker/IInvoker";
 import {IResponse} from "../application/IResponse";
 import {IOperation} from "@interface/invoker/IOperation";
+import ModelInvokerHateoas from "@model/invoker/InvokerHateoas";
 
 interface FieldProps{
     name: string,
@@ -45,7 +46,7 @@ export interface IInvokerRequest{
     getInvokerByName(): Promise<AxiosResponse<IInvoker>>,
 
     //to get all invokers of authorized user
-    getAllInvokers(): Promise<AxiosResponse<IInvoker[]>>,
+    getAllInvokers(): Promise<AxiosResponse<ModelInvokerHateoas | null>>,
 
     //to add invoker
     addInvoker(invoker: IInvoker): Promise<AxiosResponse<IInvoker>>,

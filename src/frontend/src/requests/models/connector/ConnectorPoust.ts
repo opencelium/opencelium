@@ -15,6 +15,7 @@
 
 import ModelConnector from "./ConnectorParent";
 
+//api description of posting/putting connector
 export default interface ModelConnectorPoust extends Partial<ModelConnector>{
     invoker: {
         name: string;

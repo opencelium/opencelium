@@ -24,6 +24,7 @@ import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
 import ModelSchedule from "@model/schedule/Schedule";
 import ModelCurrentSchedule from "@model/schedule/CurrentSchedule";
+import ModelScheduleHateoas from "@model/schedule/ScheduleHateoas";
 
 
 export class ScheduleRequest extends Request implements IScheduleRequest{
@@ -67,8 +68,8 @@ export class ScheduleRequest extends Request implements IScheduleRequest{
         return super.post<ModelSchedule[]>(data);
     }
 
-    async getAllSchedules(): Promise<AxiosResponse<ModelSchedule[]>>{
-        return super.get<ModelSchedule[]>();
+    async getAllSchedules(): Promise<AxiosResponse<ModelScheduleHateoas | null>>{
+        return super.get<ModelScheduleHateoas | null>();
     }
 
     async getCurrentSchedules(): Promise<AxiosResponse<ModelCurrentSchedule[]>>{

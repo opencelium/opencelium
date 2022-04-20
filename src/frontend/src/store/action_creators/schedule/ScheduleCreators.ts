@@ -132,7 +132,6 @@ export const getAllSchedules = createAsyncThunk(
         try {
             const request = new ScheduleRequest({endpoint: `/all`});
             const response = await request.getAllSchedules();
-            // @ts-ignore
             return response.data._embedded?.schedulerResourceList || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

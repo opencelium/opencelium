@@ -17,6 +17,7 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "../application/IResponse";
 import ModelSchedule from "@model/schedule/Schedule";
 import ModelCurrentSchedule from "@model/schedule/CurrentSchedule";
+import ModelScheduleHateoas from "@model/schedule/ScheduleHateoas";
 
 
 export interface ScheduleStatusRequestProps{
@@ -57,7 +58,7 @@ export interface IScheduleRequest{
     getSchedulesById(data: SchedulesIdRequestProps): Promise<AxiosResponse<ModelSchedule[]>>,
 
     //to get all schedules of authorized user
-    getAllSchedules(): Promise<AxiosResponse<ModelSchedule[]>>,
+    getAllSchedules(): Promise<AxiosResponse<ModelScheduleHateoas | null>>,
 
     //to get schedules of authorized user that currently working on
     getCurrentSchedules(): Promise<AxiosResponse<ModelCurrentSchedule[]>>,

@@ -25,22 +25,40 @@ import {useAppSelector} from "../../hooks/redux";
 import {isString} from "../../components/utils";
 import {baseUrl} from "@request/application/url";
 
-
+// Application class for managing core internal operations
 export class Application{
+
+    // turn on/off debugging mode
     static isDebugging = false;
+
+    // check if url is not part of opencelium
     static isExternalUrl(url: string){
         return url.indexOf(baseUrl) === 0;
     }
-    static getReduxState(){
-        return useAppSelector((state: RootState) => state.applicationReducer);
-    }
+
+    // check if image's url has valid format
     static isValidImageUrl(url: string){
         return isString(url) && url !== '' && url.indexOf('/null') === -1;
     }
+
+    // returns redux state of Application
+    static getReduxState(){
+        return useAppSelector((state: RootState) => state.applicationReducer);
+    }
+
+    /*
+    * TODO: remove dispatch property and test all forms
+    */
+    /**
+     * create react state basing on inputType annotation
+     * @param instance - class which used to be stated
+     * @param dispatch - set application dispatcher (probably should be removed)
+     * @param observations - array of dependencies to refresh the state
+     */
     static createState<Type extends HookStateClass>(instance: Type, dispatch?: AppDispatch, observations?: IObservation[]): [Type, any]{
         const [entity, setEntity] = useState(instance)
         entity.updateState = (data: any) => {
-            this.isDebugging && Console.print(data);
+            Console.print(data);
             setEntity(data)
         };
         if(dispatch){
@@ -64,38 +82,14 @@ export class Application{
         return [entity, setEntity];
     }
 
-    static createSelector<Type extends HookStateClass>(selectorFunction: any, dispatch: any): Type{
-        const selector = useSelector(selectorFunction);
-        // @ts-ignore
-        selector.dispatch = dispatch;
-        // @ts-ignore
-        return selector;
-    }
-
+    // update inputTyped child's property via dependencies
     static inputTypeWithDependencies(dependencies: string[]) {
         return function (target: any, propertyKey: string) {
             Application.inputType(target, propertyKey, dependencies);
         }
     }
 
-    static required(target: any, propertyKey: string) {
-        if(propertyKey) {
-            const descriptor = {
-                value: (reference: any, newValue: any) => {
-                    const Instance = reference.getClass();
-                    let validations = {...reference.validations, ...newValue};
-                    const newData = new Instance({...reference, validations});
-                    if (typeof reference.updateState === 'function') {
-                        reference.updateState(newData);
-                    }
-                }
-            };
-            if(typeof target[`${propertyKey}ValidationMessageRequired`] === 'undefined'){
-                Object.defineProperty(target, `${propertyKey}ValidationMessageRequired`, descriptor);
-            }
-        }
-    }
-
+    // annotation to child's property to assign it as a react state
     static inputType(target: any, propertyKey: string, dependencies?: string[]) {
         if(propertyKey) {
             const descriptor = {
@@ -123,6 +117,11 @@ export class Application{
         }
     }
 
+    /**
+     * annotation to dispatch (redux) the child's method
+     * @param action - action for dispatching
+     * @param params - read DispatchParamsProps comments
+     */
     static dispatch<T>(action: AsyncThunk<unknown, unknown, unknown>, params?: DispatchParamsProps<T>){
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
             const originalMethod = descriptor.value;

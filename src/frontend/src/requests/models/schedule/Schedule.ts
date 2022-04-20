@@ -15,6 +15,7 @@
 
 import ModelWebhook from "./Webhook";
 
+//api description of schedule
 export default interface ModelSchedule{
     cronExp: string;
     debugMode: boolean;

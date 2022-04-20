@@ -140,7 +140,6 @@ export const getAllConnectors = createAsyncThunk(
         try {
             const request = new ConnectorRequest({endpoint: `/all`});
             const response = await request.getAllConnectors();
-            // @ts-ignore
             return response.data._embedded?.connectorResourceList || [];
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

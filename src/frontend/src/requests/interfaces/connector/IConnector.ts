@@ -17,6 +17,7 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "../application/IResponse";
 import ModelConnectorPoust from "@model/connector/ConnectorPoust";
 import ModelConnector from "@model/connector/Connector";
+import ModelConnectorHateoas from "@model/connector/ConnectorHateoas";
 
 export interface IConnectorRequest{
     //to test validity of request data
@@ -29,7 +30,7 @@ export interface IConnectorRequest{
     getConnectorById(): Promise<AxiosResponse<ModelConnector>>,
 
     //to get all connectors of authorized user
-    getAllConnectors(): Promise<AxiosResponse<ModelConnector[]>>,
+    getAllConnectors(): Promise<AxiosResponse<ModelConnectorHateoas | null>>,
 
     //to add connector
     addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>,

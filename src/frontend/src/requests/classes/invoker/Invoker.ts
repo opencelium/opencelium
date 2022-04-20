@@ -20,6 +20,7 @@ import {IInvokerRequest, UpdateMethodProps} from "../../interfaces/invoker/IInvo
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
 import {IOperation} from "@interface/invoker/IOperation";
+import ModelInvokerHateoas from "@model/invoker/InvokerHateoas";
 
 
 export class InvokerRequest extends Request implements IInvokerRequest{
@@ -45,8 +46,8 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         return super.get<IInvoker>();
     }
 
-    async getAllInvokers(): Promise<AxiosResponse<IInvoker[]>>{
-        return super.get<IInvoker[]>();
+    async getAllInvokers(): Promise<AxiosResponse<ModelInvokerHateoas | null>>{
+        return super.get<ModelInvokerHateoas | null>();
     }
 
     async addInvoker(invoker: IInvoker): Promise<AxiosResponse<IInvoker>>{

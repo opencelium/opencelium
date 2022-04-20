@@ -32,6 +32,12 @@ import {Permissions} from "@molecule/form_section/permissions/Permissions";
 import {UserGroupState} from "@slice/UserGroupSlice";
 import {addUserGroup, deleteUserGroupById, getUserGroupById, updateUserGroup} from "@action/UserGroupCreators";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux";
+import ModelUserGroup from "@model/user_group/UserGroup";
+import ModelComponent from "@model/user/Component";
+import {addUser} from "@action/UserCreators";
+import {IUser} from "@interface/user/IUser";
+import {IEntityWithImage} from "@requestInterface/application/IRequest";
+import ModelUserPoust from "@model/user/UserPoust";
 
 
 export class UserGroup extends HookStateClass implements IUserGroup{
@@ -220,12 +226,12 @@ export class UserGroup extends HookStateClass implements IUserGroup{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(addUserGroup)
+    @App.dispatch(addUserGroup, {mapping: (userGroup: IUserGroup):IEntityWithImage<ModelUserGroup> => { return {entityData: userGroup.getPoustModel(), iconFile: userGroup.iconFile, shouldDeleteIcon: false};}})
     add(): boolean{
         return this.validateAdd();
     }
 
-    @App.dispatch(updateUserGroup)
+    @App.dispatch(updateUserGroup, {mapping: (userGroup: IUserGroup):IEntityWithImage<ModelUserGroup> => { return {entityData: userGroup.getPoustModel(), iconFile: userGroup.iconFile, shouldDeleteIcon: false};}})
     update(): boolean{
         return this.validateId(this.id) && this.validateAdd();
     }
@@ -233,5 +239,20 @@ export class UserGroup extends HookStateClass implements IUserGroup{
     @App.dispatch<IUserGroup>(deleteUserGroupById, {mapping: (userGroup: IUserGroup) => {return userGroup.id;}, hasNoValidation: true})
     deleteById(): boolean{
         return true;
+    }
+
+    getPoustModel(): ModelUserGroup{
+        let mappedUserGroup: ModelUserGroup = {
+            name: this.name,
+            description: this.description,
+            components: this.componentsSelect.map((component):ModelComponent => {return {componentId: parseInt(component.value.toString()), permissions: this.permissions[component.label]}}),
+        };
+        if(this.id !== 0){
+            return {
+                groupId: this.id,
+                ...mappedUserGroup,
+            }
+        }
+        return mappedUserGroup;
     }
 }

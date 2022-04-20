@@ -18,6 +18,8 @@ export enum UserTitle{
     MRS= 'mrs',
     NOT_SET= '',
 }
+
+//api description of user detail
 export default interface ModelUserDetail{
     appTour?: boolean;
     bitbucketPassword?: string;

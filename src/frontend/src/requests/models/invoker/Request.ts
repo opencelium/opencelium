@@ -21,6 +21,7 @@ export enum REQUEST_METHOD{
     PUT = 'PUT',
     DELETE = 'DELETE',
 }
+
 export default interface ModelRequest{
     body: ModelBody;
     endpoint: string;

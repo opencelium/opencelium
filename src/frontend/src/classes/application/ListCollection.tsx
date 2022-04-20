@@ -25,18 +25,43 @@ import {ViewType} from "@organism/collection_view/CollectionView";
 import {AppDispatch} from "@store/store";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
 
+// parent class represents collection of entities
 class ListCollection implements IListCollection{
+
+    // to dispatch actions in collection (like delete by id)
     dispatch?: AppDispatch;
+
+    // state of deleting entity
     deletingEntitiesState?: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
+
+    // state of uploading image
     uploadingImage?: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
+
+    // title of collection
     title?: string | MultipleTitleProps[] | React.ReactNode;
+
+    // name of the property that represents key during collection rendering
     keyPropName: string;
+
+    // props of list view
     listProps: ListProp[] = [];
+
+    // props of grid view
     gridProps: ListCollectionCardProps;
+
+    // name of the properties that should be sorted
     sortingProps: string[] = [];
+
+    // translations of the listProps
     translations: any;
+
+    // action to upload image
     uploadImage: any = false;
+
+    // returns actions that located on the top of collection
     getTopActions?: (viewType?: ViewType, checkedIds?: number[]) => React.ReactNode = () => {return null;};
+
+    // returns actions for grid view for each entity
     getGridActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         const hasDeleteButton = !this.isCurrentItem(entity);
         return (
@@ -47,6 +72,8 @@ class ListCollection implements IListCollection{
             </React.Fragment>
         );
     };
+
+    //returns actions for list view for each entity
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         const hasDeleteButton = !this.isCurrentItem(entity);
         return (
@@ -57,14 +84,32 @@ class ListCollection implements IListCollection{
             </React.Fragment>
         );
     };
+
+    // all entities
     entities: any[] = [];
+
+    // on/off actions of entity
     hasActions?: boolean;
+
+    // on/off checkboxes of collection
     hasCheckboxes?: boolean;
+
+    // on/off search input of collection
     hasSearch?: boolean;
+
+    // filtered entities by search name
     filteredEntities?: any[] = [];
+
+    // check if entity has link to navigate
     hasCardLink?: boolean = false;
+
+    // check if entity's link is external
     isCardLinkExternal?: boolean = false;
+
+    // currentItem (exceptions like auth user for users collection)
     currentItem?: any;
+
+    // check if entity is a current item
     isCurrentItem?: (entity: any) => boolean = (entity) => {return false;};
 
     constructor(data?: IListCollection) {
@@ -73,11 +118,29 @@ class ListCollection implements IListCollection{
         this.hasSearch = data && data.hasOwnProperty('hasSearch') ? data.hasSearch : true;
     }
 
-    search(element: any, searchValue: string): boolean{
+    /**
+     * search in collection
+     * @param entity
+     * @param searchValue
+     */
+    search(entity: any, searchValue: string): boolean{
         return true;
     }
+
+    /**
+     * sort collection
+     * @param sortingProp - class property name
+     * @param sortingType - check SortType
+     */
     sort(sortingProp: string, sortingType: SortType): void{
     }
+
+    /**
+     * get filtered by search value and page entities
+     * @param searchValue
+     * @param page - page number
+     * @param entitiesPerPage
+     */
     getEntitiesByPage(searchValue: string, page: number, entitiesPerPage: number): any[]{
         let filteredEntities = this.entities.filter(visibleEntity => this.search(visibleEntity, searchValue));
         this.filteredEntities = filteredEntities;
@@ -92,6 +155,12 @@ class ListCollection implements IListCollection{
         }
         return newEntities;
     }
+
+    /**
+     * ascending sort
+     * @param a
+     * @param b
+     */
     asc(a: string | number, b: string | number): number{
         let result = 0
         if(a < b){
@@ -102,6 +171,12 @@ class ListCollection implements IListCollection{
         }
         return result;
     }
+
+    /**
+     * descending sort
+     * @param a
+     * @param b
+     */
     desc(a: string | number, b: string | number): number{
         let result = 0
         if(a > b){

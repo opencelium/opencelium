@@ -15,10 +15,16 @@
 
 import {IAdminCard} from "@interface/application/IAdminCard";
 
+// Admin Card class
 export class AdminCard implements IAdminCard{
+
     id: number;
+
     name: string = '';
+
+    // to open admin card via link
     link: string = '';
+
     permission?: string = '';
 
     constructor(adminCard?: IAdminCard) {

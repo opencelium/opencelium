@@ -23,7 +23,11 @@ export interface IObservation{
 }
 
 export interface DispatchParamsProps<T>{
+
+    // on/off validation before dispatching
     hasNoValidation?: boolean,
+
+    // map entity before dispatching
     mapping?: (entity: T) => any,
 }
 enum TRIPLET_STATE{

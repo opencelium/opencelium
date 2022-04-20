@@ -13,11 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//api description of connection template
-export default interface ModelTemplate{
-    templateId?: string;
-    name: string;
-    description: string;
-    version: string;
-    connection: any;
+import ModelSchedule from "./Schedule";
+
+//api description of getting schedules based on Hateoas constraint
+export default interface ModelScheduleHateoas{
+    _embedded: {
+        schedulerResourceList: ModelSchedule[],
+    },
 }

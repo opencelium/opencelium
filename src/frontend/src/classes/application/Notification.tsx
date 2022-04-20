@@ -14,7 +14,7 @@
  */
 
 import React from "react";
-import {INotification, NotificationType} from "@interface/application/INotification";
+import {INotification, MessageDataProps, NotificationType} from "@interface/application/INotification";
 import {ColorTheme} from "../../components/general/Theme";
 import {TypeIconStyled, WarningIconStyled} from "@molecule/notification/styles";
 import FulfilledInterpolations from "@translations/interpolations";
@@ -26,13 +26,22 @@ import {NavigateFunction} from "react-router";
 import {login} from "@action/application/AuthCreators";
 import {ResponseMessages} from "@requestInterface/application/IResponse";
 
+// class for application's notification
 export class CNotification implements INotification{
+
     id: string | number;
+
     title?: string = 'OC';
+
     createdTime: string;
+
+    // type of the redux action
     actionType: string;
+
     type: NotificationType;
+
     params?: any = null;
+
     static MAX_NOTIFICATION_MESSAGE_LENGTH = 250;
 
     constructor(notification: Partial<INotification>) {
@@ -44,6 +53,7 @@ export class CNotification implements INotification{
         this.params = notification?.params || null;
     }
 
+    // returns notification when application got access denied
     static getAccessDeniedMessage(message?: string): INotification{
         const date = new Date();
         return {
@@ -56,8 +66,14 @@ export class CNotification implements INotification{
         };
     }
 
-    getMessageData(onClick?: any, dispatch?: AppDispatch, navigate?: NavigateFunction){
-        let messageData: {message: any, length: number, dialogMessage?: any} = {message: '', length: 0};
+    /**
+     * generates message for notification
+     * @param onClick - on click action for long messages
+     * @param dispatch - dispatcher for redux actions
+     * @param navigate - redux hook
+     */
+    getMessageData(onClick?: any, dispatch?: AppDispatch, navigate?: NavigateFunction): MessageDataProps{
+        let messageData: MessageDataProps = {message: '', length: 0};
         let interpolations: any = {};
         for(let param in FulfilledInterpolations){
             // @ts-ignore
@@ -92,6 +108,7 @@ export class CNotification implements INotification{
         return messageData;
     }
 
+    // returns icon component for notification
     getTypeIcon(){
         let tooltip = '';
         let value = '';

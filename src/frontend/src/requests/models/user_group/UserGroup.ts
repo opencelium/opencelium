@@ -15,11 +15,11 @@
 
 import ModelComponent from "@model/user/Component";
 
-
+//api description of user group
 export default interface ModelUserGroup{
     components: ModelComponent[],
     description: string;
-    groupId: number;
-    icon: string | null;
+    groupId?: number;
+    icon?: string | null;
     name: string;
 }

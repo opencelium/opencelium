@@ -15,6 +15,7 @@
 
 import ModelSchedule from "./Schedule";
 
+//api description of schedule
 export default interface Schedules extends ModelSchedule{
     connection: {
         connectionId: number;

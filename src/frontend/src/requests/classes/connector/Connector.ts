@@ -20,6 +20,7 @@ import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
 import ModelConnectorPoust from "@model/connector/ConnectorPoust";
 import ModelConnector from "@model/connector/Connector";
+import ModelConnectorHateoas from "@model/connector/ConnectorHateoas";
 
 
 export class ConnectorRequest extends Request implements IConnectorRequest{
@@ -40,8 +41,8 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         return super.get<ModelConnector>();
     }
 
-    async getAllConnectors(): Promise<AxiosResponse<ModelConnector[]>>{
-        return super.get<ModelConnector[]>();
+    async getAllConnectors(): Promise<AxiosResponse<ModelConnectorHateoas | null>>{
+        return super.get<ModelConnectorHateoas | null>();
     }
 
     async addConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>{

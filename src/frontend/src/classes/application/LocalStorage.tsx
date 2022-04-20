@@ -16,11 +16,21 @@
 import SecureLS from 'secure-ls';
 import {ILocalStorage} from "@interface/application/ILocalStorage";
 
+// class for manipulation local storage
 export class LocalStorage implements ILocalStorage{
+
+    // encrypted local storage
     private static cryptStorage: SecureLS;
+
+    // opened local storage
     private static storage: any;
+
+    // local storage
     private static instance: LocalStorage;
+
+    // check if encrypted should be used or not
     isSecured: boolean;
+
     private constructor() {}
 
     static getStorage(isSecured = false): LocalStorage{

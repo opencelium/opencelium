@@ -19,6 +19,8 @@ import {IUserGroup} from "@interface/usergroup/IUserGroup";
 import {IUserGroupRequest} from "../../interfaces/user_group/IUserGroup";
 import {IRequestSettings} from "../../interfaces/application/IRequest";
 import {IResponse} from "../../interfaces/application/IResponse";
+import ModelUserGroupHateoas from "@model/user_group/UserGroupHateoas";
+import ModelUserGroup from "@model/user_group/UserGroup";
 
 
 export class UserGroupRequest extends Request implements IUserGroupRequest{
@@ -35,16 +37,16 @@ export class UserGroupRequest extends Request implements IUserGroupRequest{
         return super.get<IUserGroup>();
     }
 
-    async getAllUserGroups(): Promise<AxiosResponse<IUserGroup[]>>{
-        return super.get<IUserGroup[]>();
+    async getAllUserGroups(): Promise<AxiosResponse<ModelUserGroupHateoas | null>>{
+        return super.get<ModelUserGroupHateoas | null>();
     }
 
-    async addUserGroup(userGroup: IUserGroup): Promise<AxiosResponse<IUserGroup>>{
-        return super.post<IUserGroup>(this.backendMap(userGroup));
+    async addUserGroup(userGroup: ModelUserGroup): Promise<AxiosResponse<ModelUserGroup>>{
+        return super.post<IUserGroup>(userGroup);
     }
 
-    async updateUserGroup(userGroup: IUserGroup): Promise<AxiosResponse<IUserGroup>>{
-        return super.put<IUserGroup>(this.backendMap(userGroup));
+    async updateUserGroup(userGroup: ModelUserGroup): Promise<AxiosResponse<ModelUserGroup>>{
+        return super.put<ModelUserGroup>(userGroup);
     }
 
     async deleteUserGroupById(): Promise<AxiosResponse<IUserGroup>>{
@@ -62,20 +64,5 @@ export class UserGroupRequest extends Request implements IUserGroupRequest{
 
     async deleteUserGroupImage(): Promise<AxiosResponse<IUserGroup>>{
         return super.delete<IUserGroup>();
-    }
-
-    backendMap(userGroup: IUserGroup){
-        let mappedUserGroup = {
-            name: userGroup.name,
-            description: userGroup.description,
-            components: userGroup.componentsSelect.map(component => {return {componentId: component.value, permissions: userGroup.permissions[component.label]}}),
-        };
-        if(userGroup.id !== 0){
-            return {
-                id: userGroup.id,
-                ...mappedUserGroup,
-            }
-        }
-        return mappedUserGroup;
     }
 }

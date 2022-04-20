@@ -16,6 +16,7 @@
 import ModelUserGroup from "@model/user_group/UserGroup";
 import ModelUserParent from "./UserParent";
 
+//api description of getting user
 export default interface ModelUser extends Partial<ModelUserParent>{
     userGroup: ModelUserGroup,
 }

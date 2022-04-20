@@ -250,7 +250,7 @@ export class Invoker extends HookStateClass implements IInvoker{
         return this.validateId(this.id) && this.validateIcon();
     }
 
-    @App.dispatch(checkInvokerName, {hasNoValidation: true})
+    @App.dispatch(checkInvokerName, {mapping: (invoker: IInvoker) => {return invoker.name}, hasNoValidation: true})
     checkName(): boolean{
         return this.validateName();
     }

@@ -17,6 +17,7 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "../application/IResponse";
 import ModelUser from "@model/user/User";
 import ModelUserPoust from "@model/user/UserPoust";
+import ModelUserHateoas from "@model/user/UserHateoas";
 
 export interface IUserRequest{
 
@@ -27,7 +28,7 @@ export interface IUserRequest{
     getUserById(): Promise<AxiosResponse<ModelUser>>,
 
     //to get all users of authorized user
-    getAllUsers(): Promise<AxiosResponse<ModelUser[]>>,
+    getAllUsers(): Promise<AxiosResponse<ModelUserHateoas | null>>,
 
     //to add user
     addUser(user: ModelUserPoust): Promise<AxiosResponse<ModelUser>>,

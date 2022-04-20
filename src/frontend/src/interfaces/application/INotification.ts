@@ -38,8 +38,15 @@ interface INotification{
     getTypeIcon?: () => ReactNode,
 }
 
+interface MessageDataProps{
+    message: any,
+    length: number,
+    dialogMessage?: any,
+}
+
 
 export {
     NotificationType,
     INotification,
+    MessageDataProps,
 }

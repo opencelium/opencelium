@@ -22,8 +22,12 @@ import {InputFileProps} from "@atom/input/file/interfaces";
 import {InputTextareaProps} from "@atom/input/textarea/interfaces";
 import {InputSwitchProps} from "@atom/input/switch/interfaces";
 
+// properties of HookStateClass methods that returns components
 export interface IInput<T, P>{
+    // name of the class property
     propertyName: TextVariableType<T>,
+
+    // properties of the component that will be returned
     props?: P | undefined,
 }
 

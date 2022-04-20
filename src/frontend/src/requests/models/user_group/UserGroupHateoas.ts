@@ -13,19 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class Validation{
+import ModelUserGroup from "./UserGroup";
 
-    static cannotBeEmpty(callback: any){
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-            const originalMethod = descriptor.value;
-            descriptor.value = function () {
-                if(arguments[0] !== ''){
-                    originalMethod.apply(this, arguments);
-                } else{
-                    callback('Cannot be empty');
-                }
-            };
-            return descriptor;
-        };
-    }
+//api description of getting user groups based on Hateoas constraint
+export default interface ModelUserGroupHateoas{
+    _embedded: {
+        userRoleResourceList: ModelUserGroup[],
+    },
 }

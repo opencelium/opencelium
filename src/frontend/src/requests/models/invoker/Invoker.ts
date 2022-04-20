@@ -15,6 +15,7 @@
 
 import ModelOperation from "./Operation";
 
+//api description of invoker
 export default interface ModelInvoker{
     authType: string;
     description: string;

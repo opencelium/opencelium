@@ -58,7 +58,10 @@ interface CheckProps{
 }
 
 enum SortType{
+    //ascending sort
     asc,
+
+    //descending sort
     desc
 };
 

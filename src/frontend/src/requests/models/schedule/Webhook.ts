@@ -13,6 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+//api description of webhook
 export default interface ModelWebhook{
     webhookId?: number;
     url: string;
