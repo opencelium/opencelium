@@ -1591,6 +1591,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@^7.17.2":
+  version "7.17.9"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.17.9.tgz#d19fbf802d01a8cb6cf053a64e472d42c434ba72"
+  integrity sha512-lSiBBvodq29uShpWGNbgFdKYNiFDo5/HIYsaCEY9ff4sb10x9jizo2+pRrSyF4jKZCXqgzuqBOQKbUm90gQwJg==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
   version "7.15.3"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.15.3.tgz#2e1c2880ca118e5b2f9988322bd8a7656a32502b"
@@ -8248,12 +8255,12 @@ i18next-resources-to-backend@^1.0.0:
   dependencies:
     "@babel/runtime" "7.14.0"
 
-i18next@^21.3.1:
-  version "21.3.1"
-  resolved "https://registry.yarnpkg.com/i18next/-/i18next-21.3.1.tgz#cb132b6e0975de7d5472b26c4cdec57ecca96cf0"
-  integrity sha512-VElMm+LoeEuhViVwnDw1gR3snTItK9NJqgok8PZ5WU870MVO1x+5KEbzLO/6GC1zu42Uc3EuGj3nsGMGMNwT0A==
+i18next@^21.6.14:
+  version "21.6.16"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-21.6.16.tgz#8cff8c3ba2ffaf8438a8c83fe284083f15cf3941"
+  integrity sha512-xJlzrVxG9CyAGsbMP1aKuiNr1Ed2m36KiTB7hjGMG2Zo4idfw3p9THUEu+GjBwIgEZ7F11ZbCzJcfv4uyfKNuw==
   dependencies:
-    "@babel/runtime" "^7.12.0"
+    "@babel/runtime" "^7.17.2"
 
 iconv-lite@0.4.24:
   version "0.4.24"
