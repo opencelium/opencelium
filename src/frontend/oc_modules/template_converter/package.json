@@ -1,10 +1,10 @@
 {
   "name": "invoker_converter",
+  "main": "src/main.js",
   "version": "1.0.1",
   "description": "opencelium, open celium, oc, template, converter",
-  "author": "becon <ruzalin.galiev@becon.de>",
-  "license": "MIT",
-  "private": true,
+  "author": "becon GmbH",
+  "license": "becon",
   "dependencies": {
     "bootstrap": "^4.5.2",
     "classnames": "^2.2.6",
@@ -51,7 +51,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
-    "watch:test": "jest --watchAll",
+    "watch:test": "cross-env NODE_ENV=development jest --watchAll",
     "test": "cross-env NODE_ENV=development jest"
   }
 }
