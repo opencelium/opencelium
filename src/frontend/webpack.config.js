@@ -199,7 +199,7 @@ const getConfig = ({isBuild, envVar}) => {
                     {
                         from: path.resolve(__dirname, 'locales'),
                         to: path.resolve(__dirname, 'dist/locales')
-                    },/*
+                    },
                     {
                         from: path.resolve(__dirname, 'src/img'),
                         to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
@@ -207,7 +207,11 @@ const getConfig = ({isBuild, envVar}) => {
                     {
                         from: path.resolve(__dirname, 'src/styles/css'),
                         to: path.resolve(__dirname, 'dist/styles/css')
-                    },*/
+                    },
+                    {
+                        from: path.resolve(__dirname, 'src/styles/fonts'),
+                        to: path.resolve(__dirname, 'dist/styles/fonts')
+                    },
                 ]
             }),
             new webpack.DefinePlugin({...envVar})
