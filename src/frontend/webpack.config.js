@@ -75,10 +75,10 @@ const getConfig = ({isBuild, envVar}) => {
                         {
                             loader: "css-loader",
                             options: {
-                                importLoaders: 2,
                                 import: true,
                                 modules: {
                                     exportLocalsConvention: "camelCase",
+                                    auto: (resourcePath) => resourcePath.endsWith("theme.css"),
                                     localIdentName: '[path][name]__[local]--[hash:base64:5]',
                                 },
                             }
@@ -92,7 +92,7 @@ const getConfig = ({isBuild, envVar}) => {
                         {
                             loader: "css-loader",
                             options: {
-                                importLoaders: 2,
+                                importLoaders: 1,
                                 import: true,
                                 modules: {
                                     exportLocalsConvention: "camelCase",

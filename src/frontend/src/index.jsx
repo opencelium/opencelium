@@ -20,6 +20,11 @@ import {store} from "@store/store";
 import './translations/i18n';
 import {App} from "./components/App";
 
+import "@style/fonts.css";
+import "@style/bootstrap.css";
+import "@style/react_grid_layout.css";
+import "@style/react_crop.css";
+
 
 ReactDOM.render(
     <Provider store={store}>

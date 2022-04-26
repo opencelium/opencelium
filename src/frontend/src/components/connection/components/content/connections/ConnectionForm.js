@@ -31,6 +31,8 @@ import {TextSize} from "@atom/text/interfaces";
 import ContentLoading from "@molecule/loading/ContentLoading";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@interface/application/IApplication";
 
+import "@style/react_resizable.css";
+import "@style/graphiql.css";
 
 /**
  * common component to add and update Connection

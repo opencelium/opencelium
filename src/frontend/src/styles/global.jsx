@@ -17,9 +17,6 @@ import React from 'react';
 import chroma from "chroma-js";
 import {createGlobalStyle} from "styled-components";
 import {ColorTheme} from "../components/general/Theme";
-import {ReactCropStyles} from "./react_crop";
-import {ReactGridLayoutStyled} from "./react_grid_layout";
-import {ReactResizableStyles} from "./react_resizable";
 import {SlickCarousel} from "./slick_carousel";
 
 
@@ -46,8 +43,5 @@ export const Global = createGlobalStyle`
     .fade{
         transition: none !important;
     }
-    ${ReactCropStyles}
-    ${ReactGridLayoutStyled}
-    ${ReactResizableStyles}
     ${SlickCarousel}
 `;
