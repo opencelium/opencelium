@@ -19,14 +19,16 @@ import Themes, {ThemeNames} from "./general/Theme";
 import {BrowserRouter} from "react-router-dom";
 import {Global} from "../styles/global";
 import {getRoutes} from "@store/routes";
-import {Auth} from "@class/application/Auth";
+import {Application} from "@class/application/Application";
 
 
 
 const App = ({}) => {
-    const {authUser} = Auth.getReduxState();
-    let theme: ThemeNames = authUser?.userDetail?.theme || null;
+    const {theme} = Application.getReduxState();
     let appTheme: any = theme ? Themes[theme] : Themes.default;
+    /*const {authUser} = Auth.getReduxState();
+    let theme: ThemeNames = authUser?.userDetail?.theme || null;
+    let appTheme: any = theme ? Themes[theme] : Themes.default;*/
     return (
         <ThemeProvider theme={appTheme}>
             <BrowserRouter>

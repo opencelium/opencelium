@@ -57,54 +57,67 @@ export class LocalStorage implements ILocalStorage{
     }
 
     set(key: string, value: any, namespace?: string): void{
-        if(LocalStorage.instance.isSecured){
-            namespace = namespace ? namespace : 'g';
-            let data = LocalStorage.cryptStorage.get(namespace);
-            if(data === ''){
-                data = {};
+        try {
+            if (LocalStorage.instance.isSecured) {
+                namespace = namespace ? namespace : 'g';
+                let data = LocalStorage.cryptStorage.get(namespace);
+                if (data === '') {
+                    data = {};
+                }
+                data[key] = value;
+                LocalStorage.cryptStorage.set(namespace, data);
+            } else {
+                LocalStorage.storage.setItem(key, JSON.stringify(value));
             }
-            data[key] = value;
-            LocalStorage.cryptStorage.set(namespace, data);
-        } else{
-            LocalStorage.storage.setItem(key, JSON.stringify(value));
+        }catch(e){
         }
     }
 
     get(key: string, namespace?: string): any{
-        if(LocalStorage.instance.isSecured){
-            namespace = namespace ? namespace : 'g';
-            let data = LocalStorage.cryptStorage.get(namespace);
-            if(data === ''){
-                return null;
+        try {
+            if (LocalStorage.instance.isSecured) {
+                namespace = namespace ? namespace : 'g';
+                let data = LocalStorage.cryptStorage.get(namespace);
+                if (data === '') {
+                    return null;
+                }
+                return data[key];
+            } else {
+                return JSON.parse(LocalStorage.storage.getItem(key));
             }
-            return data[key];
-        } else{
-            return JSON.parse(LocalStorage.storage.getItem(key));
+        } catch(e){
+            return null;
         }
     }
 
     remove(key: string, namespace?: string): void{
-        if(LocalStorage.instance.isSecured){
-            namespace = namespace ? namespace : 'g';
-            let data = LocalStorage.cryptStorage.get(namespace);
-            if(data !== ''){
-                delete data[key];
-                LocalStorage.cryptStorage.set(namespace, data);
+        try {
+            if (LocalStorage.instance.isSecured) {
+                namespace = namespace ? namespace : 'g';
+                let data = LocalStorage.cryptStorage.get(namespace);
+                if (data !== '') {
+                    delete data[key];
+                    LocalStorage.cryptStorage.set(namespace, data);
+                }
+            } else {
+                LocalStorage.storage.removeItem(key);
             }
-        } else{
-            LocalStorage.storage.removeItem(key);
+        }catch(e){
         }
     }
 
     removeAll(key: string, namespace?: string): void{
-        if(LocalStorage.instance.isSecured){
-            namespace = namespace ? namespace : 'g';
-            let data = LocalStorage.cryptStorage.get(namespace);
-            if(data !== '') {
-                LocalStorage.cryptStorage.remove(namespace);
+        try {
+            if(LocalStorage.instance.isSecured){
+                namespace = namespace ? namespace : 'g';
+                let data = LocalStorage.cryptStorage.get(namespace);
+                if(data !== '') {
+                    LocalStorage.cryptStorage.remove(namespace);
+                }
+            } else{
+                LocalStorage.storage.clear();
             }
-        } else{
-            LocalStorage.storage.clear();
+        }catch(e){
         }
     }
 }

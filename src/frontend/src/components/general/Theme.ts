@@ -182,7 +182,10 @@ const greenTheme: ITheme = {
     }
 }
 
-export type ThemeNames = 'default' | 'other';
+export enum ThemeNames{
+    Default= 'default',
+    Other= 'other'
+}
 
 export default {
     other: greenTheme,

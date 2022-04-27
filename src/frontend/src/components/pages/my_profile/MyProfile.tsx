@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC} from "react";
+import React, {ChangeEvent, FC} from "react";
 import {User} from "@class/user/User";
 import FormSection from "@organism/form_section/FormSection";
 import Form from "@organism/form/Form";
@@ -28,10 +28,14 @@ import {Auth} from "@class/application/Auth";
 import {useAppDispatch} from "../../../hooks/redux";
 import {updateAuthUserDetail} from "@action/application/AuthCreators";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import {Application} from "@class/application/Application";
+import { setTheme } from "@store/reducers/application/ApplicationSlice";
+import InputRadios from "@atom/input/radio/InputRadios";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
+    const {theme} = Application.getReduxState();
     const {authUser, updatingAuthUser} = Auth.getReduxState();
     const userGroup = UserGroup.createState<IUserGroup>({
         _readOnly: true,
@@ -58,23 +62,20 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         {propertyName: "email", props: {icon: 'email', label: "Email", maxLength: 255, required: true}},
     );
     const Permissions = userGroup.getPermissionComponent();
-    const Theme = userDetail.getRadios({
-        propertyName: 'theme', props: {
-            readOnly: false,
-            icon: 'preview',
-            label: 'Themes',
-            options: [
+    const Theme =
+        <InputRadios
+            onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                // @ts-ignore
+                dispatch(setTheme(e.target.value));
+            }}
+            value={theme}
+            icon={'preview'}
+            label={'Themes'}
+            options={[
                 {label: 'Default', value: 'default', key: 'default'},
                 {label: 'Green Day', value: 'other', key: 'other'}
-            ],
-            callback: (e: any) => {
-                let updatedAuthUser = {...authUser, userDetail: {...authUser.userDetail}};
-                updatedAuthUser.userDetail.theme = e.target.value;
-                dispatch(updateAuthUserDetail(updatedAuthUser));
-            },
-            isLoading: updatingAuthUser === API_REQUEST_STATE.START
-        }
-    });
+            ]}
+        />
     const AppTour = userDetail.getSwitch({propertyName: 'appTour', props:{
         readOnly: false,
         icon: 'help_center',

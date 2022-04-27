@@ -38,10 +38,8 @@ import {LocalStorage} from "@class/application/LocalStorage";
 import {ViewType} from "@organism/collection_view/CollectionView";
 import {GridViewType} from "@molecule/list/GridViewMenu";
 import {ConnectionViewProps, ConnectionViewType} from "@page/connection/interfaces";
+import {ThemeNames} from "../../../components/general/Theme";
 
-/*
-* TODO: implement set current page items
-*/
 
 export interface AuthState extends ICommonState{
     addingTicket: API_REQUEST_STATE,
@@ -67,6 +65,7 @@ export interface AuthState extends ICommonState{
     gridViewType: GridViewType,
     searchValue: string,
     currentPageItems: any[],
+    theme: ThemeNames,
 }
 
 
@@ -100,6 +99,7 @@ const initialState: AuthState = {
     connectionViewType: connectionViewType || ConnectionViewProps.Diagram,
     searchValue: '',
     currentPageItems: [],
+    theme: storage.get('theme') || ThemeNames.Default,
     ...CommonState,
 }
 
@@ -144,6 +144,9 @@ export const applicationSlice = createSlice({
         setSearchValue: (state, action: PayloadAction<string>) => {
             state.searchValue = action.payload;
         },
+        setTheme: (state, action: PayloadAction<ThemeNames>) => {
+            state.theme = action.payload;
+        }
     },
     extraReducers: {
         [addTicket.pending.type]: (state) => {
@@ -247,7 +250,7 @@ export const applicationSlice = createSlice({
 export const {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setConnectionViewType, setViewType, setFullScreen, setSearchValue,
+    setConnectionViewType, setViewType, setFullScreen, setSearchValue, setTheme,
 } = applicationSlice.actions;
 
 export default applicationSlice.reducer;

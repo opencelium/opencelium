@@ -38,6 +38,7 @@ import {notificationMiddleware} from "../middlewares/notification";
 import {createStateSyncMiddleware, withReduxStateSync} from "redux-state-sync";
 import {setItems, setArrows, setCurrentTechnicalItem, setCurrentBusinessItem, setDetailsLocation, setConnectionData } from "@slice/connection/ConnectionSlice";
 import {applicationMiddleware} from "../middlewares/application";
+import {themeMiddleware} from "../middlewares/theme";
 const syncConfig: any = {
     whitelist: [
         setItems.type,
@@ -70,6 +71,7 @@ const rootReducer = combineReducers({
 
 const middlewares = [
     authMiddleware,
+    themeMiddleware,
     applicationMiddleware,
     notificationMiddleware,
     createStateSyncMiddleware(syncConfig),

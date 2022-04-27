@@ -63,6 +63,7 @@ const CalloutMessageStyled = styled.div<CalloutMessageStyledProps>`
 
 const TopBarStyled = styled.div`
   z-index: 1000;
+  height: 38px;
   position: absolute;
   right: 30px;
   top: 20px;
