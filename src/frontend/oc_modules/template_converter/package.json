@@ -1,24 +1,26 @@
 {
   "name": "invoker_converter",
   "main": "src/main.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "opencelium, open celium, oc, template, converter",
-  "author": "becon <ruzalin.galiev@becon.de>",
+  "author": "becon GmbH",
   "license": "becon",
+  "private": true,
   "dependencies": {
     "bootstrap": "^4.5.2",
     "classnames": "^2.2.6",
     "immutable": "^4.0.0-rc.12",
-    "node-sass": "~7.0.1",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "npm:@hot-loader/react-dom",
     "react-json-view": "^1.19.1",
     "react-redux": "^7.2.1",
+    "react-toolbox": "^2.0.0-beta.13",
     "reactstrap": "^8.5.1",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",
-    "redux-immutable": "^4.0.0"
+    "redux-immutable": "^4.0.0",
+    "sass": "^1.49.11"
   },
   "devDependencies": {
     "@babel/core": "^7.10.3",
