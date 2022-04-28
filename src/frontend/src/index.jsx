@@ -24,7 +24,6 @@ import "@style/bootstrap.css";
 import "@style/react_grid_layout.css";
 import "@style/react_crop.css";
 
-
 ReactDOM.render(
     <Provider store={store}>
         <App/>

@@ -36,6 +36,7 @@ import {
 import {checkNeo4j, checkElasticsearch, checkAllExternalApplications} from "@action/external_application/ExternalApplicationCreators";
 import {addNotificationTemplate, updateNotificationTemplate, deleteNotificationTemplateById, deleteNotificationTemplatesById, getNotificationTemplateById, getNotificationTemplatesByType, checkNotificationTemplateName, getAllNotificationTemplates} from "@action/schedule/NotificationTemplateCreators";
 import { copyWebhookToClipboard } from "@store/reducers/schedule/ScheduleSlice";
+import {setTheme} from "@slice/application/ApplicationSlice";
 /*
 * TODO: copy to clipboard webhook, user email already exists,
 *  user group name already exists, connector title already exists,
@@ -50,6 +51,7 @@ import { copyWebhookToClipboard } from "@store/reducers/schedule/ScheduleSlice";
 
 const NotificationTranslations = {
   fulfilled: {
+    [setTheme.type]: "Your theme was successfully updated",
     [copyWebhookToClipboard.type]: "The webhook was successfully copied",
     [addUser.fulfilled.type]: "The user <1><0>{{email}}</0></1> was successfully added.",
     [updateUser.fulfilled.type]: "The user <1><0>{{email}}</0></1> was successfully updated.",
