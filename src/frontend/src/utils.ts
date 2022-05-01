@@ -111,14 +111,12 @@ export function useEventListener(eventName: string, handler: any, element = wind
     );
 }
 
-
 export function getFocusableElements(elem: any = document): HTMLElement[]{
     if(elem) {
         return elem.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     }
     return [];
 }
-
 
 export function reactElementToText(node: ReactElement): string {
     return ReactDOMServer.renderToString(node);

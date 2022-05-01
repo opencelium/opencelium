@@ -34,7 +34,7 @@ const MonitoringBoardsWidget: FC =
     const dispatch = useAppDispatch();
     const {requestingRemoteApi, remoteApiData} = Application.getReduxState();
     const {authUser} = Auth.getReduxState();
-    let defaultUrl = `${protocol}//${hostname}:19999/oc-mode.html`;
+    let defaultUrl = `https://service.opencelium.io:443/`;
     if(authUser.hasOwnProperty('dashboard')){
         if(authUser.dashboard.hasOwnProperty('settings')
             && authUser.dashboard.settings.url !== ''){
