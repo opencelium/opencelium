@@ -30,11 +30,10 @@ import {setTheme} from "@slice/application/ApplicationSlice";
  * @param src - iframe url
  */
 export function createIframe(src: string): void{
-    const iframe = document.createElement('iframe');
-    iframe.id = 'iframe_messenger';
-    iframe.src = src;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
+    const iframe: any = document.getElementById('iframe_messenger');
+    if(iframe){
+        iframe.setAttribute("src", src);
+    }
     function handleMessage(e: any) {
         let {key, value, method} = e.data;
         if (method === 'opencelium_theme_store') {
