@@ -143,17 +143,17 @@ const NotificationTranslations = {
     },
     [addUser.rejected.type]: {
       "EXISTS": "User with such email is already in use",
-      "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not added."
+      "__DEFAULT__": "The user was not added."
     },
     [updateUser.rejected.type]: {
       "EXISTS": "User with such email is already in use",
       "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not updated."
     },
     [uploadUserImage.rejected.type]: {
-      "__DEFAULT__": "The image of the user <1><0>{{email}}</0></1> was not uploaded."
+      "__DEFAULT__": "The image of the user was not uploaded."
     },
     [deleteUserById.rejected.type]: {
-      "__DEFAULT__": "The user <1><0>{{email}}</0></1> was not removed."
+      "__DEFAULT__": "The user was not removed."
     },
     [deleteUsersById.rejected.type]: {
       "__DEFAULT__": "The selected users were not removed."
@@ -166,17 +166,17 @@ const NotificationTranslations = {
     },
     [addUserGroup.rejected.type]: {
       "EXISTS": "User Group with such name is already in use",
-      "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not added."
+      "__DEFAULT__": "The user group was not added."
     },
     [updateUserGroup.rejected.type]: {
       "EXISTS": "User Group with such name is already in use",
-      "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not updated."
+      "__DEFAULT__": "The user group was not updated."
     },
     [uploadUserGroupImage.rejected.type]: {
-      "__DEFAULT__": "The image of the user group <1><0>{{name}}</0></1> was not uploaded."
+      "__DEFAULT__": "The image of the user group was not uploaded."
     },
     [deleteUserGroupById.rejected.type]: {
-      "__DEFAULT__": "The user group <1><0>{{name}}</0></1> was not removed."
+      "__DEFAULT__": "The user group was not removed."
     },
     [deleteUserGroupsById.rejected.type]: {
       "__DEFAULT__": "The selected user groups were not removed."
@@ -192,18 +192,18 @@ const NotificationTranslations = {
     [addConnector.rejected.type]: {
       "COMMUNICATION_FAILED": "Connection was failed",
       "CONNECTOR_ALREADY_EXISTS": "Connector with such title is already in use",
-      "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not added"
+      "__DEFAULT__": "The connector was not added"
     },
     [updateConnector.rejected.type]: {
       "COMMUNICATION_FAILED": "Connection was failed",
       "CONNECTOR_ALREADY_EXISTS": "Connector with such title is already in use",
-      "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not updated"
+      "__DEFAULT__": "The connector was not updated"
     },
     [uploadConnectorImage.rejected.type]: {
-      "__DEFAULT__": "The image of the connector <1><0>{{title}}</0></1> was not uploaded."
+      "__DEFAULT__": "The image of the connector was not uploaded."
     },
     [deleteConnectorById.rejected.type]: {
-      "__DEFAULT__": "The connector <1><0>{{title}}</0></1> was not removed"
+      "__DEFAULT__": "The connector was not removed"
     },
     [deleteConnectorsById.rejected.type]: {
       "__DEFAULT__": "The selected connectors were not removed"
@@ -214,10 +214,10 @@ const NotificationTranslations = {
     [getAllConnections.rejected.type]: {
       "__DEFAULT__": "There is an error fetching connections."
     },
-    [addConnection.rejected.type]: "The connection <1><0>{{title}}</0></1> was not added",
-    [updateConnection.rejected.type]: "The connection <1><0>{{title}}</0></1> was not updated",
+    [addConnection.rejected.type]: "The connection was not added",
+    [updateConnection.rejected.type]: "The connection was not updated",
     [deleteConnectionById.rejected.type]: {
-      "__DEFAULT__": "The connection <1><0>{{title}}</0></1> was not removed"
+      "__DEFAULT__": "The connection was not removed"
     },
     [deleteConnectionsById.rejected.type]: {
       "__DEFAULT__": "The selected connections were not removed"
@@ -229,19 +229,19 @@ const NotificationTranslations = {
       "__DEFAULT__": "There is an error fetching schedules."
     },
     [startSchedule.rejected.type]: {
-      "__DEFAULT__": "The job <1><0>{{title}}</0></1> was not triggered"
+      "__DEFAULT__": "The job was not triggered"
     },
     [addSchedule.rejected.type]: {
-      "__DEFAULT__": "The schedule <1><0>{{title}}</0></1> was not added"
+      "__DEFAULT__": "The schedule was not added"
     },
     [deleteScheduleById.rejected.type]: {
-      "__DEFAULT__": "The schedule <1><0>{{title}}</0></1> was not removed"
+      "__DEFAULT__": "The schedule was not removed"
     },
     [updateSchedule.rejected.type]: {
-      "__DEFAULT__": "The schedule <1><0>{{title}}</0></1> was not updated"
+      "__DEFAULT__": "The schedule was not updated"
     },
     [switchScheduleStatus.rejected.type]: {
-      "__DEFAULT__": "The status of the job <1><0>{{title}}</0></1> was not updated"
+      "__DEFAULT__": "The status of the job was not updated"
     },
     [enableSchedules.rejected.type]: {
       "__DEFAULT__": "The selected schedules were not enabled"
@@ -262,31 +262,31 @@ const NotificationTranslations = {
       "__DEFAULT__": "There is an error fetching templates."
     },
     [addTemplate.rejected.type]: {
-      "__DEFAULT__": "The template <1><0>{{name}}</0></1> of the <3><0>{{title}}</0></3> was not added"
+      "__DEFAULT__": "The template was not added"
     },
     [updateTemplate.rejected.type]: {
-      "__DEFAULT__": "The template <1><0>{{name}}</0></1> was not updated"
+      "__DEFAULT__": "The template was not updated"
     },
     [updateTemplates.rejected.type]: {
       "__DEFAULT__": "The templates were not updated"
     },
     [importTemplate.rejected.type]: {
-      "__DEFAULT__": "The Template <1><0>{{name}}</0></1> was not imported"
+      "__DEFAULT__": "The template was not imported"
     },
     [exportTemplate.rejected.type]: {
-      "__DEFAULT__": "The Template <1><0>{{name}}</0></1> was not downloaded"
+      "__DEFAULT__": "The template was not downloaded"
     },
     [deleteTemplateById.rejected.type]: {
-      "__DEFAULT__": "The template <1><0>{{name}}</0></1> was not removed"
+      "__DEFAULT__": "The template was not removed"
     },
     [deleteTemplatesById.rejected.type]: {
       "__DEFAULT__": "The selected templates were not removed"
     },
     [getWebhook.rejected.type]: {
-      "__DEFAULT__": "The webhook of the job <1><0>{{name}}</0></1> was not created"
+      "__DEFAULT__": "The webhook of the job was not created"
     },
     [deleteWebhook.rejected.type]: {
-      "__DEFAULT__": "The webhook of the job <1><0>{{name}}</0></1> was not removed"
+      "__DEFAULT__": "The webhook of the job was not removed"
     },
     [getInvokerByName.rejected.type]: {
       "__DEFAULT__": "There is an error fetching invoker."
@@ -295,22 +295,22 @@ const NotificationTranslations = {
       "__DEFAULT__": "There is an error fetching invokers."
     },
     [addInvoker.rejected.type]: {
-      "__DEFAULT__": "The invoker <1><0>{{name}}</0></1> was not added."
+      "__DEFAULT__": "The invoker was not added."
     },
     [importInvoker.rejected.type]: {
       "__DEFAULT__": "The invoker was not imported."
     },
     [deleteInvokerByName.rejected.type]: {
-      "__DEFAULT__": "The invoker <1><0>{{name}}</0></1> was not removed"
+      "__DEFAULT__": "The invoker was not removed"
     },
     [deleteInvokersById.rejected.type]: {
       "__DEFAULT__": "The selected invokers were not removed"
     },
     [updateInvoker.rejected.type]: {
-      "__DEFAULT__": "The invoker <1><0>{{name}}</0></1> was not updated"
+      "__DEFAULT__": "The invoker was not updated"
     },
     [uploadInvokerImage.rejected.type]: {
-      "__DEFAULT__": "The image of the invoker <1><0>{{name}}</0></1> was not uploaded."
+      "__DEFAULT__": "The image of the invoker was not uploaded."
     },
     [getNotificationTemplateById.rejected.type]: {
       "__DEFAULT__": "There is an error fetching notification template."
@@ -319,19 +319,19 @@ const NotificationTranslations = {
       "__DEFAULT__": "There is an error fetching notification templates."
     },
     [addNotificationTemplate.rejected.type]: {
-      "__DEFAULT__": "The notification <1><0>{{name}}</0></1> was not added"
+      "__DEFAULT__": "The notification was not added"
     },
     [updateNotificationTemplate.rejected.type]: {
-      "__DEFAULT__": "The notification <1><0>{{name}}</0></1> was not updated"
+      "__DEFAULT__": "The notification was not updated"
     },
     [deleteNotificationTemplateById.rejected.type]: {
-      "__DEFAULT__": "The notification <1><0>{{name}}</0></1> was not removed"
+      "__DEFAULT__": "The notification was not removed"
     },
     [deleteNotificationTemplatesById.rejected.type]: {
       "__DEFAULT__": "The selected templates were not removed"
     },
     [checkForUpdates.rejected.type]: {
-      "__DEFAULT__": "OC Update <1><0>{{version}}</0></1> available"
+      "__DEFAULT__": "OC Update available"
     },
     [getResources.rejected.type]: {
       "__DEFAULT__": "The request of getting resources was rejected."

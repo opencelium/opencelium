@@ -239,7 +239,7 @@ class FormMode extends Component{
         const {template} = this.state;
         const {deleteTemplate, entity, updateEntity} = this.props;
         if(template !== null) {
-            deleteTemplate({id: template.value});
+            deleteTemplate(template.value);
             entity.template.templateId = -1;
             entity.template.label = '';
             entity.resetToEmptyTemplate();

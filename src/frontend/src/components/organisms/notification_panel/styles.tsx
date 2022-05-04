@@ -29,7 +29,7 @@ const NotificationPanelStyled = styled.div`
     background: white;
     border-left: 2px solid #ccc;
     transition: all 0.3s;
-    z-index: 1000;
+    z-index: 1001;
     padding: 0 10px;
 `;
 
