@@ -31,6 +31,7 @@ import {setViewType as setViewTypeGlobally, setGridViewType as setGridViewTypeGl
 import Title from "@molecule/collection_title/Title";
 import ContentLoading from "@molecule/loading/ContentLoading";
 import {API_REQUEST_STATE} from "@interface/application/IApplication";
+import {TooltipButton} from "@molecule/tooltip_button/TooltipButton";
 
 const LIST_VIEW_ENTITIES_NUMBER = 10;
 
@@ -129,7 +130,7 @@ const CollectionView: FC<CollectionViewProps> =
                             <InputText marginLeft={'0'} autoFocus inputHeight={'35px'} value={searchValue} onChange={(e) => search(e.target.value)} minHeight={'1'}  width={'200px'} placeholder={'Search field'}/>
                         }
                         <ViewSectionStyled>
-                            <Button icon={'view_list'} size={24} hasBackground={false} color={ColorTheme.Turquoise} handleClick={() => onChangeViewType(ViewType.LIST)}/>
+                            <TooltipButton target={'view_list'} tooltip={'List'} position={'top'} icon={'view_list'} size={24} hasBackground={false} color={ColorTheme.Turquoise} handleClick={() => onChangeViewType(ViewType.LIST)}/>
                             <GridViewMenu setGridViewType={onChangeViewGridType} viewType={viewType} setViewType={onChangeViewType} setIsRefreshing={setIsRefreshing}/>
                         </ViewSectionStyled>
                     </TopSectionStyled>}

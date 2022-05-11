@@ -20,7 +20,7 @@ import {AdminCard} from "@class/application/AdminCard";
 import {SortType} from "@organism/collection_view/interfaces";
 import {ListProp} from "@interface/application/IListCollection";
 import {ComponentPermissionProps} from "@constants/permissions";
-import {PermissionButton} from "@atom/button/PermissionButton";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ColorTheme} from "../components/general/Theme";
 import {TextSize} from "@atom/text/interfaces";
 
@@ -43,7 +43,7 @@ class AdminCards extends ListCollection{
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return (
             <React.Fragment>
-                <PermissionButton href={`${entity.link}`} hasBackground={false} icon={'visibility'} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionTooltipButton target={`view_entity_${entity.id.toString()}`} position={'top'} tooltip={'View'} href={`${entity.link}`} hasBackground={false} icon={'visibility'} size={TextSize.Size_20} permission={componentPermission.READ}/>
             </React.Fragment>
         );
     };

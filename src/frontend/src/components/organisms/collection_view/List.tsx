@@ -26,6 +26,7 @@ import {ThStyled} from "@organism/collection_view/styles";
 import {ListProp} from "@interface/application/IListCollection";
 import {ListRow} from "@molecule/list/ListRow";
 import {Text} from "@atom/text/Text";
+import {TooltipButton} from "@molecule/tooltip_button/TooltipButton";
 
 
 const MAX_COLUMN_VALUE_LENGTH = 150;
@@ -132,7 +133,7 @@ const List: FC<ListViewProps> =
                                             <div style={{display: 'flex', justifyContent: 'center'}}>
                                                 <span style={{marginLeft: hasSortIcon ? '24px' : 0}}><Text value={collection.translations[translationProp]}/></span>
                                                 {hasSortIcon &&
-                                                    <Button hasBackground={false} color={ColorTheme.Blue}
+                                                    <TooltipButton target={'sort_button'} tooltip={sortTypes[propertyKey] === SortType.asc ? 'Asc' : 'Desc'} position={'top'} hasBackground={false} color={ColorTheme.Blue}
                                                             handleClick={() => sort(propertyKey, sortTypes[propertyKey] === SortType.asc ? SortType.desc : SortType.asc)}
                                                             icon={sortIcon} size={24}
                                                     />

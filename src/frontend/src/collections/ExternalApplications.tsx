@@ -20,7 +20,7 @@ import {ExternalApplication} from "@class/external_application/ExternalApplicati
 import {SortType} from "@organism/collection_view/interfaces";
 import {ListCollectionCardProps, ListProp} from "@interface/application/IListCollection";
 import {ComponentPermissionProps} from "@constants/permissions";
-import {PermissionButton} from "@atom/button/PermissionButton";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ColorTheme} from "../components/general/Theme";
 import {TextSize} from "@atom/text/interfaces";
 
@@ -40,7 +40,7 @@ class ExternalApplications extends ListCollection{
     getListActions?: (entity: IExternalApplication, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return (
             <React.Fragment>
-                <PermissionButton handleClick={() => {window.open(entity.link, '_blank').focus()}} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionTooltipButton target={`view_entity_${entity.name.toString()}`} position={'top'} tooltip={'View'} handleClick={() => {window.open(entity.link, '_blank').focus()}} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
             </React.Fragment>
         );
     };

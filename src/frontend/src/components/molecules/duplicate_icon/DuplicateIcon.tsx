@@ -23,7 +23,7 @@ import {addConnection, checkConnectionTitle, getConnectionById} from "@action/co
 import {Connection} from "@class/connection/Connection";
 import {ColorTheme} from "../../general/Theme";
 import {TextSize} from "@atom/text/interfaces";
-import {PermissionButton} from "@atom/button/PermissionButton";
+import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ConnectionPermissions} from "@constants/permissions";
 import {Dialog} from "@atom/dialog/Dialog";
 import {Connector} from "@class/connector/Connector";
@@ -161,10 +161,10 @@ const DuplicateIcon: FC<DuplicateIconProps> =
             setFocusById('duplicate_title');
         }
     }, [checkingConnectionTitle])
-
+    //TODO add tooltip
     return (
         <DuplicateIconStyled >
-            <PermissionButton hasBackground={false} handleClick={toggleDuplicateForm} icon={'content_copy'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={ConnectionPermissions.UPDATE}/>
+            <PermissionTooltipButton target={`duplicate_entity_${listConnection.id.toString()}`} position={'top'} tooltip={'Duplicate'} hasBackground={false} handleClick={toggleDuplicateForm} icon={'content_copy'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={ConnectionPermissions.UPDATE}/>
             <Dialog
                 actions={[
                     {id: 'duplicate_ok', label: 'Ok', onClick: validateFields},

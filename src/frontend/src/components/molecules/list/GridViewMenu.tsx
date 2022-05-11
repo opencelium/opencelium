@@ -22,6 +22,7 @@ import {ColorTheme} from "../../general/Theme";
 import Button from "../../atoms/button/Button";
 import Icon from "../../atoms/icon/Icon";
 import {ViewType} from "@organism/collection_view/CollectionView";
+import {TooltipButton} from "@molecule/tooltip_button/TooltipButton";
 
 
 const Types = (props: TypesProps) => {
@@ -71,7 +72,7 @@ const GridViewMenu: FC<GridViewMenuProps> =
                 data-toggle="dropdown"
                 aria-expanded={isMenuOpen}
             >
-                <Button icon={'grid_view'} size={24} hasBackground={false} color={ColorTheme.Turquoise} handleClick={() => {}}/>
+                <TooltipButton target={'grid_view'} tooltip={'Grid'} position={'top'} icon={'grid_view'} size={24} hasBackground={false} color={ColorTheme.Turquoise} handleClick={() => {}}/>
             </DropdownToggle>
             <DropdownMenuStyled>
                 <Types setType={setType} number={2}/>
