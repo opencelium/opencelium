@@ -42,11 +42,11 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     const shouldFetchConnection = isUpdate || isView;
     const form = new Form({isView, isAdd, isUpdate});
     const formData = form.getFormData('schedule');
-    let connectionId = 0;
+    let scheduleId = 0;
     if(shouldFetchConnection){
-        connectionId = parseInt(urlParams.id);
+        scheduleId = parseInt(urlParams.id);
     }
-    const schedule = Schedule.createState<ISchedule>({id: connectionId, _readOnly: isView, status: 1}, isAdd ? null : currentSchedule);
+    const schedule = Schedule.createState<ISchedule>({id: scheduleId, _readOnly: isView, status: 1}, isAdd ? null : currentSchedule);
     useEffect(() => {
         if(shouldFetchConnection){
             schedule.getById()
@@ -55,7 +55,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     },[]);
     useEffect(() => {
         if (didMount.current) {
-            if(error === null && (addingSchedule === API_REQUEST_STATE.FINISH || updatingSchedule === API_REQUEST_STATE.FINISH)){
+            if(error === null && (isAdd && addingSchedule === API_REQUEST_STATE.FINISH || isUpdate && updatingSchedule === API_REQUEST_STATE.FINISH)){
                 navigate('/schedules', { replace: false });
             }
         } else {
@@ -65,7 +65,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
     const TitleInput = schedule.getText({
         propertyName: "title", props: {autoFocus: !isView, icon: 'title', label: 'Title', required: true}
     })
-    const ConnectionForm = schedule.getSelect({propertyName: 'connectionSelect', props: {
+    const ConnectionComponent = schedule.getSelect({propertyName: 'connectionSelect', props: {
             icon: 'sync_alt',
             label: 'Connection',
             options: connectionOptions,
@@ -106,7 +106,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
             <FormSection label={{value: 'General Data'}}>
                 {TitleInput}
                 {DebugModeInput}
-                {ConnectionForm}
+                {ConnectionComponent}
                 {ConnectionDescriptionInput}
                 {CronExpInput}
             </FormSection>
