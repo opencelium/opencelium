@@ -61,7 +61,7 @@ export interface IInvokerRequest{
     deleteInvokerByName(): Promise<AxiosResponse<IInvoker>>,
 
     //to delete invokers by id
-    deleteInvokersById(invoker: number[]): Promise<AxiosResponse<number[]>>,
+    deleteInvokersByName(invoker: string[]): Promise<AxiosResponse<IResponse>>,
 
     //to upload image of invoker
     uploadInvokerImage(data: FormData): Promise<AxiosResponse<IInvoker>>,

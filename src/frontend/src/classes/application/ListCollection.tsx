@@ -59,7 +59,7 @@ class ListCollection implements IListCollection{
     uploadImage: any = false;
 
     // returns actions that located on the top of collection
-    getTopActions?: (viewType?: ViewType, checkedIds?: number[]) => React.ReactNode = () => {return null;};
+    getTopActions?: (viewType?: ViewType, checkedIds?: number[] | string[]) => React.ReactNode = () => {return null;};
 
     // returns actions for grid view for each entity
     getGridActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {

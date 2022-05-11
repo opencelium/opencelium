@@ -159,8 +159,8 @@ export const userSlice = createSlice({
         },
         [deleteUsersById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
             state.deletingUsersById = API_REQUEST_STATE.FINISH;
-            state.users = state.users.filter(user => action.payload.findIndex(id => id === user.userId) === -1);
-            if(state.currentUser && action.payload.findIndex(id => id === state.currentUser.userId) !== -1){
+            state.users = state.users.filter(user => action.payload.findIndex(id => `${id}` === `${user.userId}`) === -1);
+            if(state.currentUser && action.payload.findIndex(id => `${id}` === `${state.currentUser.userId}`) !== -1){
                 state.currentUser = null;
             }
             state.error = null;

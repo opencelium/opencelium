@@ -161,13 +161,13 @@ export const deleteInvokerByName = createAsyncThunk(
     }
 )
 
-export const deleteInvokersById = createAsyncThunk(
+export const deleteInvokersByName = createAsyncThunk(
     'invoker/delete/selected/byId',
-    async(invokerIds: number[], thunkAPI) => {
+    async(invokerNames: string[], thunkAPI) => {
         try {
             const request = new InvokerRequest();
-            await request.deleteInvokersById(invokerIds);
-            return invokerIds;
+            await request.deleteInvokersByName(invokerNames);
+            return invokerNames;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -210,7 +210,7 @@ export default {
     getInvokerByName,
     getAllInvokers,
     deleteInvokerByName,
-    deleteInvokersById,
+    deleteInvokersByName,
     uploadInvokerImage,
     deleteInvokerImage,
 }

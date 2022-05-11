@@ -23,7 +23,7 @@ import {AppDispatch} from "@store/store";
 import {ComponentPermissionProps, InvokerPermissions} from "@constants/permissions";
 import {PermissionButton, PermissionTooltipButton} from "@atom/button/PermissionButton";
 import {ViewType} from "@organism/collection_view/CollectionView";
-import {deleteInvokersById} from "@action/InvokerCreators";
+import {deleteInvokersByName} from "@action/InvokerCreators";
 import {ColorTheme} from "../components/general/Theme";
 import {TextSize} from "@atom/text/interfaces";
 import {DeleteButtonStyled} from "@organism/collection_view/styles";
@@ -34,7 +34,7 @@ import {API_REQUEST_STATE} from "@interface/application/IApplication";
 class Invokers extends ListCollection{
     entities: IInvoker[];
     title = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'Invokers'}];
-    keyPropName = 'id';
+    keyPropName = 'name';
     sortingProps = ['name'];
     listProps: ListProp[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'authType', width: '10%'}, {propertyKey: 'operations[name]', width: '20%'}];
     gridProps = {
@@ -47,13 +47,13 @@ class Invokers extends ListCollection{
         authType: 'Auth Type',
         'operations[name]': 'Operations'
     };
-    getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
+    getTopActions = (viewType: ViewType, checkedNames: string[] = []) => {
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
                 <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Invoker'} permission={InvokerPermissions.CREATE}/>
                 <ImportInvokerButton/>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteInvokersById(checkedIds))} permission={InvokerPermissions.DELETE}/>}
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedNames.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteInvokersByName(checkedNames))} permission={InvokerPermissions.DELETE}/>}
             </React.Fragment>
         );
     };

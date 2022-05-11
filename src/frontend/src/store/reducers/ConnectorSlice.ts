@@ -191,8 +191,8 @@ export const connectorSlice = createSlice({
         },
         [deleteConnectorsById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
             state.deletingConnectorsById = API_REQUEST_STATE.FINISH;
-            state.connectors = state.connectors.filter(connector => action.payload.findIndex(id => id === connector.connectorId) === -1);
-            if(state.currentConnector && action.payload.findIndex(id => id === state.currentConnector.connectorId) !== -1){
+            state.connectors = state.connectors.filter(connector => action.payload.findIndex(id => `${id}` === `${connector.connectorId}`) === -1);
+            if(state.currentConnector && action.payload.findIndex(id => `${id}` === `${state.currentConnector.connectorId}`) !== -1){
                 state.currentConnector = null;
             }
             state.error = null;

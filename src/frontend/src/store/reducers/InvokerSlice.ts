@@ -20,7 +20,7 @@ import {
     checkInvokerName,
     deleteInvokerByName,
     deleteInvokerImage,
-    deleteInvokersById,
+    deleteInvokersByName,
     getAllInvokers,
     getInvokerByName, importInvoker,
     updateInvoker, updateOperation,
@@ -190,18 +190,18 @@ export const invokerSlice = createSlice({
             state.deletingInvokerById = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
-        [deleteInvokersById.pending.type]: (state) => {
+        [deleteInvokersByName.pending.type]: (state) => {
             state.deletingInvokersById = API_REQUEST_STATE.START;
         },
-        [deleteInvokersById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
+        [deleteInvokersByName.fulfilled.type]: (state, action: PayloadAction<string[]>) => {
             state.deletingInvokersById = API_REQUEST_STATE.FINISH;
-            state.invokers = state.invokers.filter(invoker => action.payload.findIndex(id => id === invoker.invokerId) === -1);
-            if(state.currentInvoker && action.payload.findIndex(id => id === state.currentInvoker.invokerId) !== -1){
+            state.invokers = state.invokers.filter(invoker => action.payload.findIndex(name => `${name}` === `${invoker.name}`) === -1);
+            if(state.currentInvoker && action.payload.findIndex(name => `${name}` === `${state.currentInvoker.name}`) !== -1){
                 state.currentInvoker = null;
             }
             state.error = null;
         },
-        [deleteInvokersById.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        [deleteInvokersByName.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.deletingInvokersById = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },

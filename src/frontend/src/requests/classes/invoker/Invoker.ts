@@ -62,8 +62,8 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         return super.delete<IInvoker>();
     }
 
-    async deleteInvokersById(invokerIds: number[]): Promise<AxiosResponse<number[]>>{
-        return super.delete<number[]>({data: invokerIds});
+    async deleteInvokersByName(invokerNames: string[]): Promise<AxiosResponse<IResponse>>{
+        return super.delete<IResponse>({data: invokerNames});
     }
 
     async uploadInvokerImage(data: FormData): Promise<AxiosResponse<IInvoker>>{

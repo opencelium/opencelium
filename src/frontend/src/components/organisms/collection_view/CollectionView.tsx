@@ -105,10 +105,10 @@ const CollectionView: FC<CollectionViewProps> =
             setCurrentPage(1);
             dispatch(setSearchValue(searchValue));
         }
-        let checkedIds: number[] = [];
+        let checkedIds: any[] = [];
         for(let id in checks){
             if(checks[id]){
-                checkedIds.push(parseInt(id));
+                checkedIds.push(id);
             }
         }
         const hasSearch = collection.hasSearch && collection.entities.length > 0;

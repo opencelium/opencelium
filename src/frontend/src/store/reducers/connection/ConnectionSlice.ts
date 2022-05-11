@@ -262,9 +262,9 @@ export const connectionSlice = createSlice({
         },
         [deleteConnectionsById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
             state.deletingConnectionsById = API_REQUEST_STATE.FINISH;
-            state.connections = state.connections.filter(connection => action.payload.findIndex(id => id === connection.connectionId) === -1);
-            state.metaConnections = state.metaConnections.filter(connection => action.payload.findIndex(id => id === connection.connectionId) === -1);
-            if(state.currentConnection && action.payload.findIndex(id => id === state.currentConnection.connectionId) !== -1){
+            state.connections = state.connections.filter(connection => action.payload.findIndex(id => `${id}` === `${connection.connectionId}`) === -1);
+            state.metaConnections = state.metaConnections.filter(connection => action.payload.findIndex(id => `${id}` === `${connection.connectionId}`) === -1);
+            if(state.currentConnection && action.payload.findIndex(id => `${id}` === `${state.currentConnection.connectionId}`) !== -1){
                 state.currentConnection = null;
             }
             state.error = null;

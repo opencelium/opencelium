@@ -159,8 +159,8 @@ export const notificationTemplateSlice = createSlice({
         },
         [deleteNotificationTemplatesById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
             state.deletingNotificationTemplatesById = API_REQUEST_STATE.FINISH;
-            state.notificationTemplates = state.notificationTemplates.filter(notificationTemplate => action.payload.findIndex(id => id === notificationTemplate.templateId) === -1);
-            if(state.currentNotificationTemplate && action.payload.findIndex(id => id === state.currentNotificationTemplate.templateId) !== -1){
+            state.notificationTemplates = state.notificationTemplates.filter(notificationTemplate => action.payload.findIndex(id => `${id}` === `${notificationTemplate.templateId}`) === -1);
+            if(state.currentNotificationTemplate && action.payload.findIndex(id => `${id}` === `${state.currentNotificationTemplate.templateId}`) !== -1){
                 state.currentNotificationTemplate = null;
             }
             state.error = null;

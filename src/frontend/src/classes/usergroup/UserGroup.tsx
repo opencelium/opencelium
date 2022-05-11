@@ -34,10 +34,7 @@ import {addUserGroup, deleteUserGroupById, getUserGroupById, updateUserGroup} fr
 import {useAppDispatch, useAppSelector} from "../../hooks/redux";
 import ModelUserGroup from "@model/user_group/UserGroup";
 import ModelComponent from "@model/user/Component";
-import {addUser} from "@action/UserCreators";
-import {IUser} from "@interface/user/IUser";
 import {IEntityWithImage} from "@requestInterface/application/IRequest";
-import ModelUserPoust from "@model/user/UserPoust";
 
 
 export class UserGroup extends HookStateClass implements IUserGroup{

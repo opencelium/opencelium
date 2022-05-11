@@ -275,8 +275,8 @@ export const scheduleSlice = createSlice({
         },
         [deleteSchedulesById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
             state.deletingSchedulesById = API_REQUEST_STATE.FINISH;
-            state.schedules = state.schedules.filter(schedule => action.payload.findIndex(id => id === schedule.schedulerId) === -1);
-            if(state.currentSchedule && action.payload.findIndex(id => id === state.currentSchedule.schedulerId) !== -1){
+            state.schedules = state.schedules.filter(schedule => action.payload.findIndex(id => `${id}` === `${schedule.schedulerId}`) === -1);
+            if(state.currentSchedule && action.payload.findIndex(id => `${id}` === `${state.currentSchedule.schedulerId}`) !== -1){
                 state.currentSchedule = null;
             }
             state.error = null;

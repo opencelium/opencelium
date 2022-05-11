@@ -20,7 +20,7 @@ import {addConnection, updateConnection, deleteConnectionById, deleteConnections
 import {addSchedule, disableSchedules, enableSchedules, switchScheduleStatus, startSchedule, deleteScheduleById, updateSchedule, startSchedules, deleteSchedulesById, getCurrentSchedules, getSchedulesById, checkScheduleTitle, getScheduleById, getAllSchedules} from "@action/schedule/ScheduleCreators";
 import {deleteTemplateById, updateTemplate, importTemplate, exportTemplate, updateTemplates, deleteTemplatesById, addTemplate, getAllTemplates, getTemplateById} from "@action/connection/TemplateCreators";
 import {deleteWebhook, getWebhook} from "@action/schedule/WebhookCreators";
-import {importInvoker, addInvoker, updateInvoker, uploadInvokerImage, deleteInvokerByName, deleteInvokersById, getAllInvokers, checkInvokerName, deleteInvokerImage, getInvokerByName, updateOperation} from "@action/InvokerCreators";
+import {importInvoker, addInvoker, updateInvoker, uploadInvokerImage, deleteInvokerByName, deleteInvokersByName, getAllInvokers, checkInvokerName, deleteInvokerImage, getInvokerByName, updateOperation} from "@action/InvokerCreators";
 import {updateAuthUserDetail, login} from "@action/application/AuthCreators";
 import {graphQLLogin} from "@action/graphql/GraphQLCreators";
 import {getResources, getVersion, updateResources, getGlobalSearchData, getAllComponents, addTicket, openExternalUrl} from "@action/application/ApplicationCreators";
@@ -94,7 +94,7 @@ const NotificationTranslations = {
     [addInvoker.fulfilled.type]: "The invoker <1><0>{{name}}</0></1> was successfully added.",
     [importInvoker.fulfilled.type]: "The invoker <1><0>{{name}}</0></1> was successfully imported.",
     [deleteInvokerByName.fulfilled.type]: "The invoker <1><0>{{name}}</0></1> was successfully removed",
-    [deleteInvokersById.fulfilled.type]: "The selected invokers were successfully removed",
+    [deleteInvokersByName.fulfilled.type]: "The selected invokers were successfully removed",
     [updateInvoker.fulfilled.type]: "The invoker <1><0>{{name}}</0></1> was successfully updated",
     [uploadInvokerImage.fulfilled.type]: "The image of the invoker <1><0>{{name}}</0></1> was successfully uploaded.",
     [addNotificationTemplate.fulfilled.type]: "The notification <1><0>{{name}}</0></1> was successfully added",
@@ -303,7 +303,7 @@ const NotificationTranslations = {
     [deleteInvokerByName.rejected.type]: {
       "__DEFAULT__": "The invoker was not removed"
     },
-    [deleteInvokersById.rejected.type]: {
+    [deleteInvokersByName.rejected.type]: {
       "__DEFAULT__": "The selected invokers were not removed"
     },
     [updateInvoker.rejected.type]: {

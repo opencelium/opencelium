@@ -89,6 +89,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         required: true,
         callback: (reference) => {reference.requestData = null;}
     }})
+    //TODO update invoker description after selection
     const InvokerDescriptionInput = connector.getTextarea({
         propertyName: "invokerDescription", props:{
             label: 'Description',

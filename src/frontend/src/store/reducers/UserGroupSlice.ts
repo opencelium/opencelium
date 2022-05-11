@@ -163,8 +163,8 @@ export const userGroupSlice = createSlice({
         },
         [deleteUserGroupsById.fulfilled.type]: (state, action: PayloadAction<number[]>) => {
             state.deletingUserGroupsById = API_REQUEST_STATE.FINISH;
-            state.userGroups = state.userGroups.filter(userGroup => action.payload.findIndex(id => id === userGroup.groupId) === -1);
-            if(state.currentUserGroup && action.payload.findIndex(id => id === state.currentUserGroup.groupId) !== -1){
+            state.userGroups = state.userGroups.filter(userGroup => action.payload.findIndex(id => `${id}` === `${userGroup.groupId}`) === -1);
+            if(state.currentUserGroup && action.payload.findIndex(id => `${id}` === `${state.currentUserGroup.groupId}`) !== -1){
                 state.currentUserGroup = null;
             }
             state.error = null;

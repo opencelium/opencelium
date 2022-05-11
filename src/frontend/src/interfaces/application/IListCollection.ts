@@ -57,7 +57,7 @@ export interface IListCollection{
     sortingProps: string[];
     //translations for listProps
     translations: any;
-    getTopActions?: (viewType?: ViewType, checkedIds?: number[]) => React.ReactNode;
+    getTopActions?: (viewType?: ViewType, checkedIds?: number[] | string[]) => React.ReactNode;
     getGridActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode;
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode;
     entities: any[];
