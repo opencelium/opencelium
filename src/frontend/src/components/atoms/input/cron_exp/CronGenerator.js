@@ -36,6 +36,7 @@ import Button from "@atom/button/Button";
 import {ALL_MONTHS, convertTimeForCronExpression} from "@atom/input/cron_exp/utils";
 import {TextSize} from "@atom/text/interfaces";
 import Text from "@atom/text/Text";
+import {isArray} from "@utils/app";
 
 
 /**
@@ -97,9 +98,8 @@ class CronGenerator extends Component{
     getCronExp(){
         const {atOrEach, atOrEachOfHour, dayForMonth, timeStamp, everyValue, startAtHour, startAtMinute} = this.state;
         let cronExp = '';
-        const isForWeek = timeStamp.value === 'week';
         let value = everyValue;
-        if(isForWeek){
+        if(isArray(value)){
             value = value.map(v => v.value).join(',');
         } else{
             value = value.value;
