@@ -72,6 +72,9 @@ export const connectorSlice = createSlice({
     name: 'connector',
     initialState,
     reducers: {
+        setCurrentConnector: (state, action) => {
+            state.currentConnector = action.payload;
+        }
     },
     extraReducers: {
         [testRequestData.pending.type]: (state, action: PayloadAction<ModelConnectorPoust>) => {
@@ -233,5 +236,7 @@ export const connectorSlice = createSlice({
         },
     }
 })
+
+export const {setCurrentConnector} = connectorSlice.actions;
 
 export default connectorSlice.reducer;

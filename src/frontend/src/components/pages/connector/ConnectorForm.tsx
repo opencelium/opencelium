@@ -29,6 +29,7 @@ import {Form} from "@class/application/Form";
 import {getAllInvokers} from "@action/InvokerCreators";
 import {OptionProps} from "@atom/input/select/interfaces";
 import {InputTextType} from "@atom/input/text/interfaces";
+import { setCurrentConnector } from "@store/reducers/ConnectorSlice";
 
 
 const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
@@ -58,6 +59,9 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
             connector.getById()
         }
         dispatch(getAllInvokers());
+        return () => {
+            dispatch(setCurrentConnector(null));
+        }
     },[]);
     useEffect(() => {
         if (didMount.current) {

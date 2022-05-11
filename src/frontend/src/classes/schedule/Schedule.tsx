@@ -76,7 +76,7 @@ export class Schedule extends HookStateClass implements ISchedule{
         this.connectionSelect = schedule?.connectionSelect || null;
         this.connectionDescription = schedule?.connectionDescription || 'Here you will see the description of the connection';
         this.connection = schedule?.connection || null;
-        if((!this.connectionSelect && this.connection) || (this.connectionSelect && this.connection && this.connectionSelect.value !== this.connection?.connectionId)){
+        if(!this.connectionSelect && this.connection){
             this.connectionSelect = {
                 label: this.connection.title,
                 value: this.connection.connectionId,

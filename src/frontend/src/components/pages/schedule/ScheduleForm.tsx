@@ -27,6 +27,7 @@ import {OptionProps} from "@atom/input/select/interfaces";
 import {useNavigate, useParams} from "react-router";
 import {Form} from "@class/application/Form";
 import {getAllConnections} from "@action/connection/ConnectionCreators";
+import { setCurrentSchedule } from "@store/reducers/schedule/ScheduleSlice";
 
 
 const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
@@ -52,6 +53,9 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
             schedule.getById()
         }
         dispatch(getAllConnections());
+        return () => {
+            dispatch(setCurrentSchedule(null));
+        }
     },[]);
     useEffect(() => {
         if (didMount.current) {

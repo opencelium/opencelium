@@ -516,7 +516,15 @@ export function ConnectionForm(type) {
                                         icon: 'add',
                                         title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
                                     }}
-                                /></div>
+                                />
+                            </div>
+                            <Button
+                                key={'list_button'}
+                                label={'Cancel'}
+                                icon={'cancel'}
+                                href={'/connections'}
+                                size={TextSize.Size_16}
+                            />
                         </React.Fragment>
                     );
                 }
