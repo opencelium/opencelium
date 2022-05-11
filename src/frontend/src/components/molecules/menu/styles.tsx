@@ -17,8 +17,10 @@ import styled from "styled-components";
 import {Link} from "react-router-dom";
 import TooltipButton from "../tooltip_button/TooltipButton";
 import Text from "@atom/text/Text";
+import {ITheme} from "../../general/Theme";
+import {MenuLinkLogoStyled} from './interfaces';
 
-const NAV_LINK = `
+const getNavLinkStyles = (theme: ITheme) => { return `
     margin: 2px;
     display: grid;
     grid-template-columns: max-content max-content;
@@ -32,15 +34,14 @@ const NAV_LINK = `
     cursor: pointer;
     &:hover{
         color: white;
-        background-color: #00ACC2;
+        background-color: ${theme.menu.menuItem.hover || '#00ACC2'};
         text-decoration: none;
     }
-    
     &:focus, &:focus-visible{
         outline: none;
-        background-color: #00ACC2;
+        background-color: ${theme.menu.menuItem.hover || '#00ACC2'};
     }
-`;
+`};
 
 const SUB_LINK = `
     display: block;
@@ -53,7 +54,7 @@ const SUB_LINK = `
 
 const MainSubLinkStyled = styled(Link)`
     ${SUB_LINK}
-    ${NAV_LINK}
+    ${({theme}) => getNavLinkStyles(theme)}
     &:hover{
         color: white;
         background-color: unset;
@@ -78,7 +79,7 @@ const LinksStyled = styled.ul`
 `;
 
 const MenuLinkWithSubLinksStyled = styled.div`
-    ${NAV_LINK}
+    ${({theme}) => getNavLinkStyles(theme)}
     a{
         padding: 0;
         margin: 0 0 0 5px;
@@ -96,7 +97,7 @@ const MenuLinkLabelStyled = styled(Text)`
 `;
 
 const MenuLinkStyled = styled(Link)`
-    ${NAV_LINK}
+    ${({theme}) => getNavLinkStyles(theme)}
 `;
 
 const MenuIconStyled = styled.span`
@@ -110,11 +111,11 @@ const LogoImageStyled = styled.img`
     margin-left: 4px;
 `;
 
-const MenuLinkLogoStyled = styled(Link)`
+const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyled>`
     margin-bottom: 35px !important;
     padding-bottom: 10px;
     &:hover{
-        border-bottom: 2px solid #00ACC2;
+        border-bottom: 2px solid ${({theme}) => theme.menu.menuItem.hover || '#00ACC2'};
         padding-bottom: 8px;
     }
     & > span{

@@ -15,7 +15,10 @@
 
 import {ITheme} from "../../general/Theme";
 
-interface AdminMenuItemProps{
+interface MenuItemProps{
+    theme?: ITheme,
+}
+interface AdminMenuItemProps extends MenuItemProps{
     isMainMenuExpanded?: boolean,
 }
 interface MenuProps{
@@ -30,4 +33,5 @@ export {
     AdminMenuItemProps,
     MenuProps,
     MenuStyledProps,
+    MenuItemProps,
 }

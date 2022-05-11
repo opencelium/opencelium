@@ -15,6 +15,7 @@
 
 import styled from "styled-components";
 import {LabelStyledProps} from "./interfaces";
+import {ITheme} from "../../../general/Theme";
 
 const LabelStyled = styled.span<LabelStyledProps | HTMLSpanElement>`
     text-transform: uppercase;
@@ -23,7 +24,7 @@ const LabelStyled = styled.span<LabelStyledProps | HTMLSpanElement>`
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     padding: 15px;
     border-radius: 5px;
-    background: ${({background}) => background || 'unset'};
+    background: ${({theme}: {theme: ITheme}) => theme.menu.menuItem.hover || 'unset'};
     top: -30px;
     left: 20px;
     position: ${({position}) => position || 'inherit'};

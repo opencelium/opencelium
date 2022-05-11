@@ -16,8 +16,10 @@
 import React, {FC} from 'react';
 import MenuLink from "@molecule/menu/MenuLink";
 import {ConnectorPermissions} from "@constants/permissions";
+import {withTheme} from "styled-components";
+import {MenuItemProps} from "@organism/menu/interfaces";
 
-const ConnectorsMenuItem: FC =
+const ConnectorsMenuItem: FC<MenuItemProps> =
     ({
 
     }) => {
@@ -36,6 +38,4 @@ ConnectorsMenuItem.defaultProps = {
 }
 
 
-export {
-    ConnectorsMenuItem,
-};
+export default withTheme(ConnectorsMenuItem);

@@ -150,6 +150,7 @@ export const connectorSlice = createSlice({
             state.gettingConnector = API_REQUEST_STATE.START;
             state.isCurrentConnectorHasUniqueTitle = TRIPLET_STATE.INITIAL;
             state.isCurrentConnectorHasInvalidRequestData = TRIPLET_STATE.INITIAL;
+            state.currentConnector = null;
         },
         [getConnectorById.fulfilled.type]: (state, action: PayloadAction<ModelConnector>) => {
             state.gettingConnector = API_REQUEST_STATE.FINISH;

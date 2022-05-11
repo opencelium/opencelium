@@ -24,8 +24,11 @@ interface MenuLinkProps{
     confirmationText?: string,
 }
 
-
+interface MenuLinkLogoStyled{
+    theme?: ITheme,
+}
 
 export {
     MenuLinkProps,
+    MenuLinkLogoStyled,
 }

@@ -32,7 +32,7 @@ const Label: FC<LabelProps> =
         onClick,
     }) => {
     return (
-        <LabelStyled onClick={onClick} background={ColorTheme.Turquoise} top={top} left={left} position={position}>
+        <LabelStyled onClick={onClick} top={top} left={left} position={position}>
             <Text value={value} size={TextSize.Size_14} color={ColorTheme.White}/>
         </LabelStyled>
     )

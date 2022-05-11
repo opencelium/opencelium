@@ -73,7 +73,8 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
             label={'Themes'}
             options={[
                 {label: 'Default', value: 'default', key: 'default'},
-                {label: 'Green Day', value: 'other', key: 'other'}
+                {label: 'Green Day', value: 'other', key: 'other'},
+                {label: 'Becon Classic', value: 'becon_classic', key: 'becon_classic'}
             ]}
         />
     const AppTour = userDetail.getSwitch({propertyName: 'appTour', props:{

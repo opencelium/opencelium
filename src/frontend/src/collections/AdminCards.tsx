@@ -43,7 +43,7 @@ class AdminCards extends ListCollection{
     getListActions?: (entity: any, componentPermission: ComponentPermissionProps) => React.ReactNode = (entity: any, componentPermission: ComponentPermissionProps) => {
         return (
             <React.Fragment>
-                <PermissionButton href={`${entity.link}`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionButton href={`${entity.link}`} hasBackground={false} icon={'visibility'} size={TextSize.Size_20} permission={componentPermission.READ}/>
             </React.Fragment>
         );
     };

@@ -105,6 +105,7 @@ export const notificationTemplateSlice = createSlice({
         },
         [getNotificationTemplateById.pending.type]: (state) => {
             state.gettingNotificationTemplate = API_REQUEST_STATE.START;
+            state.currentNotificationTemplate = null;
         },
         [getNotificationTemplateById.fulfilled.type]: (state, action: PayloadAction<INotificationTemplate>) => {
             state.gettingNotificationTemplate = API_REQUEST_STATE.FINISH;

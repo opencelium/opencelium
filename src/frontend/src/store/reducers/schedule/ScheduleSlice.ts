@@ -201,6 +201,7 @@ export const scheduleSlice = createSlice({
         },
         [getScheduleById.pending.type]: (state) => {
             state.gettingScheduleById = API_REQUEST_STATE.START;
+            state.currentSchedule = null;
         },
         [getScheduleById.fulfilled.type]: (state, action: PayloadAction<ModelSchedule>) => {
             state.gettingScheduleById = API_REQUEST_STATE.FINISH;

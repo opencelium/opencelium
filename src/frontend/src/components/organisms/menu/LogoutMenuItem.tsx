@@ -18,8 +18,10 @@ import MenuLink from "@molecule/menu/MenuLink";
 import {useNavigate} from "react-router";
 import {useDispatch} from "react-redux";
 import { logout } from '@slice/application/AuthSlice';
+import {MenuItemProps} from "@organism/menu/interfaces";
+import {withTheme} from "styled-components";
 
-const LogoutMenuItem: FC =
+const LogoutMenuItem: FC<MenuItemProps> =
     ({
 
     }) => {
@@ -46,6 +48,4 @@ LogoutMenuItem.defaultProps = {
 }
 
 
-export {
-    LogoutMenuItem,
-};
+export default withTheme(LogoutMenuItem);

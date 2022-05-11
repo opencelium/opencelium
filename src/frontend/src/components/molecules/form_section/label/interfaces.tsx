@@ -17,6 +17,7 @@ import {ColorTheme, ITheme} from "../../../general/Theme";
 import {MouseEventHandler} from "react";
 
 interface LabelStyledProps{
+    theme?: ITheme,
     background?: ColorTheme,
     top?: string | number,
     left?: string | number,

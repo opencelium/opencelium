@@ -50,7 +50,7 @@ const MenuLinkWithSubLinks: FC<Partial<IconProps> & LinkProps & MenuLinkWithSubL
         <MenuLinkWithSubLinksStyled >
             <MenuIcon size={30} name={name} color={ColorTheme.White}/>
             <MainSubLinkStyled tabIndex={-1} key={label} to={to}>{label}</MainSubLinkStyled>
-            <FoldIconStyled tabIndex={isMainMenuExpanded ? 0 : -1} hasBackground={false} target={`${label}_main_menu_unfold`} tooltip={isCollapsed ? 'Unfold' : 'Fold'} color={ColorTheme.White} size={18} icon={isCollapsed ? 'expand_more' : 'expand_less'} onClick={(e: any) => toggleCollapse(e)}/>
+            <FoldIconStyled tabIndex={isMainMenuExpanded ? 0 : -1} hasBackground={false} target={`${label}_main_menu_unfold`} tooltip={isCollapsed ? 'Unfold' : 'Fold'} background={ColorTheme.White} size={18} icon={isCollapsed ? 'expand_more' : 'expand_less'} onClick={(e: any) => toggleCollapse(e)}/>
             <LinksStyled isCollapsed={isCollapsed}>
                 {subLinks.map(subLink => <PermissionSubLink key={subLink.to.toString()} to={subLink.to} permission={subLink.permission}>{subLink.children}</PermissionSubLink>)}
             </LinksStyled>

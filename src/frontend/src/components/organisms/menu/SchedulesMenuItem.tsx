@@ -16,8 +16,10 @@
 import React, {FC} from 'react';
 import MenuLink from "@molecule/menu/MenuLink";
 import {SchedulePermissions} from "@constants/permissions";
+import {withTheme} from "styled-components";
+import {MenuItemProps} from "@organism/menu/interfaces";
 
-const SchedulesMenuItem: FC =
+const SchedulesMenuItem: FC<MenuItemProps> =
     ({
 
      }) => {
@@ -36,6 +38,4 @@ SchedulesMenuItem.defaultProps = {
 }
 
 
-export {
-    SchedulesMenuItem,
-};
+export default withTheme(SchedulesMenuItem);
