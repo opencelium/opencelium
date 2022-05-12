@@ -16,7 +16,7 @@
 import React from 'react';
 import chroma from "chroma-js";
 import {createGlobalStyle} from "styled-components";
-import {ColorTheme} from "../components/general/Theme";
+import {ColorTheme} from "@style/Theme";
 import {SlickCarousel} from "./slick_carousel";
 
 

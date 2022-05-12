@@ -14,11 +14,11 @@
  */
 
 import React from 'react';
-import Tooltip from "@atom/tooltip/Tooltip";
-import Icon from "@atom/icon/Icon";
+import Tooltip from "@app_component/base/tooltip/Tooltip";
+import Icon from "@app_component/base/icon/Icon";
 import {withTheme} from "styled-components";
-import {Button} from "@atom/button/Button";
-import {ColorTheme} from "../../components/general/Theme";
+import {Button} from "@app_component/base/button/Button";
+import {ColorTheme} from "@style/Theme";
 
 export default {
     title: 'Atoms/Tooltip',

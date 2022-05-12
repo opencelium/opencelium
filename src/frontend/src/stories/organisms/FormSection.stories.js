@@ -14,14 +14,14 @@
  */
 
 import React from 'react';
-import {FormSection as FormSectionComponent} from "@organism/form_section/FormSection";
+import {FormSection as FormSectionComponent} from "@organism/../../components/form_section/FormSection";
 import {withTheme} from "styled-components";
-import InputText from "@atom/input/text/InputText";
-import InputTextarea from "@atom/input/textarea/InputTextarea";
-import InputRadios from "@atom/input/radio/InputRadios";
-import InputFile from "@atom/input/file/InputFile";
-import {InputTextType} from "@atom/input/text/interfaces";
-import InputSelect from "@atom/input/select/InputSelect";
+import InputText from "@app_component/base/input/text/InputText";
+import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
+import InputRadios from "@app_component/base/input/radio/InputRadios";
+import InputFile from "@app_component/base/input/file/InputFile";
+import {InputTextType} from "@app_component/base/input/text/interfaces";
+import InputSelect from "@app_component/base/input/select/InputSelect";
 
 const TemplateWithTheme = withTheme(FormSectionComponent);
 

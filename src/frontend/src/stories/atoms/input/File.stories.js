@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import InputFile from '@atom/input/file/InputFile';
+import InputFile from '@app_component/base/input/file/InputFile';
 
 
 export default {

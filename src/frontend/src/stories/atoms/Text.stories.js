@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import {Text as TextComponent} from "@atom/text/Text";
+import {Text as TextComponent} from "@app_component/base/text/Text";
 import {withTheme} from "styled-components";
 
 const TemplateWithTheme = withTheme(TextComponent);

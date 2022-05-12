@@ -14,12 +14,14 @@
  */
 
 import { Middleware } from 'redux'
-import {RootState} from "@store/store";
-import {LocalStorage} from "@class/../classes/application/LocalStorage";
-import {getVersion} from "@action/application/ApplicationCreators";
-import {ApplicationVersionResponseProps} from "@requestInterface/application/IApplication";
-import { setConnectionViewType, setGridViewType, setViewType } from '@store/reducers/application/ApplicationSlice';
-import {exportTemplate} from "@action/connection/TemplateCreators";
+import {RootState} from "@application/utils/store";
+import {LocalStorage} from "@application/classes/LocalStorage";
+import {getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+import {ApplicationVersionResponseProps} from "@application/requests/interfaces/IApplication";
+import { setConnectionViewType, setGridViewType, setViewType } from '@application/redux_toolkit/slices/ApplicationSlice';
+
+//TODO think how to move into entities
+import {exportTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if(getVersion.fulfilled.type === action.type){

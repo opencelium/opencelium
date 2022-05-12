@@ -14,8 +14,8 @@
  */
 
 import React from 'react';
-import InputSwitch from '@atom/input/switch/InputSwitch';
-import {ColorTheme} from "../../../components/general/Theme";
+import InputSwitch from '@app_component/base/input/switch/InputSwitch';
+import {ColorTheme} from "@style/Theme";
 
 
 export default {

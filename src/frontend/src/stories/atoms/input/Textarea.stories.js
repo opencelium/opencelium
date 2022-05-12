@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import InputTextarea from '@atom/input/textarea/InputTextarea';
+import InputTextarea from '@app_component/base/input/textarea/InputTextarea';
 
 
 export default {

@@ -14,9 +14,9 @@
  */
 
 import React from 'react';
-import InputText from '@atom/input/text/InputText';
-import {InputTextType} from "@atom/input/text/interfaces";
-import {ColorTheme} from "../../../components/general/Theme";
+import InputText from '@app_component/base/input/text/InputText';
+import {InputTextType} from "@app_component/base/input/text/interfaces";
+import {ColorTheme} from "@style/Theme";
 
 
 export default {

@@ -14,8 +14,8 @@
  */
 
 import React from 'react';
-import InputRadios from '@atom/input/radio/InputRadios';
-import {ColorTheme} from "../../../components/general/Theme";
+import InputRadios from '@app_component/base/input/radio/InputRadios';
+import {ColorTheme} from "@style/Theme";
 
 
 export default {

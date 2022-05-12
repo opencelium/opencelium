@@ -14,15 +14,15 @@
  */
 
 import React, {FC, Suspense, useEffect} from 'react';
-import {ThemeProvider, withTheme} from 'styled-components';
-import Themes, {ThemeNames} from "./general/Theme";
 import {BrowserRouter} from "react-router-dom";
-import {Global} from "../styles/global";
-import {getRoutes} from "@store/routes";
-import {Application} from "@class/application/Application";
-import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from "@utils/constants/url";
-import {store} from "@store/store";
-import {setTheme} from "@slice/application/ApplicationSlice";
+import {ThemeProvider, withTheme} from 'styled-components';
+import {getRoutes} from "@application/utils/routes";
+import {Application} from "@application/classes/Application";
+import {store} from "@application/utils/store";
+import {setTheme} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@application/requests/classes/url';
+import Themes, {ThemeNames} from "@style/Theme";
+import {Global} from "@style/global";
 
 /**
  * to create iframe for cross domain messaging
@@ -30,9 +30,9 @@ import {setTheme} from "@slice/application/ApplicationSlice";
  * @param src - iframe url
  */
 export function createIframe(src: string): void{
-    const iframe: any = document.getElementById('iframe_messenger');
-    if(iframe){
-        iframe.setAttribute("src", src);
+    const iframe: any = document.getElementById('iframe');
+    if(iframe) {
+        iframe.src = src;
     }
     function handleMessage(e: any) {
         let {key, value, method} = e.data;

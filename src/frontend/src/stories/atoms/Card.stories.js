@@ -14,11 +14,11 @@
  */
 
 import React from 'react';
-import {Card as CardComponent} from "@atom/card/Card";
+import {Card as CardComponent} from "@app_component/base/card/Card";
 import styled, {withTheme} from "styled-components";
-import InputText from "@atom/input/text/InputText";
-import Label from "@molecule/form_section/label/Label";
-import InputTextarea from "@atom/input/textarea/InputTextarea";
+import InputText from "@app_component/base/input/text/InputText";
+import Label from "@molecule/../../components/form/form_section/label/Label";
+import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
 
 const TemplateWithTheme = withTheme(CardComponent);
 

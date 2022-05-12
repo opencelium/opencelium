@@ -14,17 +14,19 @@
  */
 
 import { Middleware } from 'redux'
-
-import {AppDispatch, RootState} from "@store/store";
-import {LocalStorage} from "@class/../classes/application/LocalStorage";
-import {addNotification, clearAllNotifications, clearNotification } from '@slice/application/ApplicationSlice';
-import {logout} from "@slice/application/AuthSlice";
 import {PayloadAction} from "@reduxjs/toolkit";
-import {INotification, NotificationType} from "@interface/application/INotification";
-import {NotificationTranslations} from "@translations/en/notifications";
-import {login} from "@action/application/AuthCreators";
-import {CNotification} from "@class/application/Notification";
-import {LogoutProps} from "@interface/application/IAuth";
+import {AppDispatch, RootState} from "@application/utils/store";
+import {LocalStorage} from "@application/classes/LocalStorage";
+import {addNotification, clearAllNotifications, clearNotification } from '@application/redux_toolkit/slices/ApplicationSlice';
+import {logout} from "@application/redux_toolkit/slices/AuthSlice";
+import {INotification, NotificationType} from "@application/interfaces/INotification";
+import {translations} from "@application/translations";
+import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
+import {CNotification} from "@application/classes/Notification";
+import {LogoutProps} from "@application/interfaces/IAuth";
+
+//TODO - get en from i18n
+const NotificationTranslations = translations.en.translation.notifications;
 
 const FulfilledActions = Object.keys(NotificationTranslations.fulfilled);
 const RejectedActions = Object.keys(NotificationTranslations.rejected);

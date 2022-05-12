@@ -16,13 +16,13 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Provider} from "react-redux";
-import {store} from "@store/store";
-import './translations/i18n';
-import {App} from "./components/App";
+import {store} from "@application/utils/store";
+import '@application/utils/i18n';
+import {App} from "@app_component/App";
 
-import "@style/bootstrap.css";
-import "@style/react_grid_layout.css";
-import "@style/react_crop.css";
+import "@style/css/bootstrap.css";
+import "@style/css/react_grid_layout.css";
+import "@style/css/react_crop.css";
 
 ReactDOM.render(
     <Provider store={store}>

@@ -14,16 +14,16 @@
  */
 
 import React from 'react';
-import {Form as FormComponent} from "@organism/form/Form";
+import {Form as FormComponent} from "@organism/../../components/form/Form";
 import {withTheme} from "styled-components";
-import InputText from "@atom/input/text/InputText";
-import InputTextarea from "@atom/input/textarea/InputTextarea";
-import InputRadios from "@atom/input/radio/InputRadios";
-import InputFile from "@atom/input/file/InputFile";
-import {InputTextType} from "@atom/input/text/interfaces";
-import InputSelect from "@atom/input/select/InputSelect";
-import FormSection from "@organism/form_section/FormSection";
-import Button from "@atom/button/Button";
+import InputText from "@app_component/base/input/text/InputText";
+import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
+import InputRadios from "@app_component/base/input/radio/InputRadios";
+import InputFile from "@app_component/base/input/file/InputFile";
+import {InputTextType} from "@app_component/base/input/text/interfaces";
+import InputSelect from "@app_component/base/input/select/InputSelect";
+import FormSection from "@organism/../../components/form_section/FormSection";
+import Button from "@app_component/base/button/Button";
 
 const TemplateWithTheme = withTheme(FormComponent);
 

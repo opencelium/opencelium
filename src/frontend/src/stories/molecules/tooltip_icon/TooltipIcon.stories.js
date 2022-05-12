@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import {TooltipIcon as TooltipIconComponent} from "@molecule/tooltip_icon/TooltipIcon";
+import {TooltipIcon as TooltipIconComponent} from "@molecule/../../../components/atoms/tooltip_icon/TooltipIcon";
 import {withTheme} from "styled-components";
 
 const TemplateWithTheme = withTheme(TooltipIconComponent);

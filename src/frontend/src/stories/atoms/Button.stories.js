@@ -14,9 +14,9 @@
  */
 
 import React from 'react';
-import {Button} from "@atom/button/Button";
+import {Button} from "@app_component/base/button/Button";
 import {withTheme} from "styled-components";
-import {ColorTheme} from "../../components/general/Theme";
+import {ColorTheme} from "@style/Theme";
 
 const TemplateWithTheme = withTheme(Button);
 

@@ -14,8 +14,8 @@
  */
 
 import React from 'react';
-import InputSelect from '@atom/input/select/InputSelect';
-import {ColorTheme} from "../../../components/general/Theme";
+import InputSelect from '@app_component/base/input/select/InputSelect';
+import {ColorTheme} from "@style/Theme";
 
 
 export default {

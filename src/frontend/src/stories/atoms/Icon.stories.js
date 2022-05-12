@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import Icon from "@atom/icon/Icon";
+import Icon from "@app_component/base/icon/Icon";
 
 export default {
     title: 'Atoms/Icon',

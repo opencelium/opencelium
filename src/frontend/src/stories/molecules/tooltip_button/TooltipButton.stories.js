@@ -14,9 +14,9 @@
  */
 
 import React from 'react';
-import {TooltipButton as TooltipButtonComponent} from "@molecule/tooltip_button/TooltipButton";
+import {TooltipButton as TooltipButtonComponent} from "@molecule/../../../components/atoms/tooltip_button/TooltipButton";
 import {withTheme} from "styled-components";
-import {ColorTheme} from "../../../components/general/Theme";
+import {ColorTheme} from "@style/Theme";
 
 const TemplateWithTheme = withTheme(TooltipButtonComponent);
 

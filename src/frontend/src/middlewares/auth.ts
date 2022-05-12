@@ -14,16 +14,17 @@
  */
 
 import { Middleware } from 'redux'
+import { logout } from '@application/redux_toolkit/slices/AuthSlice';
+import {AppDispatch, RootState} from "@application/utils/store";
+import {login, updateAuthUserDetail} from "@application/redux_toolkit/action_creators/AuthCreators";
+import {LocalStorage} from "@application/classes/LocalStorage";
+import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
+import {getResources, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+import {LogoutProps} from "@application/interfaces/IAuth";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
-import { logout } from '@slice/application/AuthSlice';
-import {AppDispatch, RootState} from "@store/store";
-import {login, updateAuthUserDetail} from "@action/application/AuthCreators";
-import {LocalStorage} from "@class/../classes/application/LocalStorage";
-import {IResponse, ResponseMessages} from "@requestInterface/application/IResponse";
-import {getResources, getVersion} from "@action/application/ApplicationCreators";
-import {checkForUpdates} from "@action/application/UpdateAssistantCreators";
-import {LogoutProps} from "@interface/application/IAuth";
-import {API_REQUEST_STATE} from "@interface/application/IApplication";
+//TODO think how to move into entites
+import {checkForUpdates} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 
 export const authMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
@@ -33,7 +34,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
     const response: IResponse = action.payload;
     if(isRequestRejected){
         const applicationState = storeApi.getState().applicationReducer;
-        isAccessDenied = applicationState.openingExternalUrl !== API_REQUEST_STATE.START && (response?.status === 403 || response?.message === ResponseMessages.ACCESS_DENIED || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || false);
+        isAccessDenied = applicationState.openingExternalUrl !== API_REQUEST_STATE.START && (response?.status === 403 || response?.message === ResponseMessages.ACCESS_DENIED || response?.message === ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE || (response?.message === ResponseMessages.NETWORK_ERROR && login.rejected.type === action.type) || false);
     }
     if(isAccessDenied){
         const authState = storeApi.getState().authReducer;

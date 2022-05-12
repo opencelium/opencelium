@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import {Label as LabelComponent} from "@molecule/form_section/label/Label";
+import {Label as LabelComponent} from "@molecule/../../../components/form/form_section/label/Label";
 import {withTheme} from "styled-components";
 
 const TemplateWithTheme = withTheme(LabelComponent);

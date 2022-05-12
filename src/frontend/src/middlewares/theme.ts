@@ -1,7 +1,7 @@
 import { Middleware } from 'redux'
-import {RootState, store} from "@store/store";
-import {LocalStorage} from "@class/application/LocalStorage";
-import {setTheme} from '@slice/application/ApplicationSlice';
+import {RootState, store} from "@application/utils/store";
+import {LocalStorage} from "@application/classes/LocalStorage";
+import {setTheme} from '@application/redux_toolkit/slices/ApplicationSlice';
 
 export const themeMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (setTheme.match(action)) {
