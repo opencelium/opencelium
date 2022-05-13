@@ -13,8 +13,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
-import {AppDispatch, RootState} from "./store";
+import { Middleware } from 'redux'
+import {RootState} from "@application/utils/store";
+import {LocalStorage} from "@application/classes/LocalStorage";
+import {updateUserDetail} from "../redux-toolkit/action_creators/UserDetailCreators";
 
-export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+const userDetailMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
+    if (updateUserDetail.fulfilled.type === action.type) {
+        const storage = LocalStorage.getStorage(true);
+        storage.set('authUser', action.payload);
+    }
+    return next(action);
+}
+
+export default userDetailMiddleware;

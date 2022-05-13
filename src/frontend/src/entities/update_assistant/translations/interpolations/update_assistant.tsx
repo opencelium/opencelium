@@ -15,14 +15,14 @@
 
 import React from "react";
 import {NavigateFunction} from "react-router";
-import {checkForUpdates} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
+import {IApplicationResponse} from "@application/requests/interfaces/IResponse";
+import {CheckForUpdateProps} from "@application/requests/interfaces/IUpdateAssistant";
+import {NotificationType} from "@application/interfaces/INotification";
+import {getActionWithoutType} from "@application/utils/utils";
+import {AppDispatch} from "@application/utils/store";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import InterpolateTranslation from "@app_component/base/interpolate_translation/InterpolateTranslation";
-import {IApplicationResponse} from "../../requests/interfaces/IResponse";
-import {CheckForUpdateProps} from "../../requests/interfaces/IUpdateAssistant";
-import {NotificationType} from "../../interfaces/INotification";
-import {getActionWithoutType} from "../../utils/utils";
-import {AppDispatch} from "../../utils/store";
+import {checkForUpdates} from "../../redux_toolkit/action_creators/UpdateAssistantCreators";
 
 const GET_LAST_AVAILABLE_VERSION = (responseType: NotificationType, dispatch: AppDispatch, navigate: NavigateFunction, params: IApplicationResponse<CheckForUpdateProps>) => {
     // @ts-ignore

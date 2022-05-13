@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ModelComponent from "@entity/user/requests/models/Component";
+import ModelComponent from "@application/requests/models/Component";
 
 //api description of user group
 export default interface ModelUserGroup{

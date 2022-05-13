@@ -18,6 +18,7 @@ import {OptionProps} from "@app_component/base/input/select/interfaces";
 import { IUserGroup } from "@entity/user_group/interfaces/IUserGroup";
 import IUserDetail from "./IUserDetail";
 import ModelUserPoust from "../requests/models/UserPoust";
+import IAuthUser from "@entity/user/interfaces/IAuthUser";
 
 export interface IUserSwitch{
 }

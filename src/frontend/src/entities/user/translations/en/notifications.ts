@@ -1,6 +1,9 @@
 import ActionCreators from "../../redux-toolkit/action_creators";
 
-const {addUser, updateUser, uploadUserImage, deleteUserById, deleteUsersById, getUserById, getAllUsers, checkUserEmail, deleteUserImage} = ActionCreators;
+const {
+    addUser, updateUser, uploadUserImage, deleteUserById, deleteUsersById, getUserById,
+    getAllUsers, checkUserEmail, deleteUserImage, updateUserDetail,
+} = ActionCreators;
 
 export default {
     fulfilled: {
@@ -9,6 +12,7 @@ export default {
         [uploadUserImage.fulfilled.type]: "The image of the user <1><0>{{email}}</0></1> was successfully uploaded.",
         [deleteUserById.fulfilled.type]: "The user <1><0>{{email}}</0></1> was successfully removed.",
         [deleteUsersById.fulfilled.type]: "The selected users were successfully removed.",
+        [updateUserDetail.fulfilled.type]: "The settings were successfully updated",
     },
     rejected: {
         [addUser.rejected.type]: {
@@ -38,6 +42,9 @@ export default {
         },
         [deleteUserImage.rejected.type]: {
             "__DEFAULT__": "There is an error removing user's image."
+        },
+        [updateUserDetail.rejected.type]: {
+            "__DEFAULT__": "The settings were not updated"
         },
     },
 }

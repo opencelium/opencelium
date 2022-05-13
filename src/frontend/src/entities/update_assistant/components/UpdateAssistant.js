@@ -190,7 +190,7 @@ class UpdateAssistant extends Component{
         const {updateData, hasAvailableUpdates, hasTemplateFileUpdate, hasInvokerFileUpdate, hasConnectionMigration, hasFinishUpdate} = this.state;
         const {t, updatingSystem} = this.props;
         let contentTranslations = {};
-        contentTranslations.header = t('FORM.HEADER');
+        contentTranslations.header = [{name: 'Admin Panel', link: '/admin_cards'}, {name: t('FORM.HEADER')}];
         const isActionDisabled = !this.validateAvailableUpdates() || !this.validateTemplateFileUpdate() || !this.validateInvokerFileUpdate() || !this.validateConnectionMigration();
         contentTranslations.action_button = {title: `${t('FORM.UPDATE_OC')}`, isDisabled: isActionDisabled};
         let contents = [{

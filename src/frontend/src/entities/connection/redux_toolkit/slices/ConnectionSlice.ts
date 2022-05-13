@@ -27,6 +27,7 @@ import {
 } from "../action_creators/ConnectionCreators";
 import {IConnection} from "../../interfaces/IConnection";
 import {PANEL_LOCATION} from "../../components/utils/constants/app";
+import {ConnectionViewProps, ConnectionViewType} from "@root/components/pages/interfaces";
 
 const COLOR_MODE = {
     RECTANGLE_TOP: 'RECTANGLE_TOP',
@@ -70,10 +71,13 @@ export interface ConnectionState extends ICommonState{
     isVisibleBusinessLabelKeyPressed: boolean,
     isCreateElementPanelOpened: boolean,
     isDraftOpenedOnce: boolean,
+    connectionViewType: ConnectionViewType,
 }
 
 
 let initialState: ConnectionState = null;
+const storage = LocalStorage.getStorage();
+const connectionViewType: ConnectionViewType = storage.get('connectionViewType');
 if(isExternalWindow()){
     const storage = LocalStorage.getStorage();
     initialState = storage.get('connection_overview');
@@ -93,7 +97,6 @@ if(initialState === null) {
         deletingConnectionById: API_REQUEST_STATE.INITIAL,
         deletingConnectionsById: API_REQUEST_STATE.INITIAL,
         currentConnection: null,
-
         currentBusinessItem: null,
         currentTechnicalItem: null,
         connection: null,
@@ -109,6 +112,7 @@ if(initialState === null) {
         isVisibleBusinessLabelKeyPressed: false,
         isCreateElementPanelOpened: false,
         isDraftOpenedOnce: false,
+        connectionViewType: connectionViewType || ConnectionViewProps.Diagram,
         ...CommonState,
     }
 }
@@ -161,6 +165,9 @@ export const connectionSlice = createSlice({
         },
         setConnectionDraftWasOpened: (state, action: PayloadAction<never>) => {
             state.isDraftOpenedOnce = true;
+        },
+        setConnectionViewType: (state, action: PayloadAction<ConnectionViewType>) => {
+            state.connectionViewType = action.payload;
         },
     },
     extraReducers: {
@@ -278,19 +285,10 @@ export const connectionSlice = createSlice({
 })
 
 export const {
-    setIsVisibleBusinessLabelKeyPressed,
-    setBusinessLabelMode,
-    setColorMode,
-    setPanelConfigurations,
-    setConnectionData,
-    setArrows,
-    setItems,
-    setCurrentBusinessItem,
-    setCurrentTechnicalItem,
-    setDetailsLocation,
-    setBusinessLayoutLocation,
-    setTechnicalLayoutLocation,
-    setConnectionDraftWasOpened,
+    setIsVisibleBusinessLabelKeyPressed, setBusinessLabelMode, setColorMode, setPanelConfigurations,
+    setConnectionData, setArrows, setItems, setCurrentBusinessItem, setCurrentTechnicalItem,
+    setDetailsLocation, setBusinessLayoutLocation, setTechnicalLayoutLocation,
+    setConnectionDraftWasOpened, setConnectionViewType,
 } = connectionSlice.actions;
 
 export default connectionSlice.reducer;

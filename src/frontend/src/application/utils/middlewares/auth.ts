@@ -16,15 +16,12 @@
 import { Middleware } from 'redux'
 import { logout } from '@application/redux_toolkit/slices/AuthSlice';
 import {AppDispatch, RootState} from "@application/utils/store";
-import {login, updateAuthUserDetail} from "@application/redux_toolkit/action_creators/AuthCreators";
+import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {getResources, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {LogoutProps} from "@application/interfaces/IAuth";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-
-//TODO think how to move into entites
-import {checkForUpdates} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 
 export const authMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     const dispatch: AppDispatch = storeApi.dispatch;
@@ -43,14 +40,11 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
             dispatch(logout(logoutProps));
         }
     }
-    if (login.fulfilled.type === action.type || updateAuthUserDetail.fulfilled.type === action.type) {
+    if (login.fulfilled.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
-        if(login.fulfilled.type === action.type) {
-            dispatch(getVersion());
-            dispatch(getResources());
-            dispatch(checkForUpdates());
-        }
+        dispatch(getVersion());
+        dispatch(getResources());
     } else if (logout.match(action)) {
         const SecuredStorage = LocalStorage.getStorage(true);
         SecuredStorage.remove('authUser');

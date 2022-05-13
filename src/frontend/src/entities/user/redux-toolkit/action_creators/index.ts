@@ -14,7 +14,9 @@
  */
 
 import UserCreators from "./UserCreators";
+import UserDetailCreators from "./UserDetailCreators";
 
 export default {
     ...UserCreators,
+    ...UserDetailCreators,
 }

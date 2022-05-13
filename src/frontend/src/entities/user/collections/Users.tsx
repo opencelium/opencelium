@@ -30,7 +30,7 @@ import { UserPermissions } from "../constants";
 
 export default class Users extends ListCollection{
     entities: IUser[];
-    title = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'Users'}];
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Users'}];
     keyPropName = 'id';
     sortingProps = ['email'];
     listProps: ListProp[] = [{propertyKey: 'email', width: '40%'}, {propertyKey: 'userGroup.name', width: '40%'}];

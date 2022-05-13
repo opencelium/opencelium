@@ -18,20 +18,13 @@ import {RootState} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {ApplicationVersionResponseProps} from "@application/requests/interfaces/IApplication";
-import { setConnectionViewType, setGridViewType, setViewType } from '@application/redux_toolkit/slices/ApplicationSlice';
-
-//TODO think how to move into entities
-import {exportTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
+import { setGridViewType, setViewType } from '@application/redux_toolkit/slices/ApplicationSlice';
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if(getVersion.fulfilled.type === action.type){
         const versionResponse: ApplicationVersionResponseProps = action.payload;
         const storage = LocalStorage.getStorage();
         storage.set('appVersion', versionResponse.version);
-    }
-    if(setConnectionViewType.type === action.type){
-        const storage = LocalStorage.getStorage();
-        storage.set('connectionViewType', action.payload);
     }
     if(setViewType.type === action.type){
         const storage = LocalStorage.getStorage();
@@ -40,15 +33,6 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
     if(setGridViewType.type === action.type){
         const storage = LocalStorage.getStorage();
         storage.set('gridViewType', action.payload);
-    }
-    if(exportTemplate.fulfilled.type === action.type){
-        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(action.payload.templateContent));
-        let downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href",     dataStr);
-        downloadAnchorNode.setAttribute("download", action.payload.id + ".json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
     }
     return next(action);
 }

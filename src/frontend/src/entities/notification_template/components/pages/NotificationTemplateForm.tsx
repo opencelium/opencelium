@@ -94,7 +94,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         />);
     }
     const data = {
-        title: [{name: 'Admin Cards', link: '/admin_cards'}, {name: formData.formTitle}],
+        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: formData.formTitle}],
         actions,
         formSections: [
             <FormSection label={{value: 'General Data'}}>

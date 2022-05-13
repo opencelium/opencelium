@@ -15,10 +15,8 @@
 
 import ApplicationCreators from "./ApplicationCreators";
 import AuthCreators from "./AuthCreators";
-import UpdateAssistantCreators from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 
 export default {
     ...ApplicationCreators,
     ...AuthCreators,
-    ...UpdateAssistantCreators,
 }

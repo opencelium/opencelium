@@ -30,7 +30,7 @@ import { UserGroupPermissions } from "../constants";
 
 class UserGroups extends ListCollection{
     entities: IUserGroup[];
-    title = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'User Groups'}];
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups'}];
     keyPropName ='id';
     sortingProps = ['name'];
     listProps: ListProp[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'components[name]', width: '30%'}];

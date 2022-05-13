@@ -26,7 +26,7 @@ import {IExternalApplication} from "../interfaces/IExternalApplication";
 
 class ExternalApplications extends ListCollection{
     entities: IExternalApplication[];
-    title = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'External Application'}];
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'External Application'}];
     keyPropName ='id';
     listProps: ListProp[] = [{propertyKey: 'name', width: '40%'}, {propertyKey: 'status', width: '40%'}];
     gridProps: ListCollectionCardProps = {

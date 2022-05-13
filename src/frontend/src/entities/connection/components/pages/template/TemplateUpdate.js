@@ -22,7 +22,7 @@ import {getTemplateById as fetchTemplate, getAllTemplates as fetchTemplates, che
 import {updateTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from '@entity/connector/redux_toolkit/action_creators/ConnectorCreators';
 import {permission} from "@application/utils/permission";
-import {setConnectionViewType} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setConnectionViewType} from "../../../redux_toolkit/slices/ConnectionSlice";
 import {TemplateForm} from "./TemplateForm";
 import {useNavigate, useParams} from "react-router";
 import {ConnectionPermissions} from "@entity/connection/constants";

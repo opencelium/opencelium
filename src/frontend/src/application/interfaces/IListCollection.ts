@@ -36,6 +36,7 @@ export interface ListProp{
     width?: string,
     getValue?: (entity: any) => any,
     replace?: boolean,
+    style?: any;
 }
 
 export interface IListCollection{

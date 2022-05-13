@@ -14,8 +14,10 @@
  */
 
 import userReducer from "./UserSlice";
+import userDetailReducer from "./UserDetailSlice";
 
 
 export default {
     userReducer,
+    userDetailReducer,
 }

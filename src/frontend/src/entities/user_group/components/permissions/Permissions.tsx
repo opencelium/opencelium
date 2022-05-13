@@ -19,7 +19,7 @@ import {capitalize, removeFromArrayByValue} from "@application/utils/utils";
 import Input from "@app_component/base/input/Input";
 import {Text} from "@app_component/base/text/Text";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
-import {PermissionTypes} from "@entity/user/requests/models/Component";
+import {PermissionTypes} from "@application/requests/models/Component";
 import {PermissionProps, PermissionsProps} from './interfaces';
 import { PermissionsStyled } from './styles';
 

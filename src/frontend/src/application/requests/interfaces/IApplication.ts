@@ -16,7 +16,7 @@
 import {AxiosResponse} from "axios";
 import {ITicket} from "../../interfaces/ITicket";
 import {IResponse} from "./IResponse";
-import { IComponent } from "@entity/user_group/components/permissions/interfaces";
+import {IComponent} from "../../interfaces/IApplication";
 
 export interface ApplicationVersionResponseProps{
     /*

@@ -28,7 +28,7 @@ import { NotificationTemplatePermissions } from "../constants";
 
 class NotificationTemplates extends ListCollection{
     entities: INotificationTemplate[];
-    title = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'Notification Templates'}];
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Notification Templates'}];
     keyPropName ='id';
     sortingProps = ['name'];
     listProps: ListProp[] = [{propertyKey: 'name', width: '40%'}, {propertyKey: 'type', width: '40%'}];

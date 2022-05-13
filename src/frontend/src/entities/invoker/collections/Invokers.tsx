@@ -33,7 +33,7 @@ import ImportInvokerButton from "../components/import_invoker_button/ImportInvok
 
 class Invokers extends ListCollection{
     entities: IInvoker[];
-    title = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'Invokers'}];
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Invokers'}];
     keyPropName = 'name';
     sortingProps = ['name'];
     listProps: ListProp[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'authType', width: '10%'}, {propertyKey: 'operations[name]', width: '20%'}];

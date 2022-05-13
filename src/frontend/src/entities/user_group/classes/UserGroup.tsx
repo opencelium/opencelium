@@ -24,7 +24,7 @@ import {InputTextProps} from "@app_component/base/input/text/interfaces";
 import {InputSelectProps, OptionProps} from "@app_component/base/input/select/interfaces";
 import {InputFileProps} from "@app_component/base/input/file/interfaces";
 import {InputTextareaProps} from "@app_component/base/input/textarea/interfaces";
-import ModelComponent from "@entity/user/requests/models/Component";
+import ModelComponent from "@application/requests/models/Component";
 import {
     IUserGroup,
     IUserGroupFile,
@@ -41,11 +41,11 @@ import {
 } from "../redux_toolkit/action_creators/UserGroupCreators";
 import ModelUserGroup from "../requests/models/UserGroup";
 import {
-    ComponentProps,
     PermissionProps,
     PermissionsProps
 } from "../components/permissions/interfaces";
 import {Permissions} from "../components/permissions/Permissions";
+import {ComponentProps} from "@application/interfaces/IApplication";
 
 
 export class UserGroup extends HookStateClass implements IUserGroup{

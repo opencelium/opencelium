@@ -14,6 +14,9 @@
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {ViewType} from "@app_component/collection/collection_view/CollectionView";
+import {GridViewType} from "@app_component/collection/GridViewMenu";
+import {ThemeNames} from "@style/Theme";
 import {API_REQUEST_STATE} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
@@ -34,11 +37,7 @@ import {
 import {IApplicationResponse, IResponse} from "../../requests/interfaces/IResponse";
 import {INotification} from "../../interfaces/INotification";
 import {LocalStorage} from "../../classes/LocalStorage";
-import {ConnectionViewProps, ConnectionViewType} from "@entity/connection/components/pages/interfaces";
-import {ThemeNames} from "@style/Theme";
-import {ViewType} from "@app_component/collection/collection_view/CollectionView";
-import {GridViewType} from "@app_component/collection/GridViewMenu";
-import { IComponent } from "@entity/user_group/components/permissions/interfaces";
+import { IComponent } from "../../interfaces/IApplication";
 
 
 export interface AuthState extends ICommonState{
@@ -60,7 +59,6 @@ export interface AuthState extends ICommonState{
     isComponentExternalInChangeContent: boolean,
     isFullScreen: boolean,
     isDraftOpenedOnce: boolean,
-    connectionViewType: ConnectionViewType,
     viewType: ViewType,
     gridViewType: GridViewType,
     searchValue: string,
@@ -74,7 +72,6 @@ const notifications: INotification[] = storage.get('notifications');
 const version: string = storage.get('appVersion');
 const viewType: ViewType = storage.get('viewType');
 const gridViewType: GridViewType = storage.get('gridViewType');
-const connectionViewType: ConnectionViewType = storage.get('connectionViewType');
 const initialState: AuthState = {
     addingTicket: API_REQUEST_STATE.INITIAL,
     gettingVersion: API_REQUEST_STATE.INITIAL,
@@ -96,7 +93,6 @@ const initialState: AuthState = {
     isDraftOpenedOnce: false,
     viewType: viewType || ViewType.LIST,
     gridViewType: gridViewType || 4,
-    connectionViewType: connectionViewType || ConnectionViewProps.Diagram,
     searchValue: '',
     currentPageItems: [],
     theme: storage.get('theme') || ThemeNames.Default,
@@ -128,9 +124,6 @@ export const applicationSlice = createSlice({
         },
         setConnectionDraftToOpenOnce: (state, action: PayloadAction<boolean>) => {
             state.isDraftOpenedOnce = true;
-        },
-        setConnectionViewType: (state, action: PayloadAction<ConnectionViewType>) => {
-            state.connectionViewType = action.payload;
         },
         setViewType: (state, action: PayloadAction<ViewType>) => {
             state.viewType = action.payload;
@@ -250,13 +243,13 @@ export const applicationSlice = createSlice({
 export const {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setConnectionViewType, setViewType, setFullScreen, setSearchValue, setTheme,
+    setViewType, setFullScreen, setSearchValue, setTheme,
 } = applicationSlice.actions;
 
 export const actions = {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setConnectionViewType, setViewType, setFullScreen, setSearchValue, setTheme,
+    setViewType, setFullScreen, setSearchValue, setTheme,
 }
 
 export default applicationSlice.reducer;

@@ -33,7 +33,7 @@ import ImportTemplateButton from "../components/import_template_button/ImportTem
 
 class Templates extends ListCollection{
     entities: ITemplate[];
-    title = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'Templates'}];
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Templates'}];
     keyPropName ='id';
     sortingProps = ['name'];
     listProps: ListProp[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'connection.fromConnector.invoker.name'}, {propertyKey: 'connection.toConnector.invoker.name'}];

@@ -25,7 +25,7 @@ import {AdminCard} from "../classes/AdminCard";
 
 class AdminCards extends ListCollection{
     entities: IAdminCard[];
-    title = 'Admin Cards';
+    title = 'Admin Panel';
     keyPropName ='id';
     sortingProps = ['name'];
     listProps: ListProp[] = [{propertyKey: 'name', replace: true, getValue: (AdminCard: IAdminCard) => {

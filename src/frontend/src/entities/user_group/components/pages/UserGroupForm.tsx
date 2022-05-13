@@ -21,14 +21,13 @@ import {IForm} from "@application/interfaces/IForm";
 import {Form} from "@application/classes/Form";
 import {getAllComponents} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {capitalize} from "@application/utils/utils";
-import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE, IComponent, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import Button from "@app_component/base/button/Button";
 import FormComponent from "@app_component/form/form/Form";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
 import FormSection from "@app_component/form/form_section/FormSection";
 import {UserGroup} from "../../classes/UserGroup";
 import {IUserGroup} from "../../interfaces/IUserGroup";
-import {IComponent} from "../../components/permissions/interfaces";
 
 const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const dispatch = useAppDispatch();
@@ -100,7 +99,7 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         />);
     }
     const data = {
-        title: [{name: 'Admin Cards', link: '/admin_cards'}, {name: formData.formTitle}],
+        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: formData.formTitle}],
         actions: actions,
         formSections: [
             <FormSection label={{value: 'user details'}}>

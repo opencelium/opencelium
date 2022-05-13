@@ -34,7 +34,7 @@ import { MyProfilePermissions } from "../../constants";
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {theme} = Application.getReduxState();
-    const {authUser, updatingAuthUser} = Auth.getReduxState();
+    const {authUser} = Auth.getReduxState();
     const userGroup = UserGroup.createState<IUserGroup>({
         _readOnly: true,
         ...authUser.userGroup,
@@ -72,7 +72,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
             options={[
                 {label: 'Default', value: 'default', key: 'default'},
                 {label: 'Green Day', value: 'other', key: 'other'},
-                {label: 'Becon Classic', value: 'becon_classic', key: 'becon_classic'},
+                {label: 'becon Classic', value: 'becon_classic', key: 'becon_classic'},
             ]}
         />
     const AppTour = userDetail.getSwitch({propertyName: 'appTour', props:{

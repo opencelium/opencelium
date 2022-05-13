@@ -20,7 +20,7 @@ import {withTranslation} from 'react-i18next';
 import {addConnection, checkConnectionTitle} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
-import {setConnectionViewType} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setConnectionViewType} from "../../../../../redux_toolkit/slices/ConnectionSlice";
 import {permission} from "@application/utils/permission";
 import {ConnectionForm} from "@entity/connection/components/components/content/connections/ConnectionForm";
 import {useNavigate} from "react-router";

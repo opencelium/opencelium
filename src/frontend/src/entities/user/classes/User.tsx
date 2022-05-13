@@ -36,6 +36,9 @@ import {
     uploadUserImage,
 } from "../redux-toolkit/action_creators/UserCreators";
 import ModelUserPoust from "../requests/models/UserPoust";
+import IAuthUser from "@entity/user/interfaces/IAuthUser";
+import {TokenProps} from "@application/interfaces/IAuth";
+import jwt from "jsonwebtoken";
 
 
 export default class User extends HookStateClass implements IUser{
@@ -301,6 +304,22 @@ export default class User extends HookStateClass implements IUser{
     @App.dispatch(checkUserEmail, {hasNoValidation: true})
     checkEmail(): boolean{
         return this.validateEmail();
+    }
+
+    static getUserFromLoginResponse(user: any): IAuthUser{
+        const {data: {userDetail, userGroup}, headers} = user;
+        const token = headers?.authorization || '';
+        const decodedData: any = jwt.decode(token.slice(7));
+        return {
+            id: decodedData.userId,
+            email: decodedData.sub,
+            token,
+            expTime: decodedData.exp * 1000,
+            sessionTime: parseInt(decodedData.sessionTime),
+            lastLogin: decodedData.iat * 1000,
+            userGroup: userGroup,
+            userDetail: userDetail,
+        };
     }
 
     getPoustModel(isForApiRequest: boolean = false): ModelUserPoust{

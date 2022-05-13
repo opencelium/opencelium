@@ -17,10 +17,8 @@ import ActionCreators from "../../redux_toolkit/action_creators";
 import {actions} from '../../redux_toolkit/slices/ApplicationSlice';
 
 const {
-    updateAuthUserDetail, login, getResources, getVersion, updateResources,
-    getGlobalSearchData, getAllComponents, addTicket, openExternalUrl,deleteApplicationFile,
-    uploadApplicationFile, updateApplication, getOnlineUpdates, checkApplicationBeforeUpdate,
-    getOfflineUpdates, checkForUpdates,
+    login, getResources, getVersion, updateResources, getGlobalSearchData, getAllComponents,
+    addTicket, openExternalUrl
 } = ActionCreators;
 
 const {setTheme} = actions;
@@ -28,13 +26,8 @@ const {setTheme} = actions;
 export default {
     fulfilled: {
         [setTheme.type]: "Your theme was successfully updated",
-        [checkForUpdates.fulfilled.type]: "OC Update <1><0>{{version}}</0></1> available",
         [getResources.fulfilled.type]: "New invokers and templates are available (<1><0>{{updates}}</0></1>)",
-        [uploadApplicationFile.fulfilled.type]: "New version was successfully uploaded",
-        [deleteApplicationFile.fulfilled.type]: "The version was successfully removed",
         [updateResources.fulfilled.type]: "",
-        [updateApplication.fulfilled.type]: "Opencelium was successfully updated",
-        [updateAuthUserDetail.fulfilled.type]: "The settings were successfully updated",
     },
     rejected: {
         [login.rejected.type]: {
@@ -44,26 +37,11 @@ export default {
             "UNAUTHORIZED": "Wrong email or password",
             "Network Error": "The server connection problem."
         },
-        [checkForUpdates.rejected.type]: {
-            "__DEFAULT__": "OC Update available"
-        },
         [getResources.rejected.type]: {
             "__DEFAULT__": "The request of getting resources was rejected."
         },
-        [uploadApplicationFile.rejected.type]: {
-            "__DEFAULT__": "New version was not uploaded"
-        },
-        [deleteApplicationFile.rejected.type]: {
-            "__DEFAULT__": "The version was not removed"
-        },
         [updateResources.rejected.type]: {
             "__DEFAULT__": ""
-        },
-        [updateApplication.rejected.type]: {
-            "__DEFAULT__": "Opencelium was not updated"
-        },
-        [updateAuthUserDetail.rejected.type]: {
-            "__DEFAULT__": "The settings were not updated"
         },
     },
 }

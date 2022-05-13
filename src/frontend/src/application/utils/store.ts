@@ -17,40 +17,32 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import logger from 'redux-logger'
 import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 import {createStateSyncMiddleware, withReduxStateSync} from "redux-state-sync";
-import {reducers} from '@entity/index';
-import updateAssistantReducer from '@entity/update_assistant/redux_toolkit/slices/UpdateAssistantSlice';
-import {setItems, setArrows, setCurrentTechnicalItem, setCurrentBusinessItem, setDetailsLocation, setConnectionData } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import {reducers, middlewares as EntitiesMiddlewares, syncStateConfig} from '@entity/index';
 import authReducer from '../redux_toolkit/slices/AuthSlice';
 import applicationReducer from '../redux_toolkit/slices/ApplicationSlice';
 
 import {ICommonState} from "../interfaces/core";
-import {authMiddleware} from "../../middlewares/auth";
-import {notificationMiddleware} from "../../middlewares/notification";
-import {applicationMiddleware} from "../../middlewares/application";
-import {themeMiddleware} from "../../middlewares/theme";
+import {authMiddleware} from "./middlewares/auth";
+import {notificationMiddleware} from "./middlewares/notification";
+import {applicationMiddleware} from "./middlewares/application";
+import {themeMiddleware} from "./middlewares/theme";
 const syncConfig: any = {
     whitelist: [
-        setItems.type,
-        setArrows.type,
-        setCurrentTechnicalItem.type,
-        setCurrentBusinessItem.type,
-        setDetailsLocation.type,
-        setConnectionData.type,
+        ...syncStateConfig.whiteList,
     ],
 }
 
 const rootReducer = combineReducers({
     authReducer,
-    updateAssistantReducer,
     applicationReducer,
     ...reducers,
 })
-
 const middlewares = [
     authMiddleware,
     themeMiddleware,
     applicationMiddleware,
     notificationMiddleware,
+    ...EntitiesMiddlewares,
     createStateSyncMiddleware(syncConfig),
 ]
 

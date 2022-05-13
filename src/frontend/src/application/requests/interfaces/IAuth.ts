@@ -14,14 +14,10 @@
  */
 
 import {AxiosResponse} from "axios";
-import {ICredentials} from "../../interfaces/IAuth";
 import IUser from "@entity/user/interfaces/IUser";
-import IUserDetail from "@entity/user/interfaces/IUserDetail";
+import {ICredentials} from "../../interfaces/IAuth";
 
 interface IAuth{
-
-    //to update an authorized user
-    updateAuthUserDetail(authUser: Partial<IUserDetail>): Promise<AxiosResponse<IUserDetail>>,
 
     //to login into the application
     login(credentials: ICredentials): Promise<AxiosResponse<IUser>>,

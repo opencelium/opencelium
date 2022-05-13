@@ -15,25 +15,17 @@
 
 import {Request} from "./Request";
 import {AxiosResponse} from "axios";
+import IUser from "@entity/user/interfaces/IUser";
 import { IAuth } from "../interfaces/IAuth";
 import {ICredentials} from "../../interfaces/IAuth";
 import {IRequestSettings} from "../interfaces/IRequest";
 import {LocalStorage} from "../../classes/LocalStorage";
-
-//TODO think how to extract User and UserDetail from application
-import IUserDetail from "@entity/user/interfaces/IUserDetail";
-import UserDetailRequest from "@entity/user/requests/classes/UserDetailRequest";
-import IUser from "@entity/user/interfaces/IUser";
 
 
 export class AuthRequest extends Request implements IAuth{
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: '', ...settings});
-    }
-
-    async updateAuthUserDetail(userDetail: Partial<IUserDetail>): Promise<AxiosResponse<IUserDetail>>{
-        return super.put<IUserDetail>(UserDetailRequest.backendMap(userDetail));
     }
 
     async login(credentials: ICredentials): Promise<AxiosResponse<IUser>>{

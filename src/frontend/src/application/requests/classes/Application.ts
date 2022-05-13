@@ -25,7 +25,7 @@ import {
 import {errorTicketUrl} from "./url";
 import {ITicket} from "../../interfaces/ITicket";
 import {IResponse} from "../interfaces/IResponse";
-import { IComponent } from "@entity/user_group/components/permissions/interfaces";
+import { IComponent } from "../../interfaces/IApplication";
 
 
 export class ApplicationRequest extends Request implements IApplicationRequest{

@@ -18,7 +18,7 @@ import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {API_REQUEST_STATE} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
-import {login, updateAuthUserDetail} from "../action_creators/AuthCreators";
+import {login} from "../action_creators/AuthCreators";
 import {LocalStorage} from "../../classes/LocalStorage";
 import {IResponse} from "../../requests/interfaces/IResponse";
 import {LogoutProps} from "../../interfaces/IAuth";
@@ -27,7 +27,6 @@ export interface AuthState extends ICommonState{
     authUser: IAuthUser,
     isAuth: boolean,
     expTime: number,
-    updatingAuthUser: API_REQUEST_STATE,
     logining: API_REQUEST_STATE,
     logouting: API_REQUEST_STATE,
     isSessionExpired: boolean,
@@ -39,7 +38,6 @@ const initialState: AuthState = {
     authUser: authUser || null,
     isAuth: !!authUser,
     expTime: authUser ? authUser.expTime : 0,
-    updatingAuthUser: API_REQUEST_STATE.INITIAL,
     logining: API_REQUEST_STATE.INITIAL,
     logouting: API_REQUEST_STATE.INITIAL,
     isSessionExpired: true,
@@ -61,20 +59,6 @@ export const authSlice = createSlice({
         }
     },
     extraReducers: {
-        [updateAuthUserDetail.pending.type]: (state) => {
-            state.updatingAuthUser = API_REQUEST_STATE.START;
-        },
-        [updateAuthUserDetail.fulfilled.type]: (state, action: PayloadAction<IAuthUser>) => {
-            state.updatingAuthUser = API_REQUEST_STATE.FINISH;
-            if(state.authUser && state.authUser.id === action.payload.id){
-                state.authUser = {...action.payload};
-            }
-            state.error = null;
-        },
-        [updateAuthUserDetail.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.updatingAuthUser = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
         [login.pending.type]: (state, action: PayloadAction<any>) => {
             state.logining = API_REQUEST_STATE.START;
             state.message = '';

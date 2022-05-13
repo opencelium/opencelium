@@ -20,11 +20,11 @@ import {
     Route, Navigate, useLocation
 } from "react-router-dom";
 import {Layout} from "@app_component/layout/Layout";
-import {Auth} from "../classes/Auth";
-import ErrorBoundary from "../../components/base/error_boundary/ErrorBoundary";
 import LoginForm from "@app_component/default_pages/login/LoginForm";
 import {PageNotFound} from "@app_component/default_pages/page_not_found/PageNotFound";
 import {Routes as EntityRoutes} from "@entity/index"
+import {Auth} from "../classes/Auth";
+import ErrorBoundary from "../../components/base/error_boundary/ErrorBoundary";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
     let location = useLocation();

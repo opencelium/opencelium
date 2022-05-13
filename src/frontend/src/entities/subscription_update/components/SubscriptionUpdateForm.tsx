@@ -27,7 +27,7 @@ const SubscriptionUpdateForm: FC =
     const {resources} = Application.getReduxState();
     const fileNames = resources?.files_name || [];
     const data = {
-        title: 'Update Invokers and Templates',
+        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Update Invokers and Templates'}],
         actions: [<Button
             key={'list_button'}
             label={'Update'}

@@ -16,20 +16,14 @@
 import {ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "@app_component/base/input/interfaces";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
-import { PermissionTypes } from "@entity/user/requests/models/Component";
+import { PermissionTypes } from "@application/requests/models/Component";
 
 
 interface PermissionsStyledProps extends ElementProps{
     hasLabel?: boolean,
 }
 
-export interface ComponentProps{
-    componentId: number,
-    name: string,
-    permissions: PermissionTypes[],
-}
-
-export interface PermissionProps{
+interface PermissionProps{
     [key: string]: PermissionTypes[],
 }
 
@@ -40,15 +34,10 @@ interface PermissionsProps extends InputElementProps, PermissionsStyledProps{
     components: OptionProps[],
     onChange: any,
 }
-interface IComponent{
-    componentId: number,
-    name: string,
-    permissions?: PermissionProps,
-}
 
 
 export {
+    PermissionProps,
     PermissionsProps,
     PermissionsStyledProps,
-    IComponent,
 }

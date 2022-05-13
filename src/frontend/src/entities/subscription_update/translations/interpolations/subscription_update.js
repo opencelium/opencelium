@@ -14,10 +14,10 @@
  */
 
 import React from "react";
+import {getResources} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+import {getActionWithoutType} from "@application/utils/utils";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
-import {getResources} from "../../redux_toolkit/action_creators/ApplicationCreators";
-import {getActionWithoutType} from "../../utils/utils";
 
 const GET_RESOURCES = (responseType, dispatch, navigate, params) => {
     return (

@@ -14,8 +14,9 @@
  */
 
 import React from "react";
+import {Middleware} from "redux";
+import {RootState} from "@application/utils/store";
 import {deepObjectsMerge} from "@application/utils/utils";
-
 import ConnectionToolkit from './connection/redux_toolkit';
 import ConnectorToolkit from './connector/redux_toolkit';
 import DashboardToolkit from './dashboard/redux_toolkit';
@@ -26,6 +27,7 @@ import ScheduleToolkit from './schedule/redux_toolkit';
 import TemplateToolkit from './template/redux_toolkit';
 import UserToolkit from './user/redux-toolkit';
 import UserGroupToolkit from './user_group/redux_toolkit';
+import UpdateAssistantToolkit from './update_assistant/redux_toolkit'
 
 const ActionCreators = {
     ...ConnectionToolkit.actionCreators,
@@ -38,6 +40,7 @@ const ActionCreators = {
     ...TemplateToolkit.actionCreators,
     ...UserToolkit.actionCreators,
     ...UserGroupToolkit.actionCreators,
+    ...UpdateAssistantToolkit.actionCreators,
 }
 
 const reducers = {
@@ -51,6 +54,7 @@ const reducers = {
     ...TemplateToolkit.reducers,
     ...UserToolkit.reducers,
     ...UserGroupToolkit.reducers,
+    ...UpdateAssistantToolkit.reducers,
 }
 
 const entitiesTranslations = require.context('.', true, /\/\w+\/translations\/index.ts$/);
@@ -122,6 +126,27 @@ const Routes = (
     </React.Fragment>
 )
 
+
+const entitiesMiddlewares = require.context('.', true, /\/\w+\/utils\/middlewares.ts$/);
+let middlewares: Middleware<{}, RootState>[] = [];
+entitiesMiddlewares.keys().forEach(key => {
+    const exposed = entitiesMiddlewares(key);
+    Object.keys(exposed).forEach(key => {
+        middlewares.push(exposed[key]);
+    });
+});
+
+const entitiesSyncStateConfigs = require.context('.', true, /\/\w+\/utils\/sync_state.ts$/);
+let syncStateConfig: any = {whiteList: []}
+entitiesSyncStateConfigs.keys().forEach(key => {
+    const exposed = entitiesSyncStateConfigs(key);
+    Object.keys(exposed).forEach(key => {
+        if(key === 'whiteList'){
+            syncStateConfig.whiteList.push(exposed[key]);
+        }
+    });
+});
+
 export {
     ActionCreators,
     reducers,
@@ -129,4 +154,6 @@ export {
     interpolations,
     getMenuItems,
     Routes,
+    middlewares,
+    syncStateConfig,
 }

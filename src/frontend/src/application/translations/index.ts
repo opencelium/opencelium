@@ -1,11 +1,9 @@
 import en from './en';
 import {interpolations as EntitiesInterpolations} from '@entity/index';
 import {translations as EntitiesTranslations} from '@entity/index';
-import ApplicationInterpolations from './interpolations';
 import {deepObjectsMerge} from "../utils/utils";
 
 const interpolations = {
-    ...ApplicationInterpolations,
     ...EntitiesInterpolations,
 }
 

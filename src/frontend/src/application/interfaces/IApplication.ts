@@ -14,6 +14,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {PermissionTypes} from "../requests/models/Component";
+
 /**
  * observations that define what class properties should be observable
  */
@@ -71,9 +73,24 @@ export interface ComponentPermissionProps{
 }
 
 export const NO_NEED_PERMISSION = 'NO_NEED_PERMISSION';
+
+interface IComponent{
+    componentId: number,
+    name: string,
+    permissions?: PermissionProps,
+}
+
+
+interface ComponentProps{
+    componentId: number,
+    name: string,
+    permissions: PermissionTypes[],
+}
 export {
     API_REQUEST_STATE,
     TRIPLET_STATE,
     OC_NAME,
     OC_DESCRIPTION,
+    IComponent,
+    ComponentProps,
 }

@@ -14,10 +14,11 @@
  */
 
 import {IForm} from "@application/interfaces/core";
+import {ComponentProps} from "@application/interfaces/IApplication";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
 import {UserGroupState} from "../redux_toolkit/slices/UserGroupSlice";
 import ModelUserGroup from "../requests/models/UserGroup";
-import {ComponentProps, PermissionProps, PermissionsProps} from "../components/permissions/interfaces";
+import {PermissionProps, PermissionsProps} from "../components/permissions/interfaces";
 
 
 export interface IUserGroupFile{

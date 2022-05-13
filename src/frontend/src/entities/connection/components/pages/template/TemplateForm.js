@@ -464,7 +464,7 @@ export function TemplateForm(type) {
                     return <ContentLoading/>;
                 }
                 let contentTranslations = {};
-                contentTranslations.header = [{name: 'Admin Cards', link: '/admin_cards'}, {name: 'Update Template'}];
+                contentTranslations.header = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Update Template'}];
                 if(this.isView){
                     contentTranslations.list_button = {title: t(`connections:VIEW.LIST_BUTTON`), link: this.redirectUrl};
                 } else{

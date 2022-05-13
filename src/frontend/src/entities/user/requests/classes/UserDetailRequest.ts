@@ -14,9 +14,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {AxiosResponse} from "axios";
+import {Request} from "@application/requests/classes/Request";
 import IUserDetail from "../../interfaces/IUserDetail";
+import IUserDetailRequest from "../interfaces/IUserDetailRequest";
+import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 
-export default class UserDetailRequest{
+export default class UserDetailRequest extends Request implements IUserDetailRequest{
+
+    constructor(settings?: Partial<IRequestSettings>) {
+        super({url: 'userDetail', ...settings});
+    }
+
+    async updateUserDetail(userDetail: Partial<IUserDetail>): Promise<AxiosResponse<IUserDetail>>{
+        return super.put<IUserDetail>(UserDetailRequest.backendMap(userDetail));
+    }
+
     static backendMap(userDetail: Partial<IUserDetail>){
         return {
             appTour: userDetail.appTour,
@@ -29,7 +42,6 @@ export default class UserDetailRequest{
             surname: userDetail.surname,
             theme: userDetail.theme,
             userTitle: userDetail.userTitle,
-
         };
     }
 }
