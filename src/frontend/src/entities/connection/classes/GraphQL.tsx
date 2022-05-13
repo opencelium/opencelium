@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {useAppSelector} from "@application/utils/redux";
+import {useAppSelector} from "@application/utils/store";
 import {RootState} from "@application/utils/store";
 
 export class GraphQL{

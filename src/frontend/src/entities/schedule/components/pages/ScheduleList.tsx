@@ -14,7 +14,7 @@
  */
 
 import React, {FC, useEffect, useState} from 'react';
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@application/utils/permission";
 import {APP_STATUS_UP} from "@application/requests/classes/url";

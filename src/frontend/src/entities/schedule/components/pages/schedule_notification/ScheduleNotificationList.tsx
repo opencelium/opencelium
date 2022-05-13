@@ -16,7 +16,7 @@
 import ReactDOM from 'react-dom';
 import React, {ChangeEvent, FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import InputText from "@app_component/base/input/text/InputText";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {ColorTheme} from "@style/Theme";

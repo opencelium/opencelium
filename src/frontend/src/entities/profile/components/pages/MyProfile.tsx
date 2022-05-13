@@ -16,7 +16,7 @@
 import React, {ChangeEvent, FC, useEffect} from "react";
 import {permission} from "@application/utils/permission";
 import {Auth} from "@application/classes/Auth";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
 import { setTheme } from "@application/redux_toolkit/slices/ApplicationSlice";
 import FormSection from "@app_component/form/form_section/FormSection";

@@ -15,7 +15,7 @@
 
 import React, {FC, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import InputFile from "@app_component/base/input/file/InputFile";
 import {PermissionButton} from "@app_component/base/button/PermissionButton";
 import {TextSize} from "@app_component/base/text/interfaces";

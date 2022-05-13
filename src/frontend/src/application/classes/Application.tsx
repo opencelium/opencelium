@@ -17,10 +17,9 @@ import {useEffect, useState} from 'react';
 import {Console} from "./Console";
 import {HookStateClass} from "./HookStateClass";
 import {capitalize, isString} from "../utils/utils";
-import {AppDispatch, RootState} from "../utils/store";
+import {AppDispatch, RootState, useAppSelector} from "../utils/store";
 import {DispatchParamsProps, IObservation} from "../interfaces/IApplication";
 import {AsyncThunk} from "@reduxjs/toolkit";
-import {useAppSelector} from "../utils/redux";
 import {baseUrl} from "../requests/classes/url";
 
 // Application class for managing core internal operations

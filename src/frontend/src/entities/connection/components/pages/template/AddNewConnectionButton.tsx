@@ -20,7 +20,7 @@ import { AddNewConnectionButtonStyled } from './styles';
 import Dialog from "@basic_components/Dialog";
 import {PermissionButton} from "@app_component/base/button/PermissionButton";
 import {TextSize} from "@app_component/base/text/interfaces";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import { addConnection } from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 import InputText from "@app_component/base/input/text/InputText";
 import InputTextarea from "@app_component/base/input/textarea/InputTextarea";

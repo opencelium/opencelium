@@ -21,10 +21,9 @@ import {
     IAuthText,
 } from "../interfaces/IAuth";
 import {IInput} from "../interfaces/core";
-import {RootState} from "../utils/store";
+import {RootState, useAppSelector} from "../utils/store";
 import {AuthState} from "../redux_toolkit/slices/AuthSlice";
 import {login} from "../redux_toolkit/action_creators/AuthCreators";
-import {useAppSelector} from "../utils/redux";
 import {InputTextProps} from "@app_component/base/input/text/interfaces";
 
 // class to login into the application

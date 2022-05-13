@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {Application} from "@application/classes/Application";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {getResources} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Loading from "@app_component/base/loading/Loading";

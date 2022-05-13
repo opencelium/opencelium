@@ -18,7 +18,7 @@ import {useNavigate} from "react-router";
 import {withTheme} from 'styled-components';
 import TimeAgo from "timeago-react";
 import {ColorTheme} from "@style/Theme";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import { clearNotification } from '@application/redux_toolkit/slices/ApplicationSlice';
 import {isString} from "@application/utils/utils";
 import {NotificationProps} from "@app_component/layout/notification_panel/interfaces";

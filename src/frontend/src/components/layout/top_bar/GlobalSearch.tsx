@@ -16,7 +16,7 @@
 import React, {FC, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {useNavigate} from "react-router";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {getGlobalSearchData} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {Application} from "@application/classes/Application";
 import {ComponentRoutes, SingleSearchResult} from "@application/requests/interfaces/IApplication";

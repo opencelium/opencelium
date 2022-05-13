@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useRef} from "react";
 import {useNavigate, useParams} from "react-router";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
 import {IForm} from "@application/interfaces/IForm";
 import {Form} from "@application/classes/Form";

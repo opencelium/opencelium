@@ -18,7 +18,7 @@ import React, {FC, useEffect, useState} from 'react';
 import Graph from "react-graph-vis";
 import {isValidIconUrl} from "@application/utils/utils";
 import {OC_NAME, OC_DESCRIPTION, API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import Toast from "@app_component/base/toast/Toast";
 import {ContentLoading} from "@app_component/base/loading/ContentLoading";
 import OpenCeliumImagePath from "@image/logo.png";

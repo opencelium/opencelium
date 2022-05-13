@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useState} from 'react';
 import GraphiQL from "graphiql";
 import {FetcherParams} from "@graphiql/toolkit/src/create-fetcher/types";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {GraphQL} from "@entity/connection/classes/GraphQL";
 import {graphQLLogin, graphQLRequest} from "@entity/connection/redux_toolkit/action_creators/GraphQLCreators";
 // @ts-ignore

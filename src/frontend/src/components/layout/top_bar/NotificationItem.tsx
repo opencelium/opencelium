@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {toggleNotificationPanel} from '@application/redux_toolkit/slices/ApplicationSlice';
 import {Application} from "@application/classes/Application";
 import {CNotification} from "@application/classes/Notification";

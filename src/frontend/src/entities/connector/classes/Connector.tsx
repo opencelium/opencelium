@@ -20,7 +20,7 @@ import {IInput} from "@application/interfaces/core";
 import {RootState} from "@application/utils/store";
 import {IEntityWithImage} from "@application/requests/interfaces/IRequest";
 import {capitalize, putSpaceInCamelWords} from "@application/utils/utils";
-import {useAppDispatch, useAppSelector} from "@application/utils/redux";
+import {useAppDispatch, useAppSelector} from "@application/utils/store";
 import {InputSelectProps, OptionProps} from "@app_component/base/input/select/interfaces";
 import {InputTextProps, InputTextType} from "@app_component/base/input/text/interfaces";
 import {InputSwitchProps} from "@app_component/base/input/switch/interfaces";

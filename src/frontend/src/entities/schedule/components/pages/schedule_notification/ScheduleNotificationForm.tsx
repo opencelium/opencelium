@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useRef} from "react";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {OptionProps} from "@app_component/base/input/select/interfaces";
 import Dialog from "@app_component/base/dialog/Dialog";
 import {

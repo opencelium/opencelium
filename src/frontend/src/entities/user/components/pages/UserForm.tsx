@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useRef} from "react";
 import {useNavigate, useParams} from "react-router";
 import {withTheme} from "styled-components";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {IForm} from "@application/interfaces/IForm";
 import {Form} from "@application/classes/Form";

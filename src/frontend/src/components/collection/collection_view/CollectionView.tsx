@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {Application} from "@application/classes/Application";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {setViewType as setViewTypeGlobally, setGridViewType as setGridViewTypeGlobally, setSearchValue} from "@application/redux_toolkit/slices/ApplicationSlice";
 import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";

@@ -18,7 +18,7 @@ import Iframe from 'react-iframe';
 import {hostname, protocol} from "@application/requests/classes/url";
 import {Auth} from "@application/classes/Auth";
 import {requestRemoteApi} from "@application/redux_toolkit/action_creators/ApplicationCreators";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {REQUEST_METHOD} from "@application/requests/interfaces/IApplication";

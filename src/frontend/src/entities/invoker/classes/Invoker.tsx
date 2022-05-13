@@ -18,7 +18,7 @@ import {HookStateClass} from "@application/classes/HookStateClass";
 import {Application as App} from "@application/classes/Application";
 import {IInput} from "@application/interfaces/core";
 import {RootState} from "@application/utils/store";
-import {useAppDispatch, useAppSelector} from "@application/utils/redux";
+import {useAppDispatch, useAppSelector} from "@application/utils/store";
 import {InputTextProps} from "@app_component/base/input/text/interfaces";
 import {InputFileProps} from "@app_component/base/input/file/interfaces";
 import {InputTextareaProps} from "@app_component/base/input/textarea/interfaces";

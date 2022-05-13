@@ -17,7 +17,7 @@ import React, {FC, useState} from 'react';
 import {withTheme} from 'styled-components';
 import { ImportTemplateButtonProps } from './interfaces';
 import { ImportTemplateButtonStyled } from './styles';
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {importTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import Dialog from "@app_component/base/dialog/Dialog";
 import InputFile from "@app_component/base/input/file/InputFile";

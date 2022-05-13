@@ -18,7 +18,7 @@ import {HookStateClass} from "@application/classes/HookStateClass";
 import {Application as App} from "@application/classes/Application";
 import {IInput} from "@application/interfaces/core";
 import {RootState} from "@application/utils/store";
-import {useAppDispatch, useAppSelector} from "@application/utils/redux";
+import {useAppDispatch, useAppSelector} from "@application/utils/store";
 import {InputTextProps} from "@app_component/base/input/text/interfaces";
 import {TemplateState} from "@entity/template/redux_toolkit/slices/TemplateSlice";
 import {deleteTemplateById} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";

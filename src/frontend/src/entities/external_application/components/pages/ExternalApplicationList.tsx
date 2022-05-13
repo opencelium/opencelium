@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect} from 'react';
 import {kibanaUrl, neo4jUrl} from "@application/requests/classes/url";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";

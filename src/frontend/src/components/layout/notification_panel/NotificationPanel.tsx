@@ -19,7 +19,7 @@ import {Notification} from "@app_component/base/notification/Notification";
 import {useEventListener} from "@application/utils/utils";
 import {INotification} from "@application/interfaces/INotification";
 import {CNotification} from "@application/classes/Notification";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
 import {clearAllNotifications, toggleNotificationPanel} from '@application/redux_toolkit/slices/ApplicationSlice';
 import Text from "@app_component/base/text/Text";

@@ -18,7 +18,7 @@ import {ConnectionListProps} from "./interfaces";
 import Connections from "@entity/connection/collections/Connections";
 import {Connection} from "@entity/connection/classes/Connection";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {getAllMetaConnections} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@application/utils/permission";

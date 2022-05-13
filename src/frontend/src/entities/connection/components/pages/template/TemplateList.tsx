@@ -17,7 +17,7 @@ import React, {FC, useEffect, useState} from 'react';
 import {TemplateListProps} from "../interfaces";
 import Templates from "@entity/template/collections/Templates";
 import {Template} from "@entity/connection/classes/Template";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {getAllTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@application/utils/permission";

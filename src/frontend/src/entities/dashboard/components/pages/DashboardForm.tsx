@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useState} from 'react';
 import {ReactGridLayoutProps} from "react-grid-layout";
 import {withTheme} from 'styled-components';
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {resizeWindow} from "@application/utils/utils";
 import {ColorTheme} from "@style/Theme";

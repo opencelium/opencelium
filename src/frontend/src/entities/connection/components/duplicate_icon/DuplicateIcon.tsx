@@ -18,7 +18,7 @@ import {withTheme} from 'styled-components';
 import { DuplicateIconProps } from './interfaces';
 import { DuplicateIconStyled } from './styles';
 import {setFocusById} from "@application/utils/utils";
-import {useAppDispatch} from "@application/utils/redux";
+import {useAppDispatch} from "@application/utils/store";
 import {addConnection, checkConnectionTitle, getConnectionById} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {Connection} from "@entity/connection/classes/Connection";
 import {ColorTheme} from "@style/Theme";
