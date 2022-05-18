@@ -53,6 +53,7 @@ export interface IListCollection{
     // - <propertyName(array of string|number)> - such array will be displayed as a concatenation of values separated with comma
     // - <propertyName(array of objects)[subPropertyName]> - such array will be mapped by subPropertyName
     listProps: ListProp[];
+    listStyles?: any;
     gridProps: ListCollectionCardProps;
     sortingProps: string[];
     //translations for listProps

@@ -27,6 +27,7 @@ interface CardProps{
     isRefreshing?: boolean;
     display?: string;
     overflow?: string;
+    style?: any;
 }
 
 export{

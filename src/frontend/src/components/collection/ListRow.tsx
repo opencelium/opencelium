@@ -46,6 +46,7 @@ const ListRow: FC<ListRowProps> =
                         const propertyKey = listProp.propertyKey;
                         const getValue = listProp.getValue;
                         const shouldReplace = listProp.replace || false;
+                        const cellStyle = listProp.style || {};
                         if (propertyKey !== '') {
                             let entityValue: any = '';
                             if(getValue){
@@ -86,7 +87,7 @@ const ListRow: FC<ListRowProps> =
                                 return entityValue;
                             }
                             return (
-                                <td key={propertyKey} title={completeValue}>
+                                <td key={propertyKey} title={completeValue} style={cellStyle}>
                                     <Text value={entityValue}/>
                                 </td>
                             )

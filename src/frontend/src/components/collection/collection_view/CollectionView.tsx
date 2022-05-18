@@ -133,30 +133,32 @@ const CollectionView: FC<CollectionViewProps> =
                             <GridViewMenu setGridViewType={onChangeViewGridType} viewType={viewType} setViewType={onChangeViewType} setIsRefreshing={setIsRefreshing}/>
                         </ViewSectionStyled>
                     </TopSectionStyled>}
-                    {viewType === ViewType.LIST &&
-                        <List
-                            collection={collection}
-                            searchValue={searchValue}
-                            currentPage={currentPage}
-                            entitiesPerPage={entitiesPerPage}
-                            componentPermission={componentPermission}
-                            checks={checks}
-                            setChecks={setChecks}
-                            isRefreshing={isRefreshing}
-                            shouldBeUpdated={shouldBeUpdated}
-                        />}
-                    {viewType === ViewType.GRID &&
-                        <Grid
-                            collection={collection}
-                            searchValue={searchValue}
-                            currentPage={currentPage}
-                            gridViewType={gridViewType}
-                            entitiesPerPage={entitiesPerPage}
-                            componentPermission={componentPermission}
-                            isRefreshing={isRefreshing}
-                            shouldBeUpdated={shouldBeUpdated}
-                        />
-                    }
+                    <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
+                        {viewType === ViewType.LIST &&
+                            <List
+                                collection={collection}
+                                searchValue={searchValue}
+                                currentPage={currentPage}
+                                entitiesPerPage={entitiesPerPage}
+                                componentPermission={componentPermission}
+                                checks={checks}
+                                setChecks={setChecks}
+                                isRefreshing={isRefreshing}
+                                shouldBeUpdated={shouldBeUpdated}
+                            />}
+                        {viewType === ViewType.GRID &&
+                            <Grid
+                                collection={collection}
+                                searchValue={searchValue}
+                                currentPage={currentPage}
+                                gridViewType={gridViewType}
+                                entitiesPerPage={entitiesPerPage}
+                                componentPermission={componentPermission}
+                                isRefreshing={isRefreshing}
+                                shouldBeUpdated={shouldBeUpdated}
+                            />
+                        }
+                    </div>
                     <Pagination currentPage={currentPage} total={totalPages} setCurrentPage={setPage}/>
                 </CollectionViewStyled>
             </ErrorBoundary>

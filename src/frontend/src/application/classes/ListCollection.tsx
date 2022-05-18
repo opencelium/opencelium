@@ -45,6 +45,9 @@ class ListCollection implements IListCollection{
     // props of list view
     listProps: ListProp[] = [];
 
+    // styles for list view
+    listStyles: any = {};
+
     // props of grid view
     gridProps: ListCollectionCardProps;
 
@@ -112,9 +115,6 @@ class ListCollection implements IListCollection{
     isCurrentItem?: (entity: any) => boolean = (entity) => {return false;};
 
     constructor(data?: IListCollection) {
-        this.hasActions = data && data.hasOwnProperty('hasActions') ? data.hasActions : true;
-        this.hasCheckboxes = data && data.hasOwnProperty('hasCheckboxes') ? data.hasCheckboxes : true;
-        this.hasSearch = data && data.hasOwnProperty('hasSearch') ? data.hasSearch : true;
     }
 
     /**

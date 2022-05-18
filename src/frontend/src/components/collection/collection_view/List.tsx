@@ -101,7 +101,7 @@ const List: FC<ListViewProps> =
         setSortTypes({...sortTypes, [sortingProp]: sortType})
     }
     return (
-        <Card padding={'10px'} margin={'0 0 20px 0'} isRefreshing={isRefreshing} overflow={'auto'}>
+        <Card padding={'10px'} margin={'0 0 20px 0'} isRefreshing={isRefreshing} overflow={'auto'} style={collection.listStyles}>
             {visibleEntities.length === 0
                 ?
                 <EmptyList/>
@@ -119,6 +119,7 @@ const List: FC<ListViewProps> =
                             collection.listProps.map((listProp: ListProp) => {
                                 let propertyKey = listProp.propertyKey;
                                 let columnWidth = listProp.width || 'auto';
+                                const columnStyle = listProp.style || {};
                                 if (propertyKey !== '') {
                                     let translationProp = propertyKey;
                                     let splitColumnName = propertyKey.split('.');
@@ -129,7 +130,7 @@ const List: FC<ListViewProps> =
                                     let sortIcon = hasSortIcon ? sortTypes[propertyKey] === SortType.asc ? 'keyboard_arrow_up' : 'keyboard_arrow_down' : '';
                                     return (
                                         <ThStyled key={propertyKey} width={columnWidth}>
-                                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                                            <div style={{display: 'flex', justifyContent: 'center', ...columnStyle}}>
                                                 <span style={{marginLeft: hasSortIcon ? '24px' : 0}}><Text value={collection.translations[translationProp]}/></span>
                                                 {hasSortIcon &&
                                                     <TooltipButton target={'sort_button'} tooltip={sortTypes[propertyKey] === SortType.asc ? 'Asc' : 'Desc'} position={'top'} hasBackground={false} color={ColorTheme.Blue}
