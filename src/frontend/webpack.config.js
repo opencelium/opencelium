@@ -178,7 +178,7 @@ const getConfig = ({isBuild, envVar}) => {
         plugins: [
             new HtmlWebpackPlugin({
                 template: path.join(__dirname, "src", "index.html"),
-                favicon: path.join(__dirname, "src", "./img/fav_icon.png"),
+                favicon: path.join(__dirname, "src", "./img/application/fav_icon.png"),
             }),
             new NodePolyfillPlugin(),
             new CopyWebpackPlugin({

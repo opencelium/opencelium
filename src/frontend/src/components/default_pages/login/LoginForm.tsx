@@ -39,6 +39,7 @@ const LoginForm: FC<LoginFormProps> = ({}) => {
     } = Auth.getReduxState();
     let navigate = useNavigate();
     let location = useLocation();
+    // @ts-ignore
     let from = location.state?.from?.pathname || "/";
     useEffect(() => {
         if(isAuth){

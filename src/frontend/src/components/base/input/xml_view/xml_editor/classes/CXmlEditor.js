@@ -13,11 +13,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {isArray, isString} from "@application/utils/utils";
 import {xml2js} from 'xml-js';
-import CTag from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
-import CProperty from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CProperty";
-import {CBodyEditor} from "@entity/connection/components/classes/components/general/basic_components/CBodyEditor";
+import {isArray, isString} from "@application/utils/utils";
+import {CBodyEditor} from "@classes/general/basic_components/CBodyEditor";
+import CTag from "./CTag";
+import CProperty from "./CProperty";
 
 export default class CXmlEditor extends CBodyEditor{
     constructor(xml) {

@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import Iframe from 'react-iframe';
-import {hostname, protocol} from "@application/requests/classes/url";
+import {hostname, protocol} from "@entity/application/requests/classes/url";
 import {Auth} from "@application/classes/Auth";
 import {requestRemoteApi} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {useAppDispatch} from "@application/utils/store";

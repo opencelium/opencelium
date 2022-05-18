@@ -15,16 +15,16 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
+import Input from "@basic_components/inputs/Input";
 import {checkReferenceFormat, setFocusById} from "@application/utils/utils";
-import Reference from "@entity/connection/components/components/general/basic_components/xml_editor/Reference";
-import ReferenceValues from "@entity/connection/components/components/general/basic_components/xml_editor/ReferenceValues";
-import ValueType from "@entity/connection/components/components/general/basic_components/xml_editor/ValueType";
-import styles from "@entity/connection/components/themes/default/general/form_methods";
-import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
-import CTag from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
-import CProperty from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CProperty";
-import {OnReferenceClickContext} from "@entity/connection/components/components/general/basic_components/xml_editor/XmlEditor";
+import Reference from "@app_component/base/input/xml_view/xml_editor/Reference";
+import ReferenceValues from "@app_component/base/input/xml_view/xml_editor/ReferenceValues";
+import ValueType from "@app_component/base/input/xml_view/xml_editor/ValueType";
+import styles from "./form_methods.scss";
+import ToolboxThemeInput from "@root/components/hocs/ToolboxThemeInput";
+import CTag from "./classes/CTag";
+import CProperty from "./classes/CProperty";
+import {OnReferenceClickContext} from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
 
 
 /**

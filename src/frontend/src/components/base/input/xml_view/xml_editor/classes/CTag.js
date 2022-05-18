@@ -13,9 +13,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CProperty from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CProperty";
 import {copyStringToClipboard, isArray, isString} from "@application/utils/utils";
-import CXmlEditor from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CXmlEditor";
+import CProperty from "./CProperty";
+import CXmlEditor from "./CXmlEditor";
 
 export const TAG_VALUE_TYPES = {
     EMPTY: 'EMPTY',

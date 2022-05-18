@@ -20,7 +20,7 @@ import {checkImage} from "@application/utils/utils";
 import Dialog from "@app_component/base/dialog/Dialog";
 import InputFile from "@app_component/base/input/file/InputFile";
 import Button from "@app_component/base/button/Button";
-import DefaultConnectorImagePath from "@image/default_connector.png";
+import DefaultConnectorImagePath from "@image/application/default_image.png";
 import {ImageProps} from './interfaces';
 import {ImageStyled, UploadButtonStyled} from './styles';
 

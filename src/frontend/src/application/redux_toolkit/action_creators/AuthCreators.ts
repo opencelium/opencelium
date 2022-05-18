@@ -26,12 +26,11 @@ export const login = createAsyncThunk(
         try {
             const request = new AuthRequest({hasAuthToken: false, isApi: false});
             const loginResponseData = await request.login(data);
-            const token = loginResponseData.headers?.authorization || '';
-            if(token !== '') {
-                return User.getUserFromLoginResponse(loginResponseData);
-            } else{
-                return thunkAPI.rejectWithValue('Your token is not valid');
+            const authUser = User.getUserFromLoginResponse(loginResponseData);
+            if(!authUser){
+                return thunkAPI.rejectWithValue(errorHandler({message: 'Your token is not valid'}));
             }
+            return authUser;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

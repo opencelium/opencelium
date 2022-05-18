@@ -15,11 +15,11 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import appStyles from '@entity/connection/components/themes/default/general/basic_components.scss';
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
-import CTag from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
-import CProperty from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CProperty";
-import {ATTRIBUTES_MARK} from "@entity/connection/components/classes/components/content/invoker/CBody";
+import appStyles from './basic_components.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CTag from "./classes/CTag";
+import CProperty from "./classes/CProperty";
+import {ATTRIBUTES_MARK} from "@classes/content/invoker/CBody";
 
 
 /**

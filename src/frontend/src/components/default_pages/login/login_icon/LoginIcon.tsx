@@ -14,7 +14,7 @@
  */
 
 import React, {FC, useState} from 'react';
-import LogoOcWhiteImagePath from "@image/logo_oc_white.png";
+import LogoOcWhiteImagePath from "@image/application/logo_oc_white.png";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {Auth} from "@application/classes/Auth";
 import {Image} from "@app_component/base/image/Image";

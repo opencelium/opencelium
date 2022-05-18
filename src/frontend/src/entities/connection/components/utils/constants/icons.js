@@ -13,7 +13,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import MonochromePhotosIconPath from "@image/default_connector.png";
+import MonochromePhotosIconPath from "@image/application/default_image.png";
 
 export default {
     'add': 'add',

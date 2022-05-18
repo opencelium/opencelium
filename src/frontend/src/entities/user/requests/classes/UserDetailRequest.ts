@@ -15,7 +15,7 @@
  */
 
 import {AxiosResponse} from "axios";
-import {Request} from "@application/requests/classes/Request";
+import Request from "@entity/application/requests/classes/Request";
 import IUserDetail from "../../interfaces/IUserDetail";
 import IUserDetailRequest from "../interfaces/IUserDetailRequest";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";

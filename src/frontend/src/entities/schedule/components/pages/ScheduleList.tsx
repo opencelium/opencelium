@@ -17,7 +17,7 @@ import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@application/utils/permission";
-import {APP_STATUS_UP} from "@application/requests/classes/url";
+import {APP_STATUS_UP} from "@entity/application/requests/classes/url";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import {ExternalApplication} from "@entity/external_application/classes/ExternalApplication";
 import {ScheduleListProps} from "./interfaces";

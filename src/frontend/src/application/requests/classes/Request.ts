@@ -15,8 +15,8 @@
 
 import axios, {AxiosRequestConfig, AxiosResponse} from "axios";
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
+import {baseUrl, baseUrlApi} from "@entity/application/requests/classes/url";
 import {IRequest, IRequestSettings} from "../interfaces/IRequest";
-import {baseUrl, baseUrlApi} from "./url";
 import {LocalStorage} from "../../classes/LocalStorage";
 
 export class Request implements IRequest{
@@ -38,7 +38,7 @@ export class Request implements IRequest{
         this.endpoint = data?.endpoint || '';
     }
 
-    private getUrl():string{
+    protected getUrl():string{
         let url = this.url;
         if(!this.isFullUrl){
             if(this.isApi){
@@ -53,29 +53,12 @@ export class Request implements IRequest{
         return url;
     }
 
-    private getHeaders(settings?: AxiosRequestConfig):any{
+    getHeaders(settings?: AxiosRequestConfig):any{
         let headers: any = {
             'crossDomain': true,
             'timeout': 10000,
             'content-type': 'application/json',
         };
-        if(this.hasAuthToken){
-            const storage = LocalStorage.getStorage(true);
-            let authUser: IAuthUser = storage.get('authUser')
-            if(authUser) {
-                const {lastLogin, expTime, sessionTime} = authUser;
-                if (lastLogin !== null) {
-                    const currentLogin = Date.now();
-                    if (currentLogin - lastLogin >= sessionTime || currentLogin >= expTime) {
-                        storage.remove('authUser');
-                    } else {
-                        authUser.lastLogin = Date.now();
-                        storage.set('authUser', authUser);
-                        headers['Authorization'] = authUser.token;
-                    }
-                }
-            }
-        }
         if(this.isFormData){
             headers['content-type'] = 'multipart/form-data';
         }

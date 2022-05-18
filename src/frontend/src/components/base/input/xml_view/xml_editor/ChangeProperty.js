@@ -15,16 +15,16 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
-import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
-import CProperty from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CProperty";
+import Input from "@basic_components/inputs/Input";
+import Button from "@basic_components/buttons/Button";
+import CProperty from "./classes/CProperty";
 import {findTopLeft, isNumber, setFocusById} from "@application/utils/utils";
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import ReactDOM from "react-dom";
 import basicStyles from "@entity/connection/components/themes/default/general/basic_components";
-import Value from "@entity/connection/components/components/general/basic_components/xml_editor/Value";
-import CXmlEditor from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CXmlEditor";
-import CTag from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
+import Value from "@app_component/base/input/xml_view/xml_editor/Value";
+import CXmlEditor from "./classes/CXmlEditor";
+import CTag from "./classes/CTag";
 
 
 /**

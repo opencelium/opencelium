@@ -15,12 +15,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import XmlEditor from "@entity/connection/components/components/general/basic_components/xml_editor/XmlEditor";
 import {withTranslation} from "react-i18next";
+import XmlEditor from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
+import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
 import {RequestBody} from "@entity/connection/components/decorators/RequestBody";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import CConnectorItem from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import CXmlEditor from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CXmlEditor";
 
 
 @withTranslation('basic_components')

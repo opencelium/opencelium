@@ -309,6 +309,9 @@ export default class User extends HookStateClass implements IUser{
     static getUserFromLoginResponse(user: any): IAuthUser{
         const {data: {userDetail, userGroup}, headers} = user;
         const token = headers?.authorization || '';
+        if(token === '') {
+            return null;
+        }
         const decodedData: any = jwt.decode(token.slice(7));
         return {
             id: decodedData.userId,
@@ -317,8 +320,8 @@ export default class User extends HookStateClass implements IUser{
             expTime: decodedData.exp * 1000,
             sessionTime: parseInt(decodedData.sessionTime),
             lastLogin: decodedData.iat * 1000,
-            userGroup: userGroup,
-            userDetail: userDetail,
+            userGroup,
+            userDetail,
         };
     }
 

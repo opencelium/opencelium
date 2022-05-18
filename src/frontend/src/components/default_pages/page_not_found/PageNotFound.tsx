@@ -15,7 +15,7 @@
 
 import React, {FC} from 'react';
 import {Image} from "@app_component/base/image/Image";
-import PageNotFoundImagePath from "@image/page_not_found.png";
+import PageNotFoundImagePath from "@image/application/page_not_found.png";
 import {ImageStyled, TitleStyled} from "./styles";
 
 const PageNotFound: FC =

@@ -15,9 +15,7 @@
 
 import React, {FC} from 'react';
 import {withTheme} from 'styled-components';
-
-//TODO move XmlEditor into components/base folder
-import XmlEditor from "@basic_components/xml_editor/XmlEditor";
+import XmlEditor from "./xml_editor/XmlEditor";
 import Input from "../Input";
 import {InputXmlViewProps} from "./interfaces";
 import {getReactXmlStyles} from "./styles";

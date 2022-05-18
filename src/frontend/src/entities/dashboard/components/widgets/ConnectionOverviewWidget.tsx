@@ -22,8 +22,8 @@ import {useAppDispatch} from "@application/utils/store";
 import Toast from "@app_component/base/toast/Toast";
 import {ContentLoading} from "@app_component/base/loading/ContentLoading";
 import OpenCeliumImagePath from "@image/logo.png";
-import DefaultConnectorImagePath from "@image/default_connector.png";
-import OpenCeliumBackgroundImagePath from "@image/oc_connection_widget_background.png"
+import DefaultConnectorImagePath from "@image/application/default_image.png";
+import OpenCeliumBackgroundImagePath from "@image/application/oc_connection_widget_background.png"
 import {Connection} from "@entity/connection/classes/Connection";
 import {getAllConnections} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled} from './styles';

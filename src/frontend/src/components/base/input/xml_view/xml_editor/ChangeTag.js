@@ -16,9 +16,9 @@
 import ReactDOM from 'react-dom';
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
-import CTag, {TAG_VALUE_TYPES} from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
-import styles from "@entity/connection/components/themes/default/general/basic_components";
+import Input from "@basic_components/inputs/Input";
+import CTag, {TAG_VALUE_TYPES} from "./classes/CTag";
+import styles from "./basic_components.scss";
 import {
     checkXmlTagFormat,
     findTopLeft,
@@ -27,11 +27,11 @@ import {
     isString,
     setFocusById
 } from "@application/utils/utils";
-import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
-import CXmlEditor from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CXmlEditor";
-import TagType from "@entity/connection/components/components/general/basic_components/xml_editor/TagType";
-import Value from "@entity/connection/components/components/general/basic_components/xml_editor/Value";
+import Button from "@basic_components/buttons/Button";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CXmlEditor from "./classes/CXmlEditor";
+import TagType from "@app_component/base/input/xml_view/xml_editor/TagType";
+import Value from "@app_component/base/input/xml_view/xml_editor/Value";
 
 /**
  * ChangeTag component to add or update Tag

@@ -20,7 +20,7 @@ import {getRoutes} from "@application/utils/routes";
 import {Application} from "@application/classes/Application";
 import {store} from "@application/utils/store";
 import {setTheme} from "@application/redux_toolkit/slices/ApplicationSlice";
-import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@application/requests/classes/url';
+import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@entity/application/requests/classes/url';
 import Themes, {ThemeNames} from "@style/Theme";
 import {Global} from "@style/global";
 

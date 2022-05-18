@@ -14,7 +14,7 @@
  */
 
 import React, {FC, useEffect} from 'react';
-import {kibanaUrl, neo4jUrl} from "@application/requests/classes/url";
+import {kibanaUrl, neo4jUrl} from "@entity/application/requests/classes/url";
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@application/utils/permission";

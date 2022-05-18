@@ -17,7 +17,7 @@ import React, {FC} from 'react';
 import {useTranslation} from "react-i18next";
 import InputJsonView from "@app_component/base/input/json_view/InputJsonView";
 import InputXmlView from "@app_component/base/input/xml_view/InputXmlView";
-import CXmlEditor from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CXmlEditor";
+import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
 import {BodyProps} from "../interfaces";
 import {ResponseFormat} from "../../../requests/models/Body";
 

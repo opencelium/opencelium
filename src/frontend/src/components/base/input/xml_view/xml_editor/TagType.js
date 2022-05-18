@@ -14,8 +14,8 @@
  */
 
 import React, {Component} from 'react';
-import {TAG_VALUE_TYPES} from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
-import RadioButtons from "@entity/connection/components/components/general/basic_components/inputs/RadioButtons";
+import {TAG_VALUE_TYPES} from "./classes/CTag";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 
 /**

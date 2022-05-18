@@ -14,8 +14,8 @@
  */
 
 import React, {Component} from 'react';
-import styles from "@entity/connection/components/themes/default/general/form_methods";
-import ToolboxThemeInput from "../../../../hocs/ToolboxThemeInput";
+import styles from "./form_methods.scss";
+import ToolboxThemeInput from "@root/components/hocs/ToolboxThemeInput";
 
 
 /**

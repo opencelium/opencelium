@@ -13,8 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {Request} from "./Request";
 import {AxiosResponse} from "axios";
+import Request from "@entity/application/requests/classes/Request";
 import IUser from "@entity/user/interfaces/IUser";
 import { IAuth } from "../interfaces/IAuth";
 import {ICredentials} from "../../interfaces/IAuth";

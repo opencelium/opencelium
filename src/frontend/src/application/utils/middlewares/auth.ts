@@ -19,7 +19,6 @@ import {AppDispatch, RootState} from "@application/utils/store";
 import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
-import {getResources, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {LogoutProps} from "@application/interfaces/IAuth";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
@@ -43,8 +42,6 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
     if (login.fulfilled.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
-        dispatch(getVersion());
-        dispatch(getResources());
     } else if (logout.match(action)) {
         const SecuredStorage = LocalStorage.getStorage(true);
         SecuredStorage.remove('authUser');

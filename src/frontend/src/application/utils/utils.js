@@ -17,8 +17,6 @@ import ReactDOM from 'react-dom';
 import ReactDOMServer from "react-dom/server";
 import React, {ReactElement, useEffect, useRef} from "react";
 import _ from "lodash";
-import {SEPARATE_WINDOW} from "@root/components/utils/constants/app";
-import CUserGroup from "@classes/content/user_group/CUserGroup";
 import {ResponseMessages} from "../requests/interfaces/IResponse";
 import {Application} from "../classes/Application";
 
@@ -242,18 +240,6 @@ export const DEBUGGER_ERRORS = true;
  */
 export const TOKEN_EXPIRED_MESSAGES = ['TOKEN_EXPIRED', 'Access Denied', 'UNSUPPORTED_HEADER_AUTH_TYPE'];
 
-export function hasHeader(props){
-    return !isExternalWindow();
-}
-export function isExternalWindow(){
-    for(let windowParam in SEPARATE_WINDOW.CONNECTION_OVERVIEW){
-        if(window.name === SEPARATE_WINDOW.CONNECTION_OVERVIEW[windowParam]){
-            return true;
-        }
-    }
-    return false;
-}
-
 export function checkCronExpression(cronExp){
     const timeParts = cronExp.split(' ');
     let timePartsLength = timeParts.length;
@@ -473,58 +459,12 @@ export function sortByIndexFunction(a, b){
     });
 }
 
-/**
- * a callback to search by name
- */
-export function searchByNameFunction(element, searchValue){
-    let elementValue = element && isString(element.name) ? element.name.toUpperCase() : element && isString(element.title) ? element.title.toUpperCase() : '';
-    if(elementValue === ''){
-        if(element.hasOwnProperty('userDetail') && element.userDetail && element.userDetail.hasOwnProperty('name')){
-            elementValue = element.userDetail.name.toUpperCase();
-        } else if(element instanceof CUserGroup) {
-            elementValue = element.role.toUpperCase();
-        } else{
-            return true;
-        }
-    }
-    return elementValue.indexOf(searchValue.toUpperCase()) !== -1;
-}
-
 export function sleepApp(milliseconds) {
     const date = Date.now();
     let currentDate = null;
     do {
         currentDate = Date.now();
     } while (currentDate - date < milliseconds);
-}
-
-/**
- * a callback to sort by name
- */
-function sortByNameFunction(a, b){
-    let propertyA = a && isString(a.name) ? a.name.toUpperCase() : isString(a.title) ? a.title.toUpperCase() : '';
-    let propertyB = b && isString(b.name) ? b.name.toUpperCase() : isString(b.title) ? b.title.toUpperCase() : '';
-    if(propertyA === '' && propertyB === ''){
-        if(a.hasOwnProperty('userDetail') && a.userDetail && a.userDetail.hasOwnProperty('name')){
-            propertyA = a.userDetail.name.toUpperCase();
-            propertyB = b.userDetail.name.toUpperCase();
-        } else if(a instanceof CUserGroup) {
-            propertyA = a.role.toUpperCase();
-            propertyB = b.role.toUpperCase();
-        } else{
-            return 1;
-        }
-    }
-    return {propertyA, propertyB};
-}
-
-export function ascSortByNameFunction(a, b){
-    const {propertyA, propertyB} = sortByNameFunction(a, b);
-    if(propertyA < propertyB){return -1;} if(propertyA > propertyB){return 1;} return 0;
-}
-export function descSortByNameFunction(a, b){
-    const {propertyA, propertyB} = sortByNameFunction(a, b);
-    if(propertyA > propertyB){return -1;} if(propertyA < propertyB){return 1;} return 0;
 }
 
 /**

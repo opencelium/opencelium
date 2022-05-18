@@ -15,12 +15,12 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Tag from "@entity/connection/components/components/general/basic_components/xml_editor/Tag";
-import CXmlEditor from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CXmlEditor";
-import styles from '@entity/connection/components/themes/default/general/basic_components.scss';
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
-import ChangeTag from "@entity/connection/components/components/general/basic_components/xml_editor/ChangeTag";
-import CTag from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
+import Tag from "@app_component/base/input/xml_view/xml_editor/Tag";
+import CXmlEditor from "./classes/CXmlEditor";
+import styles from './basic_components.scss';
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import ChangeTag from "@app_component/base/input/xml_view/xml_editor/ChangeTag";
+import CTag from "./classes/CTag";
 
 export const OnReferenceClickContext = React.createContext(null);
 /**

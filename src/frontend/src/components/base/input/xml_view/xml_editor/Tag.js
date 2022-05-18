@@ -15,17 +15,17 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Property from "@entity/connection/components/components/general/basic_components/xml_editor/Property";
-import styles from '@entity/connection/components/themes/default/general/basic_components.scss';
-import CTag, {TAG_VALUE_TYPES} from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CTag";
+import Property from "@app_component/base/input/xml_view/xml_editor/Property";
+import styles from './basic_components.scss';
+import CTag, {TAG_VALUE_TYPES} from "./classes/CTag";
 import {checkReferenceFormat, isString} from "@application/utils/utils";
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
-import CProperty from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CProperty";
-import ChangeProperty from "@entity/connection/components/components/general/basic_components/xml_editor/ChangeProperty";
-import ChangeTag from "@entity/connection/components/components/general/basic_components/xml_editor/ChangeTag";
-import ReferenceValues from "@entity/connection/components/components/general/basic_components/xml_editor/ReferenceValues";
-import CXmlEditor from "@entity/connection/components/classes/components/general/basic_components/xml_editor/CXmlEditor";
-import {OnReferenceClickContext} from "@entity/connection/components/components/general/basic_components/xml_editor/XmlEditor";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import CProperty from "./classes/CProperty";
+import ChangeProperty from "@app_component/base/input/xml_view/xml_editor/ChangeProperty";
+import ChangeTag from "@app_component/base/input/xml_view/xml_editor/ChangeTag";
+import ReferenceValues from "@app_component/base/input/xml_view/xml_editor/ReferenceValues";
+import CXmlEditor from "./classes/CXmlEditor";
+import {OnReferenceClickContext} from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
 
 const XML_TAG_INDENT = 15;
 

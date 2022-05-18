@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {kibanaUrl} from "@application/requests/classes/url";
+import {kibanaUrl} from "@entity/application/requests/classes/url";
 import {usePrevious} from "@application/utils/usePrevious";
 import {convertTimeForSchedulerList} from "@application/utils/utils";
 import { LastFailExecutionProps } from './interfaces';

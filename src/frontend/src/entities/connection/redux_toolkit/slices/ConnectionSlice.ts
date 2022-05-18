@@ -19,14 +19,13 @@ import {IResponse, ResponseMessages} from "@application/requests/interfaces/IRes
 import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {LocalStorage} from "@application/classes/LocalStorage";
-import {isExternalWindow} from "@application/utils/utils";
 import {
     addConnection, checkConnectionTitle, deleteConnectionById,
     deleteConnectionsById, getAllConnections, getAllMetaConnections,
     getConnectionById, updateConnection,
 } from "../action_creators/ConnectionCreators";
 import {IConnection} from "../../interfaces/IConnection";
-import {PANEL_LOCATION} from "../../components/utils/constants/app";
+import {PANEL_LOCATION, SEPARATE_WINDOW} from "../../components/utils/constants/app";
 import {ConnectionViewProps, ConnectionViewType} from "@root/components/pages/interfaces";
 
 const COLOR_MODE = {
@@ -78,6 +77,15 @@ export interface ConnectionState extends ICommonState{
 let initialState: ConnectionState = null;
 const storage = LocalStorage.getStorage();
 const connectionViewType: ConnectionViewType = storage.get('connectionViewType');
+function isExternalWindow(){
+    for(let windowParam in SEPARATE_WINDOW.CONNECTION_OVERVIEW){
+        //@ts-ignore
+        if(window.name === SEPARATE_WINDOW.CONNECTION_OVERVIEW[windowParam]){
+            return true;
+        }
+    }
+    return false;
+}
 if(isExternalWindow()){
     const storage = LocalStorage.getStorage();
     initialState = storage.get('connection_overview');

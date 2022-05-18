@@ -14,7 +14,7 @@
  */
 
 import React, {Component} from 'react';
-import RadioButtons from "@entity/connection/components/components/general/basic_components/inputs/RadioButtons";
+import RadioButtons from "@basic_components/inputs/RadioButtons";
 
 
 /**
