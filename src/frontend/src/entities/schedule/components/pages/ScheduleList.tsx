@@ -43,7 +43,7 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
     return (
         <React.Fragment>
             <CollectionView hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
-            {/*{gettingAllSchedules === API_REQUEST_STATE.FINISH && <CurrentSchedules/>}*/}
+            {gettingAllSchedules === API_REQUEST_STATE.FINISH && <CurrentSchedules/>}
         </React.Fragment>
     )
 })

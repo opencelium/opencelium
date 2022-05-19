@@ -19,7 +19,7 @@ import {LinkMessageStyledProps} from "./interfaces";
 const LinkMessageStyled = styled.span<LinkMessageStyledProps>`
     font-weight: 600;
     ${({notClickable}) => notClickable ? '' : `
-        color: #00ACC2;
+        color: #000;
         cursor: pointer;
         &:hover{
         text-decoration: underline;

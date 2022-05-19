@@ -29,7 +29,7 @@ export enum ColorTheme {
     DarkGray = '#666666',
     Green = '#01553d',
     BeconBlue = '#2372ba',
-    BeconDarkBlue = '#fac000',
+    BeconDarkYellow = '#fac000',
     BeconTurquoise = '#e8b200',
 }
 export interface IColorStates{
@@ -78,6 +78,9 @@ type IMenu = {
 }
 
 export interface ITheme{
+    progressBarElement?: {
+        background: ColorTheme,
+    },
     menu: IMenu,
     icon: IIcon,
     button: IButton,
@@ -193,8 +196,11 @@ const greenTheme: ITheme = {
     }
 }
 const beconClassicTheme: ITheme = {
+    progressBarElement: {
+        background: ColorTheme.BeconBlue,
+    },
     menu: {
-        background: ColorTheme.BeconDarkBlue,
+        background: ColorTheme.BeconDarkYellow,
         menuItem: {
             hover: ColorTheme.BeconTurquoise,
         }
@@ -222,7 +228,7 @@ const beconClassicTheme: ITheme = {
         },
         text:{
             color: {
-                quite: ColorTheme.BeconDarkBlue,
+                quite: ColorTheme.BeconDarkYellow,
                 disable: ColorTheme.Gray,
             },
         },

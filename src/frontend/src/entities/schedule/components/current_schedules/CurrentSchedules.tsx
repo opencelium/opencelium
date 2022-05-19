@@ -22,6 +22,7 @@ import {CurrentSchedulesStyled, EmptyListStyled, HeaderStyled} from './styles';
 import {Schedule} from "../../classes/Schedule";
 import {getCurrentSchedules, getSchedulesById} from "../../redux_toolkit/action_creators/ScheduleCreators";
 import {ProgressBarElement} from "../../components/progress_bar_element/ProgressBarElement";
+import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 
 const CurrentSchedules: FC<CurrentSchedulesProps> =
     ({

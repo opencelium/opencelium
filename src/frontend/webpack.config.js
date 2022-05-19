@@ -61,6 +61,33 @@ function getHttpsSettings(){
     return https;
 }
 const getConfig = ({isBuild, envVar}) => {
+    const copyWebpackPluginSettings = {};
+    copyWebpackPluginSettings.patterns = [
+        {
+            from: path.resolve(__dirname, 'locales'),
+            to: path.resolve(__dirname, 'dist/locales')
+        },
+        {
+            from: path.resolve(__dirname, 'src/img'),
+            to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
+        },
+        {
+            from: path.resolve(__dirname, 'src/styles/css'),
+            to: path.resolve(__dirname, 'dist/styles/css')
+        },
+        {
+            from: path.resolve(__dirname, 'src/styles/fonts'),
+            to: path.resolve(__dirname, 'dist/styles/fonts')
+        },
+    ];
+    if(envVar && envVar.hasOwnProperty('process.env.isDevelopment') && envVar['process.env.isDevelopment']){
+        copyWebpackPluginSettings.patterns.push(
+            {
+                from: path.resolve(__dirname, 'src/img/application/fav_icon.png'),
+                to: path.resolve(__dirname, 'dist')
+            }
+        );
+    }
     return {
         entry: ['@babel/polyfill', './src/index.jsx'],
         module: {
@@ -181,26 +208,7 @@ const getConfig = ({isBuild, envVar}) => {
                 favicon: path.join(__dirname, "src", "./img/application/fav_icon.png"),
             }),
             new NodePolyfillPlugin(),
-            new CopyWebpackPlugin({
-                patterns: [
-                    {
-                        from: path.resolve(__dirname, 'locales'),
-                        to: path.resolve(__dirname, 'dist/locales')
-                    },
-                    {
-                        from: path.resolve(__dirname, 'src/img'),
-                        to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
-                    },
-                    {
-                        from: path.resolve(__dirname, 'src/styles/css'),
-                        to: path.resolve(__dirname, 'dist/styles/css')
-                    },
-                    {
-                        from: path.resolve(__dirname, 'src/styles/fonts'),
-                        to: path.resolve(__dirname, 'dist/styles/fonts')
-                    },
-                ]
-            }),
+            new CopyWebpackPlugin(copyWebpackPluginSettings),
             new webpack.DefinePlugin({...envVar})
         ],
     };
