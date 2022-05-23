@@ -25,7 +25,6 @@ import {ICommonState} from "../interfaces/core";
 import {authMiddleware} from "./middlewares/auth";
 import {notificationMiddleware} from "./middlewares/notification";
 import {applicationMiddleware} from "./middlewares/application";
-import {themeMiddleware} from "./middlewares/theme";
 const syncConfig: any = {
     whitelist: [
         ...syncStateConfig.whiteList,
@@ -39,7 +38,6 @@ const rootReducer = combineReducers({
 })
 const middlewares = [
     authMiddleware,
-    themeMiddleware,
     applicationMiddleware,
     notificationMiddleware,
     ...EntitiesMiddlewares,

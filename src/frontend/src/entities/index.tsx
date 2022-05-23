@@ -111,10 +111,15 @@ const getMenuItems = (showMenu: boolean) => {
 
 const entitiesRoutes = require.context('.', true, /\/\w+\/utils\/routes.tsx$/);
 let routes: any = [];
+let LoginRoute: any = null;
 entitiesRoutes.keys().forEach(key => {
     const exposed = entitiesRoutes(key);
-    Object.keys(exposed).forEach(key => {
-        routes.push(exposed[key]);
+    Object.keys(exposed).forEach(componentName => {
+        if(key !== './application/utils/routes.tsx') {
+            routes.push(exposed[componentName]);
+        } else{
+            LoginRoute = exposed[componentName];
+        }
     });
 });
 
@@ -154,6 +159,7 @@ export {
     interpolations,
     getMenuItems,
     Routes,
+    LoginRoute,
     middlewares,
     syncStateConfig,
 }

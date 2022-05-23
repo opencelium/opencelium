@@ -22,7 +22,7 @@ import {
 import {Layout} from "@app_component/layout/Layout";
 import LoginForm from "@app_component/default_pages/login/LoginForm";
 import {PageNotFound} from "@app_component/default_pages/page_not_found/PageNotFound";
-import {Routes as EntityRoutes} from "@entity/index"
+import {Routes as EntityRoutes, LoginRoute} from "@entity/index"
 import {Auth} from "../classes/Auth";
 import ErrorBoundary from "../../components/base/error_boundary/ErrorBoundary";
 
@@ -43,7 +43,7 @@ export const getRoutes = () => {
             <Route path="/" element={<ErrorBoundary><RequireAuth><Layout/></RequireAuth></ErrorBoundary>}>
                 {EntityRoutes}
             </Route>
-            <Route path="/login" element={<ErrorBoundary><LoginForm/></ErrorBoundary>}/>
+            {LoginRoute !== null ? LoginRoute : <Route path="/login" element={<ErrorBoundary><LoginForm/></ErrorBoundary>}/>}
             <Route path="/*" element={<ErrorBoundary><PageNotFound/></ErrorBoundary>}/>
         </Routes>
     )
