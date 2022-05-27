@@ -91,7 +91,7 @@ class ListCollection implements IListCollection{
     entities: any[] = [];
 
     // on/off actions of entity
-    hasActions?: boolean;
+    hasActions?: boolean = true;
 
     // on/off checkboxes of collection
     hasCheckboxes?: boolean;

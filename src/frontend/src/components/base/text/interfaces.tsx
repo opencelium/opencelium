@@ -30,7 +30,7 @@ interface TextProps extends TextStyledProps{
     value?: any,
     namespace?: string,
     transKey?: string,
-    color?: ColorTheme,
+    color?: string,
     size?: TextSize,
     hasTitle?: boolean,
     theme?: ITheme,

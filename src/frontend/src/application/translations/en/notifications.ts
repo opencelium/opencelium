@@ -21,11 +21,11 @@ const {
     addTicket, openExternalUrl
 } = ActionCreators;
 
-const {setTheme} = actions;
+const {setThemes} = actions;
 
 export default {
     fulfilled: {
-        [setTheme.type]: "Your theme was successfully updated",
+        [setThemes.type]: "Your theme was successfully updated",
         [getResources.fulfilled.type]: "New invokers and templates are available (<1><0>{{updates}}</0></1>)",
         [updateResources.fulfilled.type]: "",
     },

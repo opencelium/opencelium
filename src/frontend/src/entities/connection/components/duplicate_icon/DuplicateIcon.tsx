@@ -137,6 +137,19 @@ const DuplicateIcon: FC<DuplicateIconProps> =
             tmpToConnector.icon = toConnectorData.icon;
             connection.fromConnector = {...tmpFromConnector};
             connection.toConnector = {...tmpToConnector};
+            let fieldBinding: any = [];
+            for(let i = 0; i < connection.fieldBinding.length; i++){
+                let fieldBindingItem = {...connection.fieldBinding[i]};
+                if(fieldBindingItem && fieldBindingItem.hasOwnProperty('enhancement') && fieldBindingItem.enhancement && fieldBindingItem.enhancement.hasOwnProperty('enhanceId')){
+                    let newEnhancement = {...fieldBindingItem.enhancement};
+                    if(newEnhancement){
+                        delete newEnhancement.enhanceId;
+                        fieldBindingItem.enhancement = newEnhancement;
+                    }
+                }
+                fieldBinding.push(fieldBindingItem);
+            }
+            connection.fieldBinding = fieldBinding;
             delete connection.connectionId;
             if(connection.businessLayout){
                 delete connection.businessLayout.id;

@@ -18,7 +18,7 @@ import {AppDispatch, RootState} from "@application/utils/store";
 import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getResources, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
-import {setTheme} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (login.fulfilled.type === action.type) {
@@ -28,10 +28,10 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
         dispatch(getVersion());
         dispatch(getResources());
     }
-    if (setTheme.match(action)) {
+    if (setThemes.match(action)) {
         const storage = LocalStorage.getStorage();
-        if(storage.get('theme') !== action.payload){
-            storage.set('theme', action.payload);
+        if(storage.get('themes') !== action.payload){
+            storage.set('themes', action.payload);
             const iframe = document.getElementById('iframe_messenger');
             if(iframe) {
                 // @ts-ignore
@@ -39,7 +39,7 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
                 contentWindow.postMessage({
                     key: 'key',
                     value: action.payload,
-                    method: 'opencelium_theme_store'
+                    method: 'opencelium_themes_store'
                 }, '*');
             }
         }

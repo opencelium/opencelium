@@ -80,12 +80,18 @@ interface IComponent{
     permissions?: PermissionProps,
 }
 
-
 interface ComponentProps{
     componentId: number,
     name: string,
     permissions: PermissionTypes[],
 }
+
+interface LocalStorageTheme{
+    name: string,
+    colors: {action: string, menu: string, header: string},
+    isCurrent?: boolean,
+}
+
 export {
     API_REQUEST_STATE,
     TRIPLET_STATE,
@@ -93,4 +99,5 @@ export {
     OC_DESCRIPTION,
     IComponent,
     ComponentProps,
+    LocalStorageTheme,
 }

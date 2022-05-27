@@ -1,5 +1,6 @@
 import {store} from "@application/utils/store";
-import {setTheme} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {LocalStorageTheme} from "@application/interfaces/IApplication";
 
 /**
  * to create iframe for cross domain messaging
@@ -14,22 +15,22 @@ export function createIframe(src: string): void{
     document.body.appendChild(iframe);
     function handleMessage(e: any) {
         let {key, value, method} = e.data;
-        if (method === 'opencelium_theme_store') {
+        if (method === 'opencelium_themes_store') {
             window.localStorage.setItem(key, value);
-        } else if (method === 'opencelium_theme_retrieve') {
+        } else if (method === 'opencelium_themes_retrieve') {
             let value = window.localStorage.getItem(key);
             e.source.postMessage({
                 key,
                 value,
-                method: 'opencelium_theme_response'
+                method: 'opencelium_themes_response'
             }, '*');
         }
     }
     function handleResponse(e: any) {
-        let {value,method} = e.data
-        if (method === 'opencelium_theme_response') {
-            if(store.getState().applicationReducer.theme !== value && value !== null){
-                store.dispatch(setTheme(value));
+        let {value, method} = e.data
+        if (method === 'opencelium_themes_response') {
+            if(value !== null && store.getState().applicationReducer.themes.find((theme: LocalStorageTheme) => theme.isCurrent).name !== value.find((theme: LocalStorageTheme) => theme.isCurrent).name){
+                store.dispatch(setThemes(value));
             }
         }
     }
@@ -41,7 +42,7 @@ export function createIframe(src: string): void{
             // @ts-ignore
             const contentWindow = iframe.contentWindow;
             contentWindow.postMessage({
-                method: 'opencelium_theme_retrieve',
+                method: 'opencelium_themes_retrieve',
                 key: 'key'
             }, '*');
         }

@@ -16,8 +16,8 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {GridViewType} from "@app_component/collection/GridViewMenu";
-import {ThemeNames} from "@style/Theme";
-import {API_REQUEST_STATE} from "../../interfaces/IApplication";
+import {DefaultThemes, ThemeNames} from "@style/Theme";
+import {API_REQUEST_STATE, LocalStorageTheme} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
 import {
@@ -63,7 +63,7 @@ export interface AuthState extends ICommonState{
     gridViewType: GridViewType,
     searchValue: string,
     currentPageItems: any[],
-    theme: ThemeNames,
+    themes: LocalStorageTheme[],
 }
 
 
@@ -95,7 +95,7 @@ const initialState: AuthState = {
     gridViewType: gridViewType || 4,
     searchValue: '',
     currentPageItems: [],
-    theme: storage.get('theme') || ThemeNames.Default,
+    themes: storage.get('themes') || DefaultThemes,
     ...CommonState,
 }
 
@@ -137,8 +137,8 @@ export const applicationSlice = createSlice({
         setSearchValue: (state, action: PayloadAction<string>) => {
             state.searchValue = action.payload;
         },
-        setTheme: (state, action: PayloadAction<ThemeNames>) => {
-            state.theme = action.payload;
+        setThemes: (state, action: PayloadAction<LocalStorageTheme[]>) => {
+            state.themes = action.payload;
         }
     },
     extraReducers: {
@@ -243,13 +243,13 @@ export const applicationSlice = createSlice({
 export const {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setTheme,
+    setViewType, setFullScreen, setSearchValue, setThemes,
 } = applicationSlice.actions;
 
 export const actions = {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setTheme,
+    setViewType, setFullScreen, setSearchValue, setThemes,
 }
 
 export default applicationSlice.reducer;

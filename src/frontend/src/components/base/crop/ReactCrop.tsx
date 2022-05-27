@@ -58,7 +58,7 @@ const ReactCrop: FC<ReactCropProps> = ({
             const croppedImageUrl: any = await getCroppedImg(
                 imgRef,
                 crop,
-                'newFile.jpeg'
+                'newFile.png'
             );
             setCroppedImageUrl(croppedImageUrl);
         }
@@ -94,7 +94,7 @@ const ReactCrop: FC<ReactCropProps> = ({
                 }
                 reader.readAsDataURL(blob)
                 reader.onloadend = () => {
-                    const fileImage = dataURLtoFile(reader.result, 'cropped.jpg');
+                    const fileImage = dataURLtoFile(reader.result, 'cropped.png');
                     setImage(fileImage);
                 }
                 // @ts-ignore
@@ -104,7 +104,7 @@ const ReactCrop: FC<ReactCropProps> = ({
                 window.URL.revokeObjectURL(fileUrl);
                 fileUrl = window.URL.createObjectURL(blob);
                 resolve(fileUrl);
-            }, 'image/jpeg');
+            }, 'image/png');
         });
     }
     return(

@@ -18,7 +18,7 @@ import {permission} from "@application/utils/permission";
 import {Auth} from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
-import { setTheme } from "@application/redux_toolkit/slices/ApplicationSlice";
+import { setThemes } from "@application/redux_toolkit/slices/ApplicationSlice";
 import FormSection from "@app_component/form/form_section/FormSection";
 import Form from "@app_component/form/form/Form";
 import InputRadios from "@app_component/base/input/radio/InputRadios";
@@ -33,7 +33,7 @@ import { MyProfilePermissions } from "../../constants";
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
-    const {theme} = Application.getReduxState();
+    const {themes} = Application.getReduxState();
     const {authUser} = Auth.getReduxState();
     const userGroup = UserGroup.createState<IUserGroup>({
         _readOnly: true,
@@ -60,20 +60,26 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         {propertyName: "email", props: {icon: 'email', label: "Email", maxLength: 255, required: true}},
     );
     const Permissions = userGroup.getPermissionComponent();
+    const themesOptions = themes.map(theme => {return {label: theme.name, value: theme.name, key: theme.name};})
     const Theme =
         <InputRadios
             onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                let newThemes = [...themes].map(theme => {
+                    let newTheme = {...theme};
+                    if(newTheme.name === e.target.value){
+                        newTheme.isCurrent = true;
+                    } else{
+                        newTheme.isCurrent = false;
+                    }
+                    return newTheme;
+                })
                 // @ts-ignore
-                dispatch(setTheme(e.target.value));
+                dispatch(setThemes(newThemes));
             }}
-            value={theme}
-            icon={'preview'}
+            value={themes.find(theme => theme.isCurrent).name}
+            icon={'palette'}
             label={'Themes'}
-            options={[
-                {label: 'Default', value: 'default', key: 'default'},
-                {label: 'Green Day', value: 'other', key: 'other'},
-                {label: 'becon Classic', value: 'becon_classic', key: 'becon_classic'},
-            ]}
+            options={themesOptions}
         />
     const AppTour = userDetail.getSwitch({propertyName: 'appTour', props:{
         readOnly: false,

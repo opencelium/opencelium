@@ -70,7 +70,7 @@ export class Auth extends HookStateClass implements IAuth{
             this.validations['email'] = 'The email is a required field';
         }
         if(!isEmailRegExp.test(this.email) && !isNotValid){
-            this.validations['email'] = 'The invalid email';
+            this.validations['email'] = 'The email is invalid';
             isNotValid = true;
         }
         if(isNotValid){

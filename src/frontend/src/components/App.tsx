@@ -20,13 +20,14 @@ import {getRoutes} from "@application/utils/routes";
 import {Application} from "@application/classes/Application";
 import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@entity/application/requests/classes/url';
 import {createIframe} from "@entity/application/utils/utils";
-import Themes, {ThemeNames} from "@style/Theme";
+import Themes, {DefaultTheme, updateThemeWithColors} from "@style/Theme";
 import {Global} from "@style/global";
 
 
 const App = ({}) => {
-    const {theme} = Application.getReduxState();
-    let appTheme: any = theme ? Themes[theme] : Themes.default;
+    const {themes} = Application.getReduxState();
+    let selectedTheme: any = themes.find(theme => theme.isCurrent) || DefaultTheme;
+    const appTheme = updateThemeWithColors(Themes.default, selectedTheme)
     useEffect(() => {
         if(navigator.onLine){
             createIframe(onlineServiceOpenCeliumUrl);

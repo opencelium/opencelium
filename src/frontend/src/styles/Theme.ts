@@ -15,6 +15,7 @@
  */
 
 import {TextSize} from "@app_component/base/text/interfaces";
+import {LocalStorageTheme} from "@application/interfaces/IApplication";
 
 export enum ColorTheme {
     Black = '#000000',
@@ -30,10 +31,10 @@ export enum ColorTheme {
     Green = '#01553d',
     BeconBlue = '#2372ba',
     BeconDarkYellow = '#fac000',
-    BeconTurquoise = '#e8b200',
+    BeconYellow = '#e8b200',
 }
 export interface IColorStates{
-    quite?: ColorTheme,
+    quite?: string,
     hover?: string,
     active?: string,
     focus?: string,
@@ -73,13 +74,13 @@ type IText = {
 }
 
 type IMenu = {
-    background?: ColorTheme,
+    background?: string,
     menuItem?: IColorStates,
 }
 
 export interface ITheme{
     progressBarElement?: {
-        background: ColorTheme,
+        background: string,
     },
     menu: IMenu,
     icon: IIcon,
@@ -202,7 +203,7 @@ const beconClassicTheme: ITheme = {
     menu: {
         background: ColorTheme.BeconDarkYellow,
         menuItem: {
-            hover: ColorTheme.BeconTurquoise,
+            hover: ColorTheme.BeconYellow,
         }
     },
     button: {
@@ -252,14 +253,36 @@ const beconClassicTheme: ITheme = {
     }
 }
 
+export function updateThemeWithColors(theme: ITheme, localStorageTheme: LocalStorageTheme){
+    let updatedTheme = {...theme};
+    const colors = localStorageTheme?.colors || null;
+    if(colors && colors.hasOwnProperty('action') && colors.hasOwnProperty('menu') && colors.hasOwnProperty('header')){
+        if(updatedTheme.progressBarElement){
+            updatedTheme.progressBarElement.background = colors.action;
+        }
+        updatedTheme.menu.background = colors.menu;
+        updatedTheme.menu.menuItem.hover = colors.header;
+        updatedTheme.button.background.quite = colors.action;
+        updatedTheme.input.text.color.quite = colors.menu;
+    }
+    return updatedTheme;
+}
+
+export const DefaultThemes: LocalStorageTheme[] = [
+    {name: 'Default', colors: {action: '#007bff', header: '#00ACC2', menu: '#012E55'}},
+    {name: 'Green Day', colors: {action: '#007bff', header: '#00ACC2', menu: '#01553d'}},
+    {name: 'Becon Classic', isCurrent: true, colors: {action: '#2372ba', header: '#fac000', menu: '#e8b200'}}
+]
+export const DefaultTheme = DefaultThemes.find(theme => theme.isCurrent);
+
 export enum ThemeNames{
     Default= 'default',
-    Other= 'other',
+    GreenDay= 'green_day',
     BeconClassic= 'becon_classic'
 }
 
 export default {
-    other: greenTheme,
+    green_day: greenTheme,
     default: defaultTheme,
     becon_classic: beconClassicTheme,
 }
