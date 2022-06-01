@@ -18,7 +18,7 @@ import {actions} from '../../redux_toolkit/slices/ApplicationSlice';
 
 const {
     login, getResources, getVersion, updateResources, getGlobalSearchData, getAllComponents,
-    addTicket, openExternalUrl
+    addTicket, openExternalUrl, updateThemes
 } = ActionCreators;
 
 const {setThemes} = actions;
@@ -42,6 +42,11 @@ export default {
         },
         [updateResources.rejected.type]: {
             "__DEFAULT__": ""
+        },
+        [updateThemes.rejected.type]: {
+            "WRONG_REQUEST_BODY": "Wrong data to update thr themes",
+            "USER_NOT_FOUND": "Wrong data to update the themes",
+            "__DEFAULT__": "There is an error updating the themes",
         },
     },
 }

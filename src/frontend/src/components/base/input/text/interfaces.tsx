@@ -31,6 +31,7 @@ interface InputTextProps extends InputHTMLAttributes<HTMLInputElement>, InputEle
     isVisible?: boolean;
     paddingLeft?: string | number,
     paddingRight?: string | number,
+    checkBackground?: string,
 }
 
 

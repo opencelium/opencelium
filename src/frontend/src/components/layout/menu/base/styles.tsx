@@ -18,9 +18,9 @@ import {Link} from "react-router-dom";
 import Text from "@app_component/base/text/Text";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import {ITheme} from "@style/Theme";
-import {MenuLinkLogoStyled} from './interfaces';
+import {MenuLinkLogoStyled, MenuLinkStyledProps} from './interfaces';
 
-const getNavLinkStyles = (theme: ITheme) => { return `
+const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
     margin: 2px;
     display: grid;
     grid-template-columns: max-content max-content;
@@ -34,13 +34,13 @@ const getNavLinkStyles = (theme: ITheme) => { return `
     cursor: pointer;
     &:hover{
         color: white;
-        background-color: ${theme.menu.menuItem.hover || '#00ACC2'};
+        background-color: ${onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
         text-decoration: none;
     }
     
     &:focus, &:focus-visible{
         outline: none;
-        background-color: ${theme.menu.menuItem.hover || '#00ACC2'};
+        background-color: ${onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
     }
 `};
 
@@ -53,9 +53,9 @@ const SUB_LINK = `
     }
 `;
 
-const MainSubLinkStyled = styled(Link)`
+const MainSubLinkStyled = styled(Link)<MenuLinkStyledProps>`
     ${SUB_LINK}
-    ${({theme}) => getNavLinkStyles(theme)}
+    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
     &:hover{
         color: white;
         background-color: unset;
@@ -79,8 +79,8 @@ const LinksStyled = styled.ul`
     padding: .75rem 2.25rem .75rem calc(2.25rem + 10px);
 `;
 
-const MenuLinkWithSubLinksStyled = styled.div`
-    ${({theme}) => getNavLinkStyles(theme)}
+const MenuLinkWithSubLinksStyled = styled.div<MenuLinkStyledProps>`
+    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
     a{
         padding: 0;
         margin: 0 0 0 5px;
@@ -97,8 +97,8 @@ const MenuLinkLabelStyled = styled(Text)`
     margin-left: 5px;
 `;
 
-const MenuLinkStyled = styled(Link)`
-    ${({theme}) => getNavLinkStyles(theme)}
+const MenuLinkStyled = styled(Link)<MenuLinkStyledProps>`
+    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
 `;
 
 const MenuIconStyled = styled.span`
@@ -116,7 +116,7 @@ const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyled>`
     margin-bottom: 35px !important;
     padding-bottom: 10px;
     &:hover{
-        border-bottom: 2px solid ${({theme}) => theme.menu.menuItem.hover || '#00ACC2'};
+        border-bottom: 2px solid ${({theme, onHoverColor}) => onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
         padding-bottom: 8px;
     }
     & > span{

@@ -77,6 +77,7 @@ interface ButtonProps {
     float?: string,
     permission?: PermissionProps,
     className?: string,
+    tabIndex?: any,
 }
 
 

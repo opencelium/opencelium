@@ -15,7 +15,7 @@
 
 import React, {FC, useState} from 'react';
 import LogoOcWhiteImagePath from "@image/application/logo_oc_white.png";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE, OC_NAME} from "@application/interfaces/IApplication";
 import {Auth} from "@application/classes/Auth";
 import {Image} from "@app_component/base/image/Image";
 import {LoginIconProps} from "./interfaces";
@@ -39,7 +39,7 @@ const LoginIcon: FC<LoginIconProps> =
         }
         return (
             <LoginIconStyled hasRotation={hasRotation} isAuth={false}>
-                <Image src={LogoOcWhiteImagePath} alt={'OpenCelium'} onClick={onClick} isLoading={logining === API_REQUEST_STATE.START} width={isAuth ? '40px' : '48px'} loadingSize={'30px'}/>
+                <Image src={LogoOcWhiteImagePath} alt={OC_NAME} onClick={onClick} isLoading={logining === API_REQUEST_STATE.START} width={isAuth ? '40px' : '48px'} loadingSize={'30px'}/>
             </LoginIconStyled>
         )
     }

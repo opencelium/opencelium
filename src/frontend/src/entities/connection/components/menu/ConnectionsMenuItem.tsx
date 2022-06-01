@@ -16,11 +16,9 @@
 import React, {FC} from 'react';
 import MenuLink from "@app_component/layout/menu/base/MenuLink";
 import { ConnectionPermissions } from '../../constants';
+import {MenuItemProps} from "@app_component/layout/menu/interfaces";
 
-const ConnectionsMenuItem_1: FC =
-    ({
-
-     }) => {
+const ConnectionsMenuItem_1: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
         return (
             <MenuLink
                 permission={ConnectionPermissions.READ}
@@ -28,6 +26,8 @@ const ConnectionsMenuItem_1: FC =
                 to={'/connections'}
                 name={'sync_alt'}
                 label={'Connections'}
+                isReadonly={isReadonly}
+                onHoverColor={onHoverColor}
             />
         )
     }

@@ -17,19 +17,29 @@ import {ITheme} from "@style/Theme";
 
 interface MenuItemProps{
     theme?: ITheme,
+    isReadonly?: boolean,
+    onHoverColor?: string,
 }
 
 interface AdminMenuItemProps extends MenuItemProps{
     isMainMenuExpanded?: boolean,
+    isReadonly?: boolean,
+    onHoverColor?: string,
 }
 
 interface MenuProps{
     theme?: ITheme,
+    isPreview?: boolean,
+    isReadonly?: boolean,
+    hoverMenuItemBackground?: string,
+    background?: string,
 }
 
 interface MenuStyledProps{
+    isPreview?: boolean,
     isExpanded?: boolean,
     isFullScreen?: boolean,
+    background?: string,
 }
 
 export {

@@ -31,4 +31,6 @@ export default interface IAuthUser{
     userGroup: IUserGroupFile & IUserGroupTextarea & IUserGroupText | any,
     userDetail: IUserDetailText & IUserDetailSelect & IUserDetailRadios & IUserDetailFile & IUserDetailSwitch | any,
     dashboard?: any,
+    themes?: string,
+    logoName?: string,
 }

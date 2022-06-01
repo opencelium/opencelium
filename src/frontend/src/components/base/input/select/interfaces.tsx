@@ -65,7 +65,7 @@ interface InputSelectProps extends InputElementProps{
     placeholder?: string,
     options?: OptionProps[] | AsyncOptionProps,
     isSearchable?: boolean,
-    onChange?: (option: string | string[])=>void,
+    onChange?: (option: string | string[]) => void,
     isMultiple?: boolean | undefined,
     callback?: (reference: any, newValue?: any)=>void,
     className?: string,

@@ -30,15 +30,17 @@ const Label: FC<LabelProps> =
         left,
         position,
         onClick,
+        background,
     }) => {
     return (
-        <LabelStyled onClick={onClick} top={top} left={left} position={position}>
+        <LabelStyled background={background} onClick={onClick} top={top} left={left} position={position}>
             <Text value={value} size={TextSize.Size_14} color={ColorTheme.White}/>
         </LabelStyled>
     )
 }
 
 Label.defaultProps = {
+    background: '',
 }
 
 

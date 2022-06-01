@@ -22,12 +22,19 @@ import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@entity/
 import {createIframe} from "@entity/application/utils/utils";
 import Themes, {DefaultTheme, updateThemeWithColors} from "@style/Theme";
 import {Global} from "@style/global";
+import {Auth} from "@application/classes/Auth";
+import {useAppDispatch} from "@application/utils/store";
+import { setThemes } from '@application/redux_toolkit/slices/ApplicationSlice';
+import {LocalStorage} from "@application/classes/LocalStorage";
+import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 
 
 const App = ({}) => {
+    const dispatch = useAppDispatch();
+    const {isAuth, authUser} = Auth.getReduxState();
     const {themes} = Application.getReduxState();
     let selectedTheme: any = themes.find(theme => theme.isCurrent) || DefaultTheme;
-    const appTheme = updateThemeWithColors(Themes.default, selectedTheme)
+    const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
     useEffect(() => {
         if(navigator.onLine){
             createIframe(onlineServiceOpenCeliumUrl);
@@ -35,6 +42,17 @@ const App = ({}) => {
             createIframe(offlineServiceOpenCeliumUrls);
         }
     }, [])
+    useEffect(() => {
+        if(isAuth) {
+            if(authUser.themes) {
+                const storage = LocalStorage.getStorage();
+                if (storage.get('themes') !== authUser.themes) {
+                    dispatch(setThemes(authUser.themes));
+                }
+            }
+            dispatch(getLogoName(authUser.email));
+        }
+    },[isAuth])
     return (
         <ThemeProvider theme={appTheme}>
             <BrowserRouter>

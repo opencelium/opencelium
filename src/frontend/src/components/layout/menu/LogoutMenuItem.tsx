@@ -18,11 +18,9 @@ import {useNavigate} from "react-router";
 import {useDispatch} from "react-redux";
 import { logout } from '@application/redux_toolkit/slices/AuthSlice';
 import MenuLink from "./base/MenuLink";
+import {MenuItemProps} from "@app_component/layout/menu/interfaces";
 
-const LogoutMenuItem: FC =
-    ({
-
-    }) => {
+const LogoutMenuItem: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
         const dispatch = useDispatch()
         let navigate = useNavigate();
         return (
@@ -30,14 +28,18 @@ const LogoutMenuItem: FC =
                 key={'log_out'}
                 to={'#'}
                 onClick={() => {
-                    dispatch(logout(null));
-                    navigate("/login", { replace: true });
+                    if(!isReadonly) {
+                        dispatch(logout(null));
+                        navigate("/login", {replace: true});
+                    }
                 }}
                 name={'logout'}
                 label={'Log Out'}
                 size={30}
-                hasConfirmation={true}
+                hasConfirmation={!isReadonly}
                 confirmationText={'Do you want to logout?'}
+                isReadonly={isReadonly}
+                onHoverColor={onHoverColor}
             />
         )
     }

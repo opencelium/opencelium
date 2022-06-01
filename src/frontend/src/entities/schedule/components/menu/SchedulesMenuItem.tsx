@@ -16,11 +16,9 @@
 import React, {FC} from 'react';
 import MenuLink from "@app_component/layout/menu/base/MenuLink";
 import { SchedulePermissions } from '../../constants';
+import {MenuItemProps} from "@app_component/layout/menu/interfaces";
 
-const SchedulesMenuItem_2: FC =
-    ({
-
-     }) => {
+const SchedulesMenuItem_2: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
         return (
             <MenuLink
                 permission={SchedulePermissions.READ}
@@ -28,6 +26,8 @@ const SchedulesMenuItem_2: FC =
                 to={'/schedules'}
                 name={'update'}
                 label={'Schedules'}
+                isReadonly={isReadonly}
+                onHoverColor={onHoverColor}
             />
         )
     }

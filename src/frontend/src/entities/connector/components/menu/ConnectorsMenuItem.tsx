@@ -16,11 +16,9 @@
 import React, {FC} from 'react';
 import MenuLink from "@app_component/layout/menu/base/MenuLink";
 import {ConnectorPermissions} from "../../constants";
+import {MenuItemProps} from "@app_component/layout/menu/interfaces";
 
-const ConnectorsMenuItem_0: FC =
-    ({
-
-    }) => {
+const ConnectorsMenuItem_0: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
     return (
         <MenuLink
             permission={ConnectorPermissions.READ}
@@ -28,6 +26,8 @@ const ConnectorsMenuItem_0: FC =
             to={'/connectors'}
             name={'settings_input_hdmi'}
             label={'Connectors'}
+            isReadonly={isReadonly}
+            onHoverColor={onHoverColor}
         />
     )
 }

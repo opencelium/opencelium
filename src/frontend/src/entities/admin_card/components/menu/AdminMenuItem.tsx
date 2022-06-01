@@ -21,10 +21,13 @@ import { UserGroupPermissions } from '@entity/user_group/constants';
 import { ExternalApplicationPermissions } from '@entity/external_application/constants';
 import { InvokerPermissions } from '@entity/invoker/constants';
 import {TemplatePermissions} from "@entity/template/constants";
+import MenuLink from "@app_component/layout/menu/base/MenuLink";
 
 const AdminMenuItem_3: FC<AdminMenuItemProps> =
     ({
-         isMainMenuExpanded
+         isMainMenuExpanded,
+         isReadonly,
+         onHoverColor,
     }) => {
         return (
             <MenuLinkWithSubLinks
@@ -39,6 +42,8 @@ const AdminMenuItem_3: FC<AdminMenuItemProps> =
                     {to: '/templates', children: 'Templates', permission: TemplatePermissions.READ},
                 ]}
                 isMainMenuExpanded={isMainMenuExpanded}
+                isReadonly={isReadonly}
+                onHoverColor={onHoverColor}
             />
         )
     }

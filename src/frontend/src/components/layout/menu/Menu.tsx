@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {createGlobalStyle} from "styled-components";
-import {resizeWindow} from "@application/utils/utils";
+import {isReactComponent, resizeWindow} from "@application/utils/utils";
 import {Application} from "@application/classes/Application";
 import Button from "@app_component/base/button/Button";
 import Tooltip from "@app_component/base/tooltip/Tooltip";
@@ -36,16 +36,23 @@ const Global = createGlobalStyle`
 
 const Menu: FC<MenuProps> =
     ({
-
+        isPreview,
+        isReadonly,
+        background,
+        hoverMenuItemBackground,
     }) => {
     const {isFullScreen} = Application.getReduxState();
     const [isExpanded, toggleExpanded] = useState(false);
     const [isMouseOver, toggleMouseOver] = useState(false);
     const onMouseOver = () => {
-        toggleMouseOver(true);
+        if(!isReadonly) {
+            toggleMouseOver(true);
+        }
     }
     const onMouseLeave = () => {
-        toggleMouseOver(false);
+        if(!isReadonly) {
+            toggleMouseOver(false);
+        }
     }
     useEffect(() => {
         setTimeout(() => resizeWindow(), 500);
@@ -69,13 +76,15 @@ const Menu: FC<MenuProps> =
         }
     }, [])
     const toggle = () => {
-        toggleExpanded(!isExpanded);
-        let bodyElement = document.querySelector('body');
-        if(bodyElement) {
-            if(!isExpanded){
-                bodyElement.style['padding'] = '2rem 2rem 0 17rem';
-            } else{
-                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+        if(!isReadonly) {
+            toggleExpanded(!isExpanded);
+            let bodyElement = document.querySelector('body');
+            if (bodyElement) {
+                if (!isExpanded) {
+                    bodyElement.style['padding'] = '2rem 2rem 0 17rem';
+                } else {
+                    bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+                }
             }
         }
     }
@@ -84,20 +93,20 @@ const Menu: FC<MenuProps> =
     return (
         <React.Fragment>
             <Global/>
-            <MenuStyled isFullScreen={isFullScreen} isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
+            <MenuStyled background={background} isPreview={isPreview} isFullScreen={isFullScreen} isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
                 <NavStyled>
                     <div>
                         <MenuTop>
-                            <MenuLinkLogo/>
+                            <MenuLinkLogo isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>
                             <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
                                 <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
                             />
                         </MenuTop>
                         <div>
-                            {getMenuItems(showMenu)}
+                            {getMenuItems({showMenu, isReadonly, onHoverColor: hoverMenuItemBackground})}
                         </div>
                     </div>
-                    <LogoutMenuItem/>
+                    {!isReadonly && <LogoutMenuItem isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>}
                 </NavStyled>
             </MenuStyled>
         </React.Fragment>
@@ -105,6 +114,10 @@ const Menu: FC<MenuProps> =
 }
 
 Menu.defaultProps = {
+    isPreview: false,
+    isReadonly: false,
+    hoverMenuItemBackground: '',
+    background: '',
 }
 
 

@@ -50,6 +50,7 @@ const InputText: FC<InputTextProps> = ({
     isVisible,
     paddingLeft,
     paddingRight,
+    checkBackground,
     ...props
 }) => {
     if(!isVisible){
@@ -57,14 +58,16 @@ const InputText: FC<InputTextProps> = ({
     }
     const [checked, onCheck] = useState<boolean>(false);
     const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onCheck(!checked);
+        if(!readOnly) {
+            onCheck(!checked);
+        }
     }
     const hasCheck = type === InputTextType.Password && !(!icon && isLoading);
     const showPassword = type === InputTextType.Password && checked;
     const hasLabel = label !== '';
     return(
         <Input overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
-               afterInputComponent={hasCheck ? <CheckStyled hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingRight={paddingRight} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
+               afterInputComponent={hasCheck ? <CheckStyled tabIndex={readOnly ? -1 : 0} background={checkBackground} hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingRight={paddingRight} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
                display={display} hasUnderline={hasUnderline} readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputStyled
                 emphasizeColor={color}
@@ -98,6 +101,7 @@ InputText.defaultProps = {
     background: 'unset',
     inputHeight: 'unset',
     isVisible: true,
+    checkBackground: '',
 }
 
 export default InputText;

@@ -47,6 +47,9 @@ const InputFile: FC<InputFileProps> = ({
     const [fileName, setFileName] = useState('');
     const [src, setSrc] = useState(null);
     const inputFile = useRef(null);
+    if(src !== null && hasCrop){
+        icon = ' ';
+    }
     const hasIcon = !!icon;
     if(!placeholder && !fileName){
         placeholder = 'Please choose file...';

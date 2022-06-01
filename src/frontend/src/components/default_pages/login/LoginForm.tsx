@@ -19,11 +19,11 @@ import {useLocation, useNavigate} from "react-router";
 import {Auth} from "@application/classes/Auth";
 import {IAuth} from "@application/interfaces/IAuth";
 import {onEnter} from "@application/utils/utils";
-import {HeaderStyled, LoginFormStyled} from "./styles";
 import {InputTextType} from "@app_component/base/input/text/interfaces";
 import NotificationItem from "@app_component/layout/top_bar/NotificationItem";
 import {LayoutLoading} from "@app_component/base/loading/LayoutLoading";
 import {ColorTheme} from "@style/Theme";
+import {HeaderStyled, LoginFormStyled} from "./styles";
 import {LoginFormProps} from "./interfaces";
 import {LoginIcon} from "./login_icon/LoginIcon";
 

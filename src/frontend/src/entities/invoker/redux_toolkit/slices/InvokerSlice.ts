@@ -73,10 +73,10 @@ const initialState: InvokerState = {
 export const invokerSlice = createSlice({
     name: 'invoker',
     initialState,
-    reducers: {
-        cleanMethod: (state) => {
-            state.operation = null;
-        }
+        reducers: {
+            cleanMethod: (state) => {
+                state.operation = null;
+            }
     },
     extraReducers: {
         [importInvoker.pending.type]: (state, action: PayloadAction<ITemplate>) => {

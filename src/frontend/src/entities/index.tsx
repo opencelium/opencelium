@@ -17,6 +17,7 @@ import React from "react";
 import {Middleware} from "redux";
 import {RootState} from "@application/utils/store";
 import {deepObjectsMerge} from "@application/utils/utils";
+import EntityApplicationToolkit from './application/redux_toolkit';
 import ConnectionToolkit from './connection/redux_toolkit';
 import ConnectorToolkit from './connector/redux_toolkit';
 import DashboardToolkit from './dashboard/redux_toolkit';
@@ -44,6 +45,7 @@ const ActionCreators = {
 }
 
 const reducers = {
+    ...EntityApplicationToolkit.reducers,
     ...ConnectionToolkit.reducers,
     ...ConnectorToolkit.reducers,
     ...DashboardToolkit.reducers,
@@ -99,11 +101,11 @@ if(menuItems.length !== items.length){
     menuItems = items;
 }
 
-const getMenuItems = (showMenu: boolean) => {
+const getMenuItems = ({showMenu, isReadonly, onHoverColor}: {showMenu: boolean, isReadonly: boolean, onHoverColor?: string}) => {
     return (
         <React.Fragment>
             {
-                menuItems.map((menuItem: any, key: any) => {return React.createElement(menuItem, {key, isMainMenuExpanded: showMenu})})
+                menuItems.map((menuItem: any, key: any) => {return React.createElement(menuItem, {key, isMainMenuExpanded: showMenu, isReadonly, onHoverColor})})
             }
         </React.Fragment>
     )

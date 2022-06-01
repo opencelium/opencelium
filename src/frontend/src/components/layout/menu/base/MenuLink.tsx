@@ -36,12 +36,15 @@ const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkP
         size,
         hasConfirmation,
         confirmationText,
+        isReadonly,
+        onHoverColor
     }) => {
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
     return (
         <MenuLinkStyled
-            to={to}
+            to={isReadonly ? '#' : to}
             onClick={hasConfirmation ? () => toggleConfirmation(!isConfirmationOpened) : onClick ? onClick : () => {}}
+            onHoverColor={onHoverColor}
         >
             <MenuIcon color={ColorTheme.White} name={name} size={size}/>
             <MenuLinkLabelStyled value={label} size={TextSize.Size_16}/>
@@ -64,6 +67,7 @@ MenuLink.defaultProps = {
     permission: NO_RESTRICTION,
     hasConfirmation: false,
     confirmationText: '',
+    isReadonly: false,
 }
 
 

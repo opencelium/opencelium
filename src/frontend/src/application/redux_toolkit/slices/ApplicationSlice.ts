@@ -26,13 +26,10 @@ import {
     ResourcesProps
 } from "../../requests/interfaces/IApplication";
 import {
-    addTicket,
-    getAllComponents,
-    getGlobalSearchData,
-    getResources,
-    getVersion,
-    openExternalUrl, requestRemoteApi,
-    updateResources
+    addTicket, getAllComponents, getGlobalSearchData,
+    getLogoName, getResources, getVersion,
+    openExternalUrl, requestRemoteApi, updateResources,
+    updateThemes,
 } from "../../redux_toolkit/action_creators/ApplicationCreators";
 import {IApplicationResponse, IResponse} from "../../requests/interfaces/IResponse";
 import {INotification} from "../../interfaces/INotification";
@@ -41,6 +38,7 @@ import { IComponent } from "../../interfaces/IApplication";
 
 
 export interface AuthState extends ICommonState{
+    gettingLogoName: API_REQUEST_STATE,
     addingTicket: API_REQUEST_STATE,
     gettingVersion: API_REQUEST_STATE,
     gettingResources: API_REQUEST_STATE,
@@ -49,6 +47,7 @@ export interface AuthState extends ICommonState{
     updatingResources: API_REQUEST_STATE,
     openingExternalUrl: API_REQUEST_STATE,
     requestingRemoteApi: API_REQUEST_STATE,
+    updatingThemes: API_REQUEST_STATE,
     remoteApiData: RemoteApiResponseProps,
     isNotificationPanelOpened: boolean,
     version: string,
@@ -73,6 +72,7 @@ const version: string = storage.get('appVersion');
 const viewType: ViewType = storage.get('viewType');
 const gridViewType: GridViewType = storage.get('gridViewType');
 const initialState: AuthState = {
+    gettingLogoName: API_REQUEST_STATE.INITIAL,
     addingTicket: API_REQUEST_STATE.INITIAL,
     gettingVersion: API_REQUEST_STATE.INITIAL,
     gettingResources: API_REQUEST_STATE.INITIAL,
@@ -81,6 +81,7 @@ const initialState: AuthState = {
     updatingResources: API_REQUEST_STATE.INITIAL,
     openingExternalUrl: API_REQUEST_STATE.INITIAL,
     requestingRemoteApi: API_REQUEST_STATE.INITIAL,
+    updatingThemes: API_REQUEST_STATE.INITIAL,
     remoteApiData: null,
     isNotificationPanelOpened: false,
     version: version || '',
@@ -95,7 +96,7 @@ const initialState: AuthState = {
     gridViewType: gridViewType || 4,
     searchValue: '',
     currentPageItems: [],
-    themes: storage.get('themes') || DefaultThemes,
+    themes: JSON.parse(storage.get('themes')) || DefaultThemes,
     ...CommonState,
 }
 
@@ -137,11 +138,33 @@ export const applicationSlice = createSlice({
         setSearchValue: (state, action: PayloadAction<string>) => {
             state.searchValue = action.payload;
         },
-        setThemes: (state, action: PayloadAction<LocalStorageTheme[]>) => {
-            state.themes = action.payload;
+        setThemes: (state, action: PayloadAction<string>) => {
+            state.themes = JSON.parse(action.payload);
         }
     },
     extraReducers: {
+        [updateThemes.pending.type]: (state) => {
+            state.updatingThemes = API_REQUEST_STATE.START;
+        },
+        [updateThemes.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+            state.updatingThemes = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [updateThemes.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.updatingThemes = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getLogoName.pending.type]: (state) => {
+            state.gettingLogoName = API_REQUEST_STATE.START;
+        },
+        [getLogoName.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.gettingLogoName = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [getLogoName.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingLogoName = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [addTicket.pending.type]: (state) => {
             state.addingTicket = API_REQUEST_STATE.START;
         },

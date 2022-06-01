@@ -56,6 +56,9 @@ export const authSlice = createSlice({
             state.authUser = null;
             state.wasAccessDenied = action.payload?.wasAccessDenied || false;
             state.message = action.payload?.message || '';
+        },
+        updateAuthUser: (state, action: PayloadAction<IAuthUser>) => {
+            state.authUser = action.payload;
         }
     },
     extraReducers: {
@@ -77,5 +80,5 @@ export const authSlice = createSlice({
     }
 })
 
-export const { logout } = authSlice.actions
+export const { logout, updateAuthUser } = authSlice.actions
 export default authSlice.reducer;

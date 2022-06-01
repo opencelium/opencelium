@@ -13,24 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {MouseEventHandler} from "react";
-import {ColorTheme, ITheme} from "@style/Theme";
+import reducers from "./slices";
 
-interface LabelStyledProps{
-    theme?: ITheme,
-    background?: string,
-    top?: string | number,
-    left?: string | number,
-    position?: string,
-}
-
-interface LabelProps extends LabelStyledProps{
-    value?: string,
-    onClick?: MouseEventHandler<HTMLSpanElement>,
-}
-
-
-export {
-    LabelProps,
-    LabelStyledProps,
+export default {
+    reducers,
 }

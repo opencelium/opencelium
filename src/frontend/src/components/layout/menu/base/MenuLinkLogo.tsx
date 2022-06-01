@@ -16,16 +16,23 @@
 import React from "react";
 import {LinkProps} from "react-router-dom";
 import {LogoImageStyled, MenuLinkLogoStyled} from "./styles";
-import LogoOcWhiteImagePath from "@image/application/logo_oc_white.png";
+import {Auth} from "@application/classes/Auth";
+import LogoImage from "@app_component/base/logo_image/LogoImage";
+import {OC_NAME} from "@application/interfaces/IApplication";
 
-export const MenuLinkLogo = (props: Partial<LinkProps>) => {
+export const MenuLinkLogo = ({isReadonly, onHoverColor, ...props}: Partial<LinkProps> & {isReadonly: boolean, onHoverColor: string}) => {
+    const {authUser} = Auth.getReduxState();
+    const logoName = authUser.logoName || OC_NAME;
+    const time = new Date();
+    const logoImageProps = isReadonly ? {} : {update: time};
     return(
         <MenuLinkLogoStyled
-            to={'/'}
+            to={isReadonly ? '#' : '/'}
+            onHoverColor={onHoverColor}
         >
-            <LogoImageStyled src={LogoOcWhiteImagePath} alt={'OpenCelium'}/>
+            <LogoImage style={{marginLeft: '4px'}} {...logoImageProps}/>
             <span>
-                <span>{'OpenCelium'}</span>
+                <span>{logoName}</span>
             </span>
         </MenuLinkLogoStyled>
     )

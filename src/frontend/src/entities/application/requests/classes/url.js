@@ -53,4 +53,6 @@ export const i18nextLoadPath = isBuild ? `${pathname.substring(0, pathname.lastI
 
 export const errorTicketUrl = 'https://becon88.atlassian.net/rest/collectors/1.0/template/form/cb37ee4e';
 export const onlineServiceOpenCeliumUrl = `https://service.opencelium.io:443/`;
+//todo change this url to onlineServiceOpenCeliumUrl
+export const tmpServerOpenCeliumUrl = 'http://localhost:3000/';
 export const offlineServiceOpenCeliumUrls = `${protocol}//${hostname}:${port}/`;

@@ -58,7 +58,7 @@ const ReactCrop: FC<ReactCropProps> = ({
             const croppedImageUrl: any = await getCroppedImg(
                 imgRef,
                 crop,
-                'newFile.png'
+                'newFile.jpeg'
             );
             setCroppedImageUrl(croppedImageUrl);
         }

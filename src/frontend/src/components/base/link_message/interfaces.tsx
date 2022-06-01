@@ -18,7 +18,6 @@ import {AppDispatch} from "@application/utils/store";
 import {ITheme} from "@style/Theme";
 
 interface LinkMessageStyledProps{
-    theme?: ITheme,
     notClickable?: boolean,
 }
 

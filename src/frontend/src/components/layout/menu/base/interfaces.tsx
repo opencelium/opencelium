@@ -16,6 +16,7 @@
 import {LinkProps} from "react-router-dom";
 import { PermissionProps } from "@application/interfaces/IApplication";
 import {ITheme} from "@style/Theme";
+import * as React from "react";
 
 interface MenuLinkProps{
     theme?: ITheme,
@@ -23,6 +24,8 @@ interface MenuLinkProps{
     label?: string,
     hasConfirmation?: boolean,
     confirmationText?: string,
+    isReadonly?: boolean,
+    onHoverColor?: string,
 }
 
 
@@ -33,11 +36,18 @@ interface SubLinkProps extends LinkProps{
 interface MenuLinkWithSubLinksProps{
     label?: string,
     subLinks: SubLinkProps[],
+    isReadonly?: boolean,
     isMainMenuExpanded?: boolean,
+    onHoverColor?: string,
 }
 
 interface MenuLinkLogoStyled{
     theme?: ITheme,
+    onHoverColor?: string,
+}
+
+interface MenuLinkStyledProps extends Partial<LinkProps>{
+    onHoverColor?: string,
 }
 
 export {
@@ -45,4 +55,5 @@ export {
     MenuLinkWithSubLinksProps,
     MenuLinkProps,
     MenuLinkLogoStyled,
+    MenuLinkStyledProps,
 }

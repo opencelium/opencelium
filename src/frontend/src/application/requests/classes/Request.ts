@@ -14,10 +14,8 @@
  */
 
 import axios, {AxiosRequestConfig, AxiosResponse} from "axios";
-import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {baseUrl, baseUrlApi} from "@entity/application/requests/classes/url";
 import {IRequest, IRequestSettings} from "../interfaces/IRequest";
-import {LocalStorage} from "../../classes/LocalStorage";
 
 export class Request implements IRequest{
     url: string;

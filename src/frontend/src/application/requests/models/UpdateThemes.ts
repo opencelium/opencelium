@@ -1,3 +1,4 @@
+
 /*
  *  Copyright (C) <2022>  <becon GmbH>
  *
@@ -13,24 +14,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {MouseEventHandler} from "react";
-import {ColorTheme, ITheme} from "@style/Theme";
-
-interface LabelStyledProps{
-    theme?: ITheme,
-    background?: string,
-    top?: string | number,
-    left?: string | number,
-    position?: string,
-}
-
-interface LabelProps extends LabelStyledProps{
-    value?: string,
-    onClick?: MouseEventHandler<HTMLSpanElement>,
-}
-
-
-export {
-    LabelProps,
-    LabelStyledProps,
+export default interface ModelUpdateThemes{
+    email: string;
+    themes: string;
 }
