@@ -18,7 +18,7 @@ import {Link} from "react-router-dom";
 import Text from "@app_component/base/text/Text";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import {ITheme} from "@style/Theme";
-import {MenuLinkLogoStyled, MenuLinkStyledProps} from './interfaces';
+import {MenuLinkLogoStyledProps, MenuLinkStyledProps} from './interfaces';
 
 const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
     margin: 2px;
@@ -112,7 +112,7 @@ const LogoImageStyled = styled.img`
     margin-left: 4px;
 `;
 
-const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyled>`
+const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyledProps>`
     margin-bottom: 35px !important;
     padding-bottom: 10px;
     &:hover{

@@ -21,10 +21,12 @@ import {Auth} from "@application/classes/Auth";
 import {checkImage, convertPngUrlToBase64} from "@application/utils/utils";
 import {API_REQUEST_STATE, OC_NAME} from "@application/interfaces/IApplication";
 import {RootState, useAppSelector} from "@application/utils/store";
+import {Application} from "@application/classes/Application";
 
 const LogoImage = (props: any) => {
     const imageRef = useRef(null);
     const {authUser} = Auth.getReduxState();
+    const {logoDataStatus} = Application.getReduxState();
     const {updatingLogoData} = useAppSelector((state: RootState) => state.entityApplicationReducer);
     const [isLogoExist, setIsLogoExist] = useState<boolean>(null);
     const [src, setSrc] = useState<string>('');
@@ -41,7 +43,7 @@ const LogoImage = (props: any) => {
     useEffect(() => {
         if(isLogoExist){
             convertPngUrlToBase64(logoPath).then((data) => {
-                setSrc(data);
+                if(data) setSrc(data);
             });
         }
     }, [isLogoExist])
@@ -56,6 +58,10 @@ const LogoImage = (props: any) => {
             setIsLogoExist(false);
         }
     }, [updatingLogoData])
+    useEffect(() => {
+        setIsLogoExist(null);
+        checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
+    }, [logoDataStatus])
     if(isLogoExist === null){
         return <LoadingStyled className={props?.className || ''}/>;
     }

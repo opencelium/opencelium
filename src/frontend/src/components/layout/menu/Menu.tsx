@@ -97,7 +97,7 @@ const Menu: FC<MenuProps> =
                 <NavStyled>
                     <div>
                         <MenuTop>
-                            <MenuLinkLogo isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>
+                            <MenuLinkLogo isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground} to={'/'}/>
                             <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
                                 <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
                             />

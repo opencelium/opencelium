@@ -63,6 +63,7 @@ export interface AuthState extends ICommonState{
     searchValue: string,
     currentPageItems: any[],
     themes: LocalStorageTheme[],
+    logoDataStatus: string,
 }
 
 
@@ -97,6 +98,7 @@ const initialState: AuthState = {
     searchValue: '',
     currentPageItems: [],
     themes: JSON.parse(storage.get('themes')) || DefaultThemes,
+    logoDataStatus: storage.get('logoDataStatus') || '',
     ...CommonState,
 }
 
@@ -140,6 +142,9 @@ export const applicationSlice = createSlice({
         },
         setThemes: (state, action: PayloadAction<string>) => {
             state.themes = JSON.parse(action.payload);
+        },
+        setLogoDataStatus: (state, action: PayloadAction<string>) => {
+            state.logoDataStatus = action.payload;
         }
     },
     extraReducers: {
@@ -266,13 +271,13 @@ export const applicationSlice = createSlice({
 export const {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setThemes,
+    setViewType, setFullScreen, setSearchValue, setThemes, setLogoDataStatus,
 } = applicationSlice.actions;
 
 export const actions = {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setThemes,
+    setViewType, setFullScreen, setSearchValue, setThemes, setLogoDataStatus,
 }
 
 export default applicationSlice.reducer;

@@ -98,9 +98,9 @@ const LabelStyled = styled.span<LabelStyledProps>`
             text-decoration-color: ${color}
         }
     ` : ''}
-    @media only screen and (max-width: 1044px){
+    ${({hasIcon}) => hasIcon ? `@media only screen and (max-width: 1044px){
         display: none;
-    }
+    }` : ''}
 `;
 
 

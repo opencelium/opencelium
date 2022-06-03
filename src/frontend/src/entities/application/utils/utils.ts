@@ -1,6 +1,5 @@
 import {store} from "@application/utils/store";
-import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
-import {LocalStorageTheme} from "@application/interfaces/IApplication";
+import {setLogoDataStatus, setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
 
 /**
  * to create iframe for cross domain messaging
@@ -27,10 +26,13 @@ export function createIframe(src: string): void{
         }
     }
     function handleResponse(e: any) {
-        let {value, method} = e.data
+        let {value, method, logoDataStatus} = e.data;
         if (method === 'opencelium_themes_response') {
-            if(value !== null && store.getState().applicationReducer.themes.find((theme: LocalStorageTheme) => theme.isCurrent).name !== value.find((theme: LocalStorageTheme) => theme.isCurrent).name){
+            if(value !== null && JSON.stringify(store.getState().applicationReducer.themes) !== value){
                 store.dispatch(setThemes(value));
+            }
+            if(logoDataStatus && logoDataStatus !== store.getState().applicationReducer.logoDataStatus){
+                store.dispatch(setLogoDataStatus(logoDataStatus));
             }
         }
     }

@@ -28,6 +28,10 @@ interface MenuLinkProps{
     onHoverColor?: string,
 }
 
+interface MenuLinkLogoProps extends LinkProps{
+    isReadonly: boolean,
+    onHoverColor: string,
+}
 
 interface SubLinkProps extends LinkProps{
     permission?: PermissionProps,
@@ -41,7 +45,7 @@ interface MenuLinkWithSubLinksProps{
     onHoverColor?: string,
 }
 
-interface MenuLinkLogoStyled{
+interface MenuLinkLogoStyledProps extends LinkProps{
     theme?: ITheme,
     onHoverColor?: string,
 }
@@ -54,6 +58,7 @@ export {
     SubLinkProps,
     MenuLinkWithSubLinksProps,
     MenuLinkProps,
-    MenuLinkLogoStyled,
+    MenuLinkLogoStyledProps,
     MenuLinkStyledProps,
+    MenuLinkLogoProps,
 }
