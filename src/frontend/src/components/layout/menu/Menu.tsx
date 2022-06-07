@@ -36,82 +36,82 @@ const Global = createGlobalStyle`
 
 const Menu: FC<MenuProps> =
     ({
-        isPreview,
-        isReadonly,
-        background,
-        hoverMenuItemBackground,
-    }) => {
-    const {isFullScreen} = Application.getReduxState();
-    const [isExpanded, toggleExpanded] = useState(false);
-    const [isMouseOver, toggleMouseOver] = useState(false);
-    const onMouseOver = () => {
-        if(!isReadonly) {
-            toggleMouseOver(true);
-        }
-    }
-    const onMouseLeave = () => {
-        if(!isReadonly) {
-            toggleMouseOver(false);
-        }
-    }
-    useEffect(() => {
-        setTimeout(() => resizeWindow(), 500);
-    },[isExpanded]);
-    useEffect(() => {
-        const bodyElement = document.querySelector('body');
-        if (bodyElement) {
-            if(isFullScreen){
-                bodyElement.style['padding'] = '2rem';
-            } else{
-                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+         isPreview,
+         isReadonly,
+         background,
+         hoverMenuItemBackground,
+     }) => {
+        const {isFullScreen} = Application.getReduxState();
+        const [isExpanded, toggleExpanded] = useState(false);
+        const [isMouseOver, toggleMouseOver] = useState(false);
+        const onMouseOver = () => {
+            if(!isReadonly) {
+                toggleMouseOver(true);
             }
         }
-    }, [isFullScreen])
-    useEffect(() => {
-        return () => {
+        const onMouseLeave = () => {
+            if(!isReadonly) {
+                toggleMouseOver(false);
+            }
+        }
+        useEffect(() => {
+            setTimeout(() => resizeWindow(), 500);
+        },[isExpanded]);
+        useEffect(() => {
             const bodyElement = document.querySelector('body');
             if (bodyElement) {
-                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
-            }
-        }
-    }, [])
-    const toggle = () => {
-        if(!isReadonly) {
-            toggleExpanded(!isExpanded);
-            let bodyElement = document.querySelector('body');
-            if (bodyElement) {
-                if (!isExpanded) {
-                    bodyElement.style['padding'] = '2rem 2rem 0 17rem';
-                } else {
+                if(isFullScreen){
+                    bodyElement.style['padding'] = '2rem';
+                } else{
                     bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
                 }
             }
+        }, [isFullScreen])
+        useEffect(() => {
+            return () => {
+                const bodyElement = document.querySelector('body');
+                if (bodyElement) {
+                    bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+                }
+            }
+        }, [])
+        const toggle = () => {
+            if(!isReadonly) {
+                toggleExpanded(!isExpanded);
+                let bodyElement = document.querySelector('body');
+                if (bodyElement) {
+                    if (!isExpanded) {
+                        bodyElement.style['padding'] = '2rem 2rem 0 17rem';
+                    } else {
+                        bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+                    }
+                }
+            }
         }
-    }
 
-    let showMenu = isMouseOver ? true : isExpanded;
-    return (
-        <React.Fragment>
-            <Global/>
-            <MenuStyled background={background} isPreview={isPreview} isFullScreen={isFullScreen} isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
-                <NavStyled>
-                    <div>
-                        <MenuTop>
-                            <MenuLinkLogo isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground} to={'/'}/>
-                            <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
-                                <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
-                            />
-                        </MenuTop>
+        let showMenu = isMouseOver ? true : isExpanded;
+        return (
+            <React.Fragment>
+                <Global/>
+                <MenuStyled background={background} isPreview={isPreview} isFullScreen={isFullScreen} isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
+                    <NavStyled>
                         <div>
-                            {getMenuItems({showMenu, isReadonly, onHoverColor: hoverMenuItemBackground})}
+                            <MenuTop>
+                                <MenuLinkLogo to={'/'} isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>
+                                <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
+                                    <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
+                                />
+                            </MenuTop>
+                            <div>
+                                {getMenuItems({showMenu, isReadonly, onHoverColor: hoverMenuItemBackground})}
+                            </div>
                         </div>
-                    </div>
-                    {!isReadonly && <LogoutMenuItem isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>}
-                </NavStyled>
-            </MenuStyled>
-        </React.Fragment>
-    )
-}
+                        {!isReadonly && <LogoutMenuItem isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>}
+                    </NavStyled>
+                </MenuStyled>
+            </React.Fragment>
+        )
+    }
 
 Menu.defaultProps = {
     isPreview: false,

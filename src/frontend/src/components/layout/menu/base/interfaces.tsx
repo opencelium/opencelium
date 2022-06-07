@@ -40,12 +40,12 @@ interface SubLinkProps extends LinkProps{
 interface MenuLinkWithSubLinksProps{
     label?: string,
     subLinks: SubLinkProps[],
-    isReadonly?: boolean,
     isMainMenuExpanded?: boolean,
     onHoverColor?: string,
+    isReadonly?: boolean,
 }
 
-interface MenuLinkLogoStyledProps extends LinkProps{
+interface MenuLinkLogoStyledProps extends Partial<LinkProps>{
     theme?: ITheme,
     onHoverColor?: string,
 }
@@ -56,9 +56,9 @@ interface MenuLinkStyledProps extends Partial<LinkProps>{
 
 export {
     SubLinkProps,
+    MenuLinkLogoProps,
     MenuLinkWithSubLinksProps,
     MenuLinkProps,
     MenuLinkLogoStyledProps,
     MenuLinkStyledProps,
-    MenuLinkLogoProps,
 }
