@@ -1,16 +1,16 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import styled from "styled-components";
@@ -23,10 +23,18 @@ const MenuStyled = styled.div<MenuStyledProps>`
     width: ${({isFullScreen, isExpanded}) => isFullScreen ? '0' : isExpanded ? 'width: calc(95px + 9.25rem) !important;' : '95px'};
     padding: ${({isFullScreen}) => isFullScreen ? '0' : '1.5rem 1.5rem 2rem'};
     height: 100vh;
-    background: ${({theme}) => theme.menu.background || '#012E55'};
+    background: ${({theme, background}) => background || theme.menu.background || '#012E55'};
     color: #eee;
     transition: .5s;
     z-index: 1001;
+    ${({isPreview}) => isPreview ? `
+        width: 96px;
+        position: absolute;
+        height: calc(100% - 20px);
+        top: 10px;
+        left: 10px;
+        z-index: 0;
+    ` : ''}
 `;
 
 const NavStyled = styled.nav`

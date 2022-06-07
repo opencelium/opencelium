@@ -1,20 +1,22 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import ProgressBar from 'react-toolbox/lib/progress_bar';
 import styled from "styled-components";
+import chroma from "chroma-js";
+import { ITheme } from '@style/Theme';
 
 const ProgressBarElementStyled = styled.div`
     height: 15px;
@@ -82,11 +84,11 @@ const ProgressBarStyled = styled(ProgressBar)`
     float: left;
     &> div{
         & span:first-child{
-            background-color: #c6cbe9;
+            background-color: ${({theme}: {theme: ITheme}) => chroma(theme.progressBarElement.background).alpha(0.4).toString() || '#c6cbe9'};
             background-image: none;
         }
         & span:last-child{
-            background-color: #3f51b5;
+            background-color: ${({theme}: {theme: ITheme}) => theme.progressBarElement.background || '#3f51b5'};
         }
     }
 `;

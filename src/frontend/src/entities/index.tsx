@@ -1,22 +1,23 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import React from "react";
 import {Middleware} from "redux";
 import {RootState} from "@application/utils/store";
 import {deepObjectsMerge} from "@application/utils/utils";
+import EntityApplicationToolkit from './application/redux_toolkit';
 import ConnectionToolkit from './connection/redux_toolkit';
 import ConnectorToolkit from './connector/redux_toolkit';
 import DashboardToolkit from './dashboard/redux_toolkit';
@@ -44,6 +45,7 @@ const ActionCreators = {
 }
 
 const reducers = {
+    ...EntityApplicationToolkit.reducers,
     ...ConnectionToolkit.reducers,
     ...ConnectorToolkit.reducers,
     ...DashboardToolkit.reducers,
@@ -99,11 +101,11 @@ if(menuItems.length !== items.length){
     menuItems = items;
 }
 
-const getMenuItems = (showMenu: boolean) => {
+const getMenuItems = ({showMenu, isReadonly, onHoverColor}: {showMenu: boolean, isReadonly: boolean, onHoverColor?: string}) => {
     return (
         <React.Fragment>
             {
-                menuItems.map((menuItem: any, key: any) => {return React.createElement(menuItem, {key, isMainMenuExpanded: showMenu})})
+                menuItems.map((menuItem: any, key: any) => {return React.createElement(menuItem, {key, isMainMenuExpanded: showMenu, isReadonly, onHoverColor})})
             }
         </React.Fragment>
     )
@@ -111,10 +113,15 @@ const getMenuItems = (showMenu: boolean) => {
 
 const entitiesRoutes = require.context('.', true, /\/\w+\/utils\/routes.tsx$/);
 let routes: any = [];
+let LoginRoute: any = null;
 entitiesRoutes.keys().forEach(key => {
     const exposed = entitiesRoutes(key);
-    Object.keys(exposed).forEach(key => {
-        routes.push(exposed[key]);
+    Object.keys(exposed).forEach(componentName => {
+        if(key !== './application/utils/routes.tsx') {
+            routes.push(exposed[componentName]);
+        } else{
+            LoginRoute = exposed[componentName];
+        }
     });
 });
 
@@ -154,6 +161,7 @@ export {
     interpolations,
     getMenuItems,
     Routes,
+    LoginRoute,
     middlewares,
     syncStateConfig,
 }

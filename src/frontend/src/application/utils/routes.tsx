@@ -1,16 +1,16 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import React from 'react';
@@ -22,7 +22,7 @@ import {
 import {Layout} from "@app_component/layout/Layout";
 import LoginForm from "@app_component/default_pages/login/LoginForm";
 import {PageNotFound} from "@app_component/default_pages/page_not_found/PageNotFound";
-import {Routes as EntityRoutes} from "@entity/index"
+import {Routes as EntityRoutes, LoginRoute} from "@entity/index"
 import {Auth} from "../classes/Auth";
 import ErrorBoundary from "../../components/base/error_boundary/ErrorBoundary";
 
@@ -43,7 +43,7 @@ export const getRoutes = () => {
             <Route path="/" element={<ErrorBoundary><RequireAuth><Layout/></RequireAuth></ErrorBoundary>}>
                 {EntityRoutes}
             </Route>
-            <Route path="/login" element={<ErrorBoundary><LoginForm/></ErrorBoundary>}/>
+            {LoginRoute !== null ? LoginRoute : <Route path="/login" element={<ErrorBoundary><LoginForm/></ErrorBoundary>}/>}
             <Route path="/*" element={<ErrorBoundary><PageNotFound/></ErrorBoundary>}/>
         </Routes>
     )

@@ -1,16 +1,16 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
@@ -19,6 +19,35 @@ import {ITicket} from "../../interfaces/ITicket";
 import {SettingsProps} from "../../requests/interfaces/IResponse";
 import {RemoteApiRequestProps} from "../../requests/interfaces/IApplication";
 import {errorHandler} from "../../utils/utils";
+import {tmpServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
+import ModelUpdateThemes from "@application/requests/models/UpdateThemes";
+
+
+export const updateThemes = createAsyncThunk(
+    'application/update/themes',
+    async(data: ModelUpdateThemes, thunkAPI) => {
+        try {
+            const request = new ApplicationRequest();
+            const response = await request.updateThemes(data);
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const getLogoName = createAsyncThunk(
+    'application/get/logoName',
+    async(email: string, thunkAPI) => {
+        try{
+            const request = new ApplicationRequest({url: `${tmpServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/name/${email}`});
+            const response = await request.getLogoName(email);
+            return response.data;
+        }catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export const addTicket = createAsyncThunk(
     'application/add/ticket',
@@ -130,6 +159,8 @@ export const requestRemoteApi = createAsyncThunk(
 
 
 export default {
+    updateThemes,
+    getLogoName,
     addTicket,
     getVersion,
     getResources,

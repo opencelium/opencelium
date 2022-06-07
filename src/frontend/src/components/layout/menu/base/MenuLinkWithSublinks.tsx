@@ -1,16 +1,16 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import React, {FC, useEffect, useState} from 'react';
@@ -37,6 +37,8 @@ const MenuLinkWithSubLinks: FC<Partial<IconProps> & LinkProps & MenuLinkWithSubL
         to,
         subLinks,
         isMainMenuExpanded,
+        isReadonly,
+         onHoverColor,
     }) => {
     const [isCollapsed, collapse] = useState(true);
     useEffect(() => {
@@ -47,9 +49,9 @@ const MenuLinkWithSubLinks: FC<Partial<IconProps> & LinkProps & MenuLinkWithSubL
         collapse(!isCollapsed);
     }
     return (
-        <MenuLinkWithSubLinksStyled >
+        <MenuLinkWithSubLinksStyled onHoverColor={onHoverColor}>
             <MenuIcon size={30} name={name} color={ColorTheme.White}/>
-            <MainSubLinkStyled tabIndex={-1} key={label} to={to}>{label}</MainSubLinkStyled>
+            <MainSubLinkStyled tabIndex={-1} key={label} to={isReadonly ? '#' : to}>{label}</MainSubLinkStyled>
             <FoldIconStyled tabIndex={isMainMenuExpanded ? 0 : -1} hasBackground={false} target={`${label}_main_menu_unfold`} tooltip={isCollapsed ? 'Unfold' : 'Fold'} background={ColorTheme.White} size={18} icon={isCollapsed ? 'expand_more' : 'expand_less'} onClick={(e: any) => toggleCollapse(e)}/>
             <LinksStyled isCollapsed={isCollapsed}>
                 {subLinks.map(subLink => <PermissionSubLink key={subLink.to.toString()} to={subLink.to} permission={subLink.permission}>{subLink.children}</PermissionSubLink>)}

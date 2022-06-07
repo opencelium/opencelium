@@ -1,16 +1,16 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
@@ -61,6 +61,33 @@ function getHttpsSettings(){
     return https;
 }
 const getConfig = ({isBuild, envVar}) => {
+    const copyWebpackPluginSettings = {};
+    copyWebpackPluginSettings.patterns = [
+        {
+            from: path.resolve(__dirname, 'locales'),
+            to: path.resolve(__dirname, 'dist/locales')
+        },
+        {
+            from: path.resolve(__dirname, 'src/img'),
+            to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
+        },
+        {
+            from: path.resolve(__dirname, 'src/styles/css'),
+            to: path.resolve(__dirname, 'dist/styles/css')
+        },
+        {
+            from: path.resolve(__dirname, 'src/styles/fonts'),
+            to: path.resolve(__dirname, 'dist/styles/fonts')
+        },
+    ];
+    if(envVar && envVar.hasOwnProperty('process.env.isDevelopment') && envVar['process.env.isDevelopment']){
+        copyWebpackPluginSettings.patterns.push(
+            {
+                from: path.resolve(__dirname, 'src/img/application/fav_icon.png'),
+                to: path.resolve(__dirname, 'dist')
+            }
+        );
+    }
     return {
         entry: ['@babel/polyfill', './src/index.jsx'],
         module: {
@@ -181,26 +208,7 @@ const getConfig = ({isBuild, envVar}) => {
                 favicon: path.join(__dirname, "src", "./img/application/fav_icon.png"),
             }),
             new NodePolyfillPlugin(),
-            new CopyWebpackPlugin({
-                patterns: [
-                    {
-                        from: path.resolve(__dirname, 'locales'),
-                        to: path.resolve(__dirname, 'dist/locales')
-                    },
-                    {
-                        from: path.resolve(__dirname, 'src/img'),
-                        to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
-                    },
-                    {
-                        from: path.resolve(__dirname, 'src/styles/css'),
-                        to: path.resolve(__dirname, 'dist/styles/css')
-                    },
-                    {
-                        from: path.resolve(__dirname, 'src/styles/fonts'),
-                        to: path.resolve(__dirname, 'dist/styles/fonts')
-                    },
-                ]
-            }),
+            new CopyWebpackPlugin(copyWebpackPluginSettings),
             new webpack.DefinePlugin({...envVar})
         ],
     };

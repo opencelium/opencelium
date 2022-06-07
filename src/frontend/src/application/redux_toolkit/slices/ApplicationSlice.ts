@@ -1,23 +1,23 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {GridViewType} from "@app_component/collection/GridViewMenu";
-import {ThemeNames} from "@style/Theme";
-import {API_REQUEST_STATE} from "../../interfaces/IApplication";
+import {DefaultThemes, ThemeNames} from "@style/Theme";
+import {API_REQUEST_STATE, LocalStorageTheme} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
 import {
@@ -26,13 +26,10 @@ import {
     ResourcesProps
 } from "../../requests/interfaces/IApplication";
 import {
-    addTicket,
-    getAllComponents,
-    getGlobalSearchData,
-    getResources,
-    getVersion,
-    openExternalUrl, requestRemoteApi,
-    updateResources
+    addTicket, getAllComponents, getGlobalSearchData,
+    getLogoName, getResources, getVersion,
+    openExternalUrl, requestRemoteApi, updateResources,
+    updateThemes,
 } from "../../redux_toolkit/action_creators/ApplicationCreators";
 import {IApplicationResponse, IResponse} from "../../requests/interfaces/IResponse";
 import {INotification} from "../../interfaces/INotification";
@@ -41,6 +38,7 @@ import { IComponent } from "../../interfaces/IApplication";
 
 
 export interface AuthState extends ICommonState{
+    gettingLogoName: API_REQUEST_STATE,
     addingTicket: API_REQUEST_STATE,
     gettingVersion: API_REQUEST_STATE,
     gettingResources: API_REQUEST_STATE,
@@ -49,6 +47,7 @@ export interface AuthState extends ICommonState{
     updatingResources: API_REQUEST_STATE,
     openingExternalUrl: API_REQUEST_STATE,
     requestingRemoteApi: API_REQUEST_STATE,
+    updatingThemes: API_REQUEST_STATE,
     remoteApiData: RemoteApiResponseProps,
     isNotificationPanelOpened: boolean,
     version: string,
@@ -63,7 +62,8 @@ export interface AuthState extends ICommonState{
     gridViewType: GridViewType,
     searchValue: string,
     currentPageItems: any[],
-    theme: ThemeNames,
+    themes: LocalStorageTheme[],
+    logoDataStatus: string,
 }
 
 
@@ -73,6 +73,7 @@ const version: string = storage.get('appVersion');
 const viewType: ViewType = storage.get('viewType');
 const gridViewType: GridViewType = storage.get('gridViewType');
 const initialState: AuthState = {
+    gettingLogoName: API_REQUEST_STATE.INITIAL,
     addingTicket: API_REQUEST_STATE.INITIAL,
     gettingVersion: API_REQUEST_STATE.INITIAL,
     gettingResources: API_REQUEST_STATE.INITIAL,
@@ -81,6 +82,7 @@ const initialState: AuthState = {
     updatingResources: API_REQUEST_STATE.INITIAL,
     openingExternalUrl: API_REQUEST_STATE.INITIAL,
     requestingRemoteApi: API_REQUEST_STATE.INITIAL,
+    updatingThemes: API_REQUEST_STATE.INITIAL,
     remoteApiData: null,
     isNotificationPanelOpened: false,
     version: version || '',
@@ -95,7 +97,8 @@ const initialState: AuthState = {
     gridViewType: gridViewType || 4,
     searchValue: '',
     currentPageItems: [],
-    theme: storage.get('theme') || ThemeNames.Default,
+    themes: JSON.parse(storage.get('themes')) || DefaultThemes,
+    logoDataStatus: storage.get('logoDataStatus') || '',
     ...CommonState,
 }
 
@@ -137,11 +140,36 @@ export const applicationSlice = createSlice({
         setSearchValue: (state, action: PayloadAction<string>) => {
             state.searchValue = action.payload;
         },
-        setTheme: (state, action: PayloadAction<ThemeNames>) => {
-            state.theme = action.payload;
+        setThemes: (state, action: PayloadAction<string>) => {
+            state.themes = JSON.parse(action.payload);
+        },
+        setLogoDataStatus: (state, action: PayloadAction<string>) => {
+            state.logoDataStatus = action.payload;
         }
     },
     extraReducers: {
+        [updateThemes.pending.type]: (state) => {
+            state.updatingThemes = API_REQUEST_STATE.START;
+        },
+        [updateThemes.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+            state.updatingThemes = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [updateThemes.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.updatingThemes = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getLogoName.pending.type]: (state) => {
+            state.gettingLogoName = API_REQUEST_STATE.START;
+        },
+        [getLogoName.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.gettingLogoName = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [getLogoName.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingLogoName = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
         [addTicket.pending.type]: (state) => {
             state.addingTicket = API_REQUEST_STATE.START;
         },
@@ -243,13 +271,13 @@ export const applicationSlice = createSlice({
 export const {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setTheme,
+    setViewType, setFullScreen, setSearchValue, setThemes, setLogoDataStatus,
 } = applicationSlice.actions;
 
 export const actions = {
     addNotification, clearNotification, toggleNotificationPanel, clearAllNotifications,
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
-    setViewType, setFullScreen, setSearchValue, setTheme,
+    setViewType, setFullScreen, setSearchValue, setThemes, setLogoDataStatus,
 }
 
 export default applicationSlice.reducer;

@@ -1,16 +1,16 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import React, {FC, useState} from 'react';
@@ -50,6 +50,7 @@ const InputText: FC<InputTextProps> = ({
     isVisible,
     paddingLeft,
     paddingRight,
+    checkBackground,
     ...props
 }) => {
     if(!isVisible){
@@ -57,14 +58,16 @@ const InputText: FC<InputTextProps> = ({
     }
     const [checked, onCheck] = useState<boolean>(false);
     const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onCheck(!checked);
+        if(!readOnly) {
+            onCheck(!checked);
+        }
     }
     const hasCheck = type === InputTextType.Password && !(!icon && isLoading);
     const showPassword = type === InputTextType.Password && checked;
     const hasLabel = label !== '';
     return(
         <Input overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
-               afterInputComponent={hasCheck ? <CheckStyled hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingRight={paddingRight} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
+               afterInputComponent={hasCheck ? <CheckStyled tabIndex={readOnly ? -1 : 0} background={checkBackground} hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingRight={paddingRight} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
                display={display} hasUnderline={hasUnderline} readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputStyled
                 emphasizeColor={color}
@@ -98,6 +101,7 @@ InputText.defaultProps = {
     background: 'unset',
     inputHeight: 'unset',
     isVisible: true,
+    checkBackground: '',
 }
 
 export default InputText;
