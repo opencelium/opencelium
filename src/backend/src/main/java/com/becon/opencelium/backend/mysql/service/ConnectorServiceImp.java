@@ -16,9 +16,12 @@
 
 package com.becon.opencelium.backend.mysql.service;
 
-import com.becon.opencelium.backend.authentication.AuthenticationType;
+import com.becon.opencelium.backend.constant.DataRef;
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.factory.AuthenticationFactory;
+import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
+import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
+import com.becon.opencelium.backend.execution.rdata.extractor.Extractor;
+import com.becon.opencelium.backend.execution.rdata.extractor.ExtractorFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
@@ -36,7 +39,6 @@ import com.becon.opencelium.backend.resource.connection.OperatorResource;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.becon.opencelium.backend.utility.StringUtility;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
@@ -44,9 +46,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Repository
@@ -227,7 +229,7 @@ public class ConnectorServiceImp implements ConnectorService{
         } else {
             requestData = connector.getRequestData();
         }
-        return invokerRequestBuilder.setInvokerName(connector.getInvoker())
+        return invokerRequestBuilder
                 .setFunction(function)
                 .setRequestData(requestData)
                 .setSslCert(connector.isSslCert())
@@ -238,29 +240,31 @@ public class ConnectorServiceImp implements ConnectorService{
     public ResponseEntity<?> getAuthorization(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
         FunctionInvoker function = invokerServiceImp.getAuthFunction(connector.getInvoker());
-        return invokerRequestBuilder.setInvokerName(connector.getInvoker()).setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
+        return invokerRequestBuilder.setFunction(function).setRequestData(connector.getRequestData()).sendRequest();
     }
 
+    // TODO: must be refactored
+    // RequestData = from db; RequiredData = from invoker
     @Override
     public List<RequestData> buildRequestData(Connector connector) {
         Invoker invoker = invokerService.findByName(connector.getInvoker());
-        AuthenticationFactory authFactory = new AuthenticationFactory(invokerService.findAll(), restTemplate);
-        AuthenticationType authenticationType = authFactory.getAuthType(invoker.getAuthType());
-        FunctionInvoker authFunc = invokerServiceImp.getAuthFunction(connector.getInvoker());
-        if (invoker.getAuthType().equals("token") || authFunc != null){
-            InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
-            FunctionInvoker function = invokerServiceImp.getTestFunction(connector.getInvoker());
-            if (authFunc != null) {
-                function = authFunc;
-            }
-            invokerRequestBuilder.setInvokerName(connector.getInvoker())
-                    .setFunction(function)
-                    .setRequestData(connector.getRequestData())
-                    .sendRequest();
-            ResponseEntity<?> responseEntity = checkCommunication(connector);
-            return authenticationType.getAccessCredentials(connector, responseEntity);
-        }
+        List<RequiredData> requiredData = invoker.getRequiredData();
+        List<RequestData> requestData = connector.getRequestData();
+        requiredData.forEach(rqd -> addFieldIfNotExists(requestData, rqd));
 
-        return authenticationType.getAccessCredentials(connector);
+        // looping through request data nad looking for values that contains references
+        // rqsd - requestData object
+        RequiredDataService requiredDataService = new RequiredDataServiceImp(requestData, invoker.getOperations());
+        requestData.forEach(rqsd -> {
+            String value = requiredDataService.getValue(rqsd).orElse(null);
+            rqsd.setValue(value);
+        });
+        return requestData;
+    }
+
+    private void addFieldIfNotExists(List<RequestData> requestData, RequiredData rqd) {
+        if (requestData.stream().noneMatch(rqsd -> rqsd.getField().equals(rqd.getName()))) {
+            requestData.add(new RequestData(rqd));
+        }
     }
 }
