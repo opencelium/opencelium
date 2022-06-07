@@ -52,6 +52,6 @@ export const connectionOverviewBusinessLayoutUrl = `${protocol}//${hostname}:${p
 export const i18nextLoadPath = isBuild ? `${pathname.substring(0, pathname.lastIndexOf('/'))}/locales/{{lng}}/{{ns}}.json` : `${window.location.protocol}//${window.location.host}/locales/{{lng}}/{{ns}}.json`;
 
 export const errorTicketUrl = 'https://becon88.atlassian.net/rest/collectors/1.0/template/form/cb37ee4e';
-export const onlineServiceOpenCeliumUrl = `http://oc-service-portal.westeurope.cloudapp.azure.com/`;
+export const onlineServiceOpenCeliumUrl = `'https://service.opencelium.io:443/`;
 export const tmpServerOpenCeliumUrl = 'https://service.opencelium.io:443/';
 export const offlineServiceOpenCeliumUrls = `${protocol}//${hostname}:${port}/`;
