@@ -69,7 +69,8 @@ public class FieldNodeServiceImp implements FieldNodeService {
         Long connectionId = connection.getId();
 
         MethodNode methodNode = methodNodeServiceImp.findByConnectionIdAndColor(connectionId, fieldResource.getColor())
-                .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND_FOR_FIELD"));
+                .orElseThrow(() ->
+                        new RuntimeException("METHOD_NOT_FOUND_FOR_FIELD: " + connectionId +", " + fieldResource.getColor()));
         ErrorMessageData messageData = validationContext.get(connection.getName());
         if (messageData == null){
             messageData = new ErrorMessageData();

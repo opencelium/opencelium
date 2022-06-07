@@ -60,5 +60,7 @@ public interface InvokerService {
 
     Map<String, Invoker> findAllAsMap();
 
+    List<FunctionInvoker> getAuthFunctions(String invoker);
+
 //    Object findField(String field, Map<String, Object> body);
 }

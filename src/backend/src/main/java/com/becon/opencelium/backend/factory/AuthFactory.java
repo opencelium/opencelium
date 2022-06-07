@@ -17,33 +17,18 @@
 package com.becon.opencelium.backend.factory;
 
 import com.becon.opencelium.backend.authentication.*;
-import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
+public class AuthFactory {
 
-public class AuthenticationFactory {
-
-    private List<Invoker> invokerList;
-    private RestTemplate restTemplate;
-
-    public AuthenticationFactory(List<Invoker> invokerList, RestTemplate restTemplate) {
-        this.invokerList = invokerList;
-        this.restTemplate = restTemplate;
-    }
-
-    public AuthenticationType getAuthType(String authType){
-        switch (authType){
+    public ApiAuth generateAuth(Invoker invoker){
+        switch (invoker.getAuthType()){
             case "basic":
-                return new BasicAuth(invokerList);
+                return new BasicAuth(invoker);
             case "endpointAuth":
                 return new EndpointUrlAuth();
             case "token":
-                return new TokenAuth(invokerList, restTemplate);
+                return new TokenAuth(invoker);
             case "apikey":
                 return new ApiKeyAuth();
         }

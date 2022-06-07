@@ -16,6 +16,8 @@
 
 package com.becon.opencelium.backend.invoker.entity;
 
+import com.becon.opencelium.backend.invoker.service.OperationService;
+import com.becon.opencelium.backend.invoker.service.OperationServiceImp;
 import com.becon.opencelium.backend.resource.connector.InvokerResource;
 
 import java.util.List;
@@ -32,15 +34,15 @@ public class Invoker {
     public Invoker() {
     }
 
-    public Invoker(InvokerResource invokerResource) {
-//        this.name = invokerResource.getName();
-//        this.description = invokerResource.getDescription();
-//        this.hint = invokerResource.getHint();
-//        this.icon = invokerResource.getIcon();
-//        this.authType = invokerResource.getAuthType();
-//        this.requestData = invokerResource.getRequestData().stream().map(data -> new RequestData(data)).collect(Collectors.toList());
-//        this.operations = invokerResource.getOperations().stream().map(FunctionInvoker::new).collect(Collectors.toList());
-    }
+//    public Invoker(InvokerResource invokerResource) {
+////        this.name = invokerResource.getName();
+////        this.description = invokerResource.getDescription();
+////        this.hint = invokerResource.getHint();
+////        this.icon = invokerResource.getIcon();
+////        this.authType = invokerResource.getAuthType();
+////        this.requestData = invokerResource.getRequestData().stream().map(data -> new RequestData(data)).collect(Collectors.toList());
+////        this.operations = invokerResource.getOperations().stream().map(FunctionInvoker::new).collect(Collectors.toList());
+//    }
 
     public String getName() {
         return name;
@@ -97,4 +99,5 @@ public class Invoker {
     public void setOperations(List<FunctionInvoker> operations) {
         this.operations = operations;
     }
+
 }

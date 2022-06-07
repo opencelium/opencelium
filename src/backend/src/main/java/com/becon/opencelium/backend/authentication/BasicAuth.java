@@ -16,24 +16,21 @@
 
 package com.becon.opencelium.backend.authentication;
 
-import com.becon.opencelium.backend.invoker.InvokerContainer;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 import java.util.List;
 
-public class BasicAuth implements AuthenticationType {
+public class BasicAuth implements ApiAuth {
 
-    private List<Invoker> invokerList;
+    private final Invoker invoker;
 
-    public BasicAuth(List<Invoker> invokerList){
-        this.invokerList = invokerList;
+    public BasicAuth(Invoker invoker){
+        this.invoker = invoker;
     }
 
     @Override
@@ -44,9 +41,6 @@ public class BasicAuth implements AuthenticationType {
     @Override
     public List<RequestData> getAccessCredentials(Connector connector) {
         List<RequestData> requestDataList = connector.getRequestData();
-        Invoker invoker = invokerList.stream()
-                .filter(inv -> inv.getName().equals(connector.getInvoker()))
-                .findFirst().orElseThrow(() -> new RuntimeException("Invoker not found in storage"));
         RequiredData requiredData = invoker.getRequiredData().stream()
                         .filter(data -> data.getName().equals("token"))
                         .findFirst().orElseThrow(()-> new RuntimeException("Token property not found in request_data"));
