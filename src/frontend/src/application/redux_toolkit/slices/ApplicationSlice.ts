@@ -16,7 +16,7 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {GridViewType} from "@app_component/collection/GridViewMenu";
-import {DefaultThemes, ThemeNames} from "@style/Theme";
+import {DefaultThemes} from "@style/Theme";
 import {API_REQUEST_STATE, LocalStorageTheme} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
@@ -35,6 +35,7 @@ import {IApplicationResponse, IResponse} from "../../requests/interfaces/IRespon
 import {INotification} from "../../interfaces/INotification";
 import {LocalStorage} from "../../classes/LocalStorage";
 import { IComponent } from "../../interfaces/IApplication";
+import {isJsonString} from "@application/utils/utils";
 
 
 export interface AuthState extends ICommonState{
@@ -68,6 +69,15 @@ export interface AuthState extends ICommonState{
 
 
 const storage = LocalStorage.getStorage();
+const storageThemes = storage.get('themes');
+let themes = DefaultThemes;
+if(storageThemes){
+    if(isJsonString(storageThemes)){
+        themes = JSON.parse(storageThemes);
+    } else{
+        storage.set('themes', JSON.stringify(DefaultThemes));
+    }
+}
 const notifications: INotification[] = storage.get('notifications');
 const version: string = storage.get('appVersion');
 const viewType: ViewType = storage.get('viewType');
@@ -97,7 +107,7 @@ const initialState: AuthState = {
     gridViewType: gridViewType || 4,
     searchValue: '',
     currentPageItems: [],
-    themes: JSON.parse(storage.get('themes')) || DefaultThemes,
+    themes,
     logoDataStatus: storage.get('logoDataStatus') || '',
     ...CommonState,
 }

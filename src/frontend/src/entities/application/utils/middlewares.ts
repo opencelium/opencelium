@@ -30,6 +30,8 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
     }
     if (setThemes.match(action)) {
         const storage = LocalStorage.getStorage();
+        console.log('storage', storage.get('themes'));
+        console.log('authUser', action.payload);
         if(storage.get('themes') !== action.payload){
             storage.set('themes', action.payload);
             const iframe = document.getElementById('iframe_messenger');
