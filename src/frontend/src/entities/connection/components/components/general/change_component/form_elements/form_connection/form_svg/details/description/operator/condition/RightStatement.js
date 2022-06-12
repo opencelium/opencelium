@@ -20,6 +20,8 @@ import PropertyInput
     from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/PropertyInput";
 import ParamSelect
     from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/ParamSelect";
+import {LikePercentageStyled} from "./styles";
+import CCondition from "@classes/content/connection/operator/CCondition";
 
 class RightStatement extends React.Component{
     constructor(props) {
@@ -40,6 +42,17 @@ class RightStatement extends React.Component{
 
     updateParam(param){
         const {condition, updateCondition, getConditionFromProps} = this.props;
+        if(this.isLikeOperator()){
+            if(condition.rightParam.length > 1){
+                param = CCondition.embraceFieldForLikeOperator(param);
+                if(condition.rightParam[0] === '%'){
+                    param = `%${param}`;
+                }
+                if(condition.rightParam[condition.rightParam.length - 1] === '%'){
+                    param += '%';
+                }
+            }
+        }
         updateCondition({
             ...getConditionFromProps(),
             leftMethod: condition.leftMethod,
@@ -82,10 +95,15 @@ class RightStatement extends React.Component{
     }
 
     getParamStyles(){
-        const {isOperatorHasThreeParams, isOperatorHasValue, hasRightMethod, hasRightParam} = this.props;
+        const {isOperatorHasThreeParams, isOperatorHasValue, hasRightMethod, hasRightParam, condition} = this.props;
         let {hasValue, isRightStatementText} = isOperatorHasValue();
+        const isLikeOperator = this.isLikeOperator();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementText;
-        return {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0', float: 'left'};
+        let width = hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '25.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0';
+        if(isLikeOperator){
+            width = '25%';
+        }
+        return {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width, float: 'left'};
     }
 
     getParamSelectStyles(){
@@ -93,6 +111,61 @@ class RightStatement extends React.Component{
         let {hasValue, isRightStatementText} = isOperatorHasValue();
         let isMethodSelectRightInvisible = !hasRightMethod && hasRightParam || isRightStatementText;
         return {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '45%' : '0', float: 'left'};
+    }
+
+    isLikeOperator(){
+        const {condition} = this.props;
+        return condition && condition.relationalOperator && condition.relationalOperator.value && condition.relationalOperator.value === "LIKE";
+    }
+
+    setLeftLikeSign(){
+        const {condition, updateCondition, getConditionFromProps} = this.props;
+        let rightParam = condition.rightParam;
+        const splitRightParam = rightParam.split('{');
+        if(splitRightParam.length > 1){
+            if(splitRightParam[1][0] === '}'){
+                return;
+            }
+        }
+        if(rightParam[0] === '%'){
+            rightParam = rightParam.substring(1);
+        } else{
+            rightParam = `%${rightParam}`;
+        }
+        updateCondition({
+            ...getConditionFromProps(),
+            leftMethod: condition.leftMethod,
+            leftParam: condition.leftParam,
+            relationalOperator: condition.relationalOperator,
+            property: condition.property,
+            rightMethod: condition.rightMethod,
+            rightParam: rightParam,
+        });
+    }
+
+    setRightLikeSign(){
+        const {condition, updateCondition, getConditionFromProps} = this.props;
+        let rightParam = condition.rightParam;
+        const splitRightParam = rightParam.split('{');
+        if(splitRightParam.length > 1){
+            if(splitRightParam[1][0] === '}'){
+                return;
+            }
+        }
+        if(rightParam[rightParam.length - 1] === '%'){
+            rightParam = rightParam.substr(0, rightParam.length - 1);
+        } else{
+            rightParam += '%';
+        }
+        updateCondition({
+            ...getConditionFromProps(),
+            leftMethod: condition.leftMethod,
+            leftParam: condition.leftParam,
+            relationalOperator: condition.relationalOperator,
+            property: condition.property,
+            rightMethod: condition.rightMethod,
+            rightParam: rightParam,
+        });
     }
 
     render(){
@@ -111,8 +184,28 @@ class RightStatement extends React.Component{
         const isMethodSearchable = !readOnly;
         let paramItems = hasRightMethod ? connection.getConnectorMethodByColor(condition.rightMethod.color).response.success : null;
         const paramId = `${connector.getConnectorType()}_if_operator_${operator.type}_${operator.index}`;
+        const isLikeOperator = this.isLikeOperator();
+        let hasLeftLikeSign = false;
+        let hasRightLikeSign = false;
+        let rightParam = condition.rightParam;
+        if(isLikeOperator){
+            if(rightParam.length > 1){
+                if(rightParam[rightParam.length - 1] === '%'){
+                    hasRightLikeSign = true;
+                    rightParam = rightParam.substr(0, rightParam.length - 1);
+                }
+                if(rightParam[0] === '%'){
+                    hasLeftLikeSign = true;
+                    rightParam = rightParam.substr(1, rightParam.length);
+                }
+                rightParam = CCondition.excludeFieldFromLikeOperator(rightParam);
+            }
+        }
         return(
             <React.Fragment>
+                <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasLeftLikeSign}>
+                    <div onClick={() => this.setLeftLikeSign()}>%</div>
+                </LikePercentageStyled>
                 <PropertyInput
                     {...this.getPropertyStyles()}
                     selectedMethod={condition.leftMethod ? connection.getMethodByColor(condition.leftMethod.color) : null}
@@ -145,7 +238,7 @@ class RightStatement extends React.Component{
                         readOnly={readOnly}
                         hasMethod={hasRightMethod}
                         connector={connector}
-                        param={condition.rightParam}
+                        param={rightParam}
                         options={options}
                         updateParam={(a) => this.updateParam(a)}
                         style={this.getParamSelectStyles()}
@@ -159,13 +252,16 @@ class RightStatement extends React.Component{
                         readOnly={readOnly}
                         hasMethod={hasRightMethod}
                         connector={connector}
-                        param={condition.rightParam}
+                        param={rightParam}
                         items={paramItems}
                         updateParam={(a) => this.updateParam(a)}
                         style={this.getParamStyles()}
                         isMultiline={isMultiline}
                     />
                 }
+                <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>
+                    <div onClick={() => this.setRightLikeSign()}>%</div>
+                </LikePercentageStyled>
             </React.Fragment>
         );
     }
