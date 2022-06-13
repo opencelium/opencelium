@@ -7,7 +7,7 @@ public enum DataRef {
 //    String BASIC = "\\{(.*?):(.*?)\\}";
 //    String BODY_REF = "%\\{(.*?)\\}";
 //    String BODY_REF = "%\\{(.*?)\\}";
-    BASIC("{(.*?):(.*?)}"), BODY("%{(.*?)}"), REQ_DATA("{(.*?)}");
+    BASIC("\\{(.*?):(.*?)\\}"), BODY("%\\{(.*?)\\}"), REQ_DATA("\\{(.*?)\\}");
 
     private final String regex;
 

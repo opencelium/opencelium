@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.constant.DataRef;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -92,8 +93,12 @@ public class BodyExtractor implements Extractor{
         if(path.equals("body")){
             return Objects.requireNonNull(response.getBody()).replace("\"", "");// TODO replaced " to empty when body is just string
         }
-        String jpath = pathParts.stream().map(Object::toString).collect(Collectors.joining("."));
+        String jpath = "$." + pathParts.stream().map(Object::toString).collect(Collectors.joining("."));
         String body = response.getBody();
+
+        if (!pathExists(body, jpath)) {
+            throw new RuntimeException("Path " + jpath + " not found in " + body);
+        }
         return JsonPath.read(body, jpath);
     }
 
@@ -107,5 +112,28 @@ public class BodyExtractor implements Extractor{
             refs.add(matcher.group());
         }
         return refs;
+    }
+
+//    private boolean pathExists(String json, List<String> pathParts) {
+//        StringBuilder currentPath = new StringBuilder("$");
+//        try {
+//            pathParts.forEach(p -> {
+//                currentPath.append(".").append(p);
+//                JsonPath.read(json, currentPath.toString());
+//            });
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
+
+    private boolean pathExists(String json, String jpath) {
+        try {
+            JsonPath.read(json, jpath);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+//        return pathExists(json, Arrays.asList(jpath.split("\\.")));
     }
 }

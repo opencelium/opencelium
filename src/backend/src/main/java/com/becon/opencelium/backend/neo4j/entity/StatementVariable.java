@@ -30,7 +30,7 @@ public class StatementVariable {
 
     private String color;
     private String type;
-    private String filed;
+    private String filed;// if like then -> {}
     private String rightPropertyValue;
 
     public StatementVariable() {

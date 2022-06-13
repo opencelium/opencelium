@@ -222,13 +222,8 @@ public class ConnectorServiceImp implements ConnectorService{
     public ResponseEntity<?> checkCommunication(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder(restTemplate);
         FunctionInvoker function = invokerServiceImp.getTestFunction(connector.getInvoker());
-        List<RequestData> requestData = new ArrayList<>();
-        FunctionInvoker authFunc = invokerServiceImp.getAuthFunction(connector.getInvoker());
-        if (authFunc != null) {
-            requestData = buildRequestData(connector);
-        } else {
-            requestData = connector.getRequestData();
-        }
+        List<RequestData> requestData = buildRequestData(connector);
+
         return invokerRequestBuilder
                 .setFunction(function)
                 .setRequestData(requestData)

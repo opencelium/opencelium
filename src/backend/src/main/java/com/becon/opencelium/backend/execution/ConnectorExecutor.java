@@ -644,11 +644,11 @@ public class ConnectorExecutor {
             String ref = statementNodeService.convertToRef(statementVariable);
             String rightPropertyValueRef = leftVariableRef + "." + statementVariable.getRightPropertyValue();
             Object value;
-            if (fieldNodeService.hasReference(ref)){
+            if (FieldNodeServiceImp.hasReference(ref)){
                 value = executionContainer.getValueFromResponseData(ref);
                 result.add(value);
             } else {
-                if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+                if (FieldNodeServiceImp.hasQueryParams(statementVariable.getFiled())) {
                     result.add(executionContainer.getValueFromQueryParams(statementVariable.getFiled()));
                 } else {
                     result.add(statementVariable.getFiled());
@@ -661,8 +661,8 @@ public class ConnectorExecutor {
         }
 
         String ref = statementNodeService.convertToRef(statementVariable);
-        if (!fieldNodeService.hasReference(ref)){
-            if (fieldNodeService.hasQueryParams(statementVariable.getFiled())) {
+        if (!FieldNodeServiceImp.hasReference(ref)){
+            if (FieldNodeServiceImp.hasQueryParams(statementVariable.getFiled())) {
                 return executionContainer.getValueFromQueryParams(statementVariable.getFiled());
             } else {
                 return statementVariable.getFiled();
