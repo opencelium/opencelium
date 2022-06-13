@@ -29,13 +29,12 @@ import {ConnectionPermissions} from "@entity/connection/constants";
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
-    const connectionViewType = state.applicationReducer.connectionViewType;
     const connection = state.connectionReducer;
     const template = state.templateReducer
     const connector = state.connectorReducer;
     return{
         authUser,
-        connectionViewType,
+        connectionViewType: connection.connectionViewType,
         addingConnection: connection.addingConnection,
         error: connection.error,
         savingTemplate: template.addingTemplate,

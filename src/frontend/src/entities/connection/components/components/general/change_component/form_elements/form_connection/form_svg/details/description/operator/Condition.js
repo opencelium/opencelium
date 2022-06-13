@@ -63,7 +63,7 @@ class Condition extends React.Component{
 
     hasRightParam(){
         const {condition} = this.state;
-        if(condition.relationalOperator && condition.relationalOperator.value === 'LIKE'){
+        if(condition.relationalOperator && CCondition.isLikeOperator(condition.relationalOperator.value)){
             const embracedEmptyValue = CCondition.embraceFieldForLikeOperator('');
             return condition.rightParam !== embracedEmptyValue;
         }
@@ -120,7 +120,7 @@ class Condition extends React.Component{
     updateRelationalOperator(relationalOperator){
         const {leftMethod, leftParam} = this.state.condition;
         let {rightParam, ...restProps} = this.getConditionFromProps();
-        if(relationalOperator && relationalOperator.value === "LIKE"){
+        if(relationalOperator && CCondition.isLikeOperator(relationalOperator.value)){
             rightParam = CCondition.embraceFieldForLikeOperator('');
         }
         this.updateCondition({
@@ -133,15 +133,19 @@ class Condition extends React.Component{
     }
 
     mouseOver(){
-        this.setState({
-            isMouseOver: true,
-        });
+        if(!this.state.isOpenEditDialog){
+            this.setState({
+                isMouseOver: true,
+            });
+        }
     }
 
     mouseLeave(){
-        this.setState({
-            isMouseOver: false,
-        });
+        if(!this.state.isOpenEditDialog) {
+            this.setState({
+                isMouseOver: false,
+            });
+        }
     }
 
     toggleEdit(){

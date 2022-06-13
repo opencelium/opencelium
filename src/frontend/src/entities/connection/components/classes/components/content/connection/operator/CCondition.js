@@ -47,7 +47,8 @@ export const FUNCTIONAL_OPERATORS = [
     {value: 'ContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS_SUB_STR},
     {value: 'NotContainsSubStr', label: <span>NotContainsSubStr({OPERATOR_LABELS.NOT_CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS_SUB_STR},
     {value: '>=', hasValue: true},
-    {value: 'LIKE', hasValue: true},
+    {value: 'Like', hasValue: true},
+    {value: 'NotLike', hasValue: true},
     {value: '>', hasValue: true},
     {value: '<=', hasValue: true},
     {value: '<', hasValue: true},
@@ -107,7 +108,7 @@ export default class CCondition{
             if (this.rightStatement && this.rightStatement.field !== '') {
                 rightStatementText = this.rightStatement.field;
             }
-            const isLikeOperator = this.relationalOperator === 'LIKE';
+            const isLikeOperator = CCondition.isLikeOperator(this.relationalOperator);
             if(isLikeOperator){
                 if(rightStatementText[rightStatementText.length - 1] === '}'){
                     rightStatementText = rightStatementText.slice(0, rightStatementText.length - 1);
@@ -167,6 +168,10 @@ export default class CCondition{
 
     static embraceFieldForLikeOperator(fieldValue){
         return `{${fieldValue}}`;
+    }
+
+    static isLikeOperator(relationalOperator){
+        return relationalOperator === 'Like' || relationalOperator === 'NotLike';
     }
 
     static excludeFieldFromLikeOperator(fieldValue){

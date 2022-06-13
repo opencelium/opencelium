@@ -59,6 +59,12 @@ class SelectSearch extends Component{
         document.addEventListener("mousedown", (a) => this.checkIfClickedOutside(a))
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.inputValue !== this.props.inputValue && this.state.inputValue !== this.props.inputValue){
+            this.setState({inputValue: this.props.inputValue});
+        }
+    }
+
     componentWillUnmount() {
         document.removeEventListener("mousedown", (a) => this.checkIfClickedOutside(a))
     }

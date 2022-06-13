@@ -29,11 +29,10 @@ const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
-    const connectionViewType = state.applicationReducer.connectionViewType;
     const connection = state.connectionReducer;
     return{
         authUser,
-        connectionViewType,
+        connectionViewType: connection.connectionViewType,
         error: connection.error,
         connection: connection.currentConnection,
         fetchingConnection: connection.gettingConnection,
