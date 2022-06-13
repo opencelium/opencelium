@@ -24,7 +24,7 @@ import Dialog from "@entity/connection/components/components/general/basic_compo
 import {EditIcon, ViewIcon} from "../Icons";
 import LeftStatement
     from "./condition/LeftStatement";
-import {FUNCTIONAL_OPERATORS} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
+import CCondition, {FUNCTIONAL_OPERATORS} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import COperatorItem, {IF_OPERATOR, LOOP_OPERATOR} from "@entity/connection/components/classes/components/content/connection/operator/COperatorItem";
 import RelationalOperator
@@ -35,7 +35,6 @@ import RightStatement
 import CProcess from "@entity/connection/components/classes/components/content/connection_overview_2/process/CProcess";
 import COperator from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
 import ReactDOM from "react-dom";
-import Endpoint from "@change_component/form_elements/form_connection/form_methods/method/Endpoint";
 import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
 
 
@@ -64,6 +63,10 @@ class Condition extends React.Component{
 
     hasRightParam(){
         const {condition} = this.state;
+        if(condition.relationalOperator && condition.relationalOperator.value === 'LIKE'){
+            const embracedEmptyValue = CCondition.embraceFieldForLikeOperator('');
+            return condition.rightParam !== embracedEmptyValue;
+        }
         return condition.rightParam !== '';
     }
 
@@ -116,8 +119,13 @@ class Condition extends React.Component{
 
     updateRelationalOperator(relationalOperator){
         const {leftMethod, leftParam} = this.state.condition;
+        let {rightParam, ...restProps} = this.getConditionFromProps();
+        if(relationalOperator && relationalOperator.value === "LIKE"){
+            rightParam = CCondition.embraceFieldForLikeOperator('');
+        }
         this.updateCondition({
-            ...this.getConditionFromProps(),
+            ...restProps,
+            rightParam,
             relationalOperator,
             leftMethod,
             leftParam,

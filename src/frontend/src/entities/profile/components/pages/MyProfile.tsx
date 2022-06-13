@@ -30,7 +30,6 @@ import { MyProfileListProps } from "./interfaces";
 import { MyProfilePermissions } from "../../constants";
 import InputSelect from "@app_component/base/input/select/InputSelect";
 import {DefaultTheme} from "@style/Theme";
-import UpdateThemes from "@app_component/base/update_themes/UpdateThemes";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {

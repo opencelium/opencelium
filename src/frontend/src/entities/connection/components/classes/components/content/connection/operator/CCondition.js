@@ -47,6 +47,7 @@ export const FUNCTIONAL_OPERATORS = [
     {value: 'ContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS_SUB_STR},
     {value: 'NotContainsSubStr', label: <span>NotContainsSubStr({OPERATOR_LABELS.NOT_CONTAINS_SUB_STR})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS_SUB_STR},
     {value: '>=', hasValue: true},
+    {value: 'LIKE', hasValue: true},
     {value: '>', hasValue: true},
     {value: '<=', hasValue: true},
     {value: '<', hasValue: true},
@@ -106,6 +107,19 @@ export default class CCondition{
             if (this.rightStatement && this.rightStatement.field !== '') {
                 rightStatementText = this.rightStatement.field;
             }
+            const isLikeOperator = this.relationalOperator === 'LIKE';
+            if(isLikeOperator){
+                if(rightStatementText[rightStatementText.length - 1] === '}'){
+                    rightStatementText = rightStatementText.slice(0, rightStatementText.length - 1);
+                } else{
+                    rightStatementText = `${rightStatementText.slice(0, rightStatementText.length - 2)}${rightStatementText[rightStatementText.length - 1]}`;
+                }
+                if(rightStatementText[0] === '{'){
+                    rightStatementText = rightStatementText.slice(1);
+                } else{
+                    rightStatementText = `${rightStatementText[0]}${rightStatementText.slice(2)}`;
+                }
+            }
             if(leftStatementText !== '') {
                 statement = !isOnlyText ? (
                     <span>
@@ -149,6 +163,17 @@ export default class CCondition{
 
     set rightStatement(rightStatement){
         this._rightStatement = rightStatement;
+    }
+
+    static embraceFieldForLikeOperator(fieldValue){
+        return `{${fieldValue}}`;
+    }
+
+    static excludeFieldFromLikeOperator(fieldValue){
+        if(fieldValue[0] === '{' && fieldValue[fieldValue.length - 1] === '}'){
+            return fieldValue.substr(1, fieldValue.length - 2);
+        }
+        return fieldValue;
     }
 
     getObject(){

@@ -28,7 +28,7 @@ interface MenuLinkProps{
     onHoverColor?: string,
 }
 
-interface MenuLinkLogoProps extends LinkProps{
+interface MenuLinkLogoProps extends Partial<LinkProps>{
     isReadonly: boolean,
     onHoverColor: string,
 }
