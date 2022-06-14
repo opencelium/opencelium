@@ -13,6 +13,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,6 +21,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
@@ -134,7 +136,7 @@ public class BodyExtractor implements Extractor{
 
                 try {
                     DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document document = builder.parse(xml);
+                    Document document = convertStringToXMLDocument(xml);
                     XPathExpression expr = xpath.compile(xmlPath); // //book[@year>2001]/title/text()
                     return expr.evaluate(document, XPathConstants.STRING).toString();
                 } catch (Exception e) {
@@ -144,6 +146,23 @@ public class BodyExtractor implements Extractor{
         } else {
             throw new RuntimeException("Couldn't determine Content-Type: " + contentType);
         }
+    }
+
+    private static Document convertStringToXMLDocument(String xmlString)
+    {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+        try
+        {
+            builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
+            return doc;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     // collects refs: %{exp1}
