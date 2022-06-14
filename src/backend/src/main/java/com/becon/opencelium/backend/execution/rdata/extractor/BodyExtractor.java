@@ -7,10 +7,22 @@ import com.becon.opencelium.backend.mysql.entity.RequestData;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -93,13 +105,45 @@ public class BodyExtractor implements Extractor{
         if(path.equals("body")){
             return Objects.requireNonNull(response.getBody()).replace("\"", "");// TODO replaced " to empty when body is just string
         }
-        String jpath = "$." + pathParts.stream().map(Object::toString).collect(Collectors.joining("."));
         String body = response.getBody();
-
-        if (!pathExists(body, jpath)) {
-            throw new RuntimeException("Path " + jpath + " not found in " + body);
+        MediaType contentType = response.getHeaders().getContentType();
+        if (contentType == null) {
+            throw new RuntimeException("Content-Type is not defined in header for response: " + response);
         }
-        return JsonPath.read(body, jpath);
+        return readPayload(contentType.getSubtype()).apply(pathParts, body);
+    }
+
+    private BiFunction<List<String>, String, String> readPayload(String contentType) {
+        if (contentType.contains("json")) {
+            return (pathParts, json) -> {
+                String jpath = "$." + pathParts.stream().map(Object::toString).collect(Collectors.joining("."));
+                if (!pathExists(json, jpath)) {
+                    throw new RuntimeException("Path " + jpath + " not found in " + json);
+                }
+                return JsonPath.read(json, jpath);
+            };
+        } else if (contentType.contains("xml")) {
+            return  (pathParts, xml) -> {
+                String xmlPath = "/" + pathParts.stream().map(Object::toString).collect(Collectors.joining("/"));
+//                if (!pathExists(json, jpath)) {
+//                    throw new RuntimeException("Path " + jpath + " not found in " + json);
+//                }
+                XPathFactory xpathfactory = XPathFactory.newInstance();
+                XPath xpath = xpathfactory.newXPath();
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+                try {
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document document = builder.parse(xml);
+                    XPathExpression expr = xpath.compile(xmlPath); // //book[@year>2001]/title/text()
+                    return expr.evaluate(document, XPathConstants.STRING).toString();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } else {
+            throw new RuntimeException("Couldn't determine Content-Type: " + contentType);
+        }
     }
 
     // collects refs: %{exp1}
@@ -113,19 +157,6 @@ public class BodyExtractor implements Extractor{
         }
         return refs;
     }
-
-//    private boolean pathExists(String json, List<String> pathParts) {
-//        StringBuilder currentPath = new StringBuilder("$");
-//        try {
-//            pathParts.forEach(p -> {
-//                currentPath.append(".").append(p);
-//                JsonPath.read(json, currentPath.toString());
-//            });
-//            return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
 
     private boolean pathExists(String json, String jpath) {
         try {
