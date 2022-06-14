@@ -10,6 +10,7 @@ const LikePercentageStyled = styled.div`
     transition: width 0.3s ease 0s;
     &>div{
         opacity: ${({hasSign}) => hasSign ? 1 : 0.5};
+        font-weight: ${({hasSign}) => hasSign ? 'bold' : 'normal'};
         display: flex;
         justify-content: center;
         height: 100%;

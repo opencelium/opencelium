@@ -32,13 +32,12 @@ import {useParams} from "react-router";
 */
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
-    const connectionViewType = state.applicationReducer.connectionViewType;
     const connection = state.connectionReducer;
     const template = state.templateReducer;
     const connector = state.connectorReducer;
     return{
         authUser,
-        connectionViewType,
+        connectionViewType: connection.connectionViewType,
         connection: connection.currentConnection,
         fetchingConnection: connection.gettingConnection,
         updatingConnection: connection.updatingConnection,

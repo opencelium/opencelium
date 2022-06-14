@@ -22,7 +22,7 @@ import {DEFAULT_COLOR} from "@entity/connection/components/classes/components/co
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import COperatorItem from "@entity/connection/components/classes/components/content/connection/operator/COperatorItem";
 import CConnectorItem from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import {FUNCTIONAL_OPERATORS} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
+import CCondition, {FUNCTIONAL_OPERATORS} from "@entity/connection/components/classes/components/content/connection/operator/CCondition";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
 import SelectSearch from "@entity/connection/components/components/general/basic_components/inputs/SelectSearch";
 import {
@@ -31,6 +31,9 @@ import {
 } from "@entity/connection/components/classes/components/content/invoker/response/CResponse";
 import RadioButtons from "@entity/connection/components/components/general/basic_components/inputs/RadioButtons";
 import Select from "@entity/connection/components/components/general/basic_components/inputs/Select";
+import {
+    LikePercentageStyled
+} from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/styles";
 
 
 /**
@@ -114,6 +117,17 @@ class IfOperator extends Component{
      * to change right field value
      */
     onChangeRightField(rightField, callback = () => {}){
+        if(this.isLikeOperator()){
+            if(rightField.length > 1){
+                rightField = CCondition.embraceFieldForLikeOperator(rightField);
+                if(rightField[0] === '%'){
+                    rightField = `%${rightField}`;
+                }
+                if(rightField[rightField.length - 1] === '%'){
+                    rightField += '%';
+                }
+            }
+        }
         this.setState({rightField}, callback);
     }
 
@@ -191,11 +205,16 @@ class IfOperator extends Component{
     updateColorRight(method){
         const {operator, updateEntity} = this.props;
         operator.setRightStatementColor(method.color);
-        updateEntity();
+        let rightField = '';
+        if(operator.condition.relationalOperator && CCondition.isLikeOperator(operator.condition.relationalOperator)){
+            rightField = CCondition.embraceFieldForLikeOperator('');
+        }
         this.setState({
-            rightField: '',
+            rightField,
+            rightProperty: '',
             responseTypeRight: RESPONSE_SUCCESS,
         });
+        updateEntity();
     }
 
     /**
@@ -204,11 +223,7 @@ class IfOperator extends Component{
     updateRelationalOperator(relationalOperator){
         const {operator, updateEntity} = this.props;
         operator.setRelationalOperator(relationalOperator.value);
-        this.setState({
-            rightField: '',
-            rightProperty: '',
-            responseTypeRight: RESPONSE_SUCCESS,
-        });
+        this.updateColorRight({color: ''});
         updateEntity();
     }
 
@@ -295,6 +310,19 @@ class IfOperator extends Component{
         let rightColor = operator.condition.rightStatement.color;
         if(title === ''){
             title = 'Click to set params';
+        }
+        const isLikeOperator = CCondition.isLikeOperator(relationalOperator);
+        if(isLikeOperator){
+            if(rightField[rightField.length - 1] === '}'){
+                rightField = rightField.slice(0, rightField.length - 1);
+            } else{
+                rightField = `${rightField.slice(0, rightField.length - 2)}${rightField[rightField.length - 1]}`;
+            }
+            if(rightField[0] === '{'){
+                rightField = rightField.slice(1);
+            } else{
+                rightField = `${rightField[0]}${rightField.slice(2)}`;
+            }
         }
         if(leftColor !== ''){
             return(
@@ -652,6 +680,11 @@ class IfOperator extends Component{
         if(isRightStatementText || isRightStatementOption){
             isVisible = false;
         }
+        if(this.isLikeOperator(operator.condition.relationalOperator)){
+            if(rightField === '{}'){
+                isVisible = true;
+            }
+        }
         let selectThemeInputStyle = {width: isVisible ? '10%' : '0', float: 'left', maxHeight: '38px', transition: isVisible ? 'width 0.3s ease 0s' : 'none',};
         let generalStyles = {width: '95%', float: 'right'};
         let source = this.getOptionsForMethods('rightStatement');
@@ -776,11 +809,24 @@ class IfOperator extends Component{
         let methodValue = method ? {label: method.name, value: method.index, color: method.color} : null;
         let isMethodSelectRightInvisible = methodValue === null && rightField !== '' || isRightStatementText;
         let inputTheme = {inputElement: hasValue ? styles.input_element_pointer_compare_statement_visible : styles.input_element_pointer_compare_statement_not_visible};
+        const isLikeOperator = this.isLikeOperator();
         let divStyles = {transition: hasValue ? 'width 0.3s ease 0s' : 'none', width: hasValue ? isMethodSelectRightInvisible ? isOperatorHasThreeParams ? '27.5%' : '45%' : isOperatorHasThreeParams ? '15.5%' : '35%' : '0', float: 'left'};
         inputTheme.input = styles.input_pointer_compare_statement;
+        if(isLikeOperator){
+            divStyles.width = "25%";
+            if(rightField.length > 1){
+                if(rightField[rightField.length - 1] === '%'){
+                    rightField = rightField.substr(0, rightField.length - 1);
+                }
+                if(rightField[0] === '%'){
+                    rightField = rightField.substr(1, rightField.length);
+                }
+                rightField = CCondition.excludeFieldFromLikeOperator(rightField);
+            }
+        }
         if(isRightStatementOption){
             return(
-                <div style={divStyles}>
+                <div className={styles.param_input_right} style={{...divStyles}}>
                     <span className={styles.if_relational_operator_separator}/>
                     <Select
                         name={'relational_operators'}
@@ -861,7 +907,7 @@ class IfOperator extends Component{
             );
         }
         return (
-            <div style={divStyles}>
+            <div className={styles.param_input_right} style={{...divStyles}}>
                 {/*{this.renderResponseTypeGroupRight()}*/}
                 <Input
                     placeholder={'param'}
@@ -906,12 +952,75 @@ class IfOperator extends Component{
         );
     }
 
+    isLikeOperator(){
+        const {operator} = this.props;
+        const condition = operator.condition;
+        return condition && condition.relationalOperator && CCondition.isLikeOperator(condition.relationalOperator);
+    }
+
+    setLeftLikeSign(){
+        let {rightField} = this.state;
+        const splitRightParam = rightField.split('{');
+        if(splitRightParam.length > 1){
+            if(splitRightParam[1][0] === '}'){
+                return;
+            }
+        }
+        if(rightField[0] === '%'){
+            rightField = rightField.substring(1);
+        } else{
+            rightField = `%${rightField}`;
+        }
+        this.setState({
+            rightField,
+        });
+    }
+
+    setRightLikeSign(){
+        let {rightField} = this.state;
+        const splitRightParam = rightField.split('{');
+        if(splitRightParam.length > 1){
+            if(splitRightParam[1][0] === '}'){
+                return;
+            }
+        }
+        if(rightField[rightField.length - 1] === '%'){
+            rightField = rightField.substr(0, rightField.length - 1);
+        } else{
+            rightField += '%';
+        }
+        this.setState({
+            rightField,
+        });
+    }
+
     renderRightStatement(){
+        let {rightField} = this.state;
+        const isLikeOperator = this.isLikeOperator();
+        let hasLeftLikeSign = false;
+        let hasRightLikeSign = false;
+        if(isLikeOperator){
+            if(rightField.length > 1){
+                if(rightField[rightField.length - 1] === '%'){
+                    hasRightLikeSign = true;
+                    rightField = rightField.substr(0, rightField.length - 1);
+                }
+                if(rightField[0] === '%'){
+                    hasLeftLikeSign = true;
+                }
+            }
+        }
         return(
             <React.Fragment>
                 {this.renderPropertyInputRight()}
+                <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasLeftLikeSign}>
+                    <div onClick={() => this.setLeftLikeSign()}>%</div>
+                </LikePercentageStyled>
                 {this.renderMethodSelectRight()}
                 {this.renderParamInputRight()}
+                <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>
+                    <div onClick={() => this.setRightLikeSign()}>%</div>
+                </LikePercentageStyled>
             </React.Fragment>
         );
     }
@@ -937,9 +1046,8 @@ class IfOperator extends Component{
             operatorStyle.boxShadow = `rgba(0, 0, 0, 0.14) 0px 0px 0px 0px, rgba(230, 0, 0, 0.76) 0px 1px 7px 1px, rgba(0, 0, 0, 0.22) 0px 1px 1px 0px`;
             operatorStyle.border = 'border: 1px solid #d14b4b';
         }
-        let menuEditStyles = {width: '300px'};
+        let menuEditStyles = {width: '100%'};
         if(isOperatorHasThreeParams){
-            menuEditStyles.width = '320px';
             menuEditStyles.left = '-17px';
         }
         return (

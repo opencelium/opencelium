@@ -170,7 +170,11 @@ export default class COperatorItem{
 
     setRelationalOperator(relationalOperator){
         this._condition.relationalOperator = relationalOperator;
-        this._condition.rightStatement = CStatement.createStatement();
+        let field = '';
+        if(CCondition.isLikeOperator(relationalOperator)){
+            field = CCondition.embraceFieldForLikeOperator('');
+        }
+        this._condition.rightStatement = CStatement.createStatement({field});
     }
 
     getRelationalOperator(){

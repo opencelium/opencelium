@@ -30,8 +30,13 @@ class RightStatement extends React.Component{
 
     updateMethod(method){
         const {condition, updateCondition, getConditionFromProps} = this.props;
+        let {rightParam, ...conditionFromProps} = getConditionFromProps();
+        if(condition.relationalOperator && CCondition.isLikeOperator(condition.relationalOperator.value)){
+            rightParam = CCondition.embraceFieldForLikeOperator('');
+        }
         updateCondition({
-            ...getConditionFromProps(),
+            ...conditionFromProps,
+            rightParam,
             leftMethod: condition.leftMethod,
             leftParam: condition.leftParam,
             relationalOperator: condition.relationalOperator,
@@ -115,7 +120,7 @@ class RightStatement extends React.Component{
 
     isLikeOperator(){
         const {condition} = this.props;
-        return condition && condition.relationalOperator && condition.relationalOperator.value && condition.relationalOperator.value === "LIKE";
+        return condition && condition.relationalOperator && condition.relationalOperator.value && CCondition.isLikeOperator(condition.relationalOperator.value);
     }
 
     setLeftLikeSign(){
