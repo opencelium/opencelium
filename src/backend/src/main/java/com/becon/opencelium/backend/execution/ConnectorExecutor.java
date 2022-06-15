@@ -649,7 +649,7 @@ public class ConnectorExecutor {
                 result.add(value);
             } else {
                 if (FieldNodeServiceImp.hasQueryParams(statementVariable.getFiled())) {
-                    result.add(executionContainer.getValueFromQueryParams(statementVariable.getFiled()));
+                    result.add(executionContainer.getValueWebhookParams(statementVariable.getFiled()));
                 } else {
                     result.add(statementVariable.getFiled());
                 }
@@ -663,7 +663,7 @@ public class ConnectorExecutor {
         String ref = statementNodeService.convertToRef(statementVariable);
         if (!FieldNodeServiceImp.hasReference(ref)){
             if (FieldNodeServiceImp.hasQueryParams(statementVariable.getFiled())) {
-                return executionContainer.getValueFromQueryParams(statementVariable.getFiled());
+                return executionContainer.getValueWebhookParams(statementVariable.getFiled());
             } else {
                 return statementVariable.getFiled();
             }
