@@ -281,8 +281,7 @@ public class ExecutionContainer {
     private Object convertToType(Object val, String type) {
         Object result = val.toString();
         if (type.equalsIgnoreCase("string")){
-            result = val.toString
-                    ().replace("[","").replace("]","").replace("'","");
+            result = val.toString().replace("[","").replace("]","").replace("'","");
         } else if (type.equalsIgnoreCase("int")){
             result = Long.parseLong(val.toString());
         } else if(type.equalsIgnoreCase("double") || type.equalsIgnoreCase("float")) {
