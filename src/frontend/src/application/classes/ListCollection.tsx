@@ -94,7 +94,7 @@ class ListCollection implements IListCollection{
     hasActions?: boolean = true;
 
     // on/off checkboxes of collection
-    hasCheckboxes?: boolean;
+    hasCheckboxes?: boolean = true;
 
     // on/off search input of collection
     hasSearch?: boolean;
