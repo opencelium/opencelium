@@ -1,0 +1,91 @@
+/*!
+ *  Copyright (C) <2022>  <becon GmbH>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.appBar___theme__other{
+  background: #2e75b6 !important;
+}
+.header___theme__other{
+  background: #359a31 !important;
+  li{
+    list-style: none;
+  }
+}
+
+.appBar___theme__other{
+  background: #359a31 !important;
+}
+
+.menu_icon___theme__other{
+  color: #ffd807 !important;
+}
+.menu_icon___theme__other{
+  color: #ffc667 !important;
+}
+
+.link___theme__other{
+  color: white !important;
+  text-decoration: none;
+}
+
+.link___theme__other:hover{
+  text-decoration: underline;
+  text-decoration-color: #ffd807;
+}
+
+.admin_header___theme__other, .user_header{
+  flex-grow: 1;
+}
+
+.loading_header___theme__other :first-child{
+  margin-left: 60px;
+}
+
+.loading___theme__other{
+  height: 15px;
+  background: gray;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  float: left;
+}
+
+.loading_icon___theme__other{
+  @extend .loading___theme__other;
+  width: 20px;
+  border-radius: 4px;
+  margin-right: 5px;
+}
+
+.loading_title___theme__other{
+  @extend .loading___theme__other;
+  width: 80px;
+  border-radius: 5px;
+  margin-right: 55px;
+}
+
+.navigation___theme__other :first-child{
+  margin-left: 30px;
+}
+.right_navigation___theme__other :first-child{
+  margin-left: 10px;
+}
+.link_icon___theme__other{
+  color: #ffffff;
+  margin-right: 3px;
+  font-size: 30px;
+}
+
+.link_title___theme__other > abbr{
+  font-size: 18px;
+}

@@ -1,0 +1,176 @@
+/*!
+ *  Copyright (C) <2022>  <becon GmbH>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../../constants';
+
+.finish_update{
+  padding: 0 40px;
+  div{
+    padding: 5px 0;
+  }
+  font-family: $FONT_FAMILY;
+  text-align: center;
+  font-size: 16px;
+  .header{
+    font-size: 30px;
+  }
+  .hint{
+    span{
+      font-weight: bold;
+    }
+    margin-top: 50px;
+    margin-bottom: 20px;
+  }
+}
+
+.system_overview{
+  text-align: left;
+  font-size: 16px;
+  padding-left: 0;
+  bottom: 20px;
+  position: absolute;
+  @extend .finish_update;
+  .hint{
+    font-weight: bold;
+  }
+}
+
+.table{
+  margin-bottom: 0 !important;
+  margin-top: 20px;
+  th{
+    border-bottom: none !important;
+    width: 33.3%;
+  }
+}
+.no_versions{
+  font-size: $FONT_SIZE_SMALL;
+  margin: 45px 0;
+  text-align: center;
+}
+.table_content{
+  max-height: 300px;
+  overflow-y: auto;
+  table{
+    margin-bottom: 0 !important;
+  }
+  .radio_input{
+    margin: 0 !important;
+  }
+  .radio_label{
+    margin: 0 !important;
+  }
+  .disable_version_entry{
+    background: #d7c9c92e;
+    color: #a28e8e;
+    .delete_icon{
+      position: absolute;
+      right: 5px;
+      top: 10px;
+    }
+  }
+  .more_icon{
+    margin-bottom: 15px;
+  }
+  td{
+    width: 33.3%;
+  }
+  tr{
+    height: 50px;
+  }
+}
+.update_button{
+  float: right;
+  margin: 15px 0 40px;
+}
+.cancel_icon{
+  float: right;
+  margin: 20px 25px 35px;
+  min-height: 38px;
+}
+.upload_version_loading{
+  margin: 15px 100px 40px 0;
+  min-height: 36px;
+  float: right;
+}
+
+.upload_version_loading>div{
+  width: 24px;
+  height: 24px;
+}
+.convert_loading{
+  margin: 0;
+  min-height: 0;
+}
+
+.convert_loading>div{
+  width: 18px;
+  height: 18px;
+}
+
+.convert_success{
+  color: $SUCCESS_COLOR;
+}
+
+.convert_fail{
+  color: $ERROR_COLOR;
+}
+
+@media screen and (min-width: 992px) {
+  .offline_button{
+    width: 100px;
+    padding: 15px 10px;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+  .online_button{
+    width: 100px;
+    margin-right: 110px;
+    padding: 15px 10px;
+    font-size: $FONT_SIZE_MEDIUM;
+  }
+  .available_updates_loading{
+    margin-top: 45px !important;
+    margin-bottom: 10px !important;
+    min-height: 78px !important;
+  }
+
+  .available_updates_loading>div{
+    width: 38px;
+    height: 38px;
+  }
+}
+@media screen and (max-width: 991px) {
+  .offline_button{
+    width: 80px;
+    padding: 15px 6px;
+    font-size: $FONT_SIZE_SMALL;
+  }
+  .online_button{
+    width: 80px;
+    margin-right: 10px;
+    padding: 15px 16px;
+    font-size: $FONT_SIZE_SMALL;
+  }
+  .available_updates_loading{
+    margin-top: 45px !important;
+    margin-bottom: 10px !important;
+    min-height: 78px !important;
+  }
+
+  .available_updates_loading>div{
+    width: 38px;
+    height: 38px;
+  }
+}

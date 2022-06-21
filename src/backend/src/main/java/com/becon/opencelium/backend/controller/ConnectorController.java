@@ -16,33 +16,24 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.authentication.AuthenticationType;
-import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
+import com.becon.opencelium.backend.authentication.ApiAuth;
 import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
-import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
-import com.becon.opencelium.backend.factory.AuthenticationFactory;
+import com.becon.opencelium.backend.factory.AuthFactory;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.mysql.entity.Connector;
-import com.becon.opencelium.backend.mysql.entity.RequestData;
-import com.becon.opencelium.backend.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.neo4j.service.ConnectionNodeServiceImp;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
-import com.becon.opencelium.backend.resource.connector.InvokerResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,11 +41,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -152,9 +139,9 @@ public class ConnectorController {
     public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException, IOException {
         Connector connector = connectorService.toEntity(connectorResource);
         Invoker invoker = invokerService.findByName(connector.getInvoker());
-        AuthenticationFactory authFactory = new AuthenticationFactory(invokerService.findAll(), restTemplate);
-        AuthenticationType authenticationType = authFactory.getAuthType(invoker.getAuthType());
-        authenticationType.getAccessCredentials(connector);
+//        AuthFactory authFactory = new AuthFactory();
+//        ApiAuth authenticationType = authFactory.generateAuth(invoker);
+//        authenticationType.getAccessCredentials(connector);
         ResponseEntity<?> responseEntity;
         try {
             responseEntity = connectorService.checkCommunication(connector);

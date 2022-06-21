@@ -48,12 +48,11 @@ import java.util.List;
 import java.util.Map;
 
 // TODO: need to add interface for supporting multiple function conversion to response entity
-public class InvokerRequestBuilder{
+public class InvokerRequestBuilder {
 
     private RestTemplate restTemplate;
     private FunctionInvoker functionInvoker;
     private List<RequestData> requestData;
-    private String invokerName;
     private boolean sslCert;
 
     public InvokerRequestBuilder(RestTemplate restTemplate){
@@ -67,11 +66,6 @@ public class InvokerRequestBuilder{
 
     public InvokerRequestBuilder setFunction(FunctionInvoker function){
         this.functionInvoker = function;
-        return this;
-    }
-
-    public InvokerRequestBuilder setInvokerName(String invokerName) {
-        this.invokerName = invokerName;
         return this;
     }
 

@@ -1,0 +1,238 @@
+/*!
+ *  Copyright (C) <2022>  <becon GmbH>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../constants';
+
+.loading{
+  text-align: center;
+  margin-top: 14%;
+  min-height: 100px;
+}
+
+
+@keyframes ANotificationAppear {
+  from {
+    opacity: 0.0;
+    top: 30px;
+  }
+  to {
+    opacity: 1.0;
+    top: 70px;
+  }
+}
+
+@keyframes ANotificationDisappear {
+  from {
+    opacity: 1.0;
+    top: 30px;
+  }
+  to {
+    opacity: 0.0;
+    top: 70px;
+  }
+}
+
+.notification{
+  font-family: $FONT_FAMILY;
+  overflow: auto;
+  margin-right: 20px;
+  z-index: 1000;
+  border-radius: 2px;
+  border: 1px solid #dddddd;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  min-height: 40px;
+  padding: 5px;
+  background: #fff;
+  width: 230px;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+.notification_show{
+  font-family: $FONT_FAMILY;
+  overflow: auto;
+  margin-right: 20px;
+  z-index: 1000;
+  border-radius: 2px;
+  border: 1px solid #dddddd;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  min-height: 40px;
+  padding: 10px 5px 5px 5px;
+  background: #fff;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  animation-name: ANotificationAppear;
+}
+@media screen and (min-width: 650px) {
+  .close_icon{
+    float: right;
+    margin-right: -3px;
+    margin-top: -10px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .notification_show{
+    width: 230px;
+  }
+  .notification_hide{
+    width: 230px;
+  }
+}
+
+@media screen and (max-width: 649px) {
+  .close_icon{
+    float: right;
+    margin-right: -3px;
+    margin-top: -10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .notification_show{
+    width: 160px;
+  }
+  .notification_hide{
+    width: 160px;
+  }
+}
+.notification_hide{
+  font-family: $FONT_FAMILY;
+  overflow: auto;
+  margin-right: 20px;
+  z-index: 1000;
+  border-radius: 2px;
+  border: 1px solid #dddddd;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  min-height: 40px;
+  padding: 10px 5px 5px 5px;
+  background: #fff;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  animation-name: ANotificationDisappear;
+}
+.success{
+  //color: #359d47;
+}
+.error{
+  //color: #9d3548;
+}
+.warning{
+  //color: #9b9d35;
+}
+.note{
+  //color: black;
+}
+
+.notification_icon{
+  float: left;
+  width: 15%;
+  text-align: center;
+}
+
+.notification_message{
+  font-family: $FONT_FAMILY;
+  margin: 5px;
+}
+
+.notification_header{
+  width: 90%;
+  font-family: $FONT_FAMILY;
+  height: 30px;
+  line-height: 23px;
+}
+
+.notification_header_text{
+  font-family: $FONT_FAMILY;
+  float: left;
+  width: 85%;
+  font-weight: bold;
+}
+
+.page_not_found{
+  text-align: center;
+  font-size: 40px;
+  margin-top: 100px;
+  font-family: $FONT_FAMILY;
+}
+
+.page_not_found_smile{
+  text-align: center;
+  font-size: 40px;
+  margin-top: 20px;
+  color: #5584a6;
+  font-family: $FONT_FAMILY;
+}
+
+.confirmation_wrapper{
+  z-index: 100000 !important;
+}
+.switch_off_tour_text{
+  font-family: $FONT_FAMILY;
+  text-align: center;
+}
+
+.switch_off_tour_check{
+  text-align: right;
+  margin-top: 25px;
+}
+
+.switch_off_tour_do_not_show{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.switch_off_tour_checkbox{
+  vertical-align: middle !important;
+}
+
+.switch_off_tour_field{
+  float: right;
+  margin-left: 5px;
+}
+
+.entity_error_message{
+  text-align: center;
+  margin-top: 10%;
+}
+.support_action{
+  text-decoration: underline;
+  span{
+    cursor: pointer;
+  }
+}
+.icon_dialog{
+  min-width: 750px;
+}
+.image_crop{
+  position: relative;
+  display: flex;
+  justify-content: right;
+}
+.upload_icon{
+  width: 70%;
+  font-size: 1.5vw;
+  float: right;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  right: 0;
+  top: 15px;
+  cursor: pointer;
+}
+.image_crop_preview{
+  width: 50px;
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  border-radius: 2px;
+}

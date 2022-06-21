@@ -16,17 +16,13 @@
 
 package com.becon.opencelium.backend.authentication;
 
-import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
 import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-public class ApiKeyAuth implements AuthenticationType {
+public class ApiKeyAuth implements ApiAuth {
 
     @Override
     public List<RequestData> getAccessCredentials(Connector connector) {

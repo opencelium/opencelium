@@ -1,0 +1,497 @@
+/*!
+ *  Copyright (C) <2022>  <becon GmbH>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../constants';
+
+
+.list_view{
+  @extend .card_style;
+  margin-bottom: 20px;
+  table{
+    table-layout: fixed;
+    td{
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    td.list_view_actions{
+      overflow: visible;
+      position: relative;
+    }
+    th{
+      @extend .overflow_text;
+    }
+  }
+  .checkbox_label{
+    margin: 0;
+  }
+  .checkbox_field{
+    margin: 0;
+    position: relative;
+  }
+  .actions{
+    transition: unset;
+    position: absolute;
+    top: calc(50% - 15px);
+    left: 50%;
+    >div{
+      left: -50%;
+      position: relative;
+      white-space: nowrap;
+      >span{
+        display: inline-block;
+      }
+    }
+  }
+  .maximized_actions{
+    @extend .actions;
+    top: calc(50% - 19px);
+    left: unset;
+    right: 0;
+    >div{
+      @extend .card_style;
+      left: unset;
+      padding: 3px 3px 0;
+    }
+  }
+}
+
+.grid_view{
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.cards_item_grid_view{
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+.cards_item_grid_view_5{
+  @extend .cards_item_grid_view;
+  width: 19%;
+  margin-right: 1.25%;
+}
+
+.cards_item_grid_view_5:nth-child(5n){
+  margin-right: 0;
+}
+
+.cards_item_grid_view_4{
+  @extend .cards_item_grid_view;
+  width: 24%;
+  margin-right: 1.33%;
+}
+
+.cards_item_grid_view_4:nth-child(4n){
+  margin-right: 0;
+}
+
+.cards_item_grid_view_3{
+  @extend .cards_item_grid_view;
+  width: 32.5%;
+  margin-right: 1.25%;
+}
+
+.cards_item_grid_view_3:nth-child(3n){
+  margin-right: 0;
+}
+
+.cards_item_grid_view_2{
+  @extend .cards_item_grid_view;
+  width: 49%;
+  margin-right: 2%;
+}
+
+.cards_item_grid_view_2:nth-child(2n){
+  margin-right: 0;
+}
+
+.card{
+  @extend .card_style;
+  width: auto;
+  margin-right: 2px;
+}
+
+@keyframes Aselected_card {
+  from {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  }
+  to {
+    background-color: #ffffff;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.12), 1px 3px 15px rgba(0, 0, 0, 0.24);
+  }
+}
+
+.selected_card{
+  font-family: $FONT_FAMILY;
+  animation-name: Aselected_card;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+  animation-timing-function:ease-in;
+}
+
+@keyframes Aselected_letter {
+  from {
+  }
+  to {
+    text-decoration: underline;
+  }
+}
+
+.key_navigation_title{
+  font-family: $FONT_FAMILY;
+  margin-left: 0;
+}
+
+.key_navigation_letter{
+  font-family: $FONT_FAMILY;
+  color: #000000;
+  margin-left: 0;
+  text-decoration: underline;
+  animation-name: Aselected_letter;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+  animation-timing-function:ease-in;
+}
+.key_navigation_letter_delete{
+  font-family: $FONT_FAMILY;
+  color: $ERROR_COLOR;
+  margin-left: 0;
+  text-decoration: underline;
+  animation-name: Aselected_letter;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+  animation-timing-function:ease-in;
+}
+
+.top_section{
+  width: 100%;
+  height: 6vw;
+  display: flex;
+}
+
+.card_title{
+  font-family: $FONT_FAMILY;
+  width: 100%;
+  padding-left: 0.5vw;
+}
+
+.title{
+  @extend .overflow_text;
+  max-width: 100%;
+  font-size: 1.4vw;
+  color: #000000;
+  font-weight: normal;
+}
+
+.subtitle{
+  @extend .overflow_text;
+  font-size: 0.9vw;
+  color: #797979;
+}
+
+.card_avatar{
+  font-family: $FONT_FAMILY;
+  float: right;
+  transform-origin: 90% 25%;
+  transition: all 0.1s;
+  width: 100%;
+  display: flex;
+  justify-content: right;
+}
+
+.avatar{
+  cursor: pointer;
+  float: right;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  width: 70%;
+  text-align: right;
+}
+
+.card_avatar_default{
+  font-family: $FONT_FAMILY;
+  float: right;
+  transform-origin: 90% 25%;
+  transition: all 0.1s;
+  width: 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar_default{
+  cursor: pointer;
+  font-size: 42px
+}
+
+.card_actions{
+  overflow: hidden;
+  display: flex;
+  font-family: $FONT_FAMILY;
+  margin-top: 0.5vw;
+}
+
+.button {
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  display: inline-block;
+  cursor: pointer;
+  color: #000000;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  padding: .5vw;
+  text-decoration: none;
+  text-shadow: 0 1px 0 #ffffff;
+}
+.button:hover {
+  text-decoration: underline;
+}
+.button:active {
+  position:relative;
+  top:1px;
+}
+
+.button_delete_loading{
+  margin-top: 0;
+  text-align: right;
+  min-height: 20px;
+  margin-left: auto;
+  &>div{
+    width: 18px;
+    height: 18px;
+  }
+}
+.only_button_delete_loading{
+  @extend .button_delete_loading;
+  margin-left: 0;
+  height: 40.15px;
+}
+
+.button_delete{
+  font-family: $FONT_FAMILY;
+  color: $ERROR_COLOR;
+  margin-left: auto;
+}
+
+.only_button_delete{
+  font-family: $FONT_FAMILY;
+  color: $ERROR_COLOR;
+}
+
+.add_button{
+  font-family: $FONT_FAMILY;
+}
+.additional_button{
+  @extend .add_button;
+  margin-left: 10px;
+}
+.delete_selected_button{
+  @extend .add_button;
+  margin-left: 10px;
+}
+@media only screen and (max-width: 1024px)  {
+  .add_button,.delete_selected_button{
+    margin-left: 2px;
+    button{
+      span:nth-child(2){
+        display: none;
+      }
+      >span{
+        span{
+          font-size: 16px !important;
+        }
+      }
+      padding: .175rem .55rem;
+      margin-right: 2px !important;
+    }
+  }
+  .additional_button{
+    margin-left: 2px !important;
+    button{
+      padding: .175rem .55rem;
+      >span{
+        span{
+          font-size: 16px !important;
+        }
+      }
+    }
+  }
+  .search_field{
+    width: 104px !important;
+    input{
+      font-size: 14px !important;
+      height: 32px;
+    }
+    margin-left: 2px !important;
+  }
+}
+
+.update_button{
+  font-family: $FONT_FAMILY;
+  margin-top: 20px;
+}
+
+.current_card{
+  font-size: $FONT_SIZE_14;
+  font-family: $FONT_FAMILY;
+  float: right;
+  color: #179221;
+  margin-top: 8px;
+}
+
+.current_card_title{
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  display: inline-block;
+  cursor: default;
+  color: #179221;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  padding: 6px 8px;
+  text-decoration: none;
+  text-shadow: 0 1px 0 #ffffff;
+}
+.no_actions_card{
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  display: inline-block;
+  cursor: default;
+  color: #179221;
+  opacity: 0.0;
+  font-family: "Open Sans", "Arial", sans-serif;
+  font-size: 1.1vw;
+  padding: .5vw;
+  text-decoration: none;
+  text-shadow: 0 1px 0 #ffffff;
+}
+
+.empty_list{
+  @extend .card_style;
+  padding: 1vw;
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_SMALL;
+  display: block;
+  margin: 20px 0;
+}
+
+.loading{
+  float: right;
+  margin-top: 12px;
+  margin-right: 16px;
+  min-height: 0;
+}
+
+.loading>div{
+  width: 15px;
+  height: 15px;
+}
+
+.card_button{
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  height: 100%;
+  font-size: 1.1vw;
+}
+.card_button:focus{
+  text-decoration: underline;
+  outline: none !important;
+}
+.card_button_icon{
+  height: 100%;
+  display: none;
+  padding: 0 !important;
+}
+.card_delete_button_icon{
+  margin-left: auto;
+}
+@media only screen and (max-width: 768px){
+  .card_button{
+    display: none;
+  }
+  .card_button_icon{
+    display: block;
+  }
+}
+@media only screen and (min-width: 768px){
+  .card_button{
+    display: block;
+  }
+  .card_button_icon{
+    display: none;
+  }
+}
+
+.card_as_button{
+  padding: 0;
+  width: 100%;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  height: 100%;
+  outline: none !important;
+  text-align: left;
+}
+.card_as_button:focus>div{
+  font-family: $FONT_FAMILY;
+  animation-name: Aselected_card;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+  animation-timing-function:ease-in;
+  outline: none !important;
+}
+
+.list_header{
+  margin-top: 40px;
+  text-align: left;
+}
+
+.search_field{
+  width: 200px;
+  margin-left: 10px;
+  .input{
+    padding: 0;
+  }
+}
+
+.action_panel{
+  display: flex;
+  margin-bottom: 20px;
+  >:nth-child(n){
+    margin-left: 10px;
+  }
+  >:first-child{
+    margin-left: 0;
+  }
+  .list_view_icon{
+    margin-left: auto;
+    align-self: center;
+    display: grid;
+    grid-template-columns: max-content max-content;
+  }
+}
+.grid_dropdown_menu{
+  min-width: 100px;
+  top: -7px;
+  left: -100px;
+}
+.grid_menu_item{
+  display: flex;
+  margin-bottom: 5px;
+  cursor: pointer;
+  padding: 2px;
+}
+.grid_menu_item:hover{
+  background: #eee;
+}

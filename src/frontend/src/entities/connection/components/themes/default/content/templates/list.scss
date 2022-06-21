@@ -1,0 +1,40 @@
+/*!
+ *  Copyright (C) <2022>  <becon GmbH>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../../constants';
+
+.template_list_conversion{
+  margin-left: auto;
+  font-size: 1.6vw;
+}
+
+.export{
+  cursor: pointer;
+  float: right;
+}
+.export_loading{
+  margin: 0 7px 0 0;
+  float: right;
+  min-height: 0;
+  >div{
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.template_item_subtitle{
+  color: #797979;
+  font-size: 0.9vw;
+}

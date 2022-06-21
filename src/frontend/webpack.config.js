@@ -1,16 +1,16 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
@@ -61,6 +61,33 @@ function getHttpsSettings(){
     return https;
 }
 const getConfig = ({isBuild, envVar}) => {
+    const copyWebpackPluginSettings = {};
+    copyWebpackPluginSettings.patterns = [
+        {
+            from: path.resolve(__dirname, 'locales'),
+            to: path.resolve(__dirname, 'dist/locales')
+        },
+        {
+            from: path.resolve(__dirname, 'src/img'),
+            to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
+        },
+        {
+            from: path.resolve(__dirname, 'src/styles/css'),
+            to: path.resolve(__dirname, 'dist/styles/css')
+        },
+        {
+            from: path.resolve(__dirname, 'src/styles/fonts'),
+            to: path.resolve(__dirname, 'dist/styles/fonts')
+        },
+    ];
+    if(envVar && envVar.hasOwnProperty('process.env.isDevelopment') && envVar['process.env.isDevelopment']){
+        copyWebpackPluginSettings.patterns.push(
+            {
+                from: path.resolve(__dirname, 'src/img/application/fav_icon.png'),
+                to: path.resolve(__dirname, 'dist')
+            }
+        );
+    }
     return {
         entry: ['@babel/polyfill', './src/index.jsx'],
         module: {
@@ -75,10 +102,10 @@ const getConfig = ({isBuild, envVar}) => {
                         {
                             loader: "css-loader",
                             options: {
-                                importLoaders: 2,
                                 import: true,
                                 modules: {
                                     exportLocalsConvention: "camelCase",
+                                    auto: (resourcePath) => resourcePath.endsWith("theme.css"),
                                     localIdentName: '[path][name]__[local]--[hash:base64:5]',
                                 },
                             }
@@ -92,7 +119,7 @@ const getConfig = ({isBuild, envVar}) => {
                         {
                             loader: "css-loader",
                             options: {
-                                importLoaders: 2,
+                                importLoaders: 1,
                                 import: true,
                                 modules: {
                                     exportLocalsConvention: "camelCase",
@@ -126,43 +153,30 @@ const getConfig = ({isBuild, envVar}) => {
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss'],
             alias: {
-                '@style': path.resolve('./src/styles/css'),
+                '@entity': path.resolve('./src/entities'),
+                '@application': path.resolve('./src/application'),
+                '@style': path.resolve('./src/styles'),
                 '@image': path.resolve('./src/img'),
-                '@request': path.resolve(__dirname, './src/requests/classes/'),
-                '@model': path.resolve(__dirname, './src/requests/models/'),
-                '@requestInterface': path.resolve(__dirname, './src/requests/interfaces/'),
-                '@class': path.resolve(__dirname, './src/classes/'),
-                '@collection': path.resolve(__dirname, './src/collections/'),
-                '@interface': path.resolve(__dirname, './src/interfaces/'),
-                '@atom': path.resolve(__dirname, './src/components/atoms/'),
-                '@molecule': path.resolve(__dirname, './src/components/molecules/'),
-                '@organism': path.resolve(__dirname, './src/components/organisms/'),
-                '@page': path.resolve(__dirname, './src/components/pages/'),
-                '@template': path.resolve(__dirname, './src/components/templates/'),
-                '@action': path.resolve(__dirname, './src/store/action_creators/'),
-                '@store': path.resolve(__dirname, './src/store/'),
-                '@constants': path.resolve(__dirname, './src/constants/'),
-                '@translations': path.resolve(__dirname, './src/translations/'),
-                '@slice': path.resolve(__dirname, './src/store/reducers/'),
+                '@app_component': path.resolve(__dirname, './src/components/'),
                 '@oc_modules': path.resolve(__dirname, './oc_modules/'),
                 /*
                 * TODO: remove next alias after connection cleaning
                 */
-                '@change_component': path.resolve(__dirname, './src/components/connection/components/general/change_component/'),
-                '@basic_components': path.resolve(__dirname, './src/components/connection/components/general/basic_components/'),
-                '@themes': path.resolve(__dirname, './src/components/connection/themes/'),
-                '@list_of_components': path.resolve(__dirname, './src/components/connection/list_of_components/'),
-                '@view_component': path.resolve(__dirname, './src/components/connection/view_component/'),
-                '@utils': path.resolve(__dirname, './src/components/connection/utils/'),
-                '@classes': path.resolve(__dirname, './src/components/connection/classes/'),
-                '@root': path.resolve('./src/components/connection/'),
-                '@actions': path.resolve(__dirname, './src/components/connection/actions'),
-                '@components': path.resolve(__dirname, './src/components/connection/components'),
-                '@loading': path.resolve(__dirname, './src/components/connection/components/general/app/Loading'),
-                '@decorators': path.resolve(__dirname, './src/components/connection/decorators'),
-                '@epics': path.resolve(__dirname, './src/components/connection/epics'),
-                '@validations': path.resolve(__dirname, './src/components/connection/validations'),
-                '@update_assistant': path.resolve(__dirname, './src/components/update_assistant/'),
+                '@change_component': path.resolve(__dirname, './src/entities/connection/components/components/general/change_component/'),
+                '@basic_components': path.resolve(__dirname, './src/entities/connection/components/components/general/basic_components/'),
+                '@themes': path.resolve(__dirname, './src/entities/connection/themes/components/'),
+                '@list_of_components': path.resolve(__dirname, './src/entities/connection/list_of_components/components/'),
+                '@view_component': path.resolve(__dirname, './src/entities/connection/view_component/components/'),
+                '@utils': path.resolve(__dirname, './src/entities/connection/components/utils/components/'),
+                '@classes': path.resolve(__dirname, './src/entities/connection/components/classes/components/'),
+                '@root': path.resolve('./src/entities/connection/'),
+                '@actions': path.resolve(__dirname, './src/entities/connection/actions/components'),
+                '@components': path.resolve(__dirname, './src/entities/connection/components/components'),
+                '@loading': path.resolve(__dirname, './src/entities/connection/components/components/general/app/Loading'),
+                '@decorators': path.resolve(__dirname, './src/entities/connection/decorators/components'),
+                '@epics': path.resolve(__dirname, './src/entities/connection/epics/components'),
+                '@validations': path.resolve(__dirname, './src/entities/connection/validations/components'),
+                '@update_assistant': path.resolve(__dirname, './src/entities/update_assistant/components/'),
             },
             modules: ['node_modules', 'oc_modules']
         },
@@ -191,25 +205,10 @@ const getConfig = ({isBuild, envVar}) => {
         plugins: [
             new HtmlWebpackPlugin({
                 template: path.join(__dirname, "src", "index.html"),
-                favicon: path.join(__dirname, "src", "./img/fav_icon.png"),
+                favicon: path.join(__dirname, "src", "./img/application/fav_icon.png"),
             }),
             new NodePolyfillPlugin(),
-            new CopyWebpackPlugin({
-                patterns: [
-                    {
-                        from: path.resolve(__dirname, 'locales'),
-                        to: path.resolve(__dirname, 'dist/locales')
-                    },/*
-                    {
-                        from: path.resolve(__dirname, 'src/img'),
-                        to: path.resolve(__dirname, isBuild ? 'dist/img' : 'dist')
-                    },
-                    {
-                        from: path.resolve(__dirname, 'src/styles/css'),
-                        to: path.resolve(__dirname, 'dist/styles/css')
-                    },*/
-                ]
-            }),
+            new CopyWebpackPlugin(copyWebpackPluginSettings),
             new webpack.DefinePlugin({...envVar})
         ],
     };

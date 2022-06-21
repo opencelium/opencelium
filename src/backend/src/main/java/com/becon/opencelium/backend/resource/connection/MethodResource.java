@@ -88,4 +88,9 @@ public class MethodResource extends ResourceSupport {
     public void setResponse(ResponseResource response) {
         this.response = response;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
 }

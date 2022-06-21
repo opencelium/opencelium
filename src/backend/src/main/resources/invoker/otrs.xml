@@ -28,7 +28,7 @@
     <operations>
         <operation name="TicketSearch" type="test">
             <request>
-                <method>POST</method>
+                <method>GET</method>
                 <endpoint>{url}/{WebService}/TicketSearch/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
@@ -42,8 +42,8 @@
                     <field name="Queues" type="array"/>
                     <field name="QueueIDs" type="array"/>
                     <field name="Types" type="array"/>
-                    <field name="TypeIDs" type="array"/>                 
-                </body>  
+                    <field name="TypeIDs" type="array"/>
+                </body>
             </request>
             <response>
                 <success status="200">
@@ -52,7 +52,7 @@
                     </header>
                     <body type="object" format="json" data="raw">
                         <field name="TicketID" type="array"/>
-                    </body>  
+                    </body>
                 </success>
                 <fail status="200">
                     <header>
@@ -69,14 +69,14 @@
         </operation>
         <operation name="TicketGet" type="test">
             <request>
-                <method>POST</method>
+                <method>GET</method>
                 <endpoint>{url}/{WebService}/TicketGet/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body type="object" format="json" data="raw">
-                    <field name="TicketID" type="array"/>
-                </body>  
+                    <field name="TicketID" type="string"/>
+                </body>
             </request>
             <response>
                 <success status="200">
@@ -84,24 +84,20 @@
                         <item name="Content-Type" type="string">application/json</item>
                     </header>
                     <body type="object" format="json" data="raw">
-                    <field name="Ticket" type="array">
-                        <field name="TicketID" type="string"/>
-                        <field name="TicketNumber" type="string"/>
-                        <field name="Type" type="string"/>
-                        <field name="Title" type="string"/>
-                        <field name="Queue" type="string"/>
-                        <field name="QueueID" type="string"/>                        
-                        <field name="State" type="string"/>
-                        <field name="StateID" type="string"/>
-                        <field name="StateType" type="string"/>
-                        <field name="CustomerID" type="string"/>
-                        <field name="Owner" type="string"/>
-                        <field name="DynamicField" type="array">
-                            <field name="Name" type="string"/>
-                            <field name="Value" type="string"/>
+                        <field name="Ticket" type="array">
+                            <field name="TicketID" type="string"/>
+                            <field name="TicketNumber" type="string"/>
+                            <field name="Type" type="string"/>
+                            <field name="Title" type="string"/>
+                            <field name="Queue" type="string"/>
+                            <field name="QueueID" type="string"/>
+                            <field name="State" type="string"/>
+                            <field name="StateID" type="string"/>
+                            <field name="StateType" type="string"/>
+                            <field name="CustomerID" type="string"/>
+                            <field name="Owner" type="string"/>
                         </field>
-                    </field>
-                </body>  
+                    </body>
                 </success>
                 <fail status="200">
                     <header>
@@ -118,7 +114,7 @@
         </operation>
         <operation name="TicketCreate" type="test">
             <request>
-                <method>POST</method>
+                <method>GET</method>
                 <endpoint>{url}/{WebService}/TicketCreate/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
@@ -128,27 +124,14 @@
                         <field name="Title" type="string"/>
                         <field name="Type" type="string"/>
                         <field name="Queue" type="string"/>
-                        <field name="QueueID" type="string"/>                        
-                        <field name="Priority" type="string"/>
-                        <field name="PriorityID" type="string"/>
+                        <field name="QueueID" type="string"/>
                         <field name="State" type="string"/>
                         <field name="StateID" type="string"/>
                         <field name="StateType" type="string"/>
                         <field name="CustomerID" type="string"/>
-                        <field name="CustomerUser" type="string"/>
                         <field name="Owner" type="string"/>
                     </field>
-                    <field name="Article" type="object">
-                        <field name="Subject" type="string"/>
-                        <field name="Body" type="string"/>
-			<field name="ContentType" type="string">text/plain; charset=utf-8</field>
-                        <field name="TimeUnit" type="string"/>
-                    </field>
-                    <field name="DynamicField" type="array">
-                        <field name="Name" type="string"/>
-                        <field name="Value" type="string"/>
-                    </field>			
-                </body>  
+                </body>
             </request>
             <response>
                 <success status="200">
@@ -159,7 +142,7 @@
                         <field name="Ticket" type="array">
                             <field name="Title" type="string"/>
                             <field name="Queue" type="string"/>
-                            <field name="QueueID" type="string"/>                        
+                            <field name="QueueID" type="string"/>
                             <field name="State" type="string"/>
                             <field name="StateID" type="string"/>
                             <field name="StateType" type="string"/>
@@ -167,7 +150,7 @@
                             <field name="Types" type="string"/>
                             <field name="TypeIDs" type="string"/>
                         </field>
-                    </body>  
+                    </body>
                 </success>
                 <fail status="200">
                     <header>
@@ -184,7 +167,7 @@
         </operation>
         <operation name="TicketUpdate" type="test">
             <request>
-                <method>POST</method>
+                <method>GET</method>
                 <endpoint>{url}/{WebService}/TicketCreate/{UserLogin}/{Password}</endpoint>
                 <header>
                     <item name="Content-Type" type="string">application/json</item>
@@ -195,14 +178,14 @@
                         <field name="Title" type="string"/>
                         <field name="Type" type="string"/>
                         <field name="Queue" type="string"/>
-                        <field name="QueueID" type="string"/>                        
+                        <field name="QueueID" type="string"/>
                         <field name="State" type="string"/>
                         <field name="StateID" type="string"/>
                         <field name="StateType" type="string"/>
                         <field name="CustomerID" type="string"/>
                         <field name="Owner" type="string"/>
                     </field>
-                </body>  
+                </body>
             </request>
             <response>
                 <success status="200">
@@ -210,18 +193,18 @@
                         <item name="Content-Type" type="string">application/json</item>
                     </header>
                     <body type="object" format="json" data="raw">
-                    <field name="Ticket" type="array">
-                        <field name="Title" type="string"/>
-                        <field name="Queue" type="string"/>
-                        <field name="QueueID" type="string"/>                        
-                        <field name="State" type="string"/>
-                        <field name="StateID" type="string"/>
-                        <field name="StateType" type="string"/>
-                        <field name="QueueIDs" type="string"/>
-                        <field name="Types" type="string"/>
-                        <field name="TypeIDs" type="string"/>
-                    </field>
-                </body>  
+                        <field name="Ticket" type="array">
+                            <field name="Title" type="string"/>
+                            <field name="Queue" type="string"/>
+                            <field name="QueueID" type="string"/>
+                            <field name="State" type="string"/>
+                            <field name="StateID" type="string"/>
+                            <field name="StateType" type="string"/>
+                            <field name="QueueIDs" type="string"/>
+                            <field name="Types" type="string"/>
+                            <field name="TypeIDs" type="string"/>
+                        </field>
+                    </body>
                 </success>
                 <fail status="200">
                     <header>
@@ -235,13 +218,13 @@
                     </body>
                 </fail>
             </response>
-        </operation>                                       
+        </operation>
         <operation name="ConfigItemCreate" type="">
             <request>
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemCreate/{UserLogin}/{Password}</endpoint>
                 <header>
-                        <item name="Content-Type" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body type="array" format="json" data="raw">
                     <field name="ConfigItem" type="object">
@@ -282,7 +265,7 @@
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ConfigItemUpdate/{UserLogin}/{Password}</endpoint>
                 <header>
-                     <item name="Content-Type" type="string">application/json</item>
+                    <item name="Content-Type" type="string" >application/json</item>
                 </header>
                 <body type="object" format="json" data="raw">
                     <field name="ConfigItemID" type="string"/>
@@ -438,7 +421,7 @@
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ServiceCreate/{UserLogin}/{Password}</endpoint>
                 <header>
-                    <item name="Content-Type" type="string"/>
+                    <item name="Content-Type" type="string" >application/json</item>
                 </header>
                 <body type="object" format="json" data="raw">
                     <field name="Name" type="string"/>
@@ -512,7 +495,7 @@
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/ServiceUpdate/{UserLogin}/{Password}</endpoint>
                 <header>
-                    <item name="Content-Type" type="string"/>
+                    <item name="Content-Type" type="string" >application/json</item>
                 </header>
                 <body type="object" format="json" data="raw">
                     <field name="Name" type="string"/>
@@ -577,13 +560,13 @@
                     </body>
                 </fail>
             </response>
-        </operation>                                  
+        </operation>
         <operation name="LinkCreate" type="">
             <request>
                 <method>POST</method>
                 <endpoint>{url}/{WebService}/LinkCreate/{UserLogin}/{Password}</endpoint>
                 <header>
-                    <item name="Content-Type" type="string"/>
+                    <item name="Content-Type" type="string" >application/json</item>
                 </header>
                 <body type="object" format="json" data="raw">
                     <field name="SourceObject" type="string"/>
@@ -591,7 +574,7 @@
                     <field name="TargetObject" type="string"/>
                     <field name="TargetKey" type="string"/>
                     <field name="Type" type="string"/>
-                    <field name="State" type="string"/>                                   
+                    <field name="State" type="string"/>
                 </body>
             </request>
             <response>
@@ -675,18 +658,18 @@
                             <field name="ITSMConfigItem" type="object">
                                 <field name="AlternativeTo" type="object">
                                     <field name="Source" type="array"/>
-                                </field>                               
+                                </field>
                             </field>
                             <field name="Service" type="object">
                                 <field name="AlternativeTo" type="object">
                                     <field name="Source" type="array"/>
-                                </field>                               
+                                </field>
                             </field>
                             <field name="Ticket" type="object">
                                 <field name="AlternativeTo" type="object">
                                     <field name="Source" type="array"/>
-                                </field>                               
-                            </field>                                                       
+                                </field>
+                            </field>
                         </field>
                     </body>
                 </success>
@@ -700,6 +683,6 @@
                     </body>
                 </fail>
             </response>
-        </operation>                          
+        </operation>
     </operations>
 </invoker>

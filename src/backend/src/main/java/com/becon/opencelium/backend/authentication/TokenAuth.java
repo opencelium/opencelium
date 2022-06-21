@@ -16,13 +16,10 @@
 
 package com.becon.opencelium.backend.authentication;
 
-import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.mysql.entity.Connector;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
-import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
-import com.becon.opencelium.backend.mysql.service.ConnectorServiceImp;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -31,19 +28,17 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
-public class TokenAuth implements AuthenticationType {
+public class TokenAuth implements ApiAuth {
 
-    private List<Invoker> invokerList;
+    private final Invoker invoker;
     private RestTemplate restTemplate;
 
-    public TokenAuth(List<Invoker> invokerList, RestTemplate restTemplate){
-        this.invokerList = invokerList;
-        this.restTemplate = restTemplate;
+    public TokenAuth(Invoker invoker){
+        this.invoker = invoker;
+        this.restTemplate = new RestTemplate();
     }
 
     @Override
@@ -53,11 +48,6 @@ public class TokenAuth implements AuthenticationType {
 
     @Override
     public List<RequestData> getAccessCredentials(Connector connector, ResponseEntity<?> responseEntity) {
-//        InvokerRequestBuilder requestBuilder = new InvokerRequestBuilder(restTemplate);
-        Invoker invoker = invokerList.stream()
-                .filter(inv -> inv.getName().equals(connector.getInvoker()))
-                .findFirst().orElseThrow(() -> new RuntimeException("Invoker not found in storage"));
-
         RequiredData requiredData = invoker.getRequiredData().stream().filter(i -> i.getName().equals("token"))
                 .findFirst().orElseThrow(() -> new RuntimeException("field not found"));
 

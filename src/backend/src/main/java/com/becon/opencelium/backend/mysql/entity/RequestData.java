@@ -94,4 +94,15 @@ public class RequestData {
     public void setConnector(Connector connector) {
         this.connector = connector;
     }
+
+    @Override
+    public String toString() {
+        return "RequestData{" +
+                "id=" + id +
+                ", field='" + field + '\'' +
+                ", value='" + value + '\'' +
+                ", visibility='" + visibility + '\'' +
+                ", connector=" + connector +
+                '}';
+    }
 }

@@ -1,0 +1,194 @@
+/*!
+ *  Copyright (C) <2022>  <becon GmbH>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@import '../constants';
+
+.mode{
+  font-family: $FONT_FAMILY;
+  text-align: right;
+  font-size: $FONT_SIZE_TINY;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.item{
+  font-family: $FONT_FAMILY;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border-radius: 5px;
+  font-size: $FONT_SIZE_TINY;
+  color: black;
+  cursor: pointer;
+  background: #ecf1e9;
+  float: left;
+  margin-right: 20px;
+  margin-bottom: 10px;
+  border: 1px solid #617b4e;
+  padding: 5px;
+}
+
+.variables_title{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.variables_list{
+  font-family: $FONT_FAMILY;
+  background: #f7f7f6;
+  padding: 5px;
+  min-height: 120px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.variable_item{
+  @extend .item;
+  background: #df6363;
+}
+
+.selected_variable_item{
+  background: #ff9c9c;
+}
+
+.constants{
+  font-family: $FONT_FAMILY;
+  background: #f7f7f6;
+  padding: 5px;
+  min-height: 120px;
+  max-height: 120px;
+  margin: 0 !important;
+  overflow-y: auto;
+}
+
+.constants_title{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+}
+
+.constants_list{
+  font-family: $FONT_FAMILY;
+  overflow-y: auto !important;
+  padding: 0 !important;
+}
+
+.constant_item{
+  font-family: $FONT_FAMILY;
+  @extend .item;
+  background: #fcc80a;
+  .content{
+    float: left;
+    .number_value{
+      color: #617b4e;
+    }
+    .string_value{
+      color: #3f51b5;
+    }
+  }
+  .x{
+    float: left;
+    font-size: $FONT_SIZE_TINY;
+    color: red;
+    margin-left: 9px;
+  }
+}
+
+.selected_constant_item{
+  background: #ffe06e;
+}
+
+.constant_input_area{
+  font-family: $FONT_FAMILY;
+  padding: 0 0 0 10px !important;
+}
+
+.constant_input{
+  font-family: $FONT_FAMILY;
+  padding-bottom: 0;
+}
+
+.constant_input_element{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+  padding: 0;
+}
+
+.constant_input_label{
+  font-family: $FONT_FAMILY;
+  font-size: $FONT_SIZE_TINY;
+  line-height: 12px;
+  top: 16px;
+}
+
+.constant_add_button{
+  font-family: $FONT_FAMILY;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.operators_title{
+  font-family: $FONT_FAMILY;
+  margin-top: 10px;
+  font-size: $FONT_SIZE_SMALL;
+}
+
+.operators_list{
+  font-family: $FONT_FAMILY;
+  background: #e6e6d8;
+  padding: 5px;
+  min-height: 35px;
+  max-height: 35px;
+  margin-bottom: 10px;
+}
+
+.operator_item{
+  @extend .item;
+  background: #7aced2;
+  text-align: center;
+}
+
+.operator_item_selected{
+  font-family: $FONT_FAMILY;
+  background: #c9ebec;
+}
+
+.editor{
+  font-family: $FONT_FAMILY;
+  border: 1px solid #c9c7c7;
+  width: 100%;
+  min-height: 125px;
+  max-height: 125px;
+  overflow-y: auto;
+  padding: 5px;
+}
+
+.editor_simple_code_piece_name{
+  font-family: $FONT_FAMILY;
+  float: left;
+}
+
+.editor_simple_code_piece_x{
+  font-family: $FONT_FAMILY;
+  float: left;
+  font-size: $FONT_SIZE_TINY;
+  color: red;
+  margin-left: 9px;
+}
+
+.editor_simple_code_piece_selected{
+  font-family: $FONT_FAMILY;
+  border-bottom-width: 5px;
+}

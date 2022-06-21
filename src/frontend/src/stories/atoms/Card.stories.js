@@ -1,24 +1,24 @@
 /*
- * Copyright (C) <2022>  <becon GmbH>
+ *  Copyright (C) <2022>  <becon GmbH>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3 of the License.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import React from 'react';
-import {Card as CardComponent} from "@atom/card/Card";
+import {Card as CardComponent} from "@app_component/base/card/Card";
 import styled, {withTheme} from "styled-components";
-import InputText from "@atom/input/text/InputText";
-import Label from "@molecule/form_section/label/Label";
-import InputTextarea from "@atom/input/textarea/InputTextarea";
+import InputText from "@app_component/base/input/text/InputText";
+import Label from "@molecule/../../components/form/form_section/label/Label";
+import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
 
 const TemplateWithTheme = withTheme(CardComponent);
 
