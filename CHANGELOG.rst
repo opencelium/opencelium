@@ -2,6 +2,31 @@
 Changelog
 *********
 
+2.3
+===
+:Date: June 21, 2022
+
+Features
+--------
+
+* Manage own CI theme on service portal
+* Support multi-step authentification
+* OAuth2 support for service portal
+
+Connector
+---------
+
+* Jira Insight
+* JDisc
+* CheckMK 2
+
+Fixes
+-----
+
+* scheduler add error (OC-459)
+* scheduler update error (OC-460)
+* template delete error (OC-461)
+
 2.2
 ===
 :Date: April 14, 2022

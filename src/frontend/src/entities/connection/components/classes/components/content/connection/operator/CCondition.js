@@ -53,9 +53,9 @@ export const FUNCTIONAL_OPERATORS = [
     {value: 'NotContains', label: <span>NotContains({OPERATOR_LABELS.NOT_CONTAINS()})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS(true)},
     {value: 'ContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.CONTAINS_SUB_STR()})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS_SUB_STR(true)},
     {value: 'NotContainsSubStr', label: <span>NotContainsSubStr({OPERATOR_LABELS.NOT_CONTAINS_SUB_STR()})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS_SUB_STR(true)},
-    {value: 'RegExp', label: <span>RegExp({OPERATOR_LABELS.REG_EXP})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true),},
+    /*{value: 'RegExp', label: <span>RegExp({OPERATOR_LABELS.REG_EXP})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true),},
     {value: 'Like', hasValue: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true)},
-    {value: 'NotLike', hasValue: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true)},
+    {value: 'NotLike', hasValue: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true)},*/
     {value: '>=', hasValue: true, placeholderValue: OPERATOR_LABELS.MORE_EQUAL(true)},
     {value: '>', hasValue: true, placeholderValue: OPERATOR_LABELS.MORE(true)},
     {value: '<=', hasValue: true, placeholderValue: OPERATOR_LABELS.LESS_EQUAL(true)},
