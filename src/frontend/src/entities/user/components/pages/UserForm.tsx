@@ -97,10 +97,13 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
         options: userGroupOptions,
         required: true,
     }});
+    const userGroupSelectValue = user.userGroupSelect ? user.userGroupSelect.value : null;
+    const userGroupIndex = userGroupSelectValue !== null ? userGroups.findIndex(g => g.groupId.toString() === userGroupSelectValue) : -1;
+    let descriptionValue = userGroupIndex !== -1 ? userGroups[userGroupIndex].description : "Here you will see the description of the role";
     const UserGroupTextarea = user.getTextarea({propertyName: "userGroupDescription", props: {
         label: 'Description',
         readOnly: true,
-        value: "Here you will see the description of the role",
+        value: descriptionValue.toString(),
     }})
     let actions = [<Button
         key={'list_button'}

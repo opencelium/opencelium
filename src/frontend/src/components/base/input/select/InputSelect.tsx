@@ -87,9 +87,9 @@ const InputSelect: FC<InputSelectProps> = ({
     const filterOptions = (searchValue: string) => {
         if(isMultiple){
             // @ts-ignore
-            setLocalOptions(source.filter(option => multipleValue.findIndex(v => v.value === option.value) === -1 && !cleanString(option.label.toString()).includes(cleanString(searchValue))));
+            setLocalOptions(source.filter(option => multipleValue.findIndex(v => v.value === option.value) === -1 && !cleanString(option.label.toString()).indexOf(cleanString(searchValue)) !== -1));
         } else{
-            setLocalOptions(source.filter(option => cleanString(option.label.toString()).includes(cleanString(searchValue))));
+            setLocalOptions(source.filter(option => cleanString(option.label.toString()).indexOf(cleanString(searchValue)) !== -1));
         }
     }
     const filter = (e: any) => {

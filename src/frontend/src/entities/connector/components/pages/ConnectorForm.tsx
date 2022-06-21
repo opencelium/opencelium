@@ -93,12 +93,14 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         required: true,
         callback: (reference) => {reference.requestData = null;}
     }})
-    //TODO update invoker description after selection
+    const invokerSelectValue = connector.invokerSelect ? connector.invokerSelect.value : null;
+    const invokerIndex = invokerSelectValue !== null ? invokers.findIndex(i => i.name === invokerSelectValue) : -1;
+    let descriptionValue = invokerIndex !== -1 ? `${invokers[invokerIndex].description}\n\nHint: ${invokers[invokerIndex].hint}` : "Here you will see the description of the invoker";
     const InvokerDescriptionInput = connector.getTextarea({
         propertyName: "invokerDescription", props:{
             label: 'Description',
             readOnly: true,
-            value: "Here you will see the description of the invoker",
+            value: descriptionValue,
         }
     })
     const TimeoutInput = connector.getText({
