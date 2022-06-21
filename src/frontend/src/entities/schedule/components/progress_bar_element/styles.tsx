@@ -84,11 +84,11 @@ const ProgressBarStyled = styled(ProgressBar)`
     float: left;
     &> div{
         & span:first-child{
-            background-color: ${({theme}: {theme: ITheme}) => chroma(theme.progressBarElement.background).alpha(0.4).toString() || '#c6cbe9'};
+            background-color: ${({theme}: {theme: ITheme}) => theme?.progressBarElement?.background ? chroma(theme.progressBarElement.background).alpha(0.4).toString() : '#c6cbe9'};
             background-image: none;
         }
         & span:last-child{
-            background-color: ${({theme}: {theme: ITheme}) => theme.progressBarElement.background || '#3f51b5'};
+            background-color: ${({theme}: {theme: ITheme}) => theme?.progressBarElement?.background || '#3f51b5'};
         }
     }
 `;

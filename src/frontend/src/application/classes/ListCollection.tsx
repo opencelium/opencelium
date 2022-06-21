@@ -97,7 +97,7 @@ class ListCollection implements IListCollection{
     hasCheckboxes?: boolean = true;
 
     // on/off search input of collection
-    hasSearch?: boolean;
+    hasSearch?: boolean = true;
 
     // filtered entities by search name
     filteredEntities?: any[] = [];
