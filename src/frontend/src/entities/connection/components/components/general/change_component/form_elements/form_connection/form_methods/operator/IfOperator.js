@@ -1047,9 +1047,6 @@ class IfOperator extends Component{
             operatorStyle.border = 'border: 1px solid #d14b4b';
         }
         let menuEditStyles = {width: '100%'};
-        if(isOperatorHasThreeParams){
-            menuEditStyles.left = '-17px';
-        }
         return (
             <div style={{display: 'flex'}}>
                 <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
