@@ -16,9 +16,10 @@ Features
 Connector
 ---------
 
-* Jira Insight
-* JDisc
+* JDisc Discovery
 * CheckMK 2
+* OpenManage Enterprise
+* Adaxes
 
 Fixes
 -----
@@ -38,6 +39,12 @@ Features
 * Enable/disable SSL verification for connectors
 * Manage connection timeouts for connectors
 
+
+Connector
+---------
+
+* Jira Insight
+
 Fixes
 -----
 
@@ -45,7 +52,7 @@ Fixes
 * can't save the template (OC-444)
 * increment index on arrays in xml (OC-440)
 * new invokers and templates are available (OC-443)
-* new frontend engine has some issues… (OC-438)
+* new frontend engine has some issuesâ€¦ (OC-438)
 * error during updateing a connector (OC-439)
 
 2.1

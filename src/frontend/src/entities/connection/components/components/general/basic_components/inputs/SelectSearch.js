@@ -259,7 +259,7 @@ class SelectSearch extends Component{
                 <div style={{width: 'calc(100% - 40px)'}}>
                     No params
                 </div>
-                <AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} selectedConnector={selectedConnector} connection={connection} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>
+                {/*<AddParam id={`${id}_param_button`} selectedMethod={selectedMethod} selectedConnector={selectedConnector} connection={connection} changeInputValue={(a) => this.changeInputValue(a)} toggleCallback={(a) => this.paramCallback(a)} updateConnection={updateConnection} connector={currentConnector} path={inputValue} closeMenu={() => this.closeMenu()}/>*/}
             </div> : "No params";
             result = [{label: noParamComponent, value: '-1', disabled: true}];
         }
