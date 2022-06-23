@@ -111,7 +111,7 @@ public class Xml {
         if (!pathExists(xPath)) {
             nl = addNewFieldFromPath(operationResource);
         }
-        List<Element> fields = format.equalsIgnoreCase("restfull")
+        List<Element> fields = format.equalsIgnoreCase("restful")
                                     ? createFields(operationResource.getFields())
                                     : createXmlFields(operationResource.getFields());
         if (pathExists(xPath)) {
