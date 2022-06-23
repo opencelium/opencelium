@@ -43,7 +43,10 @@ Features
 Connector
 ---------
 
+* Ivanti
 * Jira Insight
+* ProcessMaker
+* FreshService
 
 Fixes
 -----
