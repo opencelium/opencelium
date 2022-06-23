@@ -147,7 +147,7 @@ public class Xml {
                 continue;
             }
 
-            Element field = format.equalsIgnoreCase("restfull") ? createField(fr) : createXmlField(fr);
+            Element field = format.equalsIgnoreCase("restful") ? createField(fr) : createXmlField(fr);
             node.item(0).appendChild(field);
             node = node.item(0).getChildNodes();
             hasNewField = true;
