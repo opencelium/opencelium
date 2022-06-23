@@ -111,7 +111,7 @@ public class Xml {
         if (!pathExists(xPath)) {
             nl = addNewFieldFromPath(operationResource);
         }
-        List<Element> fields = format.equalsIgnoreCase("restfull")
+        List<Element> fields = format.equalsIgnoreCase("restful")
                                     ? createFields(operationResource.getFields())
                                     : createXmlFields(operationResource.getFields());
         if (pathExists(xPath)) {
@@ -147,7 +147,7 @@ public class Xml {
                 continue;
             }
 
-            Element field = format.equalsIgnoreCase("restfull") ? createField(fr) : createXmlField(fr);
+            Element field = format.equalsIgnoreCase("restful") ? createField(fr) : createXmlField(fr);
             node.item(0).appendChild(field);
             node = node.item(0).getChildNodes();
             hasNewField = true;
