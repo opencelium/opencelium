@@ -29,7 +29,9 @@ import User from "@entity/user/classes/User";
 import { MyProfileListProps } from "./interfaces";
 import { MyProfilePermissions } from "../../constants";
 import InputSelect from "@app_component/base/input/select/InputSelect";
-import {DefaultTheme} from "@style/Theme";
+import {ColorTheme, DefaultTheme} from "@style/Theme";
+import InputSwitch from "@app_component/base/input/switch/InputSwitch";
+import {setCIThemeSyncFlag} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
@@ -83,6 +85,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         // @ts-ignore
         dispatch(setThemes(JSON.stringify(newThemes)));
     }
+    const ciSyncFlag = !!authUser?.userDetail?.ciSyncFlag;
     const data = {
         title: 'My Profile',
         formSections: [
@@ -104,6 +107,14 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                             onChange={selectTheme}
                         />
                     </div>
+                    <InputSwitch
+                        name={`${ciSyncFlag ? 'Disable' : 'Enable'} theme synchronization`}
+                        icon={'corporate_fare'}
+                        label={'Theme sync'}
+                        isChecked={ciSyncFlag} onClick={() => dispatch(setCIThemeSyncFlag(!ciSyncFlag))}
+                        hasConfirmation={true}
+                        confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
+                    />
                 </FormSection>
             </React.Fragment>
         ]
