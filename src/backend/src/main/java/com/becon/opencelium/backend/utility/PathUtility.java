@@ -19,11 +19,17 @@ public class PathUtility {
     }
 
     public static String getFields(String path) {
+        if (path.indexOf(')') == path.length() - 1) {
+            return "";
+        }
         return path.substring(path.indexOf(')') + 2);
     }
 
     //(request.success).f1.f2.f3[]
     public static String getFieldsAsXpath(String path) {
+        if (path.length() == 0) {
+            return "";
+        }
         String[] str = path.split("\\.");
         if (str.length == 0) {
             return "field[@name='" + path + "']";
@@ -45,7 +51,12 @@ public class PathUtility {
     }
 
     public static String convertToXpath(String path, String method) {
-        return getXPathTillBody(path, method) + "/" + getFieldsAsXpath(getFields(path));
+        String fieldXpath = getFieldsAsXpath(getFields(path));
+        String bodyPath = getXPathTillBody(path, method);
+        if (fieldXpath.length() == 0) {
+            return bodyPath;
+        }
+        return bodyPath + "/" + fieldXpath;
     }
 
     public static String convretToXField(String field) {
