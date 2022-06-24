@@ -29,7 +29,7 @@ class SearchValue extends React.Component{
                 <div style={{width: 'calc(100% - 40px)'}} onMouseDown={value.value !== "-1" ? (e) => onSelectItem(e, {value, type}) : null}>
                     {labelText}
                 </div>
-                {/*<UpdateParam
+                <UpdateParam
                     id={`${id}_param_button`}
                     name={name}
                     selectedMethod={selectedMethod}
@@ -42,7 +42,7 @@ class SearchValue extends React.Component{
                     connector={currentConnector}
                     path={inputValue}
                     closeMenu={() => closeMenu()}
-                />*/}
+                />
             </div>
         );
     }
