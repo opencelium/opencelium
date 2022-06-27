@@ -19,6 +19,7 @@ import {connect} from "react-redux";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {updateTemplate as convertTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import CExecution from "@entity/connection/components/classes/components/content/template_converter/CExecution";
+import {TextSize} from "@app_component/base/text/interfaces";
 
 function mapStateToProps(state){
     const appVersion = state.applicationReducer.version;
@@ -67,7 +68,7 @@ class TemplateConversionIcon extends Component{
             <React.Fragment>
                 {
                     invalidVersion &&
-                    <TooltipButton target={`upgrade_entity_${data.template.templateId.toString()}`} position={'top'} tooltip={'Upgrade'} hasBackground={false} handleClick={() => this.convert()} icon={'replay'} color={ColorTheme.Turquoise} size={TextSize.Size_20}/>
+                    <TooltipButton target={`upgrade_entity_${data.template.templateId.toString()}`} position={'top'} tooltip={'Upgrade'} hasBackground={false} handleClick={() => this.convert()} icon={'replay'} size={TextSize.Size_20}/>
                 }
             </React.Fragment>
         );
