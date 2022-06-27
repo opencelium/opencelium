@@ -13,21 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ReactDOM from 'react-dom';
-import React from 'react';
-import {Provider} from "react-redux";
-import "@style/css/fonts.css";
-import "@style/css/bootstrap.css";
-import "@style/css/graphiql.css";
-import {store} from "@application/utils/store";
-import '@application/utils/i18n';
-import {App} from "@app_component/App";
+import {IRequestSettings} from "@application/requests/interfaces/IRequest";
+import Request from "./Request";
+import IApplicationRequest from "../interfaces/IApplication";
+import {AxiosResponse} from "axios";
+import {IResponse} from "@application/requests/interfaces/IResponse";
 
-import "@style/css/react_grid_layout.css";
-import "@style/css/react_crop.css";
+export default class ApplicationRequest extends Request implements IApplicationRequest {
 
-ReactDOM.render(
-    <Provider store={store}>
-        <App/>
-    </Provider>,
-    document.getElementById("root"));
+    constructor(settings?: Partial<IRequestSettings>) {
+        super({url: '', ...settings});
+    }
+}

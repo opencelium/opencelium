@@ -50,3 +50,10 @@ export function createIframe(src: string): void{
         }
     }, 1000);
 }
+
+export function removeIframe(){
+    const iframe = document.getElementById('iframe_messenger');
+    if(iframe){
+        document.body.removeChild(iframe);
+    }
+}

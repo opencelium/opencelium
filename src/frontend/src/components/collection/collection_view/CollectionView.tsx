@@ -47,6 +47,7 @@ const CollectionView: FC<CollectionViewProps> =
         shouldBeUpdated,
         hasTopBar,
         hasTitle,
+        hasViewSection,
     }) => {
         const dispatch = useAppDispatch();
         const {searchValue, viewType, gridViewType} = Application.getReduxState();
@@ -121,17 +122,22 @@ const CollectionView: FC<CollectionViewProps> =
             <ErrorBoundary>
                 <CollectionViewStyled>
                     {hasTitle && <Title title={collection.title}/>}
-                    {hasTopBar && <TopSectionStyled>
+                    {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
                             {collection.getTopActions(viewType, checkedIds)}
                         </ActionsStyled>
                         {hasSearch &&
                             <InputText marginLeft={'0'} autoFocus inputHeight={'35px'} value={searchValue} onChange={(e) => search(e.target.value)} minHeight={'1'}  width={'200px'} placeholder={'Search field'}/>
                         }
-                        <ViewSectionStyled>
-                            <TooltipButton target={'view_list'} tooltip={'List'} position={'top'} icon={'view_list'} size={24} hasBackground={false} color={ColorTheme.Turquoise} handleClick={() => onChangeViewType(ViewType.LIST)}/>
-                            <GridViewMenu setGridViewType={onChangeViewGridType} viewType={viewType} setViewType={onChangeViewType} setIsRefreshing={setIsRefreshing}/>
-                        </ViewSectionStyled>
+                        {hasViewSection &&
+                            <ViewSectionStyled>
+                                <TooltipButton target={'view_list'} tooltip={'List'} position={'top'} icon={'view_list'}
+                                               size={24} hasBackground={false} color={ColorTheme.Turquoise}
+                                               handleClick={() => onChangeViewType(ViewType.LIST)}/>
+                                <GridViewMenu setGridViewType={onChangeViewGridType} viewType={viewType}
+                                              setViewType={onChangeViewType} setIsRefreshing={setIsRefreshing}/>
+                            </ViewSectionStyled>
+                        }
                     </TopSectionStyled>}
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
                         {viewType === ViewType.LIST &&
@@ -169,6 +175,7 @@ CollectionView.defaultProps = {
     shouldBeUpdated: false,
     hasTopBar: true,
     hasTitle: true,
+    hasViewSection: true,
 }
 
 

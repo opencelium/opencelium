@@ -50,6 +50,7 @@ interface CollectionViewProps{
     shouldBeUpdated?: boolean,
     hasTopBar?: boolean,
     hasTitle?: boolean,
+    hasViewSection?: boolean,
 }
 
 interface CheckProps{

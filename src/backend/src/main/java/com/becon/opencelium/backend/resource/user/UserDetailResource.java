@@ -37,6 +37,7 @@ public class UserDetailResource extends ResourceSupport {
     private String profilePicture;
     private boolean appTour;
     private String theme;
+    private boolean themeSync;
     private String lang;
     private String bitbucketUser;
     private String bitbucketPassword;
@@ -59,6 +60,7 @@ public class UserDetailResource extends ResourceSupport {
         this.appTour = userDetail.getTutorial();
         this.theme = userDetail.getTheme();
         this.lang = userDetail.getLang();
+        this.themeSync = userDetail.isThemeSync();
         this.bitbucketUser = userDetail.getRepoUser();
 //        this.bitbucketPassword = userDetail.get();
         if (userDetail.getProfilePicture() != null){
@@ -151,6 +153,14 @@ public class UserDetailResource extends ResourceSupport {
 
     public String getBitbucketUser() {
         return bitbucketUser;
+    }
+
+    public boolean isThemeSync() {
+        return themeSync;
+    }
+
+    public void setThemeSync(boolean themeSync) {
+        this.themeSync = themeSync;
     }
 
     public void setBitbucketUser(String bitbucketUser) {

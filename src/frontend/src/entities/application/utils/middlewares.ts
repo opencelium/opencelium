@@ -19,6 +19,8 @@ import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {getResources, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
+import IAuthUser from "@entity/user/interfaces/IAuthUser";
+import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (login.fulfilled.type === action.type) {
@@ -29,20 +31,22 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
         dispatch(getResources());
     }
     if (setThemes.match(action)) {
+        const SecStorage = LocalStorage.getStorage(true);
+        const authUser = SecStorage.get('authUser');
         const storage = LocalStorage.getStorage();
-        console.log('storage', storage.get('themes'));
-        console.log('authUser', action.payload);
-        if(storage.get('themes') !== action.payload){
+        if (storage.get('themes') !== action.payload) {
             storage.set('themes', action.payload);
-            const iframe = document.getElementById('iframe_messenger');
-            if(iframe) {
-                // @ts-ignore
-                const contentWindow = iframe.contentWindow;
-                contentWindow.postMessage({
-                    key: 'key',
-                    value: action.payload,
-                    method: 'opencelium_themes_store'
-                }, '*');
+            if(authUser.userDetail.themeSync) {
+                const iframe = document.getElementById('iframe_messenger');
+                if (iframe) {
+                    // @ts-ignore
+                    const contentWindow = iframe.contentWindow;
+                    contentWindow.postMessage({
+                        key: 'key',
+                        value: action.payload,
+                        method: 'opencelium_themes_store'
+                    }, '*');
+                }
             }
         }
     }

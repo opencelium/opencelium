@@ -29,13 +29,20 @@ import User from "@entity/user/classes/User";
 import { MyProfileListProps } from "./interfaces";
 import { MyProfilePermissions } from "../../constants";
 import InputSelect from "@app_component/base/input/select/InputSelect";
-import {DefaultTheme} from "@style/Theme";
+import {ColorTheme, DefaultTheme} from "@style/Theme";
+import InputSwitch from "@app_component/base/input/switch/InputSwitch";
+import { updateUserDetail } from "@entity/user/redux-toolkit/action_creators/UserDetailCreators";
+import {LocalStorage} from "@application/classes/LocalStorage";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {themes} = Application.getReduxState();
     const {authUser} = Auth.getReduxState();
+    const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
+    useEffect(() => {
+        setThemeSync(authUser.userDetail.themeSync);
+    }, [authUser.userDetail])
     const userGroup = UserGroup.createState<IUserGroup>({
         _readOnly: true,
         ...authUser.userGroup,
@@ -104,6 +111,14 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                             onChange={selectTheme}
                         />
                     </div>
+                    <InputSwitch
+                        name={`Theme synchronization is ${themeSync ? 'enabled' : 'disabled'}`}
+                        icon={'corporate_fare'}
+                        label={'Theme sync'}
+                        isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
+                        hasConfirmation={true}
+                        confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
+                    />
                 </FormSection>
             </React.Fragment>
         ]

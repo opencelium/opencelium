@@ -63,6 +63,9 @@ public class UserDetail {
     @Column(name = "theme")
     private String theme;
 
+    @Column(name = "theme_sync")
+    private boolean themeSync;
+
     @Column(name = "lang")
     private String lang;
 
@@ -95,6 +98,7 @@ public class UserDetail {
         this.profilePicture = StringUtility.findImageFromUrl(userDetailResource.getProfilePicture());
         this.tutorial = userDetailResource.isAppTour();
         this.theme = userDetailResource.getTheme();
+        this.themeSync = userDetailResource.isThemeSync();
         this.lang = userDetailResource.getLang();
         this.repoUser = userDetailResource.getBitbucketUser();
         this.repoPassword = userDetailResource.getBitbucketPassword();
@@ -211,6 +215,14 @@ public class UserDetail {
 
     public void setRepoPassword(String repoPassword) {
         this.repoPassword = repoPassword;
+    }
+
+    public boolean isThemeSync() {
+        return themeSync;
+    }
+
+    public void setThemeSync(boolean themeSync) {
+        this.themeSync = themeSync;
     }
 
     public Date getCreatedAt() {

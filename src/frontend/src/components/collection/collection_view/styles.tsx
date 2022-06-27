@@ -74,9 +74,10 @@ const TopSectionStyled = styled.div`
     display: flex;
     margin: 20px 0;
     width: 100%;
-    & > :last-child{
+    ${({hasViewSection}: {hasViewSection: boolean}) => hasViewSection ?
+    `& > :last-child{
         margin-left: auto;
-    }
+    }` : ``}
 `;
 
 const ViewSectionStyled = styled.div`
