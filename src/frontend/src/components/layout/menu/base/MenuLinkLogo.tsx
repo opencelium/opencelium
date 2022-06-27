@@ -23,7 +23,7 @@ import {Application} from "@application/classes/Application";
 import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {useAppDispatch} from "@application/utils/store";
 
-export const MenuLinkLogo = ({isReadonly, onHoverColor, to}: MenuLinkLogoProps) => {
+export const MenuLinkLogo = ({isReadonly, $onHoverColor, to}: MenuLinkLogoProps) => {
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
     const {logoDataStatus} = Application.getReduxState();
@@ -38,7 +38,7 @@ export const MenuLinkLogo = ({isReadonly, onHoverColor, to}: MenuLinkLogoProps) 
     return(
         <MenuLinkLogoStyled
             to={isReadonly ? '#' : to}
-            onHoverColor={onHoverColor}
+            $onHoverColor={$onHoverColor}
         >
             <LogoImage style={{marginLeft: '4px'}} {...logoImageProps}/>
             <span>

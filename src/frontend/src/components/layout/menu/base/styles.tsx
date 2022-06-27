@@ -55,7 +55,7 @@ const SUB_LINK = `
 
 const MainSubLinkStyled = styled(Link)<MenuLinkStyledProps>`
     ${SUB_LINK}
-    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
+    ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
     &:hover{
         color: white;
         background-color: unset;
@@ -80,7 +80,7 @@ const LinksStyled = styled.ul`
 `;
 
 const MenuLinkWithSubLinksStyled = styled.div<MenuLinkStyledProps>`
-    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
+    ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
     a{
         padding: 0;
         margin: 0 0 0 5px;
@@ -98,7 +98,7 @@ const MenuLinkLabelStyled = styled(Text)`
 `;
 
 const MenuLinkStyled = styled(Link)<MenuLinkStyledProps>`
-    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
+    ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
 `;
 
 const MenuIconStyled = styled.span`
@@ -116,7 +116,7 @@ const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyledProps>`
     margin-bottom: 35px !important;
     padding-bottom: 10px;
     &:hover{
-        border-bottom: 2px solid ${({theme, onHoverColor}) => onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
+        border-bottom: 2px solid ${({theme, $onHoverColor}) => $onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
         padding-bottom: 8px;
     }
     & > span{

@@ -22,7 +22,6 @@ interface LinkMessageStyledProps{
 }
 
 interface LinkMessageProps{
-    theme?: ITheme,
     message: string,
     link?: string,
     shouldSetSearchValue?: boolean,
