@@ -14,14 +14,17 @@
  */
 
 import { Middleware } from 'redux'
-import {RootState} from "@application/utils/store";
+import {AppDispatch, RootState} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {updateUserDetail} from "../redux-toolkit/action_creators/UserDetailCreators";
+import { updateAuthUser } from '@application/redux_toolkit/slices/AuthSlice';
 
 const userDetailMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (updateUserDetail.fulfilled.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
+        const dispatch: AppDispatch = storeApi.dispatch;
+        dispatch(updateAuthUser(action.payload));
     }
     return next(action);
 }

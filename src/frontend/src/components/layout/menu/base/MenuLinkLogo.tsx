@@ -27,12 +27,14 @@ export const MenuLinkLogo = ({isReadonly, onHoverColor, to}: MenuLinkLogoProps) 
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
     const {logoDataStatus} = Application.getReduxState();
-    const logoName = authUser.logoName || OC_NAME;
+    const logoName = authUser.userDetail.themeSync ? authUser.logoName || OC_NAME : OC_NAME;
     const time = new Date();
     const logoImageProps = isReadonly ? {} : {update: time};
     useEffect(() => {
-        dispatch(getLogoName(authUser.email));
-    }, [logoDataStatus])
+        if(authUser.userDetail.themeSync){
+            dispatch(getLogoName(authUser.email));
+        }
+    }, [logoDataStatus, authUser.userDetail.themeSync])
     return(
         <MenuLinkLogoStyled
             to={isReadonly ? '#' : to}

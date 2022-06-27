@@ -17,7 +17,4 @@ import {AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export default interface IApplicationRequest {
-
-    //to set sync flag for CI theme
-    setCIThemeSyncFlag(flag: boolean): Promise<AxiosResponse<IResponse>>
 }

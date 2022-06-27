@@ -21,7 +21,6 @@ import {getResources, getVersion} from "@application/redux_toolkit/action_creato
 import {setThemes} from "@application/redux_toolkit/slices/ApplicationSlice";
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
-import {setCIThemeSyncFlag} from "../redux_toolkit/action_creators/ApplicationCreators";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
     if (login.fulfilled.type === action.type) {
@@ -32,28 +31,24 @@ export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next
         dispatch(getResources());
     }
     if (setThemes.match(action)) {
+        const SecStorage = LocalStorage.getStorage(true);
+        const authUser = SecStorage.get('authUser');
         const storage = LocalStorage.getStorage();
-        if(storage.get('themes') !== action.payload){
+        if (storage.get('themes') !== action.payload) {
             storage.set('themes', action.payload);
-            const iframe = document.getElementById('iframe_messenger');
-            if(iframe) {
-                // @ts-ignore
-                const contentWindow = iframe.contentWindow;
-                contentWindow.postMessage({
-                    key: 'key',
-                    value: action.payload,
-                    method: 'opencelium_themes_store'
-                }, '*');
+            if(authUser.userDetail.themeSync) {
+                const iframe = document.getElementById('iframe_messenger');
+                if (iframe) {
+                    // @ts-ignore
+                    const contentWindow = iframe.contentWindow;
+                    contentWindow.postMessage({
+                        key: 'key',
+                        value: action.payload,
+                        method: 'opencelium_themes_store'
+                    }, '*');
+                }
             }
         }
-    }
-    if (setCIThemeSyncFlag.fulfilled.type === action.type) {
-        const storage = LocalStorage.getStorage(true);
-        let authUser: IAuthUser = {...storage.get('authUser')};
-        authUser.userDetail = {...authUser.userDetail, ciSyncFlag: action.payload};
-        storage.set('authUser', authUser);
-        const dispatch: AppDispatch = storeApi.dispatch;
-        dispatch(updateAuthUser(authUser));
     }
     return next(action);
 }

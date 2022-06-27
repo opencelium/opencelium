@@ -15,9 +15,6 @@
 
 import ApplicationCreators from "./ApplicationCreators";
 
-/*
-* TODO: check graphql action creator
-*/
 
 export default {
     ...ApplicationCreators,

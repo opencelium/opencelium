@@ -31,33 +31,38 @@ const LogoImage = (props: any) => {
     const [isLogoExist, setIsLogoExist] = useState<boolean>(null);
     const [src, setSrc] = useState<string>('');
     const logoName = authUser.logoName || OC_NAME;
-    let logoPath = `${tmpServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/logo/${authUser.email}?${new Date().getTime()}`;
+    const isThemeSynced = authUser.userDetail.themeSync;
+    let logoPath = isThemeSynced ? `${tmpServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/logo/${authUser.email}?${new Date().getTime()}` : LogoOcWhiteImagePath;
     useEffect(() => {
-        checkImage(logoPath, () => {
-            setIsLogoExist(true);
-        }, () => {
-            setIsLogoExist(false);
-            setSrc(LogoOcWhiteImagePath);
-        });
+        if(isThemeSynced) {
+            checkImage(logoPath, () => {
+                setIsLogoExist(true);
+            }, () => {
+                setIsLogoExist(false);
+                setSrc(LogoOcWhiteImagePath);
+            });
+        }
     }, [])
     useEffect(() => {
-        if(isLogoExist){
+        if(isLogoExist && isThemeSynced){
             convertPngUrlToBase64(logoPath).then((data) => {
                 if(data) setSrc(data);
             });
         }
     }, [isLogoExist])
     useEffect(() => {
-        if(updatingLogoData === API_REQUEST_STATE.START){
-            setIsLogoExist(null);
+        if(isThemeSynced) {
+            if (updatingLogoData === API_REQUEST_STATE.START) {
+                setIsLogoExist(null);
+            }
+            if (updatingLogoData === API_REQUEST_STATE.FINISH) {
+                checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
+            }
+            if (updatingLogoData === API_REQUEST_STATE.ERROR) {
+                setIsLogoExist(false);
+            }
         }
-        if(updatingLogoData === API_REQUEST_STATE.FINISH){
-            checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
-        }
-        if(updatingLogoData === API_REQUEST_STATE.ERROR){
-            setIsLogoExist(false);
-        }
-    }, [updatingLogoData])
+    }, [updatingLogoData, authUser.userDetail.themeSync])
     useEffect(() => {
         setIsLogoExist(null);
         checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
@@ -68,7 +73,7 @@ const LogoImage = (props: any) => {
     return(
         <LogoImageStyled
             ref={imageRef}
-            src={src || logoPath}
+            src={isThemeSynced ? src || logoPath : logoPath}
             alt={logoName}
             {...props}
         />
