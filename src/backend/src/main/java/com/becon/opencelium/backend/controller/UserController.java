@@ -66,7 +66,7 @@ public class UserController {
     }
 
     @GetMapping("/check/{email}")
-    public ResponseEntity<?> emailExists(@PathVariable("email") String email) throws IOException{
+    public ResponseEntity<?> emailExists(@PathVariable("email") String email) {
         if (userService.existsByEmail(email)){
             throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
         } else {
@@ -95,7 +95,7 @@ public class UserController {
         }
 
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if(userDetailResource.getLang() == null || userDetailResource.getLang() == ""){
+        if(userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()){
             userDetailResource.setLang("en");
             userRequestResource.setUserDetail(userDetailResource);
         }
@@ -158,7 +158,7 @@ public class UserController {
     @DeleteMapping
     public ResponseEntity<?> deleteUserByIdIn(@RequestBody List<Integer> ids) {
         ids.forEach(id -> {
-            User p = userService.findById(id).get();
+            User p = userService.findById(id).orElseThrow(() -> new UserNotFoundException(id));
             if (p.getUserDetail().getProfilePicture() != null){
                 storageService.delete(p.getUserDetail().getProfilePicture());
             }

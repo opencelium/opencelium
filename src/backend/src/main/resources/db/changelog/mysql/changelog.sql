@@ -298,4 +298,7 @@ ALTER TABLE detail CHANGE IF EXISTS organisation organization varchar(100);
 --changeset 2.1:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE enhancement MODIFY expert_var TEXT;
 
+--changeset 2.3:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE detail ADD COLUMN IF NOT EXISTS theme_sync tinyint(4);
+UPDATE detail SET theme_sync = 0;
 
