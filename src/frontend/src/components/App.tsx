@@ -36,16 +36,18 @@ const App = ({}) => {
     let selectedTheme: any = themes.find(theme => theme.isCurrent) || DefaultTheme;
     const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
     useEffect(() => {
-        if(authUser.userDetail.themeSync) {
-            if (navigator.onLine) {
-                createIframe(onlineServiceOpenCeliumUrl);
+        if(authUser) {
+            if (authUser.userDetail.themeSync) {
+                if (navigator.onLine) {
+                    createIframe(onlineServiceOpenCeliumUrl);
+                } else {
+                    createIframe(offlineServiceOpenCeliumUrls);
+                }
             } else {
-                createIframe(offlineServiceOpenCeliumUrls);
+                removeIframe();
             }
-        } else{
-            removeIframe();
         }
-    }, [authUser.userDetail.themeSync])
+    }, [authUser?.userDetail?.themeSync || authUser])
     useEffect(() => {
         if(isAuth) {
             if(authUser.themes) {
