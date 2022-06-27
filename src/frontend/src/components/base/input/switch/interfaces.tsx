@@ -25,6 +25,8 @@ interface InputSwitchProps extends InputHTMLAttributes<HTMLInputElement>, InputE
     theme?: ITheme,
     isChecked?: boolean | undefined,
     position?: string,
+    hasConfirmation?: boolean,
+    confirmationText?: any,
 }
 
 interface InputSwitchStyledProps extends ElementProps{

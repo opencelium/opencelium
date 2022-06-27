@@ -13,13 +13,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC} from 'react';
+import React, {FC, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {InputSwitchProps} from './interfaces';
 import Input from "../Input";
 import {InputSwitcherStyled, InputSwitchStyled} from "./styles";
 import Text from "../../text/Text";
 import {TextSize} from "../../text/interfaces";
+import Dialog from "@app_component/base/dialog/Dialog";
 
 
 const InputSwitch: FC<InputSwitchProps> = ({
@@ -35,14 +36,33 @@ const InputSwitch: FC<InputSwitchProps> = ({
        isLoading,
        isIconInside,
        readOnly,
+       hasConfirmation,
+       confirmationText,
        ...props
     }) => {
+    const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
+    const handleClick = (data: any) => {
+        onClick(data);
+        hasConfirmation && toggleConfirmation(false);
+    };
     return (
         <Input readOnly={readOnly} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputSwitchStyled {...props}>
-                <InputSwitcherStyled isChecked={isChecked} onClick={ readOnly ? () => {} : onClick}/>
+                <InputSwitcherStyled isChecked={isChecked} onClick={ readOnly ? () => {} : hasConfirmation ? () => toggleConfirmation(true) : handleClick}/>
                 <Text value={name} size={TextSize.Size_14}/>
-            </InputSwitchStyled>
+            </InputSwitchStyled>{
+                hasConfirmation &&
+                <Dialog
+                    actions={[{label: 'Yes', onClick: handleClick, id: 'confirmation_yes'},{label: 'No', onClick: () => toggleConfirmation(false), id: 'confirmation_no'}]}
+                    active={isConfirmationOpened}
+                    toggle={() => toggleConfirmation(!isConfirmationOpened)}
+                    title={'Confirmation'}
+                >
+                        <span>
+                            {confirmationText}
+                        </span>
+                </Dialog>
+            }
         </Input>
     );
 }
@@ -53,6 +73,7 @@ InputSwitch.defaultProps = {
     required: false,
     isLoading: false,
     position: '',
+    hasConfirmation: false,
 }
 
 export default withTheme(InputSwitch);
