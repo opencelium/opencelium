@@ -41,23 +41,24 @@ const List: FC<ListViewProps> =
         componentPermission,
         shouldBeUpdated,
         isRefreshing,
+         filterData,
     }) => {
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
     const [isAllChecked, setAllChecked] = useState(false);
     useEffect(() => {
         let newSortTypes: any = {};
-        setVisibleEntities(collection.getEntitiesByPage(searchValue, 1, entitiesPerPage));
+        setVisibleEntities(collection.getEntitiesByPage(searchValue, 1, entitiesPerPage, filterData));
         for(let i = 0; i < collection.sortingProps.length; i++){
             newSortTypes[collection.sortingProps[i]] = SortType.asc;
         }
         setSortTypes(newSortTypes)
     }, []);
     useEffect(() => {
-        let newVisibleEntities = collection.getEntitiesByPage(searchValue, currentPage, entitiesPerPage);
+        let newVisibleEntities = collection.getEntitiesByPage(searchValue, currentPage, entitiesPerPage, filterData);
         setVisibleEntities(newVisibleEntities);
         defineIsAllChecked(checks, newVisibleEntities);
-    }, [currentPage, searchValue, sortTypes, entitiesPerPage, collection.entities.length, shouldBeUpdated]);
+    }, [currentPage, searchValue, sortTypes, entitiesPerPage, collection.entities.length, shouldBeUpdated, filterData]);
     const toggleCheckAll = (newIsAllChecked: boolean) => {
         let newChecks : any = {};
         for (let i = 0; i < visibleEntities.length; i++) {
@@ -178,6 +179,7 @@ const List: FC<ListViewProps> =
 
 List.defaultProps = {
     isRefreshing: false,
+    filterData: null,
 }
 
 

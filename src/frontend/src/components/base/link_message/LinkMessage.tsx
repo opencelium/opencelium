@@ -14,6 +14,7 @@
  */
 
 import React, {FC} from 'react';
+import {withTheme} from 'styled-components';
 import { setSearchValue } from '@application/redux_toolkit/slices/ApplicationSlice';
 import { LinkMessageProps } from './interfaces';
 import { LinkMessageStyled } from './styles';
@@ -57,4 +58,4 @@ export {
     LinkMessage,
 };
 
-export default LinkMessage;
+export default withTheme(LinkMessage);

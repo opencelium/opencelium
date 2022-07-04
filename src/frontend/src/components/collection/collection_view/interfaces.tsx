@@ -40,6 +40,7 @@ interface ViewProps{
 interface ListViewProps extends ViewProps{
     checks: any[],
     setChecks: (checks: any[]) => void;
+    filterData?: any,
 }
 
 interface CollectionViewProps{

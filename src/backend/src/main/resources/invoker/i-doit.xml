@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+   ~// Copyright (C) <2020> <becon GmbH>
+   ~//
+   ~// This file is licensed under the OpenCelium license agreement.
+   ~//
+   ~// If you purchased an OpenCelium subscription you can use this file
+   ~// under the terms of the OpenCelium license agreement.
+   ~// License agreement and license key will be shipped with the order
+   ~// confirmation.
+-->
+<invoker type="RESTful">
+    <name>i-doit</name>
+    <description>I-doit Description</description>
+    <hint>hint text</hint>
+    <icon>i-doit.png</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="apikey" type="string" visibility="public"/>
+    </requiredData>
+    <authType>apikey</authType>
+    <operations>
+        <operation name="idoit.version" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">idoit.version</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                         <item name="Content-Type" type="string"/>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="object">
+                            <field name="version" type="string" />
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.objects.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.objects.read</field>
+                    <field name="params" type="object">
+                        <field name="filter" type="object">
+                            <field name="ids" type="array"/>
+                            <field name="type" type="array"/>
+                            <field name="title" type="string"/>
+                            <field name="type_title" type="string"/>
+                            <field name="sys_id" type="string"/>
+                            <field name="first_name" type="string"/>
+                            <field name="last_name" type="string"/>
+                            <field name="email" type="string"/>
+                        </field>
+                        <field name="limit" type="string"/>
+                        <field name="order_by" type="string"/>
+                        <field name="sort" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="id" type="number" required="true"/>
+                        <field name="jsonrpc" type="string" required="true"/>
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="sysid" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="created" type="string"/>
+                            <field name="updated" type="string"/>
+                            <field name="type_title" type="string"/>
+                            <field name="type_group_title" type="string"/>
+                            <field name="status" type="string"/>
+                            <field name="cmdb_status" type="string"/>
+                            <field name="cmdb_status_title" type="string"/>
+                            <field name="image" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.read</field>
+                    <field name="params" type="object">
+                        <field name="id" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="id" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="sysid" type="string"/>
+                            <field name="objecttyp" type="string"/>
+                            <field name="type_title" type="string"/>
+                            <field name="type_icon" type="string"/>
+                            <field name="status" type="string"/>
+                            <field name="cmdb_status" type="string"/>
+                            <field name="cmdb_status_title" type="string"/>
+                            <field name="created" type="string"/>
+                            <field name="updated" type="string"/>
+                            <field name="image" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.create" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.create</field>
+                    <field name="params" type="object">
+                        <field name="type" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="cmdb_status" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="id" type="string"/>
+                            <field name="message" type="string"/>
+                            <field name="status" type="boolean"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.delete" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.delete</field>
+                    <field name="params" type="object">
+                        <field name="id" type="string"/>
+                        <field name="status" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.quickpurge" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.quickpurge</field>
+                    <field name="params" type="object">
+                        <field name="id" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.read</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <!-- for empty or not need to ask a user -->
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="objID" type="string" />
+                            <field name="hostname" type="string" />
+                            <field name="aliases" type="array" />
+                            <field name="parent" type="object">
+                                  <field name="location_path" type="string" />
+                            </field>
+                            <field name="contact" type="object">
+                                 <field name="first_name" type="string" />
+                                 <field name="last_name" type="string" />
+                                 <field name="mail" type="string" />
+                                 <field name="login" type="string" />
+                            </field>
+                            <field name="role" type="object">
+                                 <field name="id" type="string" />
+                                 <field name="title" type="string" />
+                            </field>                            
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.update" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.update</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="data" type="object"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <!-- for empty or not need to ask a user -->
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="objID" type="string" />
+                            <field name="hostname" type="string" />
+                            <field name="parent" type="object">
+                                 <field name="location_path" type="string" />
+                            </field>
+                            <field name="contact" type="object">
+                                 <field name="first_name" type="string" />
+                                 <field name="last_name" type="string" />
+                                 <field name="mail" type="string" />
+                                 <field name="login" type="string" />
+                            </field>
+                            <field name="role" type="object">
+                                 <field name="id" type="string" />
+                                 <field name="title" type="string" />
+                            </field>                                                       
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.create" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.create</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="data" type="object">
+                            <field name="manufacturer" type="string"/>
+                            <field name="title" type="string"/>
+                        </field>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <!-- for empty or not need to ask a user -->
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+         </operation>
+        <operation name="cmdb.reports.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.reports.read</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <!-- for empty or not need to ask a user -->
+			<field name="result" type="array"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="idoit.search" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string" >application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">idoit.search</field>
+                    <field name="params" type="object">
+                        <field name="q" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="result" type="array">
+                            <field name="documentId" type="string"/>
+                            <field name="key" type="string"/>
+                            <field name="value" type="string"/>
+                        </field>    
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string" >application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

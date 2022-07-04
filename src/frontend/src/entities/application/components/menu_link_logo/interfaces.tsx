@@ -13,12 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {LinkProps} from "react-router-dom";
 import {ITheme} from "@style/Theme";
+import * as React from "react";
 
-interface UpdateThemesProps{
+interface MenuLinkLogoStyledProps extends Partial<LinkProps>{
     theme?: ITheme,
+    $onHoverColor?: string,
 }
 
 export {
-    UpdateThemesProps,
+    MenuLinkLogoStyledProps,
 }

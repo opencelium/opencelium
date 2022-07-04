@@ -69,10 +69,10 @@ class Templates extends ListCollection{
         return (
             <React.Fragment>
                 {/*<AddTemplateButton name={entity.name} description={entity.description} connection={entity.connection}/>*/}
-                <TemplateConversionIcon data={{template: entity.getModel()}} turquoiseTheme={true}/>
-                <PermissionTooltipButton target={`export_entity_${entity.id.toString()}`} position={'top'} tooltip={'Export'} hasBackground={false} handleClick={() => this.dispatch(exportTemplate(exportTemplateData))} icon={'file_download'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <TemplateConversionIcon id={entity.id.toString()} data={{template: entity.getModel()}}/>
+                <PermissionTooltipButton target={`export_entity_${entity.id.toString()}`} position={'top'} tooltip={'Export'} hasBackground={false} handleClick={() => this.dispatch(exportTemplate(exportTemplateData))} icon={'file_download'} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 {/*<PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>*/}
-                {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
+                {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );
     };

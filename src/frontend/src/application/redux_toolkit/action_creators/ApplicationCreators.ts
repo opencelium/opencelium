@@ -134,7 +134,7 @@ export const openExternalUrl = createAsyncThunk(
     'application/externalUrl/open',
     async(url: string, thunkAPI) => {
         try{
-            const request = new ApplicationRequest({url, isFullUrl: true});
+            const request = new ApplicationRequest({url, isFullUrl: true, hasAuthToken: false});
             const response = await request.openExternalUrl();
             return response.data;
         }catch(e){

@@ -52,7 +52,7 @@ export const exportTemplate = createAsyncThunk(
     'template/export/byId',
     async(template: ITemplate, thunkAPI) => {
         try {
-            const request = new TemplateRequest({url: template.link, isFullUrl: true});
+            const request = new TemplateRequest({url: template.link, isFullUrl: true, hasAuthToken: true,});
             const response = await request.exportTemplate();
             return {...template, templateContent: response.data};
         } catch(e){

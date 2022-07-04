@@ -14,14 +14,14 @@
  */
 
 import React, {useEffect, useRef, useState} from "react";
-import {LogoImageStyled, LoadingStyled} from "./styles";
-import {tmpServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
-import LogoOcWhiteImagePath from "@image/application/logo_oc_white.png";
 import {Auth} from "@application/classes/Auth";
 import {checkImage, convertPngUrlToBase64} from "@application/utils/utils";
 import {API_REQUEST_STATE, OC_NAME} from "@application/interfaces/IApplication";
 import {RootState, useAppSelector} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
+import LogoOcWhiteImagePath from "@image/application/logo_oc_white.png";
+import {tmpServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
+import {LogoImageStyled, LoadingStyled} from "./styles";
 
 const LogoImage = (props: any) => {
     const imageRef = useRef(null);

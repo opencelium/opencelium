@@ -70,6 +70,9 @@ export interface IListCollection{
     isCardLinkExternal?: boolean;
     currentItem?: any;
     isCurrentItem?: (entity: any) => boolean;
+    hasFilter?: boolean;
+    getFilterComponents?: (filterData: any, setFilterData: (filterData: any) => void) => any;
+    filter?: (entity: any, filterProps: any) => boolean;
     search(element: any, searchValue: string): boolean;
     sort(sortingProp: string, sortingType: SortType): void;
     asc(a: string | number, b: string | number): number;

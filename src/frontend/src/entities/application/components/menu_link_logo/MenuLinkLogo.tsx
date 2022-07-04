@@ -16,12 +16,12 @@
 import React, {useEffect} from "react";
 import {MenuLinkLogoStyled} from "./styles";
 import {Auth} from "@application/classes/Auth";
-import LogoImage from "@app_component/base/logo_image/LogoImage";
 import {OC_NAME} from "@application/interfaces/IApplication";
-import {MenuLinkLogoProps} from "./interfaces";
 import {Application} from "@application/classes/Application";
 import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {useAppDispatch} from "@application/utils/store";
+import {MenuLinkLogoProps} from "@app_component/layout/menu/base/interfaces";
+import LogoImage from "./LogoImage";
 
 export const MenuLinkLogo = ({isReadonly, $onHoverColor, to}: MenuLinkLogoProps) => {
     const dispatch = useAppDispatch();

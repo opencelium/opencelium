@@ -31,7 +31,7 @@ export default class Request extends ApplicationRequest{
             'timeout': 10000,
             'content-type': 'application/json',
         };
-        if(this.hasAuthToken && !this.isFullUrl){
+        if(this.hasAuthToken){
             const storage = LocalStorage.getStorage(true);
             let authUser: IAuthUser = storage.get('authUser')
             if(authUser) {
