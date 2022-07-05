@@ -24,6 +24,7 @@ export interface ListCollectionCardProps{
     title: string | titleFunc,
     subtitle?: string | titleFunc,
     image?: string | titleFunc,
+    getImageComponent?: (entity: any) => any,
 }
 
 export interface MultipleTitleProps{
