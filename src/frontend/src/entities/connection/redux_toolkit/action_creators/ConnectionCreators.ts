@@ -44,6 +44,22 @@ export const addConnection = createAsyncThunk(
     }
 )
 
+export const getAndUpdateConnection = createAsyncThunk(
+    'connection/getAndUpdate',
+    async(connection: IConnection, thunkAPI) => {
+        try {
+            const GetConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
+            const GetConnectionResponse = await GetConnectionRequest.getConnectionById();
+            const getConnection = GetConnectionResponse.data;
+            const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection,title: connection.title, description: connection.description});
+            return UpdateConnectionResponse.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const updateConnection = createAsyncThunk(
     'connection/update',
     async(connection: IConnection, thunkAPI) => {
@@ -127,6 +143,7 @@ export const deleteConnectionsById = createAsyncThunk(
 export default {
     checkConnectionTitle,
     addConnection,
+    getAndUpdateConnection,
     updateConnection,
     getConnectionById,
     getAllConnections,

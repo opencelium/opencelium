@@ -17,6 +17,13 @@ import {ITheme} from "@style/Theme";
 import ListCollection from "@application/classes/ListCollection";
 import { ComponentPermissionProps } from "@application/interfaces/IApplication";
 
+interface InlineEditInputProps{
+    theme?: ITheme,
+    updateValue: (newValue: string) => void,
+    initialValue: string,
+    isInProcess?: boolean,
+}
+
 interface GridStyledProps{
     gridViewType?: number,
 }
@@ -68,6 +75,7 @@ enum SortType{
 };
 
 export {
+    InlineEditInputProps,
     GridStyledProps,
     ThStyledProps,
     ListViewProps,

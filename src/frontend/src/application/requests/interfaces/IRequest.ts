@@ -17,8 +17,9 @@ import {AxiosRequestConfig, AxiosResponse} from "axios";
 
 export interface IEntityWithImage<T>{
     entityData: T,
-    iconFile: any,
-    shouldDeleteIcon: boolean,
+    iconFile?: any,
+    shouldDeleteIcon?: boolean,
+    hasCheck?: boolean,
 }
 
 export interface IRequestSettings{
