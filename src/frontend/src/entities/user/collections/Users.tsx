@@ -52,7 +52,7 @@ export default class Users extends ListCollection{
     };
     translations = {
         email: 'Email',
-        userGroupName: 'Name',
+        userGroupName: 'Group',
     };
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
         const hasSearch = this.hasSearch && this.entities.length > 0;

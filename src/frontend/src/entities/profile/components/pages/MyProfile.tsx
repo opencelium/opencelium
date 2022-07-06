@@ -33,9 +33,12 @@ import {ColorTheme, DefaultTheme} from "@style/Theme";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import { updateUserDetail } from "@entity/user/redux-toolkit/action_creators/UserDetailCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
+import {ProfileImageStyled} from "@entity/profile/components/pages/styles";
+import {UserImageStyled} from "@entity/user/components/pages/UserImage";
+import {withTheme} from "styled-components";
 
 
-const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
+const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
     const {themes} = Application.getReduxState();
     const {authUser} = Auth.getReduxState();
@@ -57,6 +60,11 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         userDetail,
         email: authUser.email,
     });
+    const Title = user.userDetail.getRadios({propertyName: "userTitle", props: {
+        icon: ' ',
+        label: 'Title',
+        options: [{autoFocus: true, label: 'Mr', value: 'mr', checked: true, key: 'mr'}, {label: 'Mrs', value: 'mrs', checked: false, key: 'mrs'}],
+    }})
     const UserDetailsInputs = user.userDetail.getTexts([
         {propertyName: "name", props: {icon: 'perm_identity', label: "Name", maxLength: 128, required: true}},
         {propertyName: "surname", props: {icon: 'perm_identity', label: "Surname", maxLength: 128, required: true}},
@@ -94,6 +102,16 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         title: 'My Profile',
         formSections: [
             <FormSection label={{value: 'user details'}}>
+                <ProfileImageStyled
+                    email={user.email}
+                    size={100}
+                    rating="pg"
+                    default="mm"
+                    title={'Avatar'}
+                    style={{borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+                    protocol="https://"
+                />
+                {Title}
                 {UserDetailsInputs}
                 {Email}
             </FormSection>,
@@ -128,4 +146,4 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     )
 })
 
-export default MyProfile
+export default withTheme(MyProfile);
