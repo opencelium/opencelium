@@ -44,10 +44,4 @@ export default interface IUserRequest{
 
     //to upload image of user
     uploadUserImage(data: FormData): Promise<AxiosResponse<ModelUser>>,
-
-    /*
-    * TODO: do not exist suck method on the server
-    */
-    //to delete image of user
-    deleteUserImage(): Promise<AxiosResponse<IResponse>>,
 }

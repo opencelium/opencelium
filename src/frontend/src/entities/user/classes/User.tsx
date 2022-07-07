@@ -32,12 +32,11 @@ import {UserState} from "../redux-toolkit/slices/UserSlice";
 import UserDetail from "../classes/UserDetail";
 import {
     addUser, checkUserEmail, deleteUserById,
-    deleteUserImage, getUserById, updateUser,
+    getUserById, updateUser,
     uploadUserImage,
 } from "../redux-toolkit/action_creators/UserCreators";
 import ModelUserPoust from "../requests/models/UserPoust";
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
-import {TokenProps} from "@application/interfaces/IAuth";
 import jwt from "jsonwebtoken";
 
 
@@ -293,11 +292,6 @@ export default class User extends HookStateClass implements IUser{
 
     @App.dispatch(uploadUserImage, {hasNoValidation: true})
     uploadImage(): boolean{
-        return this.validateId(this.id) && this.validateProfilePicture();
-    }
-
-    @App.dispatch(deleteUserImage, {hasNoValidation: true})
-    deleteImage(): boolean{
         return this.validateId(this.id) && this.validateProfilePicture();
     }
 

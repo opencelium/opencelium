@@ -50,9 +50,6 @@ export const addUser = createAsyncThunk(
                 data.append('file', iconFile[0]);
                 const uploadImageRequest = new UserRequest({isFormData: true});
                 await uploadImageRequest.uploadUserImage(data);
-            } else if (shouldDeleteIcon) {
-                const deleteImageRequest = new UserRequest({endpoint: `/${entityData.userId}/profilePicture`});
-                await deleteImageRequest.deleteUserImage();
             }
             return response.data;
         } catch(e){
@@ -82,9 +79,6 @@ export const updateUser = createAsyncThunk(
                 data.append('file', iconFile[0]);
                 const request = new UserRequest({isFormData: true});
                 await request.uploadUserImage(data);
-            } else if (shouldDeleteIcon) {
-                const deleteImageRequest = new UserRequest({endpoint: `/${entityData.userId}/profilePicture`});
-                await deleteImageRequest.deleteUserImage();
             }
             return response.data;
         } catch(e){
@@ -161,18 +155,6 @@ export const uploadUserImage = createAsyncThunk(
     }
 )
 
-export const deleteUserImage = createAsyncThunk(
-    'user/delete/image/byId',
-    async(id: string, thunkAPI) => {
-        try{
-            const request = new UserRequest({endpoint: `/${id}/profilePicture`});
-            await request.deleteUserImage();
-            return id;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
 
 export default {
     checkUserEmail,
@@ -183,5 +165,4 @@ export default {
     deleteUserById,
     deleteUsersById,
     uploadUserImage,
-    deleteUserImage,
 }

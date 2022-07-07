@@ -21,7 +21,7 @@ import {CommonState} from "@application/utils/store";
 import {
     addUser,
     checkUserEmail,
-    deleteUserById, deleteUserImage,
+    deleteUserById,
     deleteUsersById,
     getAllUsers,
     getUserById,
@@ -182,21 +182,6 @@ export const userSlice = createSlice({
         },
         [uploadUserImage.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.uploadingUserImage = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
-        [deleteUserImage.pending.type]: (state) => {
-            state.deletingUserImage = API_REQUEST_STATE.START;
-        },
-        [deleteUserImage.fulfilled.type]: (state, action: PayloadAction<number>) => {
-            state.deletingUserImage = API_REQUEST_STATE.FINISH;
-            state.users = state.users.map(user => user.userId === action.payload ? {...user, userDetail: {...user.userDetail, profilePicture: ''}} : user);
-            if(state.currentUser && state.currentUser.userId === action.payload){
-                state.currentUser = {...state.currentUser, userDetail: {...state.currentUser.userDetail, profilePicture: ''}};
-            }
-            state.error = null;
-        },
-        [deleteUserImage.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.deletingUserImage = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
