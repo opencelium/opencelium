@@ -16,20 +16,9 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import ApplicationRequest from '../../requests/classes/Application';
+import { LocalStorage } from "@application/classes/LocalStorage";
+import IAuthUser from "@entity/user/interfaces/IAuthUser";
 
-export const setCIThemeSyncFlag = createAsyncThunk(
-    'application/update/ciThemeSyncFlag',
-    async(flag: boolean, thunkAPI) => {
-        try {
-            const request = new ApplicationRequest();
-            await request.setCIThemeSyncFlag(flag);
-            return flag;
-        } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
-        }
-    }
-)
 
 export default {
-    setCIThemeSyncFlag,
 }

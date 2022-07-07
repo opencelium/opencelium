@@ -14,10 +14,10 @@
  */
 
 import styled from "styled-components";
-import {Image} from "@app_component/collection/image/Image";
+import Gravatar from 'react-gravatar';
 
 
-const UserImageStyled = styled(Image)`
+const UserImageStyled = styled(Gravatar)`
     position: absolute;
     top: 40px;
     right: 20px;

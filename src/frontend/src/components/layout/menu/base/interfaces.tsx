@@ -30,7 +30,7 @@ interface MenuLinkProps{
 
 interface MenuLinkLogoProps extends Partial<LinkProps>{
     isReadonly: boolean,
-    onHoverColor: string,
+    $onHoverColor: string,
 }
 
 interface SubLinkProps extends LinkProps{
@@ -45,13 +45,8 @@ interface MenuLinkWithSubLinksProps{
     isReadonly?: boolean,
 }
 
-interface MenuLinkLogoStyledProps extends Partial<LinkProps>{
-    theme?: ITheme,
-    onHoverColor?: string,
-}
-
 interface MenuLinkStyledProps extends Partial<LinkProps>{
-    onHoverColor?: string,
+    $onHoverColor?: string,
 }
 
 export {
@@ -59,6 +54,5 @@ export {
     MenuLinkLogoProps,
     MenuLinkWithSubLinksProps,
     MenuLinkProps,
-    MenuLinkLogoStyledProps,
     MenuLinkStyledProps,
 }

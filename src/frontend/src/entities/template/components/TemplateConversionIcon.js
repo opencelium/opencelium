@@ -17,8 +17,9 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import {updateTemplate as convertTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import CExecution from "@entity/connection/components/classes/components/content/template_converter/CExecution";
+import {TextSize} from "@app_component/base/text/interfaces";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 
 function mapStateToProps(state){
     const appVersion = state.applicationReducer.version;
@@ -57,7 +58,7 @@ class TemplateConversionIcon extends Component{
     * TODO: add loading during the conversion a few templates
     */
     render(){
-        const {appVersion, data} = this.props;
+        const {appVersion, data, id} = this.props;
         let {classNameIcon, turquoiseTheme, blueTheme} = this.props;
         let invalidVersion = data.template.version !== appVersion;
         let styleIcon = {};
@@ -67,7 +68,7 @@ class TemplateConversionIcon extends Component{
             <React.Fragment>
                 {
                     invalidVersion &&
-                    <TooltipFontIcon turquoiseTheme={turquoiseTheme} blueTheme={blueTheme} isButton={true} className={classNameIcon} iconStyles={styleIcon} tooltip={'Upgrade'} value={'replay'} onClick={() => this.convert()} size={'24px'}/>
+                    <TooltipButton target={`conversion_${id}`} position={'top'} tooltip={'Convert'} handleClick={() => this.convert()} hasBackground={false} icon={'replay'} size={TextSize.Size_20}/>
                 }
             </React.Fragment>
         );

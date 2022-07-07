@@ -15,19 +15,10 @@
 
 import ActionCreators from "../../redux_toolkit/action_creators";
 
-const {
-    setCIThemeSyncFlag,
-} = ActionCreators;
 
 export default {
     fulfilled: {
-        [setCIThemeSyncFlag.fulfilled.type]: {
-            "__DEFAULT__": "Your CI settings were successfully updated"
-        },
     },
     rejected: {
-        [setCIThemeSyncFlag.rejected.type]: {
-            "__DEFAULT__": "There is an error updating CI settings"
-        },
     },
 }

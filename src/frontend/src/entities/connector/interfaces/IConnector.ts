@@ -47,7 +47,7 @@ export interface IConnectorText{
 export interface IConnectorForm extends IConnectorText, IConnectorTextarea, IConnectorSelect, IConnectorSwitch, IConnectorFile, IForm<IConnectorText, IConnectorSelect, {}, IConnectorFile, IConnectorTextarea, IConnectorSwitch>{
     getById: () => boolean;
     add: () => boolean;
-    update: () => boolean;
+    update: (title?: string) => boolean;
     deleteById: () => boolean;
     reduxState?: ConnectorState;
     getCredentials: (props: InputTextProps) => any;

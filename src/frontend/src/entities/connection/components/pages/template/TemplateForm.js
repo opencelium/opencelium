@@ -432,7 +432,6 @@ export function TemplateForm(type) {
                 this.startAction = true;
 
                 const convertedObject = {...template, name: entity.title, description: entity.description, connection: typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : entity};
-                console.log(convertedObject);
                 if(this.isUpdate){
                    // updateTemplate(convertedObject);
                 }

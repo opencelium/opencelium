@@ -16,11 +16,11 @@
 import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {createGlobalStyle} from "styled-components";
-import {isReactComponent, resizeWindow} from "@application/utils/utils";
+import {resizeWindow} from "@application/utils/utils";
 import {Application} from "@application/classes/Application";
 import Button from "@app_component/base/button/Button";
 import Tooltip from "@app_component/base/tooltip/Tooltip";
-import {MenuLinkLogo} from "./base/MenuLinkLogo";
+import {MenuLinkLogo} from "@entity/application/components/menu_link_logo/MenuLinkLogo";
 import {ColorTheme} from "@style/Theme";
 import { MenuProps } from './interfaces';
 import {MenuStyled, MenuTop, NavStyled} from './styles';
@@ -97,7 +97,7 @@ const Menu: FC<MenuProps> =
                     <NavStyled>
                         <div>
                             <MenuTop>
-                                <MenuLinkLogo to={'/'} isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>
+                                <MenuLinkLogo to={'/'} isReadonly={isReadonly} $onHoverColor={hoverMenuItemBackground}/>
                                 <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
                                     <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
                                 />

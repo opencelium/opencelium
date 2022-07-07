@@ -23,6 +23,8 @@ import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
 import {ContentLoading} from "@app_component/base/loading/ContentLoading";
 import InputText from "@app_component/base/input/text/InputText";
 import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
+import Button from "@app_component/base/button/Button";
+import Filter from "@app_component/collection/filter/Filter";
 import {ColorTheme} from "@style/Theme";
 import {Pagination} from "../Pagination";
 import {GridViewMenu, GridViewType} from "../GridViewMenu";
@@ -52,6 +54,8 @@ const CollectionView: FC<CollectionViewProps> =
         const dispatch = useAppDispatch();
         const {searchValue, viewType, gridViewType} = Application.getReduxState();
         const [isRefreshing, setIsRefreshing] = useState(false);
+        const [isFilterVisible, toggleFilter] = useState<boolean>(false);
+        const [filterData, setFilterData] = useState(null);
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
         const [currentPage, setCurrentPage] = useState(1);
@@ -125,6 +129,9 @@ const CollectionView: FC<CollectionViewProps> =
                     {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
                             {collection.getTopActions(viewType, checkedIds)}
+                            {collection.hasFilter &&
+                                <Button key={'filter_button'} icon={'filter_list'} label={'Filter'} handleClick={() => toggleFilter(!isFilterVisible)}/>
+                            }
                         </ActionsStyled>
                         {hasSearch &&
                             <InputText marginLeft={'0'} autoFocus inputHeight={'35px'} value={searchValue} onChange={(e) => search(e.target.value)} minHeight={'1'}  width={'200px'} placeholder={'Search field'}/>
@@ -139,6 +146,11 @@ const CollectionView: FC<CollectionViewProps> =
                             </ViewSectionStyled>
                         }
                     </TopSectionStyled>}
+                    {isFilterVisible &&
+                        <Filter>
+                            {collection.getFilterComponents(filterData, (data) => setFilterData({...data}))}
+                        </Filter>
+                    }
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
                         {viewType === ViewType.LIST &&
                             <List
@@ -151,6 +163,7 @@ const CollectionView: FC<CollectionViewProps> =
                                 setChecks={setChecks}
                                 isRefreshing={isRefreshing}
                                 shouldBeUpdated={shouldBeUpdated}
+                                filterData={filterData}
                             />}
                         {viewType === ViewType.GRID &&
                             <Grid

@@ -19,7 +19,7 @@ import {ThemeProvider, withTheme} from 'styled-components';
 import {getRoutes} from "@application/utils/routes";
 import {Application} from "@application/classes/Application";
 import {offlineServiceOpenCeliumUrls, onlineServiceOpenCeliumUrl} from '@entity/application/requests/classes/url';
-import {createIframe} from "@entity/application/utils/utils";
+import {createIframe, removeIframe} from "@entity/application/utils/utils";
 import Themes, {DefaultTheme, updateThemeWithColors} from "@style/Theme";
 import {Global} from "@style/global";
 import {Auth} from "@application/classes/Auth";
@@ -36,12 +36,18 @@ const App = ({}) => {
     let selectedTheme: any = themes.find(theme => theme.isCurrent) || DefaultTheme;
     const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
     useEffect(() => {
-        if(navigator.onLine){
-            createIframe(onlineServiceOpenCeliumUrl);
-        } else{
-            createIframe(offlineServiceOpenCeliumUrls);
+        if(authUser) {
+            if (authUser.userDetail.themeSync) {
+                if (navigator.onLine) {
+                    createIframe(onlineServiceOpenCeliumUrl);
+                } else {
+                    createIframe(offlineServiceOpenCeliumUrls);
+                }
+            } else {
+                removeIframe();
+            }
         }
-    }, [])
+    }, [authUser?.userDetail?.themeSync || authUser])
     useEffect(() => {
         if(isAuth) {
             if(authUser.themes) {
@@ -50,7 +56,9 @@ const App = ({}) => {
                     dispatch(setThemes(authUser.themes));
                 }
             }
-            dispatch(getLogoName(authUser.email));
+            if(authUser.userDetail.sync){
+                dispatch(getLogoName(authUser.email));
+            }
         }
     },[isAuth])
     return (

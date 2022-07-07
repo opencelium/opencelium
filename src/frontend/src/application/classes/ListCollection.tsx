@@ -126,6 +126,18 @@ class ListCollection implements IListCollection{
         return true;
     }
 
+    hasFilter?: boolean = false;
+    getFilterComponents?: (filterData: any, setFilterData: (filterData: any) => void) => any;
+
+    /**
+     * filter in collection
+     * @param entity
+     * @param filterProps
+     */
+    filter(entity: any, filterProps: any): boolean{
+        return true;
+    }
+
     /**
      * sort collection
      * @param sortingProp - class property name
@@ -139,9 +151,13 @@ class ListCollection implements IListCollection{
      * @param searchValue
      * @param page - page number
      * @param entitiesPerPage
+     * @param filterData
      */
-    getEntitiesByPage(searchValue: string, page: number, entitiesPerPage: number): any[]{
+    getEntitiesByPage(searchValue: string, page: number, entitiesPerPage: number, filterData: any = null): any[]{
         let filteredEntities = this.entities.filter(visibleEntity => this.search(visibleEntity, searchValue));
+        if(filterData !== null){
+            filteredEntities = filteredEntities.filter(visibleEntity => this.filter(visibleEntity, filterData));
+        }
         this.filteredEntities = filteredEntities;
         let newEntities = [];
         let startIndex = (page - 1) * entitiesPerPage;

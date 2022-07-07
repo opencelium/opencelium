@@ -18,20 +18,17 @@ import {ICommonState} from "@application/interfaces/core";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {setCIThemeSyncFlag} from "../action_creators/ApplicationCreators";
 
 export interface EntityApplicationState extends ICommonState{
     documentation: any,
     checkingApi: API_REQUEST_STATE,
     updatingLogoData: API_REQUEST_STATE,
-    settingCIFlag: API_REQUEST_STATE,
 }
 
 const initialState: EntityApplicationState = {
     documentation: null,
     checkingApi: API_REQUEST_STATE.INITIAL,
     updatingLogoData: API_REQUEST_STATE.INITIAL,
-    settingCIFlag: API_REQUEST_STATE.INITIAL,
     ...CommonState,
 }
 
@@ -41,17 +38,6 @@ export const applicationSlice = createSlice({
     reducers: {
     },
     extraReducers: {
-        [setCIThemeSyncFlag.pending.type]: (state) => {
-            state.settingCIFlag = API_REQUEST_STATE.START;
-        },
-        [setCIThemeSyncFlag.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
-            state.settingCIFlag = API_REQUEST_STATE.FINISH;
-            state.error = null;
-        },
-        [setCIThemeSyncFlag.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.settingCIFlag = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
     }
 })
 

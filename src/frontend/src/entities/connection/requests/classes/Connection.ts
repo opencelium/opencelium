@@ -63,8 +63,8 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
         let mappedConnection = {
             title: connection.title,
             description: connection.description,
-            fromConnector: connection.fromConnector,
-            toConnector: connection.toConnector,
+            fromConnector: {...connection.fromConnector, invoker: {name: connection.fromConnector.invoker.name}},
+            toConnector: {...connection.toConnector, invoker: {name: connection.toConnector.invoker.name}},
             fieldBinding: connection.fieldBinding,
         };
         if(connection.id !== 0){

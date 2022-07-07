@@ -31,13 +31,21 @@ import { MyProfilePermissions } from "../../constants";
 import InputSelect from "@app_component/base/input/select/InputSelect";
 import {ColorTheme, DefaultTheme} from "@style/Theme";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
-import {setCIThemeSyncFlag} from "@entity/application/redux_toolkit/action_creators/ApplicationCreators";
+import { updateUserDetail } from "@entity/user/redux-toolkit/action_creators/UserDetailCreators";
+import {LocalStorage} from "@application/classes/LocalStorage";
+import {ProfileImageStyled} from "@entity/profile/components/pages/styles";
+import {UserImageStyled} from "@entity/user/components/pages/UserImage";
+import {withTheme} from "styled-components";
 
 
-const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
+const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
     const {themes} = Application.getReduxState();
     const {authUser} = Auth.getReduxState();
+    const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
+    useEffect(() => {
+        setThemeSync(authUser.userDetail.themeSync);
+    }, [authUser.userDetail])
     const userGroup = UserGroup.createState<IUserGroup>({
         _readOnly: true,
         ...authUser.userGroup,
@@ -52,6 +60,11 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         userDetail,
         email: authUser.email,
     });
+    const Title = user.userDetail.getRadios({propertyName: "userTitle", props: {
+        icon: ' ',
+        label: 'Title',
+        options: [{autoFocus: true, label: 'Mr', value: 'mr', checked: true, key: 'mr'}, {label: 'Mrs', value: 'mrs', checked: false, key: 'mrs'}],
+    }})
     const UserDetailsInputs = user.userDetail.getTexts([
         {propertyName: "name", props: {icon: 'perm_identity', label: "Name", maxLength: 128, required: true}},
         {propertyName: "surname", props: {icon: 'perm_identity', label: "Surname", maxLength: 128, required: true}},
@@ -85,11 +98,20 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         // @ts-ignore
         dispatch(setThemes(JSON.stringify(newThemes)));
     }
-    const ciSyncFlag = !!authUser?.userDetail?.ciSyncFlag;
     const data = {
         title: 'My Profile',
         formSections: [
             <FormSection label={{value: 'user details'}}>
+                <ProfileImageStyled
+                    email={user.email}
+                    size={100}
+                    rating="pg"
+                    default="mm"
+                    title={'Avatar'}
+                    style={{borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+                    protocol="https://"
+                />
+                {Title}
                 {UserDetailsInputs}
                 {Email}
             </FormSection>,
@@ -108,10 +130,10 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         />
                     </div>
                     <InputSwitch
-                        name={`${ciSyncFlag ? 'Disable' : 'Enable'} theme synchronization`}
+                        name={`Theme synchronization is ${themeSync ? 'enabled' : 'disabled'}`}
                         icon={'corporate_fare'}
                         label={'Theme sync'}
-                        isChecked={ciSyncFlag} onClick={() => dispatch(setCIThemeSyncFlag(!ciSyncFlag))}
+                        isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
                         hasConfirmation={true}
                         confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
                     />
@@ -124,4 +146,4 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     )
 })
 
-export default MyProfile
+export default withTheme(MyProfile);

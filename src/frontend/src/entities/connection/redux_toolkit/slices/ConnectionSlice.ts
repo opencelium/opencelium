@@ -21,7 +21,7 @@ import {ICommonState} from "@application/interfaces/core";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {
     addConnection, checkConnectionTitle, deleteConnectionById,
-    deleteConnectionsById, getAllConnections, getAllMetaConnections,
+    deleteConnectionsById, getAllConnections, getAllMetaConnections, getAndUpdateConnection,
     getConnectionById, updateConnection,
 } from "../action_creators/ConnectionCreators";
 import {IConnection} from "../../interfaces/IConnection";
@@ -203,6 +203,19 @@ export const connectionSlice = createSlice({
         },
         [addConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.addingConnection = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getAndUpdateConnection.pending.type]: (state, action: any) => {
+            state.updatingConnection = API_REQUEST_STATE.START;
+        },
+        [getAndUpdateConnection.fulfilled.type]: (state, action: PayloadAction<IConnection>) => {
+            state.updatingConnection = API_REQUEST_STATE.FINISH;
+            state.connections = state.connections.map(connection => connection.connectionId === action.payload.connectionId ? action.payload : connection);
+            state.metaConnections = state.metaConnections.map(connection => connection.connectionId === action.payload.connectionId ? action.payload : connection);
+            state.error = null;
+        },
+        [getAndUpdateConnection.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.updatingConnection = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [updateConnection.pending.type]: (state) => {

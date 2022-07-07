@@ -16,11 +16,13 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Provider} from "react-redux";
+import "@style/fonts/fonts.css";
+import "@style/css/bootstrap.css";
+import "@style/css/graphiql.css";
 import {store} from "@application/utils/store";
 import '@application/utils/i18n';
 import {App} from "@app_component/App";
 
-import "@style/css/bootstrap.css";
 import "@style/css/react_grid_layout.css";
 import "@style/css/react_crop.css";
 

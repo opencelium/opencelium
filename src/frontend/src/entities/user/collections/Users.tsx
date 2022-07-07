@@ -26,6 +26,7 @@ import User from "../classes/User";
 import IAuthUser from "../interfaces/IAuthUser";
 import IUser from "../interfaces/IUser";
 import { UserPermissions } from "../constants";
+import Gravatar from "react-gravatar";
 
 
 export default class Users extends ListCollection{
@@ -37,11 +38,21 @@ export default class Users extends ListCollection{
     gridProps = {
         title: (user: IUser) => {return user.getFullName();},
         subtitle: 'email',
-        //image: (user: IUser) => {return user.userDetail.profilePicture;},
+        getImageComponent: (user: IUser) => {return (
+            <Gravatar
+                email={user.email}
+                size={80}
+                rating="pg"
+                default="blank"
+                title={'avatar'}
+                style={{cursor: 'pointer', borderRadius: '2px'}}
+                protocol="https://"
+            />
+        )},
     };
     translations = {
         email: 'Email',
-        userGroupName: 'Name',
+        userGroupName: 'Group',
     };
     getTopActions = (viewType: ViewType, checkedIds: number[] = []) => {
         const hasSearch = this.hasSearch && this.entities.length > 0;

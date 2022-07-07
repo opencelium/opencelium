@@ -24,10 +24,4 @@ export default class ApplicationRequest extends Request implements IApplicationR
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: '', ...settings});
     }
-
-    async setCIThemeSyncFlag(flag: boolean): Promise<AxiosResponse<IResponse>>{
-        this.url = 'user'
-        this.endpoint = '/update/ciThemeSyncFlag';
-        return super.post<IResponse>(flag);
-    }
 }

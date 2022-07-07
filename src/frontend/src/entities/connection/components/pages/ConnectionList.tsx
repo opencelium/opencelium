@@ -31,7 +31,7 @@ import { ConnectionPermissions } from '@entity/connection/constants';
 
 const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
-    const {gettingMetaConnections, metaConnections, deletingConnectionsById} = Connection.getReduxState();
+    const {gettingMetaConnections, metaConnections, deletingConnectionsById, updatingConnection} = Connection.getReduxState();
     const {neo4jCheckResults} = ExternalApplication.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
@@ -54,7 +54,7 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
             dispatch(addNotification(notification))
         }
     },[neo4jCheckResults])
-    const CConnections = new Connections(metaConnections, dispatch, deletingConnectionsById);
+    const CConnections = new Connections(metaConnections, dispatch, deletingConnectionsById, updatingConnection);
     return (
         <CollectionView collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
     )
