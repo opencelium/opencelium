@@ -56,6 +56,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -270,11 +271,16 @@ public class ConnectorExecutor {
             httpEntity = new HttpEntity <Object> (header);
         }
 
+        URI uri;
+        try {
+            uri = new URI("");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i
-        
-        ResponseEntity<String> response = restTemplate.exchange(url, method ,httpEntity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(uri, method ,httpEntity, String.class);
         logMessage = LogMessageServiceImp.LogBuilder.newInstance()
                 .setTaId(taId)
                 .setOrderId(executionContainer.getOrder())
