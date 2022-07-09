@@ -17,30 +17,67 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import CCoordinates from "@entity/connection/components/classes/components/content/connection_overview_2/CCoordinates";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2.scss";
+import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {connect} from "react-redux";
+import {setCurrentBusinessItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 export const ARROW_WIDTH = 2;
 
 
+function mapStateToProps(state){
+    const {currentTechnicalItem} = mapItemsToClasses(state);
+    return{
+        currentTechnicalItem,
+    }
+}
+
+@connect(mapStateToProps, {setCurrentBusinessItem})
 class Arrow extends React.Component{
     constructor(props) {
         super(props);
+        this.state = {
+            isMouseOver: false,
+        }
+    }
+
+    onMouseOver(){
+        this.setState({
+            isMouseOver: true,
+        })
+    }
+
+    onMouseLeave(){
+        this.setState({
+            isMouseOver: false,
+        })
     }
 
     render(){
-        const {from, to, isHighlighted, isDisabled} = this.props;
+        const {isMouseOver} = this.state;
+        const {from, to, isHighlighted, isDisabled, currentTechnicalItem} = this.props;
         if(!from || !to){
             return null;
         }
+        const isDraggableProcessOver = isMouseOver && currentTechnicalItem && currentTechnicalItem.isDragged && from.connectorType === currentTechnicalItem.connectorType;
         let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
         const isDisabledStyle = isDisabled ? styles.disabled_arrow : '';
+        const stroke = isDraggableProcessOver ? '#00acc2' : '#000';
+        const processPlaceholderX = line1 === null ? arrow.x1 - 15 + (arrow.x2 - arrow.x1) / 2 : line1.x1 - 15 + (arrow.x2 - line1.x1) / 2;
+        const processPlaceholderY = line1 === null ? arrow.y1 - 10 + (arrow.y2 - arrow.y1) / 2 : line1.y1 - 10 + (arrow.y2 - line1.y1) / 2;
+        const aroundConst = 40;
+        const processPlaceholderBackgroundCoord = {x: line1 ? line1.x1 - aroundConst : arrow.x1 - aroundConst, y: line1 ? line1.y1 - aroundConst : arrow.y1 - aroundConst, width: line1 ? arrow.x2 - line1.x1 + aroundConst * 2 : arrow.x2 - arrow.x1 + aroundConst * 2, height: line1 ? arrow.y2 - line1.y1 + aroundConst * 2 : arrow.y2 - arrow.y1 + aroundConst * 2};
         return(
             <React.Fragment>
-                {line1 && <line id={`${from.id}_${to.id}_line1`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`} x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke="#000"
+                {line1 && <line id={`${from.id}_${to.id}_line1`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`} x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
                       strokeWidth={ARROW_WIDTH}/>}
-                {line2 && <line id={`${from.id}_${to.id}_line2`} strokeLinecap={"round"} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line2`} x1={line2.x1} y1={line2.y1} x2={line2.x2} y2={line2.y2} stroke="#000"
+                {line2 && <line id={`${from.id}_${to.id}_line2`} strokeLinecap={"round"} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line2`} x1={line2.x1} y1={line2.y1} x2={line2.x2} y2={line2.y2} stroke={stroke}
                       strokeWidth={ARROW_WIDTH}/>}
-                {arrow && <line id={`${from.id}_${to.id}_arrow`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`} x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke="#000"
-                      strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${isHighlighted ? '_highlighted' : ''})`}/>}
+                {arrow && <line id={`${from.id}_${to.id}_arrow`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`} x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke={stroke}
+                                strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${isHighlighted || isDraggableProcessOver ? '_highlighted' : ''})`}/>}
+                {isDraggableProcessOver &&
+                    <rect className={styles.process_placeholder} rx={5} ry={5} x={processPlaceholderX} y={processPlaceholderY} width={30} height={20}/>
+                }
+                <rect id={`arrow_from_${from.id}_to_${to.id}`} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
             </React.Fragment>
         );
     }

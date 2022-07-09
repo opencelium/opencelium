@@ -143,6 +143,7 @@ export default class CProcess{
             width: this._width,
             height: this._height,
             isDragged: this._isDragged,
+            isDraggedByIcon: this._isDraggedByIcon,
         };
     }
 

@@ -22,6 +22,9 @@ $ASSIGN_COLOR: #79c883;
 $ASSIGNED_COLOR: #79c883;
 $ASSIGN_HOVER_COLOR: #9ee7a4;
 $ASSIGN_ACTIVE_COLOR: #5c9966;
+$MOVE_COLOR: #3a5d86;
+$MOVE_HOVER_COLOR: #3c75b7;
+$MOVE_ACTIVE_COLOR: #263e5b;
 $SVG_DISABLED_HIGHLIGHT_COLOR: #499f54;
 $SVG_NOT_ASSIGNABLE_COLOR: #eee;
 $HIGHLIGHT_COLOR: #8a9dd7;
@@ -155,6 +158,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   height: 100vh;
 }
 .layout_svg {
+  outline: none;
   cursor: move;
   width: 100%;
   height: calc(100% - 22px);
@@ -216,8 +220,8 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 }
 .highlighted_marker{
   polygon {
-    @extend .highlighting;
-    fill: $HIGHLIGHT_COLOR;
+    stroke: #00acc2;
+    fill: #00acc2;
   }
 }
 .disabled_arrow{
@@ -257,6 +261,10 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   fill: white;
   cursor: pointer;
 }
+.process_move_rect{
+  fill: white;
+  cursor: pointer;
+}
 
 .process_assign{
   stroke: $ASSIGN_COLOR !important;
@@ -276,6 +284,16 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 }
 .assign_icon:active{
   fill: $ASSIGN_ACTIVE_COLOR;
+}
+.move_icon{
+  cursor: pointer;
+  fill: $MOVE_COLOR;
+}
+.move_icon:hover{
+  fill: $MOVE_HOVER_COLOR;
+}
+.move_icon:active{
+  fill: $MOVE_ACTIVE_COLOR;
 }
 .operator_delete{
   @extend .delete;
@@ -799,6 +817,16 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   fill: none !important;
   stroke: #00acc2 !important;
   stroke-width: 2px;
+}
+
+.process_placeholder{
+  fill: #fff !important;
+  stroke: #00acc2 !important;
+  stroke-width: 2px;
+}
+
+.process_placeholder_background{
+  fill: transparent !important;
 }
 
 .svg_description_xml_body{

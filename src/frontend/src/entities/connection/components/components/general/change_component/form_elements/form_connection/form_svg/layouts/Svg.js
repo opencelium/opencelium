@@ -143,9 +143,9 @@ class Svg extends React.Component {
                     }
                     return item;
                 }));
-                currentItem.isDragged = false;
-                setCurrentItem(currentItem);
             }
+            currentItem.isDragged = false;
+            setCurrentItem(currentItem);
         }
     }
 
@@ -164,10 +164,10 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, connection, updateConnection} = this.props;
+        const {svgId, isItemDraggable, isItemDraggableByIcon, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, connection, updateConnection} = this.props;
         this.dragCoordinates = null;
-        if(e.target.classList.contains('draggable')) {
-            if(isItemDraggable) {
+        if(e.target.classList.contains('draggable') || e.target.classList.contains('draggable_icon')) {
+            if(isItemDraggable || isItemDraggableByIcon) {
                 this.selectedElement = e.target.parentNode;
                 if(this.selectedElement.parentNode){
                     this.hideCreateElementPanel();
@@ -199,9 +199,9 @@ class Svg extends React.Component {
     }
 
     drag(e){
-        const {isItemDraggable, dragAndDropStep, svgId, isDraggable, currentItem} = this.props;
+        const {isItemDraggable, isItemDraggableByIcon, dragAndDropStep, svgId, isDraggable, currentItem} = this.props;
         if (this.selectedElement) {
-            if(isItemDraggable) {
+            if(isItemDraggable || isItemDraggableByIcon) {
                 e.preventDefault();
                 if(this.selectedElement?.parentNode) {
                     const coordinates = CSvg.getMousePosition(e, this.selectedElement.parentNode);
@@ -248,6 +248,8 @@ class Svg extends React.Component {
     }
 
     endDrag(e){
+        console.log(e)
+        console.log(this.selectedElement)
         if(this.selectedElement){
             this.selectedElement = null;
             this.setCoordinatesForCreateElementPanel(e);
@@ -453,6 +455,7 @@ Svg.propTypes = {
     deleteProcess: PropTypes.func.isRequired,
     dragAndDropStep: PropTypes.number,
     isItemDraggable: PropTypes.bool,
+    isItemDraggableByIcon: PropTypes.bool,
     isDraggable: PropTypes.bool,
     isScalable: PropTypes.bool,
     startingSvgY : PropTypes.number,
@@ -463,6 +466,7 @@ Svg.propTypes = {
 Svg.defaultProps = {
     dragAndDropStep: 10,
     isItemDraggable: false,
+    isItemDraggableByIcon: false,
     isDraggable: true,
     isScalable: false,
     startingSvgY: -190,

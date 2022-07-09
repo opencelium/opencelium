@@ -22,21 +22,23 @@ import {CTechnicalProcess} from "@entity/connection/components/classes/component
 import {isString} from "@application/utils/utils";
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
 import {setCurrentBusinessItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import {AssignIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
+import {AssignIcon, MoveIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 import {SvgItem} from "@entity/connection/components/decorators/SvgItem";
 import CProcess from "@entity/connection/components/classes/components/content/connection_overview_2/process/CProcess";
 import {BUSINESS_LABEL_MODE, COLOR_MODE} from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CBusinessLayout from "@entity/connection/components/classes/components/content/connection_overview_2/CBusinessLayout";
+import ReactDOM from "react-dom";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
-    const {currentBusinessItem} = mapItemsToClasses(state);
+    const {currentBusinessItem, currentTechnicalItem} = mapItemsToClasses(state);
     return{
         colorMode: connectionOverview.colorMode,
         businessLabelMode: connectionOverview.businessLabelMode,
         isVisibleBusinessLabelKeyPressed: connectionOverview.isVisibleBusinessLabelKeyPressed,
         currentBusinessItem,
+        currentTechnicalItem,
     }
 }
 
@@ -68,7 +70,6 @@ class Process extends React.Component{
                 setCurrentItem(process);
             }
         }
-
     }
 
     onMouseLeave(){
@@ -124,7 +125,7 @@ class Process extends React.Component{
         const {
             process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess,
             isDisabled, colorMode, readOnly, businessLabelMode, connection,
-            isVisibleBusinessLabelKeyPressed, currentBusinessItem,
+            isVisibleBusinessLabelKeyPressed, currentBusinessItem, currentTechnicalItem,
         } = this.props;
         const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const method = process.entity;
@@ -167,7 +168,11 @@ class Process extends React.Component{
         const assignedStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
         const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
-        const hasDraggableProcess = isCurrent && currentBusinessItem && currentBusinessItem.isDragged && CBusinessLayout.isInstanceOfBusinessItem(process);
+        const isBusinessItem = CBusinessLayout.isInstanceOfBusinessItem(process);
+        const hasDraggableProcess = isCurrent && currentBusinessItem && currentBusinessItem.isDragged && isBusinessItem || isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
+        const isSelected = isCurrent && !readOnly;
+        const hasDeleteIcon = isSelected;
+        const hasMoveIcon = isSelected;
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
@@ -178,9 +183,9 @@ class Process extends React.Component{
                         {shortLabel}
                     </text>
                     <title>{label}</title>
-                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isCurrent && !readOnly ? 95 : 110} height={15} rx={5} ry={5}/>}
+                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isSelected ? 95 : 110} height={15} rx={5} ry={5}/>}
                     {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
-                    {isCurrent && !readOnly &&
+                    {hasDeleteIcon &&
                         <DeleteIcon svgX={105} svgY={2} x={closeX} y={closeY} onClick={(a) => this.deleteProcess(a)}/>
                     }
                     {hasAssignIcon &&
@@ -188,7 +193,9 @@ class Process extends React.Component{
                     }
                 </svg>
                 {hasDraggableProcess &&
-                    <rect id={'draggable_process'} className={styles.draggable_process} rx={borderRadius} ry={borderRadius} x={process.x} y={process.y} width={process.width} height={process.height}/>
+                    ReactDOM.createPortal(
+                        <rect id={'draggable_process'} className={styles.draggable_process} rx={borderRadius} ry={borderRadius} x={process.x} y={process.y} width={process.width} height={process.height}/>, document.getElementById(isBusinessItem ? 'business_layout_svg' : 'technical_layout_svg')
+                    )
                 }
             </React.Fragment>
         );
