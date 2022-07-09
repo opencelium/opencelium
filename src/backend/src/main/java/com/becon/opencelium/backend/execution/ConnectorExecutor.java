@@ -273,7 +273,7 @@ public class ConnectorExecutor {
 
         URI uri;
         try {
-            uri = new URI("");
+            uri = new URI(url);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
