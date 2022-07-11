@@ -20,6 +20,7 @@ import styles from "@entity/connection/components/themes/default/content/connect
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {connect} from "react-redux";
 import {setCurrentBusinessItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import COperator, {OPERATOR_SIZE} from "@classes/content/connection_overview_2/operator/COperator";
 
 export const ARROW_WIDTH = 2;
 
@@ -59,6 +60,7 @@ class Arrow extends React.Component{
             return null;
         }
         const isDraggableProcessOver = isMouseOver && currentTechnicalItem && currentTechnicalItem.isDragged && from.connectorType === currentTechnicalItem.connectorType;
+        const isOperator = isDraggableProcessOver ? currentTechnicalItem instanceof COperator : false;
         let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
         const isDisabledStyle = isDisabled ? styles.disabled_arrow : '';
         const stroke = isDraggableProcessOver ? '#00acc2' : '#000';
@@ -66,6 +68,10 @@ class Arrow extends React.Component{
         const processPlaceholderY = line1 === null ? arrow.y1 - 10 + (arrow.y2 - arrow.y1) / 2 : line1.y1 - 10 + (arrow.y2 - line1.y1) / 2;
         const aroundConst = 40;
         const processPlaceholderBackgroundCoord = {x: line1 ? line1.x1 - aroundConst : arrow.x1 - aroundConst, y: line1 ? line1.y1 - aroundConst : arrow.y1 - aroundConst, width: line1 ? arrow.x2 - line1.x1 + aroundConst * 2 : arrow.x2 - arrow.x1 + aroundConst * 2, height: line1 ? arrow.y2 - line1.y1 + aroundConst * 2 : arrow.y2 - arrow.y1 + aroundConst * 2};
+        let markerStyle = isHighlighted ? '_highlighted' : '';
+        if(isDraggableProcessOver){
+            markerStyle = '_placeholder';
+        }
         return(
             <React.Fragment>
                 {line1 && <line id={`${from.id}_${to.id}_line1`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`} x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
@@ -73,11 +79,15 @@ class Arrow extends React.Component{
                 {line2 && <line id={`${from.id}_${to.id}_line2`} strokeLinecap={"round"} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line2`} x1={line2.x1} y1={line2.y1} x2={line2.x2} y2={line2.y2} stroke={stroke}
                       strokeWidth={ARROW_WIDTH}/>}
                 {arrow && <line id={`${from.id}_${to.id}_arrow`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} arrow`} x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2} stroke={stroke}
-                                strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${isHighlighted || isDraggableProcessOver ? '_highlighted' : ''})`}/>}
-                {isDraggableProcessOver &&
-                    <rect className={styles.process_placeholder} rx={5} ry={5} x={processPlaceholderX} y={processPlaceholderY} width={30} height={20}/>
+                                strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${markerStyle})`}/>}
+                {isDraggableProcessOver ?
+                    !isOperator ?
+                        <rect className={styles.process_placeholder} rx={5} ry={5} x={processPlaceholderX} y={processPlaceholderY} width={30} height={20}/>
+                    :
+                        <polygon className={styles.operator_placeholder} points={COperator.getPoints(processPlaceholderX, processPlaceholderY - 5, 30)}/>
+                    : null
                 }
-                <rect id={`arrow_from_${from.id}_to_${to.id}`} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
+                <rect id={`arrow_from__${from.id}__to__${to.id}`} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
             </React.Fragment>
         );
     }

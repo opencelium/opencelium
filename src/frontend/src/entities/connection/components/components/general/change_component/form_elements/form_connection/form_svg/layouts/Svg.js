@@ -22,12 +22,21 @@ import Arrow from "../elements/Arrow";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
-import {HighlightedMarkers, DefaultMarkers} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
+import {
+    HighlightedMarkers,
+    DefaultMarkers,
+    PlaceholderMarkers
+} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
 import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
 import CSvg from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CBusinessProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {CONNECTOR_FROM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
+import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import COperator, {OPERATOR_SIZE} from "@classes/content/connection_overview_2/operator/COperator";
 
 function mapStateToProps(state){
     const {currentBusinessItem, currentTechnicalItem} = mapItemsToClasses(state);
@@ -37,7 +46,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setCurrentTechnicalItem})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -166,7 +175,7 @@ class Svg extends React.Component {
     startDrag(e){
         const {svgId, isItemDraggable, isItemDraggableByIcon, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, connection, updateConnection} = this.props;
         this.dragCoordinates = null;
-        if(e.target.classList.contains('draggable') || e.target.classList.contains('draggable_icon')) {
+        if(e.target.classList.contains('draggable')) {
             if(isItemDraggable || isItemDraggableByIcon) {
                 this.selectedElement = e.target.parentNode;
                 if(this.selectedElement.parentNode){
@@ -220,10 +229,19 @@ class Svg extends React.Component {
                         this.dragCoordinates.y = Math.round((coordinates.y - this.offset.y) / dragAndDropStep) * dragAndDropStep;
                     }
                     if(this.dragCoordinates !== null) {
-                        const htmlElem = document.getElementById('draggable_process');
+                        let isOperator = false;
+                        let htmlElem = document.getElementById('draggable_process') || null;
+                        if(!htmlElem){
+                            isOperator = true;
+                            htmlElem = document.getElementById('draggable_operator');
+                        }
                         if(htmlElem){
-                            if(this.dragCoordinates.x) htmlElem.setAttribute('x', this.dragCoordinates.x);
-                            if(this.dragCoordinates.y) htmlElem.setAttribute('y', this.dragCoordinates.y);
+                            if(isOperator){
+                                htmlElem.setAttribute('points', COperator.getPoints(this.dragCoordinates.x || coordinates.x - currentOffset.x, this.dragCoordinates.y || coordinates.y - currentOffset.y));
+                            } else{
+                                if(this.dragCoordinates.x) htmlElem.setAttribute('x', this.dragCoordinates.x);
+                                if(this.dragCoordinates.y) htmlElem.setAttribute('y', this.dragCoordinates.y);
+                            }
                         }
                     }
                 }
@@ -248,16 +266,86 @@ class Svg extends React.Component {
     }
 
     endDrag(e){
-        console.log(e)
-        console.log(this.selectedElement)
+        const {connection} = this.props;
+        let shouldMoveItem = false;
+        const targetElemId = e.target ? e.target.id : '';
+        const sourceElemId = this.selectedElement ? this.selectedElement.id : '';
+        if(targetElemId && sourceElemId){
+            const targetElemIdSplit = targetElemId.split('__');
+            const sourceElemIdSplit = sourceElemId.split('__');
+            if(targetElemIdSplit.length > 3 && sourceElemIdSplit.length > 0) {
+                const connectorType = sourceElemIdSplit[0];
+                const connector = connection.getConnectorByType(connectorType);
+                const sourceIndex = sourceElemIdSplit[1].substring(connectorType.length + 1);
+                const sourceItem = connector ? connector.getItemByIndex(sourceIndex) : null;
+                const targetLeftElemIndexSplit = targetElemIdSplit[1].split('_');
+                const targetRightElemIndexSplit = targetElemIdSplit[1].split('_');
+                if(targetLeftElemIndexSplit.length > 0) {
+                    const targetLeftIndex = targetLeftElemIndexSplit[1];
+                    const targetRightIndex = targetRightElemIndexSplit[1];
+                    const targetLeftItem = connector ? connector.getItemByIndex(targetLeftIndex) : null;
+                    const targetRightItem = connector ? connector.getItemByIndex(targetRightIndex) : null;
+                    if (connector && sourceItem && targetLeftItem && sourceIndex !== targetLeftIndex) {
+                        this.moveItem(connector, sourceItem, targetLeftItem, targetRightItem);
+                        shouldMoveItem = true;
+                    }
+                }
+            }
+        }
         if(this.selectedElement){
             this.selectedElement = null;
             this.setCoordinatesForCreateElementPanel(e);
             if(this.dragCoordinates !== null) {
-                this.setItemCoordinates(this.dragCoordinates)
+                if(!shouldMoveItem){
+                    this.setItemCoordinates(this.dragCoordinates)
+                }
             }
         }
         if(this.isPointerDown) this.isPointerDown = false;
+    }
+
+    moveItem(connector, sourceItem, targetLeftItem, targetRightItem){
+        const {connection, updateConnection, setCurrentItem} = this.props;
+        if(sourceItem instanceof CMethodItem) {
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                connection.removeFromConnectorMethod(sourceItem);
+                sourceItem.index = '';
+                sourceItem.isDragged = false;
+                connector.setCurrentItem(targetLeftItem);
+                connection.addFromConnectorMethod(sourceItem, OUTSIDE_ITEM);
+            } else {
+                connection.removeToConnectorMethod(sourceItem);
+                sourceItem.index = '';
+                sourceItem.isDragged = false;
+                connector.setCurrentItem(targetLeftItem);
+                connection.addToConnectorMethod(sourceItem, OUTSIDE_ITEM);
+            }
+            updateConnection(connection);
+            const currentItem = connector.getMethodByColor(sourceItem.color);
+            connector.setCurrentItem(currentItem);
+            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+            setCurrentItem(currentSvgElement)
+        }
+        if(sourceItem instanceof COperatorItem) {
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                connection.removeFromConnectorOperator(sourceItem);
+                sourceItem.index = '';
+                sourceItem.isDragged = false;
+                connector.setCurrentItem(targetLeftItem);
+                connection.addFromConnectorOperator(sourceItem, OUTSIDE_ITEM);
+            } else {
+                connection.removeToConnectorOperator(sourceItem);
+                sourceItem.index = '';
+                sourceItem.isDragged = false;
+                connector.setCurrentItem(targetLeftItem);
+                connection.addToConnectorOperator(sourceItem, OUTSIDE_ITEM);
+            }
+            updateConnection(connection);
+            const currentItem = connector.getOperatorByIndex(sourceItem.index);
+            connector.setCurrentItem(currentItem);
+            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+            setCurrentItem(currentSvgElement)
+        }
     }
 
     onWheel(e) {
@@ -299,7 +387,7 @@ class Svg extends React.Component {
 
     renderItems(){
         const {
-            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection,         setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
+            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
         } = this.props;
         if(hasAssignCentralText){
             return null;
@@ -417,6 +505,7 @@ class Svg extends React.Component {
                     <defs>
                         <DefaultMarkers/>
                         <HighlightedMarkers/>
+                        <PlaceholderMarkers/>
                     </defs>
                     {fromConnectorPanelParams && toConnectorPanelParams &&
                         <ConnectorPanels

@@ -62,3 +62,26 @@ export const HighlightedMarkers = () => {
         </React.Fragment>
     );
 }
+
+export const PlaceholderMarkers = () => {
+    return (
+        <React.Fragment>
+            <marker id="arrow_head_right_placeholder" markerWidth="10" markerHeight="7"
+                    refX="0" refY="3.5" orient="auto" className={styles.placeholder_marker}>
+                <polygon points="0 0, 10 3.5, 0 7" />
+            </marker>
+            <marker id="arrow_head_down_placeholder" markerWidth="7" markerHeight="10"
+                    refX="0" refY="3.5" orient="auto" className={styles.placeholder_marker}>
+                <polygon points="0 0, 7 0, 3.5 10" />
+            </marker>
+            <marker id="arrow_head_left_placeholder" markerWidth="10" markerHeight="7"
+                    refX="0" refY="3.5" orient="auto" className={styles.placeholder_marker}>
+                <polygon points="10 0, 0 3.5, 10 7" />
+            </marker>
+            <marker id="arrow_head_up_placeholder" markerWidth="7" markerHeight="10"
+                    refX="0" refY="3.5" orient="auto" className={styles.placeholder_marker}>
+                <polygon points="0 10, 3.5 0, 7 10" />
+            </marker>
+        </React.Fragment>
+    );
+}

@@ -44,16 +44,3 @@ export const AssignIcon = (props) => {
         </svg>
     )
 }
-
-export const MoveIcon = (props) => {
-    const {svgX, svgY, x, y, onMouseDown, onMouseMove, onMouseUp} = props;
-    return(
-        <svg x={svgX} y={svgY} onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}>
-            <rect x="0" y="0" width="24" height="24" className={styles.process_move_rect}/>
-            <path xmlns="http://www.w3.org/2000/svg" d="M0 0h24v24H0z" fill="none"/>
-            <path id={'open_with'} className={`${styles.move_icon} draggable_icon`} x={x} y={y} xmlns="http://www.w3.org/2000/svg" d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z">
-                <title>{'Move'}</title>
-            </path>
-        </svg>
-    )
-}

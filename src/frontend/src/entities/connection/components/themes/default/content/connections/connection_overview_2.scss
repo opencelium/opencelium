@@ -220,6 +220,12 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 }
 .highlighted_marker{
   polygon {
+    @extend .highlighting;
+    fill: $HIGHLIGHT_COLOR;
+  }
+}
+.placeholder_marker{
+  polygon {
     stroke: #00acc2;
     fill: #00acc2;
   }
@@ -819,7 +825,30 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   stroke-width: 2px;
 }
 
+.draggable_operator{
+  fill: none !important;
+  stroke: #00acc2 !important;
+  stroke-width: 2px;
+}
+
 .process_placeholder{
+  fill: #fff !important;
+  stroke: #00acc2 !important;
+  stroke-width: 2px;
+}
+
+.operator_placeholder_leave{
+  fill: #fff !important;
+  stroke-width: 2px;
+}
+
+.operator_placeholder_over{
+  fill: #fff !important;
+  stroke: #00acc2 !important;
+  stroke-width: 2px;
+}
+
+.operator_placeholder{
   fill: #fff !important;
   stroke: #00acc2 !important;
   stroke-width: 2px;

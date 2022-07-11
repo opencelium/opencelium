@@ -40,7 +40,7 @@ export default class CProcess{
     }
 
     getHtmlIdName(){
-        return `${this._id}_${this._name}`
+        return `${this._id}__${this._name}`
     }
 
     get name(){
@@ -143,7 +143,6 @@ export default class CProcess{
             width: this._width,
             height: this._height,
             isDragged: this._isDragged,
-            isDraggedByIcon: this._isDraggedByIcon,
         };
     }
 

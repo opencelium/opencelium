@@ -22,7 +22,7 @@ import {CTechnicalProcess} from "@entity/connection/components/classes/component
 import {isString} from "@application/utils/utils";
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
 import {setCurrentBusinessItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import {AssignIcon, MoveIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
+import {AssignIcon} from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 import {SvgItem} from "@entity/connection/components/decorators/SvgItem";
 import CProcess from "@entity/connection/components/classes/components/content/connection_overview_2/process/CProcess";
 import {BUSINESS_LABEL_MODE, COLOR_MODE} from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
@@ -172,7 +172,6 @@ class Process extends React.Component{
         const hasDraggableProcess = isCurrent && currentBusinessItem && currentBusinessItem.isDragged && isBusinessItem || isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
         const isSelected = isCurrent && !readOnly;
         const hasDeleteIcon = isSelected;
-        const hasMoveIcon = isSelected;
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
