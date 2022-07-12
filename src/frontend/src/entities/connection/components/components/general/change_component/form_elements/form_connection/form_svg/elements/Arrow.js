@@ -21,6 +21,7 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {connect} from "react-redux";
 import {setCurrentBusinessItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import COperator, {OPERATOR_SIZE} from "@classes/content/connection_overview_2/operator/COperator";
+import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 
 export const ARROW_WIDTH = 2;
 
@@ -62,7 +63,6 @@ class Arrow extends React.Component{
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
         const isDraggedInfoAvailable = isCurrentItemDragged && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index;
         const isDraggableItemOver = isMouseOver && isCurrentItemDragged && from.connectorType === currentTechnicalItem.connectorType;
-        console.log(isMouseOver, isDraggableItemOver)
         const isOperator = isDraggableItemOver ? currentTechnicalItem instanceof COperator : false;
         let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
         const isDisabledStyle = isDisabled ? styles.disabled_arrow : '';
@@ -73,6 +73,7 @@ class Arrow extends React.Component{
         const aroundConst = 40;
         const processPlaceholderBackgroundCoord = {x: line1 ? line1.x1 - aroundConst : arrow.x1 - aroundConst, y: line1 ? line1.y1 - aroundConst : arrow.y1 - aroundConst, width: line1 ? arrow.x2 - line1.x1 + aroundConst * 2 : arrow.x2 - arrow.x1 + aroundConst * 2, height: line1 ? arrow.y2 - line1.y1 + aroundConst * 2 : arrow.y2 - arrow.y1 + aroundConst * 2};
         let markerStyle = isHighlighted ? '_highlighted' : '';
+        const isInsideDirection = line1 !== null && line2 !== null;
         if(showPlaceholder){
             markerStyle = '_placeholder';
         }
@@ -91,7 +92,7 @@ class Arrow extends React.Component{
                         <polygon className={styles.operator_placeholder} points={COperator.getPoints(processPlaceholderX, processPlaceholderY - 5, 30)}/>
                     : null
                 }
-                <rect id={`arrow_from__${from.id}`} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
+                <rect id={`arrow_from__${from.id}__${isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM}`} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
             </React.Fragment>
         );
     }
