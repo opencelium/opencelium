@@ -270,6 +270,8 @@ class Svg extends React.Component {
         let shouldMoveItem = false;
         const targetElemId = e.target ? e.target.id : '';
         const sourceElemId = this.selectedElement ? this.selectedElement.id : '';
+        console.log('targetElemId', targetElemId);
+        console.log('sourceElemId', sourceElemId)
         if(targetElemId && sourceElemId){
             const targetElemIdSplit = targetElemId.split('__');
             const sourceElemIdSplit = sourceElemId.split('__');
@@ -279,10 +281,10 @@ class Svg extends React.Component {
                 const sourceIndex = sourceElemIdSplit[1].substring(connectorType.length + 1);
                 const sourceItem = connector ? connector.getItemByIndex(sourceIndex) : null;
                 const targetLeftElemIndexSplit = targetElemIdSplit[1].split('_');
-                const targetRightElemIndexSplit = targetElemIdSplit[1].split('_');
+                const targetRightElemIndexSplit = targetElemIdSplit[3].split('_');
                 if(targetLeftElemIndexSplit.length > 0) {
-                    const targetLeftIndex = targetLeftElemIndexSplit[1];
-                    const targetRightIndex = targetRightElemIndexSplit[1];
+                    const targetLeftIndex = targetElemIdSplit[1].substring(connectorType.length + 1);
+                    const targetRightIndex = targetElemIdSplit[3].substring(connectorType.length + 1);
                     const targetLeftItem = connector ? connector.getItemByIndex(targetLeftIndex) : null;
                     const targetRightItem = connector ? connector.getItemByIndex(targetRightIndex) : null;
                     if (connector && sourceItem && targetLeftItem && sourceIndex !== targetLeftIndex) {

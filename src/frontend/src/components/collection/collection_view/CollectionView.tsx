@@ -50,6 +50,7 @@ const CollectionView: FC<CollectionViewProps> =
         hasTopBar,
         hasTitle,
         hasViewSection,
+        defaultViewType,
     }) => {
         const dispatch = useAppDispatch();
         const {searchValue, viewType, gridViewType} = Application.getReduxState();
@@ -60,9 +61,13 @@ const CollectionView: FC<CollectionViewProps> =
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
         const [currentPage, setCurrentPage] = useState(1);
         const [totalPages, setTotalPages] = useState(Math.ceil(collection.entities.length / entitiesPerPage))
+        let applicationViewType = viewType;
+        if(defaultViewType !== ''){
+            applicationViewType = defaultViewType;
+        }
         useEffect(() => {
             let newEntitiesPerPage = LIST_VIEW_ENTITIES_NUMBER;
-            if(viewType === ViewType.GRID){
+            if(applicationViewType === ViewType.GRID){
                 switch(gridViewType){
                     case 2:
                         newEntitiesPerPage = 6;
@@ -80,7 +85,7 @@ const CollectionView: FC<CollectionViewProps> =
             }
             setEntitiesPerPage(newEntitiesPerPage);
             setTotalPages(Math.ceil(collection.filteredEntities.length / newEntitiesPerPage));
-        }, [currentPage, searchValue, viewType, gridViewType, collection.entities.length, shouldBeUpdated]);
+        }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, shouldBeUpdated]);
         useEffect(() => {
             if(collection.deletingEntitiesState === API_REQUEST_STATE.FINISH){
                 setChecks([]);
@@ -128,7 +133,7 @@ const CollectionView: FC<CollectionViewProps> =
                     {hasTitle && <Title title={collection.title}/>}
                     {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
-                            {collection.getTopActions(viewType, checkedIds)}
+                            {collection.getTopActions(applicationViewType, checkedIds)}
                             {collection.hasFilter &&
                                 <Button key={'filter_button'} icon={'filter_list'} label={'Filter'} handleClick={() => toggleFilter(!isFilterVisible)}/>
                             }
@@ -141,7 +146,7 @@ const CollectionView: FC<CollectionViewProps> =
                                 <TooltipButton target={'view_list'} tooltip={'List'} position={'top'} icon={'view_list'}
                                                size={24} hasBackground={false} color={ColorTheme.Turquoise}
                                                handleClick={() => onChangeViewType(ViewType.LIST)}/>
-                                <GridViewMenu setGridViewType={onChangeViewGridType} viewType={viewType}
+                                <GridViewMenu setGridViewType={onChangeViewGridType} viewType={applicationViewType}
                                               setViewType={onChangeViewType} setIsRefreshing={setIsRefreshing}/>
                             </ViewSectionStyled>
                         }
@@ -152,7 +157,7 @@ const CollectionView: FC<CollectionViewProps> =
                         </Filter>
                     }
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
-                        {viewType === ViewType.LIST &&
+                        {applicationViewType === ViewType.LIST &&
                             <List
                                 collection={collection}
                                 searchValue={searchValue}
@@ -165,7 +170,7 @@ const CollectionView: FC<CollectionViewProps> =
                                 shouldBeUpdated={shouldBeUpdated}
                                 filterData={filterData}
                             />}
-                        {viewType === ViewType.GRID &&
+                        {applicationViewType === ViewType.GRID &&
                             <Grid
                                 collection={collection}
                                 searchValue={searchValue}
@@ -189,6 +194,7 @@ CollectionView.defaultProps = {
     hasTopBar: true,
     hasTitle: true,
     hasViewSection: true,
+    defaultViewType: '',
 }
 
 

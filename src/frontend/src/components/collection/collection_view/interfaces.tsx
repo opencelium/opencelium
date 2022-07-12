@@ -16,6 +16,7 @@
 import {ITheme} from "@style/Theme";
 import ListCollection from "@application/classes/ListCollection";
 import { ComponentPermissionProps } from "@application/interfaces/IApplication";
+import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 
 interface InlineEditInputProps{
     theme?: ITheme,
@@ -59,6 +60,7 @@ interface CollectionViewProps{
     hasTopBar?: boolean,
     hasTitle?: boolean,
     hasViewSection?: boolean,
+    defaultViewType?: ViewType | '',
 }
 
 interface CheckProps{

@@ -842,6 +842,30 @@ export default class CConnectorItem{
         this.addItem(METHOD_ITEM, method, mode);
     }
 
+    getNextInsideItemForOperator(operator){
+        if(!operator){
+            return null;
+        }
+        let items = [...this.methods, ...this.operators];
+        let nextOperatorIndex = `${operator.index}_0`;
+        let nextItem = items.find(item => item.index === nextOperatorIndex);
+        return nextItem || null;
+    }
+
+    getNextOutsideItem(item){
+        if(!item){
+            return null;
+        }
+        let items = [...this.methods, ...this.operators];
+        let indexPath = item.index.split('_');
+        if(indexPath.length >= 1){
+            indexPath[indexPath.length - 1] = parseInt(indexPath[indexPath.length - 1]) + 1;
+        }
+        let nextOperatorIndex = indexPath.join('_');
+        let nextItem = items.find(item => item.index === nextOperatorIndex);
+        return nextItem || null;
+    }
+
     getItemByIndex(index){
         const method = this.getMethodByIndex(index);
         if(method === null){

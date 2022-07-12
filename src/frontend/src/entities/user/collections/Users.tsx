@@ -43,7 +43,7 @@ export default class Users extends ListCollection{
                 email={user.email}
                 size={80}
                 rating="pg"
-                default="blank"
+                default="mm"
                 title={'avatar'}
                 style={{cursor: 'pointer', borderRadius: '2px'}}
                 protocol="https://"

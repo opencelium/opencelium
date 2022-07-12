@@ -29,6 +29,8 @@ import {BUSINESS_LABEL_MODE, COLOR_MODE} from "@entity/connection/components/cla
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CBusinessLayout from "@entity/connection/components/classes/components/content/connection_overview_2/CBusinessLayout";
 import ReactDOM from "react-dom";
+import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
+import COperator from "@classes/content/connection_overview_2/operator/COperator";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -50,6 +52,40 @@ class Process extends React.Component{
 
         this.state = {
             technicalRectClassName: '',
+            isMouseOverSvg: false,
+            isMouseOverPlaceholder: false,
+        }
+    }
+
+    onMouseOverPlaceholder(){
+        if(!this.state.isMouseOverPlaceholder){
+            this.setState({
+                isMouseOverPlaceholder: true,
+            })
+        }
+    }
+
+    onMouseLeavePlaceholder(){
+        if(this.state.isMouseOverPlaceholder) {
+            this.setState({
+                isMouseOverPlaceholder: false,
+            })
+        }
+    }
+
+    onMouseOverSvg(){
+        if(!this.state.isMouseOverSvg){
+            this.setState({
+                isMouseOverSvg: true,
+            })
+        }
+    }
+
+    onMouseLeaveSvg(){
+        if(this.state.isMouseOverSvg){
+            this.setState({
+                isMouseOverSvg: false,
+            })
         }
     }
 
@@ -120,8 +156,16 @@ class Process extends React.Component{
         }
     }
 
+    shouldShowPlaceholder(){
+        const {isMouseOverSvg} = this.state;
+        const {connection, currentTechnicalItem, isCurrent, process} = this.props;
+        const connector = connection.getConnectorByType(process.connectorType);
+        const hasNextItem = !!connector.getNextOutsideItem(process.entity);
+        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
+    }
+
     render(){
-        const {technicalRectClassName} = this.state;
+        const {technicalRectClassName, isMouseOverSvg, isMouseOverPlaceholder} = this.state;
         const {
             process, isNotDraggable, isCurrent, isHighlighted, isAssignedToBusinessProcess,
             isDisabled, colorMode, readOnly, businessLabelMode, connection,
@@ -172,15 +216,28 @@ class Process extends React.Component{
         const hasDraggableProcess = isCurrent && currentBusinessItem && currentBusinessItem.isDragged && isBusinessItem || isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
         const isSelected = isCurrent && !readOnly;
         const hasDeleteIcon = isSelected;
+        const showPlaceholder = this.shouldShowPlaceholder();
+        const svgSize = {
+            width: process.width,
+            height: process.height,
+        }
+        if(isMouseOverSvg){
+            if(showPlaceholder){
+                svgSize.width += 90;
+            }
+        }
         return(
             <React.Fragment>
-                <svg id={process.getHtmlIdName()} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={process.width} height={process.height}>
+                <svg id={process.getHtmlIdName()} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>
+                    <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
                     <rect fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color} onDoubleClick={(a) => this.onDoubleClick(a)} onClick={(a) => this.onClick(a)} onMouseOver={(a) => this.onMouseOver(a)} onMouseDown={(a) => this.onMouseDown(a)} onMouseLeave={(a) => this.onMouseLeave(a)} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                           className={`${technicalRectClassName} ${styles.process_rect} ${assignedStyle} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                     />
-                    <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
-                        {shortLabel}
-                    </text>
+                    <svg x={0} y={0} width={process.width} height={process.height}>
+                        <text dominantBaseline={"middle"} textAnchor={"middle"} className={styles.process_label} x={labelX} y={labelY}>
+                            {shortLabel}
+                        </text>
+                    </svg>
                     <title>{label}</title>
                     {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={styles.process_color_rect} fill={color} x={10} y={5} width={isSelected ? 95 : 110} height={15} rx={5} ry={5}/>}
                     {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={styles.process_color_circle} cx={15} cy={15} r="10" fill={color}/>}
@@ -189,6 +246,25 @@ class Process extends React.Component{
                     }
                     {hasAssignIcon &&
                         <AssignIcon svgX={85} svgY={2} x={assignX} y={assignY} onClick={(a) => this.setAssignMode(a)}/>
+                    }
+                    {
+                        showPlaceholder
+                            ?
+                            <React.Fragment>
+                                <line x1={process.width} y1={process.height / 2} x2={process.width + 20} y2={process.height / 2} stroke={isMouseOverPlaceholder ? '#00acc2' : '#5d5b5b'} strokeWidth={ARROW_WIDTH}/>
+                                <rect
+                                    onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
+                                    onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
+                                    className={isMouseOverPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                    rx={5} ry={5}
+                                    x={process.width + 20}
+                                    y={30}
+                                    width={30}
+                                    height={20}
+                                />
+                            </React.Fragment>
+                            :
+                            null
                     }
                 </svg>
                 {hasDraggableProcess &&
