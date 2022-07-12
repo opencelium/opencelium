@@ -253,6 +253,7 @@ class Process extends React.Component{
                             <React.Fragment>
                                 <line x1={process.width} y1={process.height / 2} x2={process.width + 20} y2={process.height / 2} stroke={isMouseOverPlaceholder ? '#00acc2' : '#5d5b5b'} strokeWidth={ARROW_WIDTH}/>
                                 <rect
+                                    id={`arrow_from__${process.id}`}
                                     onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
                                     onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
                                     className={isMouseOverPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}

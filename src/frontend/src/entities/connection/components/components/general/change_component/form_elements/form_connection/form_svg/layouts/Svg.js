@@ -270,25 +270,24 @@ class Svg extends React.Component {
         let shouldMoveItem = false;
         const targetElemId = e.target ? e.target.id : '';
         const sourceElemId = this.selectedElement ? this.selectedElement.id : '';
-        console.log('targetElemId', targetElemId);
-        console.log('sourceElemId', sourceElemId)
         if(targetElemId && sourceElemId){
             const targetElemIdSplit = targetElemId.split('__');
             const sourceElemIdSplit = sourceElemId.split('__');
-            if(targetElemIdSplit.length > 3 && sourceElemIdSplit.length > 0) {
+            if(targetElemIdSplit.length > 1 && sourceElemIdSplit.length > 0) {
                 const connectorType = sourceElemIdSplit[0];
                 const connector = connection.getConnectorByType(connectorType);
                 const sourceIndex = sourceElemIdSplit[1].substring(connectorType.length + 1);
                 const sourceItem = connector ? connector.getItemByIndex(sourceIndex) : null;
                 const targetLeftElemIndexSplit = targetElemIdSplit[1].split('_');
-                const targetRightElemIndexSplit = targetElemIdSplit[3].split('_');
                 if(targetLeftElemIndexSplit.length > 0) {
                     const targetLeftIndex = targetElemIdSplit[1].substring(connectorType.length + 1);
-                    const targetRightIndex = targetElemIdSplit[3].substring(connectorType.length + 1);
                     const targetLeftItem = connector ? connector.getItemByIndex(targetLeftIndex) : null;
-                    const targetRightItem = connector ? connector.getItemByIndex(targetRightIndex) : null;
                     if (connector && sourceItem && targetLeftItem && sourceIndex !== targetLeftIndex) {
-                        this.moveItem(connector, sourceItem, targetLeftItem, targetRightItem);
+                        let mode = OUTSIDE_ITEM;
+                        if(targetElemIdSplit.length === 3){
+                            mode = targetElemIdSplit[2];
+                        }
+                        this.moveItem(connector, sourceItem, targetLeftItem, mode);
                         shouldMoveItem = true;
                     }
                 }
@@ -306,7 +305,7 @@ class Svg extends React.Component {
         if(this.isPointerDown) this.isPointerDown = false;
     }
 
-    moveItem(connector, sourceItem, targetLeftItem, targetRightItem){
+    moveItem(connector, sourceItem, targetLeftItem, mode){
         const {connection, updateConnection, setCurrentItem} = this.props;
         if(sourceItem instanceof CMethodItem) {
             if (connector.getConnectorType() === CONNECTOR_FROM) {
@@ -314,13 +313,13 @@ class Svg extends React.Component {
                 sourceItem.index = '';
                 sourceItem.isDragged = false;
                 connector.setCurrentItem(targetLeftItem);
-                connection.addFromConnectorMethod(sourceItem, OUTSIDE_ITEM);
+                connection.addFromConnectorMethod(sourceItem, mode);
             } else {
                 connection.removeToConnectorMethod(sourceItem);
                 sourceItem.index = '';
                 sourceItem.isDragged = false;
                 connector.setCurrentItem(targetLeftItem);
-                connection.addToConnectorMethod(sourceItem, OUTSIDE_ITEM);
+                connection.addToConnectorMethod(sourceItem, mode);
             }
             updateConnection(connection);
             const currentItem = connector.getMethodByColor(sourceItem.color);
@@ -334,13 +333,13 @@ class Svg extends React.Component {
                 sourceItem.index = '';
                 sourceItem.isDragged = false;
                 connector.setCurrentItem(targetLeftItem);
-                connection.addFromConnectorOperator(sourceItem, OUTSIDE_ITEM);
+                connection.addFromConnectorOperator(sourceItem, mode);
             } else {
                 connection.removeToConnectorOperator(sourceItem);
                 sourceItem.index = '';
                 sourceItem.isDragged = false;
                 connector.setCurrentItem(targetLeftItem);
-                connection.addToConnectorOperator(sourceItem, OUTSIDE_ITEM);
+                connection.addToConnectorOperator(sourceItem, mode);
             }
             updateConnection(connection);
             const currentItem = connector.getOperatorByIndex(sourceItem.index);
