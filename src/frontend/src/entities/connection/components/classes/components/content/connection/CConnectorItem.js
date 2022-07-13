@@ -214,6 +214,22 @@ export default class CConnectorItem{
         }
     }
 
+    updateIndexesForOperator(operator, newParentIndex){
+        if(isString(newParentIndex)){
+            let operatorIndex = operator.index;
+            for(let i = 0; i < this._methods.length; i++){
+                if(this._methods[i].index.indexOf(operatorIndex) === 0 && this._methods[i].index !== operatorIndex){
+                    this._methods[i].index = `${newParentIndex}${this._methods[i].index.substring(operatorIndex.length)}`;
+                }
+            }
+            for(let i = 0; i < this._operators.length; i++){
+                if(this._operators[i].index.indexOf(operatorIndex) === 0 && this._operators[i].index !== operatorIndex){
+                    this._operators[i].index = `${newParentIndex}${this._operators[i].index.substring(operatorIndex.length)}`;
+                }
+            }
+        }
+    }
+
     getPrevIndex(index){
         if(index === '0'){
             return '';
@@ -518,6 +534,17 @@ export default class CConnectorItem{
 
     get operatorsHistory(){
         return this._operatorsHistory;
+    }
+
+    getItemByUniqueIndex(uniqueIndex){
+        let item = this._methods.find(m => m.uniqueIndex === uniqueIndex);
+        if(!item){
+            item = this._operators.find(o => o.uniqueIndex === uniqueIndex);
+        }
+        if(!item){
+            return null;
+        }
+        return item;
     }
 
     getCurrentItem(){
@@ -1009,15 +1036,18 @@ export default class CConnectorItem{
         this.setSvgItems();
     }
 
-    generateNextIndex(mode){
+    generateNextIndex(mode, item = null){
         let result = '0';
-        if(this._currentItem) {
+        if(item === null){
+            item = this._currentItem;
+        }
+        if(item) {
             switch (mode) {
                 case INSIDE_ITEM:
-                    result = `${this._currentItem.index}_0`;
+                    result = `${item.index}_0`;
                     break;
                 case OUTSIDE_ITEM:
-                    let indexes = this._currentItem.index.split('_');
+                    let indexes = item.index.split('_');
                     if(indexes.length >= 1){
                         indexes[indexes.length - 1] = parseInt(indexes[indexes.length - 1]) + 1;
                     }

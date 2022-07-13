@@ -161,7 +161,7 @@ class Process extends React.Component{
         const {connection, currentTechnicalItem, isCurrent, process} = this.props;
         const connector = connection.getConnectorByType(process.connectorType);
         const hasNextItem = !!connector.getNextOutsideItem(process.entity);
-        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
+        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged && process.connectorType === currentTechnicalItem.connectorType;
     }
 
     render(){

@@ -183,7 +183,7 @@ class Operator extends React.Component{
         const {connection, currentTechnicalItem, isCurrent, operator} = this.props;
         const connector = connection.getConnectorByType(operator.connectorType);
         const hasNextItem = !!connector.getNextOutsideItem(operator.entity);
-        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
+        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged && operator.connectorType === currentTechnicalItem.connectorType;
     }
 
     shouldShowBottomPlaceholder(){
@@ -191,7 +191,7 @@ class Operator extends React.Component{
         const {connection, currentTechnicalItem, isCurrent, operator} = this.props;
         const connector = connection.getConnectorByType(operator.connectorType);
         const hasNextItem = !!connector.getNextInsideItemForOperator(operator.entity);
-        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
+        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged && operator.connectorType === currentTechnicalItem.connectorType;
     }
 
     renderOperator(operatorType){

@@ -328,18 +328,20 @@ class Svg extends React.Component {
             setCurrentItem(currentSvgElement)
         }
         if(sourceItem instanceof COperatorItem) {
+            sourceItem.isDragged = false;
+            const sourceItemData = sourceItem.getObject();
+            sourceItemData.index = '';
+            connector.setCurrentItem(targetLeftItem);
             if (connector.getConnectorType() === CONNECTOR_FROM) {
-                connection.removeFromConnectorOperator(sourceItem);
-                sourceItem.index = '';
-                sourceItem.isDragged = false;
-                connector.setCurrentItem(targetLeftItem);
-                connection.addFromConnectorOperator(sourceItem, mode);
+                connection.addFromConnectorOperator(sourceItemData, mode);
             } else {
-                connection.removeToConnectorOperator(sourceItem);
-                sourceItem.index = '';
-                sourceItem.isDragged = false;
-                connector.setCurrentItem(targetLeftItem);
-                connection.addToConnectorOperator(sourceItem, mode);
+                connection.addToConnectorOperator(sourceItemData, mode);
+            }
+            connector.updateIndexesForOperator(sourceItem, connector.generateNextIndex(mode, targetLeftItem));
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                connection.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+            } else {
+                connection.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
             }
             updateConnection(connection);
             const currentItem = connector.getOperatorByIndex(sourceItem.index);

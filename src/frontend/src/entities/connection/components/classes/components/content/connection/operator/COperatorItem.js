@@ -15,6 +15,7 @@
 
 import CCondition from "./CCondition";
 import CStatement from "./CStatement";
+import {isString} from "@application/utils/utils";
 
 export const IF_OPERATOR = 'if';
 export const LOOP_OPERATOR = 'loop';
