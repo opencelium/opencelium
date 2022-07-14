@@ -25,7 +25,7 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {
     HighlightedMarkers,
     DefaultMarkers,
-    PlaceholderMarkers
+    PlaceholderMarkers, RejectedPlaceholderMarkers
 } from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
 import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
 import CSvg from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
@@ -266,7 +266,7 @@ class Svg extends React.Component {
     }
 
     endDrag(e){
-        const {connection} = this.props;
+        const {connection, currentTechnicalItem, updateConnection} = this.props;
         let shouldMoveItem = false;
         const targetElemId = e.target ? e.target.id : '';
         const sourceElemId = this.selectedElement ? this.selectedElement.id : '';
@@ -287,8 +287,10 @@ class Svg extends React.Component {
                         if(targetElemIdSplit.length === 3){
                             mode = targetElemIdSplit[2];
                         }
-                        this.moveItem(connector, sourceItem, targetLeftItem, mode);
-                        shouldMoveItem = true;
+                        if(currentTechnicalItem.isAvailableForDragging){
+                            shouldMoveItem = true;
+                            this.moveItem(connector, sourceItem, targetLeftItem, mode);
+                        }
                     }
                 }
             }
@@ -307,7 +309,7 @@ class Svg extends React.Component {
 
     moveItem(connector, sourceItem, targetLeftItem, mode){
         const {connection, updateConnection, setCurrentItem} = this.props;
-        if(sourceItem instanceof CMethodItem) {
+        if (sourceItem instanceof CMethodItem) {
             if (connector.getConnectorType() === CONNECTOR_FROM) {
                 connection.removeFromConnectorMethod(sourceItem);
                 sourceItem.index = '';
@@ -327,7 +329,7 @@ class Svg extends React.Component {
             const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
             setCurrentItem(currentSvgElement)
         }
-        if(sourceItem instanceof COperatorItem) {
+        if (sourceItem instanceof COperatorItem) {
             sourceItem.isDragged = false;
             const sourceItemData = sourceItem.getObject();
             sourceItemData.index = '';
@@ -454,7 +456,7 @@ class Svg extends React.Component {
                 isHighlighted = currentTechnicalItem ? fromIndex.indexOf(currentTechnicalItem.id) === 0 && toIndex.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
-                <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
+                <Arrow key={key} connection={connection} {...arrow} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
             );
         });
     }
@@ -509,6 +511,7 @@ class Svg extends React.Component {
                         <DefaultMarkers/>
                         <HighlightedMarkers/>
                         <PlaceholderMarkers/>
+                        <RejectedPlaceholderMarkers/>
                     </defs>
                     {fromConnectorPanelParams && toConnectorPanelParams &&
                         <ConnectorPanels

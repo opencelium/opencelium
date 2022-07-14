@@ -14,7 +14,7 @@
  */
 
 import CCondition from "./CCondition";
-import CStatement from "./CStatement";
+import CStatement, {DEFAULT_COLOR} from "./CStatement";
 import {isString} from "@application/utils/utils";
 
 export const IF_OPERATOR = 'if';

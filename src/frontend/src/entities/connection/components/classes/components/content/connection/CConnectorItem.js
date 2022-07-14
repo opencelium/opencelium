@@ -26,6 +26,9 @@ import CProcess, {
     PROCESS_HEIGHT,
     PROCESS_WIDTH
 } from "@entity/connection/components/classes/components/content/connection_overview_2/process/CProcess";
+ import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
+ import CBindingItem from "@classes/content/connection/field_binding/CBindingItem";
+ import {DEFAULT_COLOR} from "@classes/content/connection/operator/CStatement";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -170,6 +173,59 @@ export default class CConnectorItem{
         return this._svgItems.find(svgItem => svgItem.entity.index === index);
     }
 
+    getAllReferences(){
+        const references = [];
+        for(let i = 0; i < this._methods.length; i++){
+            const methodReferences = this._methods[i].getReferences();
+            const methods = [];
+            for(let j = 0; j < methodReferences.length; j++){
+                methods.push(this.getMethodByColor(methodReferences[j].substring(0, 7)))
+            }
+            if(methods.length !== 0){
+                references.push({
+                    element: this._methods[i].index,
+                    references: methods.map(m => m.index)
+                });
+            }
+        }
+        return references;
+    }
+
+    convertReferencesToIndexes(references){
+        const methods = references.map(r => this.getMethodByColor(r.substring(0, 7)));
+        return methods.map(m => m.index);
+    }
+
+    getReferencesForOperator(operator){
+        const references = [];
+        for(let i = 0; i < this._methods.length; i++){
+            if(this._methods[i].index.indexOf(operator.index) === 0){
+                references.push([...this._methods[i].getReferences()]);
+            }
+        }
+        for(let i = 0; i < this._operators.length; i++){
+            if(this._operators[i].index.indexOf(operator.index) === 0){
+                const leftColor = this._operators[i].condition.leftStatement.color;
+                const rightColor = this._operators[i].condition.rightStatement.color;
+                if(leftColor && leftColor !== DEFAULT_COLOR){
+                    references.push(leftColor);
+                }
+                if(rightColor && rightColor !== DEFAULT_COLOR){
+                    references.push(rightColor);
+                }
+            }
+        }
+    }
+
+    static areIndexesUnderScope(scopeElement, indexes){
+        for(let i = 0; i < indexes.length; i++){
+            if(scopeElement.index < indexes[i]){
+                return false;
+            }
+        }
+        return true;
+    }
+
     static getSvgElement(element){
         if(element instanceof CTechnicalOperator || element instanceof CTechnicalProcess){
             return element
@@ -212,6 +268,24 @@ export default class CConnectorItem{
                 this.arrows.push({from: `${this.getConnectorType()}_${this.getPrevIndex(items[i].index)}`, to: `${this.getConnectorType()}_${items[i].index}`});
             }
         }
+    }
+
+    getOperatorChildren(operator){
+        const children = [];
+        if(operator){
+            let operatorIndex = operator.index;
+            for(let i = 0; i < this._methods.length; i++){
+                if(this._methods[i].index.indexOf(operatorIndex) === 0 && this._methods[i].index !== operatorIndex){
+                    children.push(this._methods[i]);
+                }
+            }
+            for(let i = 0; i < this._operators.length; i++){
+                if(this._operators[i].index.indexOf(operatorIndex) === 0 && this._operators[i].index !== operatorIndex){
+                    children.push(this._operators[i]);
+                }
+            }
+        }
+        return children;
     }
 
     updateIndexesForOperator(operator, newParentIndex){

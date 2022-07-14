@@ -35,6 +35,7 @@ export default class COperator{
             this._entity = COperatorItem.createOperatorItem(this._entity);
         }
         this._isDragged = operator && operator.hasOwnProperty('isDragged') ? operator.isDragged : false;
+        this._isAvailableForDragging = process && process.hasOwnProperty('isAvailableForDragging') ? process.isAvailableForDragging : false;
     }
 
     static getPoints(x, y, size = OPERATOR_SIZE){
@@ -103,6 +104,14 @@ export default class COperator{
 
     set isDragged(isDragged){
         this._isDragged = isDragged;
+    }
+
+    get isAvailableForDragging(){
+        return this._isAvailableForDragging;
+    }
+
+    set isAvailableForDragging(isAvailableForDragging){
+        this._isAvailableForDragging = isAvailableForDragging;
     }
 
     get connectorType(){
@@ -174,6 +183,7 @@ export default class COperator{
             width: this._width,
             height: this._height,
             isDragged: this._isDragged,
+            isAvailableForDragging: this._isAvailableForDragging,
             connectorType: this._connectorType,
             invoker: this._invoker,
             entity: this._entity.getObject(),

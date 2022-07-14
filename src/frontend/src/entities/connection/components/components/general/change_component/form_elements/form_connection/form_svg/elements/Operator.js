@@ -200,6 +200,7 @@ class Operator extends React.Component{
         const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
+        const isRejectedPlaceholder = currentTechnicalItem && !currentTechnicalItem.isAvailableForDragging;
         const svgExtraSize = 90;
         const svgSize = {
             width: operator.width,
@@ -211,6 +212,22 @@ class Operator extends React.Component{
             }
             if(hasRightPlaceholder){
                 svgSize.width += svgExtraSize;
+            }
+        }
+        let bottomStroke = '#5d5b5b';
+        if(isMouseOverBottomPlaceholder){
+            if(isRejectedPlaceholder){
+                bottomStroke = '#d24545';
+            } else{
+                bottomStroke = '#00acc2';
+            }
+        }
+        let rightStroke = '#5d5b5b';
+        if(isMouseOverRightPlaceholder){
+            if(isRejectedPlaceholder){
+                rightStroke = '#d24545';
+            } else{
+                rightStroke = '#00acc2';
             }
         }
         const textX = '30';
@@ -257,7 +274,7 @@ class Operator extends React.Component{
                     hasBottomPlaceholder
                     ?
                         <React.Fragment>
-                            <line x1={operator.width / 2} y1={operator.height} x2={operator.width / 2} y2={operator.height + 20} stroke={isMouseOverBottomPlaceholder ? '#00acc2' : '#5d5b5b'} strokeWidth={ARROW_WIDTH}/>
+                            <line x1={operator.width / 2} y1={operator.height} x2={operator.width / 2} y2={operator.height + 20} stroke={bottomStroke} strokeWidth={ARROW_WIDTH}/>
                             {
                                 isDraggableItemOperator
                                     ?
@@ -265,7 +282,8 @@ class Operator extends React.Component{
                                         id={`arrow_from__${operator.id}__${INSIDE_ITEM}`}
                                         onMouseOver={(a) => this.onMouseOverBottomPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveBottomPlaceholder(a)}
-                                        className={isMouseOverBottomPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        className={isMouseOverBottomPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        stroke={bottomStroke}
                                         points={COperator.getPoints(15, 80, 30)}
                                     />
                                     :
@@ -274,12 +292,18 @@ class Operator extends React.Component{
                                         onMouseOver={(a) => this.onMouseOverBottomPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveBottomPlaceholder(a)}
                                         className={isMouseOverBottomPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        stroke={bottomStroke}
                                         rx={5} ry={5}
                                         x={15}
                                         y={80}
                                         width={30}
                                         height={20}
                                     />
+                            }
+                            {isMouseOverBottomPlaceholder && isRejectedPlaceholder &&
+                                <text dominantBaseline={"middle"} textAnchor={"middle"} fill={bottomStroke} x={30} y={110} className={styles.dependency_text}>
+                                    {'dependency'}
+                                </text>
                             }
                         </React.Fragment>
                     :
@@ -289,7 +313,7 @@ class Operator extends React.Component{
                     hasRightPlaceholder
                     ?
                         <React.Fragment>
-                            <line x1={operator.width} y1={operator.height / 2} x2={operator.width + 20} y2={operator.height / 2} stroke={isMouseOverRightPlaceholder ? '#00acc2' : '#5d5b5b'} strokeWidth={ARROW_WIDTH}/>
+                            <line x1={operator.width} y1={operator.height / 2} x2={operator.width + 20} y2={operator.height / 2} stroke={rightStroke} strokeWidth={ARROW_WIDTH}/>
                             {
                                 isDraggableItemOperator
                                     ?
@@ -297,7 +321,8 @@ class Operator extends React.Component{
                                         id={`arrow_from__${operator.id}__${OUTSIDE_ITEM}`}
                                         onMouseOver={(a) => this.onMouseOverRightPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveRightPlaceholder(a)}
-                                        className={isMouseOverRightPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        className={isMouseOverRightPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        stroke={rightStroke}
                                         points={COperator.getPoints(80, 15, 30)}
                                     />
                                     :
@@ -306,12 +331,18 @@ class Operator extends React.Component{
                                         onMouseOver={(a) => this.onMouseOverRightPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveRightPlaceholder(a)}
                                         className={isMouseOverRightPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        stroke={rightStroke}
                                         rx={5} ry={5}
                                         x={80}
                                         y={20}
                                         width={30}
                                         height={20}
                                     />
+                            }
+                            {isMouseOverRightPlaceholder && isRejectedPlaceholder &&
+                                <text dominantBaseline={"middle"} textAnchor={"middle"} fill={rightStroke} className={styles.dependency_text} x={95} y={50}>
+                                    {'dependency'}
+                                </text>
                             }
                         </React.Fragment>
                     :

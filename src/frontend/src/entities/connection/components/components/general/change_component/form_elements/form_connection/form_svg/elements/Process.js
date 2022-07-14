@@ -31,6 +31,8 @@ import CBusinessLayout from "@entity/connection/components/classes/components/co
 import ReactDOM from "react-dom";
 import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
+import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
+import {INSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -103,6 +105,7 @@ class Process extends React.Component{
         if(!isDisabled) {
             if (connection && !connection.businessLayout.isInAssignMode) {
                 process.isDragged = true;
+                //process.isAvailableForDragging = process.entity.getReferences().length === 0;
                 setCurrentItem(process);
             }
         }
@@ -171,6 +174,7 @@ class Process extends React.Component{
             isDisabled, colorMode, readOnly, businessLabelMode, connection,
             isVisibleBusinessLabelKeyPressed, currentBusinessItem, currentTechnicalItem,
         } = this.props;
+        const isRejectedPlaceholder = currentTechnicalItem && !currentTechnicalItem.isAvailableForDragging;
         const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const method = process.entity;
         const borderRadius = 10;
@@ -203,20 +207,30 @@ class Process extends React.Component{
                     break;
             }
         }
+        let stroke = '#5d5b5b';
+        if(isMouseOverPlaceholder){
+            if(isRejectedPlaceholder){
+                stroke = '#d24545';
+            } else{
+                stroke = '#00acc2';
+            }
+        }
         const color = method ? method.color : '';
         let hasColor = color !== '';
         let shortLabel = label;
         if(isString(label) && label.length > 12){
             shortLabel = `${label.substr(0, 9)}...`;
         }
+        //shortLabel = process.entity.index;
         const assignedStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
         const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         const isBusinessItem = CBusinessLayout.isInstanceOfBusinessItem(process);
-        const hasDraggableProcess = isCurrent && currentBusinessItem && currentBusinessItem.isDragged && isBusinessItem || isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
+        const hasDraggableItem = isCurrent && currentBusinessItem && currentBusinessItem.isDragged && isBusinessItem || isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
         const isSelected = isCurrent && !readOnly;
         const hasDeleteIcon = isSelected;
         const showPlaceholder = this.shouldShowPlaceholder();
+        const isDraggableItemOperator = showPlaceholder && currentTechnicalItem instanceof CTechnicalOperator;
         const svgSize = {
             width: process.width,
             height: process.height,
@@ -229,7 +243,7 @@ class Process extends React.Component{
         return(
             <React.Fragment>
                 <svg id={process.getHtmlIdName()} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>
-                    <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
+                    <rect rx={borderRadius} ry={borderRadius} x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
                     <rect fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color} onDoubleClick={(a) => this.onDoubleClick(a)} onClick={(a) => this.onClick(a)} onMouseOver={(a) => this.onMouseOver(a)} onMouseDown={(a) => this.onMouseDown(a)} onMouseLeave={(a) => this.onMouseLeave(a)} x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
                           className={`${technicalRectClassName} ${styles.process_rect} ${assignedStyle} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
                     />
@@ -251,24 +265,43 @@ class Process extends React.Component{
                         showPlaceholder
                             ?
                             <React.Fragment>
-                                <line x1={process.width} y1={process.height / 2} x2={process.width + 20} y2={process.height / 2} stroke={isMouseOverPlaceholder ? '#00acc2' : '#5d5b5b'} strokeWidth={ARROW_WIDTH}/>
-                                <rect
-                                    id={`arrow_from__${process.id}`}
-                                    onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
-                                    onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
-                                    className={isMouseOverPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
-                                    rx={5} ry={5}
-                                    x={process.width + 20}
-                                    y={30}
-                                    width={30}
-                                    height={20}
-                                />
+                                <line x1={process.width} y1={process.height / 2} x2={process.width + 20} y2={process.height / 2} stroke={stroke} strokeWidth={ARROW_WIDTH}/>
+                                {
+                                    isDraggableItemOperator
+                                        ?
+                                        <polygon
+                                            id={`arrow_from__${process.id}`}
+                                            onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
+                                            onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
+                                            className={isMouseOverPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                            stroke={stroke}
+                                            points={COperator.getPoints(process.width + 20, 25, 30)}
+                                        />
+                                        :
+                                        <rect
+                                            id={`arrow_from__${process.id}`}
+                                            onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
+                                            onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
+                                            className={isMouseOverPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                            stroke={stroke}
+                                            rx={5} ry={5}
+                                            x={process.width + 20}
+                                            y={30}
+                                            width={30}
+                                            height={20}
+                                        />
+                                }
+                                {isMouseOverPlaceholder && isRejectedPlaceholder &&
+                                    <text dominantBaseline={"middle"} textAnchor={"middle"} fill={stroke} fontSize={'10px'} x={process.width + 35} y={60}>
+                                        {'dependency'}
+                                    </text>
+                                }
                             </React.Fragment>
                             :
                             null
                     }
                 </svg>
-                {hasDraggableProcess &&
+                {hasDraggableItem &&
                     ReactDOM.createPortal(
                         <rect id={'draggable_process'} className={styles.draggable_process} rx={borderRadius} ry={borderRadius} x={process.x} y={process.y} width={process.width} height={process.height}/>, document.getElementById(isBusinessItem ? 'business_layout_svg' : 'technical_layout_svg')
                     )

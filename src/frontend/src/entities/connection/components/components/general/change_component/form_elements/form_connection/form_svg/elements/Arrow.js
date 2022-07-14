@@ -21,7 +21,7 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {connect} from "react-redux";
 import {setCurrentBusinessItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import COperator, {OPERATOR_SIZE} from "@classes/content/connection_overview_2/operator/COperator";
-import {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import CConnectorItem, {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 
 export const ARROW_WIDTH = 2;
 
@@ -39,23 +39,37 @@ class Arrow extends React.Component{
         super(props);
         this.state = {
             isMouseOver: false,
+            isAvailableForDragging: false,
         }
     }
 
     onMouseOver(){
-        this.setState({
-            isMouseOver: true,
-        })
+        const {from, currentTechnicalItem, connection} = this.props;
+        const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
+        if(isCurrentItemDragged && !this.state.isMouseOver){
+            const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
+            const allReferences = currentTechnicalItem.entity.getReferences();
+            const isAvailableForDragging = CConnectorItem.areIndexesUnderScope(from.entity, connector.convertReferencesToIndexes(allReferences));
+            this.setState({
+                isMouseOver: true,
+                isAvailableForDragging,
+            })
+        }
     }
 
     onMouseLeave(){
-        this.setState({
-            isMouseOver: false,
-        })
+        const {currentTechnicalItem} = this.props;
+        const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
+        if(isCurrentItemDragged && this.state.isMouseOver){
+            this.setState({
+                isMouseOver: false,
+                isAvailableForDragging: false,
+            })
+        }
     }
 
     render(){
-        const {isMouseOver} = this.state;
+        const {isMouseOver, isAvailableForDragging} = this.state;
         const {from, to, isHighlighted, isDisabled, currentTechnicalItem} = this.props;
         if(!from || !to){
             return null;
@@ -67,15 +81,21 @@ class Arrow extends React.Component{
         let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
         const isDisabledStyle = isDisabled ? styles.disabled_arrow : '';
         const showPlaceholder = isDraggableItemOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index;
-        const stroke = showPlaceholder ? '#00acc2' : '#000';
         const processPlaceholderX = line1 === null ? arrow.x1 - 15 + (arrow.x2 - arrow.x1) / 2 : line1.x1 - 15 + (arrow.x2 - line1.x1) / 2;
         const processPlaceholderY = line1 === null ? arrow.y1 - 10 + (arrow.y2 - arrow.y1) / 2 : line1.y1 - 10 + (arrow.y2 - line1.y1) / 2;
         const aroundConst = 40;
         const processPlaceholderBackgroundCoord = {x: line1 ? line1.x1 - aroundConst : arrow.x1 - aroundConst, y: line1 ? line1.y1 - aroundConst : arrow.y1 - aroundConst, width: line1 ? arrow.x2 - line1.x1 + aroundConst * 2 : arrow.x2 - arrow.x1 + aroundConst * 2, height: line1 ? arrow.y2 - line1.y1 + aroundConst * 2 : arrow.y2 - arrow.y1 + aroundConst * 2};
         let markerStyle = isHighlighted ? '_highlighted' : '';
         const isInsideDirection = line1 !== null && line2 !== null;
+        const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
+        let stroke = '#000';
         if(showPlaceholder){
             markerStyle = '_placeholder';
+            stroke = '#00acc2';
+        }
+        if(showPlaceholder && isRejectedPlaceholder){
+            markerStyle = '_rejected_placeholder';
+            stroke = '#d24545';
         }
         return(
             <React.Fragment>
@@ -87,10 +107,15 @@ class Arrow extends React.Component{
                                 strokeWidth={ARROW_WIDTH} markerEnd={`url(#arrow_head_right${markerStyle})`}/>}
                 {showPlaceholder ?
                     !isOperator ?
-                        <rect className={styles.process_placeholder} rx={5} ry={5} x={processPlaceholderX} y={processPlaceholderY} width={30} height={20}/>
+                        <rect className={styles.process_placeholder} stroke={stroke} rx={5} ry={5} x={processPlaceholderX} y={processPlaceholderY} width={30} height={20}/>
                     :
-                        <polygon className={styles.operator_placeholder} points={COperator.getPoints(processPlaceholderX, processPlaceholderY - 5, 30)}/>
+                        <polygon className={styles.operator_placeholder} stroke={stroke} points={COperator.getPoints(processPlaceholderX, processPlaceholderY - 5, 30)}/>
                     : null
+                }
+                {showPlaceholder && isRejectedPlaceholder &&
+                    <text dominantBaseline={"middle"} textAnchor={"middle"} fill={stroke} fontSize={'10px'} x={processPlaceholderX + 18} y={processPlaceholderY + 30}>
+                        {'dependency'}
+                    </text>
                 }
                 <rect id={`arrow_from__${from.id}__${isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM}`} onMouseOver={() => this.onMouseOver()} onMouseLeave={() => this.onMouseLeave()} className={styles.process_placeholder_background} {...processPlaceholderBackgroundCoord}/>
             </React.Fragment>

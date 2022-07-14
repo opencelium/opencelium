@@ -230,6 +230,12 @@ $HIGHLIGHT_COLOR: #8a9dd7;
     fill: #00acc2;
   }
 }
+.rejected_placeholder_marker{
+  polygon {
+    stroke: #d24545;
+    fill: #d24545;
+  }
+}
 .disabled_arrow{
   opacity: 0.3;
 }
@@ -833,25 +839,32 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 
 .process_placeholder{
   fill: #fff !important;
-  stroke: #00acc2 !important;
   stroke-width: 2px;
 }
 
 .operator_placeholder_leave{
   fill: #fff !important;
-  stroke: #5d5b5b !important;
   stroke-width: 2px;
+}
+
+.dependency_text{
+  font-size: 10px !important;
 }
 
 .operator_placeholder_over{
   fill: #fff !important;
-  stroke: #00acc2 !important;
+  stroke-width: 2px;
+}
+
+.operator_placeholder_over_rejected{
+  @extend .operator_placeholder_over;
+  fill: #fff !important;
+  stroke: #d24545 !important;
   stroke-width: 2px;
 }
 
 .operator_placeholder{
   fill: #fff !important;
-  stroke: #00acc2 !important;
   stroke-width: 2px;
 }
 
