@@ -35,7 +35,7 @@ export default class COperator{
             this._entity = COperatorItem.createOperatorItem(this._entity);
         }
         this._isDragged = operator && operator.hasOwnProperty('isDragged') ? operator.isDragged : false;
-        this._isAvailableForDragging = process && process.hasOwnProperty('isAvailableForDragging') ? process.isAvailableForDragging : false;
+        this._isAvailableForDragging = operator && operator.hasOwnProperty('isAvailableForDragging') ? operator.isAvailableForDragging : false;
     }
 
     static getPoints(x, y, size = OPERATOR_SIZE){

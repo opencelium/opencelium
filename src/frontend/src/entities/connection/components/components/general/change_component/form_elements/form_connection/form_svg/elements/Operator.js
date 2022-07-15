@@ -17,7 +17,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2.scss";
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
-import {
+import CConnectorItem, {
     CONNECTOR_FROM, INSIDE_ITEM,
     OUTSIDE_ITEM
 } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
@@ -50,13 +50,28 @@ class Operator extends React.Component{
             isMouseOverSvg: false,
             isMouseOverRightPlaceholder: false,
             isMouseOverBottomPlaceholder: false,
+            isAvailableForDragging: false,
         }
     }
 
     onMouseOverSvg(){
-        if(!this.state.isMouseOverSvg){
+        const {currentTechnicalItem, connection, operator} = this.props;
+        const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
+        if(isCurrentItemDragged && !this.state.isMouseOverSvg){
+            const isOperator = currentTechnicalItem instanceof COperator;
+            const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
+            const allReferences = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
+            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(operator.entity, connector.convertReferencesToIndexes(allReferences));
+            if(isAvailableForDragging){
+                if(isOperator && currentTechnicalItem){
+                    if(operator.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
+                        isAvailableForDragging = false;
+                    }
+                }
+            }
             this.setState({
                 isMouseOverSvg: true,
+                isAvailableForDragging,
             })
         }
     }
@@ -195,12 +210,12 @@ class Operator extends React.Component{
     }
 
     renderOperator(operatorType){
-        const {polygonStyle, isMouseOverSvg, isMouseOverBottomPlaceholder, isMouseOverRightPlaceholder} = this.state;
+        const {polygonStyle, isMouseOverSvg, isMouseOverBottomPlaceholder, isMouseOverRightPlaceholder, isAvailableForDragging} = this.state;
         const {connection, operator, isNotDraggable, isCurrent, currentTechnicalItem, isHighlighted, readOnly, isAssignedToBusinessProcess, isDisabled} = this.props;
         const isAssignMode = connection && connection.businessLayout.isInAssignMode;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
-        const isRejectedPlaceholder = currentTechnicalItem && !currentTechnicalItem.isAvailableForDragging;
+        const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
         const svgExtraSize = 90;
         const svgSize = {
             width: operator.width,
@@ -280,6 +295,7 @@ class Operator extends React.Component{
                                     ?
                                     <polygon
                                         id={`arrow_from__${operator.id}__${INSIDE_ITEM}`}
+                                        data-movable={isAvailableForDragging}
                                         onMouseOver={(a) => this.onMouseOverBottomPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveBottomPlaceholder(a)}
                                         className={isMouseOverBottomPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
@@ -289,6 +305,7 @@ class Operator extends React.Component{
                                     :
                                     <rect
                                         id={`arrow_from__${operator.id}__${INSIDE_ITEM}`}
+                                        data-movable={isAvailableForDragging}
                                         onMouseOver={(a) => this.onMouseOverBottomPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveBottomPlaceholder(a)}
                                         className={isMouseOverBottomPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
@@ -319,6 +336,7 @@ class Operator extends React.Component{
                                     ?
                                     <polygon
                                         id={`arrow_from__${operator.id}__${OUTSIDE_ITEM}`}
+                                        data-movable={isAvailableForDragging}
                                         onMouseOver={(a) => this.onMouseOverRightPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveRightPlaceholder(a)}
                                         className={isMouseOverRightPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
@@ -328,6 +346,7 @@ class Operator extends React.Component{
                                     :
                                     <rect
                                         id={`arrow_from__${operator.id}__${OUTSIDE_ITEM}`}
+                                        data-movable={isAvailableForDragging}
                                         onMouseOver={(a) => this.onMouseOverRightPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveRightPlaceholder(a)}
                                         className={isMouseOverRightPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}

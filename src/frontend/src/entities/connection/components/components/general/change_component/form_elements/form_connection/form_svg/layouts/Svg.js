@@ -287,7 +287,7 @@ class Svg extends React.Component {
                         if(targetElemIdSplit.length === 3){
                             mode = targetElemIdSplit[2];
                         }
-                        if(currentTechnicalItem.isAvailableForDragging){
+                        if(this.selectedElement.getAttribute('data-movable') === 'true'){
                             shouldMoveItem = true;
                             this.moveItem(connector, sourceItem, targetLeftItem, mode);
                         }
@@ -431,7 +431,7 @@ class Svg extends React.Component {
     }
 
     renderArrows(){
-        const {currentItem, currentTechnicalItem, currentBusinessItem, arrows, items, hasAssignCentralText, connection} = this.props;
+        const {currentItem, currentTechnicalItem, currentBusinessItem, arrows, items, hasAssignCentralText, connection, setCurrentItem} = this.props;
         if(hasAssignCentralText){
             return null;
         }
@@ -456,7 +456,7 @@ class Svg extends React.Component {
                 isHighlighted = currentTechnicalItem ? fromIndex.indexOf(currentTechnicalItem.id) === 0 && toIndex.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
-                <Arrow key={key} connection={connection} {...arrow} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
+                <Arrow key={key} connection={connection} {...arrow} setCurrentItem={setCurrentItem} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
             );
         });
     }

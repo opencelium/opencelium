@@ -185,7 +185,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
   stroke: $HIGHLIGHT_COLOR;
 }
 .highlighted_process{
-  rect {
+  rect:nth-child(2)  {
     @extend .highlighting;
   }
 }
@@ -853,6 +853,7 @@ $HIGHLIGHT_COLOR: #8a9dd7;
 
 .operator_placeholder_over{
   fill: #fff !important;
+  stroke: #00acc2 !important;
   stroke-width: 2px;
 }
 

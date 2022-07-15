@@ -197,10 +197,10 @@ export default class CConnectorItem{
     }
 
     getReferencesForOperator(operator){
-        const references = [];
+        let references = [];
         for(let i = 0; i < this._methods.length; i++){
             if(this._methods[i].index.indexOf(operator.index) === 0){
-                references.push([...this._methods[i].getReferences()]);
+                references = [...references, ...this._methods[i].getReferences()];
             }
         }
         for(let i = 0; i < this._operators.length; i++){
@@ -215,11 +215,13 @@ export default class CConnectorItem{
                 }
             }
         }
+        return references;
     }
 
     static areIndexesUnderScope(scopeElement, indexes){
         for(let i = 0; i < indexes.length; i++){
-            if(scopeElement.index < indexes[i]){
+            let splitIndex = indexes[i].split('_');
+            if(scopeElement.index < indexes[i] || (scopeElement.index > indexes[i] && scopeElement.index.indexOf(subArrayToString(splitIndex, 0, splitIndex.length - 2)) !== 0)){
                 return false;
             }
         }
