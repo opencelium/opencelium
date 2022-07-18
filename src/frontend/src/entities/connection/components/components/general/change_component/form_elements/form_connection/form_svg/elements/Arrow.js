@@ -102,7 +102,6 @@ class Arrow extends React.Component{
             markerStyle = '_rejected_placeholder';
             stroke = '#d24545';
         }
-        console.log(isAvailableForDragging);
         return(
             <React.Fragment>
                 {line1 && <line id={`${from.id}_${to.id}_line1`} className={`${isDisabledStyle} ${isHighlighted ? styles.highlighted_arrow : ''} line1`} x1={line1.x1} y1={line1.y1} x2={line1.x2} y2={line1.y2} stroke={stroke}
