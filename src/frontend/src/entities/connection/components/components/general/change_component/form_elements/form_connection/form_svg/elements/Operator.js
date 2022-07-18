@@ -57,7 +57,7 @@ class Operator extends React.Component{
     onMouseOverSvg(){
         const {currentTechnicalItem, connection, operator} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseOverSvg){
+        if(isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== operator.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
             const allReferences = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
@@ -308,7 +308,7 @@ class Operator extends React.Component{
                                         data-movable={isAvailableForDragging}
                                         onMouseOver={(a) => this.onMouseOverBottomPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveBottomPlaceholder(a)}
-                                        className={isMouseOverBottomPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        className={isMouseOverBottomPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
                                         stroke={bottomStroke}
                                         rx={5} ry={5}
                                         x={15}
@@ -349,7 +349,7 @@ class Operator extends React.Component{
                                         data-movable={isAvailableForDragging}
                                         onMouseOver={(a) => this.onMouseOverRightPlaceholder(a)}
                                         onMouseLeave={(a) => this.onMouseLeaveRightPlaceholder(a)}
-                                        className={isMouseOverRightPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                        className={isMouseOverRightPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
                                         stroke={rightStroke}
                                         rx={5} ry={5}
                                         x={80}

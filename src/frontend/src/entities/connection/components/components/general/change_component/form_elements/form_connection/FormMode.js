@@ -323,7 +323,7 @@ class FormMode extends Component{
                             placeholder={`Choose template`}
                             isDisabled={readOnly}
                             isSearchable={!readOnly}
-                            getOptionRightComponent={(option) => {return (<TemplateConversionIcon id={entity.id.toString()} classNameIcon={styles.conversion_icon} data={{template: option.template}} blueTheme={true}/>);}}
+                            getOptionRightComponent={(option) => {return (<TemplateConversionIcon id={option.template.templateId} classNameIcon={styles.conversion_icon} data={{template: option.template}} blueTheme={true}/>);}}
                         />
                         <DeleteTemplateButtonStyled
                             tooltip={'Delete'}

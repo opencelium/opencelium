@@ -44,13 +44,13 @@ class Arrow extends React.Component{
     }
 
     onMouseOver(){
-        const {from, currentTechnicalItem, connection} = this.props;
+        const {from, to, currentTechnicalItem, connection} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseOver){
+        if(isCurrentItemDragged && !this.state.isMouseOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            const allReferences = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
-            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(from.entity, connector.convertReferencesToIndexes(allReferences));
+            const references = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
+            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(to.entity, connector.convertReferencesToIndexes(references));
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(from.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){

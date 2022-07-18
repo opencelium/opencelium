@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, isString, sortByIndex, subArrayToString} from "@application/utils/utils";
+import {consoleLog, isId, isString, sortByIndex, sortByIndexFunction, subArrayToString} from "@application/utils/utils";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem, {LOOP_OPERATOR} from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
@@ -173,10 +173,10 @@ export default class CConnectorItem{
         return this._svgItems.find(svgItem => svgItem.entity.index === index);
     }
 
-    getAllReferences(){
+    getAllMethodReferences(){
         const references = [];
         for(let i = 0; i < this._methods.length; i++){
-            const methodReferences = this._methods[i].getReferences();
+            const methodReferences = Array.from(this._methods[i].getReferences());
             const methods = [];
             for(let j = 0; j < methodReferences.length; j++){
                 methods.push(this.getMethodByColor(methodReferences[j].substring(0, 7)))
@@ -192,15 +192,38 @@ export default class CConnectorItem{
     }
 
     convertReferencesToIndexes(references){
-        const methods = references.map(r => this.getMethodByColor(r.substring(0, 7)));
+        const methods = Array.from(references).map(r => this.getMethodByColor(r.substring(0, 7)));
         return methods.map(m => m.index);
     }
 
+    getReferencesForMethod(method){
+        const allReferences = this.getAllMethodReferences();
+        let inReferences = new Set([]);
+        let outReferences = new Set([]);
+        for(let i = 0; i < allReferences.length; i++){
+            if(allReferences[i].element === method.index){
+                inReferences = allReferences[i].references;
+            } else{
+                if(allReferences[i].references.findIndex(ref => ref === method.index) !== -1){
+                    outReferences.add(allReferences[i].element);
+                }
+            }
+        }
+        return new Set([...inReferences, outReferences])
+    }
+
     getReferencesForOperator(operator){
-        let references = [];
-        for(let i = 0; i < this._methods.length; i++){
-            if(this._methods[i].index.indexOf(operator.index) === 0){
-                references = [...references, ...this._methods[i].getReferences()];
+        let operatorReferences = new Set([]);
+        const allReferences = this.getAllMethodReferences();
+        let inReferences = new Set([]);
+        let outReferences = new Set([]);
+        for(let i = 0; i < allReferences.length; i++){
+            if(allReferences[i].element.indexOf(operator.index) === 0){
+                inReferences = allReferences[i].references;
+            } else{
+                if(allReferences[i].references.findIndex(ref => ref.indexOf(operator.index) === 0) !== -1){
+                    outReferences.add(allReferences[i].element);
+                }
             }
         }
         for(let i = 0; i < this._operators.length; i++){
@@ -208,21 +231,27 @@ export default class CConnectorItem{
                 const leftColor = this._operators[i].condition.leftStatement.color;
                 const rightColor = this._operators[i].condition.rightStatement.color;
                 if(leftColor && leftColor !== DEFAULT_COLOR){
-                    references.push(leftColor);
+                    operatorReferences.add(leftColor);
                 }
                 if(rightColor && rightColor !== DEFAULT_COLOR){
-                    references.push(rightColor);
+                    operatorReferences.add(rightColor);
                 }
             }
         }
-        return references;
+        return new Set([...inReferences, ...outReferences, ...operatorReferences]);
     }
 
     static areIndexesUnderScope(scopeElement, indexes){
+        const scopeElementIndex = scopeElement.index;
+        const scopeElementIndexSplit = scopeElementIndex.split('_');
         for(let i = 0; i < indexes.length; i++){
-            let splitIndex = indexes[i].split('_');
-            if(scopeElement.index < indexes[i] || (scopeElement.index > indexes[i] && scopeElement.index.indexOf(subArrayToString(splitIndex, 0, splitIndex.length - 2)) !== 0)){
-                return false;
+            const indexSplit = indexes[i].split('_');
+            if(scopeElementIndexSplit.length === indexSplit.length){
+                if(scopeElementIndex < indexes[i]){
+                    return false;
+                }
+            } else if(scopeElementIndexSplit.length < indexSplit.length){
+
             }
         }
         return true;

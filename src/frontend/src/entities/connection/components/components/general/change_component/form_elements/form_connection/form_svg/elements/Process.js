@@ -79,11 +79,11 @@ class Process extends React.Component{
     onMouseOverSvg(){
         const {currentTechnicalItem, connection, process} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseOverSvg){
+        if(isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            const allReferences = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
-            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(process.entity, connector.convertReferencesToIndexes(allReferences));
+            const references = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
+            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(process.entity, connector.convertReferencesToIndexes(references));
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(process.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
@@ -298,7 +298,7 @@ class Process extends React.Component{
                                             data-movable={isAvailableForDragging}
                                             onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
                                             onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
-                                            className={isMouseOverPlaceholder ? styles.operator_placeholder_over : styles.operator_placeholder_leave}
+                                            className={isMouseOverPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
                                             stroke={stroke}
                                             rx={5} ry={5}
                                             x={process.width + 20}

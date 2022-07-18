@@ -23,10 +23,13 @@ const Option: FC<OptionProps> =
          getOptionRightComponent,
         ...props
     }) => {
+    const OptionRightComponent = getOptionRightComponent ? getOptionRightComponent({...props}) : null;
     return (
         <React.Fragment>
-            <OptionStyled readOnly={true} {...props}/>
-            {getOptionRightComponent && getOptionRightComponent({...props})}
+            <div style={{position: 'relative'}}>
+                <OptionStyled readOnly={true} {...props}/>
+                {OptionRightComponent}
+            </div>
         </React.Fragment>
     )
 }
