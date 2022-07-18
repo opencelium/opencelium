@@ -273,13 +273,12 @@ export default class CConnectorItem{
                 }
             }
         }
+        if(startIndex === '0'){
+            return true;
+        }
         let startIndexSplit = startIndex.split('_');
         let scopeElementIndexSplit = scopeElement.index.split('_');
-        if(startIndexSplit.length === 1){
-            return startIndex <= scopeElement.index;
-        } else{
-            return subArrayToString(startIndexSplit, '_', 0, startIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1) && startIndex < scopeElement.index;
-        }
+        return subArrayToString(startIndexSplit, '_', 0, startIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1) && startIndex <= scopeElement.index;
     }
 
     static areIndexesUnderScopeForMethod(scopeElement, indexes){
@@ -293,12 +292,15 @@ export default class CConnectorItem{
         if(outReferences.length > 0){
             endIndex = outReferences[0];
         }
+        if(startIndex === '0' && endIndex === ''){
+            return true;
+        }
         let startIndexSplit = startIndex.split('_');
         let endIndexSplit = endIndex.split('_');
         let scopeElementIndexSplit = scopeElement.index.split('_');
         return subArrayToString(startIndexSplit, '_', 0, startIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1)
             && startIndex <= scopeElement.index
-            && (endIndex !== '' ? subArrayToString(endIndexSplit, '_', 0, endIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, endIndexSplit.length - 1) && endIndex > scopeElement.index : true);
+            && (endIndex !== '' ? subArrayToString(endIndexSplit, '_', 0, endIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, endIndexSplit.length - 1) && endIndex >= scopeElement.index : true);
     }
 
     static areIndexesUnderScope(scopeElement, draggableElement, indexes){
