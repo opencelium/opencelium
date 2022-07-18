@@ -60,8 +60,8 @@ class Operator extends React.Component{
         if(isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== operator.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            const allReferences = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
-            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(operator.entity, connector.convertReferencesToIndexes(allReferences));
+            const allReferences = connector.getReferencesForItem(currentTechnicalItem.entity);
+            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, allReferences);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(operator.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){

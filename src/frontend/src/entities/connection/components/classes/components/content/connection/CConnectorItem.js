@@ -13,7 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, isString, sortByIndex, sortByIndexFunction, subArrayToString} from "@application/utils/utils";
+import {
+    consoleLog,
+    isArray,
+    isId,
+    isString,
+    sortByIndex,
+    sortByIndexFunction, sortConnectorItemIndexes,
+    subArrayToString
+} from "@application/utils/utils";
 import CMethodItem from "./method/CMethodItem";
 import COperatorItem, {LOOP_OPERATOR} from "./operator/COperatorItem";
 import CInvoker from "../invoker/CInvoker";
@@ -202,14 +210,14 @@ export default class CConnectorItem{
         let outReferences = new Set([]);
         for(let i = 0; i < allReferences.length; i++){
             if(allReferences[i].element === method.index){
-                inReferences = allReferences[i].references;
+                inReferences = new Set([...inReferences, ...allReferences[i].references]);
             } else{
                 if(allReferences[i].references.findIndex(ref => ref === method.index) !== -1){
                     outReferences.add(allReferences[i].element);
                 }
             }
         }
-        return new Set([...inReferences, outReferences])
+        return {inReferences: Array.from(inReferences), outReferences: Array.from(outReferences)};
     }
 
     getReferencesForOperator(operator){
@@ -218,12 +226,11 @@ export default class CConnectorItem{
         let inReferences = new Set([]);
         let outReferences = new Set([]);
         for(let i = 0; i < allReferences.length; i++){
-            if(allReferences[i].element.indexOf(operator.index) === 0){
-                inReferences = allReferences[i].references;
-            } else{
-                if(allReferences[i].references.findIndex(ref => ref.indexOf(operator.index) === 0) !== -1){
-                    outReferences.add(allReferences[i].element);
-                }
+            if(allReferences[i].element.indexOf(operator.index) === 0) {
+                inReferences = new Set([...inReferences, ...allReferences[i].references]);
+            }
+            if(allReferences[i].references.findIndex(ref => ref.indexOf(operator.index) === 0) !== -1){
+                outReferences.add(allReferences[i].element);
             }
         }
         for(let i = 0; i < this._operators.length; i++){
@@ -231,30 +238,79 @@ export default class CConnectorItem{
                 const leftColor = this._operators[i].condition.leftStatement.color;
                 const rightColor = this._operators[i].condition.rightStatement.color;
                 if(leftColor && leftColor !== DEFAULT_COLOR){
-                    operatorReferences.add(leftColor);
+                    operatorReferences.add(this.getMethodByColor(leftColor).index);
                 }
                 if(rightColor && rightColor !== DEFAULT_COLOR){
-                    operatorReferences.add(rightColor);
+                    operatorReferences.add(this.getMethodByColor(rightColor).index);
                 }
             }
         }
-        return new Set([...inReferences, ...outReferences, ...operatorReferences]);
+        return Array.from(new Set([...inReferences, ...outReferences, ...operatorReferences]));
     }
 
-    static areIndexesUnderScope(scopeElement, indexes){
-        const scopeElementIndex = scopeElement.index;
-        const scopeElementIndexSplit = scopeElementIndex.split('_');
-        for(let i = 0; i < indexes.length; i++){
-            const indexSplit = indexes[i].split('_');
-            if(scopeElementIndexSplit.length === indexSplit.length){
-                if(scopeElementIndex < indexes[i]){
-                    return false;
-                }
-            } else if(scopeElementIndexSplit.length < indexSplit.length){
+    getReferencesForItem(item){
+        const isOperator = item instanceof COperatorItem;
+        if(isOperator){
+            return this.getReferencesForOperator(item);
+        } else{
+            return this.getReferencesForMethod(item);
+        }
+    }
 
+    static areIndexesUnderScopeForOperator(scopeElement, draggableElement, indexes){
+        const draggableElementIndex = draggableElement.index;
+        indexes = sortConnectorItemIndexes(indexes);
+        let startIndex = '0';
+        if(indexes.length > 0){
+            if(indexes[0].indexOf(draggableElementIndex) !== 0){
+                if(indexes[indexes.length - 1].indexOf(draggableElementIndex) !== 0){
+                    startIndex = indexes[indexes.length - 1];
+                } else{
+                    let firstInsideReferenceIndex = indexes.findIndex(index => index.indexOf(draggableElementIndex) === 0);
+                    if(firstInsideReferenceIndex !== -1 && firstInsideReferenceIndex > 0){
+                        startIndex = indexes[firstInsideReferenceIndex - 1];
+                    }
+                }
             }
         }
-        return true;
+        let startIndexSplit = startIndex.split('_');
+        let scopeElementIndexSplit = scopeElement.index.split('_');
+        if(startIndexSplit.length === 1){
+            return startIndex < scopeElement.index;
+        } else{
+            return subArrayToString(startIndexSplit, '_', 0, startIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1) && startIndex < scopeElement.index;
+        }
+    }
+
+    static areIndexesUnderScopeForMethod(scopeElement, indexes){
+        let startIndex = '0';
+        let endIndex = '';
+        let inReferences = sortConnectorItemIndexes(indexes.inReferences);
+        let outReferences = sortConnectorItemIndexes(indexes.outReferences);
+        if(inReferences.length > 0){
+            startIndex = inReferences[inReferences.length - 1];
+        }
+        if(outReferences.length > 0){
+            endIndex = outReferences[0];
+        }
+        let startIndexSplit = startIndex.split('_');
+        let endIndexSplit = endIndex.split('_');
+        let scopeElementIndexSplit = scopeElement.index.split('_');
+        return subArrayToString(startIndexSplit, '_', 0, startIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1)
+            && startIndex < scopeElement.index
+            && (endIndex !== '' ? subArrayToString(endIndexSplit, '_', 0, endIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, endIndexSplit.length - 1) && endIndex > scopeElement.index : true);
+    }
+
+    static areIndexesUnderScope(scopeElement, draggableElement, indexes){
+        if(!scopeElement || !draggableElement){
+            return false;
+        }
+        const isDraggableItemOperator = draggableElement instanceof COperatorItem;
+        if(isDraggableItemOperator){
+            return CConnectorItem.areIndexesUnderScopeForOperator(scopeElement, draggableElement, indexes);
+        } else{
+            return CConnectorItem.areIndexesUnderScopeForMethod(scopeElement, indexes);
+        }
     }
 
     static getSvgElement(element){

@@ -49,8 +49,8 @@ class Arrow extends React.Component{
         if(isCurrentItemDragged && !this.state.isMouseOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            const references = isOperator ? connector.getReferencesForOperator(currentTechnicalItem.entity) : currentTechnicalItem.entity.getReferences();
-            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(to.entity, connector.convertReferencesToIndexes(references));
+            const allReferences = connector.getReferencesForItem(currentTechnicalItem.entity);
+            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, allReferences);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(from.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
