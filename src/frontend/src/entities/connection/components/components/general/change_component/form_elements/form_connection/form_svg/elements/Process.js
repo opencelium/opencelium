@@ -235,7 +235,7 @@ class Process extends React.Component{
         if(isString(label) && label.length > 12){
             shortLabel = `${label.substr(0, 9)}...`;
         }
-        shortLabel = method.index;
+        //shortLabel = method.index;
         const assignedStyle = isAssignMode && isAssignedToBusinessProcess ? styles.assigned_process : '';
         const hasAssignIcon = isCurrent && !readOnly && process instanceof CBusinessProcess;
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
