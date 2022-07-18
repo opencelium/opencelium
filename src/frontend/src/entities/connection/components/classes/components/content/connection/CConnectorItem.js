@@ -296,6 +296,7 @@ export default class CConnectorItem{
         let startIndexSplit = startIndex.split('_');
         let endIndexSplit = endIndex.split('_');
         let scopeElementIndexSplit = scopeElement.index.split('_');
+        console.log(subArrayToString(endIndexSplit, '_', 0, endIndexSplit.length - 1));
         return subArrayToString(startIndexSplit, '_', 0, startIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, startIndexSplit.length - 1)
             && startIndex < scopeElement.index
             && (endIndex !== '' ? subArrayToString(endIndexSplit, '_', 0, endIndexSplit.length - 1) === subArrayToString(scopeElementIndexSplit, '_', 0, endIndexSplit.length - 1) && endIndex > scopeElement.index : true);
