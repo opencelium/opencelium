@@ -32,7 +32,7 @@ import ReactDOM from "react-dom";
 import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
-import CConnectorItem, {INSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import CConnectorItem, {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -82,8 +82,7 @@ class Process extends React.Component{
         if(isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            const allReferences = connector.getReferencesForItem(currentTechnicalItem.entity);
-            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(process.entity, currentTechnicalItem.entity, allReferences);
+            let isAvailableForDragging = connector.areIndexesUnderScope(process.entity, currentTechnicalItem.entity, OUTSIDE_ITEM);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(process.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){

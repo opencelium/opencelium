@@ -55,23 +55,11 @@ class Operator extends React.Component{
     }
 
     onMouseOverSvg(){
-        const {currentTechnicalItem, connection, operator} = this.props;
+        const {currentTechnicalItem, operator} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
         if(isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== operator.entity.index){
-            const isOperator = currentTechnicalItem instanceof COperator;
-            const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            const allReferences = connector.getReferencesForItem(currentTechnicalItem.entity);
-            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, allReferences);
-            if(isAvailableForDragging){
-                if(isOperator && currentTechnicalItem){
-                    if(operator.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
-                        isAvailableForDragging = false;
-                    }
-                }
-            }
             this.setState({
                 isMouseOverSvg: true,
-                isAvailableForDragging,
             })
         }
     }
@@ -94,9 +82,22 @@ class Operator extends React.Component{
     }
 
     onMouseOverRightPlaceholder(){
-        if(!this.state.isMouseOverRightPlaceholder){
+        const {currentTechnicalItem, connection, operator} = this.props;
+        const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
+        if(isCurrentItemDragged && !this.state.isMouseOverRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
+            const isOperator = currentTechnicalItem instanceof COperator;
+            const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
+            let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, OUTSIDE_ITEM);
+            if(isAvailableForDragging){
+                if(isOperator && currentTechnicalItem){
+                    if(operator.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
+                        isAvailableForDragging = false;
+                    }
+                }
+            }
             this.setState({
                 isMouseOverRightPlaceholder: true,
+                isAvailableForDragging,
             })
         }
     }
@@ -110,9 +111,22 @@ class Operator extends React.Component{
     }
 
     onMouseOverBottomPlaceholder(){
-        if(!this.state.isMouseOverBottomPlaceholder){
+        const {currentTechnicalItem, connection, operator} = this.props;
+        const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
+        if(isCurrentItemDragged && !this.state.isMouseBottomRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
+            const isOperator = currentTechnicalItem instanceof COperator;
+            const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
+            let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, INSIDE_ITEM);
+            if(isAvailableForDragging){
+                if(isOperator && currentTechnicalItem){
+                    if(operator.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
+                        isAvailableForDragging = false;
+                    }
+                }
+            }
             this.setState({
-                isMouseOverBottomPlaceholder: true,
+                isMouseBottomRightPlaceholder: true,
+                isAvailableForDragging,
             })
         }
     }

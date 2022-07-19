@@ -47,10 +47,11 @@ class Arrow extends React.Component{
         const {from, to, currentTechnicalItem, connection} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
         if(isCurrentItemDragged && !this.state.isMouseOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index){
+            let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
+            const isInsideDirection = line1 !== null && line2 !== null;
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            const allReferences = connector.getReferencesForItem(currentTechnicalItem.entity);
-            let isAvailableForDragging = CConnectorItem.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, allReferences);
+            let isAvailableForDragging = connector.areIndexesUnderScope(from.entity, currentTechnicalItem.entity, isInsideDirection ? INSIDE_ITEM : OUTSIDE_ITEM);
             if(isAvailableForDragging){
                 if(isOperator && currentTechnicalItem){
                     if(from.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
