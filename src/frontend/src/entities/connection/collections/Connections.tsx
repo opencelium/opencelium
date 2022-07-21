@@ -42,6 +42,7 @@ class Connections extends ListCollection{
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
+                        maxLength={100}
                         isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
                         updateValue={(newValue) => {
                             entity.title = newValue;
@@ -55,6 +56,7 @@ class Connections extends ListCollection{
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
+                        maxLength={250}
                         isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
                         updateValue={(newValue) => {
                             entity.description = newValue;

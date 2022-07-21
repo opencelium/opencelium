@@ -32,14 +32,14 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {elasticSearchCheckResults} = ExternalApplication.getReduxState();
     const hasElasticSearch = elasticSearchCheckResults && elasticSearchCheckResults.status === APP_STATUS_UP;
-    const {gettingAllSchedules, schedules, deletingSchedulesById} = Schedule.getReduxState();
+    const {gettingAllSchedules, schedules, deletingSchedulesById, updatingSchedule} = Schedule.getReduxState();
     useEffect(() => {
         dispatch(getAllSchedules());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
     }, [schedules])
-    const CSchedules = new Schedules(schedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch);
+    const CSchedules = new Schedules(schedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
     return (
         <React.Fragment>
             <CollectionView defaultViewType={ViewType.LIST} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>

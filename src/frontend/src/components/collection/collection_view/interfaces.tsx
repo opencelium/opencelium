@@ -23,6 +23,7 @@ interface InlineEditInputProps{
     updateValue: (newValue: string) => void,
     initialValue: string,
     isInProcess?: boolean,
+    maxLength?: number,
 }
 
 interface GridStyledProps{

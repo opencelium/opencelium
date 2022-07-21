@@ -18,21 +18,28 @@ import {Appearance} from "@style/animations";
 import {OverflowText} from "@style/common";
 import {ThStyledProps} from "./interfaces";
 
+const BackgroundStyled = styled.div`
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(238, 238, 238, 0.5);
+    left: 0;
+    top: 0;
+`;
+
 const InlineEditInputStyled = styled.div`
+    z-index: 1;
     justify-content: center;
     position: absolute;
     display: flex;
     top: 0;
     width: 100%;
-    &>textarea{
+    & textarea{
+        padding: 5px;
+    }
+    &>div{
         width: 100%;
-        height: 100%;
-        overflow: hidden;
-        resize: none;
-        border: none;
-        border-bottom: 1px solid black;
-        text-align: center;
-        outline: none;
+        min-height: auto !important;
     }
     &>button{
         z-index: 1;
@@ -118,6 +125,7 @@ const ThStyled = styled.th<ThStyledProps>`
 `;
 
 export {
+    BackgroundStyled,
     InlineEditInputStyled,
     InfoStyled,
     GridTitleStyled,
