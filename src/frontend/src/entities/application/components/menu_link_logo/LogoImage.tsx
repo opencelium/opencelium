@@ -27,7 +27,7 @@ const LogoImage = (props: any) => {
     const imageRef = useRef(null);
     const {authUser} = Auth.getReduxState();
     const {logoDataStatus} = Application.getReduxState();
-    const {updatingLogoData} = useAppSelector((state: RootState) => state.entityApplicationReducer);
+    const {updatingUserDetail} = useAppSelector((state: RootState) => state.userDetailReducer);
     const [isLogoExist, setIsLogoExist] = useState<boolean>(null);
     const [src, setSrc] = useState<string>('');
     const logoName = authUser.logoName || OC_NAME;
@@ -45,24 +45,23 @@ const LogoImage = (props: any) => {
     }, [])
     useEffect(() => {
         if(isLogoExist && isThemeSynced){
-            convertPngUrlToBase64(logoPath).then((data) => {
+            const check = convertPngUrlToBase64(logoPath).then((data) => {
                 if(data) setSrc(data);
             });
         }
+        setSrc('');
     }, [isLogoExist])
     useEffect(() => {
-        if(isThemeSynced) {
-            if (updatingLogoData === API_REQUEST_STATE.START) {
-                setIsLogoExist(null);
-            }
-            if (updatingLogoData === API_REQUEST_STATE.FINISH) {
-                checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
-            }
-            if (updatingLogoData === API_REQUEST_STATE.ERROR) {
-                setIsLogoExist(false);
-            }
+        if (updatingUserDetail === API_REQUEST_STATE.START) {
+            setIsLogoExist(null);
         }
-    }, [updatingLogoData, authUser.userDetail.themeSync])
+        if (updatingUserDetail === API_REQUEST_STATE.FINISH) {
+            checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
+        }
+        if (updatingUserDetail === API_REQUEST_STATE.ERROR) {
+            setIsLogoExist(false);
+        }
+    }, [updatingUserDetail, authUser.userDetail.themeSync])
     useEffect(() => {
         setIsLogoExist(null);
         checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
@@ -73,7 +72,7 @@ const LogoImage = (props: any) => {
     return(
         <LogoImageStyled
             ref={imageRef}
-            src={isThemeSynced ? src || logoPath : logoPath}
+            src={isThemeSynced ? src || LogoOcWhiteImagePath : LogoOcWhiteImagePath}
             alt={logoName}
             {...props}
         />
