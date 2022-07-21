@@ -31,7 +31,8 @@ const TopBar: FC<TopBarProps> =
      }) => {
         const {authUser} = Auth.getReduxState();
         const navigate = useNavigate();
-        const MyProfile = navigator.onLine ?
+        const isOnline = authUser?.userDetail?.themeSync || false;
+        const MyProfile = isOnline ?
             <Gravatar
                 id={'my_profile'}
                 email={authUser.email}

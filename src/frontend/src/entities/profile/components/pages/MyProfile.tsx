@@ -97,8 +97,9 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         // @ts-ignore
         dispatch(setThemes(JSON.stringify(newThemes)));
     }
+    const isOnline = authUser?.userDetail?.themeSync || false;
     //TODO - Move Gravatar to external component
-    const Avatar = navigator.onLine ?
+    const Avatar = isOnline ?
         <ProfileImageStyled
             email={user.email}
             size={100}
@@ -138,7 +139,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         />
                     </div>
                     <InputSwitch
-                        name={`Theme synchronization is ${themeSync ? 'enabled' : 'disabled'}`}
+                        name={`Theme synchronization and Gravatar is ${themeSync ? 'enabled' : 'disabled'}`}
                         icon={'corporate_fare'}
                         label={'Theme sync'}
                         isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
