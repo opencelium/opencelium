@@ -392,7 +392,8 @@ class Svg extends React.Component {
 
     renderItems(){
         const {
-            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
+            isItemDraggable, currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
+            readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
         } = this.props;
         if(hasAssignCentralText){
             return null;
@@ -416,22 +417,25 @@ class Svg extends React.Component {
             switch (item.type){
                 case 'if':
                     return(
-                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} isItemDraggable={isItemDraggable} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} isItemDraggable={isItemDraggable} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} isItemDraggable={isItemDraggable} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });
     }
 
     renderArrows(){
-        const {currentItem, currentTechnicalItem, currentBusinessItem, arrows, items, hasAssignCentralText, connection, setCurrentItem} = this.props;
+        const {
+            isItemDraggable, currentItem, currentTechnicalItem, currentBusinessItem, arrows, items,
+            hasAssignCentralText, connection, setCurrentItem,
+        } = this.props;
         if(hasAssignCentralText){
             return null;
         }
@@ -456,7 +460,7 @@ class Svg extends React.Component {
                 isHighlighted = currentTechnicalItem ? fromIndex.indexOf(currentTechnicalItem.id) === 0 && toIndex.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
-                <Arrow key={key} connection={connection} {...arrow} setCurrentItem={setCurrentItem} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
+                <Arrow key={key} isItemDraggable={isItemDraggable} connection={connection} {...arrow} setCurrentItem={setCurrentItem} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
             );
         });
     }

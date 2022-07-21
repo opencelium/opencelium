@@ -77,9 +77,9 @@ class Process extends React.Component{
     }
 
     onMouseOverSvg(){
-        const {currentTechnicalItem, connection, process} = this.props;
+        const {currentTechnicalItem, connection, process, isItemDraggable} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index){
+        if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
             let isAvailableForDragging = connector.areIndexesUnderScope(process.entity, currentTechnicalItem.entity, OUTSIDE_ITEM);
@@ -115,10 +115,12 @@ class Process extends React.Component{
     }
 
     onMouseDown(){
-        const {connection, setCurrentItem, process, isDisabled} = this.props;
+        const {connection, setCurrentItem, process, isDisabled, isItemDraggable} = this.props;
         if(!isDisabled) {
             if (connection && !connection.businessLayout.isInAssignMode) {
-                process.isDragged = true;
+                if(isItemDraggable){
+                    process.isDragged = true;
+                }
                 setCurrentItem(process);
             }
         }
@@ -346,6 +348,7 @@ Process.defaultProps = {
     isHighlighted: false,
     isAssignedToBusinessProcess: false,
     isDisabled: false,
+    isItemDraggable: false,
 };
 
 export default Process;

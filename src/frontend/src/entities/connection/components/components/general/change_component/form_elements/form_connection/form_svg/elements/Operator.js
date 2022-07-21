@@ -82,9 +82,9 @@ class Operator extends React.Component{
     }
 
     onMouseOverRightPlaceholder(){
-        const {currentTechnicalItem, connection, operator} = this.props;
+        const {currentTechnicalItem, connection, operator, isItemDraggable} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseOverRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
+        if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
             let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, OUTSIDE_ITEM);
@@ -111,9 +111,9 @@ class Operator extends React.Component{
     }
 
     onMouseOverBottomPlaceholder(){
-        const {currentTechnicalItem, connection, operator} = this.props;
+        const {currentTechnicalItem, connection, operator, isItemDraggable} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseBottomRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
+        if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseBottomRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
             let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, INSIDE_ITEM);
@@ -140,10 +140,12 @@ class Operator extends React.Component{
     }
 
     onMouseDown(){
-        const {connection, setCurrentItem, operator, isDisabled} = this.props;
+        const {connection, setCurrentItem, operator, isDisabled, isItemDraggable} = this.props;
         if(!isDisabled) {
             if (connection) {
-                operator.isDragged = true;
+                if(isItemDraggable){
+                    operator.isDragged = true;
+                }
                 setCurrentItem(operator);
             }
         }
@@ -416,6 +418,7 @@ Operator.defaultProps = {
     isCurrent: false,
     isHighlighted: false,
     isDisabled: false,
+    isItemDraggable: false,
 };
 
 export default Operator;

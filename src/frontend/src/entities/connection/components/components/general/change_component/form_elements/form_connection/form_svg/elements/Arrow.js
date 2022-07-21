@@ -44,9 +44,9 @@ class Arrow extends React.Component{
     }
 
     onMouseOver(){
-        const {from, to, currentTechnicalItem, connection} = this.props;
+        const {from, to, currentTechnicalItem, connection, isItemDraggable} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isCurrentItemDragged && !this.state.isMouseOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index){
+        if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOver && currentTechnicalItem.entity.index !== from.entity.index && currentTechnicalItem.entity.index !== to.entity.index){
             let {line1, line2, arrow} = CCoordinates.getLinkCoordinates(from, to);
             const isInsideDirection = line1 !== null && line2 !== null;
             const isOperator = currentTechnicalItem instanceof COperator;
@@ -139,6 +139,7 @@ Arrow.propTypes = {
 Arrow.defaultProps = {
     isHighlighted: false,
     isDisabled: false,
+    isItemDraggable: false,
 };
 
 export default Arrow;
