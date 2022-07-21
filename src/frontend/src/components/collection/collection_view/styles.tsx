@@ -35,7 +35,6 @@ const InlineEditInputStyled = styled.div`
     top: 0;
     width: 100%;
     & textarea{
-        padding: 5px;
     }
     &>div{
         width: 100%;

@@ -32,10 +32,9 @@ import InputSelect from "@app_component/base/input/select/InputSelect";
 import {ColorTheme, DefaultTheme} from "@style/Theme";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import { updateUserDetail } from "@entity/user/redux-toolkit/action_creators/UserDetailCreators";
-import {LocalStorage} from "@application/classes/LocalStorage";
-import {ProfileImageStyled} from "@entity/profile/components/pages/styles";
-import {UserImageStyled} from "@entity/user/components/pages/UserImage";
+import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
+import AvatarDefault from "@image/application/avatar_default.png";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -98,19 +97,28 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         // @ts-ignore
         dispatch(setThemes(JSON.stringify(newThemes)));
     }
+    //TODO - Move Gravatar to external component
+    const Avatar = navigator.onLine ?
+        <ProfileImageStyled
+            email={user.email}
+            size={100}
+            rating="pg"
+            default="mm"
+            title={'Avatar'}
+            style={{borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+            protocol="https://"
+        />
+        :
+        <DefaultImageStyled
+            alt={'Avatar'}
+            src={AvatarDefault}
+            style={{width: '100px', height: '100px', cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+        />;
     const data = {
         title: 'My Profile',
         formSections: [
             <FormSection label={{value: 'user details'}}>
-                <ProfileImageStyled
-                    email={user.email}
-                    size={100}
-                    rating="pg"
-                    default="mm"
-                    title={'Avatar'}
-                    style={{borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
-                    protocol="https://"
-                />
+                {Avatar}
                 {Title}
                 {UserDetailsInputs}
                 {Email}

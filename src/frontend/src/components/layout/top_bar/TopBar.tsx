@@ -23,6 +23,7 @@ import Gravatar from 'react-gravatar';
 import {useNavigate} from "react-router";
 import Tooltip from "@app_component/base/tooltip/Tooltip";
 import {Auth} from "@application/classes/Auth";
+import AvatarDefault from "@image/application/avatar_default.png";
 
 const TopBar: FC<TopBarProps> =
     ({
@@ -30,23 +31,31 @@ const TopBar: FC<TopBarProps> =
      }) => {
         const {authUser} = Auth.getReduxState();
         const navigate = useNavigate();
+        const MyProfile = navigator.onLine ?
+            <Gravatar
+                id={'my_profile'}
+                email={authUser.email}
+                size={50}
+                rating="pg"
+                default="mm"
+                title={'My Profile'}
+                style={{cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+                protocol="https://"
+                onClick={() => navigate('/profile', {replace: false})}
+            />
+            :
+            <img
+                id={'my_profile'}
+                alt={'My Profile'}
+                src={AvatarDefault}
+                style={{width: '50px', height: '50px', cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+                onClick={() => navigate('/profile', {replace: false})}
+            />;
         return (
             <TopBarStyled >
                 <GlobalSearch/>
                 <NotificationItem/>
-                <Tooltip target={'my_profile'} tooltip={'My Profile'} position={'bottom'} component={
-                    <Gravatar
-                        id={'my_profile'}
-                        email={authUser.email}
-                        size={50}
-                        rating="pg"
-                        default="mm"
-                        title={'My Profile'}
-                        style={{cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
-                        protocol="https://"
-                        onClick={() => navigate('/profile', {replace: false})}
-                    />
-                }/>
+                <Tooltip target={'my_profile'} tooltip={'My Profile'} position={'bottom'} component={MyProfile}/>
             </TopBarStyled>
         )
     }

@@ -62,7 +62,9 @@ const InlineEditInput: FC<InlineEditInputProps> =
     }, [showEditor])
     useEventListener('mousedown', checkIfClickedOutside, window, showEditor);
     const textareaElement = document.getElementById('inline_edit_input');
-    const rows = textareaElement ? Math.round(textareaElement.scrollHeight / 25) : inlineValueRef.current ? Math.round(inlineValueRef.current.offsetHeight / 25) : 3;
+    //TODO: auto height of the textarea - check in firefox
+    //const rows = textareaElement ? Math.round(textareaElement.scrollHeight / 25) : inlineValueRef.current ? Math.round(inlineValueRef.current.offsetHeight / 25) : 3;
+    const rows = 3;
     return (
         <div style={{position: showEditor ? 'relative' : 'unset'}}>
             <span ref={inlineValueRef} style={{color: showEditor ? 'white' : 'black'}} onDoubleClick={() => {
@@ -72,7 +74,7 @@ const InlineEditInput: FC<InlineEditInputProps> =
                 <React.Fragment>
                     <BackgroundStyled/>
                     <InlineEditInputStyled ref={inlineInputRef}>
-                        <InputTextarea id={'inline_edit_input'} maxLength={maxLength} rows={rows} onKeyDown={(e) => onKeyDown(e)} onChange={(e) => setInputValue(e.target.value)} value={inputValue}/>
+                        <InputTextarea id={'inline_edit_input'} maxLength={maxLength} onKeyDown={(e) => onKeyDown(e)} onChange={(e) => setInputValue(e.target.value)} value={inputValue}/>
                         <Button isLoading={isInProcess} isDisabled={isInProcess} iconSize={TextSize.Size_12} right={-45} top={0} position={'absolute'} icon={'check'} handleClick={update}/>
                         <Button isDisabled={isInProcess} iconSize={TextSize.Size_12} right={rows > 1 ? -45 : -86} top={rows > 1 ? '28px' : 0} position={'absolute'} icon={'cancel'} handleClick={() => cancel()}/>
                     </InlineEditInputStyled>
