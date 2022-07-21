@@ -86,6 +86,8 @@ export class CBodyEditor{
                                             if(isNumber(parseInt(parents[i + 1]))){
                                                 item.field += markFieldNameAsArray(parents[i], parents[i + 1]);
                                                 i++;
+                                            } else{
+                                                item.field += `${parents[i]}`;
                                             }
                                         } else{
                                             item.field += `${parents[i]}`;
