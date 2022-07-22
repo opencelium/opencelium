@@ -55,8 +55,21 @@ export const getAndUpdateConnection = createAsyncThunk(
             getConnection.fromConnector.operators = sortByIndex([...getConnection.fromConnector.operators]);
             getConnection.toConnector.methods = sortByIndex([...getConnection.toConnector.methods]);
             getConnection.toConnector.operators = sortByIndex([...getConnection.toConnector.operators]);
+            let fieldBinding: any = [];
+            for(let i = 0; i < getConnection.fieldBinding.length; i++){
+                let fieldBindingItem = {...getConnection.fieldBinding[i]};
+                if(fieldBindingItem && fieldBindingItem.hasOwnProperty('enhancement') && fieldBindingItem.enhancement && fieldBindingItem.enhancement.hasOwnProperty('enhanceId')){
+                    let newEnhancement = {...fieldBindingItem.enhancement};
+                    if(newEnhancement){
+                        delete newEnhancement.enhanceId;
+                        fieldBindingItem.enhancement = newEnhancement;
+                    }
+                }
+                fieldBinding.push(fieldBindingItem);
+            }
+            getConnection.fieldBinding = fieldBinding;
             const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
-            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection,title: connection.title, description: connection.description});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection, id: connection.id, title: connection.title, description: connection.description});
             return UpdateConnectionResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
