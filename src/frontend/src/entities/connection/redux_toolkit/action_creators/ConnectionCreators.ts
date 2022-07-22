@@ -51,10 +51,10 @@ export const getAndUpdateConnection = createAsyncThunk(
             const GetConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
             const GetConnectionResponse = await GetConnectionRequest.getConnectionById();
             const getConnection = GetConnectionResponse.data;
-           // getConnection.fromConnector.methods = sortByIndex([...getConnection.fromConnector.methods]);
-            //getConnection.fromConnector.operators = sortByIndex([...getConnection.fromConnector.operators]);
-            //getConnection.toConnector.methods = sortByIndex([...getConnection.toConnector.methods]);
-            //getConnection.toConnector.operators = sortByIndex([...getConnection.toConnector.operators]);
+            getConnection.fromConnector.methods = sortByIndex([...getConnection.fromConnector.methods]);
+            getConnection.fromConnector.operators = sortByIndex([...getConnection.fromConnector.operators]);
+            getConnection.toConnector.methods = sortByIndex([...getConnection.toConnector.methods]);
+            getConnection.toConnector.operators = sortByIndex([...getConnection.toConnector.operators]);
             const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
             const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection,title: connection.title, description: connection.description});
             return UpdateConnectionResponse.data;
