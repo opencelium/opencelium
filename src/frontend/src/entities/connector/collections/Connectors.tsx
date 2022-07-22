@@ -25,18 +25,39 @@ import {ViewType} from "@app_component/collection/collection_view/CollectionView
 import {IConnector} from "../interfaces/IConnector";
 import {Connector} from "../classes/Connector";
 import {
-    deleteConnectorsById,
+    deleteConnectorsById, updateConnector,
     uploadConnectorImage
 } from "../redux_toolkit/action_creators/ConnectorCreators";
 import ModelConnector from "../requests/models/Connector";
 import {ConnectorPermissions} from "../constants";
+import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 
 class Connectors extends ListCollection{
     entities: IConnector[];
     title = 'Connectors';
     keyPropName ='id';
     sortingProps = ['title'];
-    listProps: ListProp[] = [{propertyKey: 'title', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'invoker.name'}];
+    listProps: ListProp[] = [
+        {
+            propertyKey: 'title',
+            width: '20%',
+            getValue: (entity: IConnector) => {
+                return(
+                    <InlineEditInput maxLength={100} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(), title: newValue}}))} initialValue={entity.title}/>
+                )
+            }
+        },
+        {
+            propertyKey: 'description',
+            width: '30%',
+            getValue: (entity: IConnector) => {
+                return(
+                    <InlineEditInput maxLength={250} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(), description: newValue}}))} initialValue={entity.description}/>
+                )
+            }
+        },
+        {propertyKey: 'invoker.name'}
+    ];
     gridProps = {
         title: 'title',
         image: (connector: IConnector) => {return Application.isValidImageUrl(connector.icon) ? connector.icon : connector.invoker.icon;},
@@ -60,9 +81,10 @@ class Connectors extends ListCollection{
     }
     dispatch: AppDispatch = null;
     deletingEntitiesState: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
+    updatingConnector: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
     uploadingImage: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
 
-    constructor(connectors: ModelConnector[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, uploadingImage?: API_REQUEST_STATE) {
+    constructor(connectors: ModelConnector[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, uploadingImage?: API_REQUEST_STATE, updatingConnector?: API_REQUEST_STATE) {
         super();
         let connectorInstances = [];
         for(let i = 0; i < connectors.length; i++){
@@ -72,6 +94,7 @@ class Connectors extends ListCollection{
         this.dispatch = dispatch;
         this.deletingEntitiesState = deletingEntitiesState;
         this.uploadingImage = uploadingImage;
+        this.updatingConnector = updatingConnector;
         this.entities = [...connectorInstances];
     }
 

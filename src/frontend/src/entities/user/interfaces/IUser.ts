@@ -49,7 +49,6 @@ export interface IUserForm extends IUserText, IUserSelect, IUserRadios, IUserFil
     update: () => boolean;
     deleteById: () => boolean;
     uploadImage: () => boolean;
-    deleteImage: () => boolean;
     checkEmail: () => boolean;
 }
 export default interface IUser extends IUserForm{

@@ -34,7 +34,7 @@ import {
     enableSchedules,
     startSchedule,
     startSchedules,
-    switchScheduleStatus
+    switchScheduleStatus, updateSchedule
 } from "../redux_toolkit/action_creators/ScheduleCreators";
 import {deleteWebhook, getWebhook} from "../redux_toolkit/action_creators/WebhookCreators";
 import {copyWebhookToClipboard} from "../redux_toolkit/slices/ScheduleSlice";
@@ -46,6 +46,8 @@ import ScheduleNotificationsIcon
 import {ExecutionStatus} from "../components/execution_status/ExecutionStatus";
 import LastDurationExecution from "../components/last_duration_execution/LastDurationExecution";
 import LastFailExecution from "../components/last_fail_execution/LastFailExecution";
+import {updateConnector} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
+import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 
 class Schedules extends ListCollection{
     hasElasticSearch: boolean = false;
@@ -63,11 +65,28 @@ class Schedules extends ListCollection{
                             copyStringToClipboard(schedule.webhook.url);
                             this.dispatch(copyWebhookToClipboard())
                         }}/>
-                        <span>{schedule.title}</span>
+                        <InlineEditInput
+                            maxLength={100}
+                            isInProcess={this.updatingSchedule === API_REQUEST_STATE.START}
+                            updateValue={(newValue) => {
+                                schedule.title = newValue;
+                                this.dispatch(updateSchedule(schedule.getModel(true)));
+                            }}
+                            initialValue={schedule.title}
+                        />
                     </div>
                 );
             } else{
-                return schedule.title;
+                return(
+                    <InlineEditInput
+                        isInProcess={this.updatingSchedule === API_REQUEST_STATE.START}
+                        updateValue={(newValue) => {
+                            schedule.title = newValue;
+                            this.dispatch(updateSchedule(schedule.getModel(true)));
+                        }}
+                        initialValue={schedule.title}
+                    />
+                );
             }
         },
         width: '15%',
@@ -153,8 +172,9 @@ class Schedules extends ListCollection{
     };
     dispatch: AppDispatch = null;
     deletingEntitiesState: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
+    updatingSchedule: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
 
-    constructor(schedules: any[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, isReadonly?: boolean, hasElasticSearch?: boolean) {
+    constructor(schedules: any[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, isReadonly?: boolean, hasElasticSearch?: boolean, updatingSchedule?: API_REQUEST_STATE) {
         super();
         let scheduleInstances = [];
         for(let i = 0; i < schedules.length; i++){
@@ -166,6 +186,7 @@ class Schedules extends ListCollection{
         this.hasCheckboxes = !isReadonly;
         this.entities = [...scheduleInstances];
         this.hasElasticSearch = hasElasticSearch;
+        this.updatingSchedule = updatingSchedule;
     }
 
     search(schedule: ISchedule, searchValue: string){

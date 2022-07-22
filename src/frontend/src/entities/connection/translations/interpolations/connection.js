@@ -17,7 +17,12 @@ import React from "react";
 import {getActionWithoutType} from "@application/utils/utils";
 import LinkMessage from "@app_component/base/link_message/LinkMessage";
 import {InterpolateTranslation} from "@app_component/base/interpolate_translation/InterpolateTranslation";
-import {addConnection, deleteConnectionById, updateConnection} from "../../redux_toolkit/action_creators/ConnectionCreators";
+import {
+    addConnection,
+    deleteConnectionById,
+    getAndUpdateConnection,
+    updateConnection
+} from "../../redux_toolkit/action_creators/ConnectionCreators";
 
 const ADD_CONNECTION = (responseType, dispatch, navigate, params) => {
     const {title} = params;
@@ -35,6 +40,14 @@ const UPDATE_CONNECTION = (responseType, dispatch, navigate, params) => {
         </InterpolateTranslation>
     );
 }
+const GET_AND_UPDATE_CONNECTION = (responseType, dispatch, navigate, params) => {
+    const {title} = params;
+    return (
+        <InterpolateTranslation i18nKey={`notifications.${responseType}.${getAndUpdateConnection[responseType].type}`}>
+            The connection <LinkMessage dispatch={dispatch} navigate={navigate} link={'connections'} message={title}/> was successfully updated.
+        </InterpolateTranslation>
+    );
+}
 const DELETE_CONNECTION = (responseType, dispatch, navigate, params) => {
     const {title} = params;
     return (
@@ -47,5 +60,6 @@ const DELETE_CONNECTION = (responseType, dispatch, navigate, params) => {
 export default {
     [getActionWithoutType(addConnection.fulfilled.type)]: ADD_CONNECTION,
     [getActionWithoutType(updateConnection.fulfilled.type)]: UPDATE_CONNECTION,
+    [getActionWithoutType(getAndUpdateConnection.fulfilled.type)]: GET_AND_UPDATE_CONNECTION,
     [getActionWithoutType(deleteConnectionById.fulfilled.type)]: DELETE_CONNECTION,
 }

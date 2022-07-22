@@ -19,6 +19,7 @@ import Request from "@entity/application/requests/classes/Request";
 import IUserDetail from "../../interfaces/IUserDetail";
 import IUserDetailRequest from "../interfaces/IUserDetailRequest";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
+import {use} from "i18next";
 
 export default class UserDetailRequest extends Request implements IUserDetailRequest{
 
@@ -42,6 +43,7 @@ export default class UserDetailRequest extends Request implements IUserDetailReq
             surname: userDetail.surname,
             theme: userDetail.theme,
             userTitle: userDetail.userTitle,
+            themeSync: userDetail.themeSync,
         };
     }
 }

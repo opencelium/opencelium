@@ -44,7 +44,7 @@ const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkP
         <MenuLinkStyled
             to={isReadonly ? '#' : to}
             onClick={hasConfirmation ? () => toggleConfirmation(!isConfirmationOpened) : onClick ? onClick : () => {}}
-            onHoverColor={onHoverColor}
+            $onHoverColor={onHoverColor}
         >
             <MenuIcon color={ColorTheme.White} name={name} size={size}/>
             <MenuLinkLabelStyled value={label} size={TextSize.Size_16}/>

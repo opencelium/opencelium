@@ -136,6 +136,7 @@ class BusinessLayout extends React.Component{
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={items.length > 0}
                     isScalable={items.length > 0 && HAS_LAYOUTS_SCALING}
+                    isItemDraggable={true}
                     setCurrentItem={(a) => this.setCurrentItem(a)}
                     deleteProcess={(a) => this.deleteProcess(a)}
                     currentItem={currentBusinessItem}
@@ -143,7 +144,6 @@ class BusinessLayout extends React.Component{
                     hasCreateCentralText={items.length === 0}
                     detailsPosition={detailsPosition}
                     dragAndDropStep={5}
-                    isItemDraggable={true}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
                     shouldUnselectOnDraggingPanel={true}
                 />

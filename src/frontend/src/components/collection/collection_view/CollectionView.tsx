@@ -23,6 +23,8 @@ import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
 import {ContentLoading} from "@app_component/base/loading/ContentLoading";
 import InputText from "@app_component/base/input/text/InputText";
 import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
+import Button from "@app_component/base/button/Button";
+import Filter from "@app_component/collection/filter/Filter";
 import {ColorTheme} from "@style/Theme";
 import {Pagination} from "../Pagination";
 import {GridViewMenu, GridViewType} from "../GridViewMenu";
@@ -48,17 +50,24 @@ const CollectionView: FC<CollectionViewProps> =
         hasTopBar,
         hasTitle,
         hasViewSection,
+        defaultViewType,
     }) => {
         const dispatch = useAppDispatch();
         const {searchValue, viewType, gridViewType} = Application.getReduxState();
         const [isRefreshing, setIsRefreshing] = useState(false);
+        const [isFilterVisible, toggleFilter] = useState<boolean>(false);
+        const [filterData, setFilterData] = useState(null);
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
         const [currentPage, setCurrentPage] = useState(1);
         const [totalPages, setTotalPages] = useState(Math.ceil(collection.entities.length / entitiesPerPage))
+        let applicationViewType = viewType;
+        if(defaultViewType !== ''){
+            applicationViewType = defaultViewType;
+        }
         useEffect(() => {
             let newEntitiesPerPage = LIST_VIEW_ENTITIES_NUMBER;
-            if(viewType === ViewType.GRID){
+            if(applicationViewType === ViewType.GRID){
                 switch(gridViewType){
                     case 2:
                         newEntitiesPerPage = 6;
@@ -76,7 +85,7 @@ const CollectionView: FC<CollectionViewProps> =
             }
             setEntitiesPerPage(newEntitiesPerPage);
             setTotalPages(Math.ceil(collection.filteredEntities.length / newEntitiesPerPage));
-        }, [currentPage, searchValue, viewType, gridViewType, collection.entities.length, shouldBeUpdated]);
+        }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, shouldBeUpdated]);
         useEffect(() => {
             if(collection.deletingEntitiesState === API_REQUEST_STATE.FINISH){
                 setChecks([]);
@@ -124,7 +133,10 @@ const CollectionView: FC<CollectionViewProps> =
                     {hasTitle && <Title title={collection.title}/>}
                     {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
-                            {collection.getTopActions(viewType, checkedIds)}
+                            {collection.getTopActions(applicationViewType, checkedIds)}
+                            {collection.hasFilter &&
+                                <Button key={'filter_button'} icon={'filter_list'} label={'Filter'} handleClick={() => toggleFilter(!isFilterVisible)}/>
+                            }
                         </ActionsStyled>
                         {hasSearch &&
                             <InputText marginLeft={'0'} autoFocus inputHeight={'35px'} value={searchValue} onChange={(e) => search(e.target.value)} minHeight={'1'}  width={'200px'} placeholder={'Search field'}/>
@@ -134,13 +146,18 @@ const CollectionView: FC<CollectionViewProps> =
                                 <TooltipButton target={'view_list'} tooltip={'List'} position={'top'} icon={'view_list'}
                                                size={24} hasBackground={false} color={ColorTheme.Turquoise}
                                                handleClick={() => onChangeViewType(ViewType.LIST)}/>
-                                <GridViewMenu setGridViewType={onChangeViewGridType} viewType={viewType}
+                                <GridViewMenu setGridViewType={onChangeViewGridType} viewType={applicationViewType}
                                               setViewType={onChangeViewType} setIsRefreshing={setIsRefreshing}/>
                             </ViewSectionStyled>
                         }
                     </TopSectionStyled>}
+                    {isFilterVisible &&
+                        <Filter>
+                            {collection.getFilterComponents(filterData, (data) => setFilterData({...data}))}
+                        </Filter>
+                    }
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
-                        {viewType === ViewType.LIST &&
+                        {applicationViewType === ViewType.LIST &&
                             <List
                                 collection={collection}
                                 searchValue={searchValue}
@@ -151,8 +168,9 @@ const CollectionView: FC<CollectionViewProps> =
                                 setChecks={setChecks}
                                 isRefreshing={isRefreshing}
                                 shouldBeUpdated={shouldBeUpdated}
+                                filterData={filterData}
                             />}
-                        {viewType === ViewType.GRID &&
+                        {applicationViewType === ViewType.GRID &&
                             <Grid
                                 collection={collection}
                                 searchValue={searchValue}
@@ -176,6 +194,7 @@ CollectionView.defaultProps = {
     hasTopBar: true,
     hasTitle: true,
     hasViewSection: true,
+    defaultViewType: '',
 }
 
 

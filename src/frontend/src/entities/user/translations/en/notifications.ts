@@ -17,7 +17,7 @@ import ActionCreators from "../../redux-toolkit/action_creators";
 
 const {
     addUser, updateUser, uploadUserImage, deleteUserById, deleteUsersById, getUserById,
-    getAllUsers, checkUserEmail, deleteUserImage, updateUserDetail,
+    getAllUsers, checkUserEmail, updateUserDetail,
 } = ActionCreators;
 
 export default {
@@ -54,9 +54,6 @@ export default {
         },
         [checkUserEmail.rejected.type]: {
             "__DEFAULT__": "There is an error checking email uniqueness."
-        },
-        [deleteUserImage.rejected.type]: {
-            "__DEFAULT__": "There is an error removing user's image."
         },
         [updateUserDetail.rejected.type]: {
             "__DEFAULT__": "The settings were not updated"

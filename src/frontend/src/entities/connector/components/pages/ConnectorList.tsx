@@ -26,7 +26,7 @@ import {ConnectorListProps} from "./interfaces";
 
 const ConnectorList: FC<ConnectorListProps> = permission(ConnectorPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
-    const {gettingConnectors, connectors, deletingConnectorsById, uploadingConnectorImage} = Connector.getReduxState();
+    const {gettingConnectors, connectors, deletingConnectorsById, uploadingConnectorImage, updatingConnector} = Connector.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
         dispatch(getAllConnectors());
@@ -34,7 +34,7 @@ const ConnectorList: FC<ConnectorListProps> = permission(ConnectorPermissions.RE
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
     }, [connectors])
-    const CConnectors = new Connectors(connectors, dispatch, deletingConnectorsById, uploadingConnectorImage);
+    const CConnectors = new Connectors(connectors, dispatch, deletingConnectorsById, uploadingConnectorImage, updatingConnector);
     return (
         <CollectionView collection={CConnectors} shouldBeUpdated={shouldBeUpdated} isLoading={gettingConnectors === API_REQUEST_STATE.START} componentPermission={ConnectorPermissions}/>
     )

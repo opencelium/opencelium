@@ -22,12 +22,21 @@ import Arrow from "../elements/Arrow";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import ConnectorPanels from "@change_component/form_elements/form_connection/form_svg/elements/ConnectorPanels";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
-import {HighlightedMarkers, DefaultMarkers} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
+import {
+    HighlightedMarkers,
+    DefaultMarkers,
+    PlaceholderMarkers, RejectedPlaceholderMarkers
+} from "@change_component/form_elements/form_connection/form_svg/elements/Markers";
 import Operator from "@change_component/form_elements/form_connection/form_svg/elements/Operator";
 import CSvg from "@entity/connection/components/classes/components/content/connection_overview_2/CSvg";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CBusinessProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CBusinessProcess";
+import {CONNECTOR_FROM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
+import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import {setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
+import COperator, {OPERATOR_SIZE} from "@classes/content/connection_overview_2/operator/COperator";
 
 function mapStateToProps(state){
     const {currentBusinessItem, currentTechnicalItem} = mapItemsToClasses(state);
@@ -37,7 +46,7 @@ function mapStateToProps(state){
     };
 }
 
-@connect(mapStateToProps, {})
+@connect(mapStateToProps, {setCurrentTechnicalItem})
 class Svg extends React.Component {
     constructor(props) {
         super(props);
@@ -143,9 +152,9 @@ class Svg extends React.Component {
                     }
                     return item;
                 }));
-                currentItem.isDragged = false;
-                setCurrentItem(currentItem);
             }
+            currentItem.isDragged = false;
+            setCurrentItem(currentItem);
         }
     }
 
@@ -164,10 +173,10 @@ class Svg extends React.Component {
     }
 
     startDrag(e){
-        const {svgId, isItemDraggable, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, connection, updateConnection} = this.props;
+        const {svgId, isItemDraggable, isItemDraggableByIcon, isDraggable, shouldUnselectOnDraggingPanel, setCurrentItem, connection, updateConnection} = this.props;
         this.dragCoordinates = null;
         if(e.target.classList.contains('draggable')) {
-            if(isItemDraggable) {
+            if(isItemDraggable || isItemDraggableByIcon) {
                 this.selectedElement = e.target.parentNode;
                 if(this.selectedElement.parentNode){
                     this.hideCreateElementPanel();
@@ -199,9 +208,9 @@ class Svg extends React.Component {
     }
 
     drag(e){
-        const {isItemDraggable, dragAndDropStep, svgId, isDraggable, currentItem} = this.props;
+        const {isItemDraggable, isItemDraggableByIcon, dragAndDropStep, svgId, isDraggable, currentItem} = this.props;
         if (this.selectedElement) {
-            if(isItemDraggable) {
+            if(isItemDraggable || isItemDraggableByIcon) {
                 e.preventDefault();
                 if(this.selectedElement?.parentNode) {
                     const coordinates = CSvg.getMousePosition(e, this.selectedElement.parentNode);
@@ -220,10 +229,19 @@ class Svg extends React.Component {
                         this.dragCoordinates.y = Math.round((coordinates.y - this.offset.y) / dragAndDropStep) * dragAndDropStep;
                     }
                     if(this.dragCoordinates !== null) {
-                        const htmlElem = document.getElementById('draggable_process');
+                        let isOperator = false;
+                        let htmlElem = document.getElementById('draggable_process') || null;
+                        if(!htmlElem){
+                            isOperator = true;
+                            htmlElem = document.getElementById('draggable_operator');
+                        }
                         if(htmlElem){
-                            if(this.dragCoordinates.x) htmlElem.setAttribute('x', this.dragCoordinates.x);
-                            if(this.dragCoordinates.y) htmlElem.setAttribute('y', this.dragCoordinates.y);
+                            if(isOperator){
+                                htmlElem.setAttribute('points', COperator.getPoints(this.dragCoordinates.x || coordinates.x - currentOffset.x, this.dragCoordinates.y || coordinates.y - currentOffset.y));
+                            } else{
+                                if(this.dragCoordinates.x) htmlElem.setAttribute('x', this.dragCoordinates.x);
+                                if(this.dragCoordinates.y) htmlElem.setAttribute('y', this.dragCoordinates.y);
+                            }
                         }
                     }
                 }
@@ -248,14 +266,91 @@ class Svg extends React.Component {
     }
 
     endDrag(e){
+        const {connection, currentTechnicalItem, updateConnection} = this.props;
+        let shouldMoveItem = false;
+        const targetElemId = e.target ? e.target.id : '';
+        const sourceElemId = this.selectedElement ? this.selectedElement.id : '';
+        if(targetElemId && sourceElemId){
+            const targetElemIdSplit = targetElemId.split('__');
+            const sourceElemIdSplit = sourceElemId.split('__');
+            if(targetElemIdSplit.length > 1 && sourceElemIdSplit.length > 0) {
+                const connectorType = sourceElemIdSplit[0];
+                const connector = connection.getConnectorByType(connectorType);
+                const sourceIndex = sourceElemIdSplit[1].substring(connectorType.length + 1);
+                const sourceItem = connector ? connector.getItemByIndex(sourceIndex) : null;
+                const targetLeftElemIndexSplit = targetElemIdSplit[1].split('_');
+                if(targetLeftElemIndexSplit.length > 0) {
+                    const targetLeftIndex = targetElemIdSplit[1].substring(connectorType.length + 1);
+                    const targetLeftItem = connector ? connector.getItemByIndex(targetLeftIndex) : null;
+                    if (connector && sourceItem && targetLeftItem && sourceIndex !== targetLeftIndex) {
+                        let mode = OUTSIDE_ITEM;
+                        if(targetElemIdSplit.length === 3){
+                            mode = targetElemIdSplit[2];
+                        }
+                        if(e.target.getAttribute('data-movable') === 'true'){
+                            shouldMoveItem = true;
+                            this.moveItem(connector, sourceItem, targetLeftItem, mode);
+                        }
+                    }
+                }
+            }
+        }
         if(this.selectedElement){
             this.selectedElement = null;
             this.setCoordinatesForCreateElementPanel(e);
             if(this.dragCoordinates !== null) {
-                this.setItemCoordinates(this.dragCoordinates)
+                if(!shouldMoveItem){
+                    this.setItemCoordinates(this.dragCoordinates)
+                }
             }
         }
         if(this.isPointerDown) this.isPointerDown = false;
+    }
+
+    moveItem(connector, sourceItem, targetLeftItem, mode){
+        const {connection, updateConnection, setCurrentItem} = this.props;
+        if (sourceItem instanceof CMethodItem) {
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                connection.removeFromConnectorMethod(sourceItem);
+                sourceItem.index = '';
+                sourceItem.isDragged = false;
+                connector.setCurrentItem(targetLeftItem);
+                connection.addFromConnectorMethod(sourceItem, mode);
+            } else {
+                connection.removeToConnectorMethod(sourceItem);
+                sourceItem.index = '';
+                sourceItem.isDragged = false;
+                connector.setCurrentItem(targetLeftItem);
+                connection.addToConnectorMethod(sourceItem, mode);
+            }
+            updateConnection(connection);
+            const currentItem = connector.getMethodByColor(sourceItem.color);
+            connector.setCurrentItem(currentItem);
+            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+            setCurrentItem(currentSvgElement)
+        }
+        if (sourceItem instanceof COperatorItem) {
+            sourceItem.isDragged = false;
+            const sourceItemData = sourceItem.getObject();
+            sourceItemData.index = '';
+            connector.setCurrentItem(targetLeftItem);
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                connection.addFromConnectorOperator(sourceItemData, mode);
+            } else {
+                connection.addToConnectorOperator(sourceItemData, mode);
+            }
+            connector.updateIndexesForOperator(sourceItem, connector.generateNextIndex(mode, targetLeftItem));
+            if (connector.getConnectorType() === CONNECTOR_FROM) {
+                connection.removeFromConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+            } else {
+                connection.removeToConnectorOperator(connector.getItemByUniqueIndex(sourceItem.uniqueIndex));
+            }
+            updateConnection(connection);
+            const currentItem = connector.getOperatorByIndex(sourceItem.index);
+            connector.setCurrentItem(currentItem);
+            const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
+            setCurrentItem(currentSvgElement)
+        }
     }
 
     onWheel(e) {
@@ -297,7 +392,8 @@ class Svg extends React.Component {
 
     renderItems(){
         const {
-            currentBusinessItem, currentTechnicalItem, items, connection, updateConnection,         setIsCreateElementPanelOpened, readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
+            isItemDraggable, currentBusinessItem, currentTechnicalItem, items, connection, updateConnection, setIsCreateElementPanelOpened,
+            readOnly, deleteProcess, setCurrentItem, hasAssignCentralText,
         } = this.props;
         if(hasAssignCentralText){
             return null;
@@ -321,22 +417,25 @@ class Svg extends React.Component {
             switch (item.type){
                 case 'if':
                     return(
-                        <Operator key={key} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} isItemDraggable={isItemDraggable} type={'if'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 case 'loop':
                     return(
-                        <Operator key={key} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Operator key={key} isItemDraggable={isItemDraggable} type={'loop'} readOnly={readOnly} operator={item} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
                 default:
                     return(
-                        <Process key={key} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
+                        <Process key={key} isItemDraggable={isItemDraggable} process={item} deleteProcess={deleteProcess} readOnly={readOnly} setCurrentItem={setCurrentItem} setIsCreateElementPanelOpened={setIsCreateElementPanelOpened} isAssignedToBusinessProcess={isAssignedToBusinessProcess} isDisabled={isDisabled} isCurrent={isCurrent} isHighlighted={isHighlighted} connection={connection} updateConnection={updateConnection}/>
                     );
             }
         });
     }
 
     renderArrows(){
-        const {currentItem, currentTechnicalItem, currentBusinessItem, arrows, items, hasAssignCentralText, connection} = this.props;
+        const {
+            isItemDraggable, currentItem, currentTechnicalItem, currentBusinessItem, arrows, items,
+            hasAssignCentralText, connection, setCurrentItem,
+        } = this.props;
         if(hasAssignCentralText){
             return null;
         }
@@ -361,7 +460,7 @@ class Svg extends React.Component {
                 isHighlighted = currentTechnicalItem ? fromIndex.indexOf(currentTechnicalItem.id) === 0 && toIndex.indexOf(currentTechnicalItem.id) === 0 : false;
             }
             return(
-                <Arrow key={key} {...arrow} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
+                <Arrow key={key} isItemDraggable={isItemDraggable} connection={connection} {...arrow} setCurrentItem={setCurrentItem} from={from} to={to} isHighlighted={isHighlighted} isDisabled={isDisabled}/>
             );
         });
     }
@@ -415,6 +514,8 @@ class Svg extends React.Component {
                     <defs>
                         <DefaultMarkers/>
                         <HighlightedMarkers/>
+                        <PlaceholderMarkers/>
+                        <RejectedPlaceholderMarkers/>
                     </defs>
                     {fromConnectorPanelParams && toConnectorPanelParams &&
                         <ConnectorPanels
@@ -453,6 +554,7 @@ Svg.propTypes = {
     deleteProcess: PropTypes.func.isRequired,
     dragAndDropStep: PropTypes.number,
     isItemDraggable: PropTypes.bool,
+    isItemDraggableByIcon: PropTypes.bool,
     isDraggable: PropTypes.bool,
     isScalable: PropTypes.bool,
     startingSvgY : PropTypes.number,
@@ -463,6 +565,7 @@ Svg.propTypes = {
 Svg.defaultProps = {
     dragAndDropStep: 10,
     isItemDraggable: false,
+    isItemDraggableByIcon: false,
     isDraggable: true,
     isScalable: false,
     startingSvgY: -190,

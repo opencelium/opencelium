@@ -49,7 +49,7 @@ const MenuLinkWithSubLinks: FC<Partial<IconProps> & LinkProps & MenuLinkWithSubL
         collapse(!isCollapsed);
     }
     return (
-        <MenuLinkWithSubLinksStyled onHoverColor={onHoverColor}>
+        <MenuLinkWithSubLinksStyled $onHoverColor={onHoverColor}>
             <MenuIcon size={30} name={name} color={ColorTheme.White}/>
             <MainSubLinkStyled tabIndex={-1} key={label} to={isReadonly ? '#' : to}>{label}</MainSubLinkStyled>
             <FoldIconStyled tabIndex={isMainMenuExpanded ? 0 : -1} hasBackground={false} target={`${label}_main_menu_unfold`} tooltip={isCollapsed ? 'Unfold' : 'Fold'} background={ColorTheme.White} size={18} icon={isCollapsed ? 'expand_more' : 'expand_less'} onClick={(e: any) => toggleCollapse(e)}/>

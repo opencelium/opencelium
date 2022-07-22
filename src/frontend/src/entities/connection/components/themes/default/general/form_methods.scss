@@ -16,8 +16,8 @@
 @import '../constants';
 
 .conversion_icon{
-  position: absolute;
-  right: 3px;
+  position: absolute !important;
+  right: 3px !important;
 }
 
 .item{

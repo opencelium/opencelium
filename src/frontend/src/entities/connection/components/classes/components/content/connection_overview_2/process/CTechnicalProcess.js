@@ -33,7 +33,7 @@ export class CTechnicalProcess extends CProcess{
     }
 
     getHtmlIdName() {
-        return `${this._connectorType}_${super.getHtmlIdName()}`;
+        return `${this._connectorType}__${super.getHtmlIdName()}`;
     }
 
     get connectorType(){

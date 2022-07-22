@@ -14,7 +14,7 @@
  */
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import {errorHandler} from "@application/utils/utils";
+import {errorHandler, sortByIndex} from "@application/utils/utils";
 import {ConnectionRequest} from "../../requests/classes/Connection";
 import { IConnection } from "../../interfaces/IConnection";
 
@@ -38,6 +38,26 @@ export const addConnection = createAsyncThunk(
             const request = new ConnectionRequest();
             const response = await request.addConnection(connection);
             return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const getAndUpdateConnection = createAsyncThunk(
+    'connection/getAndUpdate',
+    async(connection: IConnection, thunkAPI) => {
+        try {
+            const GetConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
+            const GetConnectionResponse = await GetConnectionRequest.getConnectionById();
+            const getConnection = GetConnectionResponse.data;
+            getConnection.fromConnector.methods = sortByIndex([...getConnection.fromConnector.methods]);
+            getConnection.fromConnector.operators = sortByIndex([...getConnection.fromConnector.operators]);
+            getConnection.toConnector.methods = sortByIndex([...getConnection.toConnector.methods]);
+            getConnection.toConnector.operators = sortByIndex([...getConnection.toConnector.operators]);
+            const UpdateConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
+            const UpdateConnectionResponse = await UpdateConnectionRequest.updateConnection({...getConnection,title: connection.title, description: connection.description});
+            return UpdateConnectionResponse.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -127,6 +147,7 @@ export const deleteConnectionsById = createAsyncThunk(
 export default {
     checkConnectionTitle,
     addConnection,
+    getAndUpdateConnection,
     updateConnection,
     getConnectionById,
     getAllConnections,

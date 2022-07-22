@@ -18,7 +18,7 @@ import {Link} from "react-router-dom";
 import Text from "@app_component/base/text/Text";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import {ITheme} from "@style/Theme";
-import {MenuLinkLogoStyledProps, MenuLinkStyledProps} from './interfaces';
+import {MenuLinkStyledProps} from './interfaces';
 
 const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
     margin: 2px;
@@ -55,7 +55,7 @@ const SUB_LINK = `
 
 const MainSubLinkStyled = styled(Link)<MenuLinkStyledProps>`
     ${SUB_LINK}
-    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
+    ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
     &:hover{
         color: white;
         background-color: unset;
@@ -80,7 +80,7 @@ const LinksStyled = styled.ul`
 `;
 
 const MenuLinkWithSubLinksStyled = styled.div<MenuLinkStyledProps>`
-    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
+    ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
     a{
         padding: 0;
         margin: 0 0 0 5px;
@@ -98,7 +98,7 @@ const MenuLinkLabelStyled = styled(Text)`
 `;
 
 const MenuLinkStyled = styled(Link)<MenuLinkStyledProps>`
-    ${({theme, onHoverColor}) => getNavLinkStyles(theme, onHoverColor)}
+    ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
 `;
 
 const MenuIconStyled = styled.span`
@@ -110,20 +110,6 @@ const LogoImageStyled = styled.img`
     width: 2.5rem;
     height: auto;
     margin-left: 4px;
-`;
-
-const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyledProps>`
-    margin-bottom: 35px !important;
-    padding-bottom: 10px;
-    &:hover{
-        border-bottom: 2px solid ${({theme, onHoverColor}) => onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
-        padding-bottom: 8px;
-    }
-    & > span{
-        color: #eee;
-        font-weight: 600;
-        font-size: 20px;
-    }
 `;
 
 const FoldIconStyled = styled(TooltipButton)`
@@ -144,7 +130,6 @@ export {
     MenuLinkLabelStyled,
     MenuLinkStyled,
     MenuIconStyled,
-    MenuLinkLogoStyled,
     LogoImageStyled,
     FoldIconStyled,
 }

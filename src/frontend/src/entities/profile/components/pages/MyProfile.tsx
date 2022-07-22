@@ -32,10 +32,12 @@ import InputSelect from "@app_component/base/input/select/InputSelect";
 import {ColorTheme, DefaultTheme} from "@style/Theme";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import { updateUserDetail } from "@entity/user/redux-toolkit/action_creators/UserDetailCreators";
-import {LocalStorage} from "@application/classes/LocalStorage";
+import {ProfileImageStyled, DefaultImageStyled} from "./styles";
+import {withTheme} from "styled-components";
+import AvatarDefault from "@image/application/avatar_default.png";
 
 
-const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({}) => {
+const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
     const {themes} = Application.getReduxState();
     const {authUser} = Auth.getReduxState();
@@ -57,6 +59,11 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         userDetail,
         email: authUser.email,
     });
+    const Title = user.userDetail.getRadios({propertyName: "userTitle", props: {
+        icon: ' ',
+        label: 'Title',
+        options: [{autoFocus: true, label: 'Mr', value: 'mr', checked: true, key: 'mr'}, {label: 'Mrs', value: 'mrs', checked: false, key: 'mrs'}],
+    }})
     const UserDetailsInputs = user.userDetail.getTexts([
         {propertyName: "name", props: {icon: 'perm_identity', label: "Name", maxLength: 128, required: true}},
         {propertyName: "surname", props: {icon: 'perm_identity', label: "Surname", maxLength: 128, required: true}},
@@ -90,10 +97,30 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         // @ts-ignore
         dispatch(setThemes(JSON.stringify(newThemes)));
     }
+    const isOnline = authUser?.userDetail?.themeSync || false;
+    //TODO - Move Gravatar to external component
+    const Avatar = isOnline ?
+        <ProfileImageStyled
+            email={user.email}
+            size={100}
+            rating="pg"
+            default="mm"
+            title={'Avatar'}
+            style={{borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+            protocol="https://"
+        />
+        :
+        <DefaultImageStyled
+            alt={'Avatar'}
+            src={AvatarDefault}
+            style={{width: '100px', height: '100px', cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+        />;
     const data = {
         title: 'My Profile',
         formSections: [
             <FormSection label={{value: 'user details'}}>
+                {Avatar}
+                {Title}
                 {UserDetailsInputs}
                 {Email}
             </FormSection>,
@@ -112,7 +139,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         />
                     </div>
                     <InputSwitch
-                        name={`Theme synchronization is ${themeSync ? 'enabled' : 'disabled'}`}
+                        name={`Theme synchronization and Gravatar is ${themeSync ? 'enabled' : 'disabled'}`}
                         icon={'corporate_fare'}
                         label={'Theme sync'}
                         isChecked={themeSync} onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
@@ -128,4 +155,4 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
     )
 })
 
-export default MyProfile
+export default withTheme(MyProfile);

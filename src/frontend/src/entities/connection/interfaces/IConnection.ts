@@ -23,8 +23,8 @@ export interface IConnectionTextarea{
 }
 
 export interface IConnectionSelect{
-    fromConnector: OptionProps;
-    toConnector: OptionProps;
+    fromConnector: OptionProps | any;
+    toConnector: OptionProps | any;
 }
 
 export interface IConnectionText{

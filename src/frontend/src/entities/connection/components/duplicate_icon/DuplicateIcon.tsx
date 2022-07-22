@@ -17,7 +17,7 @@ import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import { DuplicateIconProps } from './interfaces';
 import { DuplicateIconStyled } from './styles';
-import {setFocusById} from "@application/utils/utils";
+import {setFocusById, sortByIndex} from "@application/utils/utils";
 import {useAppDispatch} from "@application/utils/store";
 import {addConnection, checkConnectionTitle, getConnectionById} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {Connection} from "@entity/connection/classes/Connection";
@@ -127,11 +127,13 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         toMethods = toMethods.map(m => clearMethodFromNodeId(m))
         if(fromConnectorData && toConnectorData) {
             connection.title = title;
-            tmpFromConnector.methods = [...fromMethods];
+            tmpFromConnector.methods = sortByIndex([...fromMethods]);
+            tmpFromConnector.operators = sortByIndex([...tmpFromConnector.operators]);
             tmpFromConnector.connectorId = fromConnectorData.connectorId;
             tmpFromConnector.title = fromConnectorData.title;
             tmpFromConnector.icon = fromConnectorData.icon;
-            tmpToConnector.methods = [...toMethods];
+            tmpToConnector.methods = sortByIndex([...toMethods]);
+            tmpToConnector.operators = sortByIndex([...tmpToConnector.operators]);
             tmpToConnector.connectorId = toConnectorData.connectorId;
             tmpToConnector.title = toConnectorData.title;
             tmpToConnector.icon = toConnectorData.icon;

@@ -28,15 +28,47 @@ import {ColorTheme} from "@style/Theme";
 import {DuplicateIcon} from "@root/components/duplicate_icon/DuplicateIcon";
 import {IConnection} from "../interfaces/IConnection";
 import {Connection} from "../classes/Connection";
-import {deleteConnectionsById} from "../redux_toolkit/action_creators/ConnectionCreators";
-import { ConnectionPermissions } from "../constants";
+import {deleteConnectionsById, getAndUpdateConnection,} from "../redux_toolkit/action_creators/ConnectionCreators";
+import {ConnectionPermissions} from "../constants";
+import InlineEditInput from "@app_component/collection/collection_view/InlineEditInput";
 
 class Connections extends ListCollection{
     entities: IConnection[];
     title = 'Connections';
     keyPropName ='id';
     sortingProps = ['title'];
-    listProps: ListProp[] = [{propertyKey: 'title', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'fromConnector.title'}, {propertyKey: 'toConnector.title'}];
+    listProps: ListProp[] = [
+        {propertyKey: 'title', width: '20%',
+            getValue: (entity: IConnection) => {
+                return(
+                    <InlineEditInput
+                        maxLength={100}
+                        isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
+                        updateValue={(newValue) => {
+                            entity.title = newValue;
+                            this.dispatch(getAndUpdateConnection(entity))
+                        }}
+                        initialValue={entity.title}
+                    />
+                )
+        }},
+        {propertyKey: 'description', width: '30%',
+            getValue: (entity: IConnection) => {
+                return(
+                    <InlineEditInput
+                        maxLength={250}
+                        isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
+                        updateValue={(newValue) => {
+                            entity.description = newValue;
+                            this.dispatch(getAndUpdateConnection(entity))
+                        }}
+                        initialValue={entity.description}
+                    />
+                )
+            }},
+        {propertyKey: 'fromConnector.title'},
+        {propertyKey: 'toConnector.title'},
+    ];
     gridProps = {title: 'title'};
     translations = {
         title: 'Title',
@@ -66,8 +98,9 @@ class Connections extends ListCollection{
     };
     dispatch: AppDispatch = null;
     deletingEntitiesState: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
+    updatingConnection: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
 
-    constructor(connections: any[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE) {
+    constructor(connections: any[], dispatch: AppDispatch, deletingEntitiesState: API_REQUEST_STATE, updatingConnection: API_REQUEST_STATE) {
         super();
         let connectionInstances = [];
         if(connections) {
@@ -77,6 +110,7 @@ class Connections extends ListCollection{
         }
         this.dispatch = dispatch;
         this.deletingEntitiesState = deletingEntitiesState;
+        this.updatingConnection = updatingConnection;
         this.entities = [...connectionInstances];
     }
 

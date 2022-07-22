@@ -68,7 +68,7 @@ class TemplateConversionIcon extends Component{
             <React.Fragment>
                 {
                     invalidVersion &&
-                    <TooltipButton target={`upgrade_entity_${data.template.templateId.toString()}`} position={'top'} tooltip={'Upgrade'} hasBackground={false} handleClick={() => this.convert()} icon={'replay'} size={TextSize.Size_20}/>
+                    <TooltipButton className={classNameIcon} target={`upgrade_entity_${data.template.templateId.toString()}`} position={'top'} tooltip={'Upgrade'} hasBackground={false} handleClick={() => this.convert()} icon={'replay'} size={TextSize.Size_20}/>
                 }
             </React.Fragment>
         );

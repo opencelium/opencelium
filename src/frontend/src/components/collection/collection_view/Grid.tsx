@@ -75,6 +75,7 @@ const Grid: FC<ViewProps> =
                 // @ts-ignore
                 const imageSrc = collection.gridProps?.image ? isString(collection.gridProps.image) ? entity[collection.gridProps.image] : collection.gridProps.image(entity) : '';
                 const hasImage = !!collection.gridProps?.image;
+                const hasImageComponent = !!collection.gridProps?.getImageComponent;
                 const link = collection.hasCardLink ? entity.link : '';
                 const onCardClick = () => {
                     if(link) {
@@ -100,6 +101,7 @@ const Grid: FC<ViewProps> =
                                 <GridTitleStyled><Text value={title} size={TextSize.Size_20}/></GridTitleStyled>
                                 <GridSubTitleStyled><Text value={subtitle} size={TextSize.Size_14}/></GridSubTitleStyled>
                             </InfoStyled>
+                            {hasImageComponent && collection.gridProps.getImageComponent(entity)}
                             {hasImage && <GridImageStyled>
                                 <Image src={imageSrc} alt={title} uploadingImage={collection.uploadingImage} uploadImage={uploadImage} hasUpload={hasUpload}/>
                             </GridImageStyled>}

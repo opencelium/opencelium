@@ -193,8 +193,11 @@ export class Connector extends HookStateClass implements IConnector{
             // @ts-ignore
             this.updateTitle(this, this.title);
             if(!this.isFocused){
-                document.getElementById('input_title').focus();
-                this.isFocused = true;
+                const element = document.getElementById(`input_title`);
+                if(element){
+                    element.focus();
+                    this.isFocused = true;
+                }
             }
             return false;
         }
@@ -211,8 +214,11 @@ export class Connector extends HookStateClass implements IConnector{
             // @ts-ignore
             this.updateInvokerSelect(this, this.invokerSelect);
             if(!this.isFocused){
-                document.getElementById('input_invokerSelect').focus();
-                this.isFocused = true;
+                const element = document.getElementById(`input_invokerSelect`);
+                if(element){
+                    element.focus();
+                    this.isFocused = true;
+                }
             }
             return false;
         }
@@ -238,8 +244,11 @@ export class Connector extends HookStateClass implements IConnector{
             this.updateInvokerSelect(this, this.invokerSelect);
             if(index !== -1) {
                 if (!this.isFocused) {
-                    document.getElementById(`input_${this.invokerSelect.data[index]}`).focus();
-                    this.isFocused = true;
+                    const element = document.getElementById(`input_${this.invokerSelect.data[index]}`);
+                    if(element){
+                        element.focus();
+                        this.isFocused = true;
+                    }
                 }
             }
         }
@@ -265,7 +274,11 @@ export class Connector extends HookStateClass implements IConnector{
     }
 
     @App.dispatch(updateConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
-    update(): boolean{
+    update(title?: string): boolean{
+        if(title){
+            this.title = title;
+            return true;
+        }
         return this.validateId(this.id) && this.validateAdd();
     }
 

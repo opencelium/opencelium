@@ -27,6 +27,10 @@ export class CTechnicalOperator extends COperator{
         return new CTechnicalOperator(operator);
     }
 
+    getHtmlIdName() {
+        return `${this._connectorType}__${super.getHtmlIdName()}`;
+    }
+
     get items(){
         return this._items;
     }

@@ -76,6 +76,7 @@ export class ApplicationRequest extends Request implements IApplicationRequest{
 
     async getLogoName(email: string): Promise<AxiosResponse<string>>{
         this.isFullUrl = true;
+        this.hasAuthToken = false;
         return super.get<string>();
     }
 

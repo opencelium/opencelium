@@ -18,13 +18,13 @@ import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@application/utils/permission";
 import {APP_STATUS_UP} from "@entity/application/requests/classes/url";
-import CollectionView from "@app_component/collection/collection_view/CollectionView";
+import CollectionView, {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {ExternalApplication} from "@entity/external_application/classes/ExternalApplication";
 import {ScheduleListProps} from "./interfaces";
 import Schedules from "../../collections/Schedules";
 import {Schedule} from "../../classes/Schedule";
 import {getAllSchedules} from "../../redux_toolkit/action_creators/ScheduleCreators";
-import { SchedulePermissions } from '../../constants';
+import {SchedulePermissions} from '../../constants';
 import {CurrentSchedules} from "../../components/current_schedules/CurrentSchedules";
 
 const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle}) => {
@@ -32,17 +32,17 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {elasticSearchCheckResults} = ExternalApplication.getReduxState();
     const hasElasticSearch = elasticSearchCheckResults && elasticSearchCheckResults.status === APP_STATUS_UP;
-    const {gettingAllSchedules, schedules, deletingSchedulesById} = Schedule.getReduxState();
+    const {gettingAllSchedules, schedules, deletingSchedulesById, updatingSchedule} = Schedule.getReduxState();
     useEffect(() => {
         dispatch(getAllSchedules());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
     }, [schedules])
-    const CSchedules = new Schedules(schedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch);
+    const CSchedules = new Schedules(schedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
     return (
         <React.Fragment>
-            <CollectionView hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
+            <CollectionView defaultViewType={ViewType.LIST} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
             {gettingAllSchedules === API_REQUEST_STATE.FINISH && <CurrentSchedules/>}
         </React.Fragment>
     )

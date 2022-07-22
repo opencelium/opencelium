@@ -29,6 +29,7 @@ export default class CProcess{
         this._width = PROCESS_WIDTH;
         this._height = PROCESS_HEIGHT;
         this._isDragged = process && process.hasOwnProperty('isDragged') ? process.isDragged : false;
+        this._isAvailableForDragging = process && process.hasOwnProperty('isAvailableForDragging') ? process.isAvailableForDragging : false;
     }
 
     get id(){
@@ -40,7 +41,7 @@ export default class CProcess{
     }
 
     getHtmlIdName(){
-        return `${this._id}_${this._name}`
+        return `${this._id}__${this._name}`
     }
 
     get name(){
@@ -102,6 +103,14 @@ export default class CProcess{
         this._isDragged = isDragged;
     }
 
+    get isAvailableForDragging(){
+        return this._isAvailableForDragging;
+    }
+
+    set isAvailableForDragging(isAvailableForDragging){
+        this._isAvailableForDragging = isAvailableForDragging;
+    }
+
     get items(){
         return this._items;
     }
@@ -143,6 +152,7 @@ export default class CProcess{
             width: this._width,
             height: this._height,
             isDragged: this._isDragged,
+            isAvailableForDragging: this._isAvailableForDragging,
         };
     }
 

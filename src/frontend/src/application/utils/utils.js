@@ -466,6 +466,16 @@ export function sortByIndex(array){
     return array.sort(sortByIndexFunction, collator);
 }
 
+export function sortConnectorItemIndexes(indexes){
+    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+    return indexes.sort((a, b) => {
+        return a.localeCompare(b, undefined, {
+            numeric: true,
+            sensitivity: 'base'
+        });
+    }, collator);
+}
+
 /**
  * a callback to sort by index
  */

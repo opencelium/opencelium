@@ -64,6 +64,13 @@ export default class CMethodItem{
         };
     }
 
+    getReferences(){
+        const fieldsString = JSON.stringify(this._request.body.fields) + JSON.stringify(this._request.endpoint);
+        const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\./g;
+        const references = fieldsString.match(referenceRegExp);
+        return new Set(references ? references.map(ref => ref.substring(0, 7)) : []);
+    }
+
     checkError(error){
         if(error && error.hasOwnProperty('hasError') && error.hasOwnProperty('location')){
             return error;

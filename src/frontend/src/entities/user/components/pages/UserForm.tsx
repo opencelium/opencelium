@@ -34,10 +34,11 @@ import UserDetail from "../../classes/UserDetail";
 import IUserDetail from "../../interfaces/IUserDetail";
 import {UserImageStyled} from "../../components/pages/UserImage";
 import {UserPermissions} from "../../constants";
+import Gravatar from "react-gravatar";
 
 
 
-const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, isUpdate, isView}) => {
+const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, isUpdate, isView, theme}) => {
     const {
         addingUser, updatingUser, gettingUser, isCurrentUserHasUniqueEmail,
         checkingUserEmail, currentUser, error,
@@ -130,9 +131,17 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
                 {Title}
                 {UserDetailsInputs}
                 {isView ?
-                        <UserImageStyled src={user.userDetail.profilePicture} alt={'Avatar'} hasUpload={false}/>
+                        <UserImageStyled
+                            email={user.email}
+                            size={100}
+                            rating="pg"
+                            default="mm"
+                            title={'Avatar'}
+                            style={{borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
+                            protocol="https://"
+                        />
                     :
-                        Avatar
+                        null
                 }
             </FormSection>,
             <React.Fragment>

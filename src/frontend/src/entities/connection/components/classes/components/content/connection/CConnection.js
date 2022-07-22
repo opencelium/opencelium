@@ -456,9 +456,11 @@ export default class CConnection{
             default:
                 return;
         }
-        let color = this._colors.length > 0 ? this._colors[0] : DEFAULT_COLOR;
-        this.removeRestColor(color);
-        method.color = color;
+        if(!method.color){
+            let color = this._colors.length > 0 ? this._colors[0] : DEFAULT_COLOR;
+            this.removeRestColor(color);
+            method.color = color;
+        }
         connector.addMethod(method, mode);
     }
 

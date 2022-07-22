@@ -14,6 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
+import {getAndUpdateConnection} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 
 const {addConnection, updateConnection, deleteConnectionById, deleteConnectionsById, getConnectionById, getAllMetaConnections, getAllConnections, checkConnectionTitle, graphQLLogin} = ActionCreators;
 
@@ -21,6 +22,7 @@ export default {
     fulfilled: {
         [addConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully added",
         [updateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
+        [getAndUpdateConnection.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully updated",
         [deleteConnectionById.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully removed",
         [deleteConnectionsById.fulfilled.type]: "The selected connections were successfully removed",
     },
@@ -32,7 +34,12 @@ export default {
             "__DEFAULT__": "There is an error fetching connections."
         },
         [addConnection.rejected.type]: "The connection was not added",
-        [updateConnection.rejected.type]: "The connection was not updated",
+        [updateConnection.rejected.type]: {
+            "__DEFAULT__": "The connection was not updated"
+        },
+        [getAndUpdateConnection.rejected.type]: {
+            "__DEFAULT__": "The connection was not updated"
+        },
         [deleteConnectionById.rejected.type]: {
             "__DEFAULT__": "The connection was not removed"
         },

@@ -34,10 +34,20 @@ export default class COperator{
         if(!(this._entity instanceof COperatorItem)){
             this._entity = COperatorItem.createOperatorItem(this._entity);
         }
+        this._isDragged = operator && operator.hasOwnProperty('isDragged') ? operator.isDragged : false;
+        this._isAvailableForDragging = operator && operator.hasOwnProperty('isAvailableForDragging') ? operator.isAvailableForDragging : false;
     }
+
+    static getPoints(x, y, size = OPERATOR_SIZE){
+        return `${x + size / 2},${y + 1} ${x + size - 1},${y + size / 2} ${x + size / 2},${y + size - 1} ${x + 1},${y + size / 2}`
+    };
 
     get id(){
         return this._id;
+    }
+
+    getHtmlIdName(){
+        return `${this._id}`
     }
 
     get type(){
@@ -86,6 +96,22 @@ export default class COperator{
 
     set height(height){
         this._height = height;
+    }
+
+    get isDragged(){
+        return this._isDragged;
+    }
+
+    set isDragged(isDragged){
+        this._isDragged = isDragged;
+    }
+
+    get isAvailableForDragging(){
+        return this._isAvailableForDragging;
+    }
+
+    set isAvailableForDragging(isAvailableForDragging){
+        this._isAvailableForDragging = isAvailableForDragging;
     }
 
     get connectorType(){
@@ -156,6 +182,8 @@ export default class COperator{
             y: this._y,
             width: this._width,
             height: this._height,
+            isDragged: this._isDragged,
+            isAvailableForDragging: this._isAvailableForDragging,
             connectorType: this._connectorType,
             invoker: this._invoker,
             entity: this._entity.getObject(),

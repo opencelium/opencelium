@@ -208,7 +208,7 @@ class TechnicalLayout extends React.Component{
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={!(isSelectedBusinessItemEmpty && !isAssignMode)}
                     isScalable={HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode)}
-                    isItemDraggable={false}
+                    isItemDraggable={true}
                     setCurrentItem={(a) => this.setCurrentItem(a)}
                     deleteProcess={(a) => this.deleteProcess(a)}
                     currentItem={currentTechnicalItem}
@@ -217,6 +217,7 @@ class TechnicalLayout extends React.Component{
                     detailsPosition={detailsPosition}
                     connection={connection}
                     items={items}
+                    dragAndDropStep={1}
                     arrows={[...connection.fromConnector.arrows, ...connection.toConnector.arrows]}
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
