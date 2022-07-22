@@ -2,6 +2,28 @@
 Changelog
 *********
 
+2.4
+===
+:Date: July 22, 2022
+
+Features
+--------
+
+* Gravatar support
+* Inline editor function
+* Offline mode
+* Add marketplace for service portal
+
+
+Fixes
+-----
+
+* error after using inline editor (OC-477)
+* duplicate template (OC-475)
+* could not save connection after deleting field binding (OC-476)
+* session expired appeared when try to download a template (OC-473)
+* error during creating a field (OC-468)
+
 2.3
 ===
 :Date: June 21, 2022
@@ -43,10 +65,7 @@ Features
 Connector
 ---------
 
-* Ivanti
 * Jira Insight
-* ProcessMaker
-* FreshService
 
 Fixes
 -----
