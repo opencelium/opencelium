@@ -208,7 +208,7 @@ class TechnicalLayout extends React.Component{
                     svgId={`${this.layoutId}_svg`}
                     isDraggable={!(isSelectedBusinessItemEmpty && !isAssignMode)}
                     isScalable={HAS_LAYOUTS_SCALING && !(isSelectedBusinessItemEmpty && !isAssignMode)}
-                    isItemDraggable={true}
+                    isItemDraggable={false}
                     setCurrentItem={(a) => this.setCurrentItem(a)}
                     deleteProcess={(a) => this.deleteProcess(a)}
                     currentItem={currentTechnicalItem}
