@@ -93,7 +93,7 @@ class Enhancement extends Component{
                     theme="tomorrow"
                     onChange={(a) => this.updateExpertCode(a)}
                     name="enhancement_var"
-                    editorProps={{$blockScrolling: true, $useWorker: false}}
+                    editorProps={{$blockScrolling: true}}
                     showPrintMargin={true}
                     showGutter={true}
                     highlightActiveLine={false}
@@ -107,6 +107,7 @@ class Enhancement extends Component{
                         enableSnippets: false,
                         showLineNumbers: false,
                         tabSize: 2,
+                        useWorker: false,
                     }}
                 />
                 <AceEditor
@@ -128,6 +129,7 @@ class Enhancement extends Component{
                         enableSnippets: true,
                         showLineNumbers: false,
                         tabSize: 2,
+                        useWorker: false,
                     }}
                 />
             </div>

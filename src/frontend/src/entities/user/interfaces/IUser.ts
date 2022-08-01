@@ -25,6 +25,7 @@ export interface IUserSwitch{
 
 export interface IUserFile{
 }
+
 export interface IUserTextarea{
     userGroupDescription: string;
 }
@@ -42,15 +43,15 @@ export interface IUserText{
     repeatPassword: string;
 }
 
-
 export interface IUserForm extends IUserText, IUserSelect, IUserRadios, IUserFile, IUserSwitch, IForm<IUserText, IUserSelect, IUserRadios, IUserFile, IUserTextarea, IUserSwitch>{
     getById: () => boolean;
     add: () => boolean;
     update: () => boolean;
     deleteById: () => boolean;
-    uploadImage: () => boolean;
     checkEmail: () => boolean;
+    uploadImage: () => boolean;
 }
+
 export default interface IUser extends IUserForm{
     id?: number;
     userId?: number;

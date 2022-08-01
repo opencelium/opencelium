@@ -290,14 +290,14 @@ export default class User extends HookStateClass implements IUser{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(uploadUserImage, {hasNoValidation: true})
-    uploadImage(): boolean{
-        return this.validateId(this.id) && this.validateProfilePicture();
-    }
-
     @App.dispatch(checkUserEmail, {hasNoValidation: true})
     checkEmail(): boolean{
         return this.validateEmail();
+    }
+
+    @App.dispatch(uploadUserImage, {hasNoValidation: true})
+    uploadImage(): boolean{
+        return this.validateId(this.id) && this.validateProfilePicture();
     }
 
     static getUserFromLoginResponse(user: any): IAuthUser{

@@ -34,7 +34,6 @@ import UserDetail from "../../classes/UserDetail";
 import IUserDetail from "../../interfaces/IUserDetail";
 import {UserImageStyled} from "../../components/pages/UserImage";
 import {UserPermissions} from "../../constants";
-import Gravatar from "react-gravatar";
 
 
 
