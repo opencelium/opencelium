@@ -26,18 +26,18 @@ import {ColorTheme} from "@style/Theme";
 
 //TODO move DuplicateIcon in connection/components
 import {DuplicateIcon} from "@root/components/duplicate_icon/DuplicateIcon";
-import {IConnection} from "../interfaces/IConnection";
+import {ConnectionProps, IConnection} from "../interfaces/IConnection";
 import {Connection} from "../classes/Connection";
 import {deleteConnectionsById, getAndUpdateConnection,} from "../redux_toolkit/action_creators/ConnectionCreators";
 import {ConnectionPermissions} from "../constants";
 import InlineEditInput from "@app_component/collection/collection_view/InlineEditInput";
 
-class Connections extends ListCollection{
+class Connections extends ListCollection<ConnectionProps>{
     entities: IConnection[];
     title = 'Connections';
-    keyPropName ='id';
-    sortingProps = ['title'];
-    listProps: ListProp[] = [
+    keyPropName: ConnectionProps ='id';
+    sortingProps: ConnectionProps[] = ['title'];
+    listProps: ListProp<ConnectionProps>[] = [
         {propertyKey: 'title', width: '20%',
             getValue: (entity: IConnection) => {
                 return(

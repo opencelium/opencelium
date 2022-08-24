@@ -62,3 +62,5 @@ export interface INotificationTemplate extends INotificationTemplateForm{
     type: string;
     content: Partial<Content>;
 }
+
+export type NotificationTemplateProps = keyof INotificationTemplate;

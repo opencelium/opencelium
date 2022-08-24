@@ -38,10 +38,17 @@ const DropdownMenuStyled = styled(DropdownMenu)`
     min-width: 100px;
     top: -7px;
     left: -100px;
-`
+`;
+
+const ListRowStyled = styled.tr`
+    &:hover{
+        background: #eee;
+    }
+`;
 
 export {
     EmptyListStyled,
     TypesStyled,
     DropdownMenuStyled,
+    ListRowStyled,
 }

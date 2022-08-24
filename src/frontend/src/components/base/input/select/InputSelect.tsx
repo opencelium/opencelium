@@ -51,6 +51,8 @@ const InputSelect: FC<InputSelectProps> = ({
     isMultiple,
     className,
     getOptionRightComponent,
+    maxMultiValues,
+    autoFocus,
     ...props
 }) => {
     let source: OptionProps[];
@@ -125,6 +127,9 @@ const InputSelect: FC<InputSelectProps> = ({
         }
         let newValue: any;
         if(isMultiple){
+            if(multipleValue.length === maxMultiValues){
+                return;
+            }
             newValue = [...multipleValue, option];
         } else{
             newValue = option;
@@ -230,6 +235,7 @@ const InputSelect: FC<InputSelectProps> = ({
                         hasSearchInput &&
                         <SearchInputStyled
                             id={id}
+                            autoFocus={autoFocus}
                             readOnly={readOnly}
                             placeholder={searchPlaceholder}
                             onKeyDown={searchInputPressed}
@@ -284,6 +290,8 @@ InputSelect.defaultProps = {
     callback: null,
     className: '',
     getOptionRightComponent: null,
+    maxMultiValues: Infinity,
+    autoFocus: false,
 }
 
 export default InputSelect;

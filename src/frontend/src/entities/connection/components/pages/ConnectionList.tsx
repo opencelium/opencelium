@@ -21,7 +21,7 @@ import CollectionView from "@app_component/collection/collection_view/Collection
 import {useAppDispatch} from "@application/utils/store";
 import {getAllMetaConnections} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {checkNeo4j} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import {ExternalApplication} from "@entity/external_application/classes/ExternalApplication";
 import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";

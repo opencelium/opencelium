@@ -22,7 +22,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {SortType} from "@app_component/collection/collection_view/interfaces";
 import {PermissionButton} from "@app_component/base/button/PermissionButton";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
-import {IConnector} from "../interfaces/IConnector";
+import {ConnectorProps, IConnector} from "../interfaces/IConnector";
 import {Connector} from "../classes/Connector";
 import {
     deleteConnectorsById, updateConnector,
@@ -32,12 +32,12 @@ import ModelConnector from "../requests/models/Connector";
 import {ConnectorPermissions} from "../constants";
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 
-class Connectors extends ListCollection{
+class Connectors extends ListCollection<ConnectorProps>{
     entities: IConnector[];
     title = 'Connectors';
-    keyPropName ='id';
-    sortingProps = ['title'];
-    listProps: ListProp[] = [
+    keyPropName: ConnectorProps ='id';
+    sortingProps: ConnectorProps[] = ['title'];
+    listProps: ListProp<ConnectorProps>[] = [
         {
             propertyKey: 'title',
             width: '20%',

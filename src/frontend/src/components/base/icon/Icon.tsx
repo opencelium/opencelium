@@ -25,6 +25,8 @@ const Icon: FC<IconProps> =
         id,
         name,
         onClick,
+        onMouseOver,
+        onMouseLeave,
         color,
         size,
         position,
@@ -52,6 +54,8 @@ const Icon: FC<IconProps> =
             id={id}
             className={`material-icons-round ${className}`}
             onClick={onClick}
+            onMouseOver={onMouseOver}
+            onMouseLeave={onMouseLeave}
             color={color}
             size={instanceSize.size}
             position={position}
@@ -70,6 +74,8 @@ Icon.defaultProps = {
     name: '',
     position: 'unset',
     styles: '',
+    onMouseOver: null,
+    onMouseLeave: null,
 }
 
 export default Icon;

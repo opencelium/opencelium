@@ -40,3 +40,5 @@ export interface ITemplate extends ITemplateForm{
     templateContent?: any;
     getModel?: () => ModelTemplate,
 }
+
+export type TemplateProps = keyof ITemplate | string;

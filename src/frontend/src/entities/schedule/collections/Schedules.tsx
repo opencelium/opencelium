@@ -26,7 +26,7 @@ import {PermissionButton, PermissionTooltipButton} from "@app_component/base/but
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {ColorTheme} from "@style/Theme";
-import {ISchedule} from "../interfaces/ISchedule";
+import {ISchedule, ScheduleProps} from "../interfaces/ISchedule";
 import {Schedule} from "../classes/Schedule";
 import {
     deleteSchedulesById,
@@ -49,13 +49,13 @@ import LastFailExecution from "../components/last_fail_execution/LastFailExecuti
 import {updateConnector} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 
-class Schedules extends ListCollection{
+class Schedules extends ListCollection<ScheduleProps>{
     hasElasticSearch: boolean = false;
     entities: ISchedule[];
     title = 'Schedules';
-    keyPropName ='id';
-    sortingProps = ['title'];
-    listProps: ListProp[] = [{
+    keyPropName: ScheduleProps ='id';
+    sortingProps: ScheduleProps[] = ['title'];
+    listProps: ListProp<ScheduleProps>[] = [{
         propertyKey: 'title',
         getValue: (schedule: ISchedule) => {
             if(schedule.webhook){

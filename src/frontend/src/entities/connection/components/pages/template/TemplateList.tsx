@@ -20,7 +20,7 @@ import {Template} from "@entity/connection/classes/Template";
 import {useAppDispatch} from "@application/utils/store";
 import {getAllTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {getAllConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {Connector} from "@entity/connector/classes/Connector";
 import { TemplatePermissions } from '@entity/template/constants';

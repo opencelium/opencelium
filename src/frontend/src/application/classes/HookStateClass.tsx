@@ -14,7 +14,7 @@
  */
 
 import {Application as App} from "./Application";
-import React, {ChangeEvent, ReactElement, ReactNodeArray} from "react";
+import React, {ChangeEvent, ReactElement, ReactNode} from "react";
 import {capitalize, isString, isArray, isEmptyObject, isNumber, isObject, putSpaceInCamelWords} from "../utils/utils";
 import {IInput} from "../interfaces/core";
 import {useAppDispatch, useAppSelector} from "../utils/store";
@@ -28,6 +28,7 @@ import InputFile from "@app_component/base/input/file/InputFile";
 import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
 import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 import InputRadios from "@app_component/base/input/radio/InputRadios";
+import InputMultiFile from "@app_component/base/input/multi_file/InputMultiFile";
 
 // class to work with form's states
 export class HookStateClass implements IHookState {
@@ -140,7 +141,7 @@ export class HookStateClass implements IHookState {
      * returns array of InputText components linked to class properties with inputType annotation
      * @param data - read IInput
      */
-    getInputTexts<T, P>(data: IInput<T, P>[]):ReactNodeArray{
+    getInputTexts<T, P>(data: IInput<T, P>[]):ReactNode[]{
         const inputs = [];
         for(let i = 0; i < data.length; i++){
             if(data[i]) {
@@ -228,6 +229,31 @@ export class HookStateClass implements IHookState {
                 // @ts-ignore
                 value={this[data.propertyName]}
                 accept={'image/png, image/jpeg'}
+                {...data.props}
+            />
+        );
+    }
+
+    /**
+     * returns InputMultiFile component linked to class property with inputType annotation
+     * @param data - read IInput
+     */
+    getInputMultiFile<T, P>(data: IInput<T, P>):ReactElement{
+        const updateFunctionName = this.getFunctionName(data.propertyName);
+        // @ts-ignore
+        let validationMessage = this.validations[data.propertyName] || '';
+        return(
+            <InputMultiFile
+                id={`input_${data.propertyName.toString()}`}
+                readOnly={this._readOnly}
+                icon={'attach_file'}
+                error={validationMessage}
+                // @ts-ignore
+                setFiles={(files: any[]) => this[updateFunctionName](this, files)}
+                // @ts-ignore
+                files={this[data.propertyName]}
+                // @ts-ignore
+                marginBottom={this[data.propertyName].length > 0 ? '50px' : '0'}
                 {...data.props}
             />
         );

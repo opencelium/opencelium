@@ -22,13 +22,13 @@ import {SortType} from "@app_component/collection/collection_view/interfaces";
 import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
 import {ColorTheme} from "@style/Theme";
 import {ExternalApplication} from "../classes/ExternalApplication";
-import {IExternalApplication} from "../interfaces/IExternalApplication";
+import {ExternalApplicationProps, IExternalApplication} from "../interfaces/IExternalApplication";
 
-class ExternalApplications extends ListCollection{
+class ExternalApplications extends ListCollection<ExternalApplicationProps>{
     entities: IExternalApplication[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'External Application'}];
-    keyPropName ='id';
-    listProps: ListProp[] = [{propertyKey: 'name', width: '40%'}, {propertyKey: 'status', width: '40%'}];
+    keyPropName: ExternalApplicationProps ='id';
+    listProps: ListProp<ExternalApplicationProps>[] = [{propertyKey: 'name', width: '40%'}, {propertyKey: 'status', width: '40%'}];
     gridProps: ListCollectionCardProps = {
         title: 'name',
         subtitle: 'status',

@@ -24,17 +24,17 @@ import {ViewType} from "@app_component/collection/collection_view/CollectionView
 import {deleteUsersById, uploadUserImage} from "../redux-toolkit/action_creators/UserCreators";
 import User from "../classes/User";
 import IAuthUser from "../interfaces/IAuthUser";
-import IUser from "../interfaces/IUser";
+import IUser, {UserProps} from "../interfaces/IUser";
 import { UserPermissions } from "../constants";
 import Gravatar from "react-gravatar";
 
 
-export default class Users extends ListCollection{
+export default class Users extends ListCollection<UserProps>{
     entities: IUser[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Users'}];
-    keyPropName = 'id';
-    sortingProps = ['email'];
-    listProps: ListProp[] = [{propertyKey: 'email', width: '40%'}, {propertyKey: 'userGroup.name', width: '40%'}];
+    keyPropName: UserProps = 'id';
+    sortingProps: UserProps[] = ['email'];
+    listProps: ListProp<UserProps>[] = [{propertyKey: 'email', width: '40%'}, {propertyKey: 'userGroup.name', width: '40%'}];
     gridProps = {
         title: (user: IUser) => {return user.getFullName();},
         subtitle: 'email',

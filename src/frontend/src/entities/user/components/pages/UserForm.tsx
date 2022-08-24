@@ -20,7 +20,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {IForm} from "@application/interfaces/IForm";
 import {Form} from "@application/classes/Form";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {InputTextType} from "@app_component/base/input/text/interfaces";
 import Button from "@app_component/base/button/Button";
 import FormSection from "@app_component/form/form_section/FormSection";

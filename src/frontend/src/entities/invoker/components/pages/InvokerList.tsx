@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import {getAllInvokers} from "../../redux_toolkit/action_creators/InvokerCreators";
 import {InvokerListProps} from "./interfaces";

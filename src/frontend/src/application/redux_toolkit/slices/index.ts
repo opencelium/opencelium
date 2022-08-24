@@ -16,7 +16,6 @@
 import applicationReducer from "./ApplicationSlice";
 import {actions} from './ApplicationSlice'
 
-
 export default {
     applicationReducer,
     actions,

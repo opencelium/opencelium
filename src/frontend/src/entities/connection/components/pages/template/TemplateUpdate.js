@@ -21,7 +21,7 @@ import {addConnection, checkConnectionTitle} from "@entity/connection/redux_tool
 import {getTemplateById as fetchTemplate, getAllTemplates as fetchTemplates, checkTemplateName} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {updateTemplate} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from '@entity/connector/redux_toolkit/action_creators/ConnectorCreators';
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {setConnectionViewType} from "../../../redux_toolkit/slices/ConnectionSlice";
 import {TemplateForm} from "./TemplateForm";
 import {useNavigate, useParams} from "react-router";

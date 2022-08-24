@@ -17,7 +17,13 @@ import styled from "styled-components";
 import Text from "@app_component/base/text/Text";
 import {TextProps} from "@app_component/base/text/interfaces";
 import {Appearance} from "@style/animations";
-import {ActionsStyledProps, FormSectionStyledProps, FormStyledProps, TitleStyledProps} from "./interfaces";
+import {
+    ActionsStyledProps,
+    FormSectionStyledProps,
+    FormStyledProps,
+    SectionStyledProps,
+    TitleStyledProps
+} from "./interfaces";
 
 const TitleStyled = styled(Text)<TitleStyledProps | TextProps>`
     display: block;
@@ -39,9 +45,9 @@ const FormStyled = styled.div<FormStyledProps>`
     padding-bottom: 30px;
 `;
 
-const SectionStyled = styled.div`
+const SectionStyled = styled.div<SectionStyledProps>`
     display: grid;
-    grid-template-columns: 50% 50%;
+    grid-template-columns: ${({gridTemplateColumns}) => gridTemplateColumns || '50% 50%'};
     column-gap: 20px;
     row-gap: 20px;
     width: calc(100% - 20px);

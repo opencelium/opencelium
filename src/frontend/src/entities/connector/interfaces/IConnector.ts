@@ -62,3 +62,5 @@ export interface IConnector extends IConnectorForm{
     icon?: string;
     shouldDeleteIcon?: boolean,
 }
+
+export type ConnectorProps = keyof IConnector | string;

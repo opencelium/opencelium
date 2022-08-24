@@ -16,7 +16,7 @@
 import React, {FC, useState} from 'react';
 import {LinkProps} from "react-router-dom";
 import {withTheme} from "styled-components";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {NO_RESTRICTION} from "@application/interfaces/IApplication";
 import {IconProps} from "@app_component/base/icon/interfaces";
 import Dialog from "@app_component/base/dialog/Dialog";
@@ -37,7 +37,8 @@ const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkP
         hasConfirmation,
         confirmationText,
         isReadonly,
-        onHoverColor
+        onHoverColor,
+        component,
     }) => {
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
     return (
@@ -46,7 +47,7 @@ const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkP
             onClick={hasConfirmation ? () => toggleConfirmation(!isConfirmationOpened) : onClick ? onClick : () => {}}
             $onHoverColor={onHoverColor}
         >
-            <MenuIcon color={ColorTheme.White} name={name} size={size}/>
+            {name !== '' ? <MenuIcon color={ColorTheme.White} name={name} size={size}/> : component}
             <MenuLinkLabelStyled value={label} size={TextSize.Size_16}/>
             {
                 hasConfirmation &&
@@ -68,6 +69,7 @@ MenuLink.defaultProps = {
     hasConfirmation: false,
     confirmationText: '',
     isReadonly: false,
+    component: null,
 }
 
 

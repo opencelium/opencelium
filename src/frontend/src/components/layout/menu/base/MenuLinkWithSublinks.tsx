@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import {LinkProps} from "react-router-dom";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {IconProps} from "@app_component/base/icon/interfaces";
 import {ColorTheme} from "@style/Theme";
 import {
@@ -38,7 +38,7 @@ const MenuLinkWithSubLinks: FC<Partial<IconProps> & LinkProps & MenuLinkWithSubL
         subLinks,
         isMainMenuExpanded,
         isReadonly,
-         onHoverColor,
+        onHoverColor,
     }) => {
     const [isCollapsed, collapse] = useState(true);
     useEffect(() => {

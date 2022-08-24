@@ -53,6 +53,7 @@ const Input: FC<InputProps> =
         className,
         labelMargin,
         paddingRight,
+        marginBottom,
     }) => {
         const hasMaxLength = maxLength !== Infinity && !readOnly;
         const hasLabel = label !== '';
@@ -89,7 +90,7 @@ const Input: FC<InputProps> =
         }
         const showIcon = (hasIcon || isLoadingWithoutIcon) && !noIcon;
         return (
-            <InputElementStyled paddingLeft={paddingLeft} paddingRight={paddingRight} className={className} overflow={overflow} height={height} marginTop={marginTop} background={background} ref={componentRef} display={display} minHeight={`${minHeight}px`} paddingTop={paddingTop} paddingBottom={paddingBottom} width={width}>
+            <InputElementStyled marginBottom={marginBottom} paddingLeft={paddingLeft} paddingRight={paddingRight} className={className} overflow={overflow} height={height} marginTop={marginTop} background={background} ref={componentRef} display={display} minHeight={`${minHeight}px`} paddingTop={paddingTop} paddingBottom={paddingBottom} width={width}>
                 {childrenWithProps}
                 {hasUnderline && <div/>}
                 {showIcon && <IconStyled paddingTop={paddingTop ? paddingTop : '0'} top={hasLabel ? '24px' : '2px'} left={!isLoadingWithoutIcon && isIconInside ? '3px' : '10px'} right={isLoadingWithoutIcon ? isTextarea ? '15px' : '3px' : 'unset'}><Icon color={ColorTheme.LightGray} isLoading={isLoading} name={icon} size={TextSize.Size_24}/></IconStyled>}
@@ -114,6 +115,7 @@ Input.defaultProps = {
     paddingTop: '0',
     height: 'unset',
     className: '',
+    marginBottom: 0,
 }
 
 export default Input;

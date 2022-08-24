@@ -32,20 +32,20 @@ export interface MultipleTitleProps{
     link?: string,
 }
 
-export interface ListProp{
-    propertyKey: string,
+export interface ListProp<EntityProps>{
+    propertyKey: EntityProps,
     width?: string,
     getValue?: (entity: any) => any,
     replace?: boolean,
     style?: any;
 }
 
-export interface IListCollection{
+export interface IListCollection<EntityProps>{
     dispatch?: AppDispatch;
     deletingEntitiesState?: API_REQUEST_STATE;
     uploadingImage?: API_REQUEST_STATE;
     title?: string | React.ReactNode;
-    keyPropName: string;
+    keyPropName: EntityProps;
 
     //array of instance properties that should be displayed in the List
     //supported formats:
@@ -53,10 +53,10 @@ export interface IListCollection{
     // - <propertyName(object).propertyName> - if property is an object than use dot to go deeper
     // - <propertyName(array of string|number)> - such array will be displayed as a concatenation of values separated with comma
     // - <propertyName(array of objects)[subPropertyName]> - such array will be mapped by subPropertyName
-    listProps: ListProp[];
+    listProps: ListProp<EntityProps>[];
     listStyles?: any;
     gridProps: ListCollectionCardProps;
-    sortingProps: string[];
+    sortingProps: EntityProps[];
     //translations for listProps
     translations: any;
     getTopActions?: (viewType?: ViewType, checkedIds?: number[] | string[]) => React.ReactNode;

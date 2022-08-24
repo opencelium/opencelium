@@ -58,9 +58,9 @@ const InputSwitch: FC<InputSwitchProps> = ({
                     toggle={() => toggleConfirmation(!isConfirmationOpened)}
                     title={'Confirmation'}
                 >
-                        <span>
-                            {confirmationText}
-                        </span>
+                    <span>
+                        {confirmationText}
+                    </span>
                 </Dialog>
             }
         </Input>

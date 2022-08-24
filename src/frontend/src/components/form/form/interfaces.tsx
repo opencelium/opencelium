@@ -25,6 +25,10 @@ interface ActionsStyledProps{
 
 }
 
+interface SectionStyledProps{
+    gridTemplateColumns?: string,
+}
+
 interface FormStyledProps{
     margin?: string | number,
     padding?: string | number,
@@ -41,6 +45,7 @@ interface FormProps{
     actions?: any[],
     isLoading?: boolean,
     error?: any,
+    gridTemplateColumns?: string,
 }
 
 export {
@@ -49,4 +54,5 @@ export {
     FormStyledProps,
     FormSectionStyledProps,
     FormProps,
+    SectionStyledProps,
 }

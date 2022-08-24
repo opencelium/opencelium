@@ -26,6 +26,7 @@ interface CardProps{
     onClick?: any,
     isRefreshing?: boolean;
     display?: string;
+    position?: string,
     overflow?: string;
     style?: any;
 }

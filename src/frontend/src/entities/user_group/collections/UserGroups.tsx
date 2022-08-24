@@ -23,17 +23,17 @@ import {PermissionButton, PermissionTooltipButton} from "@app_component/base/but
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {ColorTheme} from "@style/Theme";
-import {IUserGroup} from "../interfaces/IUserGroup";
+import {IUserGroup, UserGroupProps} from "../interfaces/IUserGroup";
 import {UserGroup} from "../classes/UserGroup";
 import {deleteUserGroupsById} from "../redux_toolkit/action_creators/UserGroupCreators";
 import { UserGroupPermissions } from "../constants";
 
-class UserGroups extends ListCollection{
+class UserGroups extends ListCollection<UserGroupProps>{
     entities: IUserGroup[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups'}];
-    keyPropName ='id';
-    sortingProps = ['name'];
-    listProps: ListProp[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'components[name]', width: '30%'}];
+    keyPropName: UserGroupProps ='id';
+    sortingProps: UserGroupProps[] = ['name'];
+    listProps: ListProp<UserGroupProps>[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'components[name]', width: '30%'}];
     gridProps = {
         title: 'name',
         //image: (userGroup: IUserGroup) => {return userGroup.icon;},

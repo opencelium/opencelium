@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {ReactElement, ReactNodeArray} from "react";
+import React, {ReactElement, ReactNode} from "react";
 import {HookStateClass} from "@application/classes/HookStateClass";
 import {Application as App} from "@application/classes/Application";
 import {IInput} from "@application/interfaces/core";
@@ -110,7 +110,7 @@ export class Notification extends HookStateClass implements INotification{
         return super.getInputText<INotificationText, InputTextProps>(data);
     }
 
-    getTexts(data: IInput<INotificationText, InputTextProps>[]):ReactNodeArray{
+    getTexts(data: IInput<INotificationText, InputTextProps>[]):ReactNode[]{
         return super.getInputTexts<INotificationText, InputTextProps>(data);
     }
 

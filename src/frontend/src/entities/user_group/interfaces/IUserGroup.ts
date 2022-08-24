@@ -55,3 +55,5 @@ export interface IUserGroup extends IUserGroupForm{
     icon?: string,
     getPoustModel?: () => ModelUserGroup,
 }
+
+export type UserGroupProps = keyof IUserGroup | string;

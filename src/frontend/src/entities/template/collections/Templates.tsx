@@ -24,19 +24,19 @@ import {ViewType} from "@app_component/collection/collection_view/CollectionView
 import {TextSize} from "@app_component/base/text/interfaces";
 import {DeleteButtonStyled} from "@app_component/collection/collection_view/styles";
 import {ColorTheme} from "@style/Theme";
-import {ITemplate} from "@entity/connection/interfaces/ITemplate";
+import {ITemplate, TemplateProps} from "@entity/connection/interfaces/ITemplate";
 import {Template} from "@entity/connection/classes/Template";
 import {deleteTemplatesById, exportTemplate} from "../redux_toolkit/action_creators/TemplateCreators";
 import TemplateConversionIcon from "../components/TemplateConversionIcon";
 import {TemplatePermissions} from "../constants";
 import ImportTemplateButton from "../components/import_template_button/ImportTemplateButton";
 
-class Templates extends ListCollection{
+class Templates extends ListCollection<TemplateProps>{
     entities: ITemplate[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Templates'}];
-    keyPropName ='id';
-    sortingProps = ['name'];
-    listProps: ListProp[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'connection.fromConnector.invoker.name'}, {propertyKey: 'connection.toConnector.invoker.name'}];
+    keyPropName: TemplateProps ='id';
+    sortingProps: TemplateProps[] = ['name'];
+    listProps: ListProp<TemplateProps>[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'connection.fromConnector.invoker.name'}, {propertyKey: 'connection.toConnector.invoker.name'}];
     gridProps = {title: 'name'};
     translations = {
         name: 'Name',

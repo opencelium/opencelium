@@ -14,7 +14,7 @@
  */
 
 import React, {ChangeEvent, FC, useEffect, useState} from "react";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {Auth} from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
 import {Application} from "@application/classes/Application";

@@ -16,7 +16,7 @@
 import React, {FC, useEffect, useRef, useState} from "react";
 import {useNavigate, useParams} from "react-router";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {IForm} from "@application/interfaces/IForm";
 import {Form} from "@application/classes/Form";
 import Button from "@app_component/base/button/Button";

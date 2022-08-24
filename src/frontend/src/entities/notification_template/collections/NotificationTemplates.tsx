@@ -21,17 +21,17 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {SortType} from "@app_component/collection/collection_view/interfaces";
 import {PermissionButton} from "@app_component/base/button/PermissionButton";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
-import {INotificationTemplate} from "../interfaces/INotificationTemplate";
+import {INotificationTemplate, NotificationTemplateProps} from "../interfaces/INotificationTemplate";
 import {NotificationTemplate} from "../classes/NotificationTemplate";
 import {deleteNotificationTemplatesById} from "../redux_toolkit/action_creators/NotificationTemplateCreators";
 import { NotificationTemplatePermissions } from "../constants";
 
-class NotificationTemplates extends ListCollection{
+class NotificationTemplates extends ListCollection<NotificationTemplateProps>{
     entities: INotificationTemplate[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Notification Templates'}];
-    keyPropName ='id';
-    sortingProps = ['name'];
-    listProps: ListProp[] = [{propertyKey: 'name', width: '40%'}, {propertyKey: 'type', width: '40%'}];
+    keyPropName: NotificationTemplateProps ='id';
+    sortingProps: NotificationTemplateProps[] = ['name'];
+    listProps: ListProp<NotificationTemplateProps>[] = [{propertyKey: 'name', width: '40%'}, {propertyKey: 'type', width: '40%'}];
     gridProps = {title: 'name'};
     translations = {
         name: 'Name',

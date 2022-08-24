@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ReactElement, ReactNodeArray} from "react";
+import {ReactElement, ReactNode} from "react";
 import {InputTextProps} from "@app_component/base/input/text/interfaces";
 import {InputSelectProps} from "@app_component/base/input/select/interfaces";
 import {InputRadiosProps} from "@app_component/base/input/radio/interfaces";
@@ -37,9 +37,10 @@ export interface IForm<Text = {}, Select = {}, Radios = {}, File = {}, Textarea 
     getSelect?(data: IInput<Select, InputSelectProps>):ReactElement;
     getRadios?(data: IInput<Radios, InputRadiosProps>):ReactElement;
     getFile?(data: IInput<File, InputFileProps>):ReactElement;
+    getMultiFiles?(data: IInput<File, InputFileProps>):ReactElement;
     getTextarea?(data: IInput<Textarea, InputTextareaProps>):ReactElement;
     getSwitch?(data: IInput<Switch, InputSwitchProps>):ReactElement;
-    getTexts?(data: IInput<Text, InputTextProps>[]):ReactNodeArray;
+    getTexts?(data: IInput<Text, InputTextProps>[]):ReactNode[];
     updateState?(instance: any): void;
     _readOnly?: boolean;
 }

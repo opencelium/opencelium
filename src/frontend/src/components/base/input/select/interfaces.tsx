@@ -58,6 +58,7 @@ interface AsyncOptionProps{
 }
 
 interface InputSelectProps extends InputElementProps{
+    autoFocus?: boolean,
     getOptionRightComponent?: (option: OptionProps) => any,
     id?: string,
     value?: any,
@@ -69,6 +70,7 @@ interface InputSelectProps extends InputElementProps{
     isMultiple?: boolean | undefined,
     callback?: (reference: any, newValue?: any)=>void,
     className?: string,
+    maxMultiValues?: number,
 }
 
 interface OptionsStyledProps extends ElementProps{

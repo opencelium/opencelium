@@ -19,6 +19,7 @@ import {ListProp} from "@application/interfaces/IListCollection";
 import {isArray, isString} from "@application/utils/utils";
 import Text from "@app_component/base/text/Text";
 import { ListRowProps } from './interfaces';
+import {ListRowStyled} from "@app_component/collection/styles";
 
 const MAX_COLUMN_VALUE_LENGTH = 150;
 
@@ -31,8 +32,9 @@ const ListRow: FC<ListRowProps> =
         check,
         checks,
     }) => {
+        const ListRawComponent = collection.ListRawComponent ? collection.ListRawComponent : ListRowStyled;
         return (
-            <tr>
+            <ListRawComponent entity={entity}>
                 {collection.hasCheckboxes &&
                 <td>
                     <input type={'checkbox'} checked={isChecked} onChange={() => check({
@@ -42,7 +44,7 @@ const ListRow: FC<ListRowProps> =
                 </td>
                 }
                 {
-                    collection.listProps.map((listProp: ListProp) => {
+                    collection.listProps.map((listProp: ListProp<any>) => {
                         const propertyKey = listProp.propertyKey;
                         const getValue = listProp.getValue;
                         const shouldReplace = listProp.replace || false;
@@ -99,7 +101,7 @@ const ListRow: FC<ListRowProps> =
                     {actionsData}
                 </td>
                 }
-            </tr>
+            </ListRawComponent>
         )
 }
 

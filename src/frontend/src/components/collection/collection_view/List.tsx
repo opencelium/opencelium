@@ -41,7 +41,8 @@ const List: FC<ListViewProps> =
         componentPermission,
         shouldBeUpdated,
         isRefreshing,
-         filterData,
+        filterData,
+        isCard,
     }) => {
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
@@ -101,8 +102,10 @@ const List: FC<ListViewProps> =
         collection.sort(sortingProp, sortType);
         setSortTypes({...sortTypes, [sortingProp]: sortType})
     }
+    const CardComponent = isCard ? Card : React.Fragment;
+    const cardProps = isCard ? {padding: '10px', margin: '0 0 20px 0', isRefreshing, overflow: 'auto', style: collection.listStyles} : {};
     return (
-        <Card padding={'10px'} margin={'0 0 20px 0'} isRefreshing={isRefreshing} overflow={'auto'} style={collection.listStyles}>
+        <CardComponent {...cardProps}>
             {visibleEntities.length === 0
                 ?
                 <EmptyList/>
@@ -117,7 +120,7 @@ const List: FC<ListViewProps> =
                         </th>
                         }
                         {
-                            collection.listProps.map((listProp: ListProp) => {
+                            collection.listProps.map((listProp: ListProp<any>) => {
                                 let propertyKey = listProp.propertyKey;
                                 let columnWidth = listProp.width || 'auto';
                                 const columnStyle = listProp.style || {};
@@ -125,14 +128,14 @@ const List: FC<ListViewProps> =
                                     let translationProp = propertyKey;
                                     let splitColumnName = propertyKey.split('.');
                                     if (splitColumnName.length > 1) {
-                                        translationProp = splitColumnName.map((name, key) => key !== 0 ? capitalize(name) : name).join('');
+                                        translationProp = splitColumnName.map((name: string, key: number) => key !== 0 ? capitalize(name) : name).join('');
                                     }
-                                    let hasSortIcon = collection.sortingProps.findIndex(prop => prop === propertyKey) !== -1;
+                                    let hasSortIcon = collection.sortingProps.findIndex((prop: string) => prop === propertyKey) !== -1;
                                     let sortIcon = hasSortIcon ? sortTypes[propertyKey] === SortType.asc ? 'keyboard_arrow_up' : 'keyboard_arrow_down' : '';
                                     return (
                                         <ThStyled key={propertyKey} width={columnWidth}>
                                             <div style={{display: 'flex', justifyContent: 'center', ...columnStyle}}>
-                                                <span style={{marginLeft: hasSortIcon ? '24px' : 0}}><Text value={collection.translations[translationProp]}/></span>
+                                                {collection.translations[translationProp] && <span style={{marginLeft: hasSortIcon ? '24px' : 0}}><Text value={collection.translations[translationProp]}/></span>}
                                                 {hasSortIcon &&
                                                     <TooltipButton target={'sort_button'} tooltip={sortTypes[propertyKey] === SortType.asc ? 'Asc' : 'Desc'} position={'top'} hasBackground={false} color={ColorTheme.Blue}
                                                             handleClick={() => sort(propertyKey, sortTypes[propertyKey] === SortType.asc ? SortType.desc : SortType.asc)}
@@ -173,13 +176,14 @@ const List: FC<ListViewProps> =
                     </tbody>
                 </Table>
             }
-        </Card>
+        </CardComponent>
     )
 }
 
 List.defaultProps = {
     isRefreshing: false,
     filterData: null,
+    isCard: true,
 }
 
 

@@ -16,7 +16,7 @@
 import React, {FC, useEffect} from 'react';
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {Auth} from "@application/classes/Auth";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import UserGroups from "../../collections/UserGroups";

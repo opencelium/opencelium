@@ -37,6 +37,7 @@ const App = ({}) => {
     const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
     useEffect(() => {
         if(authUser) {
+            //todo: themesync is absent in service portal. move it out
             if (authUser.userDetail.themeSync) {
                 if (navigator.onLine) {
                     createIframe(onlineServiceOpenCeliumUrl);

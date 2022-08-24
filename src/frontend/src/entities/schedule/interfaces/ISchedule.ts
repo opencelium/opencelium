@@ -73,3 +73,5 @@ export interface ISchedule extends IScheduleForm{
     connection: IConnection,
     getModel?: (isForApiRequest?: boolean) => ModelSchedule,
 }
+
+export type ScheduleProps = keyof ISchedule | string;

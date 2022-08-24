@@ -21,6 +21,10 @@ interface FormSectionProps{
     label?: LabelProps,
     hasFullWidthInForm?: boolean,
     dependencies?: boolean[],
+    padding?: string,
+    overflow?: string,
+    position?: string,
+    styles?: any,
 }
 
 export {

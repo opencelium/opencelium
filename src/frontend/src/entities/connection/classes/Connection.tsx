@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {ReactElement, ReactNodeArray} from "react";
+import React, {ReactElement, ReactNode} from "react";
 import {HookStateClass} from "@application/classes/HookStateClass";
 import {Application as App} from "@application/classes/Application";
 import {IInput} from "@application/interfaces/core";
@@ -78,7 +78,7 @@ export class Connection extends HookStateClass implements IConnection{
         return super.getInputText<IConnectionText, InputTextProps>(data);
     }
 
-    getTexts(data: IInput<IConnectionText, InputTextProps>[]):ReactNodeArray{
+    getTexts(data: IInput<IConnectionText, InputTextProps>[]):ReactNode[]{
         return super.getInputTexts<IConnectionText, InputTextProps>(data);
     }
 

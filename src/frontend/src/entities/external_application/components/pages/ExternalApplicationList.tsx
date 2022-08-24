@@ -17,7 +17,7 @@ import React, {FC, useEffect} from 'react';
 import {kibanaUrl, neo4jUrl} from "@entity/application/requests/classes/url";
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import KibanaImagePath from "@image/apps/kibana.png";
 import Neo4jImagePath from "@image/apps/neo4j.png";

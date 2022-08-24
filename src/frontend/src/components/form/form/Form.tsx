@@ -30,6 +30,7 @@ const Form: FC<FormProps> =
         formSections,
         isLoading,
         error,
+        gridTemplateColumns,
     }) => {
     if(isLoading){
         return(
@@ -42,7 +43,8 @@ const Form: FC<FormProps> =
         if (React.isValidElement(formSection)) {
             const props: FormSectionProps = formSection.props
             const hasFullWidth = props.hasFullWidthInForm;
-            let additionalStyles = '';
+            //@ts-ignore
+            let additionalStyles = props.children.length > 1 ? props.children[0].props.styles || '' : '';
             if(hasFullWidth){
                 additionalStyles = `
                     grid-column-start: 1;
@@ -65,7 +67,7 @@ const Form: FC<FormProps> =
             <FormStyled>
                 <Title title={title}/>
                 <ActionsStyled>{actions}</ActionsStyled>
-                <SectionStyled>
+                <SectionStyled gridTemplateColumns={gridTemplateColumns}>
                     {sectionComponents}
                 </SectionStyled>
             </FormStyled>
@@ -76,6 +78,7 @@ const Form: FC<FormProps> =
 Form.defaultProps = {
     title: '',
     error: null,
+    gridTemplateColumns: '',
 }
 
 

@@ -16,7 +16,7 @@
 import React, {FC, useEffect} from 'react';
 import {withTheme} from 'styled-components';
 import {useParams} from "react-router";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {IForm} from "@application/interfaces/IForm";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Button from "@app_component/base/button/Button";

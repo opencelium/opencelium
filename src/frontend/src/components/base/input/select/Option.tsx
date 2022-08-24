@@ -23,16 +23,16 @@ const Option: FC<OptionProps> =
          getOptionRightComponent,
         ...props
     }) => {
-    const OptionRightComponent = getOptionRightComponent ? getOptionRightComponent({...props}) : null;
-    return (
-        <React.Fragment>
-            <div style={{position: 'relative'}}>
-                <OptionStyled readOnly={true} {...props}/>
-                {OptionRightComponent}
-            </div>
-        </React.Fragment>
-    )
-}
+        const OptionRightComponent = getOptionRightComponent ? getOptionRightComponent({...props}) : null;
+        return (
+            <React.Fragment>
+                <div style={{position: 'relative'}}>
+                    <OptionStyled readOnly={true} {...props}/>
+                    {OptionRightComponent}
+                </div>
+            </React.Fragment>
+        )
+    }
 
 Option.defaultProps = {
     isCurrent: false,

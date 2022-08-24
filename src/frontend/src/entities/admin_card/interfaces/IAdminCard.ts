@@ -19,3 +19,5 @@ export interface IAdminCard{
     link: string,
     permission?: string,
 }
+
+export type AdminCardProps = keyof IAdminCard;

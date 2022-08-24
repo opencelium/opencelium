@@ -57,7 +57,7 @@ const InputFile: FC<InputFileProps> = ({
     if(fileName){
         placeholder = fileName;
     }
-    const hasValue = !!value;
+    const hasValue = !!src;
     const textColor = hasValue || (hasNoImage && hasCheckbox) ? ColorTheme.Black : ColorTheme.Gray;
     if(hasNoImage && hasCheckbox){
         placeholder = 'Set Image';

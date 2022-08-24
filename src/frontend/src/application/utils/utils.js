@@ -466,16 +466,6 @@ export function sortByIndex(array){
     return array.sort(sortByIndexFunction, collator);
 }
 
-export function sortConnectorItemIndexes(indexes){
-    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
-    return indexes.sort((a, b) => {
-        return a.localeCompare(b, undefined, {
-            numeric: true,
-            sensitivity: 'base'
-        });
-    }, collator);
-}
-
 /**
  * a callback to sort by index
  */
@@ -869,4 +859,29 @@ function placeBinding(action, fieldBinding){
             }
         }
     }
+}
+
+export function sortConnectorItemIndexes(indexes){
+    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+    return indexes.sort((a, b) => {
+        return a.localeCompare(b, undefined, {
+            numeric: true,
+            sensitivity: 'base'
+        });
+    }, collator);
+}
+
+export const convertFileToBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
+
+export const debounce = (callback, wait = 500) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => callback.apply(this, args), wait);
+    };
 }

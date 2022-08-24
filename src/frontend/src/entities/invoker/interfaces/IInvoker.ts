@@ -65,3 +65,5 @@ export interface IInvoker extends IInvokerForm{
     getXml: () => string,
     getConnection: () => Operation,
 }
+
+export type InvokerProps = keyof IInvoker | string;

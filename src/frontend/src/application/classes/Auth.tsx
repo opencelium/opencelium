@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {ReactElement, ReactNodeArray} from "react";
+import React, {ReactElement, ReactNode} from "react";
 import {HookStateClass} from "../classes/HookStateClass";
 import {Application as App} from "./Application";
 import {
@@ -57,7 +57,7 @@ export class Auth extends HookStateClass implements IAuth{
         return super.getInputText<IAuthText, InputTextProps>(data);
     }
 
-    getTexts(data: IInput<IAuthText, InputTextProps>[]):ReactNodeArray{
+    getTexts(data: IInput<IAuthText, InputTextProps>[]):ReactNode[]{
         return super.getInputTexts<IAuthText, InputTextProps>(data);
     }
 

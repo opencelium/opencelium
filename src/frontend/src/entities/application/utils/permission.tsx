@@ -16,8 +16,8 @@
 import React, {Component, ElementType, FC} from 'react';
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {NoPermission} from "@app_component/base/no_permission/NoPermission";
-import {Auth} from "../classes/Auth";
-import {ComponentProps, NO_RESTRICTION, PermissionProps} from '../interfaces/IApplication';
+import {Auth} from "@application/classes/Auth";
+import {ComponentProps, NO_RESTRICTION, PermissionProps} from '@application/interfaces/IApplication';
 
 /**
  * check the component on the permission

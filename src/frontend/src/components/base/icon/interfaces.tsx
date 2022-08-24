@@ -27,6 +27,8 @@ interface IconProps extends MaterialIconStyledProps{
     id?: string,
     name: string,
     onClick?: (e?: any) => void,
+    onMouseOver?: (e?: any) => void,
+    onMouseLeave?: (e?: any) => void,
     isLoading?: boolean,
     className?: string,
 }

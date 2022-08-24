@@ -14,7 +14,7 @@
  */
 
 import React, {FC} from 'react';
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import AdminCards from "../../collections/AdminCards";
 import { AdminCardPermissions } from '../../constants';

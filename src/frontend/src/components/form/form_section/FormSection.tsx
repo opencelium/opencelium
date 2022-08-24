@@ -22,9 +22,12 @@ import { FormSectionStyled } from './styles';
 
 const FormSection: FC<FormSectionProps> =
     ({
-         label,
-         dependencies,
-         children,
+        overflow,
+        position,
+        label,
+        dependencies,
+        children,
+        padding,
     }) => {
     let isVisible = true;
     for(let i = 0; i < dependencies.length; i++){
@@ -34,7 +37,7 @@ const FormSection: FC<FormSectionProps> =
     }
     const hasLabel = label !== null;
     return (
-        <FormSectionStyled isVisible={isVisible} padding={`${hasLabel ? '50px' : '20px'} 30px 20px 10px`} margin={`${hasLabel ? '31px' : '0'} 0 0`}>
+        <FormSectionStyled position={position} overflow={overflow} isVisible={isVisible} padding={padding ? padding : `${hasLabel ? '50px' : '20px'} 30px 20px 10px`} margin={`${hasLabel ? '31px' : '0'} 0 0`}>
             {hasLabel && <Label {...label} position={'absolute'}/>}
             <Inputs>{children}</Inputs>
         </FormSectionStyled>
@@ -45,6 +48,10 @@ FormSection.defaultProps = {
     hasFullWidthInForm: false,
     dependencies: [],
     label: null,
+    padding: '',
+    overflow: '',
+    position: '',
+    styles: {},
 }
 
 

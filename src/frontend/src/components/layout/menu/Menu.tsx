@@ -40,78 +40,78 @@ const Menu: FC<MenuProps> =
          isReadonly,
          background,
          hoverMenuItemBackground,
-     }) => {
-        const {isFullScreen} = Application.getReduxState();
-        const [isExpanded, toggleExpanded] = useState(false);
-        const [isMouseOver, toggleMouseOver] = useState(false);
-        const onMouseOver = () => {
-            if(!isReadonly) {
-                toggleMouseOver(true);
+    }) => {
+    const {isFullScreen} = Application.getReduxState();
+    const [isExpanded, toggleExpanded] = useState(false);
+    const [isMouseOver, toggleMouseOver] = useState(false);
+    const onMouseOver = () => {
+        if(!isReadonly) {
+            toggleMouseOver(true);
+        }
+    }
+    const onMouseLeave = () => {
+        if(!isReadonly) {
+            toggleMouseOver(false);
+        }
+    }
+    useEffect(() => {
+        setTimeout(() => resizeWindow(), 500);
+    },[isExpanded]);
+    useEffect(() => {
+        const bodyElement = document.querySelector('body');
+        if (bodyElement) {
+            if(isFullScreen){
+                bodyElement.style['padding'] = '2rem';
+            } else{
+                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
             }
         }
-        const onMouseLeave = () => {
-            if(!isReadonly) {
-                toggleMouseOver(false);
-            }
-        }
-        useEffect(() => {
-            setTimeout(() => resizeWindow(), 500);
-        },[isExpanded]);
-        useEffect(() => {
+    }, [isFullScreen])
+    useEffect(() => {
+        return () => {
             const bodyElement = document.querySelector('body');
             if (bodyElement) {
-                if(isFullScreen){
-                    bodyElement.style['padding'] = '2rem';
-                } else{
-                    bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
-                }
+                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
             }
-        }, [isFullScreen])
-        useEffect(() => {
-            return () => {
-                const bodyElement = document.querySelector('body');
-                if (bodyElement) {
+        }
+    }, [])
+    const toggle = () => {
+        if(!isReadonly) {
+            toggleExpanded(!isExpanded);
+            let bodyElement = document.querySelector('body');
+            if (bodyElement) {
+                if (!isExpanded) {
+                    bodyElement.style['padding'] = '2rem 2rem 0 17rem';
+                } else {
                     bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
-                }
-            }
-        }, [])
-        const toggle = () => {
-            if(!isReadonly) {
-                toggleExpanded(!isExpanded);
-                let bodyElement = document.querySelector('body');
-                if (bodyElement) {
-                    if (!isExpanded) {
-                        bodyElement.style['padding'] = '2rem 2rem 0 17rem';
-                    } else {
-                        bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
-                    }
                 }
             }
         }
-
-        let showMenu = isMouseOver ? true : isExpanded;
-        return (
-            <React.Fragment>
-                <Global/>
-                <MenuStyled background={background} isPreview={isPreview} isFullScreen={isFullScreen} isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
-                    <NavStyled>
-                        <div>
-                            <MenuTop>
-                                <MenuLinkLogo to={'/'} isReadonly={isReadonly} $onHoverColor={hoverMenuItemBackground}/>
-                                <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
-                                    <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
-                                />
-                            </MenuTop>
-                            <div>
-                                {getMenuItems({showMenu, isReadonly, onHoverColor: hoverMenuItemBackground})}
-                            </div>
-                        </div>
-                        {!isReadonly && <LogoutMenuItem isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>}
-                    </NavStyled>
-                </MenuStyled>
-            </React.Fragment>
-        )
     }
+
+    let showMenu = isMouseOver ? true : isExpanded;
+    return (
+        <React.Fragment>
+            <Global/>
+            <MenuStyled background={background} isPreview={isPreview} isFullScreen={isFullScreen} isExpanded={showMenu} onMouseOver={(e) => onMouseOver()} onMouseLeave={(e) => onMouseLeave()}>
+                <NavStyled>
+                    <div>
+                        <MenuTop>
+                            <MenuLinkLogo to={'/'} isReadonly={isReadonly} $onHoverColor={hoverMenuItemBackground}/>
+                            <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
+                                <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
+                            />
+                        </MenuTop>
+                        <div>
+                            {getMenuItems({showMenu, isReadonly, onHoverColor: hoverMenuItemBackground})}
+                        </div>
+                    </div>
+                    {!isReadonly && <LogoutMenuItem isReadonly={isReadonly} onHoverColor={hoverMenuItemBackground}/>}
+                </NavStyled>
+            </MenuStyled>
+        </React.Fragment>
+    )
+}
 
 Menu.defaultProps = {
     isPreview: false,

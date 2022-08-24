@@ -14,7 +14,7 @@
  */
 
 import {TooltipProps} from "reactstrap";
-import {permission} from "@application/utils/permission";
+import {permission} from "@entity/application/utils/permission";
 import {ButtonProps} from "./interfaces";
 import {TooltipButtonProps} from "../tooltip_button/interfaces";
 import Button from "./Button";

@@ -25,7 +25,7 @@ import {SortType} from "@app_component/collection/collection_view/interfaces";
 import { DeleteButtonStyled } from "@app_component/collection/collection_view/styles";
 
 // parent class represents collection of entities
-class ListCollection implements IListCollection{
+class ListCollection<EntityProps> implements IListCollection<EntityProps>{
 
     // to dispatch actions in collection (like delete by id)
     dispatch?: AppDispatch;
@@ -40,19 +40,22 @@ class ListCollection implements IListCollection{
     title?: string | MultipleTitleProps[] | React.ReactNode;
 
     // name of the property that represents key during collection rendering
-    keyPropName: string;
+    keyPropName: EntityProps;
 
     // props of list view
-    listProps: ListProp[] = [];
+    listProps: ListProp<EntityProps>[] = [];
 
     // styles for list view
     listStyles: any = {};
+
+    // component for raw in the list
+    ListRawComponent: any = null;
 
     // props of grid view
     gridProps: ListCollectionCardProps;
 
     // name of the properties that should be sorted
-    sortingProps: string[] = [];
+    sortingProps: EntityProps[] = [];
 
     // translations of the listProps
     translations: any;
@@ -114,7 +117,7 @@ class ListCollection implements IListCollection{
     // check if entity is a current item
     isCurrentItem?: (entity: any) => boolean = (entity) => {return false;};
 
-    constructor(data?: IListCollection) {
+    constructor(data?: IListCollection<EntityProps>) {
     }
 
     /**

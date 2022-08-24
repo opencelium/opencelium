@@ -19,6 +19,7 @@ import {ITheme} from "@style/Theme";
 import * as React from "react";
 
 interface MenuLinkProps{
+    component?: any,
     theme?: ITheme,
     permission?: PermissionProps,
     label?: string,

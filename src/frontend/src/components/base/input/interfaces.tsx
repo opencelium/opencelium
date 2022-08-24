@@ -27,6 +27,7 @@ interface InputElementProps{
     callback?: any,
     paddingTop?: string | number,
     marginTop?: string | number,
+    marginBottom?: string | number,
     error?: string,
     icon?: string,
     label?: string,
@@ -87,12 +88,13 @@ interface ElementProps{
     background?: string,
     paddingLeftInput?: string,
     paddingRightInput?: string,
+    height?: any,
 }
 
 interface InputStyledProps{
     overflow?: string,
     display?: string,
-    marginBottom?: string,
+    marginBottom?: string | number,
     paddingTop?: string | number,
     paddingBottom?: string,
     marginTop?: string | number,

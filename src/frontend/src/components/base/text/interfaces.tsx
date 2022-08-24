@@ -24,6 +24,10 @@ export enum TextSize{
     Size_20= '20px',
     Size_24= '24px',
     Size_30= '30px',
+    Size_40= '40px',
+    Size_50= '50px',
+    Size_60= '60px',
+    Size_70= '70px',
 }
 
 interface TextProps extends TextStyledProps{

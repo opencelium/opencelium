@@ -17,9 +17,10 @@ import styled from "styled-components";
 import {Card as CardComponent} from "@app_component/base/card/Card";
 
 const FormSectionStyled = styled(CardComponent)`
+    overflow: ${({overflow}) => overflow || 'unset'};
     @media screen and (max-width: 950px) {
-        overflow: auto;
-        position: static;
+        overflow: ${({overflow}) => overflow || 'auto'};
+        position: ${({position}) => position || 'static'};
     }
     &>:not(:last-child){
         margin-bottom: 10px;

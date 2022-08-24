@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {ReactElement, ReactNodeArray} from "react";
+import React, {ReactElement, ReactNode} from "react";
 import {HookStateClass} from "@application/classes/HookStateClass";
 import {Application as App} from "@application/classes/Application";
 import {IInput} from "@application/interfaces/core";
@@ -107,7 +107,7 @@ export class Schedule extends HookStateClass implements ISchedule{
         return super.getInputText<IScheduleText, InputTextProps>(data);
     }
 
-    getTexts(data: IInput<IScheduleText, InputTextProps>[]):ReactNodeArray{
+    getTexts(data: IInput<IScheduleText, InputTextProps>[]):ReactNode[]{
         return super.getInputTexts<IScheduleText, InputTextProps>(data);
     }
 

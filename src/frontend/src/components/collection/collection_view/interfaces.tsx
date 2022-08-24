@@ -37,7 +37,7 @@ interface ThStyledProps{
 interface ViewProps{
     theme?: ITheme,
     componentPermission?: ComponentPermissionProps,
-    collection: ListCollection,
+    collection: ListCollection<any>,
     searchValue?: string,
     currentPage?: number,
     gridViewType?: number,
@@ -50,18 +50,23 @@ interface ListViewProps extends ViewProps{
     checks: any[],
     setChecks: (checks: any[]) => void;
     filterData?: any,
+    isCard?: boolean,
 }
 
 interface CollectionViewProps{
     theme?: ITheme,
     componentPermission?: ComponentPermissionProps,
-    collection: ListCollection,
+    collection: ListCollection<any>,
     isLoading?: boolean,
     shouldBeUpdated?: boolean,
     hasTopBar?: boolean,
     hasTitle?: boolean,
     hasViewSection?: boolean,
     defaultViewType?: ViewType | '',
+    hasError?: boolean,
+    isListViewCard?: boolean,
+    defaultFilterData?: any,
+    loadingStyles?: any,
 }
 
 interface CheckProps{

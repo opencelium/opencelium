@@ -27,16 +27,16 @@ import {ColorTheme} from "@style/Theme";
 import {Invoker} from "../classes/Invoker";
 import {deleteInvokersByName} from "../redux_toolkit/action_creators/InvokerCreators";
 import { InvokerPermissions } from "../constants";
-import {IInvoker} from "../interfaces/IInvoker";
+import {IInvoker, InvokerProps} from "../interfaces/IInvoker";
 import ImportInvokerButton from "../components/import_invoker_button/ImportInvokerButton";
 
 
-class Invokers extends ListCollection{
+class Invokers extends ListCollection<InvokerProps>{
     entities: IInvoker[];
     title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Invokers'}];
-    keyPropName = 'name';
-    sortingProps = ['name'];
-    listProps: ListProp[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'authType', width: '10%'}, {propertyKey: 'operations[name]', width: '20%'}];
+    keyPropName: InvokerProps = 'name';
+    sortingProps: InvokerProps[] = ['name'];
+    listProps: ListProp<InvokerProps>[] = [{propertyKey: 'name', width: '20%'}, {propertyKey: 'description', width: '30%'}, {propertyKey: 'authType', width: '10%'}, {propertyKey: 'operations[name]', width: '20%'}];
     gridProps = {
         title: 'name',
         image: (invoker: IInvoker) => {return invoker.icon;},

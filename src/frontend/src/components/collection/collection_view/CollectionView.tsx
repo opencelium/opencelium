@@ -20,7 +20,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {setViewType as setViewTypeGlobally, setGridViewType as setGridViewTypeGlobally, setSearchValue} from "@application/redux_toolkit/slices/ApplicationSlice";
 import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
-import {ContentLoading} from "@app_component/base/loading/ContentLoading";
+import ContentLoading from "@app_component/base/loading/ContentLoading";
 import InputText from "@app_component/base/input/text/InputText";
 import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import Button from "@app_component/base/button/Button";
@@ -33,6 +33,7 @@ import {CollectionViewProps} from "./interfaces";
 import {ActionsStyled, CollectionViewStyled, TopSectionStyled, ViewSectionStyled} from "./styles";
 import {Grid} from "./Grid";
 import Title from "../collection_title/Title";
+import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 
 const LIST_VIEW_ENTITIES_NUMBER = 10;
 
@@ -51,12 +52,15 @@ const CollectionView: FC<CollectionViewProps> =
         hasTitle,
         hasViewSection,
         defaultViewType,
+        hasError,
+        isListViewCard,
+        defaultFilterData,
     }) => {
         const dispatch = useAppDispatch();
         const {searchValue, viewType, gridViewType} = Application.getReduxState();
         const [isRefreshing, setIsRefreshing] = useState(false);
         const [isFilterVisible, toggleFilter] = useState<boolean>(false);
-        const [filterData, setFilterData] = useState(null);
+        const [filterData, setFilterData] = useState(defaultFilterData);
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
         const [currentPage, setCurrentPage] = useState(1);
@@ -122,6 +126,11 @@ const CollectionView: FC<CollectionViewProps> =
             }
         }
         const hasSearch = collection.hasSearch && collection.entities.length > 0;
+        if(hasError){
+            return(
+                <BadRequest/>
+            )
+        }
         if(isLoading){
             return(
                 <ContentLoading/>
@@ -153,12 +162,13 @@ const CollectionView: FC<CollectionViewProps> =
                     </TopSectionStyled>}
                     {isFilterVisible &&
                         <Filter>
-                            {collection.getFilterComponents(filterData, (data) => setFilterData({...data}))}
+                            {collection.getFilterComponents(filterData, (data: any) => setFilterData({...data}))}
                         </Filter>
                     }
                     <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
                         {applicationViewType === ViewType.LIST &&
                             <List
+                                isCard={isListViewCard}
                                 collection={collection}
                                 searchValue={searchValue}
                                 currentPage={currentPage}
@@ -195,6 +205,10 @@ CollectionView.defaultProps = {
     hasTitle: true,
     hasViewSection: true,
     defaultViewType: '',
+    hasError: false,
+    isListViewCard: true,
+    defaultFilterData: null,
+    loadingStyles: {},
 }
 
 

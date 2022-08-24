@@ -20,15 +20,15 @@ import { ComponentPermissionProps } from "@application/interfaces/IApplication";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
 import {SortType} from "@app_component/collection/collection_view/interfaces";
-import {IAdminCard} from "../interfaces/IAdminCard";
+import {AdminCardProps, IAdminCard} from "../interfaces/IAdminCard";
 import {AdminCard} from "../classes/AdminCard";
 
-class AdminCards extends ListCollection{
+class AdminCards extends ListCollection<AdminCardProps>{
     entities: IAdminCard[];
     title = 'Admin Panel';
-    keyPropName ='id';
-    sortingProps = ['name'];
-    listProps: ListProp[] = [{propertyKey: 'name', replace: true, getValue: (AdminCard: IAdminCard) => {
+    keyPropName: AdminCardProps ='id';
+    sortingProps: AdminCardProps[] = ['name'];
+    listProps: ListProp<AdminCardProps>[] = [{propertyKey: 'name', replace: true, getValue: (AdminCard: IAdminCard) => {
         return <td key={AdminCard.id} style={{textAlign: 'left'}}>{AdminCard.name}</td>
     }}];
     gridProps = {title: 'name'};

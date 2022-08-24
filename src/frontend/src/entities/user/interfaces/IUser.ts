@@ -60,3 +60,5 @@ export default interface IUser extends IUserForm{
     getFullName?: () => string,
     getPoustModel?: (isForApiRequest?: boolean) => ModelUserPoust,
 }
+
+export type UserProps = keyof IUser | string;
