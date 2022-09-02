@@ -45,8 +45,7 @@ class Connections extends ListCollection<ConnectionProps>{
                         maxLength={100}
                         isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
                         updateValue={(newValue) => {
-                            entity.title = newValue;
-                            this.dispatch(getAndUpdateConnection(entity))
+                            this.dispatch(getAndUpdateConnection({...entity, title: newValue}))
                         }}
                         initialValue={entity.title}
                     />

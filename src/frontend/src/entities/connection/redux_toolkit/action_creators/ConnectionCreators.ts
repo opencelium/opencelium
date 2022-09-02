@@ -17,6 +17,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler, sortByIndex} from "@application/utils/utils";
 import {ConnectionRequest} from "../../requests/classes/Connection";
 import { IConnection } from "../../interfaces/IConnection";
+import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 
 export const checkConnectionTitle = createAsyncThunk(
     'connection/exist/title',
@@ -48,6 +49,11 @@ export const getAndUpdateConnection = createAsyncThunk(
     'connection/getAndUpdate',
     async(connection: IConnection, thunkAPI) => {
         try {
+            const request = new ConnectionRequest({endpoint: `/check/${connection.title}`});
+            const response = await request.checkConnectionTitle();
+            if (response.data.message === ResponseMessages.EXISTS) {
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
+            }
             const GetConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
             const GetConnectionResponse = await GetConnectionRequest.getConnectionById();
             const getConnection = GetConnectionResponse.data;

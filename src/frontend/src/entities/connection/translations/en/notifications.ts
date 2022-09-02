@@ -27,10 +27,16 @@ export default {
         [deleteConnectionsById.fulfilled.type]: "The selected connections were successfully removed",
     },
     rejected: {
+        [checkConnectionTitle.rejected.type]: {
+            "__DEFAULT__": "There is an error in checking uniqueness of the title."
+        },
         [getConnectionById.rejected.type]: {
             "__DEFAULT__": "There is an error fetching connection."
         },
         [getAllConnections.rejected.type]: {
+            "__DEFAULT__": "There is an error fetching connections."
+        },
+        [getAllMetaConnections.rejected.type]: {
             "__DEFAULT__": "There is an error fetching connections."
         },
         [addConnection.rejected.type]: "The connection was not added",

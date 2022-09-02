@@ -265,8 +265,11 @@ export function ConnectionForm(type) {
              */
             validateTitle(entity){
                 const {t, connection, checkConnectionTitle, checkTitleResult} = this.props;
+                const specialCharacters = /[\/\\]/;
                 if(entity.title.trim() === ''){
                     return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_REQUIRED`)};
+                } else if(specialCharacters.test(entity.title)) {
+                    return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_CONTAINER_SPEC_CHAR`)};
                 } else{
                     if(!this.isUpdate || (this.isUpdate && connection.title !== entity.title)) {
                         if(!(this.state.entity && entity.title === this.state.entity.title && checkTitleResult === TRIPLET_STATE.TRUE)) {

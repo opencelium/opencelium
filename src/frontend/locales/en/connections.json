@@ -40,6 +40,7 @@
     "HEADER": "Add Connection",
     "VALIDATION_MESSAGES": {
       "TITLE_REQUIRED": "Title is a required field",
+      "TITLE_CONTAINER_SPEC_CHAR": "Title cannot contain \"/\" and \"\\\" characters",
       "TITLE_EXIST": "Connection with such title already exist",
       "FROM_CONNECTOR_REQUIRED": "From Connector is a required field",
       "TO_CONNECTOR_REQUIRED": "To Connector is a required field",
@@ -103,6 +104,7 @@
     "HEADER": "Update Connection",
     "VALIDATION_MESSAGES": {
       "TITLE_REQUIRED": "Title is a required field",
+      "TITLE_CONTAINER_SPEC_CHAR": "Title cannot contains such characters as: /,",
       "TITLE_EXIST": "Connection with such title already exist",
       "FROM_CONNECTOR_REQUIRED": "From Connector is a required field",
       "TO_CONNECTOR_REQUIRED": "To Connector is a required field",

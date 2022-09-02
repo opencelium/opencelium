@@ -89,7 +89,7 @@ const CollectionView: FC<CollectionViewProps> =
             }
             setEntitiesPerPage(newEntitiesPerPage);
             setTotalPages(Math.ceil(collection.filteredEntities.length / newEntitiesPerPage));
-        }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, shouldBeUpdated]);
+        }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, shouldBeUpdated, filterData]);
         useEffect(() => {
             if(collection.deletingEntitiesState === API_REQUEST_STATE.FINISH){
                 setChecks([]);

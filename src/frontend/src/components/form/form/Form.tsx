@@ -22,6 +22,7 @@ import {Title} from "@app_component/collection/collection_title/Title";
 import {FormSectionProps} from "../form_section/interfaces";
 import {FormProps} from './interfaces';
 import {ActionsStyled, FormSectionStyled, FormStyled, SectionStyled} from './styles';
+import {isArray} from "@application/utils/utils";
 
 const Form: FC<FormProps> =
     ({
@@ -44,7 +45,8 @@ const Form: FC<FormProps> =
             const props: FormSectionProps = formSection.props
             const hasFullWidth = props.hasFullWidthInForm;
             //@ts-ignore
-            let additionalStyles = props.children.length > 1 ? props.children[0].props.styles || '' : '';
+            const childWithStyles = isArray(props.children) ? props.children.find((child: any) => !!child?.props?.styles) : props.children;
+            let additionalStyles = childWithStyles ? childWithStyles?.props?.styles || '' : '';
             if(hasFullWidth){
                 additionalStyles = `
                     grid-column-start: 1;
