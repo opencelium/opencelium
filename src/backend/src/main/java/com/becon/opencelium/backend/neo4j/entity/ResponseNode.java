@@ -30,7 +30,6 @@ public class ResponseNode {
     private String name = "response";
     @Relationship(type = "has_success", direction = Relationship.OUTGOING)
     private ResultNode success;
-
     @Relationship(type = "has_fail", direction = Relationship.OUTGOING)
     private ResultNode fail;
 

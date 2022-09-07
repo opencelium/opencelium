@@ -190,7 +190,7 @@ public class InvokerParserImp {
         });
     }
 
-    private Map<String, Object> getFields(NodeList nodeList){
+    private Map<String, Object> getFields(NodeList nodeList) {
         Map<String, Object> fields = new HashMap<>();
         InvokerParserFactory<Map<String, Object>> invokerParserFactory = new InvokerParserFactory<>();
         XMLParser<Node, Map<String, Object>> xmlDomParser = invokerParserFactory.getXmlDomParser(nodeList);

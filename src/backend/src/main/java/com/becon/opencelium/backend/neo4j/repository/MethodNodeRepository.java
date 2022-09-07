@@ -31,7 +31,6 @@ public interface MethodNodeRepository extends Neo4jRepository<MethodNode, Long> 
     @Query("MATCH p=((f:Field)<-[:has_field*0..10]-(:Body)<-[*]-()<-[:has_request|:has_response]-(:Method)) WHERE ID(f) = {0} RETURN p")
     Optional<MethodNode> findByFieldNodeId(Long fieldNodeId);
 
-//    @Query("MATCH p=((f:Field)<-[:has_field*0..10]-(:Body)<-[*]-()<-[:has_request|:has_response]-(m:Method)) WHERE ID(m)={0} RETURN p")
     @Query("match p=((m:Method)-[:has_response|:has_request]->()-[*]->()) where ID(m)={0} return p;")
     Optional<MethodNode> findById(Long id);
 

@@ -543,7 +543,7 @@ public class ConnectorExecutor {
             }
 
             // from response data;
-            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && fieldNodeService.hasReference(f.getValue())){
+            if ((f.getValue()!=null) && !fieldNodeService.hasEnhancement(f.getId()) && FieldNodeServiceImp.hasReference(f.getValue())){
                 item.put(f.getName(), executionContainer.getValueFromResponseData(f.getValue()));
                 return;
             }
@@ -616,7 +616,8 @@ public class ConnectorExecutor {
         String ref = statementNodeService.convertToRef(ifStatement.getLeftStatementVariable());
         Object rightStatement = null;
         if (ifStatement.getOperand().equals("AllowList") || ifStatement.getOperand().equals("DenyList") ) {
-            rightStatement = ifStatement.getRightStatementVariable().getFiled().split(",");
+            rightStatement = ifStatement.getRightStatementVariable().getFiled()
+                    .replace("\n", ",").split(",");
         } else {
             rightStatement = getValue(ifStatement.getRightStatementVariable(), ref);
         }
@@ -639,6 +640,18 @@ public class ConnectorExecutor {
             executeDecisionStatement(ifStatement.getBodyOperator());
         }
     }
+
+//    private String[] getArrayForAllowList(String s) {
+//        String refRegex = "(\\s?(\"[\\w\\s]*\"|\\d*)\\s?(,|$)){16}";
+//        Pattern pattern = Pattern.compile(refRegex);
+//        Matcher matcher = pattern.matcher(s);
+//
+//        while (matcher.find()) {
+//            return s.split(",");
+//        }
+//
+//        return s.split("\n");
+//    }
 
     private Object getValue(StatementVariable statementVariable, String leftVariableRef) {
         if (statementVariable == null) {
