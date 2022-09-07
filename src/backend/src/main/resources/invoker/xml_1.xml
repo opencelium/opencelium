@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>xml_1</name>
+    <description/>
+    <hint/>
+    <icon/>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="name" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>endpoint</endpoint>
+                <body data="raw" format="xml" type="object">
+                    <field name="users" type="object">
+                        <field name="__oc__attributes" type="object"/>
+                        <field name="name" type="object">
+                            <field name="__oc__attributes" type="object"/>
+                            <field name="__oc__value" type="string"/>
+                        </field>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="404">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

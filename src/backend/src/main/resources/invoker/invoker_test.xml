@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>invoker_test</name>
+    <description>description</description>
+    <hint>hint</hint>
+    <icon/>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="checkApi" type="test">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/application</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="401">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="repositories" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/repositories</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="full_name" type=""/>
+                            <field name="name" type=""/>
+                            <field name="slug" type=""/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                    <header>
+                        <item name="Authorization" type="string">{token}</item>
+                        <item name="Accept" type="string">application/json</item>
+                    </header>
+                </fail>
+            </response>
+        </operation>
+        <operation name="workspaces" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/workspaces</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="values" type="array">
+                            <field name="name" type=""/>
+                            <field name="uuid" type=""/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="400">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

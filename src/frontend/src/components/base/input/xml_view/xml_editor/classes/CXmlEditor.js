@@ -179,7 +179,7 @@ export default class CXmlEditor extends CBodyEditor{
     }
 
     convertFromXml(){
-        if(this._xml.hasOwnProperty('_declaration')){
+        if(this._xml && this._xml.hasOwnProperty('_declaration')){
             this._declaration = CTag.createTag('xml', this._xml._declaration, this);
         }
         for(let node in this._xml){

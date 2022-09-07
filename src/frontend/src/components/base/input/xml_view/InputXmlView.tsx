@@ -19,6 +19,9 @@ import XmlEditor from "./xml_editor/XmlEditor";
 import Input from "../Input";
 import {InputXmlViewProps} from "./interfaces";
 import {getReactXmlStyles} from "./styles";
+import {EditButton} from "@app_component/base/input/json_view/EditButton";
+import EditXmlButton from './EditXmlButton';
+import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
 
 
 const InputXmlView: FC<InputXmlViewProps> = ({
@@ -33,6 +36,7 @@ const InputXmlView: FC<InputXmlViewProps> = ({
         isIconInside,
         readOnly,
         theme,
+        hasEdit,
         ...props
     }) => {
     const hasLabel = label !== '';
@@ -47,12 +51,17 @@ const InputXmlView: FC<InputXmlViewProps> = ({
         paddingRight: isLoadingWithoutIcon ? '30px' : 0,
         theme,
     }
+    let xmlValue = CXmlEditor.createXmlEditor(xmlViewProps?.xml).convertToXml();
+    if(xmlValue && xmlValue.length > 1){
+        xmlValue = xmlValue.substring(1);
+    }
     return (
         <Input readOnly={readOnly} value={value} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <XmlEditor
                 style={getReactXmlStyles(styleProps)}
                 {...xmlViewProps}
             />
+            {hasEdit && <EditXmlButton readOnly={readOnly} xmlValue={xmlValue} editXml={(newXml) => xmlViewProps.afterUpdateCallback(newXml)}/>}
         </Input>
     );
 }
@@ -62,6 +71,7 @@ InputXmlView.defaultProps = {
     error: '',
     required: false,
     isLoading: false,
+    hasEdit: false,
 }
 
 export default withTheme(InputXmlView);

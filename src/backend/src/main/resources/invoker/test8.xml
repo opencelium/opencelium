@@ -1,0 +1,2270 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
+    <name>test8</name>
+    <description>des</description>
+    <hint/>
+    <icon/>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="apikey" type="string" visibility="public"/>
+    </requiredData>
+    <authType>apikey</authType>
+    <operations>
+        <operation name="as" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>d</endpoint>
+                <body data="raw" format="json" type="array">
+                    <field name="id" type=""/>
+                    <field name="title" type="string">new</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022090600000011</field>
+                    <field name="age" type="string">1662463255000</field>
+                    <field name="lastActivity" type="string">1662463256000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">dsddsdasdasdsd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662463255000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022090200000019</field>
+                    <field name="age" type="string">1662101979000</field>
+                    <field name="lastActivity" type="string">1662450287000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test bodytest</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662101979000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+fdf
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662377214000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+dfsdf
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662377246000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+asdasdasdasdadasdasdsdasdasd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662379907000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+test
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662388684000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+test2
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662388695000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+test
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662448456000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+qqwwee
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662448538000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+sss
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662450287000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">w</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022090100000039</field>
+                    <field name="age" type="string">1662058580000</field>
+                    <field name="lastActivity" type="string">1662058580000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+w
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662058580000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">good test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022090100000021</field>
+                    <field name="age" type="string">1662057772000</field>
+                    <field name="lastActivity" type="string">1662058566000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+1
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057772000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+2
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057779000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+3
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057787000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+4
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057789000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+5
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057794000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+6
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057798000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+7
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057816000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+8
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057828000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+9
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057841000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+10
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057852000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+11
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662057867000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+12
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662058079000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+13
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662058128000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+14
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662058141000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+15
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662058566000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080400000106</field>
+                    <field name="age" type="string">1659615005000</field>
+                    <field name="lastActivity" type="string">1662039790000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test body</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659615005000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+
+04.08.2022 14:10 - jakob semere schrieb: test body
+
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659615047000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">second body</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string"/>
+                        </field>
+                        <field name="createdAt" type="string">1659615139000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">another message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string"/>
+                        </field>
+                        <field name="createdAt" type="string">1659731104000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">last message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659731724000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">asdasd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659741168000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660058313000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">ww</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660058338000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">one more message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660058378000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">q</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660058420000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">second body</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string"/>
+                        </field>
+                        <field name="createdAt" type="string">1661765618000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">second body</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string"/>
+                        </field>
+                        <field name="createdAt" type="string">1661765657000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">das ist ein Test</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661766393000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">das ist ein Test 2</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661766734000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">tset</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Ruzalin Galiev</field>
+                            <field name="email" type="string">ruzalin.galiev@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662020099000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+last message
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662039790000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">22</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080500000051</field>
+                    <field name="age" type="string">1659735890000</field>
+                    <field name="lastActivity" type="string">1662038763000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">33</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659735890000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+ruzrulit
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662038762000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">steffen test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022090100000011</field>
+                    <field name="age" type="string">1662020860000</field>
+                    <field name="lastActivity" type="string">1662038602000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+hahaha
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662020860000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+dsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662031173000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+cxcxc
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662031213000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+fdfd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662031366000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+dasd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662031649000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+zxc
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662032662000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+zxc
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662032678000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+zxc
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662032759000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+1
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662032819000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+12
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662032825000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+3
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662032912000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+4
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662032944000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+5
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662036644000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+ruzrulit
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662038602000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">hello</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080500000042</field>
+                    <field name="age" type="string">1659735573000</field>
+                    <field name="lastActivity" type="string">1662036625000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659735573000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+
+05.08.2022 23:39 - jakob semere написал(а): message
+
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662036625000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">another ticket</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080500000033</field>
+                    <field name="age" type="string">1659735414000</field>
+                    <field name="lastActivity" type="string">1662031148000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">one more message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659735414000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+
+05.08.2022 23:36 - jakob semere написал(а): one more message
+
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1662031148000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022083100000038</field>
+                    <field name="age" type="string">1661941763000</field>
+                    <field name="lastActivity" type="string">1661941763000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test bodytest</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661941763000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">one more test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022083100000029</field>
+                    <field name="age" type="string">1661935729000</field>
+                    <field name="lastActivity" type="string">1661935729000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+sdsdddsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661935729000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">new request 31 08</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022083100000011</field>
+                    <field name="age" type="string">1661931441000</field>
+                    <field name="lastActivity" type="string">1661931442000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+fdfdfdfddfdf
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661931442000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">hello my friend</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022083000000021</field>
+                    <field name="age" type="string">1661861610000</field>
+                    <field name="lastActivity" type="string">1661861610000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+dsdsdasdasdzxczxcxc
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661861610000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">new topic</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022083000000012</field>
+                    <field name="age" type="string">1661861228000</field>
+                    <field name="lastActivity" type="string">1661861229000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+message asdasdasd asdasdasasdasdas
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661861228000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">29 08</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022082900000015</field>
+                    <field name="age" type="string">1661764862000</field>
+                    <field name="lastActivity" type="string">1661765011000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+message
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661764862000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+dsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661765011000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">dd</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081600000012</field>
+                    <field name="age" type="string">1660662664000</field>
+                    <field name="lastActivity" type="string">1661764678000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+aasd dsdasda
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660662664000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+sdasdsdsdsdsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1661764678000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">sdsd</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081500000041</field>
+                    <field name="age" type="string">1660572680000</field>
+                    <field name="lastActivity" type="string">1660657458000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">fdfd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660572681000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+fdfdffdfdfsddd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660572750000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+ssssssssdddddfffff
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660573267000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+ddd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660653240000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+sdasdasd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660655596000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">fdfdf</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660657457000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">last ticket</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080500000024</field>
+                    <field name="age" type="string">1659732038000</field>
+                    <field name="lastActivity" type="string">1660653012000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">my message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659732038000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+
+05.08.2022 22:40 - jakob semere написал(а): my message
+
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660573701000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+dsdsddsdsddsdsddsdsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660574041000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660652897000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660653012000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">d</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081500000032</field>
+                    <field name="age" type="string">1660571235000</field>
+                    <field name="lastActivity" type="string">1660572118000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">s</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660571236000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+Another message
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660571984000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+ - test
+ - test2
+ - test3
+ - sdsdsddsdsdsdsdsdsdsddsdsdsd
+
+ - dsdsd
+ - sdsdsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660572064000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+ - test
+ - test2
+ - test3
+ - sdsdsddsdsdsdsdsdsdsddsdsdsd
+
+ - dsdsd
+ - sdsdsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660572071000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+sdsdsdsdsdsddsdsdsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660572114000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">
+sdsdsdsdsdsddsdsdsdsd
+
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660572118000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">ssss</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081500000023</field>
+                    <field name="age" type="string">1660558536000</field>
+                    <field name="lastActivity" type="string">1660559814000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">sss</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660558536000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">last message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660558859000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">one more message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660559133000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">another message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660559814000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">another request</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081500000014</field>
+                    <field name="age" type="string">1660555560000</field>
+                    <field name="lastActivity" type="string">1660558834000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660555560000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">d</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660558794000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">d</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660558816000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">d</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660558834000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">tt</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000163</field>
+                    <field name="age" type="string">1660306307000</field>
+                    <field name="lastActivity" type="string">1660306903000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">nmmm</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660306307000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660306902000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">sdd</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000154</field>
+                    <field name="age" type="string">1660306098000</field>
+                    <field name="lastActivity" type="string">1660306099000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">dsd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660306099000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">cell</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000145</field>
+                    <field name="age" type="string">1660306019000</field>
+                    <field name="lastActivity" type="string">1660306020000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">cell</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660306019000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">xcccc</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000136</field>
+                    <field name="age" type="string">1660305946000</field>
+                    <field name="lastActivity" type="string">1660305946000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">ccxcc</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660305946000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">sssss</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000127</field>
+                    <field name="age" type="string">1660305898000</field>
+                    <field name="lastActivity" type="string">1660305901000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">sssss</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660305899000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">wee</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000118</field>
+                    <field name="age" type="string">1660305481000</field>
+                    <field name="lastActivity" type="string">1660305481000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">wewe</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660305481000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">sdddd</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000109</field>
+                    <field name="age" type="string">1660304223000</field>
+                    <field name="lastActivity" type="string">1660304223000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">dddd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660304223000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">asdasd</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000092</field>
+                    <field name="age" type="string">1660304076000</field>
+                    <field name="lastActivity" type="string">1660304076000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">asdasd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660304076000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">dsd</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000083</field>
+                    <field name="age" type="string">1660303502000</field>
+                    <field name="lastActivity" type="string">1660303503000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">dsd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660303502000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">wewe</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000074</field>
+                    <field name="age" type="string">1660303477000</field>
+                    <field name="lastActivity" type="string">1660303477000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">ee</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660303477000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">last ticket</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000065</field>
+                    <field name="age" type="string">1660303421000</field>
+                    <field name="lastActivity" type="string">1660303421000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">new mssa</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660303421000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">w</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000056</field>
+                    <field name="age" type="string">1660303239000</field>
+                    <field name="lastActivity" type="string">1660303239000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">e</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660303239000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">w</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000047</field>
+                    <field name="age" type="string">1660303140000</field>
+                    <field name="lastActivity" type="string">1660303141000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">e</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660303140000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">у</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000038</field>
+                    <field name="age" type="string">1660303077000</field>
+                    <field name="lastActivity" type="string">1660303077000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">й</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660303077000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">ss</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000029</field>
+                    <field name="age" type="string">1660302910000</field>
+                    <field name="lastActivity" type="string">1660302911000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">ss</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660302910000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">w</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081200000011</field>
+                    <field name="age" type="string">1660302769000</field>
+                    <field name="lastActivity" type="string">1660302771000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">e</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660302769000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">s</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000138</field>
+                    <field name="age" type="string">1660233379000</field>
+                    <field name="lastActivity" type="string">1660233379000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">d</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660233379000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">with attach</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000129</field>
+                    <field name="age" type="string">1660233249000</field>
+                    <field name="lastActivity" type="string">1660233251000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">mes</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660233250000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">выв</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000111</field>
+                    <field name="age" type="string">1660233022000</field>
+                    <field name="lastActivity" type="string">1660233023000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">вы</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660233023000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">w</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000101</field>
+                    <field name="age" type="string">1660232581000</field>
+                    <field name="lastActivity" type="string">1660232581000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">e</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660232581000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">with attach</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000094</field>
+                    <field name="age" type="string">1660232360000</field>
+                    <field name="lastActivity" type="string">1660232362000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">mes</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660232361000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">with attach</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000085</field>
+                    <field name="age" type="string">1660232272000</field>
+                    <field name="lastActivity" type="string">1660232274000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">mes</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660232272000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">d</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000076</field>
+                    <field name="age" type="string">1660227523000</field>
+                    <field name="lastActivity" type="string">1660227524000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">s</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660227523000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000067</field>
+                    <field name="age" type="string">1660213070000</field>
+                    <field name="lastActivity" type="string">1660213577000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test bodytest</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660213070000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+
+11.08.2022 12:17 - jakob semere schrieb: test bodytest
+
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660213574000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000058</field>
+                    <field name="age" type="string">1660213034000</field>
+                    <field name="lastActivity" type="string">1660213035000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test bodytest</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660213035000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000049</field>
+                    <field name="age" type="string">1660212964000</field>
+                    <field name="lastActivity" type="string">1660212966000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test bodytest</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660212965000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000031</field>
+                    <field name="age" type="string">1660212860000</field>
+                    <field name="lastActivity" type="string">1660212861000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test bodytest</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660212861000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">This is a service portal test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000021</field>
+                    <field name="age" type="string">1660212719000</field>
+                    <field name="lastActivity" type="string">1660212720000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test body</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660212719000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">my new request 11 08 2022</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022081100000012</field>
+                    <field name="age" type="string">1660208201000</field>
+                    <field name="lastActivity" type="string">1660208211000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660208201000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">another message</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660208210000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080800000019</field>
+                    <field name="age" type="string">1659970094000</field>
+                    <field name="lastActivity" type="string">1660079616000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">test</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659970095000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+
+08.08.2022 16:48 - jakob semere написал(а): test
+
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660078248000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+
+09.08.2022 22:50 - OTRS SalesDemo написал(а): Hallo semere,
+
+Vielen Dank für Ihre Anfrage!
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[3]info@becon.de | [4]http://www.becon.de/
+_____________________________________________________
+
+08.08.2022 16:48 - jakob semere написал(а): test
+ 
+
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+[3] mailto:info@becon.de
+[4] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660079493000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">s</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660079522000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">dsd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660079606000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">sdsdd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660079616000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">test</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string"/>
+                        <field name="email" type="string">otrs.demo@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080500000015</field>
+                    <field name="age" type="string">1659714083000</field>
+                    <field name="lastActivity" type="string">1660078190000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">message
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+ 
+ 
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659714084000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">d</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080800000028</field>
+                    <field name="age" type="string">1659973531000</field>
+                    <field name="lastActivity" type="string">1660060249000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">s</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659973531000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">d</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660057157000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">qq</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660058454000</field>
+                        <field name="id" type=""/>
+                        <field name="message" type="string">xcxcxcxc</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Jakob Semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660060248000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">testmail 2</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string"/>
+                        <field name="email" type="string">ruzalin.galiev@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080900000026</field>
+                    <field name="age" type="string">1660048121000</field>
+                    <field name="lastActivity" type="string">1660048122000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">...</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">Ruzalin Galiev</field>
+                            <field name="email" type="string">ruzalin.galiev@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660048121000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">testmail</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string"/>
+                        <field name="email" type="string">otrs.demo@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080900000017</field>
+                    <field name="age" type="string">1660048085000</field>
+                    <field name="lastActivity" type="string">1660048087000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">open</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">...
+
+Mit freundlichen Grüßen
+ 
+Ihr i-doit Support-Team
+ 
+becon GmbH
+Siemensdamm 50
+13629 Berlin
+ 
+_____________________________________________________
+
+becon GmbH
+Geschäftsführer: Axel von der Ohe, Steffen Rieger
+Sitz der Gesellschaft: Unterhaching (Landkreis München)
+Registergericht: Amtsgericht München | HRB 128741
+[1]info@becon.de | [2]http://www.becon.de/
+_____________________________________________________
+ 
+ 
+
+[1] mailto:info@becon.de
+[2] http://www.becon.de/
+</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string"/>
+                            <field name="email" type="string">otrs.demo@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1660048086000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">sasdas</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080500000079</field>
+                    <field name="age" type="string">1659736668000</field>
+                    <field name="lastActivity" type="string">1659736668000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">dasdasd</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659736668000</field>
+                    </field>
+                    <field name="id" type=""/>
+                    <field name="title" type="string">sdfsdf</field>
+                    <field name="unreadArticlesAmount" type=""/>
+                    <field name="creator" type="object">
+                        <field name="username" type="string">Jakob Semere</field>
+                        <field name="email" type="string">jakob.semere@becon.de</field>
+                    </field>
+                    <field name="reference" type="string">2022080500000061</field>
+                    <field name="age" type="string">1659736593000</field>
+                    <field name="lastActivity" type="string">1659736593000</field>
+                    <field name="type" type="string">Incident</field>
+                    <field name="status" type="string">new</field>
+                    <field name="articles" type="array">
+                        <field name="id" type=""/>
+                        <field name="message" type="string">sdfsdf</field>
+                        <field name="author" type="object">
+                            <field name="username" type="string">jakob semere</field>
+                            <field name="email" type="string">jakob.semere@becon.de</field>
+                        </field>
+                        <field name="createdAt" type="string">1659736593000</field>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="404">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

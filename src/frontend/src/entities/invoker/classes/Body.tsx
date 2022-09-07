@@ -63,7 +63,9 @@ export class Body extends HookStateClass implements IBody{
                 this.fields = isArray(this.fields) ? this.fields.length > 0 ? this.fields[0] : {} : this.fields;
                 break;
             case ResponseType.Array:
-                this.fields = [this.fields];
+                if(!isArray(this.fields)){
+                    this.fields = [this.fields];
+                }
                 break;
         }
     }
