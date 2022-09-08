@@ -13,13 +13,19 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC} from 'react';
-import {useTranslation} from "react-i18next";
-import InputJsonView from "@app_component/base/input/json_view/InputJsonView";
-import InputXmlView from "@app_component/base/input/xml_view/InputXmlView";
-import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
+import React, {FC, useState} from 'react';
+import AceEditor from "react-ace";
+import Input from "@app_component/base/input/Input";
 import {BodyProps} from "../interfaces";
-import {ResponseFormat} from "../../../requests/models/Body";
+import {ResponseFormat} from "@entity/invoker/requests/models/Body";
+import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
+import {withTheme} from "styled-components";
+import {getReactXmlStyles} from "@app_component/base/input/xml_view/styles";
+import 'ace-builds/src-noconflict/mode-xml';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-textmate';
+import 'ace-builds/src-noconflict/mode-livescript';
+import "ace-builds/src-noconflict/ext-language_tools";
 
 
 const Body: FC<BodyProps> =
@@ -28,41 +34,46 @@ const Body: FC<BodyProps> =
         readOnly,
         value,
         format,
-        ...props
+        theme,
     }) => {
-        const {t} = useTranslation('basic_components');
-        switch (format){
-            case ResponseFormat.Json:
-                return (
-                    <InputJsonView
-                        readOnly={readOnly}
-                        icon={'data_object'}
-                        label={'Body'}
-                        updateJson={updateBody}
-                        jsonViewProps={{
-                            name: 'body',
-                            collapsed: false,
-                            src: value,
-                        }}
-                    />
-                );
-            case ResponseFormat.Xml:
-                return(
-                    <InputXmlView
-                        readOnly={readOnly}
-                        icon={'data_object'}
-                        label={'Body'}
-                        hasEdit={true}
-                        xmlViewProps={{
-                            translate: t,
-                            xml: value,
-                            afterUpdateCallback: (xmlEditor: CXmlEditor) => {return updateBody(xmlEditor.convertToBackendXml())},
-                            readOnly: readOnly,
-                        }}
-                    />
-                );
-        }
-        return null;
+    const [localValue, setLocalValue] = useState<string>(format === ResponseFormat.Json ? JSON.stringify(value) : CXmlEditor.createXmlEditor(value).convertToXml());
+    const hasLabel = true;
+    const hasIcon = true;
+    const styleProps = {
+        hasIcon,
+        marginTop: hasLabel ? '25px' : 0,
+        marginBottom: '50px',
+        theme,
+    }
+    return (
+        <Input readOnly={readOnly} value={value} label={'Body'} icon={'data_object'}>
+            <AceEditor
+                style={{...getReactXmlStyles(styleProps), marginLeft: '50px'}}
+                mode={format}
+                theme="textmate"
+                name="blah2"
+                fontSize={14}
+                showPrintMargin={true}
+                showGutter={true}
+                highlightActiveLine={true}
+                setOptions={{
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    enableSnippets: false,
+                    showLineNumbers: false,
+                    tabSize: 2,
+                    useWorker: false,
+                }}
+                value={localValue}
+                onBlur={() => {
+                    if(value !== localValue){
+                        updateBody(format === ResponseFormat.Json ? JSON.parse(localValue) : CXmlEditor.createXmlEditor(localValue).convertToBackendXml())
+                    }
+                }}
+                onChange={(newValue) => setLocalValue(newValue)}
+            />
+        </Input>
+    );
     }
 
 Body.defaultProps = {
@@ -72,3 +83,5 @@ Body.defaultProps = {
 export {
     Body,
 };
+
+export default withTheme(Body);

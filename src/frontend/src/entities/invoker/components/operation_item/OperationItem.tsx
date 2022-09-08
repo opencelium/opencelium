@@ -31,7 +31,7 @@ import {Header} from "../operation/header/Header";
 import {NavLinkStyled} from "./styles";
 import {OperationItemProps} from "./interfaces";
 import {ResponseType} from "@entity/invoker/requests/models/Body";
-import {isArray, isString} from "@application/utils/utils";
+import {isArray, isJsonString, isString} from "@application/utils/utils";
 
 
 const OperationItem: FC<OperationItemProps> = (

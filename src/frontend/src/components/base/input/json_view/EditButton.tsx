@@ -72,6 +72,7 @@ const EditButton: FC<EditButtonProps> =
                 active={showDialog}
                 toggle={toggle}
                 title={'Edit Json'}
+                styles={{modal: {minWidth: '60%'}, body: {minHeight: '400px'}}}
             >
                 <InputTextarea
                     rows={5}

@@ -75,6 +75,7 @@ const EditXmlButton: FC<EditXmlButtonProps> =
                 active={showDialog}
                 toggle={toggle}
                 title={'Edit Xml'}
+                styles={{modal: {minWidth: '60%'}, body: {minHeight: '400px'}}}
             >
                 <InputTextarea
                     rows={5}
