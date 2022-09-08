@@ -16,17 +16,27 @@
 import React from "react";
 import {ITheme} from "@style/Theme";
 import {InputElementProps} from "../../input/interfaces";
+import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
+
+interface EditXmlButtonProps{
+    theme?: ITheme,
+    editXml: (xml: any) => void,
+    readOnly?: boolean,
+    xmlValue: string,
+}
 
 interface InputXmlViewProps extends InputElementProps{
     theme?: ITheme,
     xmlViewProps:{
         translate: any,
         xml: any,
-        afterUpdateCallback: any,
+        afterUpdateCallback: (xmlEditor: CXmlEditor) => void,
         readOnly?: boolean,
-    }
+    },
+    hasEdit?: boolean,
 }
 
 export {
+    EditXmlButtonProps,
     InputXmlViewProps,
 }

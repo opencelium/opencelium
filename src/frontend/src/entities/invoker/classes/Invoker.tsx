@@ -201,7 +201,7 @@ export class Invoker extends HookStateClass implements IInvoker{
         return this.validateName();
     }
 
-    @App.dispatch(addInvoker, {mapping: (invoker: IInvoker) => {return {xml: invoker.getXml()}}})
+    @App.dispatch(addInvoker, {mapping: (invoker: IInvoker) => {return {xml: invoker.getXml(), name: invoker.name}}})
     add(connection: Operation, operations: Operation[] = []): boolean{
         let hasConnection = false;
         this.operations = operations;
@@ -218,7 +218,7 @@ export class Invoker extends HookStateClass implements IInvoker{
         return this.validateAdd();
     }
 
-    @App.dispatch(updateInvoker, {mapping: (invoker: IInvoker) => {return {xml: invoker.getXml()}}})
+    @App.dispatch(updateInvoker, {mapping: (invoker: IInvoker) => {return {xml: invoker.getXml(), name: invoker.name}}})
     update(connection: Operation, operations: Operation[] = []): boolean{
         this.operations = operations;
         let hasConnection = false;

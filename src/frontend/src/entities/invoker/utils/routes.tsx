@@ -26,6 +26,6 @@ export default (
         <Route path="add" element={<ErrorBoundary><InvokerForm isAdd permission={InvokerPermissions.CREATE}/></ErrorBoundary>}/>
         <Route path="page/:pageNumber" element={<ErrorBoundary><InvokerList/></ErrorBoundary>}/>
         <Route path=":name/view" element={<ErrorBoundary><InvokerForm isView permission={InvokerPermissions.READ}/></ErrorBoundary>}/>
-        <Route path=":name/update" element={<ErrorBoundary><InvokerForm isUpdate permission={InvokerPermissions.UPDATE}/></ErrorBoundary>}/>
+        {/*<Route path=":name/update" element={<ErrorBoundary><InvokerForm isUpdate permission={InvokerPermissions.UPDATE}/></ErrorBoundary>}/>*/}
     </Route>
 )

@@ -63,7 +63,7 @@ class Invokers extends ListCollection<InvokerProps>{
         return (
             <React.Fragment>
                 <PermissionTooltipButton target={`view_entity_${id}`} position={'top'} tooltip={'View'} href={`${entity.name}/view`} hasBackground={false} icon={'visibility'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>
-                <PermissionTooltipButton target={`update_entity_${id}`} position={'top'} tooltip={'Update'} href={`${entity.name}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>
+                {/*<PermissionTooltipButton target={`update_entity_${id}`} position={'top'} tooltip={'Update'} href={`${entity.name}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.UPDATE}/>*/}
                 {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${id}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteByName()} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>
         );

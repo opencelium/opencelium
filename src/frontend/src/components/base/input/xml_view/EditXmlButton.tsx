@@ -15,39 +15,42 @@
 
 import React, {ChangeEvent, FC, useEffect, useRef, useState} from 'react';
 import {withTheme} from 'styled-components';
-import {isJsonString, setFocusById} from "@application/utils/utils";
+import {setFocusById} from "@application/utils/utils";
 import {ColorTheme} from "@style/Theme";
-import {EditButtonProps} from "../../input/json_view/interfaces";
+import {EditXmlButtonProps} from "./interfaces";
 import Button from "../../button/Button";
 import {TextSize} from "../../text/interfaces";
 import Dialog from "../../dialog/Dialog";
 import InputTextarea from "../../input/textarea/InputTextarea";
+import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
 
-const EditButton: FC<EditButtonProps> =
+const EditXmlButton: FC<EditXmlButtonProps> =
     ({
         readOnly,
-        jsonValue,
-        editJson,
+        xmlValue,
+        editXml,
     }) => {
-    const [newJson, setNewJson] = useState(JSON.stringify(jsonValue));
+    const [newXml, setNewXml] = useState<string>(xmlValue);
     const [validationMessage, setValidationMessage] = useState<string>('');
     const [showDialog, toggleDialog] = useState<boolean>(false);
     const toggle = () => {
         toggleDialog(!showDialog);
     }
     const edit = () => {
-        if(isJsonString(newJson)){
+        const domParser = new DOMParser();
+        const dom = domParser.parseFromString(newXml, 'text/xml');
+        if(dom.documentElement.nodeName !== 'parsererror'){
             setValidationMessage('')
-            editJson(JSON.parse(newJson));
+            editXml(CXmlEditor.createXmlEditor(newXml));
             toggle();
         } else{
-            setValidationMessage('This is not a valid Json input.')
+            setValidationMessage('This is not a valid xml input.')
         }
     }
     useEffect(() => {
         if(showDialog){
-            setNewJson(JSON.stringify(jsonValue));
-            setFocusById('input_json');
+            setNewXml(xmlValue);
+            setFocusById('input_xml');
         }
     }, [showDialog])
     let actions = [
@@ -71,29 +74,29 @@ const EditButton: FC<EditButtonProps> =
                 actions={actions}
                 active={showDialog}
                 toggle={toggle}
-                title={'Edit Json'}
+                title={'Edit Xml'}
             >
                 <InputTextarea
                     rows={5}
-                    id={`input_json`}
-                    label={'Json'}
+                    id={`input_xml`}
+                    label={'Xml'}
                     readOnly={readOnly}
                     icon={'data_object'}
                     error={validationMessage}
-                    onChange={(e) => setNewJson(e.target.value)}
-                    value={newJson}
+                    onChange={(e) => setNewXml(e.target.value)}
+                    value={newXml}
                 />
             </Dialog>
         </React.Fragment>
     )
 }
 
-EditButton.defaultProps = {
+EditXmlButton.defaultProps = {
 }
 
 
 export {
-    EditButton,
+    EditXmlButton,
 };
 
-export default withTheme(EditButton);
+export default withTheme(EditXmlButton);

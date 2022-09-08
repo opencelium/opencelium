@@ -82,7 +82,7 @@ export default class CXmlReParent{
                 let keys = Object.keys(values[i]);
                 for (let j = 0; j < keys.length; j++) {
                     let xmlField = {_attributes: {name: keys[j], type: ''}};
-                    let field = data[keys[j]];
+                    let field = values[i][keys[j]];
                     let typeOfField = typeof field;
                     switch (typeOfField) {
                         case 'string':

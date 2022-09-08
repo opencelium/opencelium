@@ -52,6 +52,7 @@ const Body: FC<BodyProps> =
                         readOnly={readOnly}
                         icon={'data_object'}
                         label={'Body'}
+                        hasEdit={true}
                         xmlViewProps={{
                             translate: t,
                             xml: value,

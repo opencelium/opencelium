@@ -47,7 +47,7 @@ const InputRadios: FC<InputRadiosProps> = ({
             <InputRadiosStyled readOnly={readOnly} {...props}>
                 {
                     options.map((option, key) =>
-                        <InputRadio align={align} autoFocus={option.autoFocus} key={option.key} id={`input_${option.label.toString().toLowerCase()}`} readOnly={readOnly} {...option} onChange={readOnly ? () => {} : onChange} currentValue={value}/>
+                        <InputRadio align={align} autoFocus={option.autoFocus} key={option.key} id={`radio_input_${option.label.toString().toLowerCase()}`} readOnly={readOnly} {...option} onChange={readOnly ? () => {} : onChange} currentValue={value}/>
                     )
                 }
             </InputRadiosStyled>

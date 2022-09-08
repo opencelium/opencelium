@@ -37,6 +37,17 @@ class XmlEditor extends Component{
         };
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(this.props.xml && prevProps.xml !== this.props.xml){
+            const xml = CXmlEditor.createXmlEditor(this.props.xml);
+            this.setState({
+                xml,
+                addTag: CTag.createTag('', null, null, xml.xml),
+                hasAddTagPopup: false,
+            });
+        }
+    }
+
     /**
      * to add declaration in xml
      */

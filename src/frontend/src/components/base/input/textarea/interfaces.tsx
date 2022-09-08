@@ -19,6 +19,7 @@ import {InputElementProps} from "../interfaces";
 
 interface InputTextareaProps extends InputHTMLAttributes<HTMLTextAreaElement>, InputElementProps{
     rows?: number,
+    ref?: any,
 }
 
 

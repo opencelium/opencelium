@@ -15,7 +15,7 @@
 
 import React, {ChangeEvent, FC, useEffect, useState} from "react";
 import {Nav, NavItem, TabContent, TabPane} from "reactstrap";
-import { REQUEST_METHOD } from "@application/requests/interfaces/IApplication";
+import {REQUEST_METHOD} from "@application/requests/interfaces/IApplication";
 import InputRadios from "@app_component/base/input/radio/InputRadios";
 import {InputTextType} from "@app_component/base/input/text/interfaces";
 import {Operation} from "../../classes/Operation";
@@ -30,6 +30,8 @@ import {Body} from "../operation/body/Body";
 import {Header} from "../operation/header/Header";
 import {NavLinkStyled} from "./styles";
 import {OperationItemProps} from "./interfaces";
+import {ResponseType} from "@entity/invoker/requests/models/Body";
+import {isArray, isString} from "@application/utils/utils";
 
 
 const OperationItem: FC<OperationItemProps> = (
@@ -47,6 +49,11 @@ const OperationItem: FC<OperationItemProps> = (
         updateOperation(operationItem);
     }
     const updateRequestBodyFields = (value: any) => {
+        if(isArray(value)){
+            operationItem.request.body.type = ResponseType.Array;
+        } else{
+            operationItem.request.body.type = ResponseType.Object;
+        }
         operationItem.request.body.fields = value;
         updateOperation(operationItem);
     }
@@ -57,6 +64,11 @@ const OperationItem: FC<OperationItemProps> = (
         updateOperation(operationItem);
     }
     const updateSuccessBodyFields = (value: any) => {
+        if(isArray(value)){
+            operationItem.response.success.body.type = ResponseType.Array;
+        } else{
+            operationItem.response.success.body.type = ResponseType.Object;
+        }
         operationItem.response.success.body.fields = value;
         updateOperation(operationItem);
     }
@@ -67,6 +79,11 @@ const OperationItem: FC<OperationItemProps> = (
         updateOperation(operationItem);
     }
     const updateFailBodyFields = (value: any) => {
+        if(isArray(value)){
+            operationItem.response.fail.body.type = ResponseType.Array;
+        } else{
+            operationItem.response.fail.body.type = ResponseType.Object;
+        }
         operationItem.response.fail.body.fields = value;
         updateOperation(operationItem);
     }
