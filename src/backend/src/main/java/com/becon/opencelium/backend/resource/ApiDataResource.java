@@ -10,6 +10,7 @@ public class ApiDataResource {
     private String method;
     private Map<String, String> header;
     private Map<String, Object> body;
+    private boolean sslOn;
 
     public String getUrl() {
         return url;
@@ -41,5 +42,13 @@ public class ApiDataResource {
 
     public void setBody(Map<String, Object> body) {
         this.body = body;
+    }
+
+    public boolean isSslOn() {
+        return sslOn;
+    }
+
+    public void setSslOn(boolean sslOn) {
+        this.sslOn = sslOn;
     }
 }
