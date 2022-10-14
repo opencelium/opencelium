@@ -153,10 +153,7 @@ Debian/Ubuntu (example for 20.04 LTS)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-	root@shell> mv opencelium/* .
-	root@shell> mv opencelium/.* .
-	root@shell> rmdir opencelium
+	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 2. Build frontend project
 
@@ -347,10 +344,7 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-	root@shell> mv opencelium/* .
-	root@shell> mv opencelium/.* .
-	root@shell> rmdir opencelium
+	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 2. Run frontend with yarn
 
@@ -520,10 +514,7 @@ Red Hat Enterprise Linux
 .. code-block:: sh
 
 	root@shell> cd /opt
-	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
-	root@shell> mv opencelium/* .
-	root@shell> mv opencelium/.* .
-	root@shell> rmdir opencelium
+	root@shell> git clone -b <StableVersion> https://bitbucket.org/becon_gmbh/opencelium.git . // Get stable versions here https://bitbucket.org/becon_gmbh/opencelium/downloads/?tab=tags
 
 2. Run frontend with yarn
 
@@ -598,10 +589,7 @@ Ansible
 	:linenos:
 
 	root@shell> cd /etc/ansible
-	root@shell> git clone https://bitbucket.org/becon_gmbh/opencelium.setup.ansible.git
-	root@shell> mv opencelium.setup.ansible/* ./
-	root@shell> mv opencelium.setup.ansible/.* ./
-	root@shell> rmdir opencelium.setup.ansible
+	root@shell> git clone https://bitbucket.org/becon_gmbh/opencelium.setup.ansible.git .
 
 3. Add localhost in ansible
 
@@ -651,7 +639,7 @@ Use default Docker installation guide.
 .. code-block:: sh
 	:linenos:
 
-	root@shell> git clone https://github.com/opencelium/opencelium-docker.git // we recommend to use always the latest tag version 
+	root@shell> git clone https://github.com/opencelium/opencelium-docker.git  // we recommend to use always the latest tag version 
 	root@shell> cd opencelium-docker
 
 3. Start OpenCelium using DockerHub images
