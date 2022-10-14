@@ -6,39 +6,6 @@ Installation
 	Please check the software requirements, before installing OC. 
 
 
-Windows  (Instruction is deprecated. It will be renewed.)
-"""""""""""""""""
-
-**Instructions:**
-
-1. Install Node.js
-2. Install yarn
-3. Download the project from the bitbucket or clone it with the git tool on your pc.
-4. Open the front-end folder with IDE tool or in terminal/command line.
-5. Run the next command to install node-modules:
-
-.. code-block:: sh
-
-	root@shell> yarn
-
-6. Run the next command to run the project: 
-
-.. code-block:: shell
-
-	root@shell> yarn start
-
-After that, your browser should automatically open in a new tab with url: `http://localhost:3000/ <http://localhost:3000/>`_
-
-7. Install JDK and JRE.
-8. Unpack the Gradle into c:\\Gradle
-9. Install MariaDB
-10. Unpack Neo4j Community version into c:\\Neo4j
-11. Run the next command 
-
-		*setx path “%path%;[path_to_jdk];[path_to_jre];[path_to_gradle];[path_to_neo4j];[path_to_mariadb] \M”*
-
-
-
 Debian/Ubuntu (example for 20.04 LTS)
 """""""""""""""""
 **Prepare environment:**
@@ -58,9 +25,9 @@ Debian/Ubuntu (example for 20.04 LTS)
 	:linenos:
 	
 	root@shell> sudo apt install curl (if debian)
-	root@shell> curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+	root@shell> curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 	root@shell> apt-get install -y nodejs
-	root@shell> nodejs -v // to check
+	root@shell> node -v // to check
 
 3. Install yarn:
 
@@ -140,9 +107,13 @@ Debian/Ubuntu (example for 20.04 LTS)
 
 	if ubuntu
 	root@shell> apt-get install netdata -y
+
 	root@shell> sed -i '/\tbind socket to IP = 127.0.0.1/c\\tbind socket to IP = 0.0.0.0' /etc/netdata/netdata.conf
 	root@shell> wget https://bitbucket.org/becon_gmbh/opencelium/raw/cf5b43c102cca25d0a7abe778f1de0fe0c4e40c7/docs/netdata/oc-mode.html -O /usr/share/netdata/web/oc-mode.html
-	root@shell> chown netdata:netdata /usr/share/netdata/web/oc-mode.html (if debian)
+	
+	 (if debian)
+	root@shell> chown netdata:netdata /usr/share/netdata/web/oc-mode.html
+	
 	root@shell> systemctl restart netdata
 
 10. Install Elasticsearch (optional)
@@ -255,9 +226,9 @@ SUSE Linux Enterprise Server (example for SLES 15 SP1)
 .. code-block:: sh
 	:linenos:
 	
-	root@shell> zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/nodejs/SLE_15_SP1 node10
+	root@shell> zypper addrepo http://download.opensuse.org/repositories/devel:/languages:/nodejs/SLE_15_SP2 node14
 	root@shell> zypper refresh
-	root@shell> zypper install nodejs10
+	root@shell> zypper install nodejs14
 	root@shell> node -v
 
 2. Install yarn:
@@ -454,7 +425,7 @@ Red Hat Enterprise Linux
 	:linenos:
 	
 	root@shell> yum install -y gcc-c++ make
-	root@shell> curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash -
+	root@shell> curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
 	root@shell> yum install nodejs
 	root@shell> node -v // to check
 
