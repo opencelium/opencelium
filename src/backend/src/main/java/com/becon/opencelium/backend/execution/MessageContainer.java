@@ -252,10 +252,10 @@ public class MessageContainer {
     }
 
     private Object jsonPathFinder( String value, Map<String, Integer> loopStack) {
-        String ref = value.replaceFirst("\\$", "");
+//        String ref = value.("\\$", "");
         String jsonPath = "$";
-        String condition = ConditionUtility.getPathToValue(ref);
-        String refValue = ConditionUtility.getRefValue(ref);
+        String condition = ConditionUtility.getPathToValue(value);
+        String refValue = ConditionUtility.getRefValue(value);
 
         List<String> conditionParts =  Arrays.asList(refValue.split("\\."));
         int responseIndex = 0;

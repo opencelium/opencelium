@@ -18,8 +18,8 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
-import com.becon.opencelium.backend.application.service.AssistantServiceImp;
-import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
+import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
