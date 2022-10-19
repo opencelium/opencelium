@@ -230,18 +230,18 @@ public class UpdateAssistantController {
                 dir = migrateDataResource.getVersion();
             }
 
-//            // saving files to tmp folder
-//            migrateDataResource.getInvokers().forEach(inv -> {
-//                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
-//            });
-//
-//            migrateDataResource.getTemplates().forEach(temp -> {
-//                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
-//            });
-//
-//            migrateDataResource.getConnections().forEach(ction -> {
-//                assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
-//            });
+            // saving files to tmp folder
+            migrateDataResource.getInvokers().forEach(inv -> {
+                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
+            });
+
+            migrateDataResource.getTemplates().forEach(temp -> {
+                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
+            });
+
+            migrateDataResource.getConnections().forEach(ction -> {
+                assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
+            });
 
             //////test commit
             if (migrateDataResource.isOnline()) {
@@ -250,38 +250,38 @@ public class UpdateAssistantController {
                 assistantServiceImp.updateOff(dir, version);
             }
 
-            // after updateAll need to move or replace files in main project
-//            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
-//            List<File> invokers = Files.list(filePath)
-//                    .filter(Files::isRegularFile)
-//                    .filter(path -> path.toString().endsWith(".xml"))
-//                    .map(Path::toFile)
-//                    .collect(Collectors.toList());
-//            invokers.forEach(f -> {
-//                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
-//            });
-//
-//            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
-//            List<File> templates = Files.list(filePath)
-//                    .filter(Files::isRegularFile)
-//                    .filter(path -> path.toString().endsWith(".json"))
-//                    .map(Path::toFile)
-//                    .collect(Collectors.toList());
-//            templates.forEach(f -> {
-//                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
-//            });
-//
-//            Object connectionResources = migrateDataResource.getConnections().stream()
-//                    .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
-//            List<HashMap> cns = (ArrayList) connectionResources;
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            for (HashMap<String, Object> connection : cns) {
-//                String str = objectMapper.writeValueAsString(connection);
-//                ConnectionResource connectionResource = objectMapper.readValue(str, ConnectionResource.class);
-//                assistantServiceImp.updateConnection(connectionResource);
-//            }
-//
-//            assistantServiceImp.buildAndRestart();
+//             after updateAll need to move or replace files in main project
+            Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
+            List<File> invokers = Files.list(filePath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".xml"))
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+            invokers.forEach(f -> {
+                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
+            });
+
+            filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
+            List<File> templates = Files.list(filePath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".json"))
+                    .map(Path::toFile)
+                    .collect(Collectors.toList());
+            templates.forEach(f -> {
+                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
+            });
+
+            Object connectionResources = migrateDataResource.getConnections().stream()
+                    .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
+            List<HashMap> cns = (ArrayList) connectionResources;
+            ObjectMapper objectMapper = new ObjectMapper();
+            for (HashMap<String, Object> connection : cns) {
+                String str = objectMapper.writeValueAsString(connection);
+                ConnectionResource connectionResource = objectMapper.readValue(str, ConnectionResource.class);
+                assistantServiceImp.updateConnection(connectionResource);
+            }
+
+            assistantServiceImp.buildAndRestart();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
