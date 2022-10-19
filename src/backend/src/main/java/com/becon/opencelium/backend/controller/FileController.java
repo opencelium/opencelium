@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
 import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
@@ -41,6 +42,9 @@ import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.jayway.jsonpath.JsonPath;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -53,8 +57,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,6 +65,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Controller
 @RequestMapping(value = "/api/storage")
@@ -254,16 +259,22 @@ public class FileController {
         }
     }
 
+    @Autowired
+    private SystemOverviewRepository systemOverviewRepository;
+
     @PostMapping(value = "/assistant/zipfile")
     public ResponseEntity<?> assistantUploadFile(@RequestParam("file") MultipartFile file) {
         try {
+//            systemOverviewRepository.getCurrentVersionFromDb();
+//            return ResponseEntity.ok().build();
 
-            Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
-            Path target = Paths.get(PathConstant.APPLICATION);
-            Path folder = assistantServiceImp.unzipFolder(source, target);
-
-            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
-            assistantServiceImp.deleteZipFile(pathToZip);
+//            Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
+            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream());
+            Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
+                               .replace(".", "_"));
+            Path folder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
+//            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
+//            assistantServiceImp.deleteZipFile(pathToZip);
             String dir = folder.toString().replace(folder.getParent().toString() + File.separator, "");
             AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(dir);
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
@@ -276,7 +287,7 @@ public class FileController {
     @DeleteMapping(value = "/assistant/zipfile/{filename}")
     public ResponseEntity<?> assistantDeleteFile(@PathVariable String filename) {
 
-        Path zipPath = Paths.get(PathConstant.APPLICATION + filename);
+        Path zipPath = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + filename);
         assistantServiceImp.deleteZipFile(zipPath);
 
         return ResponseEntity.noContent().build();

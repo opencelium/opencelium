@@ -15,7 +15,11 @@ import com.becon.opencelium.backend.neo4j.service.LinkRelationServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -43,6 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -161,8 +166,30 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public String getVersion() {
-        return systemOverviewRepository.getVersion();
+    public String getCurrentVersion() {
+        return systemOverviewRepository.getCurrentVersionFromDb();
+    }
+
+    // dir - assistant/version/{folder}
+    public String getVersionFromDir(String dir) {
+        String appYmlPath = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir + "/" + PathConstant.APP_DEFAULT_YML;
+        try {
+            String content = String.join("\n", Files.readAllLines(Paths.get(appYmlPath)));
+            ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+            Object obj = yamlReader.readValue(content, Object.class);
+            ObjectMapper jsonReader = new ObjectMapper();
+            String s = jsonReader.writeValueAsString(obj);
+            if (JsonPath.isPathDefinite("$.opencelium.version")) {
+                return JsonPath.read(s, "$.opencelium.version");
+            }
+            return "NOT_SET";
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getVersion(InputStream inputStream) {
+        return systemOverviewRepository.getVersionFromStream(inputStream);
     }
 
     public void saveTmpInvoker(String xmlInvoker, String dir) {
@@ -286,22 +313,27 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void updateOff(String dir, String version) throws Exception {
-        System.out.println("Offline update run");
-        Path currentRelativePath = Paths.get("");
-        String s = currentRelativePath.toAbsolutePath().toString();
-
-        Path path = Paths.get("");
-        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
-        File gitDir = new File(workTree.getPath() + "/.git");
-        Process process = Runtime.getRuntime().exec("git"
-                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " pull " + s + "/assistant/application/" + dir);
-        getText(process.getInputStream());
-        getText(process.getErrorStream());
-
-        Process process1 = Runtime.getRuntime().exec("git"
-                + " --git-dir=" + gitDir + " --work-tree=" + workTree + "checkout " + version);
-        getText(process1.getInputStream());
-        getText(process1.getErrorStream());
+//        System.out.println("Offline update run");
+//        Path currentRelativePath = Paths.get("");
+//        String s = currentRelativePath.toAbsolutePath().toString();
+//
+//        Path path = Paths.get("");
+//        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
+//        File gitDir = new File(workTree.getPath() + "/.git");
+//        Process process = Runtime.getRuntime().exec("git"
+//                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " pull " + s + "/assistant/application/" + dir);
+//        getText(process.getInputStream());
+//        getText(process.getErrorStream());
+//
+//        Process process1 = Runtime.getRuntime().exec("git"
+//                + " --git-dir=" + gitDir + " --work-tree=" + workTree + "checkout " + version);
+//        getText(process1.getInputStream());
+//        getText(process1.getErrorStream());
+            dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
+            InputStream oc = Files.newInputStream(Paths.get(dir));
+            File mainOcFolder = new File("");
+            Path target = Paths.get(mainOcFolder.getAbsolutePath()).getParent().getParent();
+            unzipFolder(oc, target);
     }
 
     @Override
@@ -423,14 +455,13 @@ public class AssistantServiceImp implements ApplicationService {
         return null;
     }
 
-    public Path unzipFolder(Path source, Path target) throws IOException {
+    public Path unzipFolder(InputStream inputStream, Path target) throws IOException {
 
         String os = System.getProperty("os.name");
         if (os.contains("Windows")) {
-            String fileZip = source.toString();
             File destDir = new File(target.toString());
             byte[] buffer = new byte[1024];
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
+            ZipInputStream zis = new ZipInputStream(inputStream);
             ZipEntry zipEntry = zis.getNextEntry();
             Path folder = zipSlipProtect(zipEntry, target);
             while (zipEntry != null) {
@@ -461,10 +492,11 @@ public class AssistantServiceImp implements ApplicationService {
             zis.close();
             return folder.getParent();
         } else {
-            try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
+            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
 
                 ZipEntry zipEntry = zis.getNextEntry();
-                Path folder = zipSlipProtect(zipEntry, target);
+                String rootName = zipEntry.getName();
+//                Path folder = zipSlipProtect(zipEntry, target);
                 while (zipEntry != null) {
 
                     boolean isDirectory = false;
@@ -472,12 +504,11 @@ public class AssistantServiceImp implements ApplicationService {
                         isDirectory = true;
                     }
 
-                    Path newPath = zipSlipProtect(zipEntry, target);
-
+                    String vFolder = zipSlipProtect(zipEntry, target).toString().replace(rootName, "");
+                    Path newPath = Paths.get(vFolder);
                     if (isDirectory) {
                         Files.createDirectories(newPath);
                     } else {
-
                         // example 1.2
                         // some zip stored file path only, need create parent directories
                         // e.g data/folder/file.txt
@@ -494,7 +525,7 @@ public class AssistantServiceImp implements ApplicationService {
                 }
                 zis.closeEntry();
                 zis.close();
-                return folder;
+                return target;
             }
         }
     }

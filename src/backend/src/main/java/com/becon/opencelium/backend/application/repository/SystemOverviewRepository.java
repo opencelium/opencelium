@@ -1,30 +1,43 @@
 package com.becon.opencelium.backend.application.repository;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.jayway.jsonpath.JsonPath;
+import liquibase.Liquibase;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.integration.spring.SpringLiquibase;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.elasticsearch.action.admin.cluster.node.info.NodeInfo;
-import org.elasticsearch.action.admin.cluster.node.info.NodesInfoResponse;
 import org.elasticsearch.client.Client;
-import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.Session;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.ApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.DriverManager;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Component
 public class SystemOverviewRepository {
@@ -41,6 +54,9 @@ public class SystemOverviewRepository {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public SystemOverview getCurrentOverview() {
         SystemOverview systemOverview = new SystemOverview();
@@ -87,7 +103,18 @@ public class SystemOverviewRepository {
         return systemOverview;
     }
 
-    public String getVersion() {
+    // return current version
+    public String getCurrentVersionFromDb() {
+        try {
+            return jdbcTemplate
+                    .queryForList("select AUTHOR from DATABASECHANGELOG order by AUTHOR DESC LIMIT 1", String.class)
+                    .get(0);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getVersionFromGit() {
         try	{
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Path path = Paths.get("");
@@ -108,6 +135,35 @@ public class SystemOverviewRepository {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public String getVersionFromStream(InputStream inputStream) {
+        try {
+            ZipInputStream zis = new ZipInputStream(inputStream);
+            ZipEntry zipEntry = zis.getNextEntry();
+            byte[] buffer = new byte[1024];
+            int read = 0;
+            StringBuilder stringBuilder = new StringBuilder();
+            while (zipEntry != null) {
+                zipEntry = zis.getNextEntry();
+                if (zipEntry.getName().contains("backend/src/main/resources/application_default.yml")) {
+                    while ((read = zis.read(buffer, 0, 1024)) >= 0) {
+                        stringBuilder.append(new String(buffer, 0, read));
+                    }
+                    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+                    Object obj = yamlReader.readValue(stringBuilder.toString(), Object.class);
+                    ObjectMapper jsonReader = new ObjectMapper();
+                    String s = jsonReader.writeValueAsString(obj);
+                    if (JsonPath.isPathDefinite("$.opencelium.version")) {
+                        return JsonPath.read(s, "$.opencelium.version");
+                    }
+                    return "NOT_SET";
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return "NOT_SET";
     }
 
     // Kibana getting request

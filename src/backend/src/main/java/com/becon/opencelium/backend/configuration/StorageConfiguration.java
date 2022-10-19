@@ -61,11 +61,11 @@ public class StorageConfiguration {
             directory.mkdir();
             System.out.println("Directory has been created: " + PathConstant.ASSISTANT);
         }
-        filePath = Paths.get(PathConstant.ASSISTANT + "application/");
+        filePath = Paths.get(PathConstant.ASSISTANT + "versions/");
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.ASSISTANT + "application/");
+            File directory = new File(PathConstant.ASSISTANT + "versions/");
             directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "application/");
+            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "versions/");
         }
         filePath = Paths.get(PathConstant.ASSISTANT + "temporary/");
         if (Files.notExists(filePath)){
@@ -73,12 +73,12 @@ public class StorageConfiguration {
             directory.mkdir();
             System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/");
         }
-        filePath = Paths.get(PathConstant.ASSISTANT + "zipfile/");
-        if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.ASSISTANT + "zipfile/");
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "zipfile/");
-        }
+//        filePath = Paths.get(PathConstant.ASSISTANT + "zipfile/");
+//        if (Files.notExists(filePath)){
+//            File directory = new File(PathConstant.ASSISTANT + "zipfile/");
+//            directory.mkdir();
+//            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "zipfile/");
+//        }
         List<Connector> connectors = connectorService.findAll();
         connectors.forEach(c -> {
             List<RequestData> requestData = c.getRequestData();

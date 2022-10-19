@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,9 +72,10 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         }
     }
 
+    // assistant/versions/{folder}
     @Override
     public AvailableUpdate getOffVersionByDir(String appDir) throws Exception {
-        String version = assistantServiceImp.getVersion();
+        String version = assistantServiceImp.getVersionFromDir(appDir);
         String status = getVersionStatus(version);
         AvailableUpdate availableUpdate = new AvailableUpdate();
         availableUpdate.setFolder(appDir);
@@ -85,7 +87,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     @Override
     public String[] getDirectories() {
-        File file = new File(PathConstant.APPLICATION);
+        File file = new File(PathConstant.ASSISTANT + PathConstant.VERSIONS);
         return file.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -121,7 +123,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     // [1.2, 1.3] :  1.2 - current
     // [1.2, 1.3] :  1.3 - current
     private String getVersionStatus(String version) {
-        String currentVersion = assistantServiceImp.getVersion();
+        String currentVersion = assistantServiceImp.getCurrentVersion();
         ArrayList<String> versions = new ArrayList<>();
         versions.add(currentVersion);
         versions.add(version);

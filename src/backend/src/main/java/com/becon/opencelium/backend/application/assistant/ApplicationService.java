@@ -19,6 +19,6 @@ public interface ApplicationService {
     void updateConnection(ConnectionResource connectionresource);
     boolean checkRepoConnection();
     void buildAndRestart();
-    String getVersion();
+    String getCurrentVersion();
     void restore();
 }
