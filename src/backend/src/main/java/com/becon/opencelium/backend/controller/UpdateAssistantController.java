@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -231,17 +232,23 @@ public class UpdateAssistantController {
             }
 
             // saving files to tmp folder
-            migrateDataResource.getInvokers().forEach(inv -> {
-                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
-            });
+            if (migrateDataResource.getInvokers() != null) {
+                migrateDataResource.getInvokers().forEach(inv -> {
+                    assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
+                });
+            }
 
-            migrateDataResource.getTemplates().forEach(temp -> {
-                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
-            });
+            if (migrateDataResource.getTemplates() != null) {
+                migrateDataResource.getTemplates().forEach(temp -> {
+                    assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
+                });
+            }
 
-            migrateDataResource.getConnections().forEach(ction -> {
-                assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
-            });
+            if (migrateDataResource.getConnections() != null) {
+                migrateDataResource.getConnections().forEach(ction -> {
+                    assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
+                });
+            }
 
             //////test commit
             if (migrateDataResource.isOnline()) {
@@ -252,24 +259,10 @@ public class UpdateAssistantController {
 
 //             after updateAll need to move or replace files in main project
             Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
-            List<File> invokers = Files.list(filePath)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".xml"))
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-            invokers.forEach(f -> {
-                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
-            });
+            moveToTmpFolder(filePath, PathConstant.INVOKER, ".xml");
 
             filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
-            List<File> templates = Files.list(filePath)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".json"))
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-            templates.forEach(f -> {
-                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
-            });
+            moveToTmpFolder(filePath, PathConstant.TEMPLATE, ".json");
 
             Object connectionResources = migrateDataResource.getConnections().stream()
                     .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
@@ -289,6 +282,17 @@ public class UpdateAssistantController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    private void moveToTmpFolder(Path filePath, String folder, String fileExtension) throws IOException {
+        List<File> templates = Files.list(filePath)
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(fileExtension))
+                .map(Path::toFile)
+                .collect(Collectors.toList());
+        templates.forEach(f -> {
+            assistantServiceImp.moveFiles(f.getPath(), folder + f.getName());
+        });
     }
 
     @ResponseBody

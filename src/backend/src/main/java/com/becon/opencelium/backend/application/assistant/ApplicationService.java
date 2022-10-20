@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public interface ApplicationService {
 
     SystemOverview getSystemOverview();
-    Path uploadZipFile(MultipartFile file, String location);
+    Path uploadZipFile(MultipartFile file, Path location);
     void deleteZipFile(Path path);
     void createTmpDir(String dir);
     SystemOverviewResource toResource(SystemOverview systemOverview);

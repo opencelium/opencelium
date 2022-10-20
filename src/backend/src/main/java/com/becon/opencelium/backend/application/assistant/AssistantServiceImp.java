@@ -71,10 +71,9 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public Path uploadZipFile(MultipartFile file, String location) {
+    public Path uploadZipFile(MultipartFile file, Path location) {
         String filename = file.getOriginalFilename();
-        Path source = Paths.get(location);
-        Path target = source.resolve(filename);
+        Path target = location.resolve(filename);
         try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + filename);
@@ -172,7 +171,7 @@ public class AssistantServiceImp implements ApplicationService {
 
     // dir - assistant/version/{folder}
     public String getVersionFromDir(String dir) {
-        String appYmlPath = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir + "/" + PathConstant.APP_DEFAULT_YML;
+        String appYmlPath = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir + "/" + PathConstant.APP_DEFAULT_YML; // e.g : assistant/versions/3_0_0
         try {
             String content = String.join("\n", Files.readAllLines(Paths.get(appYmlPath)));
             ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
@@ -312,7 +311,7 @@ public class AssistantServiceImp implements ApplicationService {
 //    }
 
     @Override
-    public void updateOff(String dir, String version) throws Exception {
+    public void  updateOff(String dir, String version) throws Exception {
 //        System.out.println("Offline update run");
 //        Path currentRelativePath = Paths.get("");
 //        String s = currentRelativePath.toAbsolutePath().toString();
@@ -330,10 +329,11 @@ public class AssistantServiceImp implements ApplicationService {
 //        getText(process1.getInputStream());
 //        getText(process1.getErrorStream());
             dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
-            InputStream oc = Files.newInputStream(Paths.get(dir));
+//            InputStream oc = Files.newInputStream(Paths.get(dir));
             File mainOcFolder = new File("");
             Path target = Paths.get(mainOcFolder.getAbsolutePath()).getParent().getParent();
-            unzipFolder(oc, target);
+            Files.copy(Paths.get(dir), target);
+//            unzipFolder(oc, target);
     }
 
     @Override
