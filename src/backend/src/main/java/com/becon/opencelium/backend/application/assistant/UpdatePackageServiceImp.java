@@ -74,13 +74,13 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     // assistant/versions/{folder}
     @Override
-    public AvailableUpdate getOffVersionByDir(String appDir) throws Exception {
-        String version = assistantServiceImp.getVersionFromDir(appDir);
+    public AvailableUpdate getOffVersionByFolder(String folder) throws Exception {
+        String version = assistantServiceImp.getVersionFromDir(folder);
         String status = getVersionStatus(version);
         AvailableUpdate availableUpdate = new AvailableUpdate();
-        availableUpdate.setFolder(appDir);
+        availableUpdate.setFolder(folder);
         availableUpdate.setStatus(status);
-        availableUpdate.setChangelogLink(getChangelogLink(appDir));
+        availableUpdate.setChangelogLink(getChangelogLink(folder));
         availableUpdate.setVersion(version);
         return availableUpdate;
     }
@@ -109,7 +109,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     private List<AvailableUpdate> getAll(String[] appDirectories) throws Exception {
         List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
-            AvailableUpdate availableUpdate = getOffVersionByDir(appDir);
+            AvailableUpdate availableUpdate = getOffVersionByFolder(appDir);
             packages.add(availableUpdate);
         }
         return packages;

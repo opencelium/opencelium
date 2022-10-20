@@ -272,11 +272,11 @@ public class FileController {
             String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream());
             Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
                                .replace(".", "_"));
-            Path folder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
+            Path pathToFolder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
 //            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
 //            assistantServiceImp.deleteZipFile(pathToZip);
-            String dir = folder.toString().replace(folder.getParent().toString() + File.separator, "");
-            AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByDir(dir);
+            String folder = pathToFolder.toString().replace(pathToFolder.getParent().toString() + File.separator, "");
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByFolder(folder);
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
             return ResponseEntity.ok(availableUpdateResource);
         } catch (Exception e) {
