@@ -1,10 +1,9 @@
-package com.becon.opencelium.backend.application.service;
+package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -18,8 +17,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,21 +72,22 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         }
     }
 
+    // assistant/versions/{folder}
     @Override
-    public AvailableUpdate getOffVersionByDir(String appDir) throws Exception {
-        String version = assistantServiceImp.getVersion();
+    public AvailableUpdate getOffVersionByFolder(String folder) throws Exception {
+        String version = assistantServiceImp.getVersionFromDir(folder);
         String status = getVersionStatus(version);
         AvailableUpdate availableUpdate = new AvailableUpdate();
-        availableUpdate.setFolder(appDir);
+        availableUpdate.setFolder(folder);
         availableUpdate.setStatus(status);
-        availableUpdate.setChangelogLink(getChangelogLink(appDir));
+        availableUpdate.setChangelogLink(getChangelogLink(folder));
         availableUpdate.setVersion(version);
         return availableUpdate;
     }
 
     @Override
     public String[] getDirectories() {
-        File file = new File(PathConstant.APPLICATION);
+        File file = new File(PathConstant.ASSISTANT + PathConstant.VERSIONS);
         return file.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -109,7 +109,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     private List<AvailableUpdate> getAll(String[] appDirectories) throws Exception {
         List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
-            AvailableUpdate availableUpdate = getOffVersionByDir(appDir);
+            AvailableUpdate availableUpdate = getOffVersionByFolder(appDir);
             packages.add(availableUpdate);
         }
         return packages;
@@ -123,7 +123,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
     // [1.2, 1.3] :  1.2 - current
     // [1.2, 1.3] :  1.3 - current
     private String getVersionStatus(String version) {
-        String currentVersion = assistantServiceImp.getVersion();
+        String currentVersion = assistantServiceImp.getCurrentVersion();
         ArrayList<String> versions = new ArrayList<>();
         versions.add(currentVersion);
         versions.add(version);

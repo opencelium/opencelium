@@ -18,8 +18,8 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
-import com.becon.opencelium.backend.application.service.AssistantServiceImp;
-import com.becon.opencelium.backend.application.service.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
+import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceImp;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,14 +99,14 @@ public class UpdateAssistantController {
 
     @GetMapping("/oc/version")
     public ResponseEntity<?> ocCurrentVersion(){
-        String version = assistantServiceImp.getVersion();
+        String version = assistantServiceImp.getCurrentVersion();
         String result = "{" + "\"version\": \"" + version + "\"}";
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/oc/requirements")
     public ResponseEntity<?> getSystemRequirement() {
-        String version = assistantServiceImp.getVersion();
+        String version = assistantServiceImp.getCurrentVersion();
         String result = "{" + "\"version\": \"" + version + "\"}";
         return ResponseEntity.ok(result);
     }
@@ -220,8 +221,7 @@ public class UpdateAssistantController {
         // do backup
 //        assistantServiceImp.runScript();
         try {
-            String version = migrateDataResource.getVersion();
-            assistantServiceImp.createTmpDir(version);
+
 
             final String dir;
             if (migrateDataResource.getFolder() != null && !migrateDataResource.getFolder().isEmpty()) {
@@ -229,47 +229,40 @@ public class UpdateAssistantController {
             } else {
                 dir = migrateDataResource.getVersion();
             }
+            assistantServiceImp.createTmpDir(dir);
 
             // saving files to tmp folder
-            migrateDataResource.getInvokers().forEach(inv -> {
-                assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
-            });
+            if (migrateDataResource.getInvokers() != null) {
+                migrateDataResource.getInvokers().forEach(inv -> {
+                    assistantServiceImp.saveTmpInvoker(inv, dir + "/invoker");
+                });
+            }
 
-            migrateDataResource.getTemplates().forEach(temp -> {
-                assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
-            });
+            if (migrateDataResource.getTemplates() != null) {
+                migrateDataResource.getTemplates().forEach(temp -> {
+                    assistantServiceImp.saveTmpTemplate(temp, dir + "/template");
+                });
+            }
 
-            migrateDataResource.getConnections().forEach(ction -> {
-                assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
-            });
+            if (migrateDataResource.getConnections() != null) {
+                migrateDataResource.getConnections().forEach(ction -> {
+                    assistantServiceImp.saveTmpConnection(ction, dir + "/connection");
+                });
+            }
 
             //////test commit
             if (migrateDataResource.isOnline()) {
-                assistantServiceImp.updateOn(version);
+                assistantServiceImp.updateOn(migrateDataResource.getVersion());
             } else {
-                assistantServiceImp.updateOff(dir, version);
+                assistantServiceImp.updateOff(dir);
             }
 
-            // after updateAll need to move or replace files in main project
+//             after updateAll need to move or replace files in main project
             Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
-            List<File> invokers = Files.list(filePath)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".xml"))
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-            invokers.forEach(f -> {
-                assistantServiceImp.moveFiles(f.getPath(), PathConstant.INVOKER + f.getName());
-            });
+            assistantServiceImp.moveToTmpFolder(filePath, PathConstant.INVOKER, ".xml");
 
             filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
-            List<File> templates = Files.list(filePath)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".json"))
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-            templates.forEach(f -> {
-                assistantServiceImp.moveFiles(f.getPath(), PathConstant.TEMPLATE + f.getName());
-            });
+            assistantServiceImp.moveToTmpFolder(filePath, PathConstant.TEMPLATE, ".json");
 
             Object connectionResources = migrateDataResource.getConnections().stream()
                     .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
@@ -291,12 +284,14 @@ public class UpdateAssistantController {
         return ResponseEntity.ok().build();
     }
 
+
+
     @ResponseBody
     @GetMapping("/changelog/file/{packageName}")
     public ResponseEntity<org.springframework.core.io.Resource> download(@PathVariable String packageName) {
 
         try {
-            String path = PathConstant.APPLICATION + packageName + "/";
+            String path = PathConstant.ASSISTANT + PathConstant.VERSIONS + packageName + "/";
             Path rootLocation = Paths.get(path);
             Path filePath = rootLocation.resolve("CHANGELOG");
             org.springframework.core.io.Resource file = new UrlResource(filePath.toUri());

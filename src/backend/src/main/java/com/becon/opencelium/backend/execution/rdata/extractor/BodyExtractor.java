@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.constant.DataRef;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.mysql.entity.RequestData;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -109,7 +111,9 @@ public class BodyExtractor implements Extractor{
         }
         String body = response.getBody();
         MediaType contentType = response.getHeaders().getContentType();
-        if (contentType == null) {
+        if (isJson(body)) {
+            contentType = MediaType.APPLICATION_JSON;
+        } else if (contentType == null) {
             throw new RuntimeException("Content-Type is not defined in header for response: " + response);
         }
         return readPayload(contentType.getSubtype()).apply(pathParts, body);
@@ -146,6 +150,16 @@ public class BodyExtractor implements Extractor{
         } else {
             throw new RuntimeException("Couldn't determine Content-Type: " + contentType);
         }
+    }
+
+    private boolean isJson(String payload) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.readTree(payload);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
     private static Document convertStringToXMLDocument(String xmlString)

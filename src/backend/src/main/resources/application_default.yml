@@ -104,6 +104,7 @@ kibana:
   port: 5601
 
 opencelium:
+  version: 3.0.0
   debug_mode: false
   reboot:
     path: src/backend/src/main/resources/bashfile/restart.sh
