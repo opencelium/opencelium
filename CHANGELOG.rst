@@ -2,6 +2,40 @@
 Changelog
 *********
 
+Major Relase :loudspeaker:
+============
+
+3.0
+===
+:Date: October 25, 2022
+
+Features
+--------
+
+* New Service Portal
+    * Marketplace to get all invoker and business template files
+    * Service Center to create ticket requests
+    * Api converter to generate invoker files from openapi or wsdl files
+
+Connector
+---------
+
+* Matrix42
+* phpIPAM
+* Baramundi Management Suite
+* Tenable
+* Xen Orchestra
+* Work4all
+
+Fixes
+-----
+
+* Problems saving a connection (OC-476)
+* Error updating scheduler (OC-485)
+* There was a problem trying to download a template (OC-473)
+* js error in developer tools (OC-483)
+
+
 2.4
 ===
 :Date: July 22, 2022
@@ -13,7 +47,6 @@ Features
 * Inline editor function
 * Offline mode
 * Add marketplace for service portal
-
 
 Fixes
 -----
