@@ -10,12 +10,12 @@ Requirements
 
 **Software:**
 
-- git (optional) (https://git-scm.com/downloads)
-- node.js 10.15.0 (https://nodejs.org/en/)
-- mariadb (https://mariadb.org/)
-- yarn 1.7.0 (https://yarnpkg.com/en/docs/getting-started)
-- java (jdk, jre) (https://www.oracle.com/technetwork/java/javase/downloads/index.html)
-- neo4j (https://neo4j.com/developer/get-started/)
+- git 2 or higher (optional) (https://git-scm.com/downloads)
+- node.js 14 or higher (https://nodejs.org/en/)
+- mariadb 10 or higher (https://mariadb.org/)
+- yarn 1.7.0 or higher (https://yarnpkg.com/en/docs/getting-started)
+- java 8 not higher (jdk, jre) (https://www.oracle.com/technetwork/java/javase/downloads/index.html)
+- neo4j 3.x not higher (https://neo4j.com/developer/get-started/)
 
 **Operating System:**
 

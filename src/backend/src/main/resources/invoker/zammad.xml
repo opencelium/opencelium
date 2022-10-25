@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
     <name>Zammad</name>
     <description>Zammad is a web based open source helpdesk/customer support system with many features to manage customer communication via several channels like telephone, facebook, twitter, chat and emails.</description>
-    <hint>Read api documentation https://docs.zammad.org/en/latest/api</hint>
+    <hint>Please add freshdeskid object to ticket to zammad to use this property. Read api documentation https://docs.zammad.org/en/latest/api</hint>
     <icon>zammad.png</icon>
     <requiredData>
         <item name="url" type="string" visibility="public"/>
-        <item name="username" type="string" visibility="public"/>
-        <item name="password" type="string" visibility="protected"/>
-        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+        <item name="token" type="string" visibility="protected"/>
     </requiredData>
-    <authType>basic</authType>
+    <authType>apikey</authType>
     <operations>
         <operation name="UserGetCurrent" type="test">
             <request>
                 <method>GET</method>
                 <endpoint>{url}/api/v1/users/me</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -44,7 +42,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/users</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -72,7 +70,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/users/search?query={search-term}&amp;limit=10</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -100,7 +98,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/users/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -128,7 +126,7 @@
                 <method>POST</method>
                 <endpoint>{url}/api/v1/users</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -163,7 +161,7 @@
                 <method>PUT</method>
                 <endpoint>{url}/api/v1/users/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -199,7 +197,7 @@
                 <method>DELETE</method>
                 <endpoint>{url}/api/v1/users/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -221,7 +219,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/organizations</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -249,7 +247,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/organizations/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -277,7 +275,7 @@
                 <method>POST</method>
                 <endpoint>{url}/api/v1/organizations</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -310,7 +308,7 @@
                 <method>PUT</method>
                 <endpoint>{url}/api/v1/organizations/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -344,7 +342,7 @@
                 <method>DELETE</method>
                 <endpoint>{url}/api/v1/organizations/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -366,7 +364,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/groups</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -398,7 +396,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/groups/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -430,7 +428,7 @@
                 <method>POST</method>
                 <endpoint>{url}/api/v1/groups</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -471,7 +469,7 @@
                 <method>PUT</method>
                 <endpoint>{url}/api/v1/groups/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -512,7 +510,7 @@
                 <method>DELETE</method>
                 <endpoint>{url}/api/v1/groups/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -534,7 +532,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/tickets</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -561,13 +559,17 @@
         </operation>
         <operation name="TicketSearch" type="">
             <request>
-                <method>GET</method>
-                <endpoint>{url}/api/v1/tickets/search?query={search-term}&amp;limit=10</endpoint>
+                <method>POST</method>
+                <endpoint>{url}/api/v1/tickets/search</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
-                <body/>
+                <body type="object" format="json" data="raw">
+                    <field name="query" type="string"/>
+		    <field name="limit" type="string">10</field>
+		    <field name="expand" type="string">1</field>
+                </body>
             </request>
             <response>
                 <success status="200">
@@ -581,6 +583,7 @@
                         <field name="note" type="string"/>
                         <field name="created_at" type="string"/>
                         <field name="updated_at" type="string"/>                                                                 
+                        <field name="freshdeskid" type="string"/>                                                                 
                     </body>
                 </success>
                 <fail status="401">
@@ -594,7 +597,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/tickets/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -611,6 +614,11 @@
                         <field name="note" type="string"/>
                         <field name="created_at" type="string"/>
                         <field name="updated_at" type="string"/>                                                                  
+			<field name="preferences" type="object">
+                        	<field name="idoit" type="object">                                                                  
+                        		<field name="object_ids" type="array"/>                                                                  
+				</field>
+			</field>
                     </body>
                 </success>
                 <fail status="401">
@@ -624,7 +632,7 @@
                 <method>POST</method>
                 <endpoint>{url}/api/v1/tickets</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -671,7 +679,7 @@
                 <method>PUT</method>
                 <endpoint>{url}/api/v1/tickets/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -710,7 +718,7 @@
                 <method>DELETE</method>
                 <endpoint>{url}/api/v1/tickets/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -732,7 +740,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/ticket_articles/by_ticket/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -765,7 +773,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/ticket_articles/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -799,7 +807,7 @@
                 <method>POST</method>
                 <endpoint>{url}/api/v1/ticket_articles</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -849,7 +857,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/ticket_priorities</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -876,7 +884,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/ticket_priorities/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -903,7 +911,7 @@
                 <method>POST</method>
                 <endpoint>{url}/api/v1/ticket_priorities</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -934,7 +942,7 @@
                 <method>PUT</method>
                 <endpoint>{url}/api/v1/ticket_priorities/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -966,7 +974,7 @@
                 <method>DELETE</method>
                 <endpoint>{url}/api/v1/ticket_priorities/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -988,7 +996,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/ticket_states</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -1018,7 +1026,7 @@
                 <method>GET</method>
                 <endpoint>{url}/api/v1/ticket_states/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body/>
@@ -1048,7 +1056,7 @@
                 <method>POST</method>
                 <endpoint>{url}/api/v1/ticket_states</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -1085,7 +1093,7 @@
                 <method>PUT</method>
                 <endpoint>{url}/api/v1/ticket_states/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
@@ -1123,7 +1131,7 @@
                 <method>DELETE</method>
                 <endpoint>{url}/api/v1/ticket_states/{id}</endpoint>
                 <header>
-                    <item name="Authorization" type="string">{token}</item>
+                    <item name="Authorization" type="string">Bearer {token}</item>
                     <item name="Content-Type" type="string">application/json</item>
                 </header>
                 <body data="raw" format="json" type="object">
