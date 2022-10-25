@@ -19,7 +19,7 @@ import {RemoteApiRequestProps, REQUEST_METHOD} from "@application/requests/inter
 import {errorHandler} from "@application/utils/utils";
 import {GraphQLLoginProps, GraphQLRequestProps} from "../../requests/interfaces/IGraphQL";
 
-export const graphQLRequest = ({accessToken, url, ...body}: GraphQLRequestProps) => {
+export const graphQLRequest = ({accessToken, url, sslOn, ...body}: GraphQLRequestProps) => {
     const requestProps: RemoteApiRequestProps = {
         body: body,
         header: {
@@ -29,6 +29,7 @@ export const graphQLRequest = ({accessToken, url, ...body}: GraphQLRequestProps)
         },
         method: REQUEST_METHOD.POST,
         url: url,
+        sslOn,
     }
     const Request = new ApplicationRequest();
     return Request.remoteApiRequest(requestProps);
@@ -38,7 +39,7 @@ export const graphQLLogin = createAsyncThunk(
     'graphQL/login',
     async(data: GraphQLLoginProps, thunkAPI) => {
         try {
-            const {url, user, password} = data;
+            const {url, user, password, sslOn} = data;
             const request = new ApplicationRequest();
             const loginProps: RemoteApiRequestProps = {
                 body: {
@@ -53,6 +54,7 @@ export const graphQLLogin = createAsyncThunk(
                 },
                 method: REQUEST_METHOD.POST,
                 url,
+                sslOn,
             }
             const response = await request.remoteApiRequest(loginProps);
             return JSON.parse(response.data.body);

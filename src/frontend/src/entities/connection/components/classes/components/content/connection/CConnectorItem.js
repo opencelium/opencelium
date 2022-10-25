@@ -67,7 +67,7 @@ export default class CConnectorItem{
 
     constructor(
         connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [],
-        connectorType = '', shiftXForSvgItems = 0, currentItemIndex = '', svgItems = [], arrows = []){
+        connectorType = '', shiftXForSvgItems = 0, currentItemIndex = '', svgItems = [], arrows = [], sslCert = false){
         this._id = isId(connectorId) ? connectorId : 0;
         this._title = title === '' ? 'Please, choose connector' : title;
         this._icon = isString(icon) ? icon : '';
@@ -82,6 +82,7 @@ export default class CConnectorItem{
         this._pagination = this.setConnectorPagination();
         this._currentProgress = this.getCurrentProgress();
         this._operatorsHistory = [];
+        this._sslCert = sslCert;
         this.setSvgItems();
     }
 
@@ -97,7 +98,8 @@ export default class CConnectorItem{
         let currentItemIndex = connectorItem && connectorItem.hasOwnProperty('currentItemIndex') ? connectorItem.currentItemIndex : '';
         let svgItems = connectorItem && connectorItem.hasOwnProperty('svgItems') ? connectorItem.svgItems : [];
         let arrows = connectorItem && connectorItem.hasOwnProperty('arrows') ? connectorItem.arrows : [];
-        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex, svgItems, arrows);
+        let sslCert = connectorItem && connectorItem.hasOwnProperty('sslCert') ? connectorItem.sslCert : false;
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex, svgItems, arrows, sslCert);
     }
 
     static isInstanceOfBusinessItem(item){
@@ -760,6 +762,14 @@ export default class CConnectorItem{
 
     get arrows(){
         return this._arrows;
+    }
+
+    get sslCert(){
+        return this._sslCert;
+    }
+
+    set sslCert(sslCert){
+        this._sslCert = sslCert;
     }
 
     get pagination(){

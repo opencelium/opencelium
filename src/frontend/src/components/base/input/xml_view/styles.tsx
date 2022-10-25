@@ -23,7 +23,7 @@ const getReactXmlStyles = ({paddingLeft, paddingRight, width, isIconInside, hasI
         transition: `border-bottom-color 0.5s`,
         paddingLeft: `${paddingLeft || 0}`,
         paddingRight: `${paddingRight || 0}`,
-        width: `${width || isIconInside || !hasIcon ? '100%' : `calc(100% - 30px)`}`,
+        width: `${width || isIconInside || !hasIcon ? '100%' : `calc(100% - 50px)`}`,
         marginLeft: `${!hasIcon || isIconInside ? 0 : '30px'}`,
         marginTop: `${marginTop || 0}`,
         marginBottom: `${marginBottom || 0}`,

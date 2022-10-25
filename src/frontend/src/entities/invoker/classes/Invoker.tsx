@@ -22,12 +22,11 @@ import {useAppDispatch, useAppSelector} from "@application/utils/store";
 import {InputTextProps} from "@app_component/base/input/text/interfaces";
 import {InputFileProps} from "@app_component/base/input/file/interfaces";
 import {InputTextareaProps} from "@app_component/base/input/textarea/interfaces";
-import {InputRadiosProps} from "@app_component/base/input/radio/interfaces";
 import {
     AuthType,
     IInvoker,
     IInvokerFile,
-    IInvokerRadios,
+    IInvokerSelect,
     IInvokerText,
     IInvokerTextarea
 } from "../interfaces/IInvoker";
@@ -41,6 +40,8 @@ import {
 import {IOperation} from "../interfaces/IOperation";
 import {Operation} from "./Operation";
 import Xml from "../classes/xml/Xml";
+import {InputSelectProps, OptionProps} from "@app_component/base/input/select/interfaces";
+import RequiredData from "@entity/invoker/components/required_data/RequiredData";
 
 
 export class Invoker extends HookStateClass implements IInvoker{
@@ -48,6 +49,7 @@ export class Invoker extends HookStateClass implements IInvoker{
 
     static reduxState?: InvokerState;
 
+    @App.inputType
     name: string = '';
 
     description: string = '';
@@ -55,6 +57,8 @@ export class Invoker extends HookStateClass implements IInvoker{
     hint: string = '';
 
     @App.inputType
+    authTypeSelect: OptionProps;
+
     authType: AuthType;
 
     @App.inputType
@@ -62,9 +66,11 @@ export class Invoker extends HookStateClass implements IInvoker{
 
     icon?: string = '';
 
+    @App.inputType
     operations: Operation[] = [];
 
-    requiredData: string[] = [];
+    @App.inputType
+    requiredData: any = null;
     shouldDeletePicture?: boolean = false;
 
     constructor(invoker?: Partial<IInvoker> | null) {
@@ -76,8 +82,12 @@ export class Invoker extends HookStateClass implements IInvoker{
         this.hint = invoker?.hint || '';
         this.iconFile = invoker?.iconFile || null;
         this.icon = invoker?.icon || '';
+        this.authTypeSelect = invoker?.authTypeSelect || null;
         this.authType = invoker?.authType || null;
-        this.requiredData = invoker?.requiredData || [];
+        this.requiredData = invoker?.requiredData || null;
+        if(!this.authTypeSelect && this.authType){
+            this.authTypeSelect = {label: this.authType, value: this.authType};
+        }
         for(let i = 0; i < invoker?.operations?.length; i++){
             this.operations.push(new Operation(invoker.operations[i]));
         }
@@ -107,8 +117,8 @@ export class Invoker extends HookStateClass implements IInvoker{
         return super.getInputTexts<IInvokerText, InputTextProps>(data);
     }
 
-    getRadios(data: IInput<IInvokerRadios, InputRadiosProps>): React.ReactElement {
-        return super.getInputRadios<IInvokerRadios, InputRadiosProps>(data);
+    getSelect(data: IInput<IInvokerSelect, InputSelectProps>): React.ReactElement {
+        return super.getInputSelect<IInvokerSelect, InputSelectProps>(data);
     }
 
     getFile(data: IInput<IInvokerFile, InputFileProps>): ReactElement {
@@ -124,6 +134,13 @@ export class Invoker extends HookStateClass implements IInvoker{
 
     getTextarea(data: IInput<IInvokerTextarea, InputTextareaProps>): ReactElement {
         return super.getInputTextarea<IInvokerTextarea, InputTextareaProps>(data);
+    }
+
+    getRequiredDataComponent(): ReactElement{
+        return <RequiredData initialRequiredData={this.requiredData} authType={this.authTypeSelect?.value.toString() || ''} setRequiredData={(requiredData: any) => {
+            //@ts-ignore
+            this.updateRequiredData(this, requiredData)
+        }}/>;
     }
 
     validateName(): boolean{
@@ -146,15 +163,15 @@ export class Invoker extends HookStateClass implements IInvoker{
 
     validateAuthType(): boolean{
         let isNotValid = false;
-        if(!this.authType){
+        if(!this.authTypeSelect){
             isNotValid = true;
-            this.validations['authType'] = 'The Auth Type is a required field';
+            this.validations['authTypeSelect'] = 'The Auth Type is a required field';
         }
         if(isNotValid){
             // @ts-ignore
-            this.updateAuthType(this, this.authType);
+            this.updateAuthTypeSelect(this, this.authTypeSelect);
             if(!this.isFocused){
-                document.getElementById('input_authType').focus();
+                document.getElementById('input_authTypeSelect').focus();
                 this.isFocused = true;
             }
             return false;
@@ -190,10 +207,8 @@ export class Invoker extends HookStateClass implements IInvoker{
 
     validateAdd(): boolean{
         this.isFocused = false;
-        const isValidName = this.validateName();
         const isValidAuthType = this.validateAuthType();
-        const isValidOperations = this.validateOperations();
-        return isValidName && isValidAuthType && isValidOperations;
+        return isValidAuthType;
     }
 
     @App.dispatch<IInvoker>(getInvokerByName, {mapping: (invoker: IInvoker) => {return invoker.name;}, hasNoValidation: true})
@@ -202,37 +217,17 @@ export class Invoker extends HookStateClass implements IInvoker{
     }
 
     @App.dispatch(addInvoker, {mapping: (invoker: IInvoker) => {return {xml: invoker.getXml(), name: invoker.name}}})
-    add(connection: Operation, operations: Operation[] = []): boolean{
-        let hasConnection = false;
+    add(operations: Operation[] = []): boolean{
+        // @ts-ignore
+        this.authType = this.authTypeSelect.value.toString();
         this.operations = operations;
-        for(let i = 0; i < operations.length; i++){
-            if(operations[i].type === "test"){
-                this.operations[i] = connection;
-                hasConnection = true;
-                break;
-            }
-        }
-        if(!hasConnection){
-            this.operations.unshift(connection);
-        }
-        return this.validateAdd();
+        return true;
     }
 
     @App.dispatch(updateInvoker, {mapping: (invoker: IInvoker) => {return {xml: invoker.getXml(), name: invoker.name}}})
-    update(connection: Operation, operations: Operation[] = []): boolean{
+    update(operations: Operation[] = []): boolean{
         this.operations = operations;
-        let hasConnection = false;
-        for(let i = 0; i < operations.length; i++){
-            if(operations[i].type === "test"){
-                this.operations[i] = connection;
-                hasConnection = true;
-                break;
-            }
-        }
-        if(!hasConnection){
-            this.operations.unshift(connection);
-        }
-        return this.validateAdd();
+        return true;
     }
 
     @App.dispatch<IInvoker>(deleteInvokerByName, {mapping: (invoker: IInvoker) => {return invoker.name}, hasNoValidation: true})
@@ -271,7 +266,7 @@ export class Invoker extends HookStateClass implements IInvoker{
             hint: this.hint,
             icon: this.icon,
             data: this.requiredData,
-            auth: this.authType,
+            auth: this.authTypeSelect.value,
             operations,
         };
         return obj;

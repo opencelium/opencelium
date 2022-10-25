@@ -22,11 +22,13 @@ export interface IGraphQLCredentials{
 
 export interface GraphQLLoginProps extends IGraphQLCredentials{
     url: string,
+    sslOn: boolean,
 }
 
 export interface GraphQLRequestProps extends FetcherParams{
     url: string,
     accessToken: string,
+    sslOn: boolean,
 }
 export interface GraphQLLoginResponseProps{
 

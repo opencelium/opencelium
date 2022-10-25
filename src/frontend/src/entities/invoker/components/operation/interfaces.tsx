@@ -50,6 +50,7 @@ interface BodyProps{
     readOnly?: boolean,
     value: string,
     format: ResponseFormat,
+    error?: string,
 }
 
 interface HeaderProps{

@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import AceEditor from "react-ace";
 import Input from "@app_component/base/input/Input";
 import {BodyProps} from "../interfaces";
@@ -26,6 +26,7 @@ import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-textmate';
 import 'ace-builds/src-noconflict/mode-livescript';
 import "ace-builds/src-noconflict/ext-language_tools";
+import {isJsonString} from "@application/utils/utils";
 
 
 const Body: FC<BodyProps> =
@@ -35,7 +36,9 @@ const Body: FC<BodyProps> =
         value,
         format,
         theme,
+        error,
     }) => {
+    const [validationMessage, setValidationMessage] = useState<string>('');
     const [localValue, setLocalValue] = useState<string>(format === ResponseFormat.Json ? JSON.stringify(value) : CXmlEditor.createXmlEditor(value).convertToXml());
     const hasLabel = true;
     const hasIcon = true;
@@ -45,15 +48,21 @@ const Body: FC<BodyProps> =
         marginBottom: '50px',
         theme,
     }
+    useEffect(() => {
+        let newValue = format === ResponseFormat.Json ? JSON.stringify(value, null, 2) : CXmlEditor.createXmlEditor(value).convertToXml();
+        if(newValue !== localValue){
+            setLocalValue(newValue);
+        }
+    }, [value]);
     return (
-        <Input readOnly={readOnly} value={value} label={'Body'} icon={'data_object'}>
+        <Input readOnly={readOnly} value={value} label={'Body'} icon={'data_object'} error={error || validationMessage} marginBottom={'20px'}>
             <AceEditor
-                style={{...getReactXmlStyles(styleProps), marginLeft: '50px'}}
+                style={{...getReactXmlStyles(styleProps), marginLeft: '50px', marginBottom: 0}}
                 mode={format}
                 theme="textmate"
-                name="blah2"
+                name="body"
                 fontSize={14}
-                showPrintMargin={true}
+                showPrintMargin={false}
                 showGutter={true}
                 highlightActiveLine={true}
                 setOptions={{
@@ -67,16 +76,28 @@ const Body: FC<BodyProps> =
                 value={localValue}
                 onBlur={() => {
                     if(value !== localValue){
-                        updateBody(format === ResponseFormat.Json ? JSON.parse(localValue) : CXmlEditor.createXmlEditor(localValue).convertToBackendXml())
+                        if(format === ResponseFormat.Json){
+                            if(isJsonString(localValue)){
+                                updateBody(JSON.parse(localValue))
+                            } else{
+                                setValidationMessage('Body should be a valid JSON value. It will not be saved.');
+                            }
+                        } else{
+                            updateBody(CXmlEditor.createXmlEditor(localValue).convertToBackendXml())
+                        }
                     }
                 }}
-                onChange={(newValue) => setLocalValue(newValue)}
+                onChange={(newValue) => {
+                    setLocalValue(newValue);
+                    setValidationMessage('');
+                }}
             />
         </Input>
     );
     }
 
 Body.defaultProps = {
+    error: '',
 }
 
 
