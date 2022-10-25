@@ -221,8 +221,7 @@ public class UpdateAssistantController {
         // do backup
 //        assistantServiceImp.runScript();
         try {
-            String version = migrateDataResource.getVersion();
-            assistantServiceImp.createTmpDir(version);
+
 
             final String dir;
             if (migrateDataResource.getFolder() != null && !migrateDataResource.getFolder().isEmpty()) {
@@ -230,6 +229,7 @@ public class UpdateAssistantController {
             } else {
                 dir = migrateDataResource.getVersion();
             }
+            assistantServiceImp.createTmpDir(dir);
 
             // saving files to tmp folder
             if (migrateDataResource.getInvokers() != null) {
@@ -252,17 +252,17 @@ public class UpdateAssistantController {
 
             //////test commit
             if (migrateDataResource.isOnline()) {
-//                assistantServiceImp.updateOn(version);
+                assistantServiceImp.updateOn(migrateDataResource.getVersion());
             } else {
-                assistantServiceImp.updateOff(dir, version);
+                assistantServiceImp.updateOff(dir);
             }
 
 //             after updateAll need to move or replace files in main project
             Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/invoker");
-            moveToTmpFolder(filePath, PathConstant.INVOKER, ".xml");
+            assistantServiceImp.moveToTmpFolder(filePath, PathConstant.INVOKER, ".xml");
 
             filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/template");
-            moveToTmpFolder(filePath, PathConstant.TEMPLATE, ".json");
+            assistantServiceImp.moveToTmpFolder(filePath, PathConstant.TEMPLATE, ".json");
 
             Object connectionResources = migrateDataResource.getConnections().stream()
                     .map(t -> JsonPath.read(t, "$.connection")).collect(Collectors.toList());
@@ -284,16 +284,7 @@ public class UpdateAssistantController {
         return ResponseEntity.ok().build();
     }
 
-    private void moveToTmpFolder(Path filePath, String folder, String fileExtension) throws IOException {
-        List<File> templates = Files.list(filePath)
-                .filter(Files::isRegularFile)
-                .filter(path -> path.toString().endsWith(fileExtension))
-                .map(Path::toFile)
-                .collect(Collectors.toList());
-        templates.forEach(f -> {
-            assistantServiceImp.moveFiles(f.getPath(), folder + f.getName());
-        });
-    }
+
 
     @ResponseBody
     @GetMapping("/changelog/file/{packageName}")

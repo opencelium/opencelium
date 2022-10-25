@@ -187,6 +187,17 @@ public class AssistantServiceImp implements ApplicationService {
         }
     }
 
+    public void moveToTmpFolder(Path filePath, String folder, String fileExtension) throws IOException {
+        List<File> templates = Files.list(filePath)
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(fileExtension))
+                .map(Path::toFile)
+                .collect(Collectors.toList());
+        templates.forEach(f -> {
+            moveFiles(f.getPath(), folder + f.getName());
+        });
+    }
+
     public String getVersion(InputStream inputStream) {
         return systemOverviewRepository.getVersionFromStream(inputStream);
     }
@@ -311,7 +322,7 @@ public class AssistantServiceImp implements ApplicationService {
 //    }
 
     @Override
-    public void  updateOff(String dir, String version) throws Exception {
+    public void  updateOff(String dir) throws Exception { // removed version parameter
 //        System.out.println("Offline update run");
 //        Path currentRelativePath = Paths.get("");
 //        String s = currentRelativePath.toAbsolutePath().toString();
