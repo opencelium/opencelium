@@ -359,7 +359,6 @@ public class AssistantServiceImp implements ApplicationService {
 //            unzipFolder(oc, target);
     }
 
-
     private void deleteDir(File[] files, Stack<String> pathParts) {
         try {
             for (File file : files) {
@@ -368,7 +367,10 @@ public class AssistantServiceImp implements ApplicationService {
                     deleteDir(file.listFiles(), pathParts);
                     continue;
                 }
-                FileUtils.deleteDirectory(file);
+                if (file.isDirectory()) {
+                    FileUtils.deleteDirectory(file);
+                }
+                Files.delete(file.toPath());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
