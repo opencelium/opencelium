@@ -353,7 +353,11 @@ public class AssistantServiceImp implements ApplicationService {
             pathParts.push("backend");
             pathParts.push("src");
         }
+        String appYmlPath = PathConstant.RESOURCES + "application.yml";
+        // move application.yml file to folder that will be not be deleted;
+        moveFiles(appYmlPath, dir);
         deleteDir(files, pathParts);
+        moveFiles(dir, root.toString());
         System.out.println(files);
 //            Files.copy(Paths.get(dir), root);
 //            unzipFolder(oc, target);
@@ -369,8 +373,9 @@ public class AssistantServiceImp implements ApplicationService {
                 }
                 if (file.isDirectory()) {
                     FileUtils.deleteDirectory(file);
+                } else {
+                    Files.delete(file.toPath());
                 }
-                Files.delete(file.toPath());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
