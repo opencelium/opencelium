@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -339,12 +340,39 @@ public class AssistantServiceImp implements ApplicationService {
 //                + " --git-dir=" + gitDir + " --work-tree=" + workTree + "checkout " + version);
 //        getText(process1.getInputStream());
 //        getText(process1.getErrorStream());
-            dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
+        dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
 //            InputStream oc = Files.newInputStream(Paths.get(dir));
-            File mainOcFolder = new File("");
-            Path target = Paths.get(mainOcFolder.getAbsolutePath()).getParent().getParent();
-            Files.copy(Paths.get(dir), target);
+        File backendRoot = new File("");
+
+
+        Path root = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
+        File[] files = new File(root.toString()).listFiles();
+        final Stack<String> pathParts = new Stack<String>();
+        {
+            pathParts.push("assistant");
+            pathParts.push("backend");
+            pathParts.push("src");
+        }
+        deleteDir(files, pathParts);
+        System.out.println(files);
+//            Files.copy(Paths.get(dir), root);
 //            unzipFolder(oc, target);
+    }
+
+
+    private void deleteDir(File[] files, Stack<String> pathParts) {
+        try {
+            for (File file : files) {
+                if (file.isDirectory() && !pathParts.isEmpty() && file.getName().equals(pathParts.peek())) {
+                    pathParts.pop();
+                    deleteDir(file.listFiles(), pathParts);
+                    continue;
+                }
+                FileUtils.deleteDirectory(file);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
