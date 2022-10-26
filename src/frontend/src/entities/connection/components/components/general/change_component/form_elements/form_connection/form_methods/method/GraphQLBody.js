@@ -58,6 +58,7 @@ class GraphQLBody extends React.Component{
                 query={value.query}
                 readOnly={readOnly}
                 credentials={credentials}
+                connector={connector}
             />
         );
     }

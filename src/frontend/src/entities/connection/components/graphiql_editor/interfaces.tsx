@@ -14,12 +14,14 @@
  */
 
 import {GraphQLLoginProps} from "@entity/connection/requests/interfaces/IGraphQL";
+import CConnectorItem from "@classes/content/connection/CConnectorItem";
 
 interface GraphiQLEditorProps{
     update: ({query}: {query: string}) => void,
     query: string,
     readOnly?: boolean,
     credentials: GraphQLLoginProps,
+    connector: CConnectorItem,
 }
 
 export {

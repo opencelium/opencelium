@@ -16,10 +16,10 @@
 import CXmlOperation from "./CXmlOperation";
 import {Invoker} from "../Invoker";
 
-const AUTH_API_KEY = 'apikey';
-const AUTH_TOKEN = 'token';
-const AUTH_BASIC = 'basic';
-const AUTH_ENDPOINT = 'endpointAuth';
+export const AUTH_API_KEY = 'apikey';
+export const AUTH_TOKEN = 'token';
+export const AUTH_BASIC = 'basic';
+export const AUTH_ENDPOINT = 'endpointAuth';
 
 const API_KEY_DATA = [
     {_attributes: {name: 'url', type: 'string', visibility: 'public'}},
@@ -57,7 +57,7 @@ export default class CXmlInvoker{
         this._hint = invoker.hint;
         this._icon = invoker.icon;
         this._authType = invoker.authType;
-        this._requiredData = this.getRequiredData();
+        this._requiredData = invoker.requiredData;
         this._operations = this.convertOperations(invoker.operations);
     }
 

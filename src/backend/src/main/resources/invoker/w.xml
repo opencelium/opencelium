@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
-    <name>test9</name>
-    <description>test9</description>
+    <name>w</name>
+    <description/>
     <hint/>
     <icon/>
     <requiredData>
@@ -9,12 +9,11 @@
     </requiredData>
     <authType>apikey</authType>
     <operations>
-        <operation name="test9" type="test">
+        <operation name="" type="">
             <request>
                 <method>POST</method>
                 <endpoint/>
-                <body data="graphql" format="json" type="object">
-                    <field name="result" type="string"/>
+                <body data="raw" format="json" type="object">
                 </body>
             </request>
             <response>

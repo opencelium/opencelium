@@ -32,17 +32,19 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
         update,
         readOnly,
         credentials,
+        connector,
     }) => {
         const dispatch = useAppDispatch();
         const {accessToken, logining} = GraphQL.getReduxState();
         const [shouldRevokeToken, setShouldRevokeToken] = useState(false);
         const {url, user, password} = credentials;
+        const sslOn = connector.sslCert;
         useEffect(() => {
-            dispatch(graphQLLogin({url, user, password}));
+            dispatch(graphQLLogin({url, user, password, sslOn}));
         }, []);
         useEffect(() => {
             if(shouldRevokeToken && logining !== API_REQUEST_STATE.ERROR){
-                dispatch(graphQLLogin({url, user, password}));
+                dispatch(graphQLLogin({url, user, password, sslOn}));
                 setShouldRevokeToken(false);
             }
         }, [shouldRevokeToken]);
@@ -55,7 +57,7 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
             }
         }, [logining])
         const graphQLFetcher = (graphQLParams: FetcherParams) => {
-            const requestProps: GraphQLRequestProps = {url, accessToken, ...graphQLParams};
+            const requestProps: GraphQLRequestProps = {url, accessToken, sslOn, ...graphQLParams};
             return graphQLRequest(requestProps).then((response: any) => {
                 const result = JSON.parse(response.data.body);
                 if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){

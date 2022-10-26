@@ -16,6 +16,8 @@
 import {IForm} from "@application/interfaces/core";
 import {InvokerState} from "../redux_toolkit/slices/InvokerSlice";
 import {Operation} from "../classes/Operation";
+import {ReactElement} from "react";
+import {OptionProps} from "@app_component/base/input/select/interfaces";
 
 
 export enum AuthType{
@@ -25,8 +27,8 @@ export enum AuthType{
     Token= 'token',
 }
 
-export interface IInvokerRadios{
-    authType: AuthType,
+export interface IInvokerSelect{
+    authTypeSelect: OptionProps,
 }
 
 export interface IInvokerFile{
@@ -43,10 +45,10 @@ export interface IInvokerText{
 }
 
 
-export interface IInvokerForm extends IInvokerText, IInvokerTextarea, IInvokerFile, IInvokerRadios, IForm<IInvokerText, {}, IInvokerRadios, IInvokerFile, IInvokerTextarea, {}>{
+export interface IInvokerForm extends IInvokerText, IInvokerTextarea, IInvokerFile, IInvokerSelect, IForm<IInvokerText, IInvokerSelect, {}, IInvokerFile, IInvokerTextarea, {}>{
     getByName: () => boolean;
-    add: (connection: Operation, operations: Operation[]) => boolean;
-    update: (connection: Operation, operations: Operation[]) => boolean;
+    add: (operations: Operation[]) => boolean;
+    update: (operations: Operation[]) => boolean;
     deleteByName: () => boolean;
     uploadImage: () => boolean;
     deleteImage: () => boolean;
@@ -59,8 +61,10 @@ export interface IInvoker extends IInvokerForm{
     invokerId?: number;
     icon?: string;
     operations: Operation[];
-    requiredData: string[];
+    authType: AuthType,
+    requiredData: any;
     shouldDeletePicture?: boolean,
+    getRequiredDataComponent: () => ReactElement,
     getObject: () => any,
     getXml: () => string,
     getConnection: () => Operation,

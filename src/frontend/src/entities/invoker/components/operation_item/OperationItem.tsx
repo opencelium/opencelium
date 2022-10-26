@@ -31,7 +31,8 @@ import {Header} from "../operation/header/Header";
 import {NavLinkStyled} from "./styles";
 import {OperationItemProps} from "./interfaces";
 import {ResponseType} from "@entity/invoker/requests/models/Body";
-import {isArray, isString} from "@application/utils/utils";
+import {isArray, isJsonString, isString} from "@application/utils/utils";
+import InputSwitch from "@app_component/base/input/switch/InputSwitch";
 
 
 const OperationItem: FC<OperationItemProps> = (
@@ -39,14 +40,24 @@ const OperationItem: FC<OperationItemProps> = (
         operationItem,
         isReadonly,
         updateOperation,
+        hasTestConnectionSwitch,
+        nameValidationMessage,
+        methodValidationMessage,
     }) => {
     const [tab, setTab] = useState(1);
+    const [isTestConnection, toggleTestConnection] = useState<boolean>(operationItem.type === "test");
     const [method, setMethod] = useState(operationItem?.request?.method || '');
     const [requestHeader, setRequestHeader] = useState(operationItem?.request?.header || {});
     const [requestBodyFields, setRequestBodyFields] = useState(operationItem?.request?.body?.fields || {});
     const updateRequestHeader = (value: any) => {
         operationItem.request.header = value;
         updateOperation(operationItem);
+    }
+    const toggleOperationAsTestConnection = () => {
+        const newValue = !isTestConnection;
+        operationItem.type = newValue ? 'test' : '';
+        updateOperation(operationItem);
+        toggleTestConnection(newValue);
     }
     const updateRequestBodyFields = (value: any) => {
         if(isArray(value)){
@@ -98,13 +109,26 @@ const OperationItem: FC<OperationItemProps> = (
             setFailBodyFields(operationItem.response.fail.body.fields);
         }
     }, [operationItem]);
+    const showSwitch = hasTestConnectionSwitch || operationItem.type === 'test';
     return(
         <React.Fragment>
+            {showSwitch &&
+                <InputSwitch
+                    readOnly={isReadonly}
+                    error={''}
+                    onClick={toggleOperationAsTestConnection}
+                    isChecked={isTestConnection}
+                    icon={'verified'}
+                    label={'Test Connection'}
+                    name={'Use this operation for testing'}
+                />
+            }
             <Name
+                required={true}
                 label={'Name'}
                 icon={'person'}
                 readOnly={isReadonly}
-                error={''}
+                error={nameValidationMessage}
                 operationItem={operationItem}
                 updateOperation={updateOperation}
             />
@@ -117,6 +141,7 @@ const OperationItem: FC<OperationItemProps> = (
                 updateOperation={updateOperation}
             />
             <InputRadios
+                required={true}
                 icon={'public'}
                 label={'Method'}
                 options={[
@@ -138,7 +163,7 @@ const OperationItem: FC<OperationItemProps> = (
                         key: REQUEST_METHOD.DELETE,
                 }]}
                 readOnly={isReadonly}
-                error={''}
+                error={methodValidationMessage}
                 onChange={(e:ChangeEvent<HTMLInputElement>) => {
                     setMethod(e.target.value);
                     // @ts-ignore
@@ -159,7 +184,7 @@ const OperationItem: FC<OperationItemProps> = (
                     <NavLinkStyled onClick={() => {setTab(3);}} active={tab === 3}>Response (fail)</NavLinkStyled>
                 </NavItem>
             </Nav>
-            <TabContent activeTab={tab} style={{display: method ? 'block' : 'none', marginTop: '10px'}}>
+            {method && <TabContent activeTab={tab} style={{display: method ? 'block' : 'none', marginTop: '10px'}}>
                 <TabPane tabId={1}>
                     <Header
                         updateHeader={updateRequestHeader}
@@ -170,7 +195,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.request.body.data = e.target.value;
                             updateOperation(operationItem);
@@ -181,7 +206,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.request.body.format = e.target.value;
                             updateOperation(operationItem);
@@ -192,7 +217,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.request.body.setType(e.target.value);
                             updateOperation(operationItem);
@@ -216,7 +241,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.response.success.body.data = e.target.value;
                             updateOperation(operationItem);
@@ -227,7 +252,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.response.success.body.format = e.target.value;
                             updateOperation(operationItem);
@@ -238,7 +263,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.response.success.body.setType(e.target.value);
                             updateOperation(operationItem);
@@ -282,7 +307,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.response.fail.body.format = e.target.value;
                             updateOperation(operationItem);
@@ -293,7 +318,7 @@ const OperationItem: FC<OperationItemProps> = (
                         readOnly={isReadonly}
                         operationItem={operationItem}
                         updateOperation={updateOperation}
-                        onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             // @ts-ignore
                             operationItem.response.fail.body.setType(e.target.value);
                             updateOperation(operationItem);
@@ -317,6 +342,7 @@ const OperationItem: FC<OperationItemProps> = (
                     />
                 </TabPane>
             </TabContent>
+            }
         </React.Fragment>
     )
 }
@@ -324,6 +350,9 @@ const OperationItem: FC<OperationItemProps> = (
 OperationItem.defaultProps = {
     operationItem: null,
     isReadonly: false,
+    hasTestConnectionSwitch: true,
+    nameValidationMessage: '',
+    methodValidationMessage: '',
 }
 
 export default OperationItem;

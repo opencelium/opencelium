@@ -36,7 +36,7 @@ The *method* step can be defined in two modes: *column* view (default) and
 There you also can open *method* form section on the whole window clicking
 on the maximize icon |form_methods_top_icons|.
 
-Column View
+Column View (deprecated! will be removed in v3.0)
 =========
 
 The *column* view is divided into two parts: left and right. On the
@@ -99,8 +99,13 @@ popup.
 |image12|
 
 You can handle with that in the same principe as for the *Query*.
-When you finish with editing click on the apply icon |image13|. Moreover, you can add
+When you finish with editing click on the apply icon |image13|. 
+
+Moreover, you can add
 an enhancement between fields. Clicking on the reference
+
+.. note::
+	Enhancement is currently only supported in the body configuration of the target system (to connector). 
 
 |image20|
 
@@ -251,6 +256,9 @@ you will see a pop up dialog to add a reference.
 
 There is an *enhancement* on the right side as soon as you set the reference.
 *Enhancement* is piece of javascript code that will be applied before the definition.
+
+.. note::
+        Enhancement is currently only supported in the body configuration of the target system (to connector).
 
 |details_request_enhancement|
 

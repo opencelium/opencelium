@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
     <name>zabbix</name>
-    <description>zabbix Description</description>
-    <hint>zabbix hint text</hint>
+    <description>Zabbix is a software that monitors numerous parameters of a network and the health and integrity of servers, virtual machines, applications, services, databases, websites, the cloud and more. Zabbix uses a flexible notification mechanism that allows users to configure e-mail based alerts for virtually any event. This allows a fast reaction to server problems. Zabbix offers excellent reporting and data visualization features based on the stored data. This makes Zabbix ideal for capacity planning.</description>
+    <hint>This interface provides a apikey auth. Read the documentation here https://www.zabbix.com/documentation/5.0/en/manual/api</hint>
     <icon>http://localhost:9090/api/storage/files/zabbix.jpg</icon>
     <requiredData>
         <item name="url" type="string" visibility="public"/>
         <item name="user" type="string" visibility="public"/>
         <item name="password" type="string" visibility="protected"/>
-        <item name="token" type="string" visibility="private">%{body.result}</item>
+        <item name="token" type="string" visibility="private">%{userLogin.body.result}</item>
     </requiredData>
     <authType>token</authType>
     <operations>
-        <operation name="user.login" type="test">
+        <operation name="userLogin" type="test">
             <request>
                 <method>POST</method>
                 <endpoint>{url}</endpoint>

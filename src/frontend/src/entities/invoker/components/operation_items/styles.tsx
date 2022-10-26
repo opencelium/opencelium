@@ -17,6 +17,8 @@ import styled from "styled-components";
 import { REQUEST_METHOD } from "@application/requests/interfaces/IApplication";
 import Button from "@app_component/base/button/Button";
 import {MethodTitleStyledProps} from "./interfaces";
+import Icon from "@app_component/base/icon/Icon";
+import { ITheme } from "@style/Theme";
 
 const OperationItemsStyled = styled.div`
     & :not(:first-child) {
@@ -30,6 +32,18 @@ const HeaderStyled = styled.div`
     overflow: hidden;
     white-space: nowrap;
     float: left;
+`;
+
+const ValidationMessageStyled = styled.span`
+    font-size: 14px;
+    color: ${({color, theme}: {color?: string, theme: ITheme}) => color || theme.input.error.color};
+`;
+
+const RightContainerStyled = styled.div`
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+    align-items: center;
 `;
 
 const MethodTitleStyled = styled.div<MethodTitleStyledProps>`
@@ -54,13 +68,18 @@ const MethodTitleStyled = styled.div<MethodTitleStyledProps>`
 `;
 
 const DeleteButtonStyled = styled(Button)`
-    float: right;
-    margin-left: 10px;
+`;
+
+const TestConnectionIconStyled = styled(Icon)`
+    color: green; 
 `;
 
 export {
     OperationItemsStyled,
     HeaderStyled,
+    RightContainerStyled,
     MethodTitleStyled,
     DeleteButtonStyled,
+    TestConnectionIconStyled,
+    ValidationMessageStyled,
 }

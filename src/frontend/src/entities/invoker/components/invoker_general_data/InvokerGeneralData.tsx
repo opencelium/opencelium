@@ -27,6 +27,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
         isAdd,
         isView,
         isReadonly,
+        nameValidationMessage,
     }) => {
     const {
         isCurrentInvokerHasUniqueTitle, checkingInvokerTitle, currentInvoker,
@@ -37,13 +38,14 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
     return (
         <React.Fragment>
             <InputText
+                id={'invoker_name'}
                 autoFocus={!isView}
                 icon={'person'}
                 label={'Name'}
                 value={name}
                 required={true}
                 isLoading={checkingInvokerTitle === API_REQUEST_STATE.START}
-                error={isCurrentInvokerHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
+                error={isCurrentInvokerHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title must be unique' : nameValidationMessage}
                 onChange={(e:ChangeEvent<HTMLInputElement>) => {
                     setName(e.target.value);
                 }}
@@ -81,6 +83,7 @@ const InvokerGeneralData: FC<InvokerGeneralDataProps> =
 }
 
 InvokerGeneralData.defaultProps = {
+    nameValidationMessage: '',
 }
 
 

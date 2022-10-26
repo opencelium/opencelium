@@ -38,7 +38,7 @@ class XmlEditor extends Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if(this.props.xml && prevProps.xml !== this.props.xml){
+        if(this.props.xml && JSON.stringify(prevProps.xml) !== JSON.stringify(this.props.xml)){
             const xml = CXmlEditor.createXmlEditor(this.props.xml);
             this.setState({
                 xml,

@@ -38,6 +38,7 @@ export class Operation extends HookStateClass implements IOperation{
     @App.inputType
     name: string = '';
 
+    @App.inputType
     type: OperationType = '';
 
     @App.inputType

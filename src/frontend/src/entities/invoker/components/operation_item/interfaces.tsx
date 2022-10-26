@@ -21,6 +21,9 @@ interface OperationItemProps{
     operationItem?: Operation,
     isReadonly?: boolean,
     updateOperation?: any,
+    hasTestConnectionSwitch?: boolean,
+    nameValidationMessage?: string,
+    methodValidationMessage?: string,
 }
 
 export {

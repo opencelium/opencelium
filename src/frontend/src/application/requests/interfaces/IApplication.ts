@@ -62,6 +62,7 @@ export interface RemoteApiRequestProps{
     header?: any,
     method: REQUEST_METHOD,
     body?: any,
+    sslOn?: boolean,
 }
 
 export interface RemoteApiResponseProps{

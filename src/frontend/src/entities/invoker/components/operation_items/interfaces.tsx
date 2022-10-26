@@ -22,6 +22,7 @@ interface OperationItemsProps{
     operations: Operation[],
     isReadonly?: boolean,
     updateOperations?: (operations: Operation[]) => void;
+    validations?: {index: number, message: string}[],
 }
 
 interface MethodTitleStyledProps{

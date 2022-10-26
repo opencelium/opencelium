@@ -18,6 +18,9 @@ import {InputRadiosProps} from "@app_component/base/input/radio/interfaces";
 import {ITheme} from "@style/Theme";
 import {Operation} from "../../classes/Operation";
 import {ResponseFormat} from "../../requests/models/Body";
+import {InputElementProps} from "@app_component/base/input/interfaces";
+import CXmlEditor from "@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor";
+import {AceEditorProps} from "react-ace/types";
 
 interface DefaultProps{
     operationItem: Operation,
@@ -45,8 +48,9 @@ interface BodyProps{
     theme?: ITheme,
     updateBody: (body: any) => void,
     readOnly?: boolean,
-    value: any,
+    value: string,
     format: ResponseFormat,
+    error?: string,
 }
 
 interface HeaderProps{
@@ -56,6 +60,15 @@ interface HeaderProps{
     value: any,
 }
 
+interface JsonBodyProps extends InputElementProps{
+    theme?: ITheme,
+    jsonProps: AceEditorProps,
+}
+interface XmlBodyProps extends InputElementProps{
+    theme?: ITheme,
+    xmlProps: AceEditorProps,
+}
+
 export {
     NameProps,
     EndpointProps,
@@ -63,4 +76,6 @@ export {
     DataProps,
     BodyProps,
     HeaderProps,
+    JsonBodyProps,
+    XmlBodyProps,
 }

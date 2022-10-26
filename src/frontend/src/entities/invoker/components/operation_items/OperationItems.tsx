@@ -22,18 +22,26 @@ import {IOperation} from "../../interfaces/IOperation";
 import {Operation} from "../../classes/Operation";
 import OperationItem from "../operation_item/OperationItem";
 import { OperationItemsProps } from './interfaces';
-import {DeleteButtonStyled, HeaderStyled, MethodTitleStyled, OperationItemsStyled} from './styles';
+import {DeleteButtonStyled, HeaderStyled, MethodTitleStyled, OperationItemsStyled,
+    RightContainerStyled, TestConnectionIconStyled, ValidationMessageStyled} from './styles';
+import {TextSize} from "@app_component/base/text/interfaces";
+import {isJsonString} from "@application/utils/utils";
 
 const OperationItems: FC<OperationItemsProps> =
     ({
         operations,
         isReadonly,
         updateOperations,
+        validations,
     }) => {
     const [collapseKey, setCollapseKey] = useState('');
     const [newOperation, setNewOperation] = useState<Operation>(new Operation());
+    const [newNameValidation, setNewNameValidation] = useState<string>('');
+    const [newMethodValidation, setNewMethodValidation] = useState<string>('');
     const updateNewOperation = (operation: IOperation) => {
         setNewOperation(new Operation({...operation}));
+        setNewNameValidation('');
+        setNewMethodValidation('');
     }
     const toggle = (e: any) => {
         let event = e.target.dataset.event;
@@ -43,6 +51,22 @@ const OperationItems: FC<OperationItemsProps> =
         setCollapseKey(collapseKey === event ? '' : event)
     }
     const addOperation = () => {
+        let isValid = true;
+        if(newOperation.name === ''){
+            isValid = false;
+            setNewNameValidation('Name is a required field');
+        }
+        if(!newOperation.request.method){
+            isValid = false;
+            setNewMethodValidation('Method is a required field');
+        }
+        if(operations.findIndex(o => o.name === newOperation.name) !== -1){
+            isValid = false;
+            setNewNameValidation('Operation with such name already exists');
+        }
+        if(!isValid){
+            return;
+        }
         let newOperations: Operation[] = [...operations];
         newOperations.unshift(newOperation);
         updateOperations(newOperations);
@@ -58,6 +82,7 @@ const OperationItems: FC<OperationItemsProps> =
         newOperations[index] = new Operation({...operation});
         updateOperations(newOperations);
     }
+    const hasTestConnectionSwitch = operations.findIndex(operation => operation.type === 'test') === -1;
     return (
         <OperationItemsStyled>
             <Card key={'operation_add'}>
@@ -67,22 +92,29 @@ const OperationItems: FC<OperationItemsProps> =
                 </CardHeader>
                 <Collapse isOpen={collapseKey === 'operation_add'}>
                     <CardBody>
-                        <OperationItem isReadonly={isReadonly} operationItem={newOperation} updateOperation={updateNewOperation}/>
-                        <div style={{textAlign: 'center'}}><Button icon={'add'} handleClick={addOperation}/></div>
+                        <OperationItem methodValidationMessage={newMethodValidation} nameValidationMessage={newNameValidation} hasTestConnectionSwitch={hasTestConnectionSwitch} isReadonly={isReadonly} operationItem={newOperation} updateOperation={updateNewOperation}/>
+                        <div style={{textAlign: 'right'}}><Button icon={'add'} handleClick={addOperation} label={'Add Operation'}/></div>
                     </CardBody>
                 </Collapse>
             </Card>
             {operations.map((operation: Operation, index) => {
+                const validationMessage = validations.find(v => v.index === index)?.message || '';
                 return (
                     <Card key={operation.uniqueIndex}>
                         <CardHeader onClick={toggle} data-event={operation.uniqueIndex}>
-                            <HeaderStyled onClick={toggle}>{operation.name}</HeaderStyled>
-                            {!isReadonly && <DeleteButtonStyled hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => deleteOperation(operation, index)} icon={'delete'} hasBackground={false} color={ColorTheme.DarkBlue}/>}
-                            <MethodTitleStyled onClick={toggle} method={operation.request.method}>{operation.request.method || ''}</MethodTitleStyled>
+                            <HeaderStyled onClick={toggle}>
+                                {operation.name}
+                                {!!validationMessage && <ValidationMessageStyled>({validationMessage})</ValidationMessageStyled>}
+                            </HeaderStyled>
+                            <RightContainerStyled>
+                                <TestConnectionIconStyled name={operation.type === 'test' ? 'verified' : ' '}/>
+                                <MethodTitleStyled onClick={toggle} method={operation.request.method}>{operation.request.method || ''}</MethodTitleStyled>
+                                {!isReadonly && <DeleteButtonStyled hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => deleteOperation(operation, index)} icon={'delete'} hasBackground={false} color={ColorTheme.DarkBlue}/>}
+                            </RightContainerStyled>
                         </CardHeader>
                         <Collapse isOpen={collapseKey === operation.uniqueIndex}>
                             <CardBody>
-                                <OperationItem isReadonly={isReadonly} operationItem={operation} updateOperation={(operation: Operation) => updateExistOperation(operation, index)}/>
+                                <OperationItem hasTestConnectionSwitch={hasTestConnectionSwitch} isReadonly={isReadonly} operationItem={operation} updateOperation={(operation: Operation) => updateExistOperation(operation, index)}/>
                             </CardBody>
                         </Collapse>
                     </Card>
@@ -95,6 +127,7 @@ const OperationItems: FC<OperationItemsProps> =
 OperationItems.defaultProps = {
     isReadonly: false,
     operations: [],
+    validations: [],
 }
 
 

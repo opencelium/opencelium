@@ -45,7 +45,7 @@
     "prop-types": "^15.7.2",
     "ramda": "^0.28.0",
     "react": "^17.0.2",
-    "react-ace": "^9.5.0",
+    "react-ace": "^10.1.0",
     "react-bootstrap": "^2.1.1",
     "react-color": "^2.19.3",
     "react-contenteditable": "^3.3.6",

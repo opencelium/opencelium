@@ -51,17 +51,13 @@ const InputXmlView: FC<InputXmlViewProps> = ({
         paddingRight: isLoadingWithoutIcon ? '30px' : 0,
         theme,
     }
-    let xmlValue = CXmlEditor.createXmlEditor(xmlViewProps?.xml).convertToXml();
-    if(xmlValue && xmlValue.length > 1){
-        xmlValue = xmlValue.substring(1);
-    }
     return (
         <Input readOnly={readOnly} value={value} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <XmlEditor
                 style={getReactXmlStyles(styleProps)}
                 {...xmlViewProps}
             />
-            {hasEdit && <EditXmlButton readOnly={readOnly} xmlValue={xmlValue} editXml={(newXml) => xmlViewProps.afterUpdateCallback(newXml)}/>}
+            {hasEdit && <EditXmlButton readOnly={readOnly} xmlValue={CXmlEditor.createXmlEditor(xmlViewProps?.xml).convertToXml()} editXml={(newXml) => xmlViewProps.afterUpdateCallback(newXml)}/>}
         </Input>
     );
 }

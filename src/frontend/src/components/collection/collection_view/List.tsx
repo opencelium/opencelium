@@ -112,7 +112,7 @@ const List: FC<ListViewProps> =
                 :
                 <Table>
                     <thead>
-                    <tr>
+                        <tr>
                         {collection.hasCheckboxes &&
                         <th>
                             <input type={'checkbox'} onChange={() => toggleCheckAll(!isAllChecked)}
