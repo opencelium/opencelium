@@ -529,7 +529,10 @@ public class AssistantServiceImp implements ApplicationService {
             byte[] buffer = new byte[1024];
             ZipInputStream zis = new ZipInputStream(inputStream);
             ZipEntry zipEntry = zis.getNextEntry();
-            Path folder = zipSlipProtect(zipEntry, target);
+
+            String rootName = zipEntry.getName();
+            String vFolder = zipSlipProtect(zipEntry, target).toString().replace(rootName, "");
+            Path folder = Paths.get(vFolder);
             while (zipEntry != null) {
                 File newFile = newFile(destDir, zipEntry);
                 if (zipEntry.isDirectory()) {
