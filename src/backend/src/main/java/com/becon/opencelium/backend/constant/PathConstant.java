@@ -25,7 +25,7 @@ public interface PathConstant {
     public static final String TEMPLATE = "src/main/resources/templates/";
     public static final String VERSIONS = "versions/";
     public static final String ASSISTANT = "assistant/";
-    public static final String RESOURCES = "/src/backend/src/main/resources/";
+    public static final String RESOURCES = "src/main/resources/";
     public static final String ICONS = "src/main/resources/icon/";
     public static final String APP_DEFAULT_YML = "src/backend/src/main/resources/application_default.yml";
 }

@@ -221,8 +221,6 @@ public class UpdateAssistantController {
         // do backup
 //        assistantServiceImp.runScript();
         try {
-
-
             final String dir;
             if (migrateDataResource.getFolder() != null && !migrateDataResource.getFolder().isEmpty()) {
                 dir = migrateDataResource.getFolder();

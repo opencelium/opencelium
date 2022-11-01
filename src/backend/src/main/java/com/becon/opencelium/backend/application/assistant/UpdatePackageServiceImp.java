@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,7 +50,7 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         }
         List<AvailableUpdate> versions;
         try {
-            versions = getAll(directories);
+            versions = getAllAvailableUpdates(directories);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -74,16 +76,18 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
 
     // assistant/versions/{folder}
     @Override
-    public AvailableUpdate getOffVersionByFolder(String folder) throws Exception {
-        String version = assistantServiceImp.getVersionFromDir(folder);
+    public AvailableUpdate getAvailableUpdate(String version) throws Exception {
+//        String version = assistantServiceImp.getVersionFromDir(pathTofolder);
         String status = getVersionStatus(version);
+        version = version.replace(".", "_");
         AvailableUpdate availableUpdate = new AvailableUpdate();
-        availableUpdate.setFolder(folder);
+        availableUpdate.setFolder(version);
         availableUpdate.setStatus(status);
-        availableUpdate.setChangelogLink(getChangelogLink(folder));
+        availableUpdate.setChangelogLink(getChangelogLink(version));
         availableUpdate.setVersion(version);
         return availableUpdate;
     }
+
 
     @Override
     public String[] getDirectories() {
@@ -106,10 +110,10 @@ public class UpdatePackageServiceImp implements UpdatePackageService {
         return availableUpdateResource;
     }
 
-    private List<AvailableUpdate> getAll(String[] appDirectories) throws Exception {
+    private List<AvailableUpdate> getAllAvailableUpdates(String[] appDirectories) throws Exception {
         List<AvailableUpdate> packages = new LinkedList<>();
         for (String appDir : appDirectories) {
-            AvailableUpdate availableUpdate = getOffVersionByFolder(appDir);
+            AvailableUpdate availableUpdate = getAvailableUpdate(appDir);
             packages.add(availableUpdate);
         }
         return packages;
