@@ -521,7 +521,8 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     public Path unzipFolder(InputStream inputStream, Path target) throws IOException {
-
+        File f = new File("../frontend");
+        FileUtils.deleteDirectory(f);
         String os = System.getProperty("os.name");
         if (os.contains("Windows")) {
             File destDir = new File(target.toString());
@@ -569,9 +570,6 @@ public class AssistantServiceImp implements ApplicationService {
                     }
 
                     String vFolder = zipSlipProtect(zipEntry, target).toString().replace(rootName, "");
-                    if (vFolder.contains("src/frontend")) {
-                        Files.delete(Paths.get(vFolder));
-                    }
                     Path newPath = Paths.get(vFolder);
                     if (isDirectory) {
                         Files.createDirectories(newPath);
