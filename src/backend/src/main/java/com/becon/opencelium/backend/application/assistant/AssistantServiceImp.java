@@ -569,6 +569,9 @@ public class AssistantServiceImp implements ApplicationService {
                     }
 
                     String vFolder = zipSlipProtect(zipEntry, target).toString().replace(rootName, "");
+                    if (vFolder.contains("src/frontend")) {
+                        Files.delete(Paths.get(vFolder));
+                    }
                     Path newPath = Paths.get(vFolder);
                     if (isDirectory) {
                         Files.createDirectories(newPath);
