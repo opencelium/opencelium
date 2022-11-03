@@ -302,3 +302,6 @@ ALTER TABLE enhancement MODIFY expert_var TEXT;
 ALTER TABLE detail ADD COLUMN IF NOT EXISTS theme_sync tinyint(4);
 UPDATE detail SET theme_sync = 0;
 
+--changeset 3.0:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+SELECT VERSION();
+

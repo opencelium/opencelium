@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -49,6 +50,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 
@@ -58,18 +60,36 @@ public class AssistantServiceImp implements ApplicationService {
     @Autowired
     private SystemOverviewRepository systemOverviewRepository;
 
-
     @Autowired
     private Environment env;
 
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private ConnectionServiceImp connectionService;
+
+    @Autowired
+    private ConnectionNodeServiceImp connectionNodeService;
+
+    @Autowired
+    private EnhancementServiceImp enhancementService;
+
+    @Autowired
+    private EnhancementNodeServiceImp enhancementNodeService;
+
+    @Autowired
+    private LinkRelationServiceImp linkRelationService;
+
+    @Autowired
+    private ValidationContext validationContext;
+
     @Override
     public SystemOverview getSystemOverview() {
         return systemOverviewRepository.getCurrentOverview();
     }
 
+    // if directory is not exists function will create;
     @Override
     public Path uploadZipFile(MultipartFile file, Path location) {
         String filename = file.getOriginalFilename();
@@ -83,6 +103,9 @@ public class AssistantServiceImp implements ApplicationService {
                 throw new StorageException(
                         "Cannot store file with relative path outside current directory "
                                 + filename);
+            }
+            if (!Files.exists(location)) {
+                Files.createDirectory(location);
             }
             try (InputStream inputStream = file.getInputStream()) {
                 Files.copy(inputStream, target,
@@ -113,8 +136,6 @@ public class AssistantServiceImp implements ApplicationService {
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
-
-
         }
         catch (IOException e){
             throw new StorageException("Failed to delete stored file", e);
@@ -170,10 +191,10 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     // dir - assistant/version/{folder}
-    public String getVersionFromDir(String dir) {
-        String appYmlPath = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir + "/" + PathConstant.APP_DEFAULT_YML; // e.g : assistant/versions/3_0_0
+    public String getVersionFromDir(String pathTodir) {
+
         try {
-            String content = String.join("\n", Files.readAllLines(Paths.get(appYmlPath)));
+            String content = String.join("\n", Files.readAllLines(Paths.get(pathTodir)));
             ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
             Object obj = yamlReader.readValue(content, Object.class);
             ObjectMapper jsonReader = new ObjectMapper();
@@ -321,30 +342,81 @@ public class AssistantServiceImp implements ApplicationService {
 //        }
 //    }
 
-    @Override
+//    @Override
+//    public void  updateOff(String dir) throws Exception { // removed version parameter
+////        System.out.println("Offline update run");
+////        Path currentRelativePath = Paths.get("");
+////        String s = currentRelativePath.toAbsolutePath().toString();
+////
+////        Path path = Paths.get("");
+////        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
+////        File gitDir = new File(workTree.getPath() + "/.git");
+////        Process process = Runtime.getRuntime().exec("git"
+////                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " pull " + s + "/assistant/application/" + dir);
+////        getText(process.getInputStream());
+////        getText(process.getErrorStream());
+////
+////        Process process1 = Runtime.getRuntime().exec("git"
+////                + " --git-dir=" + gitDir + " --work-tree=" + workTree + "checkout " + version);
+////        getText(process1.getInputStream());
+////        getText(process1.getErrorStream());
+//        dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
+////            InputStream oc = Files.newInputStream(Paths.get(dir));
+//        File backendRoot = new File("");
+//        Path root = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
+//        ZipFile zipFile = new ZipFile(dir);
+//        Paths.get(dir);
+//        File[] files = new File(root.toString()).listFiles();
+//        final Stack<String> pathParts = new Stack<String>();
+//        {
+//            pathParts.push("assistant");
+//            pathParts.push("backend");
+//            pathParts.push("src");
+//        }
+//        String appYmlPath = PathConstant.RESOURCES + "application.yml";
+//        // move application.yml file to folder that will be not be deleted;
+//        moveFiles(appYmlPath, dir);
+////        deleteDir(files, pathParts);
+//        moveFiles(dir, root.toString());
+////            Files.copy(Paths.get(dir), root);
+////            unzipFolder(oc, target);
+//    }
+
+        @Override
     public void  updateOff(String dir) throws Exception { // removed version parameter
-//        System.out.println("Offline update run");
-//        Path currentRelativePath = Paths.get("");
-//        String s = currentRelativePath.toAbsolutePath().toString();
-//
-//        Path path = Paths.get("");
-//        File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
-//        File gitDir = new File(workTree.getPath() + "/.git");
-//        Process process = Runtime.getRuntime().exec("git"
-//                + " --git-dir=" + gitDir + " --work-tree=" + workTree + " pull " + s + "/assistant/application/" + dir);
-//        getText(process.getInputStream());
-//        getText(process.getErrorStream());
-//
-//        Process process1 = Runtime.getRuntime().exec("git"
-//                + " --git-dir=" + gitDir + " --work-tree=" + workTree + "checkout " + version);
-//        getText(process1.getInputStream());
-//        getText(process1.getErrorStream());
-            dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
+        dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
 //            InputStream oc = Files.newInputStream(Paths.get(dir));
-            File mainOcFolder = new File("");
-            Path target = Paths.get(mainOcFolder.getAbsolutePath()).getParent().getParent();
-            Files.copy(Paths.get(dir), target);
-//            unzipFolder(oc, target);
+        File backendRoot = new File("");
+        File file = new File(dir);
+        File[] dirFiles = file.listFiles();
+        File zipFile;
+        if (dirFiles != null && dirFiles.length != 0) {
+            zipFile = dirFiles[0];
+        } else {
+            throw new RuntimeException("Zip file in folder \"versions/" + dir + "\" not found.");
+        }
+        InputStream inputStream = Files.newInputStream(zipFile.toPath());
+        Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
+        unzipFolder(inputStream, appRoot);
+    }
+
+    private void deleteDir(File[] files, Stack<String> pathParts) {
+        try {
+            for (File file : files) {
+                if (file.isDirectory() && !pathParts.isEmpty() && file.getName().equals(pathParts.peek())) {
+                    pathParts.pop();
+                    deleteDir(file.listFiles(), pathParts);
+                    continue;
+                }
+                if (file.isDirectory()) {
+                    FileUtils.deleteDirectory(file);
+                } else {
+                    Files.delete(file.toPath());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -375,24 +447,6 @@ public class AssistantServiceImp implements ApplicationService {
             System.out.println("File movement failed.");
         }
     }
-
-    @Autowired
-    private ConnectionServiceImp connectionService;
-
-    @Autowired
-    private ConnectionNodeServiceImp connectionNodeService;
-
-    @Autowired
-    private EnhancementServiceImp enhancementService;
-
-    @Autowired
-    private EnhancementNodeServiceImp enhancementNodeService;
-
-    @Autowired
-    private LinkRelationServiceImp linkRelationService;
-
-    @Autowired
-    private ValidationContext validationContext;
 
     @Override
     public void updateConnection(ConnectionResource connectionResource) {
@@ -467,14 +521,18 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     public Path unzipFolder(InputStream inputStream, Path target) throws IOException {
-
+        File f = new File("../frontend");
+        FileUtils.deleteDirectory(f);
         String os = System.getProperty("os.name");
         if (os.contains("Windows")) {
             File destDir = new File(target.toString());
             byte[] buffer = new byte[1024];
             ZipInputStream zis = new ZipInputStream(inputStream);
             ZipEntry zipEntry = zis.getNextEntry();
-            Path folder = zipSlipProtect(zipEntry, target);
+
+            String rootName = zipEntry.getName();
+            String vFolder = zipSlipProtect(zipEntry, target).toString().replace(rootName, "");
+            Path folder = Paths.get(vFolder);
             while (zipEntry != null) {
                 File newFile = newFile(destDir, zipEntry);
                 if (zipEntry.isDirectory()) {
@@ -509,7 +567,6 @@ public class AssistantServiceImp implements ApplicationService {
                 String rootName = zipEntry.getName();
 //                Path folder = zipSlipProtect(zipEntry, target);
                 while (zipEntry != null) {
-
                     boolean isDirectory = false;
                     if (zipEntry.getName().endsWith(File.separator)) {
                         isDirectory = true;
@@ -530,9 +587,7 @@ public class AssistantServiceImp implements ApplicationService {
                         }
                         Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
                     }
-
                     zipEntry = zis.getNextEntry();
-
                 }
                 zis.closeEntry();
                 zis.close();

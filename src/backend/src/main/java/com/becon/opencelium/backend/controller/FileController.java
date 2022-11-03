@@ -268,17 +268,18 @@ public class FileController {
 //            systemOverviewRepository.getCurrentVersionFromDb();
 //            return ResponseEntity.ok().build();
 
-//            Path source = assistantServiceImp.uploadZipFile(file,PathConstant.ASSISTANT + "zipfile/");
-            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream());
-            Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
-                               .replace(".", "_"));
-            Path pathToFolder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
-//            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
-//            assistantServiceImp.deleteZipFile(pathToZip);
-            String folder = pathToFolder.toString().replace(pathToFolder.getParent().toString() + File.separator, "");
-            AvailableUpdate availableUpdate = updatePackageServiceImp.getOffVersionByFolder(folder);
+            String zipedAppVersion = assistantServiceImp.getVersion(file.getInputStream()).replace(".", "_");
+            Path target = Paths.get(PathConstant.ASSISTANT + "versions/" + zipedAppVersion);
+            assistantServiceImp.uploadZipFile(file, target);
+            AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(zipedAppVersion);
             AvailableUpdateResource availableUpdateResource = updatePackageServiceImp.toResource(availableUpdate);
             return ResponseEntity.ok(availableUpdateResource);
+//            Path target = Paths.get(PathConstant.ASSISTANT + PathConstant.VERSIONS + zipedAppVersion
+//                               .replace(".", "_"));
+//            Path pathToFolder = assistantServiceImp.unzipFolder(file.getInputStream(), target);
+//            Path pathToZip = Paths.get(PathConstant.ASSISTANT + "zipfile/" + file.getOriginalFilename());
+//            assistantServiceImp.deleteZipFile(pathToZip);
+//            String folder = pathToFolder.toString().replace(pathToFolder.getParent().toString() + File.separator, "");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

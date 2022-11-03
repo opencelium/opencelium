@@ -4,14 +4,6 @@ import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.jsonpath.JsonPath;
-import liquibase.Liquibase;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.integration.spring.SpringLiquibase;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -19,10 +11,7 @@ import org.elasticsearch.client.Client;
 import org.neo4j.ogm.model.Result;
 import org.neo4j.ogm.session.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -145,7 +134,6 @@ public class SystemOverviewRepository {
             int read = 0;
             StringBuilder stringBuilder = new StringBuilder();
             while (zipEntry != null) {
-                zipEntry = zis.getNextEntry();
                 if (zipEntry.getName().contains("backend/src/main/resources/application_default.yml")) {
                     while ((read = zis.read(buffer, 0, 1024)) >= 0) {
                         stringBuilder.append(new String(buffer, 0, read));
@@ -157,13 +145,14 @@ public class SystemOverviewRepository {
                     if (JsonPath.isPathDefinite("$.opencelium.version")) {
                         return JsonPath.read(s, "$.opencelium.version");
                     }
-                    return "NOT_SET";
+                    return "VERSION_IN_APPLICATION_DEFAULT_NOT_FOUND";
                 }
+                zipEntry = zis.getNextEntry();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return "NOT_SET";
+        return "APPLICATION_DEFAULT_NOT_FOUND";
     }
 
     // Kibana getting request

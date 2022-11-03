@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.application.health;
 
+import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -18,25 +19,28 @@ public class OpenceliumHealthIndicator extends AbstractHealthIndicator {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private AssistantServiceImp assistantServiceImp;
+
     @Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
-        String version = getVersion();
+        String version = assistantServiceImp.getCurrentVersion();
         builder.up()
                 .withDetail("version", Objects.requireNonNull(version));
     }
 
-    private String getVersion() {
-        try	{
-            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repository = builder
-                    .readEnvironment()
-                    .findGitDir()
-                    .build();
-            Git git = new Git(repository);
-            return git.describe().call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
+//    private String getVersion() {
+//        try	{
+//            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+//            Repository repository = builder
+//                    .readEnvironment()
+//                    .findGitDir()
+//                    .build();
+//            Git git = new Git(repository);
+//            return git.describe().call();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return "";
+//    }
 }
