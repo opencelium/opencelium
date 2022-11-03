@@ -119,7 +119,7 @@ export default class CMethodItem{
     }
 
     getValueForSelectInput(connector){
-        return {label: this._name, value: `${connector.getPrefixForMethodOption()}${this._index}`, color: this._color};
+        return {label: this._label || this._name, value: `${connector.getPrefixForMethodOption()}${this._index}`, color: this._color};
     }
 
     get uniqueIndex(){

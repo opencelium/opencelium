@@ -1358,7 +1358,7 @@ export default class CConnectorItem{
                     let method = this._methods.find(method => method.index === decreasedIndex);
                     if (method) {
                         methods.push({
-                            label: method.name,
+                            label: method.label || method.name,
                             value: `${this.getPrefixForMethodOption()}${method.index}`,
                             color: method.color,
                         });
@@ -1378,7 +1378,7 @@ export default class CConnectorItem{
                 let method = this._methods[i];
                 if (method) {
                     methods.push({
-                        label: method.name,
+                        label: method.label || method.name,
                         value: `${this.getPrefixForMethodOption()}${method.index}`,
                         color: method.color,
                     });

@@ -82,7 +82,7 @@ class AvailableUpdates extends React.Component{
 
     uploadVersion(f){
         if(f) {
-            this.props.uploadVersion({versionFile: f});
+            this.props.uploadVersion(f);
         }
     }
 
