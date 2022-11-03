@@ -73,10 +73,10 @@ export const getOfflineUpdates = createAsyncThunk(
 
 export const uploadApplicationFile = createAsyncThunk(
     'application/upload/application_file',
-    async(applicationFile: FileList, thunkAPI) => {
+    async(applicationFile: any, thunkAPI) => {
         try {
             let data = new FormData();
-            data.append('file', applicationFile[0]);
+            data.append('file', applicationFile);
             const request = new UpdateAssistantRequest({isFormData: true});
             const response = await request.uploadApplicationFile(data);
             return response.data;
