@@ -60,8 +60,8 @@ class SystemOverview extends React.Component{
     }
 
     componentDidMount() {
-        const {entity, updateEntity, systemRequirements} = this.props;
-        entity.systemRequirements = systemRequirements;
+        let {entity, updateEntity, systemRequirements} = this.props;
+        entity = {...entity, systemRequirements};
         updateEntity(entity);
         this.validateSystemRequirements(entity);
     }
