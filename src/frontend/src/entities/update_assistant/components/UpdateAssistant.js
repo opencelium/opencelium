@@ -109,9 +109,8 @@ class UpdateAssistant extends Component{
         })
     }
 
-    updateSystem(){
+    updateSystem(updateData){
         const {updateSystem} = this.props;
-        const {updateData} = this.state;
         const data = {
             folder: updateData.availableUpdates.folder ? updateData.availableUpdates.folder : '',
             isOnline: updateData.availableUpdates.mode === ONLINE_UPDATE,
@@ -270,7 +269,7 @@ class UpdateAssistant extends Component{
                     name: 'finishUpdate',
                     label: t('FORM.FINISH_UPDATE'),
                     Component: FinishUpdate,
-                    componentProps: {updateSystem: () => this.updateSystem()}
+                    componentProps: {updateSystem: (entity) => this.updateSystem(entity)}
                 },
             ],
             header: t(`FORM.PAGE_6`),

@@ -27,7 +27,7 @@ class FinishUpdate extends React.Component{
     }
 
     render(){
-        const {t, updateSystem} = this.props;
+        const {t, updateSystem, entity} = this.props;
         const updateLogLink = 'https://docs.opencelium.io/en/prod/gettinginvolved/administration.html';
         const restoreLinkText = t('FORM.FINISH.RESTORE_LINK_TEXT');
         return(
@@ -42,7 +42,7 @@ class FinishUpdate extends React.Component{
                 <div className={styles.hint}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
                 <Button
                     style={{float: 'right'}}
-                    onClick={updateSystem}
+                    onClick={() => updateSystem(entity)}
                     title={t('FORM.UPDATE_OC')}
                 />
             </div>

@@ -119,7 +119,7 @@ class AvailableUpdates extends React.Component{
         let newEntity = {...entity};
         switch (activeMode){
             case ONLINE_UPDATE:
-                fetchOnlineUpdates();
+                //fetchOnlineUpdates();
                 startFetchingOnlineUpdates = true;
                 break;
             case OFFLINE_UPDATE:
@@ -224,6 +224,9 @@ class AvailableUpdates extends React.Component{
         const {selectedVersionName, isOldVersionsExtended, isNewVersionsExtended, activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates} = this.state;
         const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, error} = this.props;
         let updates = this.getUpdates();
+        if(activeMode === ONLINE_UPDATE){
+            return <div style={{marginTop: '40px'}}>{"This feature is currently in development phase."}</div>;
+        }
         if(updates.available.length === 0 && updates.old.length === 0 && updates.veryNew.length === 0){
             if(activeMode !== '' && !(fetchingOnlineUpdates === API_REQUEST_STATE.START || fetchingOfflineUpdates === API_REQUEST_STATE.START)){
                 if(error === null){
