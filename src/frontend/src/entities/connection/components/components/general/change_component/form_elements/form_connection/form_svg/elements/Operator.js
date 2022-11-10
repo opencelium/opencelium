@@ -113,7 +113,7 @@ class Operator extends React.Component{
     onMouseOverBottomPlaceholder(){
         const {currentTechnicalItem, connection, operator, isItemDraggable} = this.props;
         const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseBottomRightPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
+        if(isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverBottomPlaceholder && currentTechnicalItem.entity.index !== operator.entity.index){
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
             let isAvailableForDragging = connector.areIndexesUnderScope(operator.entity, currentTechnicalItem.entity, INSIDE_ITEM);
@@ -125,7 +125,7 @@ class Operator extends React.Component{
                 }
             }
             this.setState({
-                isMouseBottomRightPlaceholder: true,
+                isMouseOverBottomPlaceholder: true,
                 isAvailableForDragging,
             })
         }
