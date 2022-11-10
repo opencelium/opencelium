@@ -138,7 +138,7 @@ export class CBodyEditor{
                 result = 0;
             }
         } else{
-            consoleLog('Type json should be reworked to do mapping');
+            //consoleLog('Type json should be reworked to do mapping');
         }
         return result;
     }
