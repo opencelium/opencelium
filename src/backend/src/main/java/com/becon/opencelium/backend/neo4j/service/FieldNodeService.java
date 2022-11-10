@@ -20,8 +20,6 @@ import com.becon.opencelium.backend.mysql.entity.Connection;
 import com.becon.opencelium.backend.neo4j.entity.FieldNode;
 import com.becon.opencelium.backend.neo4j.entity.MethodNode;
 import com.becon.opencelium.backend.resource.connection.binding.LinkedFieldResource;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import jdk.nashorn.internal.ir.FunctionNode;
 
 import java.util.List;
 import java.util.Map;
