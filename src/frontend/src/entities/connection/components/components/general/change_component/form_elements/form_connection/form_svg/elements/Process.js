@@ -33,6 +33,8 @@ import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 import CConnectorItem, {INSIDE_ITEM, OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import Icon from "@app_component/base/icon/Icon";
+import {TextSize} from "@app_component/base/text/interfaces";
 
 function mapStateToProps(state){
     const connectionOverview = state.connectionReducer;
@@ -114,12 +116,13 @@ class Process extends React.Component{
         }
     }
 
-    onMouseDown(){
+    onMouseDown(e){
         const {connection, setCurrentItem, process, isDisabled, isItemDraggable} = this.props;
         if(!isDisabled) {
             if (connection && !connection.businessLayout.isInAssignMode) {
                 if(isItemDraggable){
                     process.isDragged = true;
+                    process.isDraggedForCopy = e.ctrlKey;
                 }
                 setCurrentItem(process);
             }
@@ -320,7 +323,15 @@ class Process extends React.Component{
                 </svg>
                 {hasDraggableItem &&
                     ReactDOM.createPortal(
-                        <rect id={'draggable_process'} className={styles.draggable_process} rx={borderRadius} ry={borderRadius} x={process.x} y={process.y} width={process.width} height={process.height}/>, document.getElementById(isBusinessItem ? 'business_layout_svg' : 'technical_layout_svg')
+                        <React.Fragment>
+                            <svg id={'draggable_process'} x={process.x} y={process.y}>
+                                <rect className={styles.draggable_process} rx={borderRadius} ry={borderRadius} width={process.width} height={process.height}/>
+                                {currentTechnicalItem.isDraggedForCopy && <svg xmlns="http://www.w3.org/2000/svg" x={process.width - 20} width={20} height={20}>
+                                    <path x={20} stroke={"#00acc2"} d="M4.5 18q-.625 0-1.062-.438Q3 17.125 3 16.5V5h1.5v11.5H14V18Zm3-3q-.625 0-1.062-.438Q6 14.125 6 13.5v-10q0-.625.438-1.062Q6.875 2 7.5 2h8q.625 0 1.062.438Q17 2.875 17 3.5v10q0 .625-.438 1.062Q16.125 15 15.5 15Zm0-1.5h8v-10h-8v10Zm0 0v-10 10Z"/>
+                                </svg>}
+                            </svg>
+                        </React.Fragment>,
+                        document.getElementById(isBusinessItem ? 'business_layout_svg' : 'technical_layout_svg')
                     )
                 }
             </React.Fragment>

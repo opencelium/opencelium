@@ -35,6 +35,7 @@ export default class COperator{
             this._entity = COperatorItem.createOperatorItem(this._entity);
         }
         this._isDragged = operator && operator.hasOwnProperty('isDragged') ? operator.isDragged : false;
+        this._isDraggedForCopy = operator && operator.hasOwnProperty('isDraggedForCopy') ? operator.isDraggedForCopy : false;
         this._isAvailableForDragging = operator && operator.hasOwnProperty('isAvailableForDragging') ? operator.isAvailableForDragging : false;
     }
 
@@ -104,6 +105,14 @@ export default class COperator{
 
     set isDragged(isDragged){
         this._isDragged = isDragged;
+    }
+
+    get isDraggedForCopy(){
+        return this._isDraggedForCopy;
+    }
+
+    set isDraggedForCopy(isDraggedForCopy){
+        this._isDraggedForCopy = isDraggedForCopy;
     }
 
     get isAvailableForDragging(){
@@ -183,6 +192,7 @@ export default class COperator{
             width: this._width,
             height: this._height,
             isDragged: this._isDragged,
+            isDraggedForCopy: this._isDraggedForCopy,
             isAvailableForDragging: this._isAvailableForDragging,
             connectorType: this._connectorType,
             invoker: this._invoker,

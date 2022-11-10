@@ -450,17 +450,37 @@ export default class CConnectorItem{
         return children;
     }
 
-    updateIndexesForOperator(operator, newParentIndex){
+    updateIndexesForOperator(operator, newParentIndex, connection, shouldDelete){
         if(isString(newParentIndex)){
             let operatorIndex = operator.index;
             for(let i = 0; i < this._methods.length; i++){
                 if(this._methods[i].index.indexOf(operatorIndex) === 0 && this._methods[i].index !== operatorIndex){
-                    this._methods[i].index = `${newParentIndex}${this._methods[i].index.substring(operatorIndex.length)}`;
+                    let index = `${newParentIndex}${this._methods[i].index.substring(operatorIndex.length)}`;
+                    if(shouldDelete) {
+                        this._methods[i].index = index;
+                    } else {
+                        let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
+                        if(this.getConnectorType() === CONNECTOR_FROM){
+                            connection.addFromConnectorMethod({...this._methods[i].getObject(), index}, mode);
+                        } else {
+                            connection.addToConnectorMethod({...this._methods[i].getObject(), index}, mode);
+                        }
+                    }
                 }
             }
             for(let i = 0; i < this._operators.length; i++){
                 if(this._operators[i].index.indexOf(operatorIndex) === 0 && this._operators[i].index !== operatorIndex){
-                    this._operators[i].index = `${newParentIndex}${this._operators[i].index.substring(operatorIndex.length)}`;
+                    let index = `${newParentIndex}${this._operators[i].index.substring(operatorIndex.length)}`;
+                    if(shouldDelete) {
+                        this._operators[i].index = index;
+                    } else {
+                        let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
+                        if(this.getConnectorType() === CONNECTOR_FROM){
+                            connection.addFromConnectorOperator({...this._operators[i].getObject(), index}, mode);
+                        } else {
+                            connection.addToConnectorMethod({...this._operators[i].getObject(), index}, mode);
+                        }
+                    }
                 }
             }
         }

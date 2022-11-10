@@ -86,6 +86,8 @@ export function RequestBody(CRequestType){
                 importJson(){
                     let {importJsonBody} = this.state;
                     if(isJsonString(importJsonBody)) {
+                        //const referenceRegExp = /\"\#[0-9a-fA-F]{6}\.\((request|response)\)\.[^\"]*\"/g;
+                        //importJsonBody = JSON.parse(JSON.stringify(importJsonBody).replace(referenceRegExp, '"\\"'));
                         this.updateBody({updated_src: JSON.parse(importJsonBody)});
                         this.toggleImportJson();
                     } else{

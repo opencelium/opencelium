@@ -70,6 +70,8 @@ class Body extends Component{
     importJson(){
         let {importJson} = this.state;
         if(isJsonString(importJson)) {
+            //const referenceRegExp = /\"\#[0-9a-fA-F]{6}\.\((request|response)\)\..*\"/g;
+            //importJson = JSON.parse(JSON.stringify(importJson).replace(referenceRegExp, '"\\"'));
             this.handleInput({updated_src: importJson});
             this.toggleImportJson();
         } else{
