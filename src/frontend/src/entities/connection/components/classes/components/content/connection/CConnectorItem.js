@@ -509,9 +509,9 @@ export default class CConnectorItem{
                     } else {
                         let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
                         if(this.getConnectorType() === CONNECTOR_FROM){
-                            connection.addFromConnectorMethod({...this._methods[i].getObject(), index}, mode);
+                            connection.addFromConnectorMethod({...this._methods[i].getObject(), index, color: ''}, mode);
                         } else {
-                            connection.addToConnectorMethod({...this._methods[i].getObject(), index}, mode);
+                            connection.addToConnectorMethod({...this._methods[i].getObject(), index, color: ''}, mode);
                         }
                     }
                 }
@@ -524,9 +524,9 @@ export default class CConnectorItem{
                     } else {
                         let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
                         if(this.getConnectorType() === CONNECTOR_FROM){
-                            connection.addFromConnectorOperator({...this._operators[i].getObject(), index}, mode);
+                            connection.addFromConnectorOperator({...this._operators[i].getObject(), index, color: ''}, mode);
                         } else {
-                            connection.addToConnectorMethod({...this._operators[i].getObject(), index}, mode);
+                            connection.addToConnectorMethod({...this._operators[i].getObject(), index, color: ''}, mode);
                         }
                     }
                 }

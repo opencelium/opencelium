@@ -319,7 +319,7 @@ class Svg extends React.Component {
                     connection.addFromConnectorMethod(sourceItem, mode);
                 } else{
                     connector.setCurrentItem(targetLeftItem);
-                    connection.addFromConnectorMethod({...sourceItem.getObject(), index: ''}, mode);
+                    connection.addFromConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
                 }
             } else {
                 if(shouldDelete) {
@@ -330,7 +330,7 @@ class Svg extends React.Component {
                     connection.addToConnectorMethod(sourceItem, mode);
                 } else{
                     connector.setCurrentItem(targetLeftItem);
-                    connection.addToConnectorMethod({...sourceItem.getObject(), index: ''}, mode);
+                    connection.addToConnectorMethod({...sourceItem.getObject(), index: '', color: ''}, mode);
                 }
             }
             updateConnection(connection);

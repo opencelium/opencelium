@@ -36,7 +36,7 @@ export class ApplicationRequest extends Request implements IApplicationRequest{
     }
 
     async remoteApiRequest(data: RemoteApiRequestProps): Promise<AxiosResponse<RemoteApiResponseProps>>{
-        this.url = 'connection/remoteapi/test';
+        this.url = 'connection/remoteapi';
         return super.post<RemoteApiResponseProps>(data);
     }
 
