@@ -142,15 +142,6 @@ class MethodTitle extends Component{
                     let connectorType = connector.getConnectorType();
                     switch (connectorType) {
                         case CONNECTOR_FROM:
-                            if (method.index === '0') {
-                                if (connector.operators.length > 0) {
-                                    if (connector.operators[0].index === '1') {
-                                        alert('From Connector cannot start from operator');
-                                        that.toggleConfirm();
-                                        return;
-                                    }
-                                }
-                            }
                             connection.removeFromConnectorMethod(method);
                             break;
                         case CONNECTOR_TO:

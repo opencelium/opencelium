@@ -28,13 +28,15 @@ const OPERATOR_LABELS = {
     NOT_CONTAINS: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>⊄</span>);},
     CONTAINS_SUB_STR: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex', fontSize: '16px'} : {fontSize: '16px'}; return (<span style={styles}>⊂<span style={{fontSize: '9px'}}>a-z</span></span>);},
     NOT_CONTAINS_SUB_STR: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex', fontSize: '16px'} : {fontSize: '16px'}; return (<span style={styles}>⊄<span style={{fontSize: '9px'}}>a-z</span></span>);},
-    REG_EXP: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>.*</span>);},
+    REG_EXP: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{".*"}</span>);},
+    LIKE: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"≈"}</span>);},
+    NOT_LIKE: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"≉"}</span>);},
     MORE_EQUAL: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{">="}</span>);},
     MORE: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{">"}</span>);},
     LESS_EQUAL: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"<="}</span>);},
     LESS: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"<"}</span>);},
     EQUAL: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"="}</span>);},
-    NOT_EQUAL: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"!="}</span>);},
+    NOT_EQUAL: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>{"≠"}</span>);},
 }
 
 //value - operator name for backend
@@ -53,9 +55,9 @@ export const FUNCTIONAL_OPERATORS = [
     {value: 'NotContains', label: <span>NotContains({OPERATOR_LABELS.NOT_CONTAINS()})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS(true)},
     {value: 'ContainsSubStr', label: <span>ContainsSubStr({OPERATOR_LABELS.CONTAINS_SUB_STR()})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.CONTAINS_SUB_STR(true)},
     {value: 'NotContainsSubStr', label: <span>NotContainsSubStr({OPERATOR_LABELS.NOT_CONTAINS_SUB_STR()})</span>, hasValue: true, hasThreeValues: true, placeholderValue: OPERATOR_LABELS.NOT_CONTAINS_SUB_STR(true)},
-    /*{value: 'RegExp', label: <span>RegExp({OPERATOR_LABELS.REG_EXP})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true),},
-    {value: 'Like', hasValue: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true)},
-    {value: 'NotLike', hasValue: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true)},*/
+    {value: 'RegExp', label: <span>RegExp({OPERATOR_LABELS.REG_EXP})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS.REG_EXP(true),},
+    {value: 'Like', hasValue: true, placeholderValue: OPERATOR_LABELS.LIKE(true)},
+    {value: 'NotLike', hasValue: true, placeholderValue: OPERATOR_LABELS.NOT_LIKE(true)},
     {value: '>=', hasValue: true, placeholderValue: OPERATOR_LABELS.MORE_EQUAL(true)},
     {value: '>', hasValue: true, placeholderValue: OPERATOR_LABELS.MORE(true)},
     {value: '<=', hasValue: true, placeholderValue: OPERATOR_LABELS.LESS_EQUAL(true)},

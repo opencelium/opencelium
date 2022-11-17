@@ -183,21 +183,45 @@ export default class CConnectorItem{
         return this._svgItems.find(svgItem => svgItem.entity.index === index);
     }
 
+    getNearestLoopOperatorFromReference(reference){
+        const iterators = ITERATOR_NAMES.join('|');
+        const previousLoopOperators = this.getPreviousLoopOperators(this);
+        const loopIteratorExp =  new RegExp(`\\[(${iterators})\\]`,"g");
+        const nearestLoopIterator = reference
+            .match(loopIteratorExp)?.map(iterator => iterator.substring(1, iterator.length - 1))
+            .sort(function(a, b){
+                return b.length - a.length || b.localeCompare(a);
+            }) || [];
+        if(nearestLoopIterator.length > 0) {
+            return previousLoopOperators.find(operator => operator.iterator === nearestLoopIterator[0]);
+        }
+        return null;
+    }
+
     getAllMethodReferences(){
         const references = [];
         for(let i = 0; i < this._methods.length; i++){
             const methodReferences = Array.from(this._methods[i].getReferences());
-            const methods = [];
+            let insideReferences = [];
+            let loopOperatorReference = '';
             for(let j = 0; j < methodReferences.length; j++){
                 const method = this.getMethodByColor(methodReferences[j].substring(0, 7));
                 if(method){
-                    methods.push(method);
+                    insideReferences.push(method);
+                }
+                const nearestLoopOperator = this.getNearestLoopOperatorFromReference(methodReferences[j]);
+                if (nearestLoopOperator && nearestLoopOperator.index > loopOperatorReference) {
+                    loopOperatorReference = nearestLoopOperator.index;
                 }
             }
-            if(methods.length !== 0){
+            if(insideReferences.length !== 0){
+                insideReferences = insideReferences.map(m => m.index);
+                if(loopOperatorReference){
+                    insideReferences.push(loopOperatorReference);
+                }
                 references.push({
                     element: this._methods[i].index,
-                    references: methods.map(m => m.index)
+                    references: insideReferences
                 });
             }
         }
@@ -209,6 +233,15 @@ export default class CConnectorItem{
         for(let i = 0; i < this._operators.length; i++){
             const leftColor = this._operators[i].condition.leftStatement.color;
             const rightColor = this._operators[i].condition.rightStatement.color;
+            let loopOperatorReference = '';
+            const nearestLoopOperatorFromLeftStatement = this.getNearestLoopOperatorFromReference(this._operators[i].condition.leftStatement.field);
+            const nearestLoopOperatorFromRightStatement = this.getNearestLoopOperatorFromReference(this._operators[i].condition.rightStatement.field);
+            if (nearestLoopOperatorFromLeftStatement && nearestLoopOperatorFromLeftStatement.index > loopOperatorReference) {
+                loopOperatorReference = nearestLoopOperatorFromLeftStatement.index;
+            }
+            if (nearestLoopOperatorFromRightStatement && nearestLoopOperatorFromRightStatement.index > loopOperatorReference) {
+                loopOperatorReference = nearestLoopOperatorFromRightStatement.index;
+            }
             const operatorReferences = [];
             if(leftColor && leftColor !== DEFAULT_COLOR){
                 const method = this.getMethodByColor(leftColor);
@@ -221,6 +254,9 @@ export default class CConnectorItem{
                 if(method) {
                     operatorReferences.push(method.index);
                 }
+            }
+            if(loopOperatorReference){
+                operatorReferences.push(loopOperatorReference);
             }
             references.push({element: this._operators[i].index, references: operatorReferences});
         }
@@ -277,6 +313,15 @@ export default class CConnectorItem{
             if(this._operators[i].index.indexOf(operator.index) === 0){
                 const leftColor = this._operators[i].condition.leftStatement.color;
                 const rightColor = this._operators[i].condition.rightStatement.color;
+                let loopOperatorReference = '';
+                const nearestLoopOperatorFromLeftStatement = this.getNearestLoopOperatorFromReference(this._operators[i].condition.leftStatement.field);
+                const nearestLoopOperatorFromRightStatement = this.getNearestLoopOperatorFromReference(this._operators[i].condition.rightStatement.field);
+                if (nearestLoopOperatorFromLeftStatement && nearestLoopOperatorFromLeftStatement.index > loopOperatorReference) {
+                    loopOperatorReference = nearestLoopOperatorFromLeftStatement.index;
+                }
+                if (nearestLoopOperatorFromRightStatement && nearestLoopOperatorFromRightStatement.index > loopOperatorReference) {
+                    loopOperatorReference = nearestLoopOperatorFromRightStatement.index;
+                }
                 if(leftColor && leftColor !== DEFAULT_COLOR){
                     const method = this.getMethodByColor(leftColor);
                     if(method){
@@ -288,6 +333,9 @@ export default class CConnectorItem{
                     if(method){
                         operatorReferences.add(method.index);
                     }
+                }
+                if(loopOperatorReference){
+                    operatorReferences.add(loopOperatorReference);
                 }
             }
         }
@@ -450,17 +498,37 @@ export default class CConnectorItem{
         return children;
     }
 
-    updateIndexesForOperator(operator, newParentIndex){
+    updateIndexesForOperator(operator, newParentIndex, connection, shouldDelete){
         if(isString(newParentIndex)){
             let operatorIndex = operator.index;
             for(let i = 0; i < this._methods.length; i++){
                 if(this._methods[i].index.indexOf(operatorIndex) === 0 && this._methods[i].index !== operatorIndex){
-                    this._methods[i].index = `${newParentIndex}${this._methods[i].index.substring(operatorIndex.length)}`;
+                    let index = `${newParentIndex}${this._methods[i].index.substring(operatorIndex.length)}`;
+                    if(shouldDelete) {
+                        this._methods[i].index = index;
+                    } else {
+                        let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
+                        if(this.getConnectorType() === CONNECTOR_FROM){
+                            connection.addFromConnectorMethod({...this._methods[i].getObject(), index, color: ''}, mode);
+                        } else {
+                            connection.addToConnectorMethod({...this._methods[i].getObject(), index, color: ''}, mode);
+                        }
+                    }
                 }
             }
             for(let i = 0; i < this._operators.length; i++){
                 if(this._operators[i].index.indexOf(operatorIndex) === 0 && this._operators[i].index !== operatorIndex){
-                    this._operators[i].index = `${newParentIndex}${this._operators[i].index.substring(operatorIndex.length)}`;
+                    let index = `${newParentIndex}${this._operators[i].index.substring(operatorIndex.length)}`;
+                    if(shouldDelete) {
+                        this._operators[i].index = index;
+                    } else {
+                        let mode = index.substring(index.length - 2) === '_0' ? INSIDE_ITEM : OUTSIDE_ITEM;
+                        if(this.getConnectorType() === CONNECTOR_FROM){
+                            connection.addFromConnectorOperator({...this._operators[i].getObject(), index, color: ''}, mode);
+                        } else {
+                            connection.addToConnectorMethod({...this._operators[i].getObject(), index, color: ''}, mode);
+                        }
+                    }
                 }
             }
         }
@@ -1153,6 +1221,20 @@ export default class CConnectorItem{
     getOperatorByIndex(index){
         let operator = this._operators.find(o => o.index === index);
         return operator ? operator : null;
+    }
+
+    getPreviousLoopOperators(item = null){
+        let previousOperators = [];
+        let currentItem = item || this._currentItem;
+        if(currentItem) {
+            for (let i = 0; i < this._operators.length; i++) {
+                if (currentItem.index >= this._operators[i].index) {
+                    break;
+                }
+                previousOperators.push(this._operators[i]);
+            }
+        }
+        return previousOperators;
     }
 
     getPreviousIterators(){

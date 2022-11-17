@@ -29,6 +29,7 @@ export default class CProcess{
         this._width = PROCESS_WIDTH;
         this._height = PROCESS_HEIGHT;
         this._isDragged = process && process.hasOwnProperty('isDragged') ? process.isDragged : false;
+        this._isDraggedForCopy = process && process.hasOwnProperty('isDraggedForCopy') ? process.isDraggedForCopy : false;
         this._isAvailableForDragging = process && process.hasOwnProperty('isAvailableForDragging') ? process.isAvailableForDragging : false;
     }
 
@@ -103,6 +104,14 @@ export default class CProcess{
         this._isDragged = isDragged;
     }
 
+    get isDraggedForCopy(){
+        return this._isDraggedForCopy;
+    }
+
+    set isDraggedForCopy(isDraggedForCopy){
+        this._isDraggedForCopy = isDraggedForCopy;
+    }
+
     get isAvailableForDragging(){
         return this._isAvailableForDragging;
     }
@@ -152,6 +161,7 @@ export default class CProcess{
             width: this._width,
             height: this._height,
             isDragged: this._isDragged,
+            isDraggedForCopy: this._isDraggedForCopy,
             isAvailableForDragging: this._isAvailableForDragging,
         };
     }
