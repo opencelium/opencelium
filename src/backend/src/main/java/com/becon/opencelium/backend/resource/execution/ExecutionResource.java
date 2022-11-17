@@ -17,12 +17,12 @@
 package com.becon.opencelium.backend.resource.execution;
 
 import com.becon.opencelium.backend.mysql.entity.LastExecution;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
 
 @Resource
-public class ExecutionResource extends ResourceSupport {
+public class ExecutionResource extends RepresentationModel {
 
     private String taId;
     private long startTime;

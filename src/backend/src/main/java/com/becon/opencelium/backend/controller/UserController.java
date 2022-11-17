@@ -29,7 +29,7 @@ import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -75,10 +75,10 @@ public class UserController {
     }
 //
     @GetMapping("/all")
-    public ResponseEntity<Resources<UserResource>> all(){
+    public ResponseEntity<CollectionModel<UserResource>> all(){
         final List<UserResource> userResources =
                 userService.findAll().stream().map(UserResource::new).collect(Collectors.toList());
-        final Resources<UserResource> resources = new Resources<>(userResources);
+        final CollectionModel<UserResource> resources = CollectionModel.of(userResources);
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(uri).body(resources);
     }

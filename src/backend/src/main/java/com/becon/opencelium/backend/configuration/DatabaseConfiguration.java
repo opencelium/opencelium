@@ -18,12 +18,7 @@ package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.enums.RepositoryEnum;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.neo4j.ogm.session.SessionFactory;
+import org.neo4j.driver.internal.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -33,12 +28,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
-import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.neo4j.core.transaction.Neo4jTransactionManager;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-import org.springframework.data.neo4j.transaction.Neo4jTransactionManager;
 import org.springframework.data.transaction.ChainedTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -47,12 +39,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.net.InetAddress;
 
 @Configuration
 @EnableNeo4jRepositories(basePackages = PathConstant.NEO4J)
 @EnableJpaRepositories(basePackages = PathConstant.MYSQl, transactionManagerRef = "mysqlTransactionManager")
-@EnableElasticsearchRepositories(basePackages = PathConstant.ELASTICSEARCH)
 @EnableTransactionManagement
 public class DatabaseConfiguration {
 
@@ -60,28 +50,28 @@ public class DatabaseConfiguration {
     private Environment env;
 
     // ----------------------------------------- Neo4j -----------------------------------------------------------------
-    @Bean
-    public SessionFactory sessionFactory() {
-        // with domain entity base package(s)
-        return new SessionFactory(configuration(), RepositoryEnum.NEO4J.getPath());
-    }
-
-    @Bean
-    public org.neo4j.ogm.config.Configuration configuration() {
-        String url = env.getProperty("spring.data.neo4j.url");
-        String username = env.getProperty("spring.data.neo4j.username");
-        String password = env.getProperty("spring.data.neo4j.password");
-
-        return new org.neo4j.ogm.config.Configuration.Builder()
-                .uri(url)
-                .credentials(username, password)
-                .build();
-    }
-
-    @Bean(name = "neo4jTransactionManager")
-    public Neo4jTransactionManager neo4jTransactionManager() {
-        return new Neo4jTransactionManager(sessionFactory());
-    }
+//    @Bean
+//    public SessionFactory sessionFactory() {
+//        // with domain entity base package(s)
+//        return new SessionFactory("org.neo4j.example.domain");
+//    }
+//
+//    @Bean
+//    public org.neo4j.ogm.config.Configuration configuration() {
+//        String url = env.getProperty("spring.data.neo4j.url");
+//        String username = env.getProperty("spring.data.neo4j.username");
+//        String password = env.getProperty("spring.data.neo4j.password");
+//
+//        return new org.neo4j.ogm.config.Configuration.Builder()
+//                .uri(url)
+//                .credentials(username, password)
+//                .build();
+//    }
+//
+//    @Bean(name = "neo4jTransactionManager")
+//    public Neo4jTransactionManager neo4jTransactionManager() {
+//        return new Neo4jTransactionManager(sessionFactory());
+//    }
 
 // ----------------------------------------- MariaDB -----------------------------------------------------------------
 
@@ -119,39 +109,6 @@ public class DatabaseConfiguration {
         transactionManager.setEntityManagerFactory(entityManagerFactory);
 
         return transactionManager;
-    }
-
-// ---------------------------------------- Elasticsearch ----------------------------------------------------------
-
-    @Bean
-    public Client client() throws Exception{
-
-        String esHost = env.getProperty("elasticsearch.host");
-        String port = env.getProperty("elasticsearch.port");
-        int esPort = 0;
-        if (port != null){
-            esPort = Integer.parseInt(port);
-        }
-
-        String esClusterName = env.getProperty("elasticsearch.clustername");
-        if(esClusterName == null || esHost == null || port == null){
-            esClusterName = "default";
-            esHost = "localhost";
-            esPort = 0;
-        }
-        Settings esSettings = Settings.builder()
-                .put("cluster.name", esClusterName)
-                .build();
-
-        TransportClient client = new PreBuiltTransportClient(esSettings);
-        client.addTransportAddress(new TransportAddress(InetAddress.getByName(esHost), esPort));
-
-        return client;
-    }
-
-    // @Bean(name = "elasticsearchTemplate")
-    public ElasticsearchOperations elasticsearchTemplate() throws Exception {
-        return new ElasticsearchTemplate(client());
     }
 
     // -----------------------------------------------------------------------------------------------------------------

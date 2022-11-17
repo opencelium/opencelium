@@ -33,7 +33,7 @@ import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -78,7 +78,7 @@ public class ConnectorController {
                 .stream().map(c -> connectorService.toResource(c))
                 .collect(Collectors.toList());
 
-        final Resources<ConnectorResource> resources = new Resources<>(connectorResources);
+        final CollectionModel<ConnectorResource> resources = CollectionModel.of(connectorResources);
         return ResponseEntity.ok(resources);
     }
     @PostMapping

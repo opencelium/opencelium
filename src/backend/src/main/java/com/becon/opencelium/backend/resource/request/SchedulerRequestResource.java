@@ -17,14 +17,14 @@
 package com.becon.opencelium.backend.resource.request;
 
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Resource
-public class SchedulerRequestResource extends ResourceSupport {
+public class SchedulerRequestResource extends RepresentationModel {
 
     private int schedulerId;
     private Long connectionId;

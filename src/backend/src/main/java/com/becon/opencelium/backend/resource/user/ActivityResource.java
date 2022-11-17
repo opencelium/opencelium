@@ -17,13 +17,13 @@
 package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.mysql.entity.Activity;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
 import java.util.Date;
 
 @Resource
-public class ActivityResource extends ResourceSupport {
+public class ActivityResource extends RepresentationModel {
 
     private Date requestTime;
 

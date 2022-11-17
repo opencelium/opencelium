@@ -16,16 +16,13 @@
 
 package com.becon.opencelium.backend.resource.connector;
 
-import com.becon.opencelium.backend.constant.PathConstant;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
-import java.net.URI;
 import java.util.Map;
 
 @Resource
-public class ConnectorResource extends ResourceSupport {
+public class ConnectorResource extends RepresentationModel {
 
     private int connectorId;
     private String title;

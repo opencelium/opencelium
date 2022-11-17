@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.resource.notification;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
-public class TemplateMessageResource extends ResourceSupport {
+public class TemplateMessageResource extends RepresentationModel {
     private int templateId;
     private String name;
 

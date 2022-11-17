@@ -1,13 +1,13 @@
 package com.becon.opencelium.backend.resource.notification;
 
 import com.becon.opencelium.backend.mysql.entity.EventMessage;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MessageResource extends ResourceSupport {
+public class MessageResource extends RepresentationModel {
 
     private int templateId;
     private String name;

@@ -17,13 +17,13 @@
 package com.becon.opencelium.backend.resource.connector;
 
 import com.becon.opencelium.backend.invoker.entity.ResultInv;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
 import java.util.Map;
 
 @Resource
-public class ResultResource extends ResourceSupport {
+public class ResultResource extends RepresentationModel {
 
     private Long nodeId;
     private String status;

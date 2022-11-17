@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.quartz;
 
-import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.ConnectorExecutor;
 import com.becon.opencelium.backend.execution.ExecutionContainer;
@@ -32,7 +31,6 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -90,9 +88,6 @@ public class JobExecutor extends QuartzJobBean {
     private FieldNodeServiceImp fieldNodeService;
 
     @Autowired
-    private LogMessageServiceImp logMessageService;
-
-    @Autowired
     private VariableNodeServiceImp statementNodeService;
 
     @Override
@@ -141,7 +136,7 @@ public class JobExecutor extends QuartzJobBean {
         try {
             ConnectorExecutor connectorExecutor = new ConnectorExecutor(invokerService, executionContainer,
                     fieldNodeServiceImp, methodNodeServiceImp,
-                    connectorService, logMessageService, statementNodeService);
+                    connectorService, statementNodeService);
             ConnectionExecutor connectionExecutor = new ConnectionExecutor(connectionNodeService, connectorService,
                     executionContainer, connectorExecutor, debugMode);
             connectionExecutor.start(scheduler);
