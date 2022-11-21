@@ -20,14 +20,11 @@ import com.becon.opencelium.backend.mysql.entity.Component;
 import com.becon.opencelium.backend.mysql.service.ComponentServiceImpl;
 import com.becon.opencelium.backend.resource.user.ComponentResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,13 +36,13 @@ public class ComponentController {
     private ComponentServiceImpl componentService;
 
     @GetMapping("/all")
-    public ResponseEntity<Resources<ComponentResource>> all(){
+    public ResponseEntity<CollectionModel<ComponentResource>> all(){
 
         final List<ComponentResource> collection =
                 componentService.findAll().stream().map(ComponentResource::new).collect(Collectors.toList());
 
-        final Resources<ComponentResource> resources = new Resources<>(collection);
-        final String uriString = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+        final CollectionModel<ComponentResource> resources = CollectionModel.of(collection);
+//        final String uriString = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
         return ResponseEntity.ok(resources);
     }
 

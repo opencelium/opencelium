@@ -20,6 +20,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -45,10 +46,8 @@ import com.becon.opencelium.backend.resource.error.validation.ValidationResource
 import com.becon.opencelium.backend.validation.connection.ValidationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -111,7 +110,7 @@ public class ConnectionController {
     public ResponseEntity<?> get(@PathVariable Long connectionId){
         Connection connection = connectionService.findById(connectionId).orElse(null);
         ConnectionResource connectionResource = connectionService.toNodeResource(connection);
-        final Resource<ConnectionResource> resource = new Resource<>(connectionResource);
+        final EntityModel<ConnectionResource> resource = EntityModel.of(connectionResource);
         return ResponseEntity.ok().body(resource);
     }
 
@@ -132,7 +131,7 @@ public class ConnectionController {
 
             if (connectionResource.getFieldBinding() != null){
                 if (connectionResource.getFieldBinding().isEmpty()){
-                    final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
+                    final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
                     return ResponseEntity.ok().body(resource);
                 }
 
@@ -147,7 +146,7 @@ public class ConnectionController {
                 }
             }
 
-            final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
+            final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
             validationContext.remove(connection.getName());
             return ResponseEntity.ok().body(resource);
         } catch (Exception e) {
@@ -211,7 +210,7 @@ public class ConnectionController {
                         .buildEnhancementNodes(connectionResource.getFieldBinding(), connection);
                 enhancementNodeService.saveAll(enhancementNodes);
             }
-            final Resource<ConnectionResource> resource = new Resource<>(connectionService.toNodeResource(connection));
+            final EntityModel<ConnectionResource> resource = EntityModel.of(connectionService.toNodeResource(connection));
             return ResponseEntity.ok().body(resource);
         } catch (Exception e){
             e.printStackTrace();

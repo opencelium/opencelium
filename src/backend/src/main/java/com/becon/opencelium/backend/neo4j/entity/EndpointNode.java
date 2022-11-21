@@ -16,11 +16,11 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
 
-@NodeEntity(label = "Endpoint")
+@Node("Endpoint")
 public class EndpointNode {
 
     @Id

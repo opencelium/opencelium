@@ -17,12 +17,12 @@
 package com.becon.opencelium.backend.resource.template;
 
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
 
 @Resource
-public class TemplateResource extends ResourceSupport {
+public class TemplateResource extends RepresentationModel {
 
     private String templateId;
     private String name;

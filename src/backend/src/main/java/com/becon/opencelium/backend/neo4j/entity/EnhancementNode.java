@@ -16,14 +16,16 @@
 
 package com.becon.opencelium.backend.neo4j.entity;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
+
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
 import java.util.List;
 
-@NodeEntity(label = "Enhancement")
+@Node("Enhancement")
 public class EnhancementNode {
 
     @Id
@@ -34,10 +36,10 @@ public class EnhancementNode {
     private String name;
 
 
-    @Relationship(type = "linked", direction = Relationship.INCOMING)
+    @Relationship(type = "linked", direction = Direction.INCOMING)
     private List<FieldNode> incomeField;
 
-    @Relationship(type = "linked", direction = Relationship.OUTGOING)
+    @Relationship(type = "linked", direction = Direction.OUTGOING)
     private List<FieldNode> outgoingField;
 
     public EnhancementNode() {

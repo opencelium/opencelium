@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.mysql.entity.Component;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Resource
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ComponentResource extends ResourceSupport {
+public class ComponentResource extends RepresentationModel {
 
     private int componentId;// TODO: perhaps need to change from componentId to id;
     private String name;

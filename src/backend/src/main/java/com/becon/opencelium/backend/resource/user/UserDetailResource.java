@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.mysql.entity.UserDetail;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Resource;
@@ -26,7 +26,7 @@ import java.net.URI;
 import java.util.Date;
 
 @Resource
-public class UserDetailResource extends ResourceSupport {
+public class UserDetailResource extends RepresentationModel {
 
     private String name;
     private String surname;

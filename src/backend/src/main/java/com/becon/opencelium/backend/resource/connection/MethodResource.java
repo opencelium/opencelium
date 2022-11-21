@@ -18,12 +18,12 @@ package com.becon.opencelium.backend.resource.connection;
 
 import com.becon.opencelium.backend.resource.connector.RequestResource;
 import com.becon.opencelium.backend.resource.connector.ResponseResource;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.annotation.Resource;
 
 @Resource
-public class MethodResource extends ResourceSupport {
+public class MethodResource extends RepresentationModel {
 
     private Long nodeId;
     private String index;

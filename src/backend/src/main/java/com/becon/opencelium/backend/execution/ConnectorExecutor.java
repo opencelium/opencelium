@@ -17,8 +17,6 @@
 package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.elasticsearch.logs.entity.LogMessage;
-import com.becon.opencelium.backend.elasticsearch.logs.service.LogMessageServiceImp;
 import com.becon.opencelium.backend.enums.OperatorType;
 import com.becon.opencelium.backend.execution.statement.operator.factory.OperatorAbstractFactory;
 import com.becon.opencelium.backend.invoker.entity.Body;
@@ -72,20 +70,17 @@ public class ConnectorExecutor {
     private FieldNodeServiceImp fieldNodeService;
     private MethodNodeServiceImp methodNodeServiceImp;
     private ConnectorServiceImp connectorService;
-    private LogMessageServiceImp logMessageService;
     private VariableNodeServiceImp statementNodeService;
     private boolean debugMode = false;
 
     public ConnectorExecutor(InvokerServiceImp invokerService, ExecutionContainer executionContainer,
                              FieldNodeServiceImp fieldNodeService, MethodNodeServiceImp methodNodeServiceImp,
-                             ConnectorServiceImp connectorService, LogMessageServiceImp logMessageService,
-                             VariableNodeServiceImp statementNodeService) {
+                             ConnectorServiceImp connectorService, VariableNodeServiceImp statementNodeService) {
         this.invokerService = invokerService;
         this.executionContainer = executionContainer;
         this.fieldNodeService = fieldNodeService;
         this.methodNodeServiceImp = methodNodeServiceImp;
         this.connectorService = connectorService;
-        this.logMessageService = logMessageService;
         this.statementNodeService = statementNodeService;
     }
 
@@ -186,56 +181,9 @@ public class ConnectorExecutor {
 
         String url = buildUrl(methodNode); // done
         if (debugMode) System.out.println("URL: " + url);
-
-        LogMessage logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("REQUEST")
-                .setMethodPart("URL")
-                .setMessage(url)
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if(debugMode) System.err.println(e.getMessage());
-        }
-
-
         HttpHeaders header = buildHeader(functionInvoker); // done
-        if (debugMode) System.out.println("Header: " + header.toString());
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("REQUEST")
-                .setMethodPart("HEADER")
-                .setMessage(header.toString())
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if(debugMode) System.err.println(e.getMessage());
-        }
-
         String body = buildBody(methodNode.getRequestNode().getBodyNode()); // done
-
         if (debugMode) System.out.println("Body: " + body);
-        if (debugMode) System.out.println("============================================================");
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("REQUEST")
-                .setMethodPart("BODY")
-                .setMessage(body)
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if (debugMode) System.err.println(e.getMessage());
-        }
-
         // TODO: added application/x-www-form-urlencoded support: need to refactor.
         Object data;
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
@@ -280,35 +228,7 @@ public class ConnectorExecutor {
 //        f (invoker.getName().equalsIgnoreCase("igel")){
 //            restTemplate = getRestTemplate();
 //        }i
-        ResponseEntity<String> response = restTemplate.exchange(uri, method ,httpEntity, String.class);
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("RESPONSE")
-                .setMethodPart("HEADER")
-                .setMessage(response.getHeaders().toString())
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if (debugMode) System.err.println(e.getMessage());
-        }
-
-        logMessage = LogMessageServiceImp.LogBuilder.newInstance()
-                .setTaId(taId)
-                .setOrderId(executionContainer.getOrder())
-                .setMethod(methodNode.getName())
-                .setExchange("RESPONSE")
-                .setMethodPart("BODY")
-                .setMessage(response.getBody())
-                .build();
-        try {
-            logMessageService.save(logMessage);
-        } catch (Exception e){
-            if (debugMode) System.err.println(e.getMessage());
-        }
-        return response;
+        return restTemplate.exchange(uri, method ,httpEntity, String.class);
     }
 
     private CloseableHttpClient getDisabledHttpsClient() {
